@@ -1,14 +1,10 @@
 ﻿namespace JavaLanguageService.AntlrLanguage
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Language.StandardClassification;
-    using Microsoft.VisualStudio.Utilities;
-    using Microsoft.VisualStudio.Text.Classification;
     using System.Windows.Media;
+    using Microsoft.VisualStudio.Language.StandardClassification;
+    using Microsoft.VisualStudio.Text.Classification;
+    using Microsoft.VisualStudio.Utilities;
 
     public static class AntlrServices
     {

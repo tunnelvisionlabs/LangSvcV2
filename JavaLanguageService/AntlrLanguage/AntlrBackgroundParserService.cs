@@ -1,12 +1,9 @@
 ﻿namespace JavaLanguageService.AntlrLanguage
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Text;
     using JavaLanguageService.Panes;
+    using Microsoft.VisualStudio.Text;
 
     [Export]
     public sealed class AntlrBackgroundParserService
