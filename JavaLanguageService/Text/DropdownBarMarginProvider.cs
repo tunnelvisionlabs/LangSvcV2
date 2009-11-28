@@ -8,16 +8,21 @@
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Utilities;
     using JavaLanguageService.Text.Language;
+using Microsoft.VisualStudio.Language.Intellisense;
 
-    //[Export(typeof(IWpfTextViewMarginProvider))]
+    [Export(typeof(IWpfTextViewMarginProvider))]
     [MarginContainer(PredefinedMarginNames.Top)]
     [ContentType("text")]
-    [Order]
+    [Order(Before = PredefinedMarginNames.ZoomControl)]
     [Name("Dropdown Bar Margin")]
+    [TextViewRole(PredefinedTextViewRoles.Structured)]
     public sealed class DropdownBarMarginProvider : IWpfTextViewMarginProvider
     {
         [Import]
         public ILanguageElementManagerService LanguageElementManagerService;
+
+        [Import]
+        public IGlyphService GlyphService;
 
         public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer)
         {
@@ -25,7 +30,7 @@
             if (manager == null)
                 return null;
 
-            return new DropdownBarMargin(wpfTextViewHost.TextView, manager);
+            return new DropdownBarMargin(wpfTextViewHost.TextView, manager, GlyphService);
         }
     }
 }

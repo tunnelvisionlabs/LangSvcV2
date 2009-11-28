@@ -1,30 +1,83 @@
 ﻿namespace JavaLanguageService.Text
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Text.Editor;
-    using JavaLanguageService.Text.Language;
     using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Controls.Primitives;
+    using System.Windows.Documents;
+    using JavaLanguageService.Text.Language;
+    using Microsoft.VisualStudio.Language.Intellisense;
+    using Microsoft.VisualStudio.Text.Editor;
 
     internal class DropdownBarMargin : IWpfTextViewMargin
     {
         private readonly IWpfTextView _wpfTextView;
         private readonly ILanguageElementManager _manager;
+        private readonly IGlyphService _glyphService;
         private bool _disposed;
 
-        public DropdownBarMargin(IWpfTextView iWpfTextView, ILanguageElementManager manager)
+        private readonly UniformGrid _container;
+        private readonly ComboBox _typesControl;
+        private readonly ComboBox _membersControl;
+
+        public DropdownBarMargin(IWpfTextView wpfTextView, ILanguageElementManager manager, IGlyphService glyphService)
         {
-            this._wpfTextView = iWpfTextView;
+            this._wpfTextView = wpfTextView;
             this._manager = manager;
+            this._glyphService = glyphService;
+
+            this._container = new UniformGrid()
+                {
+                    Columns = 2,
+                    Rows = 1
+                };
+
+            this._typesControl = new ComboBox()
+                {
+                    ToolTip = new ToolTip()
+                    {
+                        Content = "Types"
+                    }
+                };
+
+            this._membersControl = new ComboBox()
+                {
+                    ToolTip = new ToolTip()
+                    {
+                        Content = "Members"
+                    }
+                };
+
+            this._container.Children.Add(_typesControl);
+            this._container.Children.Add(_membersControl);
+
+            var items = Enumerable.Range(1, 3).Select(i =>
+            {
+                var panel = new StackPanel()
+                {
+                    Orientation = Orientation.Horizontal
+                };
+
+                panel.Children.Add(new Image()
+                {
+                    Source = _glyphService.GetGlyph(StandardGlyphGroup.GlyphGroupField, StandardGlyphItem.GlyphItemPublic)
+                });
+                panel.Children.Add(new TextBlock(new Run("Item" + i)));
+                return panel;
+            });
+
+            foreach (var item in items)
+            {
+                _membersControl.Items.Add(item);
+            }
         }
 
         public FrameworkElement VisualElement
         {
             get
             {
-                throw new NotImplementedException();
+                return _container;
             }
         }
 
@@ -32,13 +85,16 @@
         {
             get
             {
-                throw new NotImplementedException();
+                return false;
             }
         }
 
         public ITextViewMargin GetTextViewMargin(string marginName)
         {
-            throw new NotImplementedException();
+            if (marginName == "Dropdown Bar Margin")
+                return this;
+
+            return null;
         }
 
         public double MarginSize
