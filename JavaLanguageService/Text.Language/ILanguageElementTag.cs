@@ -5,12 +5,9 @@
     using System.Linq;
     using System.Text;
     using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Tagging;
 
-    public interface ILanguageElement
+    public interface ILanguageElementTag : ITag
     {
-        ITrackingSpan Extent
-        {
-            get;
-        }
     }
 }

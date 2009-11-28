@@ -8,16 +8,20 @@
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Utilities;
     using JavaLanguageService.Text.Language;
-using Microsoft.VisualStudio.Language.Intellisense;
+    using Microsoft.VisualStudio.Language.Intellisense;
+    using Microsoft.VisualStudio.Text.Tagging;
 
     [Export(typeof(IWpfTextViewMarginProvider))]
     [MarginContainer(PredefinedMarginNames.Top)]
     [ContentType("text")]
-    [Order(Before = PredefinedMarginNames.ZoomControl)]
-    [Name("Dropdown Bar Margin")]
+    [Order]
+    [Name("Editor Navigation Margin")]
     [TextViewRole(PredefinedTextViewRoles.Structured)]
-    public sealed class DropdownBarMarginProvider : IWpfTextViewMarginProvider
+    public sealed class EditorNavigationMarginProvider : IWpfTextViewMarginProvider
     {
+        [Import]
+        public IBufferTagAggregatorFactoryService BufferTagAggregatorFactoryService;
+
         [Import]
         public ILanguageElementManagerService LanguageElementManagerService;
 
@@ -26,11 +30,12 @@ using Microsoft.VisualStudio.Language.Intellisense;
 
         public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer)
         {
-            var manager = LanguageElementManagerService.GetLanguageElementManager(wpfTextViewHost.TextView);
-            if (manager == null)
-                return null;
+            var tagAggregator = BufferTagAggregatorFactoryService.CreateTagAggregator<ILanguageElementTag>(wpfTextViewHost.TextView.TextBuffer);
+            //var manager = LanguageElementManagerService.GetLanguageElementManager(wpfTextViewHost.TextView);
+            //if (manager == null)
+            //    return null;
 
-            return new DropdownBarMargin(wpfTextViewHost.TextView, manager, GlyphService);
+            return new EditorNavigationMargin(wpfTextViewHost.TextView, tagAggregator, GlyphService);
         }
     }
 }

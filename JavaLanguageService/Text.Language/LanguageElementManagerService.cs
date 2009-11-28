@@ -9,6 +9,7 @@
     [Export(typeof(ILanguageElementManagerService))]
     internal class LanguageElementManagerService : ILanguageElementManagerService
     {
+        [Import]
         internal IBufferTagAggregatorFactoryService TagAggregatorFactory
         {
             get;

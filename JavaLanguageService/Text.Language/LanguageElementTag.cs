@@ -6,7 +6,7 @@
     using System.Text;
     using Microsoft.VisualStudio.Text;
 
-    internal class LanguageElement : ILanguageElement
+    internal class LanguageElementTag : ILanguageElementTag
     {
         public ITrackingSpan Extent
         {

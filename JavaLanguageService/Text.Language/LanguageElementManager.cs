@@ -29,9 +29,9 @@
             this.textBuffer.Changed += SourceTextChanged;
         }
 
-        public IEnumerable<ILanguageElement> GetAllLanguageElements(SnapshotSpan span)
+        public IEnumerable<ILanguageElementTag> GetAllLanguageElements(SnapshotSpan span)
         {
-            return this.GetAllLanguageElementsInternal(span).Cast<ILanguageElement>();
+            return this.GetAllLanguageElementsInternal(span).Cast<ILanguageElementTag>();
         }
 
         public void Dispose()
@@ -53,12 +53,12 @@
                 throw new ArgumentException("The given span is on an invalid buffer. Spans must be generated against the view model's edit bufer.", "span");
         }
 
-        private IEnumerable<LanguageElement> GetAllLanguageElementsInternal(SnapshotSpan span)
+        private IEnumerable<LanguageElementTag> GetAllLanguageElementsInternal(SnapshotSpan span)
         {
-            IEnumerable<LanguageElement> elements;
+            IEnumerable<LanguageElementTag> elements;
             EnsureValid(span);
             if (!this.enabled)
-                return new LanguageElement[0];
+                return new LanguageElementTag[0];
 
             throw new NotImplementedException();
         }

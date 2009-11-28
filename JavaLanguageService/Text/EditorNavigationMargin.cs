@@ -9,11 +9,13 @@
     using JavaLanguageService.Text.Language;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Tagging;
 
-    internal class DropdownBarMargin : IWpfTextViewMargin
+    internal class EditorNavigationMargin : IWpfTextViewMargin
     {
         private readonly IWpfTextView _wpfTextView;
-        private readonly ILanguageElementManager _manager;
+        //private readonly ILanguageElementManager _manager;
+        private readonly ITagAggregator<ILanguageElementTag> _tagAggregator;
         private readonly IGlyphService _glyphService;
         private bool _disposed;
 
@@ -21,10 +23,11 @@
         private readonly ComboBox _typesControl;
         private readonly ComboBox _membersControl;
 
-        public DropdownBarMargin(IWpfTextView wpfTextView, ILanguageElementManager manager, IGlyphService glyphService)
+        public EditorNavigationMargin(IWpfTextView wpfTextView, ITagAggregator<ILanguageElementTag> tagAggregator, IGlyphService glyphService)
         {
             this._wpfTextView = wpfTextView;
-            this._manager = manager;
+            //this._manager = manager;
+            this._tagAggregator = tagAggregator;
             this._glyphService = glyphService;
 
             this._container = new UniformGrid()
@@ -61,9 +64,13 @@
 
                 panel.Children.Add(new Image()
                 {
-                    Source = _glyphService.GetGlyph(StandardGlyphGroup.GlyphGroupField, StandardGlyphItem.GlyphItemPublic)
+                    Source = _glyphService.GetGlyph(StandardGlyphGroup.GlyphGroupField, StandardGlyphItem.GlyphItemPublic),
+                    VerticalAlignment = VerticalAlignment.Center
                 });
-                panel.Children.Add(new TextBlock(new Run("Item" + i)));
+                panel.Children.Add(new TextBlock(new Run(string.Join(string.Empty, Enumerable.Range(0, 10).Select(j => "Item" + i))))
+                {
+                    VerticalAlignment = VerticalAlignment.Center
+                });
                 return panel;
             });
 
@@ -91,7 +98,7 @@
 
         public ITextViewMargin GetTextViewMargin(string marginName)
         {
-            if (marginName == "Dropdown Bar Margin")
+            if (marginName == "Editor Navigation Margin")
                 return this;
 
             return null;

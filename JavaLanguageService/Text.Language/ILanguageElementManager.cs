@@ -10,6 +10,6 @@
     {
         event EventHandler<LanguageElementsChangedEventArgs> LanguageElementsChanged;
 
-        IEnumerable<ILanguageElement> GetAllLanguageElements(SnapshotSpan span);
+        IEnumerable<ILanguageElementTag> GetAllLanguageElements(SnapshotSpan span);
     }
 }
