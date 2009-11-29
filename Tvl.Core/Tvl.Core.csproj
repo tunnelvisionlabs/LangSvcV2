@@ -74,6 +74,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -86,6 +87,7 @@
     <Compile Include="Events\WeakEventExtensions.cs" />
     <Compile Include="Events\WeakEventHandler`2.cs" />
     <Compile Include="Events\WeakEvents.cs" />
+    <Compile Include="Interop\Variant.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

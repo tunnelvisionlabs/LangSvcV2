@@ -1,4 +1,4 @@
-﻿namespace JavaLanguageService.ShellServices
+﻿namespace Tvl.Core.Events
 {
     using System;
     using System.Collections.Generic;

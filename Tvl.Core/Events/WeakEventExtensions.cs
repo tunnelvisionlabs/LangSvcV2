@@ -1,7 +1,6 @@
-﻿namespace JavaLanguageService.Extensions
+﻿namespace Tvl.Core.Events
 {
     using System;
-    using JavaLanguageService.ShellServices;
 
     public static class WeakEventExtensions
     {
