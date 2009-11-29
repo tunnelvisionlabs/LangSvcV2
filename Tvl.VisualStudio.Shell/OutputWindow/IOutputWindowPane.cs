@@ -1,4 +1,4 @@
-﻿namespace JavaLanguageService.Panes
+﻿namespace Tvl.VisualStudio.Shell.OutputWindow
 {
     using System;
 
