@@ -251,10 +251,7 @@
     <Compile Include="Text\IEditorNavigationTarget.cs" />
     <Compile Include="Text\ShimEditorNavigationSource.cs" />
     <Compile Include="Text\ShimEditorNavigationSourceProvider.cs" />
-    <Compile Include="Text\SquiggleQuickInfoControllerProvider.cs" />
     <Compile Include="Text\Tagger`1.cs" />
-    <Compile Include="Text\TagQuickInfoController`1.cs" />
-    <Compile Include="Text\UrlQuickInfoControllerProvider.cs" />
     <Compile Include="Threading\DeferredOperation.cs" />
     <Compile Include="TypeAndMemberDropdownInitializer.cs" />
     <Compile Include="Variant.cs" />
@@ -328,6 +325,12 @@
     <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
       <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
       <Name>Tvl.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.Language.Implementation\Tvl.VisualStudio.Language.Implementation.csproj">
+      <Project>{9C111828-9344-4CB2-8A2C-A20C4B909908}</Project>
+      <Name>Tvl.VisualStudio.Language.Implementation</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Shell.Implementation\Tvl.VisualStudio.Shell.Implementation.csproj">
       <Project>{D9C9E707-E9C3-428B-85BD-B5AAE8F714A2}</Project>

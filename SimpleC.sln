@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Text", "Tv
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Text.Implementation", "Tvl.VisualStudio.Text.Implementation\Tvl.VisualStudio.Text.Implementation.csproj", "{D9B45C61-9721-41B7-9ABF-85C452CD9F49}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language.Implementation", "Tvl.VisualStudio.Language.Implementation\Tvl.VisualStudio.Language.Implementation.csproj", "{9C111828-9344-4CB2-8A2C-A20C4B909908}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{D9B45C61-9721-41B7-9ABF-85C452CD9F49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D9B45C61-9721-41B7-9ABF-85C452CD9F49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D9B45C61-9721-41B7-9ABF-85C452CD9F49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C111828-9344-4CB2-8A2C-A20C4B909908}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C111828-9344-4CB2-8A2C-A20C4B909908}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C111828-9344-4CB2-8A2C-A20C4B909908}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C111828-9344-4CB2-8A2C-A20C4B909908}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
