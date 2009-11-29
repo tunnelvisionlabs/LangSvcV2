@@ -11,7 +11,7 @@
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Tagging;
 
-    internal sealed class BraceMatchingTagger : ITagger<TextMarkerTag>
+    public sealed class BraceMatchingTagger : ITagger<TextMarkerTag>
     {
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
