@@ -8,6 +8,7 @@
     using JavaLanguageService.Panes;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Shell.OutputWindow;
+    using Tvl.VisualStudio.Language.Parsing;
 
     public class AntlrBackgroundParser : IDisposable
     {

@@ -195,9 +195,6 @@
     <Compile Include="Panes\IToolWindowProvider.cs" />
     <Compile Include="Panes\ToolWindowService.cs" />
     <Compile Include="Panes\ToolWindow`1.cs" />
-    <Compile Include="ShellServices\OpenedViewTrackerService.cs" />
-    <Compile Include="ShellServices\MonitorSelectionService.cs" />
-    <Compile Include="ShellServices\ActiveViewTrackerService.cs" />
     <Compile Include="Text\BraceMatchingTagger.cs" />
     <Compile Include="BraceMatchingTaggerProvider.cs" />
     <Compile Include="JavaBackgroundParser.cs" />
@@ -210,8 +207,8 @@
     <Compile Include="JavaLexerHelper.cs">
       <DependentUpon>Java.g3</DependentUpon>
     </Compile>
-    <Compile Include="ParseErrorEventArgs.cs" />
-    <Compile Include="ParseResultEventArgs.cs" />
+    <Compile Include="Language.Parsing\ParseErrorEventArgs.cs" />
+    <Compile Include="Language.Parsing\ParseResultEventArgs.cs" />
     <None Include="Power\PowerAction.cs" />
     <None Include="Power\PowerActionOptions.cs" />
     <None Include="Power\PowerActionPolicy.cs" />

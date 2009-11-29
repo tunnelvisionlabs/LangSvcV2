@@ -7,6 +7,7 @@
     using Antlr.Runtime;
     using System.Diagnostics;
     using Microsoft.VisualStudio.Text;
+    using Tvl.VisualStudio.Language.Parsing;
 
     partial class JavaParser
     {

@@ -1,4 +1,4 @@
-﻿namespace JavaLanguageService.Language.Parsing
+﻿namespace Tvl.VisualStudio.Language.Parsing
 {
     using System;
     using System.Collections.Generic;

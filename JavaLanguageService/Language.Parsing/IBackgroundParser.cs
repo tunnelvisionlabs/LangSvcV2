@@ -1,9 +1,6 @@
-﻿namespace JavaLanguageService.Language.Parsing
+﻿namespace Tvl.VisualStudio.Language.Parsing
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
 
     public interface IBackgroundParser
     {

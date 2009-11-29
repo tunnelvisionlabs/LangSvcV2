@@ -7,6 +7,7 @@
     using Antlr.Runtime;
     using Antlr3.Tool;
     using Microsoft.VisualStudio.Text;
+    using Tvl.VisualStudio.Language.Parsing;
 
     internal class AntlrParseResultEventArgs : ParseResultEventArgs
     {

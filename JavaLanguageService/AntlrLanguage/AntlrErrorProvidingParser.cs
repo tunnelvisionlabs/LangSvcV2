@@ -5,6 +5,7 @@
     using Antlr3.Grammars;
     using Antlr3.Tool;
     using Microsoft.VisualStudio.Text;
+    using Tvl.VisualStudio.Language.Parsing;
 
     internal class AntlrErrorProvidingParser : ANTLRParser
     {

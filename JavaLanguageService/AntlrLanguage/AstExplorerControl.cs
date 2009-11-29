@@ -5,12 +5,13 @@
     using System.Linq;
     using System.Text;
     using System.Windows.Controls;
-    using JavaLanguageService.Language.Parsing;
     using JavaLanguageService.ShellServices;
     using System.Windows;
     using Antlr.Runtime;
     using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio.Text.Editor;
+    using Tvl.VisualStudio.Shell;
+    using Tvl.VisualStudio.Language.Parsing;
 
     public class AstExplorerControl : Panel
     {

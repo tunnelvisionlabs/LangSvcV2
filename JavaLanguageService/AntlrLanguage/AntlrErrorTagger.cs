@@ -7,6 +7,7 @@
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Adornments;
     using Microsoft.VisualStudio.Text.Tagging;
+    using Tvl.VisualStudio.Language.Parsing;
 
     internal class AntlrErrorTagger : ITagger<SquiggleTag>
     {

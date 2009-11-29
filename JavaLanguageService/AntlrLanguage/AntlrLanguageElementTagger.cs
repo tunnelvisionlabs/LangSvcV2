@@ -10,6 +10,7 @@
     using StringReader = System.IO.StringReader;
     using JavaLanguageService.Panes;
     using Tvl.VisualStudio.Shell.OutputWindow;
+    using Tvl.VisualStudio.Language.Parsing;
 
     internal sealed class AntlrLanguageElementTagger : ITagger<ILanguageElementTag>
     {
