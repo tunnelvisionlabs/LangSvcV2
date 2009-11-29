@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Shell.Impl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Antlr", "Tvl.VisualStudio.Antlr\Tvl.VisualStudio.Antlr.csproj", "{3852C7D0-60EA-45CC-A84C-BF66B350CF3B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Text", "Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj", "{2B913C3A-3FD8-4633-81C8-683AF66741A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Text.Implementation", "Tvl.VisualStudio.Text.Implementation\Tvl.VisualStudio.Text.Implementation.csproj", "{D9B45C61-9721-41B7-9ABF-85C452CD9F49}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +47,14 @@ Global
 		{3852C7D0-60EA-45CC-A84C-BF66B350CF3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3852C7D0-60EA-45CC-A84C-BF66B350CF3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3852C7D0-60EA-45CC-A84C-BF66B350CF3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B913C3A-3FD8-4633-81C8-683AF66741A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B913C3A-3FD8-4633-81C8-683AF66741A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B913C3A-3FD8-4633-81C8-683AF66741A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B913C3A-3FD8-4633-81C8-683AF66741A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9B45C61-9721-41B7-9ABF-85C452CD9F49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9B45C61-9721-41B7-9ABF-85C452CD9F49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9B45C61-9721-41B7-9ABF-85C452CD9F49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9B45C61-9721-41B7-9ABF-85C452CD9F49}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
