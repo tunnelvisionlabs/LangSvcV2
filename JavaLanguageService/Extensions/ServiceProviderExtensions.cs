@@ -8,6 +8,11 @@
 
     public static class ServiceProviderExtensions
     {
+        public static IOleServiceProvider TryGetOleServiceProvider(this IServiceProvider sp)
+        {
+            return (IOleServiceProvider)sp.GetService(typeof(IOleServiceProvider));
+        }
+
         public static TServiceInterface TryGetGlobalService<TServiceClass, TServiceInterface>(this IOleServiceProvider sp)
             where TServiceInterface : class
         {

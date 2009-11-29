@@ -4,13 +4,21 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using Antlr.Runtime;
+    using Microsoft.VisualStudio.Text;
 
     public class ParseResultEventArgs : EventArgs
     {
-        public ParseResultEventArgs(ParserRuleReturnScope result, IList<ParseErrorEventArgs> errors)
+        public ParseResultEventArgs(ITextSnapshot snapshot, ParserRuleReturnScope result, IList<ParseErrorEventArgs> errors)
         {
+            this.Snapshot = snapshot;
             this.Result = result;
             this.Errors = new ReadOnlyCollection<ParseErrorEventArgs>(errors);
+        }
+
+        public ITextSnapshot Snapshot
+        {
+            get;
+            private set;
         }
 
         public ParserRuleReturnScope Result

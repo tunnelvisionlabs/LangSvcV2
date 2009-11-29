@@ -119,6 +119,10 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.Language.QuickSearch.Interfaces">
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.Language.Intellisense, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
@@ -156,6 +160,7 @@
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AntlrClassifierBase.cs" />
@@ -175,11 +180,29 @@
     <Compile Include="AntlrLanguage\AntlrErrorTaggerProvider.cs" />
     <Compile Include="AntlrLanguage\AntlrLanguageElementTagger.cs" />
     <Compile Include="AntlrLanguage\AntlrLanguageElementTaggerProvider.cs" />
+    <Compile Include="AntlrLanguage\AntlrParseResultEventArgs.cs" />
     <Compile Include="AntlrLanguage\AntlrParserTokenStream.cs" />
     <Compile Include="AntlrLanguage\AntlrQuickInfoSource.cs" />
+    <Compile Include="AntlrLanguage\AntlrQuickSearchItemProvider.cs" />
+    <Compile Include="AntlrLanguage\AntlrQuickSearchItemProviderFactory.cs" />
     <Compile Include="AntlrLanguage\AntlrServices.cs" />
+    <Compile Include="AntlrLanguage\AstExplorerControl.cs" />
+    <Compile Include="AntlrLanguage\AstExplorerProvider.cs" />
+    <Compile Include="Extensions\WeakEventExtensions.cs" />
+    <Compile Include="Language.Parsing\IBackgroundParser.cs" />
+    <Compile Include="Language.Parsing\IBackgroundParserFactoryService.cs" />
+    <Compile Include="Language.Parsing\IBackgroundParserProvider.cs" />
     <Compile Include="Panes\IOutputWindowPane.cs" />
+    <Compile Include="Panes\IToolWindow.cs" />
+    <Compile Include="Panes\IToolWindowProvider.cs" />
+    <Compile Include="Panes\ToolWindowService.cs" />
+    <Compile Include="Panes\ToolWindow`1.cs" />
     <Compile Include="Panes\VsOutputWindowPaneAdapter.cs" />
+    <Compile Include="ShellServices\IMonitorSelectionService.cs" />
+    <Compile Include="ShellServices\IOpenedViewTrackerService.cs" />
+    <Compile Include="ShellServices\OpenedViewTrackerService.cs" />
+    <Compile Include="ShellServices\MonitorSelectionService.cs" />
+    <Compile Include="ShellServices\ActiveViewTrackerService.cs" />
     <Compile Include="Text\BraceMatchingTagger.cs" />
     <Compile Include="BraceMatchingTaggerProvider.cs" />
     <Compile Include="Extensions\ServiceProviderExtensions.cs" />
@@ -229,10 +252,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services.cs" />
     <Compile Include="SnapshotCharStream.cs" />
-    <Compile Include="Text.Language\ILanguageElementTag.cs" />
     <Compile Include="Text.Language\ILanguageElementManager.cs" />
     <Compile Include="Text.Language\ILanguageElementManagerService.cs" />
-    <Compile Include="Text.Language\LanguageElementTag.cs" />
     <Compile Include="Text.Language\LanguageElementManager.cs" />
     <Compile Include="Text.Language\LanguageElementManagerService.cs" />
     <Compile Include="Text.Language\LanguageElementsChangedEventArgs.cs" />
@@ -245,13 +266,24 @@
     <Compile Include="Text\EditorNavigationComboBoxItem.cs" />
     <Compile Include="Text\EditorNavigationMargin.cs" />
     <Compile Include="Text\EditorNavigationMarginProvider.cs" />
+    <Compile Include="ShellServices\IActiveViewTrackerService.cs" />
     <Compile Include="Text\ICommenter.cs" />
     <Compile Include="Text\ICommenterProvider.cs" />
+    <Compile Include="Text\IEditorNavigationSource.cs" />
+    <Compile Include="Text\IEditorNavigationSourceProvider.cs" />
+    <Compile Include="Text\IEditorNavigationTarget.cs" />
+    <Compile Include="ShellServices\IWeakEventHandler`1.cs" />
+    <Compile Include="Text\ShimEditorNavigationSource.cs" />
+    <Compile Include="Text\ShimEditorNavigationSourceProvider.cs" />
     <Compile Include="Text\SquiggleQuickInfoControllerProvider.cs" />
     <Compile Include="Text\Tagger`1.cs" />
     <Compile Include="Text\TagQuickInfoController`1.cs" />
     <Compile Include="Text\TextViewCommandFilter.cs" />
     <Compile Include="Text\UrlQuickInfoControllerProvider.cs" />
+    <Compile Include="ShellServices\ViewChangedEventArgs.cs" />
+    <Compile Include="ShellServices\WeakEventHandler`2.cs" />
+    <Compile Include="ShellServices\WeakEvents.cs" />
+    <Compile Include="Threading\DeferredOperation.cs" />
     <Compile Include="TypeAndMemberDropdownInitializer.cs" />
     <Compile Include="Variant.cs" />
   </ItemGroup>

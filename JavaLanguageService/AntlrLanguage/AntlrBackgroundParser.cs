@@ -49,6 +49,7 @@
         private void TextBufferPostChanged(object sender, EventArgs e)
         {
             this._dirty = true;
+            this._lastEdit = DateTimeOffset.Now;
         }
 
         private void ParseTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -80,9 +81,10 @@
             var outputWindow = OutputWindowService.TryGetPane(Constants.AntlrIntellisenseOutputWindow);
             try
             {
-                SnapshotCharStream input = new SnapshotCharStream(TextBuffer.CurrentSnapshot);
+                var snapshot = TextBuffer.CurrentSnapshot;
+                var input = new SnapshotCharStream(snapshot);
                 var lexer = new AntlrErrorProvidingLexer(input);
-                AntlrParserTokenStream tokens = new AntlrParserTokenStream(lexer);
+                var tokens = new AntlrParserTokenStream(lexer);
                 var parser = new AntlrErrorProvidingParser(tokens);
 
                 lexer.Parser = parser;
@@ -105,7 +107,7 @@
                 ErrorManager.SetErrorListener(new AntlrErrorProvidingParser.ErrorListener());
                 Grammar g = new Grammar();
                 var result = parser.grammar_(g);
-                OnParseComplete(new ParseResultEventArgs(result, errors));
+                OnParseComplete(new ParseResultEventArgs(snapshot, result, errors));
             }
             catch (Exception e)
             {

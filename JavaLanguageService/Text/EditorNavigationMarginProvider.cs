@@ -10,6 +10,7 @@
     using JavaLanguageService.Text.Language;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text.Tagging;
+    using JavaLanguageService.Text.Tagging;
 
     [Export(typeof(IWpfTextViewMarginProvider))]
     [MarginContainer(PredefinedMarginNames.Top)]

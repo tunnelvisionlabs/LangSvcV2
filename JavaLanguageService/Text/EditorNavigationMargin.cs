@@ -10,6 +10,7 @@
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
+    using JavaLanguageService.Text.Tagging;
 
     internal class EditorNavigationMargin : IWpfTextViewMargin
     {

@@ -26,7 +26,7 @@
 
             this._dirty = true;
             this._timer = new System.Timers.Timer(2000);
-            this._timer.Elapsed += ParseTimerElapsed;
+            this._timer.Elapsed += OnParseTimerElapsed;
             this._lastEdit = DateTimeOffset.MinValue;
             this._timer.Start();
         }
@@ -52,7 +52,7 @@
             this._dirty = true;
         }
 
-        private void ParseTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void OnParseTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             if (!_dirty)
                 return;
@@ -81,7 +81,8 @@
             var outputWindow = OutputWindowService.TryGetPane(Constants.AntlrIntellisenseOutputWindow);
             try
             {
-                SnapshotCharStream input = new SnapshotCharStream(TextBuffer.CurrentSnapshot);
+                var snapshot = TextBuffer.CurrentSnapshot;
+                SnapshotCharStream input = new SnapshotCharStream(snapshot);
                 JavaLexer lexer = new JavaLexer(input);
                 CommonTokenStream tokens = new CommonTokenStream(lexer);
                 JavaParser parser = new JavaParser(tokens);
@@ -99,7 +100,7 @@
                     };
 
                 var result = parser.compilationUnit();
-                OnParseComplete(new ParseResultEventArgs(result, errors));
+                OnParseComplete(new ParseResultEventArgs(snapshot, result, errors));
             }
             catch (Exception e)
             {
