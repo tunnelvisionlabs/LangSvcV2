@@ -8,6 +8,7 @@
     using Microsoft.VisualStudio.Text.Adornments;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
+    using JavaLanguageService.AntlrLanguage;
 
     internal class JavaErrorTagger : ITagger<SquiggleTag>
     {
@@ -42,7 +43,7 @@
 
         private void BackgroundParserParseComplete(object sender, ParseResultEventArgs e)
         {
-            var startToken = (IToken)e.Result.Start;
+            var startToken = (IToken)((AntlrParseResultEventArgs)e).Result.Start;
             SnapshotCharStream input = (SnapshotCharStream)startToken.InputStream;
             _tags = e.Errors.Select(error => new TagSpan<SquiggleTag>(new SnapshotSpan(input.Snapshot, error.Span), new SquiggleTag(StandardErrorTypeService.SyntaxError, error.Message))).ToArray();
 

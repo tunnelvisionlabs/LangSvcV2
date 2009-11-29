@@ -10,6 +10,7 @@
     using JavaLanguageService.Panes;
     using Tvl.VisualStudio.Shell.OutputWindow;
     using Tvl.VisualStudio.Language.Parsing;
+    using JavaLanguageService.AntlrLanguage;
 
     public class JavaBackgroundParser : IDisposable
     {
@@ -102,7 +103,7 @@
                     };
 
                 var result = parser.compilationUnit();
-                OnParseComplete(new ParseResultEventArgs(snapshot, result, errors));
+                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, result));
             }
             catch (Exception e)
             {

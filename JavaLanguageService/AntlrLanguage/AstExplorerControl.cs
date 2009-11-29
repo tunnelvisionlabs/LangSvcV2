@@ -52,7 +52,7 @@
 
         private void OnParseComplete(object sender, ParseResultEventArgs e)
         {
-            var result = e.Result;
+            var result = ((AntlrParseResultEventArgs)e).Result;
             var tree = result.Tree;
         }
     }

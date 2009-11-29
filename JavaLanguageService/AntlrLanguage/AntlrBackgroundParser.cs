@@ -109,7 +109,7 @@
                 ErrorManager.SetErrorListener(new AntlrErrorProvidingParser.ErrorListener());
                 Grammar g = new Grammar();
                 var result = parser.grammar_(g);
-                OnParseComplete(new ParseResultEventArgs(snapshot, result, errors));
+                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, result));
             }
             catch (Exception e)
             {
