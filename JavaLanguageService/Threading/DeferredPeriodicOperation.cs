@@ -1,11 +1,8 @@
-﻿namespace JavaLanguageService.Threading
+﻿namespace Tvl.Threading
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
 
-    internal class DeferredOperation : IDisposable
+    internal class DeferredPeriodicOperation : IDisposable
     {
         private Action _action;
         private System.Timers.Timer _timer;
@@ -15,7 +12,7 @@
         private bool _dirty;
         private int _operating;
 
-        public DeferredOperation(Action action, TimeSpan deferPeriod, TimeSpan minimumPeriod, bool requiresInitialOperation)
+        public DeferredPeriodicOperation(Action action, TimeSpan deferPeriod, TimeSpan minimumPeriod, bool requiresInitialOperation)
         {
             this._action = action;
             this._lastDefer = DateTimeOffset.MinValue;

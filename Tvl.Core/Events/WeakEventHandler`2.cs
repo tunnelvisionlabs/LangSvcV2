@@ -1,9 +1,6 @@
-﻿namespace Tvl.Core.Events
+﻿namespace Tvl.Events
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
 
     public class WeakEventHandler<T, E>
         where T : class

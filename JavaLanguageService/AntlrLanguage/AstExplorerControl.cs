@@ -11,7 +11,7 @@
     using Microsoft.VisualStudio.Text.Editor;
     using Tvl.VisualStudio.Shell;
     using Tvl.VisualStudio.Language.Parsing;
-    using Tvl.Core.Events;
+    using Tvl.Events;
 
     public class AstExplorerControl : Panel
     {

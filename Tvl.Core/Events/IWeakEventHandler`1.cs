@@ -1,4 +1,4 @@
-﻿namespace Tvl.Core.Events
+﻿namespace Tvl.Events
 {
     using System;
 

@@ -1,4 +1,4 @@
-﻿namespace Tvl.Core
+﻿namespace Tvl.Interop
 {
     using System;
     using System.Diagnostics;

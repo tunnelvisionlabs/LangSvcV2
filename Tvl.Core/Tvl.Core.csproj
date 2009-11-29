@@ -8,7 +8,7 @@
     <ProjectGuid>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tvl.Core</RootNamespace>
+    <RootNamespace>Tvl</RootNamespace>
     <AssemblyName>Tvl.Core</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
