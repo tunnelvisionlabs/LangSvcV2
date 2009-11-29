@@ -188,24 +188,18 @@
     <Compile Include="AntlrLanguage\AntlrServices.cs" />
     <Compile Include="AntlrLanguage\AstExplorerControl.cs" />
     <Compile Include="AntlrLanguage\AstExplorerProvider.cs" />
-    <Compile Include="Extensions\WeakEventExtensions.cs" />
     <Compile Include="Language.Parsing\IBackgroundParser.cs" />
     <Compile Include="Language.Parsing\IBackgroundParserFactoryService.cs" />
     <Compile Include="Language.Parsing\IBackgroundParserProvider.cs" />
-    <Compile Include="Panes\IOutputWindowPane.cs" />
     <Compile Include="Panes\IToolWindow.cs" />
     <Compile Include="Panes\IToolWindowProvider.cs" />
     <Compile Include="Panes\ToolWindowService.cs" />
     <Compile Include="Panes\ToolWindow`1.cs" />
-    <Compile Include="Panes\VsOutputWindowPaneAdapter.cs" />
-    <Compile Include="ShellServices\IMonitorSelectionService.cs" />
-    <Compile Include="ShellServices\IOpenedViewTrackerService.cs" />
     <Compile Include="ShellServices\OpenedViewTrackerService.cs" />
     <Compile Include="ShellServices\MonitorSelectionService.cs" />
     <Compile Include="ShellServices\ActiveViewTrackerService.cs" />
     <Compile Include="Text\BraceMatchingTagger.cs" />
     <Compile Include="BraceMatchingTaggerProvider.cs" />
-    <Compile Include="Extensions\ServiceProviderExtensions.cs" />
     <Compile Include="JavaBackgroundParser.cs" />
     <Compile Include="JavaBackgroundParserService.cs" />
     <Compile Include="JavaErrorTagger.cs" />
@@ -216,11 +210,6 @@
     <Compile Include="JavaLexerHelper.cs">
       <DependentUpon>Java.g3</DependentUpon>
     </Compile>
-    <Compile Include="Panes\IOutputWindowDefinitionMetadata.cs" />
-    <Compile Include="Panes\IOutputWindowService.cs" />
-    <Compile Include="Panes\OutputWindowDefinition.cs" />
-    <Compile Include="Panes\OutputWindowService.cs" />
-    <Compile Include="Panes\PredefinedOutputWindowPanes.cs" />
     <Compile Include="ParseErrorEventArgs.cs" />
     <Compile Include="ParseResultEventArgs.cs" />
     <None Include="Power\PowerAction.cs" />
@@ -232,7 +221,6 @@
     <Compile Include="Constants.cs" />
     <Compile Include="DropdownBarsAdaptor.cs" />
     <Compile Include="DropdownBarsAggregator.cs" />
-    <Compile Include="Extensions\IVsTextViewExtensions.cs" />
     <Compile Include="IDropdownBars.cs" />
     <Compile Include="IDropdownBarsProvider.cs" />
     <Compile Include="JavaClassifier.cs" />
@@ -266,13 +254,11 @@
     <Compile Include="Text\EditorNavigationComboBoxItem.cs" />
     <Compile Include="Text\EditorNavigationMargin.cs" />
     <Compile Include="Text\EditorNavigationMarginProvider.cs" />
-    <Compile Include="ShellServices\IActiveViewTrackerService.cs" />
     <Compile Include="Text\ICommenter.cs" />
     <Compile Include="Text\ICommenterProvider.cs" />
     <Compile Include="Text\IEditorNavigationSource.cs" />
     <Compile Include="Text\IEditorNavigationSourceProvider.cs" />
     <Compile Include="Text\IEditorNavigationTarget.cs" />
-    <Compile Include="ShellServices\IWeakEventHandler`1.cs" />
     <Compile Include="Text\ShimEditorNavigationSource.cs" />
     <Compile Include="Text\ShimEditorNavigationSourceProvider.cs" />
     <Compile Include="Text\SquiggleQuickInfoControllerProvider.cs" />
@@ -280,9 +266,6 @@
     <Compile Include="Text\TagQuickInfoController`1.cs" />
     <Compile Include="Text\TextViewCommandFilter.cs" />
     <Compile Include="Text\UrlQuickInfoControllerProvider.cs" />
-    <Compile Include="ShellServices\ViewChangedEventArgs.cs" />
-    <Compile Include="ShellServices\WeakEventHandler`2.cs" />
-    <Compile Include="ShellServices\WeakEvents.cs" />
     <Compile Include="Threading\DeferredOperation.cs" />
     <Compile Include="TypeAndMemberDropdownInitializer.cs" />
     <Compile Include="Variant.cs" />
@@ -352,7 +335,23 @@
     <Content Include="VSIXProject_large.png" />
     <Content Include="VSIXProject_small.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
+      <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
+      <Name>Tvl.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.Shell.Implementation\Tvl.VisualStudio.Shell.Implementation.csproj">
+      <Project>{D9C9E707-E9C3-428B-85BD-B5AAE8F714A2}</Project>
+      <Name>Tvl.VisualStudio.Shell.Implementation</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj">
+      <Project>{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}</Project>
+      <Name>Tvl.VisualStudio.Shell</Name>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <!-- Folder containing AntlrBuildTask.dll -->
     <AntlrBuildTaskPath>$(SolutionDir)External\Antlr</AntlrBuildTaskPath>

@@ -4,6 +4,7 @@
     using System.ComponentModel.Composition;
     using JavaLanguageService.Panes;
     using Microsoft.VisualStudio.Text;
+    using Tvl.VisualStudio.Shell.OutputWindow;
 
     [Export]
     public sealed class AntlrBackgroundParserService

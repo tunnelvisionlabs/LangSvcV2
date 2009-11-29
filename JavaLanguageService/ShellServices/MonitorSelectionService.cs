@@ -33,7 +33,7 @@
 
         public MonitorSelectionService()
         {
-            _listener = new Listener(GlobalServiceProvider);
+            _listener = new Listener(this, GlobalServiceProvider);
         }
 
         public ITextView CurrentView
@@ -100,14 +100,16 @@
             private MonitorSelectionService _service;
             private uint _adviseCookie;
 
-            public Listener(IServiceProvider serviceProvider)
+            public Listener(MonitorSelectionService service, IServiceProvider serviceProvider)
             {
+                Contract.Requires<ArgumentException>(service != null);
                 Contract.Requires<ArgumentNullException>(serviceProvider != null);
 
                 IOleServiceProvider olesp = serviceProvider.TryGetOleServiceProvider();
                 if (olesp == null)
                     throw new NotSupportedException();
 
+                _service = service;
                 _monitorSelection = olesp.TryGetGlobalService<SVsShellMonitorSelection, IVsMonitorSelection>();
                 if (_monitorSelection == null)
                     throw new NotSupportedException();

@@ -9,6 +9,7 @@
     using Antlr3.Tool;
     using StringReader = System.IO.StringReader;
     using JavaLanguageService.Panes;
+    using Tvl.VisualStudio.Shell.OutputWindow;
 
     internal sealed class AntlrLanguageElementTagger : ITagger<ILanguageElementTag>
     {

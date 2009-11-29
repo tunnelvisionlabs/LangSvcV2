@@ -8,7 +8,7 @@
     [Export(typeof(IOpenedViewTrackerService))]
     public class OpenedViewTrackerService : IWpfTextViewCreationListener, IOpenedViewTrackerService
     {
-        private List<ITextView> _openedViews;
+        private readonly List<ITextView> _openedViews = new List<ITextView>();
 
         public IEnumerable<ITextView> OpenedViews
         {

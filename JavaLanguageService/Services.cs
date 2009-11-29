@@ -3,6 +3,7 @@
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Utilities;
     using JavaLanguageService.Panes;
+    using Tvl.VisualStudio.Shell.OutputWindow;
 
     public static class Services
     {

@@ -7,6 +7,7 @@
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Text;
     using JavaLanguageService.Panes;
+    using Tvl.VisualStudio.Shell.OutputWindow;
 
     [Export]
     public sealed class JavaBackgroundParserService

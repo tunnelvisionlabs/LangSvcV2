@@ -7,6 +7,7 @@
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
     using JavaLanguageService.Panes;
+    using Tvl.VisualStudio.Shell.OutputWindow;
 
     [Export(typeof(ITaggerProvider))]
     [ContentType(AntlrConstants.AntlrContentType)]
