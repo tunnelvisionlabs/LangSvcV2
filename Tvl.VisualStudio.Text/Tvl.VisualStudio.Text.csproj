@@ -102,7 +102,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="CommenterFilter.cs" />
     <Compile Include="ICommenterProvider.cs" />
     <Compile Include="Tagging\BraceMatchingTagger.cs" />
     <Compile Include="Commenter.cs" />
