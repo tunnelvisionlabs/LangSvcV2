@@ -238,7 +238,6 @@
     <Compile Include="Text\ShimEditorNavigationSource.cs" />
     <Compile Include="Text\ShimEditorNavigationSourceProvider.cs" />
     <Compile Include="Text\Tagger`1.cs" />
-    <Compile Include="Threading\DeferredPeriodicOperation.cs" />
     <Compile Include="TypeAndMemberDropdownInitializer.cs" />
   </ItemGroup>
   <ItemGroup>
