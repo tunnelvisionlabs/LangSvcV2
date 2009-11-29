@@ -8,7 +8,7 @@
     <ProjectGuid>{3852C7D0-60EA-45CC-A84C-BF66B350CF3B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tvl.VisualStudio.Antlr</RootNamespace>
+    <RootNamespace>Tvl.VisualStudio.Language</RootNamespace>
     <AssemblyName>Tvl.VisualStudio.Antlr</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -153,9 +153,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AntlrClassifierBase.cs" />
+    <Compile Include="Parsing\AntlrClassifierBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SnapshotCharStream.cs" />
+    <Compile Include="Parsing\SnapshotCharStream.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

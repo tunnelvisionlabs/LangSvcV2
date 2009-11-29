@@ -5,6 +5,7 @@
     using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
+    using Tvl.VisualStudio.Language.Parsing;
 
     internal class AntlrClassifier : AntlrClassifierBase
     {

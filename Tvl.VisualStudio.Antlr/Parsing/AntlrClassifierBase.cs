@@ -1,13 +1,13 @@
-﻿namespace Tvl.VisualStudio.Antlr
+﻿namespace Tvl.VisualStudio.Language.Parsing
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using global::Antlr.Runtime;
+    using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
 
-    internal abstract class AntlrClassifierBase : IClassifier
+    public abstract class AntlrClassifierBase : IClassifier
     {
         private ITextSnapshot _multilineTokenReference;
         private List<SnapshotSpan> _multilineTokens = new List<SnapshotSpan>();

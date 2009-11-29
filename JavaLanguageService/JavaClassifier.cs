@@ -7,6 +7,7 @@
     using Microsoft.VisualStudio.Text.Classification;
     using System;
     using System.Reflection;
+    using Tvl.VisualStudio.Language.Parsing;
 
     internal sealed class JavaClassifier : AntlrClassifierBase
     {

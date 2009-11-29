@@ -1,10 +1,10 @@
-﻿namespace Tvl.VisualStudio.Antlr
+﻿namespace Tvl.VisualStudio.Language.Parsing
 {
     using System.Collections.Generic;
-    using global::Antlr.Runtime;
+    using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
 
-    internal sealed class SnapshotCharStream : ICharStream
+    public sealed class SnapshotCharStream : ICharStream
     {
         //private string _readaheadCache;
         //private int _readaheadCachePosition;
