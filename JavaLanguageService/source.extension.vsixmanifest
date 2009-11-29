@@ -22,5 +22,7 @@
   <References />
   <Content>
     <MefComponent>|JavaLanguageService|</MefComponent>
+    <MefComponent>|Tvl.VisualStudio.Text.Implementation|</MefComponent>
+    <MefComponent>|Tvl.VisualStudio.Shell.Implementation|</MefComponent>
   </Content>
 </Vsix>

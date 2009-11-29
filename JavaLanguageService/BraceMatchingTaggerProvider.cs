@@ -8,6 +8,7 @@
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Text.Tagging;
 
     [Export(typeof(IViewTaggerProvider))]
     [ContentType(Constants.JavaContentType)]

@@ -195,7 +195,6 @@
     <Compile Include="Panes\IToolWindowProvider.cs" />
     <Compile Include="Panes\ToolWindowService.cs" />
     <Compile Include="Panes\ToolWindow`1.cs" />
-    <Compile Include="Text\BraceMatchingTagger.cs" />
     <Compile Include="BraceMatchingTaggerProvider.cs" />
     <Compile Include="JavaBackgroundParser.cs" />
     <Compile Include="JavaBackgroundParserService.cs" />
@@ -214,7 +213,6 @@
     <None Include="Power\PowerActionPolicy.cs" />
     <None Include="Power\PowerNotification.cs" />
     <Compile Include="Text\CancellationPolicy.cs" />
-    <Compile Include="Text\CommentFormat.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="DropdownBarsAdaptor.cs" />
     <Compile Include="DropdownBarsAggregator.cs" />
@@ -244,15 +242,10 @@
     <Compile Include="Text.Language\LanguageElementsChangedEventArgs.cs" />
     <Compile Include="Text.Tagging\ILanguageElementTag.cs" />
     <Compile Include="Text.Tagging\LanguageElementTag.cs" />
-    <Compile Include="Text\AutoCommentService.cs" />
-    <Compile Include="Text\Commenter.cs" />
-    <Compile Include="Text\CommenterFilter.cs" />
     <Compile Include="Text\EditorNavigationComboBox.cs" />
     <Compile Include="Text\EditorNavigationComboBoxItem.cs" />
     <Compile Include="Text\EditorNavigationMargin.cs" />
     <Compile Include="Text\EditorNavigationMarginProvider.cs" />
-    <Compile Include="Text\ICommenter.cs" />
-    <Compile Include="Text\ICommenterProvider.cs" />
     <Compile Include="Text\IEditorNavigationSource.cs" />
     <Compile Include="Text\IEditorNavigationSourceProvider.cs" />
     <Compile Include="Text\IEditorNavigationTarget.cs" />
@@ -261,7 +254,6 @@
     <Compile Include="Text\SquiggleQuickInfoControllerProvider.cs" />
     <Compile Include="Text\Tagger`1.cs" />
     <Compile Include="Text\TagQuickInfoController`1.cs" />
-    <Compile Include="Text\TextViewCommandFilter.cs" />
     <Compile Include="Text\UrlQuickInfoControllerProvider.cs" />
     <Compile Include="Threading\DeferredOperation.cs" />
     <Compile Include="TypeAndMemberDropdownInitializer.cs" />
@@ -347,6 +339,16 @@
       <Project>{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}</Project>
       <Name>Tvl.VisualStudio.Shell</Name>
       <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.Text.Implementation\Tvl.VisualStudio.Text.Implementation.csproj">
+      <Project>{D9B45C61-9721-41B7-9ABF-85C452CD9F49}</Project>
+      <Name>Tvl.VisualStudio.Text.Implementation</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj">
+      <Project>{2B913C3A-3FD8-4633-81C8-683AF66741A8}</Project>
+      <Name>Tvl.VisualStudio.Text</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

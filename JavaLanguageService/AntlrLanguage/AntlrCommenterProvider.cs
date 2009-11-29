@@ -6,6 +6,7 @@
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.UI.Undo;
     using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Text;
 
     [Export(typeof(ICommenterProvider))]
     [ContentType(AntlrConstants.AntlrContentType)]
