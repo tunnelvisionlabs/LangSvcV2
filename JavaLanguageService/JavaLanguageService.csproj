@@ -179,7 +179,6 @@
     <Compile Include="AntlrLanguage\AntlrErrorTaggerProvider.cs" />
     <Compile Include="AntlrLanguage\AntlrLanguageElementTagger.cs" />
     <Compile Include="AntlrLanguage\AntlrLanguageElementTaggerProvider.cs" />
-    <Compile Include="AntlrLanguage\AntlrParseResultEventArgs.cs" />
     <Compile Include="AntlrLanguage\AntlrParserTokenStream.cs" />
     <Compile Include="AntlrLanguage\AntlrQuickInfoSource.cs" />
     <Compile Include="AntlrLanguage\AntlrQuickSearchItemProvider.cs" />

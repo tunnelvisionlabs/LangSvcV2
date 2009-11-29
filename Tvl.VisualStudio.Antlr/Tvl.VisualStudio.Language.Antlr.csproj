@@ -154,8 +154,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Parsing\AntlrClassifierBase.cs" />
+    <Compile Include="Parsing\AntlrParseResultEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Parsing\SnapshotCharStream.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Tvl.VisualStudio.Language\Tvl.VisualStudio.Language.csproj">
+      <Project>{90E28BCA-BD13-475B-B051-7A7D852A6206}</Project>
+      <Name>Tvl.VisualStudio.Language</Name>
+      <Private>False</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
