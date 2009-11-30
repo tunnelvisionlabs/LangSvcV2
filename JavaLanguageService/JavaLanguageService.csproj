@@ -335,9 +335,7 @@
       <Name>Tvl.VisualStudio.Text</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Text.Tagging\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <!-- Folder containing AntlrBuildTask.dll -->
     <AntlrBuildTaskPath>$(SolutionDir)External\Antlr</AntlrBuildTaskPath>
