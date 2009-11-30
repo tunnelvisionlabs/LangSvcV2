@@ -3,11 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Projection;
     using Microsoft.VisualStudio.Text.Tagging;
-    using JavaLanguageService.Text.Tagging;
+    using Tvl.VisualStudio.Text.Tagging;
 
     public sealed class LanguageElementManager : ILanguageElementManager
     {

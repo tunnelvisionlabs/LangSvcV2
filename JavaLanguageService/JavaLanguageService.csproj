@@ -226,14 +226,6 @@
     <Compile Include="Text.Language\LanguageElementManager.cs" />
     <Compile Include="Text.Language\LanguageElementManagerService.cs" />
     <Compile Include="Text.Language\LanguageElementsChangedEventArgs.cs" />
-    <Compile Include="Text.Tagging\ILanguageElementTag.cs" />
-    <Compile Include="Text.Tagging\LanguageElementTag.cs" />
-    <Compile Include="Text\EditorNavigationComboBox.cs" />
-    <Compile Include="Text\EditorNavigationComboBoxItem.cs" />
-    <Compile Include="Text\EditorNavigationMargin.cs" />
-    <Compile Include="Text\EditorNavigationMarginProvider.cs" />
-    <Compile Include="Text\ShimEditorNavigationSource.cs" />
-    <Compile Include="Text\ShimEditorNavigationSourceProvider.cs" />
     <Compile Include="Text\Tagger`1.cs" />
     <Compile Include="TypeAndMemberDropdownInitializer.cs" />
   </ItemGroup>
@@ -342,6 +334,9 @@
       <Project>{2B913C3A-3FD8-4633-81C8-683AF66741A8}</Project>
       <Name>Tvl.VisualStudio.Text</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Text.Tagging\" />
   </ItemGroup>
   <PropertyGroup>
     <!-- Folder containing AntlrBuildTask.dll -->

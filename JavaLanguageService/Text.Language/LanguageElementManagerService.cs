@@ -2,9 +2,9 @@
 {
     using System;
     using System.ComponentModel.Composition;
-    using JavaLanguageService.Text.Tagging;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Tagging;
+    using Tvl.VisualStudio.Text.Tagging;
 
     [Export(typeof(ILanguageElementManagerService))]
     internal class LanguageElementManagerService : ILanguageElementManagerService

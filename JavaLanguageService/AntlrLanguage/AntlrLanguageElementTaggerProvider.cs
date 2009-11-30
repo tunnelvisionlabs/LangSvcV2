@@ -2,12 +2,12 @@
 {
     using System;
     using System.ComponentModel.Composition;
-    using JavaLanguageService.Text.Tagging;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
     using JavaLanguageService.Panes;
     using Tvl.VisualStudio.Shell.OutputWindow;
+    using Tvl.VisualStudio.Text.Tagging;
 
     [Export(typeof(ITaggerProvider))]
     [ContentType(AntlrConstants.AntlrContentType)]

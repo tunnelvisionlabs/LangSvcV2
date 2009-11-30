@@ -5,7 +5,7 @@
     using System.Linq;
     using System.Text;
     using Microsoft.VisualStudio.Text;
-    using JavaLanguageService.Text.Tagging;
+    using Tvl.VisualStudio.Text.Tagging;
 
     public interface ILanguageElementManager : IDisposable
     {

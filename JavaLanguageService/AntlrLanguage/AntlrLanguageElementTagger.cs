@@ -2,15 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
-    using JavaLanguageService.Text.Tagging;
-    using Microsoft.VisualStudio.Text;
-    using Microsoft.VisualStudio.Text.Tagging;
     using System.Threading;
     using Antlr3.Tool;
-    using StringReader = System.IO.StringReader;
-    using JavaLanguageService.Panes;
-    using Tvl.VisualStudio.Shell.OutputWindow;
+    using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Shell.OutputWindow;
+    using Tvl.VisualStudio.Text.Tagging;
+    using StringReader = System.IO.StringReader;
 
     internal sealed class AntlrLanguageElementTagger : ITagger<ILanguageElementTag>
     {
