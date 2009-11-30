@@ -145,6 +145,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ICommenterProvider.cs" />
+    <Compile Include="Navigation\IEditorNavigationSource.cs" />
+    <Compile Include="Navigation\IEditorNavigationSourceProvider.cs" />
+    <Compile Include="Navigation\IEditorNavigationTarget.cs" />
     <Compile Include="Tagging\BraceMatchingTagger.cs" />
     <Compile Include="Commenter.cs" />
     <Compile Include="CommentFormat.cs" />
