@@ -2,7 +2,6 @@
 {
     using System;
     using System.ComponentModel.Composition;
-    using JavaLanguageService.Panes;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Shell.OutputWindow;
 

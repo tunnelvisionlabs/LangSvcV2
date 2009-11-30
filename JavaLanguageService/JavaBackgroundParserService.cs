@@ -1,12 +1,8 @@
 ﻿namespace JavaLanguageService
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Text;
-    using JavaLanguageService.Panes;
     using Tvl.VisualStudio.Shell.OutputWindow;
 
     [Export]

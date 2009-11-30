@@ -184,12 +184,6 @@
     <Compile Include="AntlrLanguage\AntlrQuickSearchItemProvider.cs" />
     <Compile Include="AntlrLanguage\AntlrQuickSearchItemProviderFactory.cs" />
     <Compile Include="AntlrLanguage\AntlrServices.cs" />
-    <Compile Include="AntlrLanguage\AstExplorerControl.cs" />
-    <Compile Include="AntlrLanguage\AstExplorerProvider.cs" />
-    <Compile Include="Panes\IToolWindow.cs" />
-    <Compile Include="Panes\IToolWindowProvider.cs" />
-    <Compile Include="Panes\ToolWindowService.cs" />
-    <Compile Include="Panes\ToolWindow`1.cs" />
     <Compile Include="BraceMatchingTaggerProvider.cs" />
     <Compile Include="JavaBackgroundParser.cs" />
     <Compile Include="JavaBackgroundParserService.cs" />
@@ -341,7 +335,9 @@
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Panes\" />
+  </ItemGroup>
   <PropertyGroup>
     <!-- Folder containing AntlrBuildTask.dll -->
     <AntlrBuildTaskPath>$(SolutionDir)External\Antlr</AntlrBuildTaskPath>

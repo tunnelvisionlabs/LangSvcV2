@@ -5,10 +5,9 @@
     using System.Threading;
     using Antlr3;
     using Antlr3.Tool;
-    using JavaLanguageService.Panes;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Shell.OutputWindow;
     using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Shell.OutputWindow;
 
     public class AntlrBackgroundParser : IDisposable
     {

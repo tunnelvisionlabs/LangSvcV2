@@ -2,15 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Text;
     using System.Threading;
     using Antlr.Runtime;
-    using JavaLanguageService.Panes;
-    using Tvl.VisualStudio.Shell.OutputWindow;
+    using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
-    using JavaLanguageService.AntlrLanguage;
+    using Tvl.VisualStudio.Shell.OutputWindow;
 
     public class JavaBackgroundParser : IDisposable
     {
