@@ -1,4 +1,4 @@
-﻿namespace JavaLanguageService.Text
+﻿namespace Tvl.VisualStudio.Text.Navigation.Implementation
 {
     using System;
     using System.Linq;
@@ -6,11 +6,10 @@
     using System.Windows.Controls;
     using System.Windows.Controls.Primitives;
     using System.Windows.Documents;
-    using JavaLanguageService.Text.Language;
+    using JavaLanguageService.Text.Tagging;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Text.Tagging;
-    using JavaLanguageService.Text.Tagging;
+    using Microsoft.VisualStudio.Text.Tagging;
 
     internal class EditorNavigationMargin : IWpfTextViewMargin
     {

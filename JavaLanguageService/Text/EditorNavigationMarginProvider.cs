@@ -1,16 +1,12 @@
-﻿namespace JavaLanguageService.Text
+﻿namespace Tvl.VisualStudio.Text.Navigation.Implementation
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Text.Editor;
     using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Utilities;
     using JavaLanguageService.Text.Language;
-    using Microsoft.VisualStudio.Language.Intellisense;
-    using Microsoft.VisualStudio.Text.Tagging;
     using JavaLanguageService.Text.Tagging;
+    using Microsoft.VisualStudio.Language.Intellisense;
+    using Microsoft.VisualStudio.Text.Editor;
+    using Microsoft.VisualStudio.Text.Tagging;
+    using Microsoft.VisualStudio.Utilities;
 
     [Export(typeof(IWpfTextViewMarginProvider))]
     [MarginContainer(PredefinedMarginNames.Top)]
