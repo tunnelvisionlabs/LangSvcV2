@@ -232,9 +232,6 @@
     <Compile Include="Text\EditorNavigationComboBoxItem.cs" />
     <Compile Include="Text\EditorNavigationMargin.cs" />
     <Compile Include="Text\EditorNavigationMarginProvider.cs" />
-    <Compile Include="Text\IEditorNavigationSource.cs" />
-    <Compile Include="Text\IEditorNavigationSourceProvider.cs" />
-    <Compile Include="Text\IEditorNavigationTarget.cs" />
     <Compile Include="Text\ShimEditorNavigationSource.cs" />
     <Compile Include="Text\ShimEditorNavigationSourceProvider.cs" />
     <Compile Include="Text\Tagger`1.cs" />

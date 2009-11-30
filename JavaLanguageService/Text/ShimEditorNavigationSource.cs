@@ -6,6 +6,7 @@
     using System.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using JavaLanguageService.Text.Tagging;
+    using Tvl.VisualStudio.Text;
 
     internal class ShimEditorNavigationSource : IEditorNavigationSource
     {

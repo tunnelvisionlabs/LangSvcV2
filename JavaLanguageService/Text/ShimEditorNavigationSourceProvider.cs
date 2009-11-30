@@ -7,6 +7,7 @@
     using Microsoft.VisualStudio.Text;
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Text;
 
     [Export(typeof(IEditorNavigationSourceProvider))]
     [ContentType("text")]
