@@ -2,7 +2,7 @@
 {
     using System;
 
-    internal class DeferredPeriodicOperation : IDisposable
+    public class DeferredPeriodicOperation : IDisposable
     {
         private Action _action;
         private System.Timers.Timer _timer;
