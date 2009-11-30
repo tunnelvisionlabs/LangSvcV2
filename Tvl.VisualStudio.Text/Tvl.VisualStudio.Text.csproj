@@ -162,6 +162,13 @@
     <Compile Include="Tagging\PredefinedTextMarkerTags.cs" />
     <Compile Include="TextViewCommandFilter.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
+      <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
+      <Name>Tvl.Core</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

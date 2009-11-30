@@ -10,9 +10,14 @@
     using Microsoft.VisualStudio.Text.Classification;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Tagging;
+    using Tvl.Threading;
+    using System.Threading;
 
     public sealed class BraceMatchingTagger : ITagger<TextMarkerTag>
     {
+        private volatile int _requestNumber;
+        private object _updateLock = new object();
+
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
         public BraceMatchingTagger(ITextView textView, ITextBuffer sourceBuffer, IClassifier aggregator, IEnumerable<KeyValuePair<char, char>> matchingCharacters)
@@ -27,8 +32,8 @@
             this.Aggregator = aggregator;
             this.MatchingCharacters = matchingCharacters.ToList().AsReadOnly();
 
-            this.TextView.Caret.PositionChanged += Caret_PositionChanged;
-            this.TextView.LayoutChanged += TextView_LayoutChanged;
+            this.TextView.Caret.PositionChanged += OnCaretPositionChanged;
+            this.TextView.LayoutChanged += OnTextViewLayoutChanged;
         }
 
         public ITextView TextView
@@ -61,6 +66,12 @@
             set;
         }
 
+        private IEnumerable<ITagSpan<TextMarkerTag>> Tags
+        {
+            get;
+            set;
+        }
+
         private static bool IsInCommentOrLiteral(IClassifier aggregator, SnapshotPoint point, PositionAffinity affinity)
         {
             Contract.Requires(aggregator != null);
@@ -77,27 +88,7 @@
                 || relevant.ClassificationType.IsOfType(PredefinedClassificationTypeNames.Literal);
         }
 
-        private bool IsMatchStartCharacter(char c)
-        {
-            return MatchingCharacters.Any(pair => pair.Key == c);
-        }
-
-        private bool IsMatchCloseCharacter(char c)
-        {
-            return MatchingCharacters.Any(pair => pair.Value == c);
-        }
-
-        private char GetMatchCloseCharacter(char c)
-        {
-            return MatchingCharacters.First(pair => pair.Key == c).Value;
-        }
-
-        private char GetMatchOpenCharacter(char c)
-        {
-            return MatchingCharacters.First(pair => pair.Value == c).Key;
-        }
-
-        private static bool FindMatchingCloseChar(SnapshotPoint start, IClassifier aggregator, char open, char close, int maxLines, out SnapshotSpan pairSpan)
+        private bool FindMatchingCloseChar(int revision, SnapshotPoint start, IClassifier aggregator, char open, char close, int maxLines, out SnapshotSpan pairSpan)
         {
             pairSpan = new SnapshotSpan(start.Snapshot, 1, 1);
             ITextSnapshotLine line = start.GetContainingLine();
@@ -114,6 +105,11 @@
             {
                 while (offset < line.Length)
                 {
+                    if (_requestNumber != revision)
+                    {
+                        return false;
+                    }
+
                     char currentChar = lineText[offset];
                     // TODO: is this the correct affinity
                     if (currentChar == close && !IsInCommentOrLiteral(aggregator, new SnapshotPoint(start.Snapshot, offset + line.Start.Position), PositionAffinity.Successor))
@@ -150,7 +146,7 @@
             return false;
         }
 
-        private static bool FindMatchingOpenChar(SnapshotPoint start, IClassifier aggregator, char open, char close, int maxLines, out SnapshotSpan pairSpan)
+        private bool FindMatchingOpenChar(int revision, SnapshotPoint start, IClassifier aggregator, char open, char close, int maxLines, out SnapshotSpan pairSpan)
         {
             pairSpan = new SnapshotSpan(start, start);
             ITextSnapshotLine line = start.GetContainingLine();
@@ -176,6 +172,11 @@
             {
                 while (offset >= 0)
                 {
+                    if (_requestNumber != revision)
+                    {
+                        return false;
+                    }
+
                     char currentChar = lineText[offset];
                     // TODO: is this the correct affinity
                     if (currentChar == open && !IsInCommentOrLiteral(aggregator, new SnapshotPoint(start.Snapshot, offset + line.Start.Position), PositionAffinity.Successor))
@@ -212,28 +213,139 @@
             return false;
         }
 
+        private void OnTagsChanged(SnapshotSpanEventArgs e)
+        {
+            var t = TagsChanged;
+            if (t != null)
+                t(this, e);
+        }
+
+        private bool IsMatchStartCharacter(char c)
+        {
+            return MatchingCharacters.Any(pair => pair.Key == c);
+        }
+
+        private bool IsMatchCloseCharacter(char c)
+        {
+            return MatchingCharacters.Any(pair => pair.Value == c);
+        }
+
+        private char GetMatchCloseCharacter(char c)
+        {
+            return MatchingCharacters.First(pair => pair.Key == c).Value;
+        }
+
+        private char GetMatchOpenCharacter(char c)
+        {
+            return MatchingCharacters.First(pair => pair.Value == c).Key;
+        }
+
         public IEnumerable<ITagSpan<TextMarkerTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            if (spans.Count == 0)
-                yield break;
+            return Tags;
+        }
 
+        private void UpdateAtCaretPosition(CaretPosition caretPosition)
+        {
+            var revision = Interlocked.Increment(ref _requestNumber);
+
+            CurrentChar = caretPosition.Point.GetPoint(SourceBuffer, caretPosition.Affinity);
+            if (!CurrentChar.HasValue)
+                return;
+
+            if (TrySynchronousUpdate(revision))
+            {
+                var t = TagsChanged;
+                if (t != null)
+                    t(this, new SnapshotSpanEventArgs(new SnapshotSpan(SourceBuffer.CurrentSnapshot, 0, SourceBuffer.CurrentSnapshot.Length)));
+            }
+            else if (_requestNumber == revision)
+            {
+                QueueAsynchronousUpdate(revision, CurrentChar.Value);
+            }
+        }
+
+        private void QueueAsynchronousUpdate(int revision, SnapshotPoint point)
+        {
+            Action action =
+                () =>
+                {
+                    try
+                    {
+                        IEnumerable<TagSpan<TextMarkerTag>> tags;
+                        if (TryRecalculateTags(revision, point, 0, out tags))
+                        {
+                            if (TrySaveResults(revision, tags))
+                            {
+                                var t = TagsChanged;
+                                if (t != null)
+                                    t(this, new SnapshotSpanEventArgs(new SnapshotSpan(point.Snapshot, 0, point.Snapshot.Length)));
+                            }
+                        }
+                    }
+                    catch
+                    {
+                    }
+                };
+
+            action.BeginInvoke(null, null);
+        }
+
+        private bool TryClearResults(int revision)
+        {
+            lock (this._updateLock)
+            {
+                if (_requestNumber != revision)
+                    return false;
+
+                this.Tags = new ITagSpan<TextMarkerTag>[0];
+                return true;
+            }
+        }
+
+        private bool TrySaveResults(int revision, IEnumerable<ITagSpan<TextMarkerTag>> tags)
+        {
+            lock (this._updateLock)
+            {
+                if (_requestNumber != revision)
+                    return false;
+
+                this.Tags = tags;
+                return true;
+            }
+        }
+
+        private bool TrySynchronousUpdate(int revision)
+        {
             // don't do anything if the current SnapshotPoint is not initialized or at the end of the buffer
             if (!CurrentChar.HasValue || CurrentChar.Value.Position >= CurrentChar.Value.Snapshot.Length)
-                yield break;
+            {
+                return TryClearResults(revision);
+            }
 
             // hold on to a snapshot of the current character
             var currentChar = CurrentChar.Value;
 
             if (IsInCommentOrLiteral(Aggregator, currentChar, TextView.Caret.Position.Affinity))
-                yield break;
+            {
+                return TryClearResults(revision);
+            }
 
-            // if the requested snapshot isn't the same as the one the brace is on, translate our spans to the expected snapshot
-            currentChar = currentChar.TranslateTo(spans[0].Snapshot, PointTrackingMode.Positive);
+            IEnumerable<TagSpan<TextMarkerTag>> tags;
+            if (TryRecalculateTags(revision, currentChar, TextView.TextViewLines.Count, out tags))
+            {
+                return TrySaveResults(revision, tags);
+            }
 
+            return false;
+        }
+
+        private bool TryRecalculateTags(int revision, SnapshotPoint point, int searchDistance, out IEnumerable<TagSpan<TextMarkerTag>> tags)
+        {
             // get the current char and the previous char
-            char currentText = currentChar.GetChar();
+            char currentText = point.GetChar();
             // if current char is 0 (beginning of buffer), don't move it back
-            SnapshotPoint lastChar = currentChar == 0 ? currentChar : currentChar - 1;
+            SnapshotPoint lastChar = point == 0 ? point : point - 1;
             char lastText = lastChar.GetChar();
             SnapshotSpan pairSpan = new SnapshotSpan();
 
@@ -244,41 +356,56 @@
                  *       than 1 screen's worth of lines away. Changing this to 10 * TextView.TextViewLines.Count seemed
                  *       to improve the situation.
                  */
-                if (BraceMatchingTagger.FindMatchingCloseChar(currentChar, Aggregator, currentText, closeChar, TextView.TextViewLines.Count, out pairSpan))
+                if (FindMatchingCloseChar(revision, point, Aggregator, currentText, closeChar, searchDistance, out pairSpan))
                 {
-                    yield return new TagSpan<TextMarkerTag>(new SnapshotSpan(currentChar, 1), PredefinedTextMarkerTags.BraceHighlight);
-                    yield return new TagSpan<TextMarkerTag>(pairSpan, PredefinedTextMarkerTags.BraceHighlight);
+                    tags = new TagSpan<TextMarkerTag>[]
+                        {
+                            new TagSpan<TextMarkerTag>(new SnapshotSpan(point, 1), PredefinedTextMarkerTags.BraceHighlight),
+                            new TagSpan<TextMarkerTag>(pairSpan, PredefinedTextMarkerTags.BraceHighlight)
+                        };
+
+                    return true;
+                }
+                else
+                {
+                    tags = new TagSpan<TextMarkerTag>[0];
+                    return false;
                 }
             }
             else if (IsMatchCloseCharacter(lastText))
             {
                 var open = GetMatchOpenCharacter(lastText);
-                if (BraceMatchingTagger.FindMatchingOpenChar(lastChar, Aggregator, open, lastText, TextView.TextViewLines.Count, out pairSpan))
+                if (FindMatchingOpenChar(revision, lastChar, Aggregator, open, lastText, searchDistance, out pairSpan))
                 {
-                    yield return new TagSpan<TextMarkerTag>(new SnapshotSpan(lastChar, 1), PredefinedTextMarkerTags.BraceHighlight);
-                    yield return new TagSpan<TextMarkerTag>(pairSpan, PredefinedTextMarkerTags.BraceHighlight);
+                    tags = new TagSpan<TextMarkerTag>[]
+                        {
+                            new TagSpan<TextMarkerTag>(new SnapshotSpan(lastChar, 1), PredefinedTextMarkerTags.BraceHighlight),
+                            new TagSpan<TextMarkerTag>(pairSpan, PredefinedTextMarkerTags.BraceHighlight)
+                        };
+
+                    return true;
                 }
+                else
+                {
+                    tags = new TagSpan<TextMarkerTag>[0];
+                    return false;
+                }
+            }
+            else
+            {
+                // successfully identified that there are no matching braces
+                tags = new TagSpan<TextMarkerTag>[0];
+                return true;
             }
         }
 
-        private void UpdateAtCaretPosition(CaretPosition caretPosition)
-        {
-            CurrentChar = caretPosition.Point.GetPoint(SourceBuffer, caretPosition.Affinity);
-            if (!CurrentChar.HasValue)
-                return;
-
-            var t = TagsChanged;
-            if (t != null)
-                t(this, new SnapshotSpanEventArgs(new SnapshotSpan(SourceBuffer.CurrentSnapshot, 0, SourceBuffer.CurrentSnapshot.Length)));
-        }
-
-        private void TextView_LayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
+        private void OnTextViewLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
         {
             if (e.NewSnapshot != e.OldSnapshot)
                 UpdateAtCaretPosition(TextView.Caret.Position);
         }
 
-        private void Caret_PositionChanged(object sender, CaretPositionChangedEventArgs e)
+        private void OnCaretPositionChanged(object sender, CaretPositionChangedEventArgs e)
         {
             UpdateAtCaretPosition(e.NewPosition);
         }
