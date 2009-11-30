@@ -38,8 +38,6 @@
         private readonly IClassificationType _lexerRule;
         private readonly IClassificationType _actionLiteral;
 
-        private AntlrColorableLexer _lexer;
-
         public AntlrClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService, IClassificationTypeRegistryService classificationTypeRegistryService)
         {
             this._textBuffer = textBuffer;
@@ -53,12 +51,7 @@
 
         protected override Lexer CreateLexer(ICharStream input)
         {
-            if (_lexer != null)
-                _lexer.CharStream = input;
-            else
-                _lexer = new AntlrColorableLexer(input);
-
-            return _lexer;
+            return new AntlrColorableLexer(input);
         }
 
         protected override IClassificationType ClassifyToken(IToken token)
