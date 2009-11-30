@@ -6,6 +6,7 @@
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
+    using System.Runtime.CompilerServices;
 
     public abstract class AntlrClassifierBase : IClassifier
     {
@@ -14,6 +15,7 @@
 
         public event EventHandler<ClassificationChangedEventArgs> ClassificationChanged;
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public IList<ClassificationSpan> GetClassificationSpans(SnapshotSpan span)
         {
             UpdateMultilineTokens(ref span);

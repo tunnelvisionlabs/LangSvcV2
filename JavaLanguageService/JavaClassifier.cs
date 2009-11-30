@@ -71,7 +71,6 @@
 
         private readonly ITextBuffer _textBuffer;
         private readonly IStandardClassificationService _standardClassificationService;
-        private JavaColorizerLexer _lexer;
 
         public JavaClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService)
         {
@@ -81,12 +80,7 @@
 
         protected override Lexer CreateLexer(ICharStream input)
         {
-            if (_lexer != null)
-                _lexer.CharStream = input;
-            else
-                _lexer = new JavaColorizerLexer(input);
-
-            return _lexer;
+            return new JavaColorizerLexer(input);
         }
 
         protected override IClassificationType ClassifyToken(IToken token)
