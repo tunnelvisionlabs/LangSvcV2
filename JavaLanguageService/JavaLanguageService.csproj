@@ -197,10 +197,6 @@
     </Compile>
     <Compile Include="Text\CancellationPolicy.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="DropdownBarsAdaptor.cs" />
-    <Compile Include="DropdownBarsAggregator.cs" />
-    <Compile Include="IDropdownBars.cs" />
-    <Compile Include="IDropdownBarsProvider.cs" />
     <Compile Include="JavaClassifier.cs" />
     <Compile Include="JavaClassifierProvider.cs" />
     <Compile Include="JavaColorizerLexerHelper.cs" />
@@ -221,7 +217,6 @@
     <Compile Include="Text.Language\LanguageElementManagerService.cs" />
     <Compile Include="Text.Language\LanguageElementsChangedEventArgs.cs" />
     <Compile Include="Text\Tagger`1.cs" />
-    <Compile Include="TypeAndMemberDropdownInitializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Antlr3 Include="JavaColorizerLexer.g3">
