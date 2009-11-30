@@ -25,5 +25,6 @@
     <MefComponent>|Tvl.VisualStudio.Shell.Implementation|</MefComponent>
     <MefComponent>|Tvl.VisualStudio.Text.Implementation|</MefComponent>
     <MefComponent>|Tvl.VisualStudio.Language.Implementation|</MefComponent>
+    <MefComponent>|Tvl.VisualStudio.Tools.Antlr|</MefComponent>
   </Content>
 </Vsix>

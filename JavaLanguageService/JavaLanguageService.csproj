@@ -334,6 +334,12 @@
       <Project>{2B913C3A-3FD8-4633-81C8-683AF66741A8}</Project>
       <Name>Tvl.VisualStudio.Text</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.Tools.Antlr\Tvl.VisualStudio.Tools.Antlr.csproj">
+      <Project>{728757BD-5485-411B-83A6-B02318B2F61A}</Project>
+      <Name>Tvl.VisualStudio.Tools.Antlr</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <PropertyGroup>
