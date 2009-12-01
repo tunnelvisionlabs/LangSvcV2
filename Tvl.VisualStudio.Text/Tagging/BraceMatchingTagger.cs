@@ -251,18 +251,24 @@
 
             CurrentChar = caretPosition.Point.GetPoint(SourceBuffer, caretPosition.Affinity);
             if (!CurrentChar.HasValue)
-                return;
+            {
+                if (!TryClearResults(revision))
+                    return;
+            }
+            else
+            {
+                if (!TrySynchronousUpdate(revision))
+                {
+                    if (!TryClearResults(revision))
+                        return;
 
-            if (TrySynchronousUpdate(revision))
-            {
-                var t = TagsChanged;
-                if (t != null)
-                    t(this, new SnapshotSpanEventArgs(new SnapshotSpan(SourceBuffer.CurrentSnapshot, 0, SourceBuffer.CurrentSnapshot.Length)));
+                    QueueAsynchronousUpdate(revision, CurrentChar.Value);
+                }
             }
-            else if (_requestNumber == revision)
-            {
-                QueueAsynchronousUpdate(revision, CurrentChar.Value);
-            }
+
+            var t = TagsChanged;
+            if (t != null)
+                t(this, new SnapshotSpanEventArgs(new SnapshotSpan(SourceBuffer.CurrentSnapshot, 0, SourceBuffer.CurrentSnapshot.Length)));
         }
 
         private void QueueAsynchronousUpdate(int revision, SnapshotPoint point)
@@ -326,11 +332,6 @@
             // hold on to a snapshot of the current character
             var currentChar = CurrentChar.Value;
 
-            if (IsInCommentOrLiteral(Aggregator, currentChar, TextView.Caret.Position.Affinity))
-            {
-                return TryClearResults(revision);
-            }
-
             IEnumerable<TagSpan<TextMarkerTag>> tags;
             if (TryRecalculateTags(revision, currentChar, TextView.TextViewLines.Count, out tags))
             {
@@ -349,7 +350,7 @@
             char lastText = lastChar.GetChar();
             SnapshotSpan pairSpan = new SnapshotSpan();
 
-            if (IsMatchStartCharacter(currentText))
+            if (IsMatchStartCharacter(currentText) && !IsInCommentOrLiteral(Aggregator, point, TextView.Caret.Position.Affinity))
             {
                 char closeChar = GetMatchCloseCharacter(currentText);
                 /* TODO: Need to improve handling of larger blocks. this won't highlight if the matching brace is more
@@ -372,7 +373,7 @@
                     return false;
                 }
             }
-            else if (IsMatchCloseCharacter(lastText))
+            else if (IsMatchCloseCharacter(lastText) && !IsInCommentOrLiteral(Aggregator, point, TextView.Caret.Position.Affinity))
             {
                 var open = GetMatchOpenCharacter(lastText);
                 if (FindMatchingOpenChar(revision, lastChar, Aggregator, open, lastText, searchDistance, out pairSpan))
