@@ -152,6 +152,7 @@
     <Compile Include="Parsing\IBackgroundParser.cs" />
     <Compile Include="Parsing\IBackgroundParserFactoryService.cs" />
     <Compile Include="Parsing\IBackgroundParserProvider.cs" />
+    <Compile Include="Parsing\BackgroundParser.cs" />
     <Compile Include="Parsing\ParseErrorEventArgs.cs" />
     <Compile Include="Parsing\ParseResultEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
