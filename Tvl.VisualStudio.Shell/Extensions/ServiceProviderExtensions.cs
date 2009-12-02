@@ -1,4 +1,4 @@
-﻿namespace JavaLanguageService.Extensions
+﻿namespace Tvl.VisualStudio.Shell.Extensions
 {
     using System;
     using System.Diagnostics.Contracts;
@@ -8,6 +8,11 @@
 
     public static class ServiceProviderExtensions
     {
+        public static TService GetService<TService>(this IServiceProvider sp)
+        {
+            return (TService)sp.GetService(typeof(TService));
+        }
+
         public static IOleServiceProvider TryGetOleServiceProvider(this IServiceProvider sp)
         {
             return (IOleServiceProvider)sp.GetService(typeof(IOleServiceProvider));

@@ -8,7 +8,7 @@
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow;
 
-    public class JavaBackgroundParser : IDisposable
+    public class JavaBackgroundParser : IBackgroundParser, IDisposable
     {
         private System.Timers.Timer _timer;
         private DateTimeOffset _lastEdit;
@@ -99,7 +99,7 @@
                     };
 
                 var result = parser.compilationUnit();
-                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, result));
+                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, tokens.GetTokens(), result));
             }
             catch (Exception e)
             {

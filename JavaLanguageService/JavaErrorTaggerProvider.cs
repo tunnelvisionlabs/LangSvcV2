@@ -5,6 +5,7 @@
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Language.Parsing;
 
     [Export(typeof(ITaggerProvider))]
     [ContentType(Constants.JavaContentType)]
@@ -12,13 +13,13 @@
     public sealed class JavaErrorTaggerProvider : ITaggerProvider
     {
         [Import]
-        internal JavaBackgroundParserService JavaBackgroundParserService;
+        internal IBackgroundParserFactoryService BackgroundParserFactoryService;
 
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
             if (typeof(T) == typeof(SquiggleTag))
             {
-                Func<JavaErrorTagger> creator = () => new JavaErrorTagger(buffer, JavaBackgroundParserService.GetBackgroundParser(buffer));
+                Func<JavaErrorTagger> creator = () => new JavaErrorTagger(buffer, BackgroundParserFactoryService.GetBackgroundParser(buffer));
                 return (ITagger<T>)buffer.Properties.GetOrCreateSingletonProperty(creator);
             }
 

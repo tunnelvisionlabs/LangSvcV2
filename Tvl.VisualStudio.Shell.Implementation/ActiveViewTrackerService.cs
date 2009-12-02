@@ -14,7 +14,7 @@
     internal sealed class ActiveViewTrackerService : IActiveViewTrackerService
     {
         [Import]
-        public MonitorSelectionService MonitorSelectionService;
+        public IMonitorSelectionService MonitorSelectionService;
 
         [Import]
         public IOpenedViewTrackerService OpenedViewTrackerService;

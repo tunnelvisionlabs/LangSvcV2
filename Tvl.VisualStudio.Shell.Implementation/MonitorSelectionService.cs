@@ -5,7 +5,6 @@
     using System.Linq;
     using System.Text;
     using Microsoft.VisualStudio.Shell.Interop;
-    using JavaLanguageService.Extensions;
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
     using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
@@ -17,12 +16,27 @@
     using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.TextManager.Interop;
     using System.Runtime.InteropServices;
+    using Tvl.VisualStudio.Shell.Extensions;
 
     [Export(typeof(IMonitorSelectionService))]
     internal sealed class MonitorSelectionService : IMonitorSelectionService
     {
+        private IServiceProvider _serviceProvider;
+
         [Import]
-        public IServiceProvider GlobalServiceProvider;
+        public IServiceProvider GlobalServiceProvider
+        {
+            get
+            {
+                return _serviceProvider;
+            }
+            set
+            {
+                _serviceProvider = value;
+                if (_listener == null)
+                    _listener = new Listener(this, _serviceProvider);
+            }
+        }
 
         [Import]
         public IVsEditorAdaptersFactoryService VsEditorAdaptorsFactoryService;
@@ -30,11 +44,6 @@
         private Listener _listener;
 
         public event EventHandler<ViewChangedEventArgs> ViewChanged;
-
-        public MonitorSelectionService()
-        {
-            _listener = new Listener(this, GlobalServiceProvider);
-        }
 
         public ITextView CurrentView
         {
@@ -46,6 +55,9 @@
 
         private ITextView GetTextView(IVsWindowFrame frame)
         {
+            if (frame == null)
+                return null;
+
             IVsTextView viewAdapter = VsShellUtilities.GetTextView(frame);
             IWpfTextView wpfTextView = this.VsEditorAdaptorsFactoryService.GetWpfTextView(viewAdapter);
             return wpfTextView;

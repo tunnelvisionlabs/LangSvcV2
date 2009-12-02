@@ -2,27 +2,81 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+    using Microsoft.VisualStudio.Text.Editor;
+    using System.ComponentModel.Composition;
+    using Microsoft.VisualStudio.Editor;
+    using Microsoft.VisualStudio.Utilities;
+    using Microsoft.VisualStudio.TextManager.Interop;
+    using Tvl.VisualStudio.Shell.Extensions;
 
-    public sealed class ToolWindowService
+    [Export(typeof(IVsTextViewCreationListener))]
+    [ContentType("text")]
+    [TextViewRole(PredefinedTextViewRoles.Interactive)]
+    public sealed class ToolWindowService : IVsTextViewCreationListener
     {
-        public IServiceProvider GlobalServiceProvider;
-        public IVsUIShell VsUIShell;
+        public bool created;
 
-        public void CreateWindows()
+        [Import]
+        private IServiceProvider GlobalServiceProvider
         {
+            get;
+            set;
+        }
+
+        [ImportMany]
+        private IEnumerable<Lazy<IToolWindowProvider>> ToolWindowProviders
+        {
+            get;
+            set;
+        }
+
+        private void CreateWindows()
+        {
+            IVsUIShell shell = (IVsUIShell)GlobalServiceProvider.GetService<SVsUIShell>();
+
             IOleServiceProvider serviceProvider = (IOleServiceProvider)GlobalServiceProvider.GetService(typeof(IOleServiceProvider));
-            IEnumerable<IToolWindow> windows = null;
-            foreach (var window in windows)
+            foreach (var lazyProvider in ToolWindowProviders)
             {
-                __VSCREATETOOLWIN creationFlags = 0;
+                var provider = lazyProvider.Value;
+                var toolWindow = provider.CreateWindow();
+                __VSCREATETOOLWIN creationFlags = __VSCREATETOOLWIN.CTW_fInitNew;
+                if (!toolWindow.Transient)
+                    creationFlags |= __VSCREATETOOLWIN.CTW_fForceCreate;
+
+                bool hasToolbar = false;
+                if (hasToolbar)
+                    creationFlags |= __VSCREATETOOLWIN.CTW_fToolbarHost;
+
+                if (toolWindow.MultiInstance)
+                    creationFlags |= __VSCREATETOOLWIN.CTW_fMultiInstance;
+
                 uint instance = 0;
                 IVsWindowFrame windowFrame = null;
-                string caption = "TestFrame";
-                Guid zero = Guid.Empty;
-                ErrorHandler.ThrowOnFailure(VsUIShell.CreateToolWindow((uint)creationFlags, instance, null, ref zero, ref zero, ref zero, serviceProvider, caption, null, out windowFrame));
+                string caption = toolWindow.Caption;
+                Guid empty = Guid.Empty;
+                Guid providerGuid = provider.GetType().GUID;
+                ErrorHandler.ThrowOnFailure(shell.CreateToolWindow((uint)creationFlags, instance, toolWindow, ref empty, ref providerGuid, ref empty, serviceProvider, caption, null, out windowFrame));
+                if (windowFrame != null)
+                    windowFrame.ShowNoActivate();
+            }
+        }
+
+        public void VsTextViewCreated(IVsTextView textViewAdapter)
+        {
+            try
+            {
+                if (!created)
+                {
+                    created = true;
+                    CreateWindows();
+                }
+            }
+            catch
+            {
             }
         }
     }

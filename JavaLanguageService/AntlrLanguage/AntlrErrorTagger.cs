@@ -15,7 +15,7 @@
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        public AntlrErrorTagger(ITextBuffer textBuffer, AntlrBackgroundParser backgroundParser)
+        public AntlrErrorTagger(ITextBuffer textBuffer, IBackgroundParser backgroundParser)
         {
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;
@@ -29,7 +29,7 @@
             private set;
         }
 
-        public AntlrBackgroundParser BackgroundParser
+        public IBackgroundParser BackgroundParser
         {
             get;
             private set;

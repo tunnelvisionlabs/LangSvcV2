@@ -1,11 +1,15 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
+    using Microsoft.VisualStudio.Text.Editor;
 
     public interface IMonitorSelectionService
     {
+        event EventHandler<ViewChangedEventArgs> ViewChanged;
+
+        ITextView CurrentView
+        {
+            get;
+        }
     }
 }

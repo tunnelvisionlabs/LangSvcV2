@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TextManager.Interop;
-using IObjectWithSite = Microsoft.VisualStudio.OLE.Interop.IObjectWithSite;
-using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio;
-
-namespace JavaLanguageService.Extensions
+﻿namespace Tvl.VisualStudio.Shell.Extensions
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using Microsoft.VisualStudio.TextManager.Interop;
+    using IObjectWithSite = Microsoft.VisualStudio.OLE.Interop.IObjectWithSite;
+    using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio.Shell.Interop;
+    using Microsoft.VisualStudio;
+
     public static class IVsTextViewExtensions
     {
         public static IVsCodeWindow GetCodeWindow(this IVsTextView textView)

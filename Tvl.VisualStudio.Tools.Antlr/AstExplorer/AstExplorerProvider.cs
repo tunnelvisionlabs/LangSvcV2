@@ -1,14 +1,36 @@
-﻿namespace JavaLanguageService.AntlrLanguage
+﻿namespace Tvl.VisualStudio.Tools.AstExplorer
 {
     using System.ComponentModel.Composition;
+    using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell;
 
     [Export(typeof(IToolWindowProvider))]
-    public sealed class AstExplorerProvider : IToolWindowProvider
+    internal sealed class AstExplorerProvider : IToolWindowProvider
     {
+        [Import]
+        internal IActiveViewTrackerService ActiveViewTrackerService
+        {
+            get;
+            private set;
+        }
+
+        [Import]
+        internal IBackgroundParserFactoryService BackgroundParserFactoryService
+        {
+            get;
+            private set;
+        }
+
+        [Import]
+        internal IAstReferenceTaggerProvider AstReferenceTaggerProvider
+        {
+            get;
+            private set;
+        }
+
         public IToolWindow CreateWindow()
         {
-            return new ToolWindow<AstExplorerControl>("AST Explorer", null);
+            return new AstExplorerWindow(this);
         }
     }
 }

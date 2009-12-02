@@ -1,0 +1,36 @@
+﻿namespace Tvl.VisualStudio.Language.Implementation
+{
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.Composition;
+    using System.Linq;
+    using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Language.Parsing;
+
+    [Export(typeof(IBackgroundParserFactoryService))]
+    internal class BackgroundParserFactoryService : IBackgroundParserFactoryService
+    {
+        [ImportMany]
+        private IEnumerable<Lazy<IBackgroundParserProvider, IContentTypeMetadata>> BackgroundParserProviders
+        {
+            get;
+            set;
+        }
+
+        public IBackgroundParser GetBackgroundParser(ITextBuffer buffer)
+        {
+            foreach (var provider in BackgroundParserProviders)
+            {
+                if (provider.Metadata.ContentTypes.Any(contentType => buffer.ContentType.IsOfType(contentType)))
+                {
+                    var parser = provider.Value.CreateParser(buffer);
+                    if (parser != null)
+                        return parser;
+                }
+            }
+
+            return null;
+        }
+    }
+}

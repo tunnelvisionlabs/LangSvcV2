@@ -2,18 +2,17 @@
 {
     using System;
 
-    public class WeakEventHandler<T, TEventArgs> : IWeakEventHandler<TEventArgs>
+    public class WeakEventHandler<T>
         where T : class
-        where TEventArgs : EventArgs
     {
-        private delegate void OpenEventHandler(T @this, object sender, TEventArgs e);
+        private delegate void OpenEventHandler(T @this, object sender, EventArgs e);
 
         private WeakReference _target;
         private OpenEventHandler _openHandler;
-        private EventHandler<TEventArgs> _handler;
-        private Action<EventHandler<TEventArgs>> _unregister;
+        private EventHandler _handler;
+        private Action<EventHandler> _unregister;
 
-        public WeakEventHandler(EventHandler<TEventArgs> handler, Action<EventHandler<TEventArgs>> unregister)
+        public WeakEventHandler(EventHandler handler, Action<EventHandler> unregister)
         {
             _target = new WeakReference(handler.Target);
             _openHandler = (OpenEventHandler)Delegate.CreateDelegate(typeof(OpenEventHandler), null, handler.Method);
@@ -21,7 +20,7 @@
             _unregister = unregister;
         }
 
-        public void Invoke(object sender, TEventArgs e)
+        public void Invoke(object sender, EventArgs e)
         {
             T target = (T)_target.Target;
 
@@ -33,14 +32,6 @@
             {
                 _unregister(_handler);
                 _unregister = null;
-            }
-        }
-
-        public EventHandler<TEventArgs> Handler
-        {
-            get
-            {
-                return _handler;
             }
         }
     }

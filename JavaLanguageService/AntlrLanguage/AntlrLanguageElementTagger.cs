@@ -20,7 +20,7 @@
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        public AntlrLanguageElementTagger(ITextBuffer textBuffer, AntlrBackgroundParser backgroundParser, IOutputWindowService outputWindowService)
+        public AntlrLanguageElementTagger(ITextBuffer textBuffer, IBackgroundParser backgroundParser, IOutputWindowService outputWindowService)
         {
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;
@@ -40,7 +40,7 @@
             private set;
         }
 
-        public AntlrBackgroundParser BackgroundParser
+        public IBackgroundParser BackgroundParser
         {
             get;
             private set;

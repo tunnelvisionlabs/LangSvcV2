@@ -16,7 +16,7 @@
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        public JavaErrorTagger(ITextBuffer textBuffer, JavaBackgroundParser backgroundParser)
+        public JavaErrorTagger(ITextBuffer textBuffer, IBackgroundParser backgroundParser)
         {
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;
@@ -30,7 +30,7 @@
             private set;
         }
 
-        public JavaBackgroundParser BackgroundParser
+        public IBackgroundParser BackgroundParser
         {
             get;
             private set;

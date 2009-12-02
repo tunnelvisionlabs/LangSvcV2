@@ -4,9 +4,9 @@
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
     using System.Linq;
-    using JavaLanguageService.Extensions;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
+    using Tvl.VisualStudio.Shell.Extensions;
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
     [Export(typeof(IOutputWindowService))]

@@ -8,6 +8,7 @@
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Utilities;
     using Microsoft.VisualStudio.Text;
+    using Tvl.VisualStudio.Language.Parsing;
 
     //[Export(typeof(ITaggerProvider))]
     [ContentType(Constants.JavaContentType)]
@@ -15,11 +16,11 @@
     public sealed class OutliningTaggerProvider : ITaggerProvider
     {
         [Import]
-        internal JavaBackgroundParserService JavaBackgroundParserService;
+        internal IBackgroundParserFactoryService BackgroundParserFactoryService;
 
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
-            Func<OutliningTagger> creator = () => new OutliningTagger(buffer, JavaBackgroundParserService.GetBackgroundParser(buffer));
+            Func<OutliningTagger> creator = () => new OutliningTagger(buffer, BackgroundParserFactoryService.GetBackgroundParser(buffer));
             return buffer.Properties.GetOrCreateSingletonProperty<OutliningTagger>(creator) as ITagger<T>;
         }
     }

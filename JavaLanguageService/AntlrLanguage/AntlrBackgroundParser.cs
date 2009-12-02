@@ -9,7 +9,7 @@
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow;
 
-    public class AntlrBackgroundParser : IDisposable
+    public class AntlrBackgroundParser : IBackgroundParser, IDisposable
     {
         private System.Timers.Timer _timer;
         private DateTimeOffset _lastEdit;
@@ -108,7 +108,7 @@
                 ErrorManager.SetErrorListener(new AntlrErrorProvidingParser.ErrorListener());
                 Grammar g = new Grammar();
                 var result = parser.grammar_(g);
-                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, result));
+                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, tokens.GetTokens(), result));
             }
             catch (Exception e)
             {

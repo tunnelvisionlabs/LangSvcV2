@@ -117,6 +117,9 @@ tokens
 	AST_IMPORT_ON_DEMAND;
 	AST_STATIC_IMPORT;
 	AST_STATIC_IMPORT_ON_DEMAND;
+
+	AST_TYPEREF;
+	AST_FIELDDECL;
 }
 
 @lexer::namespace{JavaLanguageService}
@@ -158,7 +161,7 @@ packageName
 	;
 
 qualifiedIdentifier
-	:	IDENTIFIER ('.' IDENTIFIER)*
+	:	IDENTIFIER ('.'^ IDENTIFIER ('.'! IDENTIFIER)*)?
 	;
 
 importDeclarations
@@ -172,19 +175,19 @@ importDeclaration
 
 typeImportDeclaration
 	:	i='import' typeName
-		(	'.' '*' ';'
-			-> ^(AST_IMPORT_ON_DEMAND[$i] typeName SEMI)
-		|	';'
-			-> ^(AST_SINGLE_TYPE_IMPORT[$i] typeName SEMI)
+		(	'.' '*' semi=';'
+			-> ^(AST_IMPORT_ON_DEMAND[$i] typeName '*' $semi)
+		|	semi=';'
+			-> ^(AST_SINGLE_TYPE_IMPORT[$i] typeName $semi)
 		)
 	;
 
 staticImportDeclaration
 	:	i='import' 'static' typeName
-		(	'.' '*' ';'
-			-> ^(AST_STATIC_IMPORT_ON_DEMAND[$i] typeName SEMI)
-		|	';'
-			-> ^(AST_STATIC_IMPORT[$i] typeName SEMI)
+		(	'.' '*' semi=';'
+			-> ^(AST_STATIC_IMPORT_ON_DEMAND[$i] typeName '*' $semi)
+		|	semi=';'
+			-> ^(AST_STATIC_IMPORT[$i] typeName $semi)
 		)
 	;
 
@@ -245,7 +248,7 @@ basicType
 	;
 
 typeArguments
-	:	'<' typeArgument (',' typeArgument)* '>'
+	:	'<'^ typeArgument (','! typeArgument)* '>'
 	;
 
 typeArgument
@@ -259,6 +262,7 @@ super
 
 classType
 	:	typeDeclSpecifier typeArguments?
+		-> ^(AST_TYPEREF typeDeclSpecifier typeArguments?)
 	;
 
 typeDeclSpecifier
@@ -329,18 +333,19 @@ generalModifier
 
 fieldDeclaration
 	:	type variableDeclarators ';'
+		-> ^(AST_FIELDDECL type variableDeclarators ';')
 	;
 
 variableDeclarators
-	:	variableDeclarator (',' variableDeclarator)*
+	:	variableDeclarator (','! variableDeclarator)*
 	;
 
 variableDeclarator
-	:	variableDeclaratorId ('=' variableInitializer)?
+	:	variableDeclaratorId ('='^ variableInitializer)?
 	;
 
 variableDeclaratorId
-	:	IDENTIFIER ('[' ']')?
+	:	IDENTIFIER^ ('[' ']')?
 	;
 
 variableInitializer
@@ -366,7 +371,7 @@ resultType
 	;
 
 methodDeclarator
-	:	IDENTIFIER '(' formalParameterList? ')'
+	:	IDENTIFIER^ '(' formalParameterList? ')'
 	;
 
 formalParameterList
@@ -382,11 +387,11 @@ variableModifiers
 	;
 
 throwsSpec
-	:	'throws' exceptionTypeList
+	:	'throws'^ exceptionTypeList
 	;
 
 exceptionTypeList
-	:	exceptionType (',' exceptionType)*
+	:	exceptionType (','! exceptionType)*
 	;
 
 // not finished
@@ -437,7 +442,7 @@ normalInterfaceDeclaration
 	;
 
 extendsInterfaces
-	:	'extends' interfaceType (',' interfaceType)*
+	:	'extends'^ interfaceType (','! interfaceType)*
 	;
 
 interfaceBody
@@ -485,7 +490,47 @@ annotationTypeElementDeclaration
 
 // not finished
 expression
-	:	IDENTIFIER
+	:	primary
+	;
+
+primary
+	:	literal
+	|	'this'
+	|	'(' expression ')'
+	|	classInstanceCreationExpression
+	;
+
+literal
+	:	numberLiteral
+	|	booleanLiteral
+	|	characterLiteral
+	|	stringLiteral
+	|	nullLiteral
+	;
+
+numberLiteral
+	:	NUMBER
+	;
+
+booleanLiteral
+	:	'true'
+	|	'false'
+	;
+
+characterLiteral
+	:	CHAR_LITERAL
+	;
+
+stringLiteral
+	:	STRING_LITERAL
+	;
+
+nullLiteral
+	:	'null'
+	;
+
+classInstanceCreationExpression
+	:	'new' typeArguments? classType '(' argumentList? ')'
 	;
 
 arrayInitializer

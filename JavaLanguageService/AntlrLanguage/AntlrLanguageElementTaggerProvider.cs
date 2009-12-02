@@ -7,6 +7,7 @@
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Shell.OutputWindow;
     using Tvl.VisualStudio.Text.Tagging;
+    using Tvl.VisualStudio.Language.Parsing;
 
     [Export(typeof(ITaggerProvider))]
     [ContentType(AntlrConstants.AntlrContentType)]
@@ -14,7 +15,7 @@
     public sealed class AntlrLanguageElementTaggerProvider : ITaggerProvider
     {
         [Import]
-        internal AntlrBackgroundParserService AntlrBackgroundParserService;
+        internal IBackgroundParserFactoryService BackgroundParserFactoryService;
 
         [Import]
         internal IOutputWindowService OutputWindowService;
@@ -26,7 +27,7 @@
                 Func<ITagger<ILanguageElementTag>> creator =
                     () =>
                     {
-                        var backgroundParser = AntlrBackgroundParserService.GetBackgroundParser(buffer);
+                        var backgroundParser = BackgroundParserFactoryService.GetBackgroundParser(buffer);
                         return new AntlrLanguageElementTagger(buffer, backgroundParser, OutputWindowService);
                     };
                 return (ITagger<T>)buffer.Properties.GetOrCreateSingletonProperty(creator);

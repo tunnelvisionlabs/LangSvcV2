@@ -83,13 +83,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Events\IWeakEventHandler.cs" />
     <Compile Include="Events\IWeakEventHandler`1.cs" />
-    <Compile Include="Events\WeakEventExtensions.cs" />
+    <Compile Include="Events\WeakEventHandler`1.cs" />
     <Compile Include="Events\WeakEventHandler`2.cs" />
     <Compile Include="Events\WeakEvents.cs" />
     <Compile Include="Interop\Variant.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Threading\DeferredPeriodicOperation.cs" />
+    <Compile Include="WeakReference`1.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
