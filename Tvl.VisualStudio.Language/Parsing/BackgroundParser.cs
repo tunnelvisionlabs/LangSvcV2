@@ -104,6 +104,7 @@
         {
             try
             {
+                _dirty = false;
                 ReParseImpl();
             }
             catch
