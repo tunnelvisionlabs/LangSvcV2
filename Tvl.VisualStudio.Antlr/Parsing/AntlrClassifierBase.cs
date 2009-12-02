@@ -3,10 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
-    using System.Runtime.CompilerServices;
 
     public abstract class AntlrClassifierBase : IClassifier
     {

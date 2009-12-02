@@ -1,10 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing
 {
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
-    using System.Collections.ObjectModel;
-    using System.Linq;
 
     public class AntlrParseResultEventArgs : ParseResultEventArgs
     {
