@@ -75,6 +75,7 @@
         private void TextBufferPostChanged(object sender, EventArgs e)
         {
             this._dirty = true;
+            this._lastEdit = DateTimeOffset.Now;
         }
 
         private void OnParseTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
