@@ -149,6 +149,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Parsing\BackgroundParserErrorTagger.cs" />
     <Compile Include="Parsing\IBackgroundParser.cs" />
     <Compile Include="Parsing\IBackgroundParserFactoryService.cs" />
     <Compile Include="Parsing\IBackgroundParserProvider.cs" />
