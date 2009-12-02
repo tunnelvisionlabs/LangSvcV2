@@ -1,4 +1,4 @@
-﻿namespace Tvl.VisualStudio.Language.Implementation
+﻿namespace Tvl.VisualStudio.Language.Parsing.Implementation
 {
     using System;
     using System.Collections.Generic;
@@ -6,7 +6,6 @@
     using System.Linq;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Utilities;
-    using Tvl.VisualStudio.Language.Parsing;
 
     [Export(typeof(IBackgroundParserFactoryService))]
     internal class BackgroundParserFactoryService : IBackgroundParserFactoryService
