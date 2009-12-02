@@ -2,38 +2,17 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow;
 
-    public class JavaBackgroundParser : IBackgroundParser, IDisposable
+    public class JavaBackgroundParser : BackgroundParser
     {
-        private System.Timers.Timer _timer;
-        private DateTimeOffset _lastEdit;
-        private bool _dirty;
-        private int _parsing;
-
-        public event EventHandler<ParseResultEventArgs> ParseComplete;
-
         public JavaBackgroundParser(ITextBuffer textBuffer, IOutputWindowService outputWindowService)
+            : base(textBuffer)
         {
-            this.TextBuffer = textBuffer;
-            this.TextBuffer.PostChanged += TextBufferPostChanged;
             this.OutputWindowService = outputWindowService;
-
-            this._dirty = true;
-            this._timer = new System.Timers.Timer(2000);
-            this._timer.Elapsed += OnParseTimerElapsed;
-            this._lastEdit = DateTimeOffset.MinValue;
-            this._timer.Start();
-        }
-
-        public ITextBuffer TextBuffer
-        {
-            get;
-            private set;
         }
 
         public IOutputWindowService OutputWindowService
@@ -42,41 +21,8 @@
             private set;
         }
 
-        public void Dispose()
+        protected override void ReParseImpl()
         {
-        }
-
-        private void TextBufferPostChanged(object sender, EventArgs e)
-        {
-            this._dirty = true;
-        }
-
-        private void OnParseTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            if (!_dirty)
-                return;
-
-            if (DateTimeOffset.Now - _lastEdit < TimeSpan.FromSeconds(2))
-                return;
-
-            if (Interlocked.CompareExchange(ref _parsing, 1, 0) == 0)
-            {
-                try
-                {
-                    Action action = ReParse;
-                    action.BeginInvoke((asyncResult) => _parsing = 0, null);
-                }
-                catch
-                {
-                    _parsing = 0;
-                    throw;
-                }
-            }
-        }
-
-        private void ReParse()
-        {
-            _dirty = false;
             var outputWindow = OutputWindowService.TryGetPane(Constants.AntlrIntellisenseOutputWindow);
             try
             {
@@ -114,13 +60,6 @@
                 {
                 }
             }
-        }
-
-        private void OnParseComplete(ParseResultEventArgs e)
-        {
-            var t = ParseComplete;
-            if (t != null)
-                t(this, e);
         }
     }
 }
