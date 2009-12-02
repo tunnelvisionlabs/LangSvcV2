@@ -175,7 +175,6 @@
     <Compile Include="AntlrLanguage\AntlrConstants.cs" />
     <Compile Include="AntlrLanguage\AntlrErrorProvidingLexer.cs" />
     <Compile Include="AntlrLanguage\AntlrErrorProvidingParser.cs" />
-    <Compile Include="AntlrLanguage\AntlrErrorTagger.cs" />
     <Compile Include="AntlrLanguage\AntlrErrorTaggerProvider.cs" />
     <Compile Include="AntlrLanguage\AntlrLanguageElementTagger.cs" />
     <Compile Include="AntlrLanguage\AntlrLanguageElementTaggerProvider.cs" />
@@ -187,7 +186,6 @@
     <Compile Include="BraceMatchingTaggerProvider.cs" />
     <Compile Include="JavaBackgroundParser.cs" />
     <Compile Include="JavaBackgroundParserProvider.cs" />
-    <Compile Include="JavaErrorTagger.cs" />
     <Compile Include="JavaErrorTaggerProvider.cs" />
     <Compile Include="JavaParserHelper.cs">
       <DependentUpon>Java.g3</DependentUpon>
@@ -312,6 +310,10 @@
       <Project>{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}</Project>
       <Name>Tvl.VisualStudio.Shell</Name>
       <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.Text.Antlr\Tvl.VisualStudio.Text.Antlr.csproj">
+      <Project>{0DB55D37-484F-4F2A-8679-C58E234AD504}</Project>
+      <Name>Tvl.VisualStudio.Text.Antlr</Name>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Text.Implementation\Tvl.VisualStudio.Text.Implementation.csproj">
       <Project>{D9B45C61-9721-41B7-9ABF-85C452CD9F49}</Project>

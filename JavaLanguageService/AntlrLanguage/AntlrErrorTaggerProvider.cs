@@ -6,6 +6,7 @@
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Text.Tagging;
 
     [Export(typeof(ITaggerProvider))]
     [ContentType(AntlrConstants.AntlrContentType)]
@@ -23,7 +24,7 @@
         {
             if (typeof(T) == typeof(SquiggleTag))
             {
-                Func<AntlrErrorTagger> creator = () => new AntlrErrorTagger(buffer, BackgroundParserFactoryService.GetBackgroundParser(buffer));
+                Func<BackgroundParserErrorTagger> creator = () => new BackgroundParserErrorTagger(buffer, BackgroundParserFactoryService.GetBackgroundParser(buffer));
                 return (ITagger<T>)buffer.Properties.GetOrCreateSingletonProperty(creator);
             }
 
