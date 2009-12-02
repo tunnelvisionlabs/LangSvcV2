@@ -11,7 +11,11 @@
     public sealed class JavaClassifierProvider : IClassifierProvider
     {
         [Import]
-        public IStandardClassificationService StandardClassificationService;
+        private IStandardClassificationService StandardClassificationService
+        {
+            get;
+            set;
+        }
 
         public IClassifier GetClassifier(ITextBuffer textBuffer)
         {

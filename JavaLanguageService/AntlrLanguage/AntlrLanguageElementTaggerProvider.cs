@@ -15,10 +15,18 @@
     public sealed class AntlrLanguageElementTaggerProvider : ITaggerProvider
     {
         [Import]
-        internal IBackgroundParserFactoryService BackgroundParserFactoryService;
+        private IBackgroundParserFactoryService BackgroundParserFactoryService
+        {
+            get;
+            set;
+        }
 
         [Import]
-        internal IOutputWindowService OutputWindowService;
+        private IOutputWindowService OutputWindowService
+        {
+            get;
+            set;
+        }
 
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {

@@ -12,7 +12,11 @@
     public sealed class JavaBackgroundParserProvider : IBackgroundParserProvider
     {
         [Import]
-        internal IOutputWindowService OutputWindowService;
+        private IOutputWindowService OutputWindowService
+        {
+            get;
+            set;
+        }
 
         public IBackgroundParser CreateParser(ITextBuffer textBuffer)
         {

@@ -16,11 +16,25 @@
     public sealed class JavaIntellisenseControllerProvider : IIntellisenseControllerProvider
     {
         [Import]
-        public IQuickInfoBroker QuickInfoBroker;
+        private IQuickInfoBroker QuickInfoBroker
+        {
+            get;
+            set;
+        }
+
         [Import]
-        public ICompletionBroker CompletionBroker;
+        private ICompletionBroker CompletionBroker
+        {
+            get;
+            set;
+        }
+
         [Import]
-        public ISignatureHelpBroker SignatureHelpBroker;
+        private ISignatureHelpBroker SignatureHelpBroker
+        {
+            get;
+            set;
+        }
 
         public IIntellisenseController TryCreateIntellisenseController(ITextView textView, IList<ITextBuffer> subjectBuffers)
         {

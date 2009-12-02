@@ -23,8 +23,12 @@
     {
         private IServiceProvider _serviceProvider;
 
+        private Listener _listener;
+
+        public event EventHandler<ViewChangedEventArgs> ViewChanged;
+
         [Import]
-        public IServiceProvider GlobalServiceProvider
+        private IServiceProvider GlobalServiceProvider
         {
             get
             {
@@ -39,11 +43,11 @@
         }
 
         [Import]
-        public IVsEditorAdaptersFactoryService VsEditorAdaptorsFactoryService;
-
-        private Listener _listener;
-
-        public event EventHandler<ViewChangedEventArgs> ViewChanged;
+        private IVsEditorAdaptersFactoryService VsEditorAdaptorsFactoryService
+        {
+            get;
+            set;
+        }
 
         public ITextView CurrentView
         {

@@ -12,7 +12,11 @@
     public sealed class AntlrBackgroundParserProvider : IBackgroundParserProvider
     {
         [Import]
-        internal IOutputWindowService OutputWindowService;
+        private IOutputWindowService OutputWindowService
+        {
+            get;
+            set;
+        }
 
         public IBackgroundParser CreateParser(ITextBuffer textBuffer)
         {

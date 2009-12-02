@@ -14,10 +14,18 @@
     public sealed class UrlQuickInfoControllerProvider : IIntellisenseControllerProvider
     {
         [Import]
-        public IQuickInfoBroker QuickInfoBroker;
+        private IQuickInfoBroker QuickInfoBroker
+        {
+            get;
+            set;
+        }
 
         [Import]
-        public IViewTagAggregatorFactoryService TagAggregatorFactoryService;
+        private IViewTagAggregatorFactoryService TagAggregatorFactoryService
+        {
+            get;
+            set;
+        }
 
         public IIntellisenseController TryCreateIntellisenseController(ITextView textView, IList<ITextBuffer> subjectBuffers)
         {

@@ -13,10 +13,18 @@
     internal sealed class OutputWindowService : IOutputWindowService
     {
         [Import]
-        public IServiceProvider GlobalServiceProvider;
+        private IServiceProvider GlobalServiceProvider
+        {
+            get;
+            set;
+        }
 
         [ImportMany]
-        internal List<Lazy<OutputWindowDefinition, IOutputWindowDefinitionMetadata>> OutputWindowDefinitions;
+        private List<Lazy<OutputWindowDefinition, IOutputWindowDefinitionMetadata>> OutputWindowDefinitions
+        {
+            get;
+            set;
+        }
 
         private readonly Dictionary<string, Guid> _outputWindows =
             new Dictionary<string, Guid>()

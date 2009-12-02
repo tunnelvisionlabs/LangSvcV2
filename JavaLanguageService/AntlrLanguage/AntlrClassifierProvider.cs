@@ -11,10 +11,18 @@
     public sealed class AntlrClassifierProvider : IClassifierProvider
     {
         [Import]
-        public IStandardClassificationService StandardClassificationService;
+        private IStandardClassificationService StandardClassificationService
+        {
+            get;
+            set;
+        }
 
         [Import]
-        public IClassificationTypeRegistryService ClassificationTypeRegistryService;
+        private IClassificationTypeRegistryService ClassificationTypeRegistryService
+        {
+            get;
+            set;
+        }
 
         public IClassifier GetClassifier(ITextBuffer textBuffer)
         {

@@ -11,32 +11,32 @@
         [Export]
         [Name(AntlrConstants.AntlrContentType)]
         [BaseDefinition("code")]
-        internal static readonly ContentTypeDefinition AntlrContentTypeDefinition;
+        private static readonly ContentTypeDefinition AntlrContentTypeDefinition;
 
         [Export]
         [FileExtension(AntlrConstants.AntlrFileExtension)]
         [ContentType(AntlrConstants.AntlrContentType)]
-        internal static FileExtensionToContentTypeDefinition AntlrFileExtensionToContentTypeDefinition;
+        private static readonly FileExtensionToContentTypeDefinition AntlrFileExtensionToContentTypeDefinition;
 
         [Export]
         [FileExtension(AntlrConstants.AntlrFileExtension2)]
         [ContentType(AntlrConstants.AntlrContentType)]
-        internal static FileExtensionToContentTypeDefinition AntlrFileExtensionToContentTypeDefinition2;
+        private static readonly FileExtensionToContentTypeDefinition AntlrFileExtensionToContentTypeDefinition2;
 
         [Export]
         [BaseDefinition(PredefinedClassificationTypeNames.Identifier)]
         [Name(AntlrClassificationTypeNames.ParserRule)]
-        internal static ClassificationTypeDefinition ParserRuleClassificationType;
+        private static readonly ClassificationTypeDefinition ParserRuleClassificationType;
 
         [Export]
         [BaseDefinition(PredefinedClassificationTypeNames.Identifier)]
         [Name(AntlrClassificationTypeNames.LexerRule)]
-        internal static ClassificationTypeDefinition LexerRuleClassificationType;
+        private static readonly ClassificationTypeDefinition LexerRuleClassificationType;
 
         [Export]
         [BaseDefinition(PredefinedClassificationTypeNames.Literal)]
         [Name(AntlrClassificationTypeNames.ActionLiteral)]
-        internal static ClassificationTypeDefinition ActionLiteralClassificationType;
+        private static readonly ClassificationTypeDefinition ActionLiteralClassificationType;
 
         [Export(typeof(EditorFormatDefinition))]
         [ClassificationType(ClassificationTypeNames = AntlrClassificationTypeNames.ParserRule)]

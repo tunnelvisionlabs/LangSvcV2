@@ -10,7 +10,7 @@
     internal class LanguageElementManagerService : ILanguageElementManagerService
     {
         [Import]
-        internal IBufferTagAggregatorFactoryService TagAggregatorFactory
+        private IBufferTagAggregatorFactoryService TagAggregatorFactory
         {
             get;
             set;

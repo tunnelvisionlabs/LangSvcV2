@@ -15,7 +15,7 @@
         private static readonly CommentFormat JavaCommentFormat = new CommentFormat("//", "/*", "*/");
 
         [Import]
-        public IUndoHistoryRegistry UndoHistoryRegistry
+        private IUndoHistoryRegistry UndoHistoryRegistry
         {
             get;
             set;

@@ -14,7 +14,11 @@
     public sealed class JavaTextStructureNavigatorProvider : ITextStructureNavigatorProvider
     {
         [Import]
-        public IContentTypeRegistryService contentTypeRegistry;
+        private IContentTypeRegistryService contentTypeRegistry
+        {
+            get;
+            set;
+        }
 
         public ITextStructureNavigator CreateTextStructureNavigator(ITextBuffer textBuffer)
         {

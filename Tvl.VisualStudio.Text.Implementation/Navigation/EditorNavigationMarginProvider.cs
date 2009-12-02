@@ -16,13 +16,21 @@
     public sealed class EditorNavigationMarginProvider : IWpfTextViewMarginProvider
     {
         [Import]
-        public IBufferTagAggregatorFactoryService BufferTagAggregatorFactoryService;
+        private IBufferTagAggregatorFactoryService BufferTagAggregatorFactoryService
+        {
+            get;
+            set;
+        }
 
         //[Import]
-        //public ILanguageElementManagerService LanguageElementManagerService;
+        //private ILanguageElementManagerService LanguageElementManagerService{get;set;}
 
         [Import]
-        public IGlyphService GlyphService;
+        private IGlyphService GlyphService
+        {
+            get;
+            set;
+        }
 
         public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer)
         {

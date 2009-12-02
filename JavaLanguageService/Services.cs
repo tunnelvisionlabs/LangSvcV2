@@ -9,15 +9,15 @@
         [Export]
         [Name(Constants.JavaContentType)]
         [BaseDefinition("code")]
-        internal static readonly ContentTypeDefinition JavaContentTypeDefinition;
+        private static readonly ContentTypeDefinition JavaContentTypeDefinition;
 
         [Export]
         [FileExtension(Constants.JavaFileExtension)]
         [ContentType(Constants.JavaContentType)]
-        internal static FileExtensionToContentTypeDefinition JavaFileExtensionToContentTypeDefinition;
+        private static readonly FileExtensionToContentTypeDefinition JavaFileExtensionToContentTypeDefinition;
 
         [Export]
         [Name(Constants.AntlrIntellisenseOutputWindow)]
-        internal static OutputWindowDefinition AntlrIntellisenseOutputWindowDefinition;
+        private static readonly OutputWindowDefinition AntlrIntellisenseOutputWindowDefinition;
     }
 }

@@ -14,13 +14,25 @@
     internal sealed class ActiveViewTrackerService : IActiveViewTrackerService
     {
         [Import]
-        public IMonitorSelectionService MonitorSelectionService;
+        private IMonitorSelectionService MonitorSelectionService
+        {
+            get;
+            set;
+        }
 
         [Import]
-        public IOpenedViewTrackerService OpenedViewTrackerService;
+        private IOpenedViewTrackerService OpenedViewTrackerService
+        {
+            get;
+            set;
+        }
 
         [Import]
-        public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
+        private IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService
+        {
+            get;
+            set;
+        }
 
         public event EventHandler<ViewChangedEventArgs> ViewChanged
         {

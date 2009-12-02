@@ -15,10 +15,14 @@
     internal sealed class AutoCommentService : IVsTextViewCreationListener
     {
         [Import]
-        public IVsEditorAdaptersFactoryService EditorAdaptersFactoryService;
+        private IVsEditorAdaptersFactoryService EditorAdaptersFactoryService
+        {
+            get;
+            set;
+        }
 
         [ImportMany]
-        public List<Lazy<ICommenterProvider, IContentTypeMetadata>> CommenterProviders
+        private List<Lazy<ICommenterProvider, IContentTypeMetadata>> CommenterProviders
         {
             get;
             set;

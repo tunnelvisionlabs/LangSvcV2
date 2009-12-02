@@ -16,7 +16,11 @@
     public sealed class AntlrBraceMatchingTaggerProvider : IViewTaggerProvider
     {
         [Import]
-        public IClassifierAggregatorService AggregatorService;
+        private IClassifierAggregatorService AggregatorService
+        {
+            get;
+            set;
+        }
 
         public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
         {

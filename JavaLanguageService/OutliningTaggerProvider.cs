@@ -16,7 +16,11 @@
     public sealed class OutliningTaggerProvider : ITaggerProvider
     {
         [Import]
-        internal IBackgroundParserFactoryService BackgroundParserFactoryService;
+        private IBackgroundParserFactoryService BackgroundParserFactoryService
+        {
+            get;
+            set;
+        }
 
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {

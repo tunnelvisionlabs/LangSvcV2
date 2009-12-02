@@ -15,7 +15,7 @@
         private static readonly CommentFormat AntlrCommentFormat = new CommentFormat("//", "/*", "*/");
 
         [Import]
-        public IUndoHistoryRegistry UndoHistoryRegistry
+        private IUndoHistoryRegistry UndoHistoryRegistry
         {
             get;
             set;
