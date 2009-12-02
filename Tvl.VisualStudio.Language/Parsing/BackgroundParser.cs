@@ -3,7 +3,6 @@
     using System;
     using System.Threading;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Language.Parsing;
 
     public abstract class BackgroundParser : IBackgroundParser, IDisposable
     {
