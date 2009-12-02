@@ -164,7 +164,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AntlrLanguage\AntlrBackgroundParser.cs" />
-    <Compile Include="AntlrLanguage\AntlrBackgroundParserService.cs" />
+    <Compile Include="AntlrLanguage\AntlrBackgroundParserProvider.cs" />
     <Compile Include="AntlrLanguage\AntlrBraceMatchingTaggerProvider.cs" />
     <Compile Include="AntlrLanguage\AntlrClassificationTypeNames.cs" />
     <Compile Include="AntlrLanguage\AntlrClassifier.cs" />
@@ -186,7 +186,7 @@
     <Compile Include="AntlrLanguage\AntlrServices.cs" />
     <Compile Include="BraceMatchingTaggerProvider.cs" />
     <Compile Include="JavaBackgroundParser.cs" />
-    <Compile Include="JavaBackgroundParserService.cs" />
+    <Compile Include="JavaBackgroundParserProvider.cs" />
     <Compile Include="JavaErrorTagger.cs" />
     <Compile Include="JavaErrorTaggerProvider.cs" />
     <Compile Include="JavaParserHelper.cs">
