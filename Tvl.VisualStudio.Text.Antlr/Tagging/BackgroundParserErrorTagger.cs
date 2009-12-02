@@ -9,7 +9,7 @@
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
 
-    internal class BackgroundParserErrorTagger : ITagger<SquiggleTag>
+    public class BackgroundParserErrorTagger : ITagger<SquiggleTag>
     {
         private ITagSpan<SquiggleTag>[] _tags;
 
