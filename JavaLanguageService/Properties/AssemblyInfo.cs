@@ -9,9 +9,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("JavaLanguageService")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Tunnel Vision Labs")]
 [assembly: AssemblyProduct("JavaLanguageService")]
-[assembly: AssemblyCopyright("")]
+[assembly: AssemblyCopyright("Copyright © Sam Harwell 2009")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
