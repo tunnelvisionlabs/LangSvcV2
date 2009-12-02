@@ -3,9 +3,9 @@
     using System;
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Shell.OutputWindow;
-    using Tvl.VisualStudio.Language.Parsing;
     using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Shell.OutputWindow;
 
     [Export(typeof(IBackgroundParserProvider))]
     [ContentType(Constants.JavaContentType)]
