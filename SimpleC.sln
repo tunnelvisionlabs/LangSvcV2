@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language.I
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Tools.Antlr", "Tvl.VisualStudio.Tools.Antlr\Tvl.VisualStudio.Tools.Antlr.csproj", "{728757BD-5485-411B-83A6-B02318B2F61A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Text.Antlr", "Tvl.VisualStudio.Text.Antlr\Tvl.VisualStudio.Text.Antlr.csproj", "{0DB55D37-484F-4F2A-8679-C58E234AD504}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +69,10 @@ Global
 		{728757BD-5485-411B-83A6-B02318B2F61A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{728757BD-5485-411B-83A6-B02318B2F61A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{728757BD-5485-411B-83A6-B02318B2F61A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DB55D37-484F-4F2A-8679-C58E234AD504}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DB55D37-484F-4F2A-8679-C58E234AD504}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DB55D37-484F-4F2A-8679-C58E234AD504}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DB55D37-484F-4F2A-8679-C58E234AD504}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
