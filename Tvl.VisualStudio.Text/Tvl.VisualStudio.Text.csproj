@@ -168,6 +168,11 @@
       <Name>Tvl.Core</Name>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj">
+      <Project>{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}</Project>
+      <Name>Tvl.VisualStudio.Shell</Name>
+      <Private>False</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

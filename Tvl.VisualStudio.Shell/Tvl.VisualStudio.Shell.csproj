@@ -144,6 +144,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandFilter.cs" />
+    <Compile Include="CommandStatus.cs" />
     <Compile Include="Extensions\IVsTextViewExtensions.cs" />
     <Compile Include="Extensions\ServiceProviderExtensions.cs" />
     <Compile Include="IActiveViewTrackerService.cs" />

@@ -4,8 +4,8 @@
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.TextManager.Interop;
+    using Tvl.VisualStudio.Shell;
 
-    using OLECMDF = Microsoft.VisualStudio.OLE.Interop.OLECMDF;
     using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
 
     [ComVisible(true)]
@@ -30,30 +30,30 @@
             private set;
         }
 
-        protected override OLECMDF QueryCommandStatus(ref Guid guidCmdGroup, uint cmdId)
+        protected override CommandStatus QueryCommandStatus(ref Guid group, uint id)
         {
-            if (guidCmdGroup == typeof(VsCommands2K).GUID)
+            if (group == typeof(VsCommands2K).GUID)
             {
-                VsCommands2K cmd = (VsCommands2K)cmdId;
+                VsCommands2K cmd = (VsCommands2K)id;
                 switch (cmd)
                 {
                 case VsCommands2K.COMMENT_BLOCK:
                 case VsCommands2K.UNCOMMENT_BLOCK:
                     if (TextView.TextBuffer.CheckEditAccess())
-                        return OLECMDF.OLECMDF_SUPPORTED | OLECMDF.OLECMDF_ENABLED;
+                        return CommandStatus.Supported | CommandStatus.Enabled;
                     else
-                        return OLECMDF.OLECMDF_SUPPORTED;
+                        return CommandStatus.Supported;
                 }
             }
 
-            return base.QueryCommandStatus(ref guidCmdGroup, cmdId);
+            return base.QueryCommandStatus(ref group, id);
         }
 
-        protected override bool HandlePreExec(ref Guid guidCmdGroup, uint cmdId, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
+        protected override bool HandlePreExec(ref Guid commandGroup, uint commandId, uint executionOptions, IntPtr pvaIn, IntPtr pvaOut)
         {
-            if (guidCmdGroup == typeof(VsCommands2K).GUID)
+            if (commandGroup == typeof(VsCommands2K).GUID)
             {
-                VsCommands2K cmd = (VsCommands2K)cmdId;
+                VsCommands2K cmd = (VsCommands2K)commandId;
                 switch (cmd)
                 {
                 case VsCommands2K.COMMENT_BLOCK:
@@ -66,7 +66,7 @@
                 }
             }
 
-            return base.HandlePreExec(ref guidCmdGroup, cmdId, nCmdexecopt, pvaIn, pvaOut);
+            return base.HandlePreExec(ref commandGroup, commandId, executionOptions, pvaIn, pvaOut);
         }
 
         protected void CommentSelection()
