@@ -156,6 +156,7 @@
     <Compile Include="IToolWindowProvider.cs" />
     <Compile Include="OutputWindow\IOutputWindowPane.cs" />
     <Compile Include="OutputWindow\IOutputWindowService.cs" />
+    <Compile Include="OutputWindow\IOutputWindowServiceContracts.cs" />
     <Compile Include="OutputWindow\OutputWindowDefinition.cs" />
     <Compile Include="OutputWindow\IOutputWindowPaneContracts.cs" />
     <Compile Include="OutputWindow\PredefinedOutputWindowPanes.cs" />

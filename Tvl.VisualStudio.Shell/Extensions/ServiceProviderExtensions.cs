@@ -10,18 +10,28 @@
     {
         public static TService GetService<TService>(this IServiceProvider sp)
         {
+            if (sp == null)
+                throw new NullReferenceException("Value 'sp' was null in extension instance method.");
+            Contract.EndContractBlock();
+
             return (TService)sp.GetService(typeof(TService));
         }
 
         public static IOleServiceProvider TryGetOleServiceProvider(this IServiceProvider sp)
         {
+            if (sp == null)
+                throw new NullReferenceException("Value 'sp' was null in extension instance method.");
+            Contract.EndContractBlock();
+
             return (IOleServiceProvider)sp.GetService(typeof(IOleServiceProvider));
         }
 
         public static TServiceInterface TryGetGlobalService<TServiceClass, TServiceInterface>(this IOleServiceProvider sp)
             where TServiceInterface : class
         {
-            Contract.Requires<NullReferenceException>(sp != null);
+            if (sp == null)
+                throw new NullReferenceException("Value 'sp' was null in extension instance method.");
+            Contract.EndContractBlock();
 
             Guid guidService = typeof(TServiceClass).GUID;
             Guid riid = typeof(TServiceClass).GUID;

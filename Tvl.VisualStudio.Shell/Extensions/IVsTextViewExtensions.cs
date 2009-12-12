@@ -1,20 +1,22 @@
 ﻿namespace Tvl.VisualStudio.Shell.Extensions
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
+    using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
     using Microsoft.VisualStudio.TextManager.Interop;
     using IObjectWithSite = Microsoft.VisualStudio.OLE.Interop.IObjectWithSite;
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
-    using System.Runtime.InteropServices;
-    using Microsoft.VisualStudio.Shell.Interop;
-    using Microsoft.VisualStudio;
 
     public static class IVsTextViewExtensions
     {
         public static IVsCodeWindow GetCodeWindow(this IVsTextView textView)
         {
+            if (textView == null)
+                throw new NullReferenceException("Value 'textView' was null in extension instance method.");
+            Contract.EndContractBlock();
+
             IObjectWithSite objectWithSite = textView as IObjectWithSite;
             if (objectWithSite == null)
                 return null;

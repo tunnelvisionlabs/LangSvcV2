@@ -10,7 +10,9 @@
     {
         public static IEnumerable<IVsWindowFrame> GetToolWindows(this IVsUIShell shell)
         {
-            Contract.Requires<NullReferenceException>(shell != null);
+            if (shell == null)
+                throw new NullReferenceException("Value 'shell' was null in extension instance method.");
+            Contract.EndContractBlock();
 
             IEnumWindowFrames frames;
             ErrorHandler.ThrowOnFailure(shell.GetToolWindowEnum(out frames));
