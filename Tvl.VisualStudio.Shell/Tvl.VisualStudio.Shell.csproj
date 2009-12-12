@@ -147,6 +147,7 @@
     <Compile Include="CommandFilter.cs" />
     <Compile Include="CommandStatus.cs" />
     <Compile Include="Extensions\IVsTextViewExtensions.cs" />
+    <Compile Include="Extensions\IVsUIShellExtensions.cs" />
     <Compile Include="Extensions\ServiceProviderExtensions.cs" />
     <Compile Include="IActiveViewTrackerService.cs" />
     <Compile Include="IMonitorSelectionService.cs" />
@@ -158,6 +159,7 @@
     <Compile Include="OutputWindow\OutputWindowDefinition.cs" />
     <Compile Include="OutputWindow\IOutputWindowPaneContracts.cs" />
     <Compile Include="OutputWindow\PredefinedOutputWindowPanes.cs" />
+    <Compile Include="PredefinedWindowMenus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ToolWindow`1.cs" />
     <Compile Include="ViewChangedEventArgs.cs" />
