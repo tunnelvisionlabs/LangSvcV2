@@ -23,8 +23,8 @@
         {
             Contract.Requires<NullReferenceException>(sp != null);
 
-            Guid guidService = typeof(TServiceInterface).GUID;
-            Guid riid = typeof(TServiceInterface).GUID;
+            Guid guidService = typeof(TServiceClass).GUID;
+            Guid riid = typeof(TServiceClass).GUID;
             IntPtr obj = IntPtr.Zero;
             int result = ErrorHandler.CallWithCOMConvention(() => sp.QueryService(ref guidService, ref riid, out obj));
             if (ErrorHandler.Failed(result) || obj == IntPtr.Zero)
