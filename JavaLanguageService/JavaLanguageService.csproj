@@ -211,6 +211,7 @@
       <DependentUpon>Java.g3</DependentUpon>
     </Compile>
     <Compile Include="Php\PhpBraceMatchingTaggerProvider.cs" />
+    <Compile Include="Php\PhpClassificationTypeNames.cs" />
     <Compile Include="Php\PhpClassifier.cs" />
     <Compile Include="Php\PhpClassifierProvider.cs" />
     <Compile Include="Php\PhpCommenterProvider.cs" />

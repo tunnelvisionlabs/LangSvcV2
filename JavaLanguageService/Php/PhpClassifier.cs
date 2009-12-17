@@ -112,11 +112,19 @@
 
         private readonly ITextBuffer _textBuffer;
         private readonly IStandardClassificationService _standardClassificationService;
+        private readonly IClassificationTypeRegistryService _classificationTypeRegistryService;
 
-        public PhpClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService)
+        private readonly IClassificationType _globalFunction;
+        private readonly IClassificationType _globalObject;
+
+        public PhpClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService, IClassificationTypeRegistryService classificationTypeRegistryService)
         {
             this._textBuffer = textBuffer;
             this._standardClassificationService = standardClassificationService;
+            this._classificationTypeRegistryService = classificationTypeRegistryService;
+
+            this._globalFunction = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.GlobalFunction);
+            this._globalObject = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.GlobalObject);
         }
 
         protected override Lexer CreateLexer(ICharStream input)
@@ -145,9 +153,9 @@
                 if (Keywords.Contains(token.Text))
                     return _standardClassificationService.Keyword;
                 else if (BuiltinFunctions.Contains(token.Text))
-                    return _standardClassificationService.PreprocessorKeyword;
+                    return _globalFunction;
                 else if (BuiltinObjects.Contains(token.Text))
-                    return _standardClassificationService.SymbolDefinition;
+                    return _globalObject;
 
                 return _standardClassificationService.Identifier;
 
