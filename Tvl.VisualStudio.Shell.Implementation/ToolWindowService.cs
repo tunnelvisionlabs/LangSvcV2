@@ -15,6 +15,7 @@
     using vsCommandControlType = EnvDTE80.vsCommandControlType;
     using Microsoft.VisualStudio.Shell;
     using System.ComponentModel.Design;
+    using IOleCommandTarget = Microsoft.VisualStudio.OLE.Interop.IOleCommandTarget;
 
     [Export(typeof(IVsTextViewCreationListener))]
     [ContentType("text")]
@@ -35,6 +36,40 @@
         {
             get;
             set;
+        }
+
+        private void RegisterCommandTarget()
+        {
+
+        }
+
+        private class CommandTarget : CommandFilter
+        {
+            private ToolWindowService toolWindowService;
+            private uint _cookie;
+
+            protected override IOleCommandTarget Connect()
+            {
+                IVsRegisterPriorityCommandTarget registerPct = (IVsRegisterPriorityCommandTarget)toolWindowService.GlobalServiceProvider.GetService<SVsRegisterPriorityCommandTarget>();
+                registerPct.RegisterPriorityCommandTarget(0, this, out _cookie);
+                return null;
+            }
+
+            protected override void Disconnect()
+            {
+                try
+                {
+                    if (_cookie != 0)
+                    {
+                        IVsRegisterPriorityCommandTarget registerPct = (IVsRegisterPriorityCommandTarget)toolWindowService.GlobalServiceProvider.GetService<SVsRegisterPriorityCommandTarget>();
+                        registerPct.UnregisterPriorityCommandTarget(_cookie);
+                    }
+                }
+                finally
+                {
+                    _cookie = 0;
+                }
+            }
         }
 
         private void CreateWindows()
