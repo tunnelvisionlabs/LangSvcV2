@@ -78,6 +78,9 @@
             {
                 _membersControl.Items.Add(item);
             }
+
+            // TODO: condition the visibility on whether or not an IEditorNavigationSource is available for the content type
+            this._container.Visibility = Visibility.Collapsed;
         }
 
         public FrameworkElement VisualElement
