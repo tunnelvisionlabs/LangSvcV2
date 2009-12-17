@@ -4,7 +4,7 @@
     using System.Diagnostics;
     using System.Runtime.InteropServices;
 
-    [CLSCompliant(false), StructLayout(LayoutKind.Sequential)]
+    [CLSCompliant(false), StructLayout(LayoutKind.Sequential, Pack = 2)]
     public struct Variant
     {
 

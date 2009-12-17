@@ -99,6 +99,18 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.9.0, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.TextManager.Interop">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
@@ -171,7 +183,10 @@
     <Compile Include="AntlrLanguage\AntlrClassifierProvider.cs" />
     <Compile Include="AntlrLanguage\AntlrColorableLexerHelper.cs" />
     <Compile Include="AntlrLanguage\AntlrCommenterProvider.cs" />
+    <Compile Include="AntlrLanguage\AntlrCompletionIntellisenseController.cs" />
+    <Compile Include="AntlrLanguage\AntlrCompletionIntellisenseControllerProvider.cs" />
     <Compile Include="AntlrLanguage\AntlrCompletionSource.cs" />
+    <Compile Include="AntlrLanguage\AntlrCompletionSourceProvider.cs" />
     <Compile Include="AntlrLanguage\AntlrConstants.cs" />
     <Compile Include="AntlrLanguage\AntlrErrorProvidingLexer.cs" />
     <Compile Include="AntlrLanguage\AntlrErrorProvidingParser.cs" />
@@ -183,6 +198,8 @@
     <Compile Include="AntlrLanguage\AntlrQuickSearchItemProvider.cs" />
     <Compile Include="AntlrLanguage\AntlrQuickSearchItemProviderFactory.cs" />
     <Compile Include="AntlrLanguage\AntlrServices.cs" />
+    <Compile Include="AntlrLanguage\IntellisenseCommandFilter.cs" />
+    <Compile Include="AntlrLanguage\IntellisenseCommandFilterProvider.cs" />
     <Compile Include="BraceMatchingTaggerProvider.cs" />
     <Compile Include="JavaBackgroundParser.cs" />
     <Compile Include="JavaBackgroundParserProvider.cs" />
@@ -193,6 +210,12 @@
     <Compile Include="JavaLexerHelper.cs">
       <DependentUpon>Java.g3</DependentUpon>
     </Compile>
+    <Compile Include="Php\PhpBraceMatchingTaggerProvider.cs" />
+    <Compile Include="Php\PhpClassifier.cs" />
+    <Compile Include="Php\PhpClassifierProvider.cs" />
+    <Compile Include="Php\PhpCommenterProvider.cs" />
+    <Compile Include="Php\PhpConstants.cs" />
+    <Compile Include="Php\PhpServices.cs" />
     <Compile Include="Text\CancellationPolicy.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="JavaClassifier.cs" />
@@ -273,6 +296,7 @@
       <Link>Tool\Templates\messages\languages\en.stg</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Antlr3 Include="Php\PhpColorizerLexer.g3" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -332,7 +356,6 @@
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <PropertyGroup>
     <!-- Folder containing AntlrBuildTask.dll -->
     <AntlrBuildTaskPath>$(SolutionDir)External\Antlr</AntlrBuildTaskPath>

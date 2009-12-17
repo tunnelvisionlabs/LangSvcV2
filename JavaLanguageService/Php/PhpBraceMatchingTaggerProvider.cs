@@ -1,4 +1,4 @@
-﻿namespace JavaLanguageService.AntlrLanguage
+﻿namespace JavaLanguageService.Php
 {
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
@@ -10,9 +10,9 @@
     using Tvl.VisualStudio.Text.Tagging;
 
     [Export(typeof(IViewTaggerProvider))]
-    [ContentType(AntlrConstants.AntlrContentType)]
+    [ContentType(PhpConstants.PhpContentType)]
     [TagType(typeof(TextMarkerTag))]
-    public sealed class AntlrBraceMatchingTaggerProvider : IViewTaggerProvider
+    public sealed class PhpBraceMatchingTaggerProvider : IViewTaggerProvider
     {
         [Import]
         private IClassifierAggregatorService AggregatorService
@@ -31,7 +31,8 @@
                 {
                     new KeyValuePair<char, char>('(', ')'),
                     new KeyValuePair<char, char>('{', '}'),
-                    new KeyValuePair<char, char>('[', ']')
+                    new KeyValuePair<char, char>('[', ']'),
+                    new KeyValuePair<char, char>('<', '>'),
                 };
             return new BraceMatchingTagger(textView, buffer, aggregator, pairs) as ITagger<T>;
         }

@@ -21,33 +21,18 @@
     using LARGE_INTEGER = Microsoft.VisualStudio.OLE.Interop.LARGE_INTEGER;
     using ULARGE_INTEGER = Microsoft.VisualStudio.OLE.Interop.ULARGE_INTEGER;
     using STATSTG = Microsoft.VisualStudio.OLE.Interop.STATSTG;
+    using System.Runtime.InteropServices;
 
-    public abstract class ToolWindow : IToolWindow, IVsUIElementPane, IDisposable
+    [ComVisible(true)]
+    internal sealed class ToolWindowAdapter : IVsUIElementPane, IDisposable
     {
         private HwndSource _source;
+        private IToolWindow _content;
+        private FrameworkElement _visualElement;
 
-        public ToolWindow(string caption, ImageSource icon)
+        public ToolWindowAdapter(IToolWindow content)
         {
-            this.Caption = caption;
-            this.Icon = icon;
-        }
-
-        public string Caption
-        {
-            get;
-            private set;
-        }
-
-        public ImageSource Icon
-        {
-            get;
-            private set;
-        }
-
-        public FrameworkElement VisualElement
-        {
-            get;
-            private set;
+            this._content = content;
         }
 
         private IOleServiceProvider ServiceProvider
@@ -55,40 +40,6 @@
             get;
             set;
         }
-
-        public bool MultiInstance
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        public ToolWindowOrientation Orientation
-        {
-            get
-            {
-                return ToolWindowOrientation.Left;
-            }
-        }
-
-        public VsDockStyle Style
-        {
-            get
-            {
-                return VsDockStyle.Linked;
-            }
-        }
-
-        public bool Transient
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        protected abstract FrameworkElement CreateVisualElement();
 
         #region IVsUIElementPane Members
 
@@ -100,8 +51,8 @@
 
         int IVsUIElementPane.CreateUIElementPane(out object punkUIElement)
         {
-            VisualElement = CreateVisualElement();
-            punkUIElement = VisualElement;
+            _visualElement = _content.CreateContent();
+            punkUIElement = _visualElement;
             return VSConstants.S_OK;
         }
 
@@ -169,7 +120,7 @@
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (disposing)
             {
@@ -182,43 +133,24 @@
             }
         }
 
-        protected virtual void OnClose()
+        private void OnClose()
         {
             this.Dispose();
         }
 
-        public virtual int LoadUIState(Stream stateStream)
+        private int LoadUIState(Stream stateStream)
         {
             return VSConstants.E_NOTIMPL;
         }
 
-        public virtual int SaveUIState(out Stream stateStream)
+        private int SaveUIState(out Stream stateStream)
         {
             stateStream = null;
             return VSConstants.S_OK;
         }
 
-        //protected virtual bool PreProcessMessage(ref Message m)
-        //{
-        //    IntPtr hwnd;
-        //    var source = HwndSource.FromHwnd(hwnd);
-        //    var visual = source.RootVisual;
-        //    visual.Dispatcher.
-        //    Control control = Control.FromChildHandle(m.HWnd);
-        //    return ((control != null) && (control.PreProcessControlMessage(ref m) == PreProcessControlState.MessageProcessed));
-        //}
-
-        private int InternalTranslateAccelerator(MSG[] msg)
+        private int InternalTranslateAccelerator(MSG[] lpmsg)
         {
-            //Message m = Message.Create(msg[0].hwnd, (int)msg[0].message, msg[0].wParam, msg[0].lParam);
-            //bool flag = this.PreProcessMessage(ref m);
-            //msg[0].message = (uint)m.Msg;
-            //msg[0].wParam = m.WParam;
-            //msg[0].lParam = m.LParam;
-            //if (flag)
-            //{
-            //    return VSConstants.S_OK;
-            //}
             return VSConstants.E_FAIL;
         }
 

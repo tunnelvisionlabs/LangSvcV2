@@ -2,7 +2,6 @@
 {
     using System.Windows;
     using System.Windows.Media;
-    using Microsoft.VisualStudio.Shell;
 
     public interface IToolWindow
     {
@@ -16,29 +15,35 @@
             get;
         }
 
-        FrameworkElement VisualElement
-        {
-            get;
-        }
+        FrameworkElement CreateContent();
 
-        bool MultiInstance
-        {
-            get;
-        }
+        /*
+         * This property is replaced by an IMultiInstanceToolWindowProvider
+         */
+        //bool MultiInstance
+        //{
+        //    get;
+        //}
 
-        ToolWindowOrientation Orientation
-        {
-            get;
-        }
+        /*
+         * This property is replaced by a DefaultPosition() attribute
+         */
+        //ToolWindowOrientation Orientation
+        //{
+        //    get;
+        //}
 
-        VsDockStyle Style
-        {
-            get;
-        }
+        /*
+         * This property is replaced by a DefaultPosition() attribute
+         */
+        //VsDockStyle Style
+        //{
+        //    get;
+        //}
 
-        bool Transient
-        {
-            get;
-        }
+        //bool Transient
+        //{
+        //    get;
+        //}
     }
 }

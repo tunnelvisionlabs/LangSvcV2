@@ -108,14 +108,20 @@
                 return;
 
             var result = ((AntlrParseResultEventArgs)e).Result;
-            _snapshot = e.Snapshot;
-            _tokens = ((AntlrParseResultEventArgs)e).Tokens;
+            this._snapshot = e.Snapshot;
+            this._tokens = ((AntlrParseResultEventArgs)e).Tokens;
 
             _tree.Dispatcher.Invoke(
                 (Action)(() =>
                 {
-                    this._tree.Items.Clear();
-                    this._tree.Items.Add(result.Tree);
+                    try
+                    {
+                        this._tree.Items.Clear();
+                        this._tree.Items.Add(result.Tree);
+                    }
+                    catch
+                    {
+                    }
                 }));
         }
     }

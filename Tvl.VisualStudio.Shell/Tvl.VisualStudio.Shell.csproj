@@ -164,7 +164,7 @@
     <Compile Include="OutputWindow\PredefinedOutputWindowPanes.cs" />
     <Compile Include="PredefinedWindowMenus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ToolWindow`1.cs" />
+    <None Include="ToolWindow`1.cs" />
     <Compile Include="ViewChangedEventArgs.cs" />
   </ItemGroup>
   <ItemGroup />
