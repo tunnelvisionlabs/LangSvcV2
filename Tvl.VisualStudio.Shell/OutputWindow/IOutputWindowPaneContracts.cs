@@ -30,12 +30,16 @@
 
         public void Write(string text)
         {
-            Contract.Requires<ArgumentNullException>(text != null);
+            if (text == null)
+                throw new ArgumentNullException("text");
+            Contract.EndContractBlock();
         }
 
         public void WriteLine(string text)
         {
-            Contract.Requires<ArgumentNullException>(text != null);
+            if (text == null)
+                throw new ArgumentNullException("text");
+            Contract.EndContractBlock();
         }
 
         public void Dispose()

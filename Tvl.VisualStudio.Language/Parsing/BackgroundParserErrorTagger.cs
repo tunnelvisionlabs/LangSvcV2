@@ -7,6 +7,7 @@
     using Microsoft.VisualStudio.Text.Adornments;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
+    using System.Diagnostics.Contracts;
 
     public class BackgroundParserErrorTagger : ITagger<SquiggleTag>
     {
@@ -16,9 +17,14 @@
 
         public BackgroundParserErrorTagger(ITextBuffer textBuffer, IBackgroundParser backgroundParser)
         {
+            if (textBuffer == null)
+                throw new ArgumentNullException("textBuffer");
+            if (backgroundParser == null)
+                throw new ArgumentNullException("backgroundParser");
+            Contract.EndContractBlock();
+
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;
-
             this.BackgroundParser.ParseComplete += new EventHandler<ParseResultEventArgs>(BackgroundParserParseComplete);
         }
 

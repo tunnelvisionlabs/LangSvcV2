@@ -11,7 +11,10 @@
 
         public VsOutputWindowPaneAdapter(IVsOutputWindowPane pane)
         {
-            Contract.Requires<ArgumentNullException>(pane != null);
+            if (pane == null)
+                throw new ArgumentNullException("pane");
+            Contract.EndContractBlock();
+
             this._pane = pane;
         }
 
@@ -46,13 +49,17 @@
 
         public void Write(string text)
         {
-            Contract.Requires<ArgumentNullException>(text != null);
+            if (text == null)
+                throw new ArgumentNullException("text");
+
             ErrorHandler.ThrowOnFailure(this._pane.OutputStringThreadSafe(text));
         }
 
         public void WriteLine(string text)
         {
-            Contract.Requires<ArgumentNullException>(text != null);
+            if (text == null)
+                throw new ArgumentNullException("text");
+
             if (!text.EndsWith(Environment.NewLine))
                 text += Environment.NewLine;
 

@@ -14,7 +14,9 @@
     {
         protected TextViewCommandFilter(IVsTextView textViewAdapter)
         {
-            Contract.Requires<ArgumentNullException>(textViewAdapter != null);
+            if (textViewAdapter == null)
+                throw new ArgumentNullException("textViewAdapter");
+            Contract.EndContractBlock();
 
             this.TextViewAdapter = textViewAdapter;
         }

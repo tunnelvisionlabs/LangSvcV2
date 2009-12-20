@@ -118,8 +118,11 @@
 
             public Listener(MonitorSelectionService service, IServiceProvider serviceProvider)
             {
-                Contract.Requires<ArgumentException>(service != null);
-                Contract.Requires<ArgumentNullException>(serviceProvider != null);
+                if (service == null)
+                    throw new ArgumentNullException("service");
+                if (serviceProvider == null)
+                    throw new ArgumentNullException("serviceProvider");
+                Contract.EndContractBlock();
 
                 IOleServiceProvider olesp = serviceProvider.TryGetOleServiceProvider();
                 if (olesp == null)

@@ -8,8 +8,11 @@
     {
         IOutputWindowPane IOutputWindowService.TryGetPane(string name)
         {
-            Contract.Requires<ArgumentNullException>(name != null);
-            Contract.Requires<ArgumentException>(name.Length > 0);
+            if (name == null)
+                throw new ArgumentNullException("name");
+            if (name.Length <= 0)
+                throw new ArgumentException();
+            Contract.EndContractBlock();
 
             throw new NotImplementedException();
         }

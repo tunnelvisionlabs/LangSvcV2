@@ -22,10 +22,15 @@
 
         public BraceMatchingTagger(ITextView textView, ITextBuffer sourceBuffer, IClassifier aggregator, IEnumerable<KeyValuePair<char, char>> matchingCharacters)
         {
-            Contract.Requires<ArgumentNullException>(textView != null);
-            Contract.Requires<ArgumentNullException>(sourceBuffer != null);
-            Contract.Requires<ArgumentNullException>(aggregator != null);
-            Contract.Requires<ArgumentNullException>(matchingCharacters != null);
+            if (textView == null)
+                throw new ArgumentNullException("text");
+            if (sourceBuffer == null)
+                throw new ArgumentNullException("sourceBuffer");
+            if (aggregator == null)
+                throw new ArgumentNullException("aggregator");
+            if (matchingCharacters == null)
+                throw new ArgumentNullException("matchingCharacters");
+            Contract.EndContractBlock();
 
             this.TextView = textView;
             this.SourceBuffer = sourceBuffer;
