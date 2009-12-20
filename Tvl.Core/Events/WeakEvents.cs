@@ -22,7 +22,9 @@
         public static EventHandler<TEventArgs> AsWeak<TEventArgs>(this EventHandler<TEventArgs> handler, Action<EventHandler<TEventArgs>> unregister)
             where TEventArgs : EventArgs
         {
-            Contract.Requires<ArgumentNullException>(handler != null);
+            if (handler == null)
+                throw new ArgumentNullException("handler");
+            Contract.EndContractBlock();
 
             if (handler.Method.IsStatic)
                 return handler;
