@@ -41,7 +41,7 @@
     <CodeContractsExtraAnalysisOptions />
     <CodeContractsBaseLineFile />
     <CodeContractsRuntimeCheckingLevel>ReleaseRequires</CodeContractsRuntimeCheckingLevel>
-    <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
+    <CodeContractsReferenceAssembly>DoNotBuild</CodeContractsReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -168,6 +168,11 @@
     <Compile Include="AstExplorer\AstExplorerWindow.cs" />
     <Compile Include="AstExplorer\AstReferenceTaggerProvider.cs" />
     <Compile Include="AstExplorer\IAstReferenceTaggerProvider.cs" />
+    <Compile Include="FileList\SolutionFileListControl.xaml.cs">
+      <DependentUpon>SolutionFileListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FileList\SolutionFileListProvider.cs" />
+    <Compile Include="FileList\SolutionFileListWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -199,6 +204,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="AstExplorer\AstExplorerTreeControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FileList\SolutionFileListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
