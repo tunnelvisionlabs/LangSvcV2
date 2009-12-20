@@ -24,7 +24,15 @@
         {
             if (typeof(T) == typeof(SquiggleTag))
             {
-                Func<BackgroundParserErrorTagger> creator = () => new BackgroundParserErrorTagger(buffer, BackgroundParserFactoryService.GetBackgroundParser(buffer));
+                BackgroundParserErrorTagger tagger;
+                if (buffer.Properties.TryGetProperty<BackgroundParserErrorTagger>(typeof(BackgroundParserErrorTagger), out tagger))
+                    return (ITagger<T>)tagger;
+
+                var backgroundParser = BackgroundParserFactoryService.GetBackgroundParser(buffer);
+                if (backgroundParser == null)
+                    return null;
+
+                Func<BackgroundParserErrorTagger> creator = () => new BackgroundParserErrorTagger(buffer, backgroundParser);
                 return (ITagger<T>)buffer.Properties.GetOrCreateSingletonProperty(creator);
             }
 
