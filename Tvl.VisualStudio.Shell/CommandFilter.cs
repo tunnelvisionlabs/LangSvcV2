@@ -110,7 +110,7 @@
 
         private int ExecCommand(ref Guid guidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
-            int rc = 0;
+            int rc = (int)OleConstants.MSOCMDERR_E_NOTSUPPORTED;
 
             if (!HandlePreExec(ref guidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut) && _next != null)
             {
@@ -132,7 +132,10 @@
 
         private int InnerExec(ref Guid commandGroup, uint commandId, uint executionOptions, IntPtr pvaIn, IntPtr pvaOut)
         {
-            return _next.Exec(ref commandGroup, commandId, executionOptions, pvaIn, pvaOut);
+            if (_next != null)
+                return _next.Exec(ref commandGroup, commandId, executionOptions, pvaIn, pvaOut);
+
+            return (int)OleConstants.OLECMDERR_E_NOTSUPPORTED;
         }
 
         protected virtual void HandlePostExec(ref Guid commandGroup, uint commandId, uint executionOptions, IntPtr pvaIn, IntPtr pvaOut)
@@ -175,10 +178,13 @@
             Guid cmdGroup = guidCmdGroup;
             for (uint i = 0; i < cCmds; i++)
             {
-                OLECMDF status = (OLECMDF)QueryCommandStatus(ref cmdGroup, prgCmds[i].cmdID);
-                if (status == 0 && _next != null)
+                CommandStatus status = QueryCommandStatus(ref cmdGroup, prgCmds[i].cmdID);
+                if (status == CommandStatus.None && _next != null)
                 {
-                    return _next.QueryStatus(ref cmdGroup, cCmds, prgCmds, pCmdText);
+                    if (_next != null)
+                        return _next.QueryStatus(ref cmdGroup, cCmds, prgCmds, pCmdText);
+                    else
+                        return (int)OleConstants.OLECMDERR_E_NOTSUPPORTED;
                 }
 
                 prgCmds[i].cmdf = (uint)status;
