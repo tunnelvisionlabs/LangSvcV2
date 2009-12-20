@@ -27,7 +27,7 @@
                     break;
 
                 for (uint i = 0; i < count; i++)
-                    yield return array[count];
+                    yield return array[i];
             }
         }
     }
