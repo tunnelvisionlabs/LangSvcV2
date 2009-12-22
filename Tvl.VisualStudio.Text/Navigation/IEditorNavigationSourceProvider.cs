@@ -1,4 +1,4 @@
-﻿namespace Tvl.VisualStudio.Text
+﻿namespace Tvl.VisualStudio.Text.Navigation
 {
     using Microsoft.VisualStudio.Text;
 

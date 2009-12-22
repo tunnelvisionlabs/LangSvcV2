@@ -188,6 +188,9 @@
     <Compile Include="AntlrLanguage\AntlrCompletionSource.cs" />
     <Compile Include="AntlrLanguage\AntlrCompletionSourceProvider.cs" />
     <Compile Include="AntlrLanguage\AntlrConstants.cs" />
+    <Compile Include="AntlrLanguage\AntlrEditorNavigationSource.cs" />
+    <Compile Include="AntlrLanguage\AntlrEditorNavigationSourceProvider.cs" />
+    <Compile Include="AntlrLanguage\AntlrEditorNavigationTypeNames.cs" />
     <Compile Include="AntlrLanguage\AntlrErrorProvidingLexer.cs" />
     <Compile Include="AntlrLanguage\AntlrErrorProvidingParser.cs" />
     <Compile Include="AntlrLanguage\AntlrErrorTaggerProvider.cs" />
@@ -210,13 +213,6 @@
     <Compile Include="JavaLexerHelper.cs">
       <DependentUpon>Java.g3</DependentUpon>
     </Compile>
-    <Compile Include="Php\PhpBraceMatchingTaggerProvider.cs" />
-    <Compile Include="Php\PhpClassificationTypeNames.cs" />
-    <Compile Include="Php\PhpClassifier.cs" />
-    <Compile Include="Php\PhpClassifierProvider.cs" />
-    <Compile Include="Php\PhpCommenterProvider.cs" />
-    <Compile Include="Php\PhpConstants.cs" />
-    <Compile Include="Php\PhpServices.cs" />
     <Compile Include="Text\CancellationPolicy.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="JavaClassifier.cs" />
@@ -297,7 +293,6 @@
       <Link>Tool\Templates\messages\languages\en.stg</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Antlr3 Include="Php\PhpColorizerLexer.g3" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>

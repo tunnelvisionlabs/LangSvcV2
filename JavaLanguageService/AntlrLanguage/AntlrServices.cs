@@ -5,6 +5,7 @@
     using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Text.Classification;
     using Microsoft.VisualStudio.Utilities;
+using Tvl.VisualStudio.Text.Navigation;
 
     public static class AntlrServices
     {
@@ -22,6 +23,15 @@
         [FileExtension(AntlrConstants.AntlrFileExtension2)]
         [ContentType(AntlrConstants.AntlrContentType)]
         private static readonly FileExtensionToContentTypeDefinition AntlrFileExtensionToContentTypeDefinition2;
+
+        [Export]
+        [Name(AntlrEditorNavigationTypeNames.ParserRule)]
+        [Order(Before = AntlrEditorNavigationTypeNames.LexerRule)]
+        private static readonly EditorNavigationTypeDefinition ParserRuleNavigationType;
+
+        [Export]
+        [Name(AntlrEditorNavigationTypeNames.LexerRule)]
+        private static readonly EditorNavigationTypeDefinition LexerRuleNavigationType;
 
         [Export]
         [BaseDefinition(PredefinedClassificationTypeNames.Identifier)]

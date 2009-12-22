@@ -10,51 +10,51 @@
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Text.Tagging;
+    using System.Collections.Generic;
 
     internal class EditorNavigationMargin : IWpfTextViewMargin
     {
         private readonly IWpfTextView _wpfTextView;
-        //private readonly ILanguageElementManager _manager;
-        private readonly ITagAggregator<ILanguageElementTag> _tagAggregator;
-        private readonly IGlyphService _glyphService;
-        private bool _disposed;
+        private readonly IEnumerable<IEditorNavigationSource> _sources;
+        private readonly IEditorNavigationTypeRegistryService _editorNavigationTypeRegistryService;
 
         private readonly UniformGrid _container;
-        private readonly ComboBox _typesControl;
-        private readonly ComboBox _membersControl;
+        private Tuple<IEditorNavigationType, ComboBox>[] _navigationControls;
 
-        public EditorNavigationMargin(IWpfTextView wpfTextView, ITagAggregator<ILanguageElementTag> tagAggregator, IGlyphService glyphService)
+        public EditorNavigationMargin(IWpfTextView wpfTextView, IEnumerable<IEditorNavigationSource> sources, IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
         {
             this._wpfTextView = wpfTextView;
-            //this._manager = manager;
-            this._tagAggregator = tagAggregator;
-            this._glyphService = glyphService;
+            this._sources = sources;
+            this._editorNavigationTypeRegistryService = editorNavigationTypeRegistryService;
+
+            _navigationControls =
+                this._sources
+                .SelectMany(source => source.GetNavigationTypes())
+                .Distinct()
+                //.OrderBy(...)
+                .Select(type => Tuple.Create(type, default(ComboBox)))
+                .ToArray();
 
             this._container = new UniformGrid()
-                {
-                    Columns = 2,
-                    Rows = 1
-                };
+            {
+                Columns = _navigationControls.Length,
+                Rows = 1
+            };
 
-            this._typesControl = new ComboBox()
+            _navigationControls = Array.ConvertAll(_navigationControls, pair => Tuple.Create(pair.Item1, new ComboBox()
                 {
+                    IsEditable = true,
+                    IsReadOnly = true,
                     ToolTip = new ToolTip()
                     {
-                        Content = "Types"
+                        Content = pair.Item1.EditorNavigationType
                     }
-                };
+                }));
 
-            this._membersControl = new ComboBox()
-                {
-                    ToolTip = new ToolTip()
-                    {
-                        Content = "Members"
-                    }
-                };
+            foreach (var controlPair in _navigationControls)
+                this._container.Children.Add(controlPair.Item2);
 
-            this._container.Children.Add(_typesControl);
-            this._container.Children.Add(_membersControl);
-
+#if false
             var items = Enumerable.Range(1, 3).Select(i =>
             {
                 var panel = new StackPanel()
@@ -78,9 +78,24 @@
             {
                 _membersControl.Items.Add(item);
             }
+#endif
 
-            // TODO: condition the visibility on whether or not an IEditorNavigationSource is available for the content type
-            this._container.Visibility = Visibility.Collapsed;
+            if (this._navigationControls.Length == 0)
+            {
+                this._container.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        public bool Disposed
+        {
+            get;
+            private set;
+        }
+
+        public bool IsDisposing
+        {
+            get;
+            private set;
         }
 
         public FrameworkElement VisualElement
@@ -117,15 +132,27 @@
 
         public void Dispose()
         {
-            Dispose(true);
+            if (IsDisposing)
+                throw new InvalidOperationException();
+
+            try
+            {
+                IsDisposing = true;
+                Dispose(true);
+            }
+            finally
+            {
+                IsDisposing = false;
+            }
+
             GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!Disposed)
             {
-                _disposed = true;
+                Disposed = true;
             }
         }
     }

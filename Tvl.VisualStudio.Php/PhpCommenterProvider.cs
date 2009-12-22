@@ -2,7 +2,6 @@
 {
     using System;
     using System.ComponentModel.Composition;
-    using JavaLanguageService.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.UI.Undo;
     using Microsoft.VisualStudio.Utilities;

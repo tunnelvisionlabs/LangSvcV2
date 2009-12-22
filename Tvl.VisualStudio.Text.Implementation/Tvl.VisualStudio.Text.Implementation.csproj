@@ -159,8 +159,12 @@
     <Compile Include="Navigation\EditorNavigationComboBoxItem.cs" />
     <Compile Include="Navigation\EditorNavigationMargin.cs" />
     <Compile Include="Navigation\EditorNavigationMarginProvider.cs" />
-    <Compile Include="Navigation\ShimEditorNavigationSource.cs" />
-    <Compile Include="Navigation\ShimEditorNavigationSourceProvider.cs" />
+    <Compile Include="Navigation\EditorNavigationType.cs" />
+    <Compile Include="Navigation\EditorNavigationTypeRegistryService.cs" />
+    <Compile Include="Navigation\IEditorNavigationSourceMetadata.cs" />
+    <Compile Include="Navigation\IEditorNavigationTypeDefinitionMetadata.cs" />
+    <None Include="Navigation\ShimEditorNavigationSource.cs" />
+    <None Include="Navigation\ShimEditorNavigationSourceProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SquiggleQuickInfoControllerProvider.cs" />
     <Compile Include="TagQuickInfoController`1.cs" />

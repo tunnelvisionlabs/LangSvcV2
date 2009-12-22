@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Vsix Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
+  <Identifier Id="Tvl.VisualStudio.Php.Microsoft.ece72f50-0b6f-4363-9986-e38af13f6aa5">
+    <Name>Tvl.VisualStudio.Php</Name>
+    <Author>Sam Harwell</Author>
+    <Version>1.0</Version>
+    <Description>Empty VSIX Project.</Description>
+    <Locale>1033</Locale>
+    <Icon>VSIXProject_small.png</Icon>
+    <PreviewImage>VSIXProject_large.png</PreviewImage>
+    <SupportedProducts>
+      <VisualStudio Version="10.0">
+        <Edition>VSTS</Edition>
+        <Edition>VSTD</Edition>
+        <Edition>Pro</Edition>
+        <Edition>IntegratedShell</Edition>
+      </VisualStudio>
+    </SupportedProducts>
+    <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
+  </Identifier>
+  <References>
+  <!--Add References here-->  
+  </References>
+
+  <Content>
+    <MefComponent>|Tvl.VisualStudio.Php|</MefComponent>
+  </Content>
+
+</Vsix>
