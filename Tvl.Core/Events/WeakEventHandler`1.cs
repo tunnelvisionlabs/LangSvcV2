@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class WeakEventHandler<T>
+    public class WeakEventHandler<T> : IWeakEventHandler
         where T : class
     {
         private delegate void OpenEventHandler(T @this, object sender, EventArgs e);
@@ -18,6 +18,14 @@
             _openHandler = (OpenEventHandler)Delegate.CreateDelegate(typeof(OpenEventHandler), null, handler.Method);
             _handler = Invoke;
             _unregister = unregister;
+        }
+
+        public EventHandler Handler
+        {
+            get
+            {
+                return _handler;
+            }
         }
 
         public void Invoke(object sender, EventArgs e)

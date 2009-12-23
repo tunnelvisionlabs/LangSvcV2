@@ -21,6 +21,14 @@
             _unregister = unregister;
         }
 
+        public EventHandler<TEventArgs> Handler
+        {
+            get
+            {
+                return _handler;
+            }
+        }
+
         public void Invoke(object sender, TEventArgs e)
         {
             T target = (T)_target.Target;
@@ -33,14 +41,6 @@
             {
                 _unregister(_handler);
                 _unregister = null;
-            }
-        }
-
-        public EventHandler<TEventArgs> Handler
-        {
-            get
-            {
-                return _handler;
             }
         }
     }

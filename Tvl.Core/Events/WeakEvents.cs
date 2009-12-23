@@ -6,18 +6,20 @@
 
     public static class WeakEvents
     {
-        //public static EventHandler AsWeak(this EventHandler handler, Action<EventHandler> unregister)
-        //{
-        //    Contract.Requires<ArgumentNullException>(handler != null);
+        public static EventHandler AsWeak(EventHandler handler, Action<EventHandler> unregister)
+        {
+            if (handler == null)
+                throw new ArgumentNullException("handler");
+            Contract.EndContractBlock();
 
-        //    if (handler.Method.IsStatic)
-        //        return handler;
+            if (handler.Method.IsStatic)
+                return handler;
 
-        //    Type t = typeof(WeakEventHandler<>).MakeGenericType(handler.Method.DeclaringType);
-        //    ConstructorInfo ctor = t.GetConstructor(new Type[] { typeof(EventHandler), typeof(Action<EventHandler>) });
-        //    IWeakEventHandler weakHandler = (IWeakEventHandler)ctor.Invoke(new object[] { });
-        //    return weakHandler.Handler;
-        //}
+            Type t = typeof(WeakEventHandler<>).MakeGenericType(handler.Method.DeclaringType);
+            ConstructorInfo ctor = t.GetConstructor(new Type[] { typeof(EventHandler), typeof(Action<EventHandler>) });
+            IWeakEventHandler weakHandler = (IWeakEventHandler)ctor.Invoke(new object[] { handler, unregister });
+            return weakHandler.Handler;
+        }
 
         public static EventHandler<TEventArgs> AsWeak<TEventArgs>(this EventHandler<TEventArgs> handler, Action<EventHandler<TEventArgs>> unregister)
             where TEventArgs : EventArgs
