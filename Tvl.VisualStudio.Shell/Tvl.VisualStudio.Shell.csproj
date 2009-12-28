@@ -149,6 +149,8 @@
     <Compile Include="CommandStatus.cs" />
     <Compile Include="CommandType.cs" />
     <Compile Include="Extensions\IVsCmdNameMappingExtensions.cs" />
+    <Compile Include="Extensions\IVsHierarchyExtensions.cs" />
+    <Compile Include="Extensions\IVsSolutionExtensions.cs" />
     <Compile Include="Extensions\IVsTextViewExtensions.cs" />
     <Compile Include="Extensions\IVsUIDataSourceExtensions.cs" />
     <Compile Include="Extensions\IVsUIShellExtensions.cs" />
