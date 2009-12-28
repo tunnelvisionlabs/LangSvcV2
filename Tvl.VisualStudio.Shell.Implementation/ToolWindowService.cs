@@ -48,7 +48,7 @@
         {
             IVsUIShell shell = (IVsUIShell)GlobalServiceProvider.GetService<SVsUIShell>();
             int index = 0;
-            IOleServiceProvider serviceProvider = (IOleServiceProvider)GlobalServiceProvider.GetService(typeof(IOleServiceProvider));
+            IOleServiceProvider serviceProvider = GlobalServiceProvider.GetService<IOleServiceProvider>();
             foreach (var lazyProvider in ToolWindowProviders)
             {
                 index++;
