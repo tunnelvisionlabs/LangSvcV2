@@ -49,7 +49,7 @@
 
         public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer)
         {
-            var providers = NavigationSourceProviders.Where(provider => wpfTextViewHost.TextView.TextBuffer.ContentType.IsOfType(provider.Metadata.ContentType));
+            var providers = NavigationSourceProviders.Where(provider => provider.Metadata.ContentTypes.Any(contentType => wpfTextViewHost.TextView.TextBuffer.ContentType.IsOfType(contentType)));
 
             var sources =
                 providers

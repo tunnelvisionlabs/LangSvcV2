@@ -11,6 +11,8 @@
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Text.Tagging;
     using System.Collections.Generic;
+    using System.Windows.Input;
+    using Tvl.Events;
 
     internal class EditorNavigationMargin : IWpfTextViewMargin
     {
@@ -45,14 +47,22 @@
                 {
                     IsEditable = true,
                     IsReadOnly = true,
+                    Cursor = Cursors.Arrow,
                     ToolTip = new ToolTip()
                     {
-                        Content = pair.Item1.EditorNavigationType
+                        Content = pair.Item1.Type
                     }
                 }));
 
             foreach (var controlPair in _navigationControls)
+            {
                 this._container.Children.Add(controlPair.Item2);
+            }
+
+            foreach (var source in this._sources)
+            {
+                source.NavigationTargetsChanged += WeakEvents.AsWeak(OnNavigationTargetsChanged, eh => source.NavigationTargetsChanged -= eh);
+            }
 
 #if false
             var items = Enumerable.Range(1, 3).Select(i =>
@@ -154,6 +164,18 @@
             {
                 Disposed = true;
             }
+        }
+
+        protected void UpdateNavigationTargets(IEditorNavigationSource source)
+        {
+            var targets = source.GetNavigationTargets().GroupBy(target => target.EditorNavigationType);
+            throw new NotImplementedException();
+        }
+
+        private void OnNavigationTargetsChanged(object sender, EventArgs e)
+        {
+            IEditorNavigationSource source = (IEditorNavigationSource)sender;
+            UpdateNavigationTargets(source);
         }
     }
 }

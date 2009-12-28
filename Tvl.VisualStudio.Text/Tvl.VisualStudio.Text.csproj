@@ -148,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ICommenterProvider.cs" />
+    <Compile Include="Navigation\EditorNavigationTarget.cs" />
     <Compile Include="Navigation\EditorNavigationTypeDefinition.cs" />
     <Compile Include="Navigation\IEditorNavigationSource.cs" />
     <Compile Include="Navigation\IEditorNavigationSourceProvider.cs" />

@@ -9,7 +9,7 @@
             get;
         }
 
-        string EditorNavigationType
+        string Type
         {
             get;
         }

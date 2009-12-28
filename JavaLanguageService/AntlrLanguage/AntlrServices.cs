@@ -27,10 +27,12 @@ using Tvl.VisualStudio.Text.Navigation;
         [Export]
         [Name(AntlrEditorNavigationTypeNames.ParserRule)]
         [Order(Before = AntlrEditorNavigationTypeNames.LexerRule)]
+        [DisplayName("Parser Rules")]
         private static readonly EditorNavigationTypeDefinition ParserRuleNavigationType;
 
         [Export]
         [Name(AntlrEditorNavigationTypeNames.LexerRule)]
+        [DisplayName("Lexer Rules")]
         private static readonly EditorNavigationTypeDefinition LexerRuleNavigationType;
 
         [Export]

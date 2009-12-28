@@ -11,8 +11,24 @@
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Text.Navigation;
 
+    //public sealed class EditorNavigationTypeAttribute : MultipleBaseMetadataAttribute
+    //{
+    //    public EditorNavigationTypeAttribute(string type)
+    //    {
+    //        this.EditorNavigationType = type;
+    //    }
+
+    //    public string EditorNavigationType
+    //    {
+    //        get;
+    //        private set;
+    //    }
+    //}
+
     [Export(typeof(IEditorNavigationSourceProvider))]
     [ContentType(AntlrConstants.AntlrContentType)]
+    //[EditorNavigationType(AntlrEditorNavigationTypeNames.ParserRule)]
+    //[EditorNavigationType(AntlrEditorNavigationTypeNames.LexerRule)]
     public sealed class AntlrEditorNavigationSourceProvider : IEditorNavigationSourceProvider
     {
         [Import]

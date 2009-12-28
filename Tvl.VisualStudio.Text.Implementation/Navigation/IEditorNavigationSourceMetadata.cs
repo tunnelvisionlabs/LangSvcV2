@@ -4,14 +4,14 @@
 
     public interface IEditorNavigationSourceMetadata
     {
-        string ContentType
+        IEnumerable<string> ContentTypes
         {
             get;
         }
 
-        IEnumerable<string> EditorNavigationTypes
-        {
-            get;
-        }
+        //IEnumerable<string> EditorNavigationType
+        //{
+        //    get;
+        //}
     }
 }

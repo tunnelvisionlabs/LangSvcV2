@@ -6,6 +6,7 @@
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Utilities;
 
+    [Export(typeof(IEditorNavigationTypeRegistryService))]
     public sealed class EditorNavigationTypeRegistryService : IEditorNavigationTypeRegistryService
     {
         [Export]
@@ -43,12 +44,14 @@
                 navigationTypes.RemoveAll(navigationType => _navigationTypes.ContainsKey(navigationType.Name));
                 for (int i = navigationTypes.Count; i > 0; i--)
                 {
-                    int currentIndex = navigationTypes.FindIndex(navigationType => navigationType.BaseDefinition.All(_navigationTypes.ContainsKey));
+                    int currentIndex = navigationTypes.FindIndex(navigationType => navigationType.BaseDefinition == null || navigationType.BaseDefinition.All(_navigationTypes.ContainsKey));
                     if (currentIndex < 0)
                         throw new InvalidOperationException("Circular editor navigation type definition.");
 
                     var current = navigationTypes[currentIndex];
-                    this._navigationTypes.Add(current.Name, new EditorNavigationType(current.Name, current.BaseDefinition.Select(GetEditorNavigationType)));
+                    string currentName = current.Name;
+                    IEnumerable<string> currentBaseDefinitions = current.BaseDefinition ?? new string[0];
+                    this._navigationTypes.Add(current.Name, new EditorNavigationType(currentName, currentBaseDefinitions.Select(GetEditorNavigationType)));
                     navigationTypes.RemoveAt(currentIndex);
                 }
             }
