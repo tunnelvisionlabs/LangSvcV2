@@ -16,7 +16,7 @@
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
     [Export(typeof(IVsTextViewCreationListener))]
-    [ContentType("java")]
+    [ContentType("antlr")]
     [TextViewRole(PredefinedTextViewRoles.Interactive)]
     public sealed class ToolWindowService : IVsTextViewCreationListener
     {
