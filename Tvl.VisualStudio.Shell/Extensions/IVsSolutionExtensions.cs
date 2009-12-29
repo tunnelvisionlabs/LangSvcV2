@@ -7,12 +7,12 @@
 
     public static class IVsSolutionExtensions
     {
-        public static IEnumerable<IVsHierarchy> GetProjectHierarchies(IVsSolution solution)
+        public static IEnumerable<IVsHierarchy> GetProjectHierarchies(this IVsSolution solution)
         {
             return GetProjectHierarchies(solution, __VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION);
         }
 
-        public static IEnumerable<IVsHierarchy> GetProjectHierarchies(IVsSolution solution, __VSENUMPROJFLAGS flags)
+        public static IEnumerable<IVsHierarchy> GetProjectHierarchies(this IVsSolution solution, __VSENUMPROJFLAGS flags)
         {
             if (solution == null)
                 throw new ArgumentNullException("solution");
