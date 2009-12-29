@@ -37,22 +37,39 @@
                 .Select(type => Tuple.Create(type, default(ComboBox)))
                 .ToArray();
 
+            if (this._navigationControls.Length == 0)
+            {
+                this._container =
+                    new UniformGrid()
+                    {
+                        Visibility = Visibility.Collapsed
+                    };
+
+                return;
+            }
+
             this._container = new UniformGrid()
             {
                 Columns = _navigationControls.Length,
                 Rows = 1
             };
 
-            _navigationControls = Array.ConvertAll(_navigationControls, pair => Tuple.Create(pair.Item1, new ComboBox()
+            _navigationControls = Array.ConvertAll(_navigationControls,
+                pair =>
                 {
-                    IsEditable = true,
-                    IsReadOnly = true,
-                    Cursor = Cursors.Arrow,
-                    ToolTip = new ToolTip()
-                    {
-                        Content = pair.Item1.Type
-                    }
-                }));
+                    ComboBox comboBox =
+                        new EditorNavigationComboBox()
+                        {
+                            Cursor = Cursors.Arrow,
+                            ToolTip = new ToolTip()
+                            {
+                                Content = pair.Item1.Type
+                            }
+                        };
+
+                    comboBox.SelectionChanged += OnSelectionChanged;
+                    return Tuple.Create(pair.Item1, comboBox);
+                });
 
             foreach (var controlPair in _navigationControls)
             {
@@ -63,37 +80,6 @@
             {
                 source.NavigationTargetsChanged += WeakEvents.AsWeak(OnNavigationTargetsChanged, eh => source.NavigationTargetsChanged -= eh);
             }
-
-#if false
-            var items = Enumerable.Range(1, 3).Select(i =>
-            {
-                var panel = new StackPanel()
-                {
-                    Orientation = Orientation.Horizontal
-                };
-
-                panel.Children.Add(new Image()
-                {
-                    Source = _glyphService.GetGlyph(StandardGlyphGroup.GlyphGroupField, StandardGlyphItem.GlyphItemPublic),
-                    VerticalAlignment = VerticalAlignment.Center
-                });
-                panel.Children.Add(new TextBlock(new Run(string.Join(string.Empty, Enumerable.Range(0, 10).Select(j => "Item" + i))))
-                {
-                    VerticalAlignment = VerticalAlignment.Center
-                });
-                return panel;
-            });
-
-            foreach (var item in items)
-            {
-                _membersControl.Items.Add(item);
-            }
-#endif
-
-            if (this._navigationControls.Length == 0)
-            {
-                this._container.Visibility = Visibility.Collapsed;
-            }
         }
 
         public bool Disposed
@@ -103,6 +89,12 @@
         }
 
         public bool IsDisposing
+        {
+            get;
+            private set;
+        }
+
+        public bool Updating
         {
             get;
             private set;
@@ -166,16 +158,75 @@
             }
         }
 
-        protected void UpdateNavigationTargets(IEditorNavigationSource source)
+        private void UpdateNavigationTargets(IEditorNavigationSource source)
         {
-            var targets = source.GetNavigationTargets().GroupBy(target => target.EditorNavigationType);
-            throw new NotImplementedException();
+            lock (this)
+            {
+                if (Updating)
+                    return;
+            }
+
+            try
+            {
+                Updating = true;
+                var targets = source.GetNavigationTargets().ToArray();
+                Action action = () => UpdateNavigationTargets(targets);
+                VisualElement.Dispatcher.Invoke(action);
+            }
+            finally
+            {
+                Updating = false;
+            }
+        }
+
+        private void UpdateNavigationTargets(IEnumerable<IEditorNavigationTarget> targets)
+        {
+            foreach (var group in targets.GroupBy(target => target.EditorNavigationType))
+            {
+                var navigationControl = this._navigationControls.FirstOrDefault(control => control.Item1 == group.Key);
+                if (navigationControl == null)
+                    continue;
+
+                var combo = navigationControl.Item2;
+                combo.Items.Clear();
+                foreach (var item in group.OrderBy(i => i.Name, StringComparer.CurrentCultureIgnoreCase))
+                    combo.Items.Add(item);
+
+                if (combo.Items.Count > 0)
+                    combo.SelectedIndex = 0;
+
+                combo.IsEnabled = combo.Items.Count > 0;
+            }
+
+            foreach (var control in this._navigationControls)
+            {
+                control.Item2.IsEnabled = control.Item2.HasItems;
+            }
         }
 
         private void OnNavigationTargetsChanged(object sender, EventArgs e)
         {
             IEditorNavigationSource source = (IEditorNavigationSource)sender;
             UpdateNavigationTargets(source);
+        }
+
+        private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (Updating)
+                return;
+
+            if (e.AddedItems.Count > 0)
+            {
+                IEditorNavigationTarget target = e.AddedItems[0] as IEditorNavigationTarget;
+                if (target != null)
+                {
+                    var seek = target.Seek.Snapshot == null ? target.Span : target.Seek;
+                    _wpfTextView.Caret.MoveTo(seek.Start);
+                    _wpfTextView.Selection.Select(seek, false);
+                    _wpfTextView.ViewScroller.EnsureSpanVisible(target.Seek);
+                    Keyboard.Focus(_wpfTextView.VisualElement);
+                }
+            }
         }
     }
 }

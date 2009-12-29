@@ -169,6 +169,7 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
@@ -298,8 +299,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\lexericon.png" />
-    <Content Include="Resources\parsericon.png" />
+    <Resource Include="Resources\lexericon.png" />
+    <Resource Include="Resources\parsericon.png" />
     <Content Include="VSIXProject_large.png" />
     <Content Include="VSIXProject_small.png" />
   </ItemGroup>
@@ -330,7 +331,6 @@
       <Name>Tvl.VisualStudio.Text</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <PropertyGroup>
     <!-- Folder containing AntlrBuildTask.dll -->
     <AntlrBuildTaskPath>$(SolutionDir)External\Antlr</AntlrBuildTaskPath>
