@@ -10,7 +10,7 @@
         <DataTemplate x:Key="FileResultsItemTemplate">
             <StackPanel Orientation="Horizontal">
                 <Image Source="{Binding Icon}" Width="16" Height="16" />
-                <Label Content="{Binding FileName}" />
+                <TextBlock Text="{Binding FileName}" />
             </StackPanel>
         </DataTemplate>
     </UserControl.Resources>
@@ -29,7 +29,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             
-            <Label Width="Auto" HorizontalAlignment="Left" Grid.Column="0" Margin="6">Filter:</Label>
+            <TextBlock Width="Auto" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6" Grid.Column="0">Filter:</TextBlock>
             <TextBox Name="txtQuery" Grid.Column="1" VerticalAlignment="Center" TextChanged="OnFilterChanged" />
             <Button Name="btnRefresh" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6" Click="OnRefreshClick" Width="Auto">Update</Button>
         </Grid>

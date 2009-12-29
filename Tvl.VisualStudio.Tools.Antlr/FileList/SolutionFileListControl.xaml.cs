@@ -75,7 +75,7 @@
                     return;
 
                 List<ProjectItemInfo> items = new List<ProjectItemInfo>();
-                foreach (IVsHierarchy projectHierarchy in GetProjectHierarchies(solution))
+                foreach (IVsHierarchy projectHierarchy in solution.GetProjectHierarchies())
                 {
                     EnvDTE.Project project = projectHierarchy.GetExtensibilityObjectOrDefault(VSConstants.VSITEMID_ROOT) as EnvDTE.Project;
                     if (project == null)
