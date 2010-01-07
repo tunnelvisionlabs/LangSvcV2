@@ -8,7 +8,7 @@
 
     public static class IVsCmdNameMappingExtensions
     {
-        private static IEnumerable<string> GetMacroNames(this IVsCmdNameMapping commandNameMapping)
+        public static IEnumerable<string> GetMacroNames(this IVsCmdNameMapping commandNameMapping)
         {
             if (commandNameMapping == null)
                 throw new NullReferenceException();
@@ -31,10 +31,10 @@
             }
         }
 
-        private static IEnumerable<string> GetCommandNames(IVsCmdNameMapping commandNameMapping)
+        public static IEnumerable<string> GetCommandNames(this IVsCmdNameMapping commandNameMapping)
         {
             if (commandNameMapping == null)
-                throw new ArgumentNullException();
+                throw new NullReferenceException();
 
             IEnumString enumString;
             if (ErrorHandler.Succeeded(commandNameMapping.EnumNames(VSCMDNAMEOPTS.CNO_GETENU, out enumString)))
