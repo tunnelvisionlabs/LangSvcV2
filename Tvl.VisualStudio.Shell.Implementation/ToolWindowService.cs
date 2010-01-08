@@ -3,7 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
+    using System.Diagnostics;
+    using System.Diagnostics.Contracts;
     using System.Linq;
+    using System.Windows.Media.Imaging;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.CommandBars;
     using Microsoft.VisualStudio.Editor;
@@ -20,8 +23,12 @@
     [TextViewRole(PredefinedTextViewRoles.Interactive)]
     public sealed class ToolWindowService : IVsTextViewCreationListener
     {
+        public const string ToolWindowCommandPrefix = "Tvl.ToolWindowService.Show";
+        public const int TabImageHeight = 0x10;
+        public const int TabImageWidth = 0x10;
+
         private bool created;
-        private readonly Dictionary<uint, Guid> _registeredToolWindows = new Dictionary<uint, Guid>();
+        private readonly Dictionary<uint, ToolWindowRegistrationInfo> _registeredToolWindows = new Dictionary<uint, ToolWindowRegistrationInfo>();
         private CommandTarget _commandTarget;
 
         [Import]
@@ -47,25 +54,29 @@
         private void CreateWindows()
         {
             IVsUIShell shell = (IVsUIShell)GlobalServiceProvider.GetService<SVsUIShell>();
-            int index = 0;
             IOleServiceProvider serviceProvider = GlobalServiceProvider.GetService<IOleServiceProvider>();
+            IVsProfferCommands3 profferCommands = serviceProvider.TryGetGlobalService<EnvDTE.IVsProfferCommands, IVsProfferCommands3>();
+            EnvDTE.DTE dte = serviceProvider.TryGetGlobalService<EnvDTE._DTE, EnvDTE.DTE>();
+
+            int index = 0;
             foreach (var lazyProvider in ToolWindowProviders)
             {
                 index++;
                 var provider = lazyProvider.Value;
+                var registration = new ToolWindowRegistrationInfo(provider.GetType(), lazyProvider.Metadata);
 
                 var toolWindow = provider.CreateWindow();
                 IVsUIElementPane vsToolWindow = toolWindow as IVsUIElementPane;
                 if (vsToolWindow == null)
                     vsToolWindow = new ToolWindowAdapter(toolWindow);
 
-                __VSCREATETOOLWIN creationFlags = __VSCREATETOOLWIN.CTW_fInitNew;
+                __VSCREATETOOLWIN creationFlags = __VSCREATETOOLWIN.CTW_fInitNew | __VSCREATETOOLWIN.CTW_fForceCreate;
                 //if (!toolWindow.Transient)
                 //    creationFlags |= __VSCREATETOOLWIN.CTW_fForceCreate;
 
-                bool hasToolbar = false;
-                if (hasToolbar)
-                    creationFlags |= __VSCREATETOOLWIN.CTW_fToolbarHost;
+                //bool hasToolbar = false;
+                //if (hasToolbar)
+                //    creationFlags |= __VSCREATETOOLWIN.CTW_fToolbarHost;
 
                 //if (toolWindow.MultiInstance)
                 //    creationFlags |= __VSCREATETOOLWIN.CTW_fMultiInstance;
@@ -74,65 +85,93 @@
                 IVsWindowFrame windowFrame = null;
                 string caption = toolWindow.Caption;
                 Guid empty = Guid.Empty;
-                Guid providerGuid = provider.GetType().GUID;
-                ErrorHandler.ThrowOnFailure(shell.CreateToolWindow((uint)creationFlags, instance, vsToolWindow, ref empty, ref providerGuid, ref empty, serviceProvider, caption, null, out windowFrame));
+                Guid windowGuid = registration.Guid;
+                int[] defaultPosition = null;
+
+                ErrorHandler.ThrowOnFailure(shell.CreateToolWindow((uint)creationFlags, instance, vsToolWindow, ref empty, ref windowGuid, ref empty, serviceProvider, caption, defaultPosition, out windowFrame));
                 if (windowFrame != null)
                 {
-                    EnvDTE.DTE dte = serviceProvider.TryGetGlobalService<EnvDTE._DTE, EnvDTE.DTE>();
+                    if (toolWindow.Icon != null)
+                    {
+                        var icon = toolWindow.Icon;
+
+                        if (icon.PixelWidth == TabImageWidth && icon.PixelHeight == TabImageHeight)
+                        {
+                            int stride = icon.Format.BitsPerPixel * icon.PixelWidth;
+                            byte[] pixels = new byte[stride * icon.PixelHeight];
+                            icon.CopyPixels(pixels, stride, 0);
+                            icon = BitmapSource.Create(16, 16, 96.0, 96.0, icon.Format, null, pixels, stride);
+                            windowFrame.SetProperty((int)__VSFPROPID4.VSFPROPID_TabImage, icon);
+                        }
+                        else
+                        {
+                            Trace.WriteLine(string.Format("The icon for the {0} window could not be used because it was not {1}x{2}px.", toolWindow.Caption, TabImageWidth, TabImageHeight));
+                        }
+                    }
+
                     dynamic commands = dte.CommandBars;
                     var bar1 = commands["MenuBar"];
 
-                    IVsProfferCommands3 profferCommands = serviceProvider.TryGetGlobalService<EnvDTE.IVsProfferCommands, IVsProfferCommands3>();
-                    if (profferCommands != null)
+                    // Microsoft.VisualStudio.ComponentModelHost.HostPackage
+                    Guid package = new Guid("{49d12072-378b-4ffa-a09e-40e0b5d097cc}");
+                    Guid group = typeof(ToolWindowService).GUID;
+                    string pszCmdNameCanonical = registration.CommandName;
+                    uint pdwCmdId;
+                    string pszCmdNameLocalized = registration.CommandName;
+                    string pszBtnText = string.Format("{0}", caption);
+                    string pszCmdTooltip = string.Format("Show the {0} window", caption);
+                    string pszSatelliteDLL = null;
+                    uint dwBitmapResourceId = 0;
+                    uint dwBitmapImageIndex = 0;
+                    CommandOptions dwCmdFlagsDefault = CommandOptions.None;
+                    Guid[] rgguidUIContexts = { };
+                    CommandType dwUIElementType = CommandType.Button;
+
+                    int hr = profferCommands.AddNamedCommand2(
+                        ref package,
+                        ref group,
+                        pszCmdNameCanonical,
+                        out pdwCmdId,
+                        pszCmdNameLocalized,
+                        pszBtnText,
+                        pszCmdTooltip,
+                        pszSatelliteDLL,
+                        dwBitmapResourceId,
+                        dwBitmapImageIndex,
+                        (uint)dwCmdFlagsDefault,
+                        (uint)rgguidUIContexts.Length,
+                        rgguidUIContexts,
+                        (uint)dwUIElementType);
+
+                    if (ErrorHandler.Succeeded(hr))
                     {
-                        // Microsoft.VisualStudio.ComponentModelHost.HostPackage
-                        Guid package = new Guid("{49d12072-378b-4ffa-a09e-40e0b5d097cc}");
-                        Guid group = typeof(ToolWindowService).GUID;
-                        string pszCmdNameCanonical = "Tvl.ToolWindowService.Show" + lazyProvider.Metadata.Name;
-                        uint pdwCmdId;
-                        string pszCmdNameLocalized = pszCmdNameCanonical;
-                        string pszBtnText = string.Format("{0}", caption);
-                        string pszCmdTooltip = string.Format("Show the {0} window", caption);
-                        string pszSatelliteDLL = null;
-                        uint dwBitmapResourceId = 0;
-                        uint dwBitmapImageIndex = 0;
-                        CommandOptions dwCmdFlagsDefault = CommandOptions.None;
-                        Guid[] rgguidUIContexts = { };
-                        CommandType dwUIElementType = CommandType.Button;
+                        _registeredToolWindows.Add(pdwCmdId, new ToolWindowRegistrationInfo(provider.GetType(), lazyProvider.Metadata));
 
-                        int hr = profferCommands.AddNamedCommand2(
-                            ref package,
-                            ref group,
-                            pszCmdNameCanonical,
-                            out pdwCmdId,
-                            pszCmdNameLocalized,
-                            pszBtnText,
-                            pszCmdTooltip,
-                            pszSatelliteDLL,
-                            dwBitmapResourceId,
-                            dwBitmapImageIndex,
-                            (uint)dwCmdFlagsDefault,
-                            (uint)rgguidUIContexts.Length,
-                            rgguidUIContexts,
-                            (uint)dwUIElementType);
+                        if (hr == VSConstants.S_OK)
+                        {
+                            var dteCommands = dte.Commands;
+                            var dteCommand = dteCommands.Item(pszCmdNameCanonical);
 
-                        if (ErrorHandler.Succeeded(hr))
-                            _registeredToolWindows.Add(pdwCmdId, providerGuid);
+                            CommandBarPopup viewMenu = bar1.Controls["View"];
+                            CommandBarPopup otherWindows = (CommandBarPopup)viewMenu.Controls["Other Windows"];
+                            CommandBarButton control = (CommandBarButton)dteCommand.AddControl(otherWindows.Controls.Parent);
+                            control.Visible = true;
+                            control.Enabled = true;
+                            control.Caption = pszBtnText;
+                        }
+                    }
+                }
+            }
 
-                        var dteCommands = dte.Commands;
-                        var dteCommand = dteCommands.Item(pszCmdNameCanonical);
-
-                        //Guid mainMenu = VsMenus.guidSHLMainMenu;
-                        //uint IDM_VS_MENU_VIEW = 0x0082;
-                        //object commandBar;
-                        //hr = profferCommands.FindCommandBar(null, ref mainMenu, IDM_VS_MENU_VIEW, out commandBar);
-
-                        CommandBarPopup viewMenu = bar1.Controls["View"];
-                        CommandBarPopup otherWindows = (CommandBarPopup)viewMenu.Controls["Other Windows"];
-                        CommandBarButton control = (CommandBarButton)dteCommand.AddControl(otherWindows.Controls.Parent);
-                        control.Visible = true;
-                        control.Enabled = true;
-                        control.Caption = pszBtnText;
+            // Remove commands for tool windows that are no longer present
+            IVsCmdNameMapping commandNameMapping = serviceProvider.TryGetGlobalService<SVsCmdNameMapping, IVsCmdNameMapping>();
+            if (commandNameMapping != null)
+            {
+                foreach (var command in commandNameMapping.GetCommandNames())
+                {
+                    if (command.StartsWith(ToolWindowCommandPrefix) && !_registeredToolWindows.Any(registered=>registered.Value.CommandName == command))
+                    {
+                        profferCommands.RemoveNamedCommand(command);
                     }
                 }
             }
@@ -177,11 +216,12 @@
                     IVsUIShell shell = (IVsUIShell)toolWindowService.GlobalServiceProvider.GetService<SVsUIShell>();
 
                     __VSCREATETOOLWIN flags = __VSCREATETOOLWIN.CTW_fForceCreate;
-                    Guid slot;
-                    if (!toolWindowService._registeredToolWindows.TryGetValue(commandId, out slot))
+                    ToolWindowRegistrationInfo windowInfo;
+                    if (!toolWindowService._registeredToolWindows.TryGetValue(commandId, out windowInfo))
                         return false;
 
                     IVsWindowFrame frame;
+                    Guid slot = windowInfo.Guid;
                     if (ErrorHandler.Failed(shell.FindToolWindow((uint)flags, ref slot, out frame)))
                         return false;
 
@@ -225,6 +265,40 @@
                 {
                     _cookie = 0;
                 }
+            }
+        }
+
+        private sealed class ToolWindowRegistrationInfo
+        {
+            public ToolWindowRegistrationInfo(Type providerType, IToolWindowMetadata metadata)
+            {
+                if (providerType == null)
+                    throw new ArgumentNullException("providerType");
+                if (metadata == null)
+                    throw new ArgumentNullException("metadata");
+                Contract.EndContractBlock();
+
+                this.Guid = providerType.GUID;
+                this.Name = metadata.Name;
+                this.CommandName = ToolWindowCommandPrefix + metadata.Name;
+            }
+
+            public Guid Guid
+            {
+                get;
+                private set;
+            }
+
+            public string Name
+            {
+                get;
+                private set;
+            }
+
+            public string CommandName
+            {
+                get;
+                private set;
             }
         }
     }
