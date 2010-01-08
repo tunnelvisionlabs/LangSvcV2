@@ -1,7 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System.Windows;
-    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
 
     public interface IToolWindow
     {
@@ -10,7 +10,7 @@
             get;
         }
 
-        ImageSource Icon
+        BitmapSource Icon
         {
             get;
         }
