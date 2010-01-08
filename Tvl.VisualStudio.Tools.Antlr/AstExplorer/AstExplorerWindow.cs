@@ -1,7 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Tools.AstExplorer
 {
     using System.Windows;
-    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
     using Tvl.VisualStudio.Shell;
 
     internal class AstExplorerWindow : IToolWindow
@@ -21,7 +21,7 @@
             }
         }
 
-        public ImageSource Icon
+        public BitmapSource Icon
         {
             get
             {
