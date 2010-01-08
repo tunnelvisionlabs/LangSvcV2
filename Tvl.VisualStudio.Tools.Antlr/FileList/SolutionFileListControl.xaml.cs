@@ -4,8 +4,8 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
-    using System.Runtime.InteropServices;
     using System.Linq;
+    using System.Runtime.InteropServices;
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Windows;
@@ -15,8 +15,6 @@
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
     using Tvl.VisualStudio.Shell.Extensions;
-    using Path = System.IO.Path;
-    using Microsoft.VisualStudio.Shell;
     using File = System.IO.File;
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
@@ -207,7 +205,7 @@
                 return;
             }
 
-            if (txtQuery.Text.StartsWith("/") && !chkRegex.IsChecked.HasValue || !chkRegex.IsChecked.Value)
+            if (txtQuery.Text.StartsWith("/") && (!chkRegex.IsChecked.HasValue || !chkRegex.IsChecked.Value))
             {
                 chkRegex.IsChecked = true;
                 chkRegex.IsEnabled = false;
@@ -233,8 +231,8 @@
             Contract.EndContractBlock();
 
             IServiceProvider serviceProvider = _provider.ServiceProvider;
-            IVsUIShellOpenDocument service = serviceProvider.GetService<IVsUIShellOpenDocument>();
-            IVsRunningDocumentTable table = serviceProvider.GetService<IVsRunningDocumentTable>();
+            IVsUIShellOpenDocument service = (IVsUIShellOpenDocument)serviceProvider.GetService<SVsUIShellOpenDocument>();
+            IVsRunningDocumentTable table = (IVsRunningDocumentTable)serviceProvider.GetService<SVsRunningDocumentTable>();
 
             foreach (var item in items)
             {
