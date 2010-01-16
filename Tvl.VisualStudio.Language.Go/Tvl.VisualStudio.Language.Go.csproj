@@ -142,6 +142,8 @@
     <Compile Include="GoBackgroundParser.cs" />
     <Compile Include="GoBackgroundParserProvider.cs" />
     <Compile Include="GoErrorTaggerProvider.cs" />
+    <Compile Include="GoOutliningTagger.cs" />
+    <Compile Include="GoOutliningTaggerProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
