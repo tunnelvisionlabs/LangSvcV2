@@ -124,6 +124,8 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GoEditorNavigationSource.cs" />
+    <Compile Include="GoEditorNavigationSourceProvider.cs" />
     <Compile Include="GoBraceMatchingTaggerProvider.cs" />
     <Compile Include="GoClassifierProvider.cs" />
     <Compile Include="GoCommenterProvider.cs" />
