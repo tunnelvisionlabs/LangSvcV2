@@ -1,1 +1,510 @@
-﻿
+﻿grammar Go;
+
+options
+{
+	language=CSharp3;
+	output=AST;
+	ASTLabelType=CommonTree;
+}
+
+tokens
+{
+	KW_BREAK       = 'break';
+	KW_CASE        = 'case';
+	KW_CHAN        = 'chan';
+	KW_CONST       = 'const';
+	KW_CONTINUE    = 'continue';
+	KW_DEFAULT     = 'default';
+	KW_DEFER       = 'defer';
+	KW_ELSE        = 'else';
+	KW_FALLTHROUGH = 'fallthrough';
+	KW_FOR         = 'for';
+	KW_FUNC        = 'func';
+	KW_GO          = 'go';
+	KW_GOTO        = 'goto';
+	KW_IF          = 'if';
+	KW_IMPORT      = 'import';
+	KW_INTERFACE   = 'interface';
+	KW_MAP         = 'map';
+	KW_PACKAGE     = 'package';
+	KW_RANGE       = 'range';
+	KW_RETURN      = 'return';
+	KW_SELECT      = 'select';
+	KW_STRUCT      = 'struct';
+	KW_SWITCH      = 'switch';
+	KW_TYPE        = 'type';
+	KW_VAR         = 'var';
+
+	// delimiters
+	LPAREN='(';
+	RPAREN=')';
+	LBRACK='[';
+	RBRACK=']';
+	LBRACE='{';
+	RBRACE='}';
+	SEMI=';';
+	COMMA=',';
+	DOT='.';
+	COLON=':';
+
+	// operators
+	EQ			='=';
+	NEQ			='!=';
+	EQEQ		='==';
+	PLUS		='+';
+	PLUSEQ		='+=';
+	MINUS		='-';
+	MINUSEQ		='-=';
+	TIMES		='*';
+	TIMESEQ		='*=';
+	DIV			='/';
+	DIVEQ		='/=';
+	LT			='<';
+	GT			='>';
+	LE			='<=';
+	GE			='>=';
+	NOT			='!';
+	AND			='&&';
+	BITAND		='&';
+	ANDEQ		='&=';
+	BITCLR		='&^';
+	BITCLREQ	='&^=';
+	OR			='||';
+	BITOR		='|';
+	OREQ		='|=';
+	INC			='++';
+	DEC			='--';
+	XOR			='^';
+	XOREQ		='^=';
+	MOD			='%';
+	MODEQ		='%=';
+	LSHIFT		='<<';
+	RSHIFT		='>>';
+	LSHIFTEQ	='<<=';
+	RSHIFTEQ	='>>=';
+	DEFEQ		=':=';
+	ELLIP		='...';
+	CHAN		='<-';
+}
+
+@lexer::namespace{Tvl.VisualStudio.Language.Go}
+@parser::namespace{Tvl.VisualStudio.Language.Go}
+
+/*
+ * Types
+ */
+
+type
+	:	typeName
+	|	typeLit
+	|	'(' type ')'
+	;
+
+typeName
+	:	qualifiedIdent
+	;
+
+typeLit
+	:	arrayType
+	|	structType
+	|	pointerType
+	|	functionType
+	|	interfaceType
+	|	sliceType
+	|	mapType
+	|	channelType
+	;
+
+// Array types
+
+arrayType
+	:	'[' arrayLength ']' elementType
+	;
+
+arrayLength
+	:	expression
+	;
+
+elementType
+	:	type
+	;
+
+// Slice types
+
+sliceType
+	:	'[' ']' elementType
+	;
+
+// Struct types
+
+structType
+	:	'struct' '{' (fieldDecl ';')* '}'
+	;
+
+fieldDecl
+	:	(	identifierList type
+		|	anonymousField
+		)
+		tag?
+	;
+
+anonymousField
+	:	'*'? typeName
+	;
+
+tag
+	:	STRING_LITERAL
+	;
+
+// Pointer types
+
+pointerType
+	:	'*' baseType
+	;
+
+baseType
+	:	type
+	;
+
+// Function types
+
+functionType
+	:	'func' signature
+	;
+
+signature
+	:	parameters result?
+	;
+
+result
+	:	parameters
+	//|	type
+	;
+
+parameters
+	:	'(' (parameterList ','?)? ')'
+	;
+
+parameterList
+	:	parameterDecl (',' parameterDecl)*
+	;
+
+parameterDecl
+	:	identifierList?
+		(	type
+		|	'...'
+		)
+	;
+
+// Interface types
+
+interfaceType
+	:	'interface' '{' (methodSpec ';')* '}'
+	;
+
+methodSpec
+	:	methodName signature
+	|	interfaceTypeName
+	;
+
+methodName
+	:	IDENTIFIER
+	;
+
+interfaceTypeName
+	:	typeName
+	;
+
+// Map types
+
+mapType
+	:	'map' '[' keyType ']' elementType
+	;
+
+keyType
+	:	type
+	;
+
+// Channel types
+
+channelType
+	:	('chan' ~('<-')) => channel
+	|	sendChannel
+	|	recvChannel
+	;
+
+channel
+	:	'chan' elementType
+	;
+
+sendChannel
+	:	'chan' '<-' elementType
+	;
+
+recvChannel
+	:	'<-' 'chan' elementType
+	;
+
+/*
+ * Blocks
+ */
+
+block
+	//:	'{' (statement ';')* '}'
+	:	'{'
+		(	~'{'
+		|	block
+		)
+		'}'
+	;
+
+/*
+ * Declarations and scope
+ */
+
+declaration
+	:	constDecl
+	|	typeDecl
+	|	varDecl
+	;
+
+topLevelDecl
+	:	declaration
+	|	functionDecl
+	|	methodDecl
+	;
+
+// Constant declarations
+
+constDecl
+	:	'const'
+		(	constSpec
+		|	'(' (constSpec ';')* ')'
+		)
+	;
+
+constSpec
+	:	identifierList
+		(type? '=' expressionList)?
+	;
+
+identifierList
+	:	IDENTIFIER (',' IDENTIFIER)*
+	;
+
+expressionList
+	:	expression (',' expression)*
+	;
+
+// Type declarations
+
+typeDecl
+	:	'type'
+		(	typeSpec
+		|	'(' (typeSpec ';')* ')'
+		)
+	;
+
+typeSpec
+	:	IDENTIFIER type
+	;
+
+// Variable declarations
+
+varDecl
+	:	'var'
+		(	varSpec
+		|	'(' (varSpec ';')* ')'
+		)
+	;
+
+varSpec
+	:	identifierList
+		(	type ('=' expressionList)?
+		|	'=' expressionList
+		)
+	;
+
+// Short variable declarations
+
+shortVarDecl
+	:	identifierList ':=' expressionList
+	;
+
+// Function declarations
+
+functionDecl
+	:	'func' IDENTIFIER signature body?
+	;
+
+body
+	:	block
+	;
+
+// Method declarations
+
+methodDecl
+	:	'func' receiver methodName signature body?
+	;
+
+receiver
+	:	'(' IDENTIFIER? '*'? baseTypeName ')'
+	;
+
+baseTypeName
+	:	IDENTIFIER
+	;
+
+/*
+ * Expressions
+ */
+
+// Operands
+// Qualified identifiers
+
+qualifiedIdent
+	:	(packageName '.')? IDENTIFIER
+	;
+
+// Composite literals
+// Function literals
+// Primary expressions
+// Selectors
+// Indexes
+// Slices
+// Type assertions
+// Calls
+// Passing arguments to ... parameters
+// Operators
+
+expression
+	//:	unaryExpr
+	//|	expression binaryOp unaryExpr
+	:	IDENTIFIER
+	;
+
+// Operator precedence
+// Arithmetic operators
+// Integer overflow
+// Comparison operators
+// Logical operators
+// Address operators
+// Communication operators
+// Method expressions
+// Conversions
+// Constant expressions
+// Order of evaluation
+
+/*
+ * Statements
+ */
+
+// Empty statements
+// Labeled statements
+// Expression statements
+// IncDec statements
+// Assignments
+// If statements
+// Switch statements
+// For statements
+// Go statements
+// Select statements
+// Return statements
+// Break statements
+// Continue statements
+// Goto statements
+// Fallthrough statements
+// Defer statements
+
+/*
+ * Packages
+ */
+
+// Source file organization
+
+public
+compilationUnit
+	:	packageClause ';'
+		(importDecl ';')*
+		(topLevelDecl ';')*
+		EOF
+	;
+
+// Package clause
+
+packageClause
+	:	'package' packageName
+	;
+
+packageName
+	:	IDENTIFIER
+	;
+
+// Import declarations
+
+importDecl
+	:	'import'
+		(	importSpec
+		|	'(' (importSpec ';')* ')'
+		)
+	;
+
+importSpec
+	:	('.' | packageName)?
+		STRING_LITERAL
+	;
+
+/*//////////////////////////////////////////////////////////////////////////*/
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// L E X E R
+
+IDENTIFIER
+	:	('a'..'z' | 'A'..'Z' | '_')
+		('a'..'z' | 'A'..'Z' | '0'..'9' | '_')*
+	;
+
+NUMBER
+	:	(	'0'..'9'
+		| 	'.' '0'..'9'
+		)
+		(IDENTIFIER NUMBER?)?
+	;
+
+COMMENT
+	:	'//' (~('\r' | '\n'))*
+		{Skip();}
+	;
+
+ML_COMMENT
+	:	'/*' .* '*/'
+		{Skip();}
+	;
+
+CHAR_LITERAL
+	:	'\''
+		(	'\\' .
+		|	~('\r' | '\n' | '\'' | '\\')
+		)*
+		'\''
+	;
+
+STRING_LITERAL
+	:	'"'
+		(	'\\' .
+		|	~('\r' | '\n' | '"' | '\\')
+		)*
+		'"'
+	;
+
+WS
+	:	(' ' | '\t')+
+		{Skip();}
+	;
+
+NEW_LINE
+	:	(	'\r' '\n'?
+		|	'\n'
+		)
+		{$channel = Hidden;}
+	;

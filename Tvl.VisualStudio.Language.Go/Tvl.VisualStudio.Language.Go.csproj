@@ -134,13 +134,17 @@
     <Compile Include="GoParserHelper.cs">
       <DependentUpon>Go.g3</DependentUpon>
     </Compile>
+    <Compile Include="GoSemicolonInsertionTokenSource.cs" />
     <Compile Include="GoServices.cs" />
     <Compile Include="GoClassifier.cs" />
+    <Compile Include="GoBackgroundParser.cs" />
+    <Compile Include="GoBackgroundParserProvider.cs" />
+    <Compile Include="GoErrorTaggerProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Antlr3 Include="GoColorizerLexer.g3" />
-    <None Include="Go.g3" />
+    <Antlr3 Include="Go.g3" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
