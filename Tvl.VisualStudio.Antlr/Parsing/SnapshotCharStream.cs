@@ -74,9 +74,9 @@
             return LA(i);
         }
 
-        public string substring(int start, int stop)
+        public string Substring(int startIndex, int length)
         {
-            return Snapshot.GetText(start, stop - start + 1);
+            return Snapshot.GetText(startIndex, length);
         }
 
         public void Consume()
