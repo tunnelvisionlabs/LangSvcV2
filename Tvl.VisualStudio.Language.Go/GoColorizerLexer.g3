@@ -1,0 +1,111 @@
+﻿lexer grammar GoColorizerLexer;
+
+options
+{
+	language = CSharp3;
+}
+
+@namespace{Tvl.VisualStudio.Language.Go}
+
+/*//////////////////////////////////////////////////////////////////////////*/
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// L E X E R
+
+// delimiters
+LPAREN:'(';
+RPAREN:')';
+LBRACK:'[';
+RBRACK:']';
+LBRACE:'{';
+RBRACE:'}';
+SEMI:';';
+COMMA:',';
+DOT:'.';
+COLON:':';
+
+// operators
+EQ			:'=';
+NEQ			:'!=';
+EQEQ		:'==';
+PLUS		:'+';
+PLUSEQ		:'+=';
+MINUS		:'-';
+MINUSEQ		:'-=';
+TIMES		:'*';
+TIMESEQ		:'*=';
+DIV			:'/';
+DIVEQ		:'/=';
+LT			:'<';
+GT			:'>';
+LE			:'<=';
+GE			:'>=';
+NOT			:'!';
+//BITNOT		:'~';
+AND			:'&&';
+BITAND		:'&';
+ANDEQ		:'&=';
+BITCLR		:'&^';
+BITCLREQ	:'&^=';
+//QUES		:'?';
+OR			:'||';
+BITOR		:'|';
+OREQ		:'|=';
+INC			:'++';
+DEC			:'--';
+XOR			:'^';
+XOREQ		:'^=';
+MOD			:'%';
+MODEQ		:'%=';
+LSHIFT		:'<<';
+RSHIFT		:'>>';
+LSHIFTEQ	:'<<=';
+RSHIFTEQ	:'>>=';
+DEFEQ		:':=';
+ELLIP		:'...';
+CHAN		:'<-';
+
+IDENTIFIER
+	:	('a'..'z' | 'A'..'Z' | '_')
+		('a'..'z' | 'A'..'Z' | '0'..'9' | '_')*
+	;
+
+NUMBER
+	:	(	'0'..'9'
+		| 	'.' '0'..'9'
+		)
+		(IDENTIFIER NUMBER?)?
+	;
+
+COMMENT
+	:	'//' (~('\r' | '\n'))*
+	;
+
+ML_COMMENT
+	:	'/*' .* '*/'
+	;
+
+CHAR_LITERAL
+	:	'\''
+		(	'\\' .
+		|	~('\r' | '\n' | '\'' | '\\')
+		)*
+		'\''
+	;
+
+STRING_LITERAL
+	:	'"'
+		(	'\\' .
+		|	~('\r' | '\n' | '"' | '\\')
+		)*
+		'"'
+	;
+
+WS
+	:	(' ' | '\t')+
+		{Skip();}
+	;
+
+ANYCHAR
+	:	.
+	;
