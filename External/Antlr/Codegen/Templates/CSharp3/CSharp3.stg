@@ -121,13 +121,32 @@ public partial class <grammar.recognizerName> : <@superClassName><superClass><@e
 <endif>
 <endif>
 		<grammar.directDelegates:
-		 {g|<g:delegateName()> = new <g.recognizerName>(input, state<trunc(g.delegators):{p|, <p:delegateName()>}>, this);}; separator="\n">
+		 {g|<g:delegateName()> = new <g.recognizerName>(input, this.state<trunc(g.delegators):{p|, <p:delegateName()>}>, this);}; separator="\n">
 		<grammar.delegators:
 		 {g|this.<g:delegateName()> = <g:delegateName()>;}; separator="\n">
 		<last(grammar.delegators):{g|gParent = <g:delegateName()>;}>
 	}
 	public override string GrammarFileName { get { return "<fileName>"; } }
 
+<if(grammar.hasDelegates)>
+	public override ICharStream CharStream
+	{
+		get
+		{
+			return base.CharStream;
+		}
+		set
+		{
+			base.CharStream = value;
+			<grammar.directDelegates:
+			 {g|<g:delegateName()> = new <g.recognizerName>(input, state<trunc(g.delegators):{p|, <p:delegateName()>}>, this);}; separator="\n">
+			<grammar.delegators:
+			 {g|this.<g:delegateName()> = <g:delegateName()>;}; separator="\n">
+			<last(grammar.delegators):{g|gParent = <g:delegateName()>;}>
+		}
+	}
+
+<endif>
 <if(filterMode)>
 	<filteringNextToken()>
 <endif>
