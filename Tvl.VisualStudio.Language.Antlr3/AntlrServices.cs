@@ -5,7 +5,7 @@
     using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Text.Classification;
     using Microsoft.VisualStudio.Utilities;
-using Tvl.VisualStudio.Text.Navigation;
+    using Tvl.VisualStudio.Text.Navigation;
 
     public static class AntlrServices
     {
