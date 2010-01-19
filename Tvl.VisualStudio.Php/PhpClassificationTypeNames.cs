@@ -1,4 +1,4 @@
-﻿namespace JavaLanguageService.Php
+﻿namespace Tvl.VisualStudio.Language.Php
 {
     public static class PhpClassificationTypeNames
     {

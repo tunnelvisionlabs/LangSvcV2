@@ -9,8 +9,8 @@
     <ProjectGuid>{278B5C1B-CF8B-4DD7-A514-EE27B268F11E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tvl.VisualStudio.Php</RootNamespace>
-    <AssemblyName>Tvl.VisualStudio.Php</AssemblyName>
+    <RootNamespace>Tvl.VisualStudio.Language.Php</RootNamespace>
+    <AssemblyName>Tvl.VisualStudio.Language.Php</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <GeneratePkgDefFile>false</GeneratePkgDefFile>

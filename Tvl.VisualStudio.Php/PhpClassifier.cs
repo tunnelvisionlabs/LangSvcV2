@@ -1,4 +1,4 @@
-﻿namespace JavaLanguageService.Php
+﻿namespace Tvl.VisualStudio.Language.Php
 {
     using System.Collections.Generic;
     using Antlr.Runtime;
@@ -68,7 +68,6 @@
                 "final",
                 "__NAMESPACE__",
                 "namespace",
-                //"goto",
                 "__DIR__",
             };
 

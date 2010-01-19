@@ -1,4 +1,4 @@
-﻿namespace JavaLanguageService.Php
+﻿namespace Tvl.VisualStudio.Language.Php
 {
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Utilities;
