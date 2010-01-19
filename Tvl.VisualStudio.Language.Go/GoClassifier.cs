@@ -5,8 +5,6 @@
     using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
-    using System;
-    using System.Reflection;
     using Tvl.VisualStudio.Language.Parsing;
 
     internal sealed class GoClassifier : AntlrClassifierBase
@@ -77,11 +75,9 @@
             case GoColorizerLexer.LE:
             case GoColorizerLexer.GE:
             case GoColorizerLexer.NOT:
-            //case GoColorizerLexer.BITNOT:
             case GoColorizerLexer.AND:
             case GoColorizerLexer.BITAND:
             case GoColorizerLexer.ANDEQ:
-            //case GoColorizerLexer.QUES:
             case GoColorizerLexer.OR:
             case GoColorizerLexer.BITOR:
             case GoColorizerLexer.OREQ:
@@ -96,8 +92,6 @@
             case GoColorizerLexer.RSHIFT:
             case GoColorizerLexer.LSHIFTEQ:
             case GoColorizerLexer.RSHIFTEQ:
-            //case GoColorizerLexer.ROR:
-            //case GoColorizerLexer.ROREQ:
                 return _standardClassificationService.Operator;
 
             case GoColorizerLexer.CHAR_LITERAL:
