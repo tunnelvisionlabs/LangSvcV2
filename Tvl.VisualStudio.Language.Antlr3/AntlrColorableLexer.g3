@@ -1,0 +1,237 @@
+﻿lexer grammar AntlrColorableLexer;
+
+options
+{
+	language=CSharp3;
+	tokenVocab=ANTLR;
+}
+
+@namespace{Tvl.VisualStudio.Language.Antlr3}
+
+/*//////////////////////////////////////////////////////////////////////////*/
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// L E X E R
+
+IDENTIFIER
+	:	('a'..'z' | 'A'..'Z' | '_')
+		('a'..'z' | 'A'..'Z' | '0'..'9' | '_')*
+	;
+
+DIRECTIVE
+	:	'@' IDENTIFIER
+	;
+
+REFERENCE
+	:	'$' IDENTIFIER
+	;
+
+WS
+	:	(	' '
+		|	'\t'
+		|	('\r')? '\n'
+		)
+		{Skip();}
+	;
+
+COMMENT
+	:	'//' (~('\r' | '\n'))*
+	;
+
+ML_COMMENT
+	:	'/*' .* '*/'
+	;
+
+CHAR_LITERAL
+	:	'\''
+		(	'\\' .
+		|	~('\r' | '\n' | '\'' | '\\')
+		)*
+		'\''
+	;
+
+STRING_LITERAL
+	:	'"'
+		(	'\\' .
+		|	~('\r' | '\n' | '"' | '\\')
+		)*
+		'"'
+	;
+
+OPEN_ELEMENT_OPTION
+	:	'<'
+	;
+
+CLOSE_ELEMENT_OPTION
+	:	'>'
+	;
+
+AMPERSAND : '@';
+
+COMMA : ',';
+
+QUESTION :	'?' ;
+
+TREE_BEGIN : '^(' ;
+
+LPAREN:	'(' ;
+
+RPAREN:	')' ;
+
+COLON :	':' ;
+
+STAR:	'*' ;
+
+PLUS:	'+' ;
+
+ASSIGN : '=' ;
+
+PLUS_ASSIGN : '+=' ;
+
+IMPLIES : '=>' ;
+
+REWRITE : '->' ;
+
+SEMI:	';' ;
+
+ROOT : '^';
+
+BANG : '!';
+
+OR	:	'|' ;
+
+WILDCARD : '.' ;
+
+ETC : '...' ;
+
+RANGE : '..' ;
+
+NOT :	'~' ;
+
+RCURLY:	'}'	;
+
+DOLLAR : '$' ;
+
+STRAY_BRACKET : ']' ;
+
+// closes a bracket action
+ESCAPE_BRACKET
+	:	'\\]'
+	;
+
+DOUBLE_ANGLE_STRING_LITERAL
+	:	'<<'
+		(	~'>'
+		|	('>' ~'>') => '>'
+		)*
+		(	'>>'
+		|	// allowed to skip in colorizer
+		)
+	;
+
+fragment
+ESC
+	:	'\\'
+		(	'n'
+		|	'r'
+		|	't'
+		|	'b'
+		|	'f'
+		|	'"'
+		|	'\''
+		|	'\\'
+		|	'>'
+		|	'u' XDIGIT XDIGIT XDIGIT XDIGIT
+		|	. // unknown, leave as it is
+		)
+	;
+
+fragment
+DIGIT
+	:	'0'..'9'
+	;
+
+fragment
+XDIGIT
+	:	'0' .. '9'
+	|	'a' .. 'f'
+	|	'A' .. 'F'
+	;
+
+INT
+	:	('0'..'9')+
+	;
+
+ARG_ACTION
+	:	'['
+		NESTED_ARG_ACTION
+		(	']'
+		|	// allowed to skip in colorizer
+		)
+	;
+
+fragment
+NESTED_ARG_ACTION
+	:	(	('\\]') => '\\' ']'
+		|	'\\' c=~(']')
+		|	ACTION_STRING_LITERAL
+		|	ACTION_CHAR_LITERAL
+		|	c=~('\\'|'"'|'\''|']')
+		)*
+	;
+
+ACTION
+	:	'{' {ActionLevel++;}
+		(	ACTION
+		|	ACTION_CHAR_LITERAL
+		|	('//' | '/*') => COMMENT
+		|	ACTION_STRING_LITERAL
+		|	ACTION_ESC
+		|	~('{'|'\''|'"'|'\\'|'}')
+		)*
+		(	'}' {ActionLevel--;}
+		|	// allowed to skip in colorizer
+		)
+		(	{ActionLevel==0}? => ('?' {$type = SEMPRED;})? )?
+	;
+
+fragment
+ACTION_CHAR_LITERAL
+	:	'\''
+		(	ACTION_ESC
+		|	~('\\'|'\'')
+		)*
+		'\''
+	;
+
+fragment
+ACTION_STRING_LITERAL
+	:	'"'
+		(	ACTION_ESC
+		|	~('\\'|'"')
+		)*
+		'"'
+	;
+
+fragment
+ACTION_ESC
+	:	'\\\''
+	|	'\\\"'
+	|	'\\' ~('\''|'"')
+	;
+
+fragment
+WS_LOOP
+	:	(	WS
+		|	COMMENT
+		)*
+	;
+
+fragment
+WS_OPT
+	:	WS?
+	;
+
+ANYCHAR
+	:	.
+	;

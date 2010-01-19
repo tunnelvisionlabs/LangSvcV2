@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Vsix Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
+  <Identifier Id="Tvl.VisualStudio.Language.Antlr3.74dda0ee-262e-4c58-8255-d57136664d2b">
+    <Name>Tvl.VisualStudio.Language.Antlr3</Name>
+    <Author>Microsoft</Author>
+    <Version>1.0</Version>
+    <Description>Empty VSIX Project.</Description>
+    <Locale>1033</Locale>
+    <Icon>VSIXProject_small.png</Icon>
+    <PreviewImage>VSIXProject_large.png</PreviewImage>
+    <SupportedProducts>
+      <VisualStudio Version="10.0">
+        <Edition>Pro</Edition>
+      </VisualStudio>
+    </SupportedProducts>
+    <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
+  </Identifier>
+  <References>
+  <!--Add References here-->  
+  </References>
+
+  <Content>
+    <MefComponent>Tvl.VisualStudio.Language.Antlr3</MefComponent>
+  </Content>
+
+</Vsix>
