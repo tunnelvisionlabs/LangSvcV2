@@ -1,0 +1,138 @@
+﻿<!--
+   [The "BSD licence"]
+   Copyright (c) 2009 Sam Harwell
+   All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+   1. Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+   2. Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+   3. The name of the author may not be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+   IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+   OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+   IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+   INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <BuildSystem>MSBuild</BuildSystem>
+    <TaskVersion>3.2.0.0</TaskVersion>
+    <TaskKeyToken>eb42632606e9261f</TaskKeyToken>
+    <GoBuildTaskAssemblyName Condition="'$(GoBuildTaskAssemblyName)'==''">GoBuildTask, Version=$(TaskVersion), Culture=neutral, PublicKeyToken=$(TaskKeyToken)</GoBuildTaskAssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <LoadTimeSensitiveTargets>
+      $(LoadTimeSensitiveTargets);
+      GoCompile;
+    </LoadTimeSensitiveTargets>
+    <LoadTimeSensitiveProperties>
+      $(LoadTimeSensitiveProperties);
+      GoCompileDependsOn;
+    </LoadTimeSensitiveProperties>
+
+
+    <PrepareResourcesDependsOn>
+      GoCompile;
+      $(PrepareResourcesDependsOn)
+    </PrepareResourcesDependsOn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GoBuildTaskLocation Condition="'$(GoBuildTaskPath)'==''">$(MSBuildBinPath)</GoBuildTaskLocation>
+    <GoBuildTaskLocation Condition="'$(GoBuildTaskPath)'!=''">$(GoBuildTaskPath)</GoBuildTaskLocation>
+    <GoCompilerLocation Condition="'$(GoCompilerPath)'==''">$(MSBuildBinPath)\Go\Tvl.Go.Compiler.dll</GoCompilerLocation>
+    <GoCompilerLocation Condition="'$(GoCompilerPath)'!=''">$(GoCompilerPath)</GoCompilerLocation>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GoGenCodeFileNames Condition="'$(GoGenCodeFileNames)'==''">$(MSBuildProjectFile).GoGeneratedCodeFileListAbsolute.txt</GoGenCodeFileNames>
+  </PropertyGroup>
+
+  <UsingTask Condition="'$(GoBuildTaskPath)'==''" TaskName="Tvl.Go.Build.Tasks.GoClassGenerationTask" AssemblyName="$(GoBuildTaskAssemblyName)" />
+  <UsingTask Condition="'$(GoBuildTaskPath)'!=''" TaskName="Tvl.Go.Build.Tasks.GoClassGenerationTask" AssemblyFile="$(GoBuildTaskPath)\Tvl.Go.Build.Tasks.dll" />
+
+  <PropertyGroup>
+    <PrepareResourcesDependsOn>
+      GoCompile;
+      GoCompileAddFilesGenerated;
+      $(PrepareResourcesDependsOn)
+    </PrepareResourcesDependsOn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GoCompileDependsOn>
+      GoCompileReadGeneratedFileList
+    </GoCompileDependsOn>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(BuildingInsideVisualStudio)'=='true'">
+    <AvailableItemName Include="GoCompile" />
+  </ItemGroup>
+
+  <Target Name="GoCompileReadGeneratedFileList">
+
+    <ReadLinesFromFile File="$(IntermediateOutputPath)$(GoGenCodeFileNames)">
+      <Output TaskParameter="Lines" ItemName="GoOutputCodeFilesList"/>
+    </ReadLinesFromFile>
+  </Target>
+
+  <Target Name="GoCompile"
+          DependsOnTargets="$(GoCompileDependsOn)"
+          Condition="'@(GoCompile)' != ''"
+          Inputs="@(GoCompile)"
+          Outputs="@(GoOutputCodeFilesList);
+                  $(IntermediateOutputPath)$(GoGenCodeFileNames);">
+
+    <ItemGroup>
+      <GoGeneratedCodeFiles Remove="@(GoGeneratedCodeFiles)" />
+    </ItemGroup>
+
+    <GoClassGenerationTask
+      GoToolPath="$(GoCompilerLocation)"
+      BuildTaskPath="$(GoBuildTaskLocation)"
+      OutputPath="$(IntermediateOutputPath)"
+      Language="$(Language)"
+      SourceCodeFiles="@(GoCompile)">
+
+      <Output ItemName="GoGeneratedCodeFiles" TaskParameter="GeneratedCodeFiles" />
+    </GoClassGenerationTask>
+
+    <WriteLinesToFile
+      File="$(IntermediateOutputPath)$(GoGenCodeFileNames)"
+      Lines="@(GoGeneratedCodeFiles)"
+      Overwrite="true"/>
+  </Target>
+
+  <Target Name="GoCompileAddFilesGenerated"
+          DependsOnTargets="GoCompile"
+          Condition="'@(GoCompile)' != ''">
+
+    <ItemGroup>
+      <GoGeneratedCodeFiles Condition="'@(GoGeneratedCodeFiles)' == ''"
+                               Include="@(GoOutputCodeFilesList)" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <FileWrites Include="@(GoGeneratedCodeFiles);
+                           $(IntermediateOutputPath)$(GoGenCodeFileNames);" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="@(GoGeneratedCodeFiles)" />
+    </ItemGroup>
+
+  </Target>
+</Project>

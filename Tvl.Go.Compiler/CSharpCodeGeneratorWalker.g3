@@ -1,0 +1,699 @@
+﻿tree grammar CSharpCodeGeneratorWalker;
+
+options
+{
+	language=CSharp3;
+	tokenVocab=Go;
+	ASTLabelType=CommonTree;
+}
+
+@namespace{Tvl.Go.Compiler}
+
+/*
+ * Types
+ */
+
+type
+	:	typeName
+	|	typeLit
+	|	'(' type ')'
+	;
+
+typeName
+	:	qualifiedIdent
+	;
+
+typeLit
+	:	arrayType
+	|	structType
+	|	pointerType
+	|	functionType
+	|	interfaceType
+	|	sliceType
+	|	mapType
+	|	channelType
+	;
+
+// Array types
+
+arrayType
+	:	^('[' arrayLength ']' elementType)
+	;
+
+arrayLength
+	:	expression
+	;
+
+elementType
+	:	type
+	;
+
+// Slice types
+
+sliceType
+	:	^('[' ']' elementType)
+	;
+
+// Struct types
+
+structType
+	:	^('struct' fieldDecl*)
+	;
+
+fieldDecl
+	:	(	identifierList type
+		|	anonymousField
+		)
+		tag?
+	;
+
+anonymousField
+	:	'*'? typeName
+	;
+
+tag
+	:	STRING_LITERAL
+	;
+
+// Pointer types
+
+pointerType
+	:	^('*' baseType)
+	;
+
+baseType
+	:	type
+	;
+
+// Function types
+
+functionType
+	:	^('func' signature)
+	;
+
+signature
+	:	parameters result?
+	;
+
+result
+	:	parameters
+	|	type
+	;
+
+parameters
+	:	^('(' parameterDecl*)
+	;
+
+parameterDecl
+	:	identifierList (type|'...')?
+	|	(type|'...')
+	;
+
+// Interface types
+
+interfaceType
+	:	^('interface' methodSpec*)
+	;
+
+methodSpec
+	:	^(methodName=IDENTIFIER signature)
+	|	interfaceTypeName
+	;
+
+interfaceTypeName
+	:	typeName
+	;
+
+// Map types
+
+mapType
+	:	^('map' keyType elementType)
+	;
+
+keyType
+	:	type
+	;
+
+// Channel types
+
+channelType
+	:	channel
+	|	sendChannel
+	|	recvChannel
+	;
+
+channel
+	:	^('chan' elementType)
+	;
+
+sendChannel
+	:	^('chan' '<-' elementType)
+	;
+
+recvChannel
+	:	^('<-' 'chan' elementType)
+	;
+
+/*
+ * Blocks
+ */
+
+block
+	:	^('{'^ statement*)
+	;
+
+/*
+ * Declarations and scope
+ */
+
+declaration
+	:	constDecl
+	|	typeDecl
+	|	varDecl
+	;
+
+topLevelDecl
+	:	declaration
+	|	functionDecl
+	|	methodDecl
+	;
+
+// Constant declarations
+
+constDecl
+	:	^('const' constSpec*)
+	;
+
+constSpec
+	:	identifierList
+		(type? '=' expressionList)?
+	;
+
+identifierList
+	:	IDENTIFIER+
+	;
+
+expressionList
+	:	expression+
+	;
+
+// Type declarations
+
+typeDecl
+	:	^('type' typeSpec*)
+	;
+
+typeSpec
+	:	^(IDENTIFIER type)
+	;
+
+// Variable declarations
+
+varDecl
+	:	^('var' varSpec*)
+	;
+
+varSpec
+	:	identifierList
+		(	type ('=' expressionList)?
+		|	'=' expressionList
+		)
+	;
+
+// Short variable declarations
+
+shortVarDecl
+	:	^(':=' ^(AST_VARS identifierList) ^(AST_VALUES expressionList))
+	;
+
+// Function declarations
+
+functionDecl
+	:	^('func' IDENTIFIER signature body?)
+	;
+
+body
+	:	block
+	;
+
+// Method declarations
+
+methodDecl
+	:	^('func' receiver methodName signature body?)
+	;
+
+receiver
+	:	'(' IDENTIFIER? '*'? baseTypeName ')'
+	;
+
+baseTypeName
+	:	IDENTIFIER
+	;
+
+/*
+ * Expressions
+ */
+
+// Operands
+
+operand
+	:	literal
+	|	qualifiedIdent
+	|	methodExpr
+	|	'(' expression ')'
+	;
+
+literal
+	:	basicLit
+	|	compositeLit
+	|	functionLit
+	;
+
+basicLit
+	:	NUMBER
+	|	CHAR_LITERAL
+	|	STRING_LITERAL
+	;
+
+// Qualified identifiers
+
+qualifiedIdent
+	:	IDENTIFIER
+	|	^('.' packageName=IDENTIFIER IDENTIFIER)
+	;
+
+// Composite literals
+
+compositeLit
+	:	literalType '{' (elementList ','?)? '}'
+	;
+
+literalType
+	:	structType
+	|	arrayType
+	|	^('[' '...' ']' elementType)
+	|	sliceType
+	|	mapType
+	|	typeName
+	|	^('(' literalType ')')
+	;
+
+elementList
+	:	element+
+	;
+
+element
+	:	(key ':')? value
+	;
+
+key
+	:	fieldName
+	|	elementIndex
+	;
+
+fieldName
+	:	IDENTIFIER
+	;
+
+elementIndex
+	:	expression
+	;
+
+value
+	:	expression
+	;
+
+// Function literals
+
+functionLit
+	:	functionType body
+	;
+
+// Primary expressions
+
+primaryExpr
+	:	(	operand
+		//|	conversion
+		//|	builtinCall
+		)
+		(	selector
+		|	index
+		|	slice
+		|	typeAssertion
+		|	call
+		)*
+	;
+
+selector
+	:	^('.' IDENTIFIER)
+	;
+
+index
+	:	^('[' expression ']')
+	;
+
+slice
+	:	^('[' expression ':' expression? ']')
+	;
+
+typeAssertion
+	:	^('.' '(' type ')')
+	;
+
+call
+	:	^('(' expressionList?)
+	;
+
+// Selectors
+// Indexes
+// Slices
+// Type assertions
+// Calls
+// Passing arguments to ... parameters
+// Operators
+
+expression
+	:	unaryExpr
+	|	^(binaryOp expression expression)
+	;
+
+unaryExpr
+	:	primaryExpr
+	|	^(unaryOp unaryExpr)
+	;
+
+binaryOp
+	:	logOp
+	|	comOp
+	|	relOp
+	|	addOp
+	|	mulOp
+	;
+
+logOp
+	:	'||' | '&&'
+	;
+
+comOp
+	:	'<-'
+	;
+
+relOp
+	:	'==' | '!=' | '<' | '<=' | '>' | '>='
+	;
+
+addOp
+	:	'+' | '-' | '|' | '^'
+	;
+
+mulOp
+	:	'*' | '/' | '%' | '<<' | '>>' | '&' | '&^'
+	;
+
+unaryOp
+	:	'+' | '-' | '!' | '^' | '*' | '&' | '<-'
+	;
+
+// Operator precedence
+// Arithmetic operators
+// Integer overflow
+// Comparison operators
+// Logical operators
+// Address operators
+// Communication operators
+// Method expressions
+
+methodExpr
+	:	receiverType '.' methodName
+	;
+
+receiverType
+	:	typeName
+	|	'(' '*' typeName ')'
+	;
+
+// Conversions
+
+conversion
+	:	literalType '(' expression ')'
+	;
+
+// Constant expressions
+// Order of evaluation
+
+/*
+ * Statements
+ */
+
+statement
+	:	declaration
+	|	labeledStmt
+	|	simpleStmt
+	|	goStmt
+	|	returnStmt
+	|	breakStmt
+	|	continueStmt
+	|	gotoStmt
+	|	fallthroughStmt
+	|	block
+	|	ifStmt
+	|	switchStmt
+	|	selectStmt
+	|	forStmt
+	|	deferStmt
+	;
+
+simpleStmt
+	:	shortVarDecl
+	|	assignment
+	|	incDecStmt
+	|	expressionStmt
+	|	emptyStmt
+	;
+
+// Empty statements
+
+emptyStmt
+	:
+	;
+
+// Labeled statements
+
+labeledStmt
+	:	label ':' statement
+	;
+
+label
+	:	IDENTIFIER
+	;
+
+// Expression statements
+
+expressionStmt
+	:	expression
+	;
+
+// IncDec statements
+
+incDecStmt
+	:	expression ('++' | '--')
+	;
+
+// Assignments
+
+assignment
+	:	expressionList assignOp expressionList
+	;
+
+assignOp
+	:	'='
+	|	'+=' | '-=' | '|=' | '^='
+	|	'*=' | '/=' | '%=' | '<<=' | '>>=' | '&=' | '&^='
+	;
+
+// If statements
+
+ifStmt
+	:	^('if' (simpleStmt ';')? expression? block ('else' statement)?)
+	;
+
+// Switch statements
+
+switchStmt
+	:	exprSwitchStmt
+	|	typeSwitchStmt
+	;
+
+exprSwitchStmt
+	:	^('switch' (simpleStmt ';')? expression? '{' exprCaseClause* '}')
+	;
+
+exprCaseClause
+	:	exprSwitchCase ':' (statement ';')*
+	;
+
+exprSwitchCase
+	:	^('case' expressionList)
+	|	'default'
+	;
+
+typeSwitchStmt
+	:	^('switch' (simpleStmt ';')? typeSwitchGuard '{' typeCaseClause '}')
+	;
+
+typeSwitchGuard
+	:	(IDENTIFIER ':=')? primaryExpr '.' '(' 'type' ')'
+	;
+
+typeCaseClause
+	:	typeSwitchCase ':' (statement ';')*
+	;
+
+typeSwitchCase
+	:	^('case' typeList)
+	|	'default'
+	;
+
+typeList
+	:	type+
+	;
+
+// For statements
+
+forStmt
+	:	^(	'for'
+			(	rangeClause
+			|	forClause
+			|	condition
+			)?
+			block
+		)
+	;
+
+condition
+	:	expression
+	;
+
+forClause
+	:	initStmt? ';' condition? ';' postStmt?
+	;
+
+initStmt
+	:	simpleStmt
+	;
+
+postStmt
+	:	simpleStmt
+	;
+
+rangeClause
+	:	expressionList ('=' | ':=') 'range' expression
+	;
+
+// Go statements
+
+goStmt
+	:	^('go' expression)
+	;
+
+// Select statements
+
+selectStmt
+	:	^('select' '{' commClause* '}')
+	;
+
+commClause
+	:	commCase ':' (statement ';')*
+	;
+
+commCase
+	:	^('case' (sendExpr | recvExpr))
+	|	'default'
+	;
+
+sendExpr
+	:	expression '<-' expression
+	;
+
+recvExpr
+	:	(expression ('=' | ':='))? '<-' expression
+	;
+
+// Return statements
+
+returnStmt
+	:	^('return' expressionList?)
+	;
+
+// Break statements
+
+breakStmt
+	:	^('break' label?)
+	;
+
+// Continue statements
+
+continueStmt
+	:	^('continue' label?)
+	;
+
+// Goto statements
+
+gotoStmt
+	:	^('goto' label)
+	;
+
+// Fallthrough statements
+
+fallthroughStmt
+	:	'fallthrough'
+	;
+
+// Defer statements
+
+deferStmt
+	:	^('defer' expression)
+	;
+
+/*
+ * Built-in functions
+ */
+
+//builtinCall
+//	:	IDENTIFIER '(' builtinArgs? ')'
+//	;
+
+//builtinArgs
+//	:	type (',' expressionList)?
+//	|	expressionList
+//	;
+
+/*
+ * Packages
+ */
+
+// Source file organization
+
+public
+sourceFile
+	:	packageClause
+		importDecl*
+		topLevelDecl*
+		EOF
+	;
+
+// Package clause
+
+packageClause
+	:	^('package' packageName=IDENTIFIER)
+	;
+
+// Import declarations
+
+importDecl
+	:	^('import' importSpec*)
+	;
+
+importSpec
+	:	^(STRING_LITERAL ('.' | packageName)?)
+	;
