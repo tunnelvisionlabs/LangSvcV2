@@ -86,6 +86,9 @@ tokens
 	DEFEQ		=':=';
 	ELLIP		='...';
 	CHAN		='<-';
+
+	AST_VARS;
+	AST_VALUES;
 }
 
 @lexer::namespace{Tvl.VisualStudio.Language.Go}
@@ -139,7 +142,11 @@ sliceType
 // Struct types
 
 structType
-	:	'struct' '{' (fieldDecl ';')* '}'
+	:	'struct'
+		'{'
+		(	'}'
+		|	fieldDecl (';' fieldDecl)* ';'? '}'
+		)
 		-> ^('struct' fieldDecl*)
 	;
 
@@ -199,7 +206,11 @@ parameterDecl
 // Interface types
 
 interfaceType
-	:	'interface'^ '{' (methodSpec ';')* '}'
+	:	'interface'^
+		'{'
+		(	'}'
+		|	methodSpec (';' methodSpec)* ';'? '}'
+		)
 	;
 
 methodSpec
@@ -250,12 +261,11 @@ recvChannel
  */
 
 block
-	//:	'{' (statement ';')* '}'
 	:	'{'^
-		(	~('{' | '}')
-		|	block
-		)*
-		'}'
+		(	'}'!
+		|	// due to the emptyStmt, there is no need to add ';'? before the '}'
+			statement (';'! statement)* '}'!
+		)
 	;
 
 /*
@@ -290,11 +300,11 @@ constSpec
 	;
 
 identifierList
-	:	IDENTIFIER (',' IDENTIFIER)*
+	:	IDENTIFIER (','! IDENTIFIER)*
 	;
 
 expressionList
-	:	expression (',' expression)*
+	:	expression (','! expression)*
 	;
 
 // Type declarations
@@ -332,6 +342,7 @@ varSpec
 
 shortVarDecl
 	:	identifierList ':=' expressionList
+		-> ^(':=' ^(AST_VARS identifierList) ^(AST_VALUES expressionList))
 	;
 
 // Function declarations
@@ -551,22 +562,214 @@ conversion
  * Statements
  */
 
+statement
+	:	declaration
+	|	labeledStmt
+	|	simpleStmt
+	|	goStmt
+	|	returnStmt
+	|	breakStmt
+	|	continueStmt
+	|	gotoStmt
+	|	fallthroughStmt
+	|	block
+	|	ifStmt
+	|	switchStmt
+	|	selectStmt
+	|	forStmt
+	|	deferStmt
+	;
+
+simpleStmt
+	:	shortVarDecl
+	|	assignment
+	|	incDecStmt
+	|	expressionStmt
+	|	emptyStmt
+	;
+
 // Empty statements
+
+emptyStmt
+	:
+	;
+
 // Labeled statements
+
+labeledStmt
+	:	label ':' statement
+	;
+
+label
+	:	IDENTIFIER
+	;
+
 // Expression statements
+
+expressionStmt
+	:	expression
+	;
+
 // IncDec statements
+
+incDecStmt
+	:	expression ('++' | '--')
+	;
+
 // Assignments
+
+assignment
+	:	expressionList assignOp expressionList
+	;
+
+assignOp
+	:	'='
+	|	'+=' | '-=' | '|=' | '^='
+	|	'*=' | '/=' | '%=' | '<<=' | '>>=' | '&=' | '&^='
+	;
+
 // If statements
+
+ifStmt
+	:	'if'^ (simpleStmt ';')? expression? block ('else' statement)?
+	;
+
 // Switch statements
+
+switchStmt
+	:	exprSwitchStmt
+	|	typeSwitchStmt
+	;
+
+exprSwitchStmt
+	:	'switch'^ (simpleStmt ';')? expression? '{' exprCaseClause* '}'
+	;
+
+exprCaseClause
+	:	exprSwitchCase ':' (statement ';')*
+	;
+
+exprSwitchCase
+	:	'case'^ expressionList
+	|	'default'
+	;
+
+typeSwitchStmt
+	:	'switch'^ (simpleStmt ';')? typeSwitchGuard '{' typeCaseClause '}'
+	;
+
+typeSwitchGuard
+	:	(IDENTIFIER ':=')? primaryExpr '.' '(' 'type' ')'
+	;
+
+typeCaseClause
+	:	typeSwitchCase ':' (statement ';')*
+	;
+
+typeSwitchCase
+	:	'case'^ typeList
+	|	'default'
+	;
+
+typeList
+	:	type (','! type)*
+	;
+
 // For statements
+
+forStmt
+	:	'for'^
+		(	rangeClause
+		|	forClause
+		|	condition
+		)?
+		block
+	;
+
+condition
+	:	expression
+	;
+
+forClause
+	:	initStmt? ';' condition? ';' postStmt?
+	;
+
+initStmt
+	:	simpleStmt
+	;
+
+postStmt
+	:	simpleStmt
+	;
+
+rangeClause
+	:	expressionList ('=' | ':=') 'range' expression
+	;
+
 // Go statements
+
+goStmt
+	:	'go'^ expression
+	;
+
 // Select statements
+
+selectStmt
+	:	'select'^ '{' commClause* '}'
+	;
+
+commClause
+	:	commCase ':' (statement ';')*
+	;
+
+commCase
+	:	'case'^ (sendExpr | recvExpr)
+	|	'default'
+	;
+
+sendExpr
+	:	expression '<-' expression
+	;
+
+recvExpr
+	:	(expression ('=' | ':='))? '<-' expression
+	;
+
 // Return statements
+
+returnStmt
+	:	'return'^ expressionList?
+	;
+
 // Break statements
+
+breakStmt
+	:	'break'^ label?
+	;
+
 // Continue statements
+
+continueStmt
+	:	'continue'^ label?
+	;
+
 // Goto statements
+
+gotoStmt
+	:	'goto'^ label
+	;
+
 // Fallthrough statements
+
+fallthroughStmt
+	:	'fallthrough'
+	;
+
 // Defer statements
+
+deferStmt
+	:	'defer'^ expression
+	;
 
 /*
  * Built-in functions
