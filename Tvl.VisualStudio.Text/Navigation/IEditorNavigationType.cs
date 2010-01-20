@@ -14,6 +14,11 @@
             get;
         }
 
+        EditorNavigationTypeDefinition Definition
+        {
+            get;
+        }
+
         bool IsOfType(string type);
     }
 }

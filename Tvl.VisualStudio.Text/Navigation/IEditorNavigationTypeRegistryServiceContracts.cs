@@ -8,8 +8,9 @@
     [ContractClassFor(typeof(IEditorNavigationTypeRegistryService))]
     public sealed class IEditorNavigationTypeRegistryServiceContracts : IEditorNavigationTypeRegistryService
     {
-        IEditorNavigationType IEditorNavigationTypeRegistryService.CreateEditorNavigationType(string type, IEnumerable<IEditorNavigationType> baseTypes)
+        IEditorNavigationType IEditorNavigationTypeRegistryService.CreateEditorNavigationType(EditorNavigationTypeDefinition definition, string type, IEnumerable<IEditorNavigationType> baseTypes)
         {
+            Contract.Requires<ArgumentNullException>(definition != null);
             Contract.Requires<ArgumentNullException>(type != null);
             Contract.Ensures(Contract.Result<IEditorNavigationType>() != null);
 

@@ -151,6 +151,8 @@
     <Compile Include="Navigation\EditorNavigationTarget.cs" />
     <Compile Include="Navigation\EditorNavigationTypeDefinition.cs" />
     <Compile Include="Navigation\IEditorNavigationSource.cs" />
+    <Compile Include="Navigation\IEditorNavigationSourceAggregator.cs" />
+    <Compile Include="Navigation\IEditorNavigationSourceAggregatorFactoryService.cs" />
     <Compile Include="Navigation\IEditorNavigationSourceProvider.cs" />
     <Compile Include="Navigation\IEditorNavigationTarget.cs" />
     <Compile Include="Navigation\IEditorNavigationType.cs" />
