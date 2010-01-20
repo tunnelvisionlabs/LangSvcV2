@@ -9,23 +9,10 @@
     [Export(typeof(IEditorNavigationTypeRegistryService))]
     public sealed class EditorNavigationTypeRegistryService : IEditorNavigationTypeRegistryService
     {
-        [Export]
-        [Name(PredefinedEditorNavigationTypes.Types)]
-        [Order(Before = PredefinedEditorNavigationTypes.Members)]
-        private static EditorNavigationTypeDefinition TypesStandardEditorNavigationTypeDefinition;
-
-        [Export]
-        [Name(PredefinedEditorNavigationTypes.Members)]
-        private static readonly EditorNavigationTypeDefinition MembersStandardEditorNavigationTypeDefinition;
-
         private IEnumerable<Lazy<EditorNavigationTypeDefinition, IEditorNavigationTypeDefinitionMetadata>> _editorNavigationTypeDefinitions;
 
         private readonly Dictionary<string, EditorNavigationType> _navigationTypes =
             new Dictionary<string, EditorNavigationType>();
-
-        public EditorNavigationTypeRegistryService()
-        {
-        }
 
         [ImportMany]
         private IEnumerable<Lazy<EditorNavigationTypeDefinition, IEditorNavigationTypeDefinitionMetadata>> EditorNavigationTypeDefinitions
@@ -40,26 +27,26 @@
                     return;
 
                 _editorNavigationTypeDefinitions = value;
-                List<IEditorNavigationTypeDefinitionMetadata> navigationTypes = _editorNavigationTypeDefinitions.Select(definition => definition.Metadata).ToList();
-                navigationTypes.RemoveAll(navigationType => _navigationTypes.ContainsKey(navigationType.Name));
+                var navigationTypes = _editorNavigationTypeDefinitions.ToList();
+                navigationTypes.RemoveAll(navigationType => _navigationTypes.ContainsKey(navigationType.Metadata.Name));
                 for (int i = navigationTypes.Count; i > 0; i--)
                 {
-                    int currentIndex = navigationTypes.FindIndex(navigationType => navigationType.BaseDefinition == null || navigationType.BaseDefinition.All(_navigationTypes.ContainsKey));
+                    int currentIndex = navigationTypes.FindIndex(navigationType => navigationType.Metadata.BaseDefinition == null || navigationType.Metadata.BaseDefinition.All(_navigationTypes.ContainsKey));
                     if (currentIndex < 0)
                         throw new InvalidOperationException("Circular editor navigation type definition.");
 
                     var current = navigationTypes[currentIndex];
-                    string currentName = current.Name;
-                    IEnumerable<string> currentBaseDefinitions = current.BaseDefinition ?? new string[0];
-                    this._navigationTypes.Add(current.Name, new EditorNavigationType(currentName, currentBaseDefinitions.Select(GetEditorNavigationType)));
+                    string currentName = current.Metadata.Name;
+                    IEnumerable<string> currentBaseDefinitions = current.Metadata.BaseDefinition ?? new string[0];
+                    this._navigationTypes.Add(current.Metadata.Name, new EditorNavigationType(current.Value, currentName, currentBaseDefinitions.Select(GetEditorNavigationType)));
                     navigationTypes.RemoveAt(currentIndex);
                 }
             }
         }
 
-        public IEditorNavigationType CreateEditorNavigationType(string type, IEnumerable<IEditorNavigationType> baseTypes)
+        public IEditorNavigationType CreateEditorNavigationType(EditorNavigationTypeDefinition definition, string type, IEnumerable<IEditorNavigationType> baseTypes)
         {
-            var navigationType = new EditorNavigationType(type, baseTypes);
+            var navigationType = new EditorNavigationType(definition, type, baseTypes);
             _navigationTypes.Add(type, navigationType);
             return navigationType;
         }
@@ -81,6 +68,28 @@
                 return null;
 
             return navigationType;
+        }
+
+        [Export(typeof(EditorNavigationTypeDefinition))]
+        [Name(PredefinedEditorNavigationTypes.Types)]
+        [Order(Before = PredefinedEditorNavigationTypes.Members)]
+        internal sealed class TypesStandardEditorNavigationTypeDefinition : EditorNavigationTypeDefinition
+        {
+            public TypesStandardEditorNavigationTypeDefinition()
+            {
+                this.DisplayName = "Types";
+            }
+        }
+
+        [Export(typeof(EditorNavigationTypeDefinition))]
+        [Name(PredefinedEditorNavigationTypes.Members)]
+        internal sealed class MembersStandardEditorNavigationTypeDefinition : EditorNavigationTypeDefinition
+        {
+            public MembersStandardEditorNavigationTypeDefinition()
+            {
+                this.DisplayName = "Members";
+                this.EnclosingTypes = new string[] { PredefinedEditorNavigationTypes.Types };
+            }
         }
     }
 }

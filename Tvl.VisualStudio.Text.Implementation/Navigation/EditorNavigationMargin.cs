@@ -13,6 +13,8 @@
     using System.Collections.Generic;
     using System.Windows.Input;
     using Tvl.Events;
+    using System.Threading;
+    using Microsoft.VisualStudio.Text;
 
     internal class EditorNavigationMargin : IWpfTextViewMargin
     {
@@ -63,10 +65,11 @@
                             Cursor = Cursors.Arrow,
                             ToolTip = new ToolTip()
                             {
-                                Content = pair.Item1.Type
+                                Content = pair.Item1.Definition.DisplayName
                             }
                         };
 
+                    comboBox.DropDownOpened += OnDropDownOpened;
                     comboBox.SelectionChanged += OnSelectionChanged;
                     return Tuple.Create(pair.Item1, comboBox);
                 });
@@ -80,6 +83,8 @@
             {
                 source.NavigationTargetsChanged += WeakEvents.AsWeak(OnNavigationTargetsChanged, eh => source.NavigationTargetsChanged -= eh);
             }
+
+            this._wpfTextView.Caret.PositionChanged += OnCaretPositionChanged;
         }
 
         public bool Disposed
@@ -191,23 +196,63 @@
                 combo.Items.Clear();
                 foreach (var item in group.OrderBy(i => i.Name, StringComparer.CurrentCultureIgnoreCase))
                     combo.Items.Add(item);
-
-                if (combo.Items.Count > 0)
-                    combo.SelectedIndex = 0;
-
-                combo.IsEnabled = combo.Items.Count > 0;
             }
 
-            foreach (var control in this._navigationControls)
-            {
-                control.Item2.IsEnabled = control.Item2.HasItems;
-            }
+            UpdateSelectedNavigationTargets();
         }
 
         private void OnNavigationTargetsChanged(object sender, EventArgs e)
         {
             IEditorNavigationSource source = (IEditorNavigationSource)sender;
             UpdateNavigationTargets(source);
+        }
+
+        private void UpdateSelectedNavigationTargets()
+        {
+            if (Thread.CurrentThread != _container.Dispatcher.Thread)
+            {
+                _container.Dispatcher.Invoke((Action)UpdateSelectedNavigationTargets);
+                return;
+            }
+
+            var currentPosition = _wpfTextView.Caret.Position.BufferPosition;
+
+            foreach (var control in this._navigationControls)
+            {
+                if (!control.Item2.HasItems)
+                    continue;
+
+                var oldSelectedItem = (IEditorNavigationTarget)control.Item2.SelectedItem;
+
+                var newSelectedItem =
+                    control.Item2.Items
+                    .Cast<IEditorNavigationTarget>()
+                    .OrderBy(item => item.Span.Start)
+                    .LastOrDefault(item => item.Span.TranslateTo(currentPosition.Snapshot, SpanTrackingMode.EdgeInclusive).Contains(currentPosition));
+
+                if (oldSelectedItem == null && newSelectedItem == null)
+                    newSelectedItem = (IEditorNavigationTarget)control.Item2.Items[0];
+
+                bool wasUpdating = Updating;
+                try
+                {
+                    Updating = true;
+                    control.Item2.SelectedItem = newSelectedItem;
+                }
+                finally
+                {
+                    Updating = wasUpdating;
+                }
+            }
+        }
+
+        private void OnCaretPositionChanged(object sender, CaretPositionChangedEventArgs e)
+        {
+            UpdateSelectedNavigationTargets();
+        }
+
+        private void OnDropDownOpened(object sender, EventArgs e)
+        {
         }
 
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)

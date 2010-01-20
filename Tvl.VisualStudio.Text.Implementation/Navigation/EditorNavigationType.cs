@@ -8,7 +8,7 @@
     {
         private static readonly IEditorNavigationType[] EmptyNavigationTypes = new IEditorNavigationType[0];
 
-        public EditorNavigationType(string type, IEnumerable<IEditorNavigationType> baseTypes)
+        public EditorNavigationType(EditorNavigationTypeDefinition definition, string type, IEnumerable<IEditorNavigationType> baseTypes)
         {
             if (type == null)
                 throw new ArgumentNullException();
@@ -21,6 +21,7 @@
 
             this.Type = type;
             this.BaseTypes = baseTypes.ToArray();
+            this.Definition = definition;
         }
 
         public IEnumerable<IEditorNavigationType> BaseTypes
@@ -30,6 +31,12 @@
         }
 
         public string Type
+        {
+            get;
+            private set;
+        }
+
+        public EditorNavigationTypeDefinition Definition
         {
             get;
             private set;
