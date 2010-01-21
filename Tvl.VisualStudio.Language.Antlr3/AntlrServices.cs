@@ -25,17 +25,6 @@
         private static readonly FileExtensionToContentTypeDefinition AntlrFileExtensionToContentTypeDefinition2;
 
         [Export]
-        [Name(AntlrEditorNavigationTypeNames.ParserRule)]
-        [Order(Before = AntlrEditorNavigationTypeNames.LexerRule)]
-        [DisplayName("Parser Rules")]
-        private static readonly EditorNavigationTypeDefinition ParserRuleNavigationType;
-
-        [Export]
-        [Name(AntlrEditorNavigationTypeNames.LexerRule)]
-        [DisplayName("Lexer Rules")]
-        private static readonly EditorNavigationTypeDefinition LexerRuleNavigationType;
-
-        [Export]
         [BaseDefinition(PredefinedClassificationTypeNames.Identifier)]
         [Name(AntlrClassificationTypeNames.ParserRule)]
         private static readonly ClassificationTypeDefinition ParserRuleClassificationType;
@@ -49,6 +38,27 @@
         [BaseDefinition(PredefinedClassificationTypeNames.Literal)]
         [Name(AntlrClassificationTypeNames.ActionLiteral)]
         private static readonly ClassificationTypeDefinition ActionLiteralClassificationType;
+
+        [Export(typeof(EditorNavigationTypeDefinition))]
+        [Name(AntlrEditorNavigationTypeNames.ParserRule)]
+        [Order(Before = AntlrEditorNavigationTypeNames.LexerRule)]
+        internal sealed class ParserRuleNavigationType : EditorNavigationTypeDefinition
+        {
+            public ParserRuleNavigationType()
+            {
+                this.DisplayName = "Parser Rules";
+            }
+        }
+
+        [Export(typeof(EditorNavigationTypeDefinition))]
+        [Name(AntlrEditorNavigationTypeNames.LexerRule)]
+        internal sealed class LexerRuleNavigationType : EditorNavigationTypeDefinition
+        {
+            public LexerRuleNavigationType()
+            {
+                this.DisplayName = "Parser Rules";
+            }
+        }
 
         [Export(typeof(EditorFormatDefinition))]
         [ClassificationType(ClassificationTypeNames = AntlrClassificationTypeNames.ParserRule)]
