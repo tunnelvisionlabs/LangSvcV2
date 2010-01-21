@@ -177,7 +177,7 @@
     <None Include="Navigation\ShimEditorNavigationSourceProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SquiggleQuickInfoControllerProvider.cs" />
-    <Compile Include="TagQuickInfoController`1.cs" />
+    <Compile Include="TextViewMappingService.cs" />
     <Compile Include="UrlQuickInfoControllerProvider.cs" />
   </ItemGroup>
   <ItemGroup>

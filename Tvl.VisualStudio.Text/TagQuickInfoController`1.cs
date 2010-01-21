@@ -1,4 +1,4 @@
-﻿namespace Tvl.VisualStudio.Text.Implementation
+﻿namespace Tvl.VisualStudio.Text
 {
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;

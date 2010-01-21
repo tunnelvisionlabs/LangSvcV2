@@ -7,6 +7,7 @@
 
     public partial class EditorNavigationComboBox : ComboBox
     {
+#if false
         static EditorNavigationComboBox()
         {
             if (Application.Current != null)
@@ -18,7 +19,7 @@
                 }
             }
 
-            //FrameworkElement.DefaultStyleKeyProperty.OverrideMetadata(typeof(EditorNavigationComboBox), new FrameworkPropertyMetadata(typeof(EditorNavigationComboBox)));
+            FrameworkElement.DefaultStyleKeyProperty.OverrideMetadata(typeof(EditorNavigationComboBox), new FrameworkPropertyMetadata(typeof(EditorNavigationComboBox)));
         }
 
         internal static T LoadResourceValue<T>(string xamlName)
@@ -27,6 +28,7 @@
             Uri resourceLocator = new Uri("/" + name + ";component/" + xamlName, UriKind.Relative);
             return (T)Application.LoadComponent(resourceLocator);
         }
+#endif
 
         public EditorNavigationComboBox()
         {
