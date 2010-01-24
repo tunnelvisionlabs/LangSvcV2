@@ -3,14 +3,14 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
+    using System.Threading;
+    using System.Windows.Media;
+    using System.Windows.Threading;
     using Antlr.Runtime.Tree;
+    using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Text.Navigation;
-    using Microsoft.VisualStudio.Language.Intellisense;
-    using System.Windows.Media;
-    using System.Threading;
-    using System.Windows.Threading;
 
     internal sealed class GoEditorNavigationSource : IEditorNavigationSource
     {
@@ -133,9 +133,48 @@
                             break;
 
                         case GoLexer.KW_CONST:
+                            foreach (CommonTree constSpec in child.Children)
+                            {
+                                CommonTree varSpec = (CommonTree)constSpec.Children[0];
+                                foreach (CommonTree constName in varSpec.Children)
+                                {
+                                    var name = constName.Token.Text;
+                                    if (string.IsNullOrWhiteSpace(name))
+                                        continue;
+
+                                    var navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Members);
+                                    var startToken = antlrParseResultArgs.Tokens[constName.TokenStartIndex];
+                                    var stopToken = antlrParseResultArgs.Tokens[constName.TokenStopIndex];
+                                    Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
+                                    SnapshotSpan ruleSpan = new SnapshotSpan(e.Snapshot, span);
+                                    SnapshotSpan ruleSeek = new SnapshotSpan(e.Snapshot, new Span(constName.Token.StartIndex, 0));
+                                    var glyph = GetGlyph(StandardGlyphGroup.GlyphGroupConstant, char.IsUpper(name[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate);
+                                    navigationTargets.Add(new EditorNavigationTarget(name, navigationType, ruleSpan, ruleSeek, glyph));
+                                }
+                            }
                             break;
 
                         case GoLexer.KW_FUNC:
+                            {
+                                // the first child is either a receiver (method) or an identifier with the name of the function
+                                var token = ((CommonTree)child.Children[0]).Token;
+                                if (token.Type == GoLexer.LPAREN)
+                                    token = ((CommonTree)child.Children[1]).Token;
+
+                                var functionName = token.Text;
+                                if (string.IsNullOrWhiteSpace(functionName))
+                                    continue;
+
+                                var navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Members);
+                                var startToken = antlrParseResultArgs.Tokens[child.TokenStartIndex];
+                                var stopToken = antlrParseResultArgs.Tokens[child.TokenStopIndex];
+                                Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
+                                SnapshotSpan ruleSpan = new SnapshotSpan(e.Snapshot, span);
+                                SnapshotSpan ruleSeek = new SnapshotSpan(e.Snapshot, new Span(child.Token.StartIndex, 0));
+                                var glyph = GetGlyph(StandardGlyphGroup.GlyphGroupMethod, char.IsUpper(functionName[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate);
+                                navigationTargets.Add(new EditorNavigationTarget(functionName, navigationType, ruleSpan, ruleSeek, glyph));
+                            }
+
                             break;
 
                         default:
