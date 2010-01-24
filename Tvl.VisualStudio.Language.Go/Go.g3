@@ -5,7 +5,7 @@ options
 	language=CSharp3;
 	output=AST;
 	ASTLabelType=CommonTree;
-	backtrack=true;
+	//backtrack=true;
 }
 
 tokens
@@ -89,6 +89,10 @@ tokens
 
 	AST_VARS;
 	AST_VALUES;
+	AST_SENDCHAN;
+	AST_RECVCHAN;
+	AST_CONST;
+	AST_TYPE;
 }
 
 @lexer::namespace{Tvl.VisualStudio.Language.Go}
@@ -122,7 +126,7 @@ typeLit
 // Array types
 
 arrayType
-	:	'['^ arrayLength ']' elementType
+	:	'['^ arrayLength ']'! elementType
 	;
 
 arrayLength
@@ -182,10 +186,11 @@ functionType
 	;
 
 signature
-	:	parameters result?
+	:	parameters ((result) => result)?
 	;
 
 result
+options{backtrack=true;}
 	:	parameters
 	|	type
 	;
@@ -199,18 +204,21 @@ parameterList
 	;
 
 parameterDecl
-	:	identifierList (type|'...')?
+	:	(IDENTIFIER) =>
+		// using IDENTIFIER instead of identifierList because parameterDecl is only used by the parameterList rule, which is itself comma separated
+		IDENTIFIER (type|'...')?
 	|	(type|'...')
 	;
 
 // Interface types
 
 interfaceType
-	:	'interface'^
+	:	'interface'
 		'{'
 		(	'}'
 		|	methodSpec (';' methodSpec)* ';'? '}'
 		)
+		-> ^('interface' methodSpec*)
 	;
 
 methodSpec
@@ -229,7 +237,7 @@ interfaceTypeName
 // Map types
 
 mapType
-	:	'map'^ '[' keyType ']' elementType
+	:	'map'^ '['! keyType ']'! elementType
 	;
 
 keyType
@@ -239,9 +247,9 @@ keyType
 // Channel types
 
 channelType
-	:	channel
-	|	sendChannel
-	|	recvChannel
+	:	('<-' 'chan') => recvChannel
+	|	('chan' '<-') => sendChannel
+	|	channel
 	;
 
 channel
@@ -249,11 +257,13 @@ channel
 	;
 
 sendChannel
-	:	'chan'^ '<-' elementType
+	:	chan='chan' '<-' elementType
+		-> ^(AST_SENDCHAN[$chan] elementType)
 	;
 
 recvChannel
-	:	'<-' 'chan'^ elementType
+	:	'<-' chan='chan' elementType
+		-> ^(AST_RECVCHAN[$chan] elementType)
 	;
 
 /*
@@ -262,10 +272,8 @@ recvChannel
 
 block
 	:	'{'^
-		(	'}'!
-		|	// due to the emptyStmt, there is no need to add ';'? before the '}'
-			statement (';'! statement)* '}'!
-		)
+		statement (';'! statement)*
+		'}'!
 	;
 
 /*
@@ -297,6 +305,7 @@ constDecl
 constSpec
 	:	identifierList
 		(type? '=' expressionList)?
+		-> ^(AST_CONST ^(AST_VARS identifierList?) ^(AST_TYPE type?) ^(AST_VALUES expressionList?))
 	;
 
 identifierList
@@ -362,7 +371,7 @@ methodDecl
 	;
 
 receiver
-	:	'(' IDENTIFIER? '*'? baseTypeName ')'
+	:	'('^ IDENTIFIER? '*'? baseTypeName ')'
 	;
 
 baseTypeName
@@ -376,6 +385,7 @@ baseTypeName
 // Operands
 
 operand
+options {backtrack=true;}
 	:	literal
 	|	qualifiedIdent
 	|	methodExpr
@@ -397,7 +407,8 @@ basicLit
 // Qualified identifiers
 
 qualifiedIdent
-	:	(packageName '.'^)? IDENTIFIER
+	:	IDENTIFIER (('.' IDENTIFIER) => '.'^ IDENTIFIER)?
+		// if the '.' is present, the first identifier is the package name
 	;
 
 // Composite literals
@@ -421,12 +432,12 @@ elementList
 	;
 
 element
-	:	(key ':')? value
+	:	((key ':') => key ':')? value
 	;
 
 key
-	:	fieldName
-	|	elementIndex
+	:	// fieldName |
+		elementIndex
 	;
 
 fieldName
@@ -454,7 +465,8 @@ primaryExpr
 		//|	conversion
 		//|	builtinCall
 		)
-		(	selector
+		(	options {backtrack=true;}
+		:	selector
 		|	index
 		|	slice
 		|	typeAssertion
@@ -490,8 +502,21 @@ call
 // Passing arguments to ... parameters
 // Operators
 
+//expressionTest
+//	:	expressionTest ',' expressionTest
+//	|	expressionTest '||' expressionTest
+//	|	expressionTest '&&' expressionTest
+//	|	expressionTest '<-' expressionTest
+//	|	expressionTest ('==' | '!=' | '<' | '<=' | '>' | '>=') expressionTest
+//	|	expressionTest ('+' | '-' | '|' | '^') expressionTest
+//	|	expressionTest ('*' | '/' | '%' | '<<' | '>>' | '&' | '&^') expressionTest
+//	|	'(' expressionTest ')'
+//	|	expressionTest '(' expressionTest ')'
+//	|	expressionTest '[' expressionTest ']'
+//	;
+
 expression
-	:	unaryExpr (binaryOp^ unaryExpr)*
+	:	unaryExpr ((binaryOp unaryExpr) => binaryOp^ unaryExpr)*
 	;
 
 unaryExpr
@@ -581,12 +606,35 @@ statement
 	;
 
 simpleStmt
-	:	shortVarDecl
-	|	assignment
-	|	incDecStmt
-	|	expressionStmt
+	:	lhs=expression
+		(	(',' lhs2=expressionList)?
+			(	//shortVarDecl
+				':=' rhs=expressionList
+				-> ^(':=' ^(AST_VARS $lhs $lhs2?) ^(AST_VALUES $rhs))
+			|	// assignment
+				assignOp rhs=expressionList
+				-> ^(assignOp ^(AST_VARS $lhs $lhs2?) ^(AST_VALUES $rhs))
+			)
+		|	// incDecStmt
+			(	'++'
+				-> ^('++' $lhs)
+			|	'--'
+				-> ^('--' $lhs)
+			)
+		|	//expression statement
+			-> $lhs
+		)
 	|	emptyStmt
 	;
+
+//simpleStmt
+//options{backtrack=true;}
+//	:	shortVarDecl
+//	|	assignment
+//	|	incDecStmt
+//	|	expressionStmt
+//	|	emptyStmt
+//	;
 
 // Empty statements
 
@@ -631,18 +679,19 @@ assignOp
 // If statements
 
 ifStmt
-	:	'if'^ (simpleStmt ';')? expression? block ('else' statement)?
+	:	'if'^ ((simpleStmt ';') => simpleStmt ';')? expression? block ('else' statement)?
 	;
 
 // Switch statements
 
 switchStmt
+options {backtrack=true;}
 	:	exprSwitchStmt
 	|	typeSwitchStmt
 	;
 
 exprSwitchStmt
-	:	'switch'^ (simpleStmt ';')? expression? '{' exprCaseClause* '}'
+	:	'switch'^ ((simpleStmt ';') => simpleStmt ';')? expression? '{' exprCaseClause* '}'
 	;
 
 exprCaseClause
@@ -655,7 +704,7 @@ exprSwitchCase
 	;
 
 typeSwitchStmt
-	:	'switch'^ (simpleStmt ';')? typeSwitchGuard '{' typeCaseClause '}'
+	:	'switch'^ ((simpleStmt ';') => simpleStmt ';')? typeSwitchGuard '{' typeCaseClause '}'
 	;
 
 typeSwitchGuard
@@ -679,7 +728,8 @@ typeList
 
 forStmt
 	:	'for'^
-		(	rangeClause
+		(	options{backtrack=true;}
+		:	rangeClause
 		|	forClause
 		|	condition
 		)?
@@ -691,7 +741,8 @@ condition
 	;
 
 forClause
-	:	initStmt? ';' condition? ';' postStmt?
+	:	// initStmt and postStmt are not optional because one of the simpleStmt is the emptyStmt
+		initStmt ';' condition? ';' postStmt
 	;
 
 initStmt
@@ -723,17 +774,26 @@ commClause
 	;
 
 commCase
-	:	'case'^ (sendExpr | recvExpr)
+	:	'case'^
+		(	(~'<-') => expression
+			(	// recvExpr
+				('=' | ':=') '<-' expression
+			|	// sendExpr
+				'<-' expression
+			)
+		|	// recvExpr
+			'<-' expression
+		)
 	|	'default'
 	;
 
-sendExpr
-	:	expression '<-' expression
-	;
+//sendExpr
+//	:	expression '<-' expression
+//	;
 
-recvExpr
-	:	(expression ('=' | ':='))? '<-' expression
-	;
+//recvExpr
+//	:	(expression ('=' | ':='))? '<-' expression
+//	;
 
 // Return statements
 
