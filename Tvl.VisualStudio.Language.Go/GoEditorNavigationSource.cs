@@ -92,16 +92,16 @@
             List<IEditorNavigationTarget> navigationTargets = new List<IEditorNavigationTarget>();
             if (antlrParseResultArgs != null)
             {
-                // add the Global Scope type
-                {
-                    var name = "Global Scope";
-                    var navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Types);
-                    var span = new SnapshotSpan(e.Snapshot, new Span(0, e.Snapshot.Length));
-                    var seek = new SnapshotSpan(e.Snapshot, new Span(0, 0));
-                    var glyph = GetGlyph(StandardGlyphGroup.GlyphGroupNamespace, StandardGlyphItem.GlyphItemPublic);
-                    var target = new EditorNavigationTarget(name, navigationType, span, seek, glyph);
-                    navigationTargets.Add(target);
-                }
+                //// add the Global Scope type
+                //{
+                //    var name = "Global Scope";
+                //    var navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Types);
+                //    var span = new SnapshotSpan(e.Snapshot, new Span(0, e.Snapshot.Length));
+                //    var seek = new SnapshotSpan(e.Snapshot, new Span(0, 0));
+                //    var glyph = GetGlyph(StandardGlyphGroup.GlyphGroupNamespace, StandardGlyphItem.GlyphItemPublic);
+                //    var target = new EditorNavigationTarget(name, navigationType, span, seek, glyph);
+                //    navigationTargets.Add(target);
+                //}
 
                 var result = antlrParseResultArgs.Result.Tree as CommonTree;
                 if (result != null)
@@ -113,6 +113,25 @@
 
                         switch (child.Type)
                         {
+                        case GoLexer.KW_PACKAGE:
+                            {
+                                var packageName = ((CommonTree)child.Children[0]).Token.Text;
+                                if (string.IsNullOrWhiteSpace(packageName))
+                                    continue;
+
+                                var navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Types);
+                                var startToken = antlrParseResultArgs.Tokens[child.TokenStartIndex];
+                                var stopToken = antlrParseResultArgs.Tokens[child.TokenStopIndex];
+                                //Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
+                                //SnapshotSpan ruleSpan = new SnapshotSpan(e.Snapshot, span);
+                                // applies to the whole file
+                                var span = new SnapshotSpan(e.Snapshot, new Span(0, e.Snapshot.Length));
+                                SnapshotSpan ruleSeek = new SnapshotSpan(e.Snapshot, new Span(((CommonTree)child.Children[0]).Token.StartIndex, 0));
+                                var glyph = GetGlyph(StandardGlyphGroup.GlyphGroupModule, StandardGlyphItem.GlyphItemPublic);
+                                navigationTargets.Add(new EditorNavigationTarget(packageName, navigationType, span, ruleSeek, glyph));
+                            }
+                            break;
+
                         case GoLexer.KW_TYPE:
                             // each child tree is a typeSpec, the root of which is an identifier that names the type
                             foreach (CommonTree typeSpec in child.Children)
@@ -133,22 +152,25 @@
                             break;
 
                         case GoLexer.KW_CONST:
-                            foreach (CommonTree constSpec in child.Children)
+                        case GoLexer.KW_VAR:
+                            foreach (CommonTree spec in child.Children)
                             {
-                                CommonTree varSpec = (CommonTree)constSpec.Children[0];
-                                foreach (CommonTree constName in varSpec.Children)
+                                CommonTree decl = (CommonTree)spec.Children[0];
+                                foreach (CommonTree nameToken in decl.Children)
                                 {
-                                    var name = constName.Token.Text;
+                                    var name = nameToken.Token.Text;
                                     if (string.IsNullOrWhiteSpace(name))
                                         continue;
 
                                     var navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Members);
-                                    var startToken = antlrParseResultArgs.Tokens[constName.TokenStartIndex];
-                                    var stopToken = antlrParseResultArgs.Tokens[constName.TokenStopIndex];
+                                    var startToken = antlrParseResultArgs.Tokens[nameToken.TokenStartIndex];
+                                    var stopToken = antlrParseResultArgs.Tokens[nameToken.TokenStopIndex];
                                     Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
                                     SnapshotSpan ruleSpan = new SnapshotSpan(e.Snapshot, span);
-                                    SnapshotSpan ruleSeek = new SnapshotSpan(e.Snapshot, new Span(constName.Token.StartIndex, 0));
-                                    var glyph = GetGlyph(StandardGlyphGroup.GlyphGroupConstant, char.IsUpper(name[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate);
+                                    SnapshotSpan ruleSeek = new SnapshotSpan(e.Snapshot, new Span(nameToken.Token.StartIndex, 0));
+                                    var group = (child.Type == GoLexer.KW_CONST) ? StandardGlyphGroup.GlyphGroupConstant : StandardGlyphGroup.GlyphGroupVariable;
+                                    var item = char.IsUpper(name[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate;
+                                    var glyph = GetGlyph(group, item);
                                     navigationTargets.Add(new EditorNavigationTarget(name, navigationType, ruleSpan, ruleSeek, glyph));
                                 }
                             }

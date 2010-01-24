@@ -87,6 +87,7 @@ tokens
 	ELLIP		='...';
 	CHAN		='<-';
 
+	AST_VAR;
 	AST_VARS;
 	AST_VALUES;
 	AST_SENDCHAN;
@@ -341,10 +342,11 @@ varDecl
 	;
 
 varSpec
-	:	identifierList
-		(	type ('=' expressionList)?
-		|	'=' expressionList
+	:	vars=identifierList
+		(	type ('=' values=expressionList)?
+		|	'=' values=expressionList
 		)
+		-> ^(AST_VAR ^(AST_VARS $vars) ^(AST_TYPE type?) ^(AST_VALUES $values?))
 	;
 
 // Short variable declarations
