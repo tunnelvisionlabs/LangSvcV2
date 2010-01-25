@@ -6,6 +6,9 @@
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow;
+    using Microsoft.VisualStudio.Shell.Interop;
+    using Microsoft.VisualStudio.TextManager.Interop;
+    using Microsoft.VisualStudio.Text.Editor;
 
     public class GoBackgroundParser : BackgroundParser
     {
@@ -38,6 +41,15 @@
                         errors.Add(e);
 
                         string message = e.Message;
+
+                        ITextDocument document;
+                        if (TextBuffer.Properties.TryGetProperty(typeof(ITextDocument), out document) && document != null)
+                        {
+                            string fileName = document.FilePath;
+                            var line = snapshot.GetLineFromPosition(e.Span.Start);
+                            message = string.Format("{0}({1},{2}): {3}", fileName, line.LineNumber + 1, e.Span.Start - line.Start.Position + 1, message);
+                        }
+
                         if (message.Length > 100)
                             message = message.Substring(0, 100) + " ...";
 

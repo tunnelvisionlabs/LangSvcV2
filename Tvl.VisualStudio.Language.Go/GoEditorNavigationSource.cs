@@ -104,7 +104,7 @@
                 //}
 
                 var result = antlrParseResultArgs.Result.Tree as CommonTree;
-                if (result != null)
+                if (result != null && result.Children != null)
                 {
                     foreach (CommonTree child in result.Children)
                     {
