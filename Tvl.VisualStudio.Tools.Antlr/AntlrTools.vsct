@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable">
+  <Extern href="vsshlids.h"/>
+
+  <Commands package="guidAntlrToolsPackage">
+    <Buttons>
+      <Button guid="guidAntlrToolsPackageCmdSet" id="cmdidShowAstExplorer" priority="0x100" type="Button">
+        <!--<Icon guid="guidShowAstExplorerCmdBmp" id="bmpShowAstExplorer"/>-->
+        <Strings>
+          <ButtonText>AST Explorer</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+
+    <!--<Bitmaps>
+      <Bitmap guid="guidShowAstExplorerCmdBmp" href="Resources\AstExplorer.png" usedList="bmpShowAstExplorer"/>
+    </Bitmaps>-->
+  </Commands>
+
+  <CommandPlacements>
+    <CommandPlacement guid="guidAntlrToolsPackageCmdSet" id="cmdidShowAstExplorer" priority="0x100">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
+    </CommandPlacement>
+  </CommandPlacements>
+
+  <Symbols>
+    <GuidSymbol name="guidAntlrToolsPackage" value="{81989F3D-7E1B-4A12-B307-1E8D000573AE}" />
+
+    <GuidSymbol name="guidAntlrToolsPackageCmdSet" value="{5CF1B786-8E82-4316-9EAB-6C35306F611E}">
+      <IDSymbol name="cmdidShowAstExplorer" value="0x2001" />
+    </GuidSymbol>
+
+    <!--<GuidSymbol name="guidShowAstExplorerCmdBmp" value="{00000000-0000-0000-0000-000000000000}">
+      <IDSymbol name="bmpShowAstExplorer" value="1" />
+    </GuidSymbol>-->
+  </Symbols>
+</CommandTable>

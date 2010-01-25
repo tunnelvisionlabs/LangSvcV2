@@ -156,15 +156,12 @@
   <ItemGroup>
     <Compile Include="ActiveViewTrackerService.cs" />
     <Compile Include="Commands\ProvidedCommandsTest.cs" />
-    <Compile Include="IToolWindowMetadata.cs" />
     <Compile Include="MonitorSelectionService.cs" />
     <Compile Include="OpenedViewTrackerService.cs" />
     <Compile Include="OutputWindow\IOutputWindowDefinitionMetadata.cs" />
     <Compile Include="OutputWindow\OutputWindowService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OutputWindow\VsOutputWindowPaneAdapter.cs" />
-    <Compile Include="ToolWindowAdapter.cs" />
-    <Compile Include="ToolWindowService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj">

@@ -1,60 +1,101 @@
 ﻿namespace Tvl.VisualStudio.Tools.AstExplorer
 {
+    using System;
+    using System.Collections.Generic;
     using System.Windows;
     using System.Windows.Controls;
     using Antlr.Runtime;
     using Antlr.Runtime.Tree;
+    using Microsoft.VisualStudio.ComponentModelHost;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.Events;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell;
+    using Tvl.VisualStudio.Shell.Extensions;
     using Tvl.VisualStudio.Text.Tagging;
-    using System;
-    using System.Collections.Generic;
 
     internal class AstExplorerControl : ContentControl
     {
-        private readonly AstExplorerProvider _provider;
-        private readonly IActiveViewTrackerService _activeViewTrackerService;
-        private readonly IBackgroundParserFactoryService _backgroundParserFactoryService;
-        private IBackgroundParser _backgroundParser;
-        private SimpleTagger<TextMarkerTag> _tagger;
-
-        private ITextSnapshot _snapshot;
-        private IList<IToken> _tokens;
-        private AstExplorerTreeControl _tree;
-
-        public AstExplorerControl(AstExplorerProvider provider)
+        public AstExplorerControl(IServiceProvider serviceProvider)
         {
-            this._provider = provider;
-            this._activeViewTrackerService = provider.ActiveViewTrackerService;
-            this._backgroundParserFactoryService = provider.BackgroundParserFactoryService;
+            IComponentModel componentModel = (IComponentModel)serviceProvider.GetService<SComponentModel>();
+            this.ActiveViewTrackerService = componentModel.GetService<IActiveViewTrackerService>();
+            this.BackgroundParserFactoryService = componentModel.GetService<IBackgroundParserFactoryService>();
+            this.AstReferenceTaggerProvider = componentModel.GetService<IAstReferenceTaggerProvider>();
 
-            this._tree = new AstExplorerTreeControl();
-            this.Content = this._tree;
+            this.Tree = new AstExplorerTreeControl();
+            this.Content = this.Tree;
 
-            this._activeViewTrackerService.ViewChanged += WeakEvents.AsWeak<ViewChangedEventArgs>(OnViewChanged, eh => this._activeViewTrackerService.ViewChanged -= eh);
-            this._tree.SelectedItemChanged += OnTreeViewSelectedItemChanged;
+            this.ActiveViewTrackerService.ViewChanged += WeakEvents.AsWeak<ViewChangedEventArgs>(OnViewChanged, eh => this.ActiveViewTrackerService.ViewChanged -= eh);
+            this.Tree.SelectedItemChanged += OnTreeViewSelectedItemChanged;
         }
 
-        void OnTreeViewSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private IActiveViewTrackerService ActiveViewTrackerService
+        {
+            get;
+            set;
+        }
+
+        private IBackgroundParserFactoryService BackgroundParserFactoryService
+        {
+            get;
+            set;
+        }
+
+        private IAstReferenceTaggerProvider AstReferenceTaggerProvider
+        {
+            get;
+            set;
+        }
+
+        private IBackgroundParser BackgroundParser
+        {
+            get;
+            set;
+        }
+
+        private SimpleTagger<TextMarkerTag> Tagger
+        {
+            get;
+            set;
+        }
+
+        private ITextSnapshot Snapshot
+        {
+            get;
+            set;
+        }
+
+        private IList<IToken> Tokens
+        {
+            get;
+            set;
+        }
+
+        private AstExplorerTreeControl Tree
+        {
+            get;
+            set;
+        }
+
+        private void OnTreeViewSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             try
             {
-                if (_tagger == null)
+                if (Tagger == null)
                     return;
 
-                using (_tagger.Update())
+                using (Tagger.Update())
                 {
-                    _tagger.RemoveTagSpans(tagSpan => true);
+                    Tagger.RemoveTagSpans(tagSpan => true);
 
-                    if (_snapshot == null)
+                    if (Snapshot == null)
                         return;
 
                     CommonTree selected = e.NewValue as CommonTree;
 
-                    IList<IToken> tokens = _tokens;
+                    IList<IToken> tokens = Tokens;
                     if (tokens != null && selected != null)
                     {
                         if (selected.TokenStartIndex >= 0 && selected.TokenStopIndex >= 0)
@@ -62,8 +103,8 @@
                             IToken startToken = tokens[selected.TokenStartIndex];
                             IToken stopToken = tokens[selected.TokenStopIndex];
                             Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
-                            ITrackingSpan trackingSpan = _snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
-                            _tagger.CreateTagSpan(trackingSpan, PredefinedTextMarkerTags.Vivid);
+                            ITrackingSpan trackingSpan = Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
+                            Tagger.CreateTagSpan(trackingSpan, PredefinedTextMarkerTags.Vivid);
                         }
                     }
                     else if (selected != null && selected.Token != null)
@@ -72,8 +113,8 @@
                         {
                             IToken token = selected.Token;
                             Span span = new Span(token.StartIndex, token.StopIndex - token.StartIndex + 1);
-                            ITrackingSpan trackingSpan = _snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
-                            _tagger.CreateTagSpan(trackingSpan, PredefinedTextMarkerTags.Vivid);
+                            ITrackingSpan trackingSpan = Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
+                            Tagger.CreateTagSpan(trackingSpan, PredefinedTextMarkerTags.Vivid);
                         }
                     }
                 }
@@ -85,18 +126,18 @@
 
         private void OnViewChanged(object sender, ViewChangedEventArgs e)
         {
-            _backgroundParser = null;
-            _tagger = null;
-            _tokens = null;
-            _snapshot = null;
+            BackgroundParser = null;
+            Tagger = null;
+            Tokens = null;
+            Snapshot = null;
 
             if (e.NewView != null)
             {
-                var backgroundParser = _backgroundParserFactoryService.GetBackgroundParser(e.NewView.TextBuffer);
-                _backgroundParser = backgroundParser;
+                var backgroundParser = BackgroundParserFactoryService.GetBackgroundParser(e.NewView.TextBuffer);
+                BackgroundParser = backgroundParser;
                 if (backgroundParser != null)
                 {
-                    _tagger = _provider.AstReferenceTaggerProvider.GetAstReferenceTagger(e.NewView.TextBuffer);
+                    Tagger = AstReferenceTaggerProvider.GetAstReferenceTagger(e.NewView.TextBuffer);
                     backgroundParser.ParseComplete += WeakEvents.AsWeak<ParseResultEventArgs>(OnParseComplete, eh => backgroundParser.ParseComplete -= eh);
                 }
             }
@@ -104,20 +145,20 @@
 
         private void OnParseComplete(object sender, ParseResultEventArgs e)
         {
-            if (!object.ReferenceEquals(sender, _backgroundParser))
+            if (!object.ReferenceEquals(sender, BackgroundParser))
                 return;
 
             var result = ((AntlrParseResultEventArgs)e).Result;
-            this._snapshot = e.Snapshot;
-            this._tokens = ((AntlrParseResultEventArgs)e).Tokens;
+            this.Snapshot = e.Snapshot;
+            this.Tokens = ((AntlrParseResultEventArgs)e).Tokens;
 
-            _tree.Dispatcher.Invoke(
+            Tree.Dispatcher.Invoke(
                 (Action)(() =>
                 {
                     try
                     {
-                        this._tree.Items.Clear();
-                        this._tree.Items.Add(result.Tree);
+                        this.Tree.Items.Clear();
+                        this.Tree.Items.Add(result.Tree);
                     }
                     catch
                     {

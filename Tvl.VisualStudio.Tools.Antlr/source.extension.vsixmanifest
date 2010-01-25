@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Vsix Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
-  <Identifier Id="Tvl.VisualStudio.Tools.Antlr.Microsoft.ce1a846f-ab0b-429c-b80c-52a732b03fdb">
-    <Name>Tvl.VisualStudio.Tools.Antlr</Name>
+  <Identifier Id="Tvl.VisualStudio.Tools.Antlr.ce1a846f-ab0b-429c-b80c-52a732b03fdb">
+    <Name>ANTLR Tools for Visual Studio</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0</Version>
-    <Description>Empty VSIX Project.</Description>
+    <Version>1.0.0</Version>
+    <Description>Currently provides the AST Explorer.</Description>
     <Locale>1033</Locale>
     <Icon>VSIXProject_small.png</Icon>
     <PreviewImage>VSIXProject_large.png</PreviewImage>
@@ -25,6 +25,7 @@
   </References>
 
   <Content>
+    <VsPackage>|Tvl.VisualStudio.Tools.Antlr|</VsPackage>
     <MefComponent>|Tvl.VisualStudio.Tools.Antlr|</MefComponent>
   </Content>
 

@@ -144,7 +144,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandDefinition.cs" />
     <Compile Include="CommandFilter.cs" />
     <Compile Include="CommandOptions.cs" />
     <Compile Include="CommandStatus.cs" />
@@ -159,18 +158,14 @@
     <Compile Include="IActiveViewTrackerService.cs" />
     <Compile Include="IMonitorSelectionService.cs" />
     <Compile Include="IOpenedViewTrackerService.cs" />
-    <Compile Include="IToolWindow.cs" />
-    <Compile Include="IToolWindowProvider.cs" />
-    <Compile Include="IToolWindowService.cs" />
     <Compile Include="OutputWindow\IOutputWindowPane.cs" />
     <Compile Include="OutputWindow\IOutputWindowService.cs" />
     <Compile Include="OutputWindow\IOutputWindowServiceContracts.cs" />
     <Compile Include="OutputWindow\OutputWindowDefinition.cs" />
     <Compile Include="OutputWindow\IOutputWindowPaneContracts.cs" />
     <Compile Include="OutputWindow\PredefinedOutputWindowPanes.cs" />
-    <Compile Include="PredefinedWindowMenus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <None Include="ToolWindow`1.cs" />
+    <Compile Include="WpfToolWindowPane.cs" />
     <Compile Include="ViewChangedEventArgs.cs" />
   </ItemGroup>
   <ItemGroup />
