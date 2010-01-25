@@ -1,16 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Vsix Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
-  <Identifier Id="Tvl.VisualStudio.Language.Go.Microsoft.c837d3e9-5ae2-4455-a608-f6a4ae016688">
-    <Name>Tvl.VisualStudio.Language.Go</Name>
-    <Author>Microsoft</Author>
-    <Version>1.0</Version>
-    <Description>Empty VSIX Project.</Description>
+  <Identifier Id="Tvl.VisualStudio.Language.Go.c837d3e9-5ae2-4455-a608-f6a4ae016688">
+    <Name>Go Language</Name>
+    <Author>Sam Harwell</Author>
+    <Version>1.0.0</Version>
+    <Description>Simple support for the Go programming language.</Description>
     <Locale>1033</Locale>
     <Icon>VSIXProject_small.png</Icon>
     <PreviewImage>VSIXProject_large.png</PreviewImage>
     <SupportedProducts>
       <VisualStudio Version="10.0">
+        <Edition>VSTS</Edition>
+        <Edition>VSTD</Edition>
         <Edition>Pro</Edition>
+        <Edition>IntegratedShell</Edition>
       </VisualStudio>
     </SupportedProducts>
     <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
