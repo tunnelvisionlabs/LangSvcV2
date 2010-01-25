@@ -98,6 +98,7 @@
                 return _standardClassificationService.CharacterLiteral;
 
             case GoColorizerLexer.STRING_LITERAL:
+            case GoColorizerLexer.RAW_STRING_LITERAL:
                 return _standardClassificationService.StringLiteral;
 
             case GoColorizerLexer.NUMBER:

@@ -101,6 +101,10 @@ STRING_LITERAL
 		'"'
 	;
 
+RAW_STRING_LITERAL
+	:	'`' .* '`'
+	;
+
 WS
 	:	(' ' | '\t')+
 		{Skip();}

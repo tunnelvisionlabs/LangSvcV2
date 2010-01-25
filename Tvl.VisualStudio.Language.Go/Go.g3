@@ -109,6 +109,11 @@ type
 	|	'(' type ')'
 	;
 
+typeNoParens
+	:	typeName
+	|	typeLit
+	;
+
 typeName
 	:	qualifiedIdent
 	;
@@ -187,14 +192,17 @@ functionType
 	;
 
 signature
-	:	parameters ((result) => result)?
+	//:	parameters ((result) => result)?
+	:	parameters
+		(	('(') => parameters
+		|	typeNoParens?
+		)
 	;
 
-result
-options{backtrack=true;}
-	:	parameters
-	|	type
-	;
+//result
+//	:	parameters
+//	|	typeNoParens
+//	;
 
 parameters
 	:	'('^ (parameterList ','?)? ')'
@@ -205,7 +213,7 @@ parameterList
 	;
 
 parameterDecl
-	:	(IDENTIFIER) =>
+	:	(IDENTIFIER ~'.') =>
 		// using IDENTIFIER instead of identifierList because parameterDecl is only used by the parameterList rule, which is itself comma separated
 		IDENTIFIER (type|'...')?
 	|	(type|'...')
@@ -389,8 +397,8 @@ baseTypeName
 operand
 options {backtrack=true;}
 	:	literal
-	|	qualifiedIdent
 	|	methodExpr
+	|	qualifiedIdent
 	|	'(' expression ')'
 	;
 
@@ -467,10 +475,10 @@ primaryExpr
 		//|	conversion
 		//|	builtinCall
 		)
-		(	options {backtrack=true;}
-		:	selector
-		|	index
-		|	slice
+		(	selector
+		|	indexOrSlice
+		//|	index
+		//|	slice
 		|	typeAssertion
 		|	call
 		)*
@@ -480,20 +488,35 @@ selector
 	:	'.'^ IDENTIFIER
 	;
 
-index
-	:	'['^ expression ']'
+indexOrSlice
+	:	'['^
+		expression
+		(	// slice
+			':' expression?
+		|	// index
+		)
+		']'
 	;
 
-slice
-	:	'['^ expression ':' expression? ']'
-	;
+//index
+//	:	'['^ expression ']'
+//	;
+
+//slice
+//	:	'['^ expression ':' expression? ']'
+//	;
 
 typeAssertion
 	:	'.'^ '(' type ')'
 	;
 
 call
-	:	'('^ (expressionList ','?)? ')'
+	:	'('^
+		(	options {backtrack=true;}
+		:	expressionList ','?
+		|	type (',' expressionList)? ','?
+		)?
+		')'
 	;
 
 // Selectors
@@ -522,8 +545,8 @@ expression
 	;
 
 unaryExpr
-	:	primaryExpr
-	|	unaryOp^ unaryExpr
+	:	unaryOp^ unaryExpr
+	|	primaryExpr
 	;
 
 binaryOp
@@ -706,7 +729,7 @@ exprSwitchCase
 	;
 
 typeSwitchStmt
-	:	'switch'^ ((simpleStmt ';') => simpleStmt ';')? typeSwitchGuard '{' typeCaseClause '}'
+	:	'switch'^ ((simpleStmt ';') => simpleStmt ';')? typeSwitchGuard '{' typeCaseClause* '}'
 	;
 
 typeSwitchGuard
@@ -922,11 +945,22 @@ CHAR_LITERAL
 	;
 
 STRING_LITERAL
+	:	INTERP_STRING_LITERAL
+	|	RAW_STRING_LITERAL
+	;
+
+fragment
+INTERP_STRING_LITERAL
 	:	'"'
 		(	'\\' .
 		|	~('\r' | '\n' | '"' | '\\')
 		)*
 		'"'
+	;
+
+fragment
+RAW_STRING_LITERAL
+	:	'`' .* '`'
 	;
 
 WS
