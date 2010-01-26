@@ -148,9 +148,13 @@
             if (!object.ReferenceEquals(sender, BackgroundParser))
                 return;
 
-            var result = ((AntlrParseResultEventArgs)e).Result;
+            AntlrParseResultEventArgs antlrArgs = e as AntlrParseResultEventArgs;
+            if (antlrArgs == null)
+                return;
+
+            var result = antlrArgs.Result;
             this.Snapshot = e.Snapshot;
-            this.Tokens = ((AntlrParseResultEventArgs)e).Tokens;
+            this.Tokens = antlrArgs.Tokens;
 
             Tree.Dispatcher.Invoke(
                 (Action)(() =>
