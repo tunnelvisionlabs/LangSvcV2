@@ -1,17 +1,14 @@
 ﻿namespace Tvl.VisualStudio.Language.Markdown
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Windows.Controls;
+    using System.Windows.Navigation;
     using Microsoft.VisualStudio.ComponentModelHost;
+    using Microsoft.VisualStudio.Text.Editor;
+    using Tvl.Events;
+    using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell;
     using Tvl.VisualStudio.Shell.Extensions;
-    using Tvl.VisualStudio.Language.Parsing;
-    using Tvl.Events;
-    using System.Windows.Navigation;
-    using Microsoft.VisualStudio.Text.Editor;
 
     internal class MarkdownPreviewControl : ContentControl
     {
@@ -83,8 +80,8 @@
 
         private void NavigateToString(string text)
         {
-            Browser.Dispatcher.Invoke(
-                (Action)(() =>
+            BrowserDispatch(
+                () =>
                 {
                     try
                     {
@@ -93,7 +90,12 @@
                     catch
                     {
                     }
-                }));
+                });
+        }
+
+        private void BrowserDispatch(Action action)
+        {
+            Browser.Dispatcher.Invoke(action);
         }
 
         private void RestoreScrollTop()
@@ -140,7 +142,7 @@
 
         private void OnBrowserLoadCompleted(object sender, NavigationEventArgs e)
         {
-            RestoreScrollTop();
+            BrowserDispatch(RestoreScrollTop);
         }
 
         private void OnViewChanged(object sender, ViewChangedEventArgs e)
@@ -155,8 +157,11 @@
                 {
                     ToolWindowPane.Caption = "Markdown Preview - ";
                     backgroundParser.ParseComplete += WeakEvents.AsWeak<ParseResultEventArgs>(OnParseComplete, eh => backgroundParser.ParseComplete -= eh);
+                    backgroundParser.RequestParse();
                 }
             }
+
+            CurrentView = e.NewView;
 
             if (BackgroundParser == null)
             {
@@ -175,7 +180,7 @@
                 return;
 
             var html = markdownArgs.HtmlText;
-            SaveScrollTop();
+            BrowserDispatch(SaveScrollTop);
             NavigateToString(html);
         }
 
