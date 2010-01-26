@@ -1,13 +1,10 @@
 ﻿namespace Tvl.VisualStudio.Language.Markdown
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Text.Classification;
     using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Utilities;
     using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Classification;
+    using Microsoft.VisualStudio.Utilities;
 
     [Export(typeof(IClassifierProvider))]
     [ContentType(MarkdownConstants.MarkdownContentType)]

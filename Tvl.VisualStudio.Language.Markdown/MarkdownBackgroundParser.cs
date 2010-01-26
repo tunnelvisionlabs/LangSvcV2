@@ -1,17 +1,11 @@
 ﻿namespace Tvl.VisualStudio.Language.Markdown
 {
     using System;
-    using System.Collections.Generic;
-    using Antlr.Runtime;
+    using System.Text;
+    using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow;
-    using Microsoft.VisualStudio.Shell.Interop;
-    using Microsoft.VisualStudio.TextManager.Interop;
-    using Microsoft.VisualStudio.Text.Editor;
-    using Microsoft.VisualStudio;
-    using System.Text;
-    using System.Windows.Controls;
 
     public class MarkdownBackgroundParser : BackgroundParser
     {
