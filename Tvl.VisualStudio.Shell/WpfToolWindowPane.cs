@@ -1,9 +1,11 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
+    using System.ComponentModel.Design;
     using System.Diagnostics;
     using System.Windows.Controls;
     using System.Windows.Media.Imaging;
+    using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
 
@@ -52,6 +54,34 @@
             get
             {
                 return null;
+            }
+        }
+
+        public static void ProvideToolWindowCommand<TToolWindowPane>(VsPackage package, Guid menuGroup, int commandId)
+            where TToolWindowPane : WpfToolWindowPane
+        {
+            EventHandler handler =
+                (object sender, EventArgs e) =>
+                {
+                    try
+                    {
+                        ToolWindowPane pane = package.FindToolWindow(typeof(TToolWindowPane), 0, true);
+                        if (pane != null)
+                            ErrorHandler.ThrowOnFailure(((IVsWindowFrame)pane.Frame).Show());
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ErrorHandler.IsCriticalException(ex))
+                            throw;
+                    }
+                };
+
+            OleMenuCommandService commandService = (OleMenuCommandService)((IServiceProvider)package).GetService(typeof(IMenuCommandService));
+            if (commandService != null)
+            {
+                CommandID toolWindowCommandId = new CommandID(menuGroup, commandId);
+                MenuCommand command = new MenuCommand(handler, toolWindowCommandId);
+                commandService.AddCommand(command);
             }
         }
 
