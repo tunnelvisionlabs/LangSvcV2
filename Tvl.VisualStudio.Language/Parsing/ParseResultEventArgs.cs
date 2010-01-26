@@ -7,6 +7,11 @@
 
     public class ParseResultEventArgs : EventArgs
     {
+        public ParseResultEventArgs(ITextSnapshot snapshot)
+            : this(snapshot, new ParseErrorEventArgs[0])
+        {
+        }
+
         public ParseResultEventArgs(ITextSnapshot snapshot, IList<ParseErrorEventArgs> errors)
         {
             this.Snapshot = snapshot;

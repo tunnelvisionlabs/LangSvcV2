@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable">
+  <Extern href="vsshlids.h"/>
+
+  <Commands package="guidMarkdownPackage">
+    <Buttons>
+      <Button guid="guidMarkdownPackageCmdSet" id="cmdidShowMarkdownPreviewWindow" priority="0x100" type="Button">
+        <!--<Icon guid="guidShowMarkdownPreviewWindowCmdBmp" id="bmpShowMarkdownPreviewWindow"/>-->
+        <Strings>
+          <ButtonText>Markdown Preview</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+
+    <!--<Bitmaps>
+      <Bitmap guid="guidShowMarkdownPreviewWindowCmdBmp" href="Resources\MarkdownPreviewWindow.png" usedList="bmpShowMarkdownPreviewWindow"/>
+    </Bitmaps>-->
+  </Commands>
+
+  <CommandPlacements>
+    <CommandPlacement guid="guidMarkdownPackageCmdSet" id="cmdidShowMarkdownPreviewWindow" priority="0x100">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
+    </CommandPlacement>
+  </CommandPlacements>
+
+  <Symbols>
+    <GuidSymbol name="guidMarkdownPackage" value="{3FB748F7-1844-4465-B6A4-5473CD36EDEF}" />
+
+    <GuidSymbol name="guidMarkdownPackageCmdSet" value="{E61E5162-5029-4329-8C71-AF5FD6FD05B7}">
+      <IDSymbol name="cmdidShowMarkdownPreviewWindow" value="0x2001" />
+    </GuidSymbol>
+
+    <!--<GuidSymbol name="guidShowMarkdownPreviewWindowCmdBmp" value="{00000000-0000-0000-0000-000000000000}">
+      <IDSymbol name="bmpShowMarkdownPreviewWindow" value="1" />
+    </GuidSymbol>-->
+  </Symbols>
+</CommandTable>
