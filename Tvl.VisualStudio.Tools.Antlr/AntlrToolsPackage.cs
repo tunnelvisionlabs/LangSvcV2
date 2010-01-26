@@ -1,11 +1,10 @@
 ﻿namespace Tvl.VisualStudio.Tools
 {
     using System;
-    using System.ComponentModel.Design;
     using System.Runtime.InteropServices;
-    using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
-    using Microsoft.VisualStudio.Shell.Interop;
+    using Tvl.VisualStudio.Shell;
+    using Tvl.VisualStudio.Tools.AstExplorer;
 
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [ProvideToolWindow(typeof(AstExplorer.AstExplorerToolWindowPane))]
@@ -16,29 +15,7 @@
         protected override void Initialize()
         {
             base.Initialize();
-
-            OleMenuCommandService commandService = (OleMenuCommandService)base.GetService(typeof(IMenuCommandService));
-            if (commandService != null)
-            {
-                CommandID toolWindowCommandId = new CommandID(Constants.GuidAntlrToolsCmdSet, Constants.ToolWindowCommandId);
-                MenuCommand command = new MenuCommand(ShowAstExplorerWindow, toolWindowCommandId);
-                commandService.AddCommand(command);
-            }
-        }
-
-        private void ShowAstExplorerWindow(object sender, EventArgs e)
-        {
-            try
-            {
-                ToolWindowPane pane = FindToolWindow(typeof(AstExplorer.AstExplorerToolWindowPane), 0, true);
-                if (pane != null)
-                    ErrorHandler.ThrowOnFailure(((IVsWindowFrame)pane.Frame).Show());
-            }
-            catch (Exception ex)
-            {
-                if (ErrorHandler.IsCriticalException(ex))
-                    throw;
-            }
+            WpfToolWindowPane.ProvideToolWindowCommand<AstExplorerToolWindowPane>(this, Constants.GuidAntlrToolsCmdSet, Constants.ToolWindowCommandId);
         }
     }
 }
