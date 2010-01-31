@@ -3,12 +3,10 @@
     using System;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
-    using Microsoft.VisualStudio.TextManager.Interop;
 
     using IOleCommandTarget = Microsoft.VisualStudio.OLE.Interop.IOleCommandTarget;
     using OLECMD = Microsoft.VisualStudio.OLE.Interop.OLECMD;
     using OLECMDEXECOPT = Microsoft.VisualStudio.OLE.Interop.OLECMDEXECOPT;
-    using OLECMDF = Microsoft.VisualStudio.OLE.Interop.OLECMDF;
     using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
     using VsMenus = Microsoft.VisualStudio.Shell.VsMenus;
 
