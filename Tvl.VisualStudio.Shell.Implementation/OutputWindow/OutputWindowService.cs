@@ -5,6 +5,7 @@
     using System.ComponentModel.Composition;
     using System.Linq;
     using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
     using Tvl.VisualStudio.Shell.Extensions;
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
@@ -12,8 +13,12 @@
     [Export(typeof(IOutputWindowService))]
     internal sealed class OutputWindowService : IOutputWindowService
     {
+        public OutputWindowService()
+        {
+        }
+
         [Import]
-        private IServiceProvider GlobalServiceProvider
+        private SVsServiceProvider GlobalServiceProvider
         {
             get;
             set;

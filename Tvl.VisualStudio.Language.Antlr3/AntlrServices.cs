@@ -1,4 +1,6 @@
-﻿namespace Tvl.VisualStudio.Language.Antlr3
+﻿#pragma warning disable 169 // The field 'fieldname' is never used
+
+namespace Tvl.VisualStudio.Language.Antlr3
 {
     using System.ComponentModel.Composition;
     using System.Windows.Media;

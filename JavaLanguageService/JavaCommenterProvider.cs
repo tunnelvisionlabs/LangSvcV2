@@ -2,9 +2,8 @@
 {
     using System;
     using System.ComponentModel.Composition;
-    using JavaLanguageService.Text;
     using Microsoft.VisualStudio.Text.Editor;
-    using Microsoft.VisualStudio.UI.Undo;
+    using Microsoft.VisualStudio.Text.Operations;
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Text;
 
@@ -15,7 +14,7 @@
         private static readonly CommentFormat JavaCommentFormat = new CommentFormat("//", "/*", "*/");
 
         [Import]
-        private IUndoHistoryRegistry UndoHistoryRegistry
+        private ITextUndoHistoryRegistry TextUndoHistoryRegistry
         {
             get;
             set;
@@ -23,7 +22,7 @@
 
         public ICommenter GetCommenter(ITextView textView)
         {
-            Func<Commenter> factory = () => new Commenter(textView, UndoHistoryRegistry, JavaCommentFormat);
+            Func<Commenter> factory = () => new Commenter(textView, TextUndoHistoryRegistry, JavaCommentFormat);
             return textView.Properties.GetOrCreateSingletonProperty<Commenter>(factory);
         }
     }

@@ -1,4 +1,6 @@
-﻿namespace JavaLanguageService
+﻿#pragma warning disable 169 // The field 'fieldname' is never used
+
+namespace JavaLanguageService
 {
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Utilities;

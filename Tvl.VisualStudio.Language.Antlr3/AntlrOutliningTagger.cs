@@ -64,7 +64,8 @@
             List<ITagSpan<IOutliningRegionTag>> outliningRegions = new List<ITagSpan<IOutliningRegionTag>>();
             if (antlrParseResultArgs != null)
             {
-                var result = antlrParseResultArgs.Result.Tree as CommonTree;
+                dynamic resultArgs = antlrParseResultArgs.Result;
+                var result = resultArgs.Tree as CommonTree;
                 if (result != null)
                 {
                     foreach (CommonTree child in result.Children)

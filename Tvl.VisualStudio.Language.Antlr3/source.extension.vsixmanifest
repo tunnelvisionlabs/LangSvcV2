@@ -1,16 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Vsix Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
+<Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
   <Identifier Id="Tvl.VisualStudio.Language.Antlr3.74dda0ee-262e-4c58-8255-d57136664d2b">
     <Name>Tvl.VisualStudio.Language.Antlr3</Name>
-    <Author>Microsoft</Author>
+    <Author>Sam Harwell</Author>
     <Version>1.0</Version>
-    <Description>Empty VSIX Project.</Description>
+    <Description xml:space="preserve">Language support for ANTLR grammars.</Description>
     <Locale>1033</Locale>
     <Icon>VSIXProject_small.png</Icon>
     <PreviewImage>VSIXProject_large.png</PreviewImage>
     <SupportedProducts>
       <VisualStudio Version="10.0">
+        <Edition>Ultimate</Edition>
+        <Edition>Premium</Edition>
         <Edition>Pro</Edition>
+        <Edition>IntegratedShell</Edition>
       </VisualStudio>
     </SupportedProducts>
     <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
@@ -20,9 +23,7 @@
       <Name>Visual Studio Extensibility Framework</Name>
     </Reference>
   </References>
-
   <Content>
-    <MefComponent>|Tvl.VisualStudio.Language.Antlr3|</MefComponent>
+    <MefComponent>|%CurrentProject%|</MefComponent>
   </Content>
-
 </Vsix>

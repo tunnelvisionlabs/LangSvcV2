@@ -1,34 +1,32 @@
 ﻿namespace Tvl.VisualStudio.Shell.Implementation
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Shell.Interop;
-    using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
-    using System.Diagnostics.Contracts;
-    using Microsoft.VisualStudio;
-    using IOleUndoManager = Microsoft.VisualStudio.OLE.Interop.IOleUndoManager;
-    using IOleCommandTarget = Microsoft.VisualStudio.OLE.Interop.IOleCommandTarget;
-    using Microsoft.VisualStudio.Text.Editor;
-    using VsShellUtilities = Microsoft.VisualStudio.Shell.VsShellUtilities;
     using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Editor;
-    using Microsoft.VisualStudio.TextManager.Interop;
+    using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Editor;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+    using Microsoft.VisualStudio.Text.Editor;
+    using Microsoft.VisualStudio.TextManager.Interop;
     using Tvl.VisualStudio.Shell.Extensions;
+    using IOleCommandTarget = Microsoft.VisualStudio.OLE.Interop.IOleCommandTarget;
+    using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+    using IOleUndoManager = Microsoft.VisualStudio.OLE.Interop.IOleUndoManager;
+    using VsShellUtilities = Microsoft.VisualStudio.Shell.VsShellUtilities;
 
     [Export(typeof(IMonitorSelectionService))]
     internal sealed class MonitorSelectionService : IMonitorSelectionService
     {
-        private IServiceProvider _serviceProvider;
+        private SVsServiceProvider _serviceProvider;
 
         private Listener _listener;
 
         public event EventHandler<ViewChangedEventArgs> ViewChanged;
 
         [Import]
-        private IServiceProvider GlobalServiceProvider
+        private SVsServiceProvider GlobalServiceProvider
         {
             get
             {

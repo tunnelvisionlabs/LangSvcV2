@@ -2,11 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Language.Intellisense;
-    using System.Collections.ObjectModel;
+    using Microsoft.VisualStudio.Text;
 
     internal sealed class JavaQuickInfoSource : IQuickInfoSource
     {
@@ -21,10 +18,19 @@
             private set;
         }
 
-        public ReadOnlyCollection<object> GetToolTipContent(IQuickInfoSession session, out ITrackingSpan applicableToSpan)
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        public void AugmentQuickInfoSession(IQuickInfoSession session, IList<object> quickInfoContent, out ITrackingSpan applicableToSpan)
         {
             applicableToSpan = null;
-            return null;
+        }
+
+        private void Dispose(bool disposing)
+        {
         }
     }
 }

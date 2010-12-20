@@ -5,5 +5,7 @@
     public interface IBackgroundParser
     {
         event EventHandler<ParseResultEventArgs> ParseComplete;
+
+        void RequestParse();
     }
 }

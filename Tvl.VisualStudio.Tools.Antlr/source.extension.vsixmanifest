@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Vsix Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
+<Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
   <Identifier Id="Tvl.VisualStudio.Tools.Antlr.ce1a846f-ab0b-429c-b80c-52a732b03fdb">
     <Name>ANTLR Tools for Visual Studio</Name>
     <Author>Sam Harwell</Author>
     <Version>1.0.0</Version>
-    <Description>Currently provides the AST Explorer.</Description>
+    <Description xml:space="preserve">Currently provides the AST Explorer.</Description>
     <Locale>1033</Locale>
     <Icon>VSIXProject_small.png</Icon>
     <PreviewImage>VSIXProject_large.png</PreviewImage>
     <SupportedProducts>
       <VisualStudio Version="10.0">
-        <Edition>VSTS</Edition>
-        <Edition>VSTD</Edition>
+        <Edition>Ultimate</Edition>
+        <Edition>Premium</Edition>
         <Edition>Pro</Edition>
         <Edition>IntegratedShell</Edition>
       </VisualStudio>
@@ -23,10 +23,8 @@
       <Name>Visual Studio Extensibility Framework</Name>
     </Reference>
   </References>
-
   <Content>
-    <VsPackage>|Tvl.VisualStudio.Tools.Antlr|</VsPackage>
-    <MefComponent>|Tvl.VisualStudio.Tools.Antlr|</MefComponent>
+    <VsPackage>|%CurrentProject%|</VsPackage>
+    <MefComponent>|%CurrentProject%|</MefComponent>
   </Content>
-
 </Vsix>

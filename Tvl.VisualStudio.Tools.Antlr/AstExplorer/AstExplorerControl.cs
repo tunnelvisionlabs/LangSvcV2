@@ -139,6 +139,7 @@
                 {
                     Tagger = AstReferenceTaggerProvider.GetAstReferenceTagger(e.NewView.TextBuffer);
                     backgroundParser.ParseComplete += WeakEvents.AsWeak<ParseResultEventArgs>(OnParseComplete, eh => backgroundParser.ParseComplete -= eh);
+                    backgroundParser.RequestParse();
                 }
             }
         }
@@ -161,8 +162,9 @@
                 {
                     try
                     {
+                        dynamic resultArgs = result;
                         this.Tree.Items.Clear();
-                        this.Tree.Items.Add(result.Tree);
+                        this.Tree.Items.Add(resultArgs.Tree);
                     }
                     catch
                     {

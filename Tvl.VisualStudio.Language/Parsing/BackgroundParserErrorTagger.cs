@@ -2,16 +2,16 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using System.Linq;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Adornments;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
-    using System.Diagnostics.Contracts;
 
-    public class BackgroundParserErrorTagger : ITagger<SquiggleTag>
+    public class BackgroundParserErrorTagger : ITagger<IErrorTag>
     {
-        private ITagSpan<SquiggleTag>[] _tags;
+        private ITagSpan<IErrorTag>[] _tags;
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
@@ -40,7 +40,7 @@
             private set;
         }
 
-        public IEnumerable<ITagSpan<SquiggleTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+        public IEnumerable<ITagSpan<IErrorTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
             return _tags;
         }
@@ -48,7 +48,7 @@
         private void BackgroundParserParseComplete(object sender, ParseResultEventArgs e)
         {
             var snapshot = TextBuffer.CurrentSnapshot;
-            _tags = e.Errors.Select(error => new TagSpan<SquiggleTag>(new SnapshotSpan(e.Snapshot, error.Span).TranslateTo(snapshot, SpanTrackingMode.EdgeExclusive), new SquiggleTag(StandardErrorTypeService.SyntaxError, error.Message))).ToArray();
+            _tags = e.Errors.Select(error => new TagSpan<IErrorTag>(new SnapshotSpan(e.Snapshot, error.Span).TranslateTo(snapshot, SpanTrackingMode.EdgeExclusive), new ErrorTag(PredefinedErrorTypeNames.SyntaxError, error.Message))).ToArray();
             OnTagsChanged(new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, 0, snapshot.Length)));
         }
 

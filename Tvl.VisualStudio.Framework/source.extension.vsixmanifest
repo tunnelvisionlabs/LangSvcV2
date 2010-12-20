@@ -1,31 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Vsix Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
+<Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
   <Identifier Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6">
     <Name>Visual Studio Extensibility Framework</Name>
     <Author>Sam Harwell</Author>
     <Version>1.0.0</Version>
-    <Description>Supporting framework for managed extensions.</Description>
+    <Description xml:space="preserve">Supporting framework for managed extensions.</Description>
     <Locale>1033</Locale>
     <Icon>VSIXProject_small.png</Icon>
     <PreviewImage>VSIXProject_large.png</PreviewImage>
     <SupportedProducts>
       <VisualStudio Version="10.0">
-        <Edition>VSTS</Edition>
-        <Edition>VSTD</Edition>
+        <Edition>Ultimate</Edition>
+        <Edition>Premium</Edition>
         <Edition>Pro</Edition>
         <Edition>IntegratedShell</Edition>
       </VisualStudio>
     </SupportedProducts>
     <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
   </Identifier>
-  <References>
-  <!--Add References here-->
-  </References>
-
+  <References />
   <Content>
     <MefComponent>|Tvl.VisualStudio.Shell.Implementation|</MefComponent>
     <MefComponent>|Tvl.VisualStudio.Text.Implementation|</MefComponent>
     <MefComponent>|Tvl.VisualStudio.Language.Implementation|</MefComponent>
   </Content>
-
 </Vsix>

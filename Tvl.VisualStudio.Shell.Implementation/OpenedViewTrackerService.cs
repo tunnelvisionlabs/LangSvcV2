@@ -4,7 +4,7 @@
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Text.Editor;
 
-    [Export(typeof(IWpfTextViewCreationListener))]
+    //[Export(typeof(IWpfTextViewCreationListener))]
     [Export(typeof(IOpenedViewTrackerService))]
     public class OpenedViewTrackerService : IWpfTextViewCreationListener, IOpenedViewTrackerService
     {

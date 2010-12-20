@@ -10,7 +10,7 @@
 
     [Export(typeof(ITaggerProvider))]
     [ContentType(Constants.JavaContentType)]
-    [TagType(typeof(SquiggleTag))]
+    [TagType(typeof(IErrorTag))]
     public sealed class JavaErrorTaggerProvider : ITaggerProvider
     {
         [Import]
@@ -22,7 +22,7 @@
 
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
-            if (typeof(T) == typeof(SquiggleTag))
+            if (typeof(T) == typeof(IErrorTag))
             {
                 BackgroundParserErrorTagger tagger;
                 if (buffer.Properties.TryGetProperty<BackgroundParserErrorTagger>(typeof(BackgroundParserErrorTagger), out tagger))

@@ -135,10 +135,6 @@
     <Reference Include="Microsoft.VisualStudio.TextManager.Interop.9.0, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.UI.Undo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -152,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ICommenterProvider.cs" />
+    <Compile Include="IContentTypeMetadata.cs" />
     <Compile Include="ITextViewMappingService.cs" />
     <Compile Include="Navigation\EditorNavigationTarget.cs" />
     <Compile Include="Navigation\EditorNavigationTypeDefinition.cs" />
@@ -164,13 +161,20 @@
     <Compile Include="Navigation\IEditorNavigationTypeRegistryService.cs" />
     <Compile Include="Navigation\IEditorNavigationTypeRegistryServiceContracts.cs" />
     <Compile Include="Navigation\PredefinedEditorNavigationTypes.cs" />
+    <Compile Include="Tagging\BlockTypeDefinition.cs" />
     <Compile Include="Tagging\BraceMatchingTagger.cs" />
     <Compile Include="Commenter.cs" />
     <Compile Include="CommentFormat.cs" />
     <Compile Include="ICommenter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tagging\DeclarationFormatOptions.cs" />
+    <Compile Include="Tagging\IBlockType.cs" />
+    <Compile Include="Tagging\ICodeBlockTag.cs" />
+    <Compile Include="Tagging\ICodeReference.cs" />
+    <Compile Include="Tagging\IDeclaration.cs" />
     <Compile Include="Tagging\ILanguageElementTag.cs" />
     <Compile Include="Tagging\LanguageElementTag.cs" />
+    <Compile Include="Tagging\PredefinedBlockTypeNames.cs" />
     <Compile Include="Tagging\PredefinedMarkerFormats.cs" />
     <Compile Include="Tagging\PredefinedTextMarkerTags.cs" />
     <Compile Include="TagQuickInfoController`1.cs" />

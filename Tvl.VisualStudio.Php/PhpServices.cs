@@ -1,10 +1,12 @@
-﻿namespace Tvl.VisualStudio.Language.Php
+﻿#pragma warning disable 169 // The field 'fieldname' is never used
+
+namespace Tvl.VisualStudio.Language.Php
 {
     using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Utilities;
-    using Microsoft.VisualStudio.Text.Classification;
-    using Microsoft.VisualStudio.Language.StandardClassification;
     using System.Windows.Media;
+    using Microsoft.VisualStudio.Language.StandardClassification;
+    using Microsoft.VisualStudio.Text.Classification;
+    using Microsoft.VisualStudio.Utilities;
 
     public static class PhpServices
     {

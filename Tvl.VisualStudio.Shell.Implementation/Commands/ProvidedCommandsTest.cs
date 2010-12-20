@@ -2,20 +2,16 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Utilities;
-    using System.Runtime.InteropServices;
-    using Microsoft.VisualStudio.Shell;
     using System.Windows.Input;
+    using Microsoft.VisualStudio.Utilities;
     using DefaultValueAttribute = System.ComponentModel.DefaultValueAttribute;
 
     internal static class ProvidedCommandsTest
     {
         [Export]
-        [Name("")]
-        [DisplayName("")]
+        [Name("Tvl.Test.TestButton")]
+        [DisplayName("Test Button")]
         [ExportMetadata("CommandFlag", "ButtonFlags...")]
         [ExportMetadata("ButtonText", "Button Text")]
         [ExportMetadata("CommandName", "Command Name")]

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
 
@@ -16,6 +17,13 @@
             _buffer = buffer;
 
             _buffer.Changed += BufferChanged;
+
+            int maxValue = _tokenToClassificationTypeName.Max(pair => (int)pair.Key);
+            _tokenToClassificationType = new IClassificationType[maxValue + 1];
+            foreach (var pair in _tokenToClassificationTypeName)
+            {
+                _tokenToClassificationType[(int)pair.Key] = _classificationRegistry.GetClassificationType(pair.Value);
+            }
         }
 
         /// <summary>
@@ -117,7 +125,7 @@
             return spans;
         }
 
-        static Dictionary<MarkdownParser.TokenType, string> _tokenToClassificationType = new Dictionary<MarkdownParser.TokenType, string>()
+        static Dictionary<MarkdownParser.TokenType, string> _tokenToClassificationTypeName = new Dictionary<MarkdownParser.TokenType, string>()
         {
             { MarkdownParser.TokenType.AutomaticUrl, "markdown.url.automatic" },
             { MarkdownParser.TokenType.Blockquote, "markdown.blockquote" },
@@ -146,13 +154,15 @@
             { MarkdownParser.TokenType.UrlDefinition, "markdown.url.definition" },
         };
 
+        private readonly IClassificationType[] _tokenToClassificationType;
+
         IClassificationType GetClassificationTypeForMarkdownToken(MarkdownParser.TokenType tokenType)
         {
-            string classificationType;
-            if (!_tokenToClassificationType.TryGetValue(tokenType, out classificationType))
+            int index = (int)tokenType;
+            if (index < 0 || index >= _tokenToClassificationType.Length || _tokenToClassificationType[index] == null)
                 throw new ArgumentException("Unable to find classification type for " + tokenType.ToString(), "tokenType");
 
-            return _classificationRegistry.GetClassificationType(classificationType);
+            return _tokenToClassificationType[index];
         }
     }
 }

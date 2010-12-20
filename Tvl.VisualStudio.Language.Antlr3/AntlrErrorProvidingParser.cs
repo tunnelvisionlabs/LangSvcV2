@@ -21,8 +21,8 @@
             string header = GetErrorHeader(e);
             string message = GetErrorMessage(e, tokenNames);
             Span span = new Span();
-            if (e.token != null)
-                span = Span.FromBounds(e.token.StartIndex, e.token.StopIndex + 1);
+            if (e.Token != null)
+                span = Span.FromBounds(e.Token.StartIndex, e.Token.StopIndex + 1);
 
             ParseErrorEventArgs args = new ParseErrorEventArgs(message, span);
             OnParseError(args);
@@ -52,7 +52,7 @@
                     if (token == null)
                         return;
 
-                    AntlrParserTokenStream stream = syntaxMessage.exception.input as AntlrParserTokenStream;
+                    AntlrParserTokenStream stream = syntaxMessage.exception.Input as AntlrParserTokenStream;
                     if (stream == null)
                         return;
 

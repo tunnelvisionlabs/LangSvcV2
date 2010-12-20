@@ -21,7 +21,8 @@
                 switch ((VsCommands2K)commandId)
                 {
                 case VsCommands2K.COMPLETEWORD:
-                    return true;
+                    throw new NotImplementedException();
+                    //return true;
 
                 default:
                     break;

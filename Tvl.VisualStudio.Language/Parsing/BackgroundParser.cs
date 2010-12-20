@@ -58,6 +58,12 @@
             }
         }
 
+        public void RequestParse()
+        {
+            if (_parsing == 0 && !_dirty)
+                MarkDirty();
+        }
+
         protected virtual void Dispose(bool disposing)
         {
         }
@@ -71,10 +77,15 @@
                 t(this, e);
         }
 
-        private void TextBufferPostChanged(object sender, EventArgs e)
+        private void MarkDirty()
         {
             this._dirty = true;
             this._lastEdit = DateTimeOffset.Now;
+        }
+
+        private void TextBufferPostChanged(object sender, EventArgs e)
+        {
+            MarkDirty();
         }
 
         private void OnParseTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)

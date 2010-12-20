@@ -2,10 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using Microsoft.VisualStudio.Language.Intellisense;
-    using System.Collections.ObjectModel;
     using Microsoft.VisualStudio.Text;
 
     internal sealed class AntlrCompletionSource : ICompletionSource
@@ -21,9 +18,19 @@
             private set;
         }
 
-        public ReadOnlyCollection<CompletionSet> GetCompletionInformation(ICompletionSession session)
+        public void Dispose()
         {
-            return null;
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        public void AugmentCompletionSession(ICompletionSession session, IList<CompletionSet> completionSets)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void Dispose(bool disposing)
+        {
         }
     }
 }

@@ -1,15 +1,31 @@
 ﻿namespace Tvl.VisualStudio.Language.Antlr3
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Language.QuickSearch.Interfaces;
+    using Microsoft.VisualStudio.Language.NavigateTo.Interfaces;
 
-    public class AntlrQuickSearchItemProvider : IQuickSearchItemProvider
+    public class AntlrQuickSearchItemProvider : INavigateToItemProvider
     {
-        public void StartSearch(IQuickSearchCallback callback, string searchValue)
+        public AntlrQuickSearchItemProvider(IServiceProvider serviceProvider)
         {
+            this.ServiceProvider = serviceProvider;
+        }
+
+        public IServiceProvider ServiceProvider
+        {
+            get;
+            private set;
+        }
+
+        public void StartSearch(INavigateToCallback callback, string searchValue)
+        {
+            //string name = null;
+            //string kind = null;
+            //string language = null;
+            //string secondarySort = null;
+            //object tag = null;
+            //MatchKind matchKind = MatchKind.None;
+            //INavigateToItemDisplayFactory displayFactory = null;
+            //NavigateToItem item = new NavigateToItem(name, kind, language, secondarySort, tag, matchKind, displayFactory);
         }
 
         public void StopSearch()

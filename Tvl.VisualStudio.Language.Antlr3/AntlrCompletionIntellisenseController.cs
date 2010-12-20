@@ -1,16 +1,13 @@
 ﻿namespace Tvl.VisualStudio.Language.Antlr3
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Language.Intellisense;
-    using Microsoft.VisualStudio.Text;
-    using Microsoft.VisualStudio.Text.Editor;
+    using ICompletionBroker = Microsoft.VisualStudio.Language.Intellisense.ICompletionBroker;
+    using IIntellisenseController = Microsoft.VisualStudio.Language.Intellisense.IIntellisenseController;
+    using ITextBuffer = Microsoft.VisualStudio.Text.ITextBuffer;
+    using ITextView = Microsoft.VisualStudio.Text.Editor.ITextView;
 
     internal sealed class AntlrCompletionIntellisenseController : IIntellisenseController
     {
-        ICompletionBroker _broker;
+        private ICompletionBroker _broker;
 
         /// <summary>
         /// Called when a new subject ITextBuffer appears in the graph of buffers associated with

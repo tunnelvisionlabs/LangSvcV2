@@ -1,9 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Language.Go
 {
     using System;
-    using Tvl.VisualStudio.Language.Parsing;
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
+    using Tvl.VisualStudio.Language.Parsing;
 
     partial class GoParser
     {
@@ -14,8 +14,8 @@
             string header = GetErrorHeader(e);
             string message = GetErrorMessage(e, tokenNames);
             Span span = new Span();
-            if (e.token != null)
-                span = Span.FromBounds(e.token.StartIndex, e.token.StopIndex + 1);
+            if (e.Token != null)
+                span = Span.FromBounds(e.Token.StartIndex, e.Token.StopIndex + 1);
 
             ParseErrorEventArgs args = new ParseErrorEventArgs(message, span);
             OnParseError(args);

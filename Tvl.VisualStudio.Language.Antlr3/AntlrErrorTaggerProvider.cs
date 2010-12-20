@@ -10,7 +10,7 @@
 
     [Export(typeof(ITaggerProvider))]
     [ContentType(AntlrConstants.AntlrContentType)]
-    [TagType(typeof(SquiggleTag))]
+    [TagType(typeof(IErrorTag))]
     public sealed class AntlrErrorTaggerProvider : ITaggerProvider
     {
         [Import]
@@ -22,7 +22,7 @@
 
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
-            if (typeof(T) == typeof(SquiggleTag))
+            if (typeof(T) == typeof(IErrorTag))
             {
                 Func<BackgroundParserErrorTagger> creator = () => new BackgroundParserErrorTagger(buffer, BackgroundParserFactoryService.GetBackgroundParser(buffer));
                 return (ITagger<T>)buffer.Properties.GetOrCreateSingletonProperty(creator);

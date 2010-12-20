@@ -39,6 +39,16 @@ csharpVisibilityMap ::= [
 	default:"private"
 ]
 
+// System.Boolean.ToString() returns "True" and "False", but the proper C# literals are "true" and "false"
+// The Java version of Boolean returns "true" and "false", so they map to themselves here.
+booleanLiteral ::= [
+	"True":"true",
+	"False":"false",
+	"true":"true",
+	"false":"false",
+	default:"false"
+]
+
 /** The overall file structure of a recognizer; stores methods for rules
  *  and cyclic DFAs plus support code.
  */
@@ -90,7 +100,7 @@ namespace <actions.(actionScope).namespace>
 >>
 
 lexer(grammar, name, tokens, scopes, rules, numRules, labelType="CommonToken",
-      filterMode, superClass="Lexer") ::= <<
+      filterMode, superClass={<if(actions.(actionScope).superClass)><actions.(actionScope).superClass><else>Antlr.Runtime.Lexer<endif>}) ::= <<
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "<ANTLRVersion>")]
 [System.CLSCompliant(false)]
 public partial class <grammar.recognizerName> : <@superClassName><superClass><@end>
@@ -107,11 +117,16 @@ public partial class <grammar.recognizerName> : <@superClassName><superClass><@e
          {g|public <g.recognizerName> <g:delegateName()>;}; separator="\n">
     <last(grammar.delegators):{g|public <g.recognizerName> gParent;}>
 
-	public <grammar.recognizerName>() {}<! needed by subclasses !>
+	public <grammar.recognizerName>()<! needed by subclasses !>
+	{
+		OnCreated();
+	}
+
 	public <grammar.recognizerName>(ICharStream input<grammar.delegators:{g|, <g.recognizerName> <g:delegateName()>}> )
 		: this(input, new RecognizerSharedState()<grammar.delegators:{g|, <g:delegateName()>}>)
 	{
 	}
+
 	public <grammar.recognizerName>(ICharStream input, RecognizerSharedState state<grammar.delegators:{g|, <g.recognizerName> <g:delegateName()>}>)
 		: base(input, state)
 	{
@@ -125,8 +140,12 @@ public partial class <grammar.recognizerName> : <@superClassName><superClass><@e
 		<grammar.delegators:
 		 {g|this.<g:delegateName()> = <g:delegateName()>;}; separator="\n">
 		<last(grammar.delegators):{g|gParent = <g:delegateName()>;}>
+
+		OnCreated();
 	}
 	public override string GrammarFileName { get { return "<fileName>"; } }
+
+	private static readonly bool[] decisionCanBacktrack = new bool[0];
 
 <if(grammar.hasDelegates)>
 	public override ICharStream CharStream
@@ -150,6 +169,11 @@ public partial class <grammar.recognizerName> : <@superClassName><superClass><@e
 <if(filterMode)>
 	<filteringNextToken()>
 <endif>
+
+	partial void OnCreated();
+	partial void EnterRule(string ruleName, int ruleIndex);
+	partial void LeaveRule(string ruleName, int ruleIndex);
+
 	<rules; separator="\n\n">
 
 	<insertLexerSynpreds(synpreds)>
@@ -182,7 +206,10 @@ public override IToken NextToken()
 	{
 		if (input.LA(1) == CharStreamConstants.EndOfFile)
 		{
-			return Tokens.EndOfFile;
+			IToken eof = new CommonToken((ICharStream)input, CharStreamConstants.EndOfFile, TokenChannels.Default, input.Index, input.Index);
+			eof.Line = Line;
+			eof.CharPositionInLine = CharPositionInLine;
+			return eof;
 		}
 		state.token = null;
 		state.channel = TokenChannels.Default;
@@ -264,6 +291,16 @@ public partial class <grammar.recognizerName> : <@superClassName><superClass><@e
 
 	<scopes:{<if(it.isDynamicGlobalScope)><globalAttributeScope(scope=it)><endif>}>
 	<@members>
+#if ANTLR_DEBUG
+	private static readonly bool[] decisionCanBacktrack =
+		new bool[]
+		{
+			false, // invalid decision
+			<grammar.decisions:{d | <booleanLiteral.(d.dfa.hasSynPred)>}; wrap="\n", separator=", ">
+		};
+#else
+	private static readonly bool[] decisionCanBacktrack = new bool[0];
+#endif
 <! WARNING. bug in ST: this is cut-n-paste into Dbg.stg !>
 public <grammar.recognizerName>( <inputStreamType> input<grammar.delegators:{g|, <g.recognizerName> <g:delegateName()>}> )
 	: this( input, new RecognizerSharedState()<grammar.delegators:{g|, <g:delegateName()>}> )
@@ -277,6 +314,8 @@ public <grammar.recognizerName>(<inputStreamType> input, RecognizerSharedState s
 	 {g|<g:delegateName()> = new <g.recognizerName>(input, state<trunc(g.delegators):{p|, <p:delegateName()>}>, this);}; separator="\n">
 	<grammar.indirectDelegates:{g | <g:delegateName()> = <g.delegator:delegateName()>.<g:delegateName()>;}; separator="\n">
 	<last(grammar.delegators):{g|gParent = <g:delegateName()>;}>
+
+	OnCreated();
 }
 	<@end>
 
@@ -284,6 +323,10 @@ public <grammar.recognizerName>(<inputStreamType> input, RecognizerSharedState s
 	public override string GrammarFileName { get { return "<fileName>"; } }
 
 	<members>
+
+	partial void OnCreated();
+	partial void EnterRule(string ruleName, int ruleIndex);
+	partial void LeaveRule(string ruleName, int ruleIndex);
 
 	#region Rules
 	<rules; separator="\n\n">
@@ -337,7 +380,7 @@ this.state.ruleMemo = new System.Collections.Generic.Dictionary\<int, int>[<leng
 >>
 
 parser(grammar, name, scopes, tokens, tokenNames, rules, numRules, bitsets,
-       ASTLabelType="object", superClass="Parser", labelType="IToken",
+       ASTLabelType="object", superClass={<if(actions.(actionScope).superClass)><actions.(actionScope).superClass><else>Antlr.Runtime.Parser<endif>}, labelType="IToken",
        members={<actions.parser.members>}) ::= <<
 <genericParser(inputStreamType="ITokenStream", rewriteElementType="IToken", ...)>
 >>
@@ -347,7 +390,7 @@ parser(grammar, name, scopes, tokens, tokenNames, rules, numRules, bitsets,
  */
 treeParser(grammar, name, scopes, tokens, tokenNames, globalAction, rules,
            numRules, bitsets, labelType={<ASTLabelType>}, ASTLabelType="object",
-           superClass={<if(filterMode)><if(buildAST)>TreeRewriter<else>TreeFilter<endif><else>TreeParser<endif>},
+           superClass={<if(actions.(actionScope).superClass)><actions.(actionScope).superClass><else>Antlr.Runtime.Tree.<if(filterMode)><if(buildAST)>TreeRewriter\<<labelType>\><else>TreeFilter<endif><else>TreeParser<endif><endif>},
            members={<actions.treeparser.members>},
            filterMode) ::= <<
 <genericParser(inputStreamType="ITreeNodeStream", rewriteElementType="Node", ...)>
@@ -362,23 +405,26 @@ treeParser(grammar, name, scopes, tokens, tokenNames, globalAction, rules,
  */
 synpredRule(ruleName, ruleDescriptor, block, description, nakedBlock) ::=
 <<
+partial void Enter_<ruleName>_fragment();
+partial void Leave_<ruleName>_fragment();
+
 // $ANTLR start <ruleName>
 public <!final !>void <ruleName>_fragment(<ruleDescriptor.parameterScope:parameterScope(scope=it)>)
 {
 	<ruleLabelDefs()>
-<if(trace)>
-	traceIn("<ruleName>_fragment", <ruleDescriptor.index>);
+	Enter_<ruleName>_fragment();
+	EnterRule("<ruleName>_fragment", <ruleDescriptor.index>);
+	TraceIn("<ruleName>_fragment", <ruleDescriptor.index>);
 	try
 	{
 		<block>
 	}
 	finally
 	{
-		traceOut("<ruleName>_fragment", <ruleDescriptor.index>);
+		TraceOut("<ruleName>_fragment", <ruleDescriptor.index>);
+		LeaveRule("<ruleName>_fragment", <ruleDescriptor.index>);
+		Leave_<ruleName>_fragment();
 	}
-<else>
-	<block>
-<endif>
 }
 // $ANTLR end <ruleName>
 >>
@@ -392,8 +438,10 @@ insertSynpreds(synpreds) ::= <<
 #region Synpreds
 private bool EvaluatePredicate(System.Action fragment)
 {
+	bool success = false;
 	state.backtracking++;
 	<@start()>
+	try { DebugBeginBacktrack(state.backtracking);
 	int start = input.Mark();
 	try
 	{
@@ -403,8 +451,9 @@ private bool EvaluatePredicate(System.Action fragment)
 	{
 		System.Console.Error.WriteLine("impossible: "+re);
 	}
-	bool success = !state.failed;
+	success = !state.failed;
 	input.Rewind(start);
+	} finally { DebugEndBacktrack(state.backtracking, success); }
 	<@stop()>
 	state.backtracking--;
 	state.failed=false;
@@ -437,15 +486,23 @@ rule(ruleName,ruleDescriptor,block,emptyRule,description,exceptions,finally,memo
 <ruleAttributeScope(scope=ruleDescriptor.ruleScope)>
 <returnScope(scope=ruleDescriptor.returnScope)>
 
+partial void Enter_<ruleName>();
+partial void Leave_<ruleName>();
+
 // $ANTLR start "<ruleName>"
 // <fileName>:<description>
-<csharpVisibilityMap.(ruleDescriptor.modifier)> <returnType()> <ruleName>(<ruleDescriptor.parameterScope:parameterScope(scope=it)>)
+[GrammarRule("<ruleName>")]
+<csharpVisibilityMap.(ruleDescriptor.modifier); null="private"> <returnType()> <ruleName>(<ruleDescriptor.parameterScope:parameterScope(scope=it)>)
 {
-	<if(trace)>traceIn("<ruleName>", <ruleDescriptor.index>);<endif>
+	Enter_<ruleName>();
+	EnterRule("<ruleName>", <ruleDescriptor.index>);
+	TraceIn("<ruleName>", <ruleDescriptor.index>);
 	<ruleScopeSetUp()>
 	<ruleDeclarations()>
 	<ruleLabelDefs()>
 	<ruleDescriptor.actions.init>
+	try { DebugEnterRule(GrammarFileName, "<ruleName>");
+	DebugLocation(<ruleDescriptor.tree.line>, <ruleDescriptor.EORNode.charPositionInLine>);
 	<@preamble()>
 	try
 	{
@@ -472,11 +529,15 @@ rule(ruleName,ruleDescriptor,block,emptyRule,description,exceptions,finally,memo
 <endif>
 	finally
 	{
-		<if(trace)>traceOut("<ruleName>", <ruleDescriptor.index>);<endif>
+		TraceOut("<ruleName>", <ruleDescriptor.index>);
+		LeaveRule("<ruleName>", <ruleDescriptor.index>);
+		Leave_<ruleName>();
 		<memoize()>
 		<ruleScopeCleanUp()>
 		<finally>
 	}
+	DebugLocation(<ruleDescriptor.EORNode.line>, <ruleDescriptor.EORNode.charPositionInLine>);
+	} finally { DebugExitRule(GrammarFileName, "<ruleName>"); }
 	<@postamble()>
 	<returnFromRule()><\n>
 }
@@ -493,7 +554,7 @@ catch (<e.decl>)
 ruleDeclarations() ::= <<
 <if(ruleDescriptor.hasMultipleReturnValues)>
 <returnType()> retval = new <returnType()>();
-retval.start = input.LT(1);<\n>
+retval.Start = (<labelType>)input.LT(1);<\n>
 <else>
 <ruleDescriptor.returnScope.attributes:{ a |
 <a.type> <a.name> = <if(a.initValue)><a.initValue><else><initValue(a.type)><endif>;
@@ -555,7 +616,7 @@ return<if(!ruleDescriptor.isSynPred)>
 ruleCleanUp() ::= <<
 <if(ruleDescriptor.hasMultipleReturnValues)>
 <if(!TREE_PARSER)>
-retval.stop = input.LT(-1);<\n>
+retval.Stop = (<labelType>)input.LT(-1);<\n>
 <endif>
 <endif>
 >>
@@ -572,10 +633,16 @@ if (state.backtracking > 0) { Memoize(input, <ruleDescriptor.index>, <ruleDescri
  *  fragment rules.
  */
 lexerRule(ruleName,nakedBlock,ruleDescriptor,block,memoize) ::= <<
+partial void Enter_<ruleName>();
+partial void Leave_<ruleName>();
+
 // $ANTLR start "<ruleName>"
-<csharpVisibilityMap.(ruleDescriptor.modifier)> void m<ruleName>(<ruleDescriptor.parameterScope:parameterScope(scope=it)>)
+[GrammarRule("<ruleName>")]
+<csharpVisibilityMap.(ruleDescriptor.modifier); null="private"> void m<ruleName>(<ruleDescriptor.parameterScope:parameterScope(scope=it)>)
 {
-	<if(trace)>traceIn("<ruleName>", <ruleDescriptor.index>);<endif>
+	Enter_<ruleName>();
+	EnterRule("<ruleName>", <ruleDescriptor.index>);
+	TraceIn("<ruleName>", <ruleDescriptor.index>);
 	<ruleScopeSetUp()>
 	<ruleDeclarations()>
 	try
@@ -600,7 +667,9 @@ lexerRule(ruleName,nakedBlock,ruleDescriptor,block,memoize) ::= <<
 	}
 	finally
 	{
-		<if(trace)>traceOut("<ruleName>", <ruleDescriptor.index>);<endif>
+		TraceOut("<ruleName>", <ruleDescriptor.index>);
+		LeaveRule("<ruleName>", <ruleDescriptor.index>);
+		Leave_<ruleName>();
 		<ruleScopeCleanUp()>
 		<memoize()>
 	}
@@ -626,13 +695,17 @@ block(alts,decls,decision,enclosingBlockLevel,blockLevel,decisionNumber,maxK,max
 int alt<decisionNumber>=<maxAlt>;
 <decls>
 <@predecision()>
+try { DebugEnterSubRule(<decisionNumber>);
+try { DebugEnterDecision(<decisionNumber>, decisionCanBacktrack[<decisionNumber>]);
 <decision>
+} finally { DebugExitDecision(<decisionNumber>); }
 <@postdecision()>
 <@prebranch()>
 switch (alt<decisionNumber>)
 {
 <alts:altSwitchCase()>
 }
+} finally { DebugExitSubRule(<decisionNumber>); }
 <@postbranch()>
 >>
 
@@ -642,7 +715,9 @@ ruleBlock(alts,decls,decision,enclosingBlockLevel,blockLevel,decisionNumber,maxK
 int alt<decisionNumber>=<maxAlt>;
 <decls>
 <@predecision()>
+try { DebugEnterDecision(<decisionNumber>, decisionCanBacktrack[<decisionNumber>]);
 <decision>
+} finally { DebugExitDecision(<decisionNumber>); }
 <@postdecision()>
 switch (alt<decisionNumber>)
 {
@@ -654,6 +729,7 @@ ruleBlockSingleAlt(alts,decls,decision,enclosingBlockLevel,blockLevel,decisionNu
 // <fileName>:<description>
 <decls>
 <@prealt()>
+DebugEnterAlt(1);
 <alts>
 <@postalt()>
 >>
@@ -663,6 +739,7 @@ blockSingleAlt(alts,decls,decision,enclosingBlockLevel,blockLevel,decisionNumber
 // <fileName>:<description>
 <decls>
 <@prealt()>
+DebugEnterAlt(1);
 <alts>
 <@postalt()>
 >>
@@ -673,11 +750,14 @@ positiveClosureBlock(alts,decls,decision,enclosingBlockLevel,blockLevel,decision
 int cnt<decisionNumber>=0;
 <decls>
 <@preloop()>
+try { DebugEnterSubRule(<decisionNumber>);
 while (true)
 {
 	int alt<decisionNumber>=<maxAlt>;
 	<@predecision()>
+	try { DebugEnterDecision(<decisionNumber>, decisionCanBacktrack[<decisionNumber>]);
 	<decision>
+	} finally { DebugExitDecision(<decisionNumber>); }
 	<@postdecision()>
 	switch (alt<decisionNumber>)
 	{
@@ -688,6 +768,7 @@ while (true)
 
 		<ruleBacktrackFailure()>
 		EarlyExitException eee<decisionNumber> = new EarlyExitException( <decisionNumber>, input );
+		DebugRecognitionException(eee<decisionNumber>);
 		<@earlyExitException()>
 		throw eee<decisionNumber>;
 	}
@@ -696,6 +777,7 @@ while (true)
 loop<decisionNumber>:
 	;
 
+} finally { DebugExitSubRule(<decisionNumber>); }
 <@postloop()>
 >>
 
@@ -706,11 +788,14 @@ closureBlock(alts,decls,decision,enclosingBlockLevel,blockLevel,decisionNumber,m
 // <fileName>:<description>
 <decls>
 <@preloop()>
+try { DebugEnterSubRule(<decisionNumber>);
 while (true)
 {
 	int alt<decisionNumber>=<maxAlt>;
 	<@predecision()>
+	try { DebugEnterDecision(<decisionNumber>, decisionCanBacktrack[<decisionNumber>]);
 	<decision>
+	} finally { DebugExitDecision(<decisionNumber>); }
 	<@postdecision()>
 	switch ( alt<decisionNumber> )
 	{
@@ -723,6 +808,7 @@ while (true)
 loop<decisionNumber>:
 	;
 
+} finally { DebugExitSubRule(<decisionNumber>); }
 <@postloop()>
 >>
 
@@ -742,6 +828,7 @@ optionalBlockSingleAlt ::= block
 altSwitchCase() ::= <<
 case <i>:
 	<@prealt()>
+	DebugEnterAlt(<i>);
 	<it>
 	break;<\n>
 >>
@@ -767,6 +854,7 @@ noRewrite(rewriteBlockLevel, treeLevel) ::= ""
 /** Dump the elements one per line */
 element() ::= <<
 <@prematch()>
+DebugLocation(<it.line>, <it.pos>);
 <it.el><\n>
 >>
 
@@ -824,6 +912,7 @@ else
 {
 	<ruleBacktrackFailure()>
 	MismatchedSetException mse = new MismatchedSetException(null,input);
+	DebugRecognitionException(mse);
 	<@mismatchedSetException()>
 <if(LEXER)>
 	Recover(mse);
@@ -861,11 +950,15 @@ matchSetAndListLabel(s,label,elementIndex,postmatchCode) ::= <<
 >>
 
 /** Match a string literal */
-lexerStringRef(string,label) ::= <<
+lexerStringRef(string,label,elementIndex) ::= <<
 <if(label)>
 int <label>Start = CharIndex;
 Match(<string>); <checkRuleBacktrackFailure()>
+int <label>StartLine<elementIndex> = Line;
+int <label>StartCharPos<elementIndex> = CharPositionInLine;
 <label> = new <labelType>(input, TokenTypes.Invalid, TokenChannels.Default, <label>Start, CharIndex-1);
+<label>.Line = <label>StartLine<elementIndex>;
+<label>.CharPositionInLine = <label>StartCharPos<elementIndex>;
 <else>
 Match(<string>); <checkRuleBacktrackFailure()><\n>
 <endif>
@@ -924,8 +1017,12 @@ ruleRefAndListLabel(rule,label,elementIndex,args,scope) ::= <<
 lexerRuleRef(rule,label,args,elementIndex,scope) ::= <<
 <if(label)>
 int <label>Start<elementIndex> = CharIndex;
+int <label>StartLine<elementIndex> = Line;
+int <label>StartCharPos<elementIndex> = CharPositionInLine;
 <if(scope)><scope:delegateName()>.<endif>m<rule.name>(<args; separator=", ">); <checkRuleBacktrackFailure()>
 <label> = new <labelType>(input, TokenTypes.Invalid, TokenChannels.Default, <label>Start<elementIndex>, CharIndex-1);
+<label>.Line = <label>StartLine<elementIndex>;
+<label>.CharPositionInLine = <label>StartCharPos<elementIndex>;
 <else>
 <if(scope)><scope:delegateName()>.<endif>m<rule.name>(<args; separator=", ">); <checkRuleBacktrackFailure()>
 <endif>
@@ -941,8 +1038,12 @@ lexerRuleRefAndListLabel(rule,label,args,elementIndex,scope) ::= <<
 lexerMatchEOF(label,elementIndex) ::= <<
 <if(label)>
 int <label>Start<elementIndex> = CharIndex;
+int <label>StartLine<elementIndex> = Line;
+int <label>StartCharPos<elementIndex> = CharPositionInLine;
 Match(EOF); <checkRuleBacktrackFailure()>
 <labelType> <label> = new <labelType>(input, EOF, TokenChannels.Default, <label>Start<elementIndex>, CharIndex-1);
+<label>.Line = <label>StartLine<elementIndex>;
+<label>.CharPositionInLine = <label>StartCharPos<elementIndex>;
 <else>
 Match(EOF); <checkRuleBacktrackFailure()>
 <endif>
@@ -990,6 +1091,7 @@ else
 <else>
 	<ruleBacktrackFailure()>
 	NoViableAltException nvae = new NoViableAltException("<description>", <decisionNumber>, <stateNumber>, input);<\n>
+	DebugRecognitionException(nvae);
 	<@noViableAltException()>
 	throw nvae;<\n>
 <endif>
@@ -1058,6 +1160,7 @@ default:
 	{
 		<ruleBacktrackFailure()>
 		NoViableAltException nvae = new NoViableAltException("<description>", <decisionNumber>, <stateNumber>, input);<\n>
+		DebugRecognitionException(nvae);
 		<@noViableAltException()>
 		throw nvae;
 	}<\n>
@@ -1099,7 +1202,15 @@ dfaEdgeSwitch(labels, targetState) ::= <<
  *  The <name> attribute is inherited via the parser, lexer, ...
  */
 dfaDecision(decisionNumber,description) ::= <<
-alt<decisionNumber> = dfa<decisionNumber>.Predict(input);
+try
+{
+	alt<decisionNumber> = dfa<decisionNumber>.Predict(input);
+}
+catch (NoViableAltException nvae)
+{
+	DebugRecognitionException(nvae);
+	throw;
+}
 >>
 
 /* Dump DFA tables as run-length-encoded Strings of octal values.
@@ -1163,11 +1274,13 @@ private class DFA<dfa.decisionNumber> : DFA
 		this.special = DFA<dfa.decisionNumber>_special;
 		this.transition = DFA<dfa.decisionNumber>_transition;
 	}
-	public override string GetDescription()
+
+	public override string Description { get { return "<dfa.description>"; } }
+
+	public override void Error(NoViableAltException nvae)
 	{
-		return "<dfa.description>";
+		DebugRecognitionException(nvae);
 	}
-	<@errorMethod()>
 }<\n>
 <if(dfa.specialStateSTs)>
 private int SpecialStateTransition<dfa.decisionNumber>(DFA dfa, int s, IIntStream _input)<! throws NoViableAltException!>
@@ -1191,7 +1304,7 @@ private int SpecialStateTransition<dfa.decisionNumber>(DFA dfa, int s, IIntStrea
 <if(backtracking)>
 	if (state.backtracking > 0) {state.failed=true; return -1;}<\n>
 <endif>
-	NoViableAltException nvae = new NoViableAltException(dfa.GetDescription(), <dfa.decisionNumber>, _s, input);
+	NoViableAltException nvae = new NoViableAltException(dfa.Description, <dfa.decisionNumber>, _s, input);
 	dfa.Error(nvae);
 	throw nvae;
 }<\n>
@@ -1272,7 +1385,7 @@ protected void <scope.name>_scopeInit( <scope.name>_scope scope )
 	<scope.actions.scopeinit>
 }<\n>
 <else>
-partial void <scope.name>_scopeInit( <scope.name>_scope scope );
+partial void <scope.name>_scopeInit( <scope.name>_scope scope );<\n>
 <endif>
 <if(scope.actions.scopeafter)>
 protected void <scope.name>_scopeAfter( <scope.name>_scope scope )
@@ -1280,7 +1393,7 @@ protected void <scope.name>_scopeAfter( <scope.name>_scope scope )
 	<scope.actions.scopeafter>
 }<\n>
 <else>
-partial void <scope.name>_scopeAfter( <scope.name>_scope scope );
+partial void <scope.name>_scopeAfter( <scope.name>_scope scope );<\n>
 <endif>
 protected Stack\<<scope.name>_scope\> <scope.name>_stack = new Stack\<<scope.name>_scope\>();<\n>
 <endif>
@@ -1345,7 +1458,7 @@ ruleLabelDef(label) ::= <<
  */
 returnScope(scope) ::= <<
 <if(ruleDescriptor.hasMultipleReturnValues)>
-public <!static !>class <ruleDescriptor:returnStructName()> : <if(TREE_PARSER)>Tree<else>Parser<endif>RuleReturnScope
+public class <ruleDescriptor:returnStructName()> : <if(TREE_PARSER)>Tree<else>Parser<endif>RuleReturnScope\<<labelType>\><@ruleReturnInterfaces()>
 {
 	<scope.attributes:{public <it.decl>;}; separator="\n">
 	<@ruleReturnMembers()>
@@ -1431,7 +1544,7 @@ tokenLabelPropertyRef_pos(scope,attr) ::= "(<scope>!=null?<scope>.CharPositionIn
 tokenLabelPropertyRef_channel(scope,attr) ::= "(<scope>!=null?<scope>.Channel:0)"
 tokenLabelPropertyRef_index(scope,attr) ::= "(<scope>!=null?<scope>.TokenIndex:0)"
 tokenLabelPropertyRef_tree(scope,attr) ::= "<scope>_tree"
-tokenLabelPropertyRef_int(scope,attr) ::= "(<scope>!=null?Integer.valueOf(<scope>.Text):0)"
+tokenLabelPropertyRef_int(scope,attr) ::= "(<scope>!=null?int.Parse(<scope>.Text):0)"
 
 ruleLabelPropertyRef_start(scope,attr) ::= "(<scope>!=null?((<labelType>)<scope>.Start):null)"
 ruleLabelPropertyRef_stop(scope,attr) ::= "(<scope>!=null?((<labelType>)<scope>.Stop):null)"
@@ -1442,11 +1555,11 @@ ruleLabelPropertyRef_text(scope,attr) ::= <<
   input.TreeAdaptor.GetTokenStartIndex(<scope>.Start),
   input.TreeAdaptor.GetTokenStopIndex(<scope>.Start))):null)
 <else>
-(<scope>!=null?input.ToString(<scope>.start,<scope>.stop):null)
+(<scope>!=null?input.ToString(<scope>.Start,<scope>.Stop):null)
 <endif>
 >>
 
-ruleLabelPropertyRef_st(scope,attr) ::= "(<scope>!=null?<scope>.st:null)"
+ruleLabelPropertyRef_st(scope,attr) ::= "(<scope>!=null?<scope>.Template:null)"
 
 /** Isolated $RULE ref ok in lexer as it's a Token */
 lexerRuleLabel(label) ::= "<label>"
@@ -1470,12 +1583,12 @@ lexerRuleLabelPropertyRef_text(scope,attr) ::=
     "(<scope>!=null?<scope>.Text:null)"
 
 lexerRuleLabelPropertyRef_int(scope,attr) ::=
-    "(<scope>!=null?Integer.valueOf(<scope>.Text):0)"
+    "(<scope>!=null?int.Parse(<scope>.Text):0)"
 
 // Somebody may ref $template or $tree or $stop within a rule:
-rulePropertyRef_start(scope,attr) ::= "((<labelType>)retval.Start)"
-rulePropertyRef_stop(scope,attr) ::= "((<labelType>)retval.Stop)"
-rulePropertyRef_tree(scope,attr) ::= "((<ASTLabelType>)retval.Tree)"
+rulePropertyRef_start(scope,attr) ::= "retval.Start"
+rulePropertyRef_stop(scope,attr) ::= "retval.Stop"
+rulePropertyRef_tree(scope,attr) ::= "retval.Tree"
 rulePropertyRef_text(scope,attr) ::= <<
 <if(TREE_PARSER)>
 input.TokenStream.ToString(
@@ -1485,7 +1598,7 @@ input.TokenStream.ToString(
 input.ToString(retval.Start,input.LT(-1))
 <endif>
 >>
-rulePropertyRef_st(scope,attr) ::= "retval.st"
+rulePropertyRef_st(scope,attr) ::= "retval.Template"
 
 lexerRulePropertyRef_text(scope,attr) ::= "Text"
 lexerRulePropertyRef_type(scope,attr) ::= "_type"
@@ -1499,8 +1612,8 @@ lexerRulePropertyRef_int(scope,attr) ::= "int.Parse(<scope>.Text)"
 
 // setting $st and $tree is allowed in local rule. everything else
 // is flagged as error
-ruleSetPropertyRef_tree(scope,attr,expr) ::= "retval.tree =<expr>;"
-ruleSetPropertyRef_st(scope,attr,expr) ::= "retval.st =<expr>;"
+ruleSetPropertyRef_tree(scope,attr,expr) ::= "retval.Tree = <expr>;"
+ruleSetPropertyRef_st(scope,attr,expr) ::= "retval.Template =<expr>;"
 
 /** How to execute an action (only when not backtracking) */
 execAction(action) ::= <<

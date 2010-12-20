@@ -3,7 +3,7 @@
     using System;
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Text.Editor;
-    using Microsoft.VisualStudio.UI.Undo;
+    using Microsoft.VisualStudio.Text.Operations;
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Text;
 
@@ -14,7 +14,7 @@
         private static readonly CommentFormat AntlrCommentFormat = new CommentFormat("//", "/*", "*/");
 
         [Import]
-        private IUndoHistoryRegistry UndoHistoryRegistry
+        private ITextUndoHistoryRegistry TextUndoHistoryRegistry
         {
             get;
             set;
@@ -22,7 +22,7 @@
 
         public ICommenter GetCommenter(ITextView textView)
         {
-            Func<Commenter> factory = () => new Commenter(textView, UndoHistoryRegistry, AntlrCommentFormat);
+            Func<Commenter> factory = () => new Commenter(textView, TextUndoHistoryRegistry, AntlrCommentFormat);
             return textView.Properties.GetOrCreateSingletonProperty<Commenter>(factory);
         }
     }

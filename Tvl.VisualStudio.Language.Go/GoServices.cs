@@ -1,4 +1,6 @@
-﻿namespace Tvl.VisualStudio.Language.Go
+﻿#pragma warning disable 169 // The field 'fieldname' is never used
+
+namespace Tvl.VisualStudio.Language.Go
 {
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Utilities;

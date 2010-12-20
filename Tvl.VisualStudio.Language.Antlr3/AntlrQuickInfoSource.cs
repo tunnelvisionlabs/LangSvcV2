@@ -2,10 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text;
     using Microsoft.VisualStudio.Language.Intellisense;
-    using System.Collections.ObjectModel;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
 
@@ -29,17 +27,22 @@
             private set;
         }
 
-        public ReadOnlyCollection<object> GetToolTipContent(IQuickInfoSession session, out ITrackingSpan applicableToSpan)
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        public void AugmentQuickInfoSession(IQuickInfoSession session, IList<object> quickInfoContent, out ITrackingSpan applicableToSpan)
         {
             applicableToSpan = null;
 
-            List<object> content = new List<object>();
             if (session.TextView.TextBuffer == this.TextBuffer)
             {
                 ITextSnapshot currentSnapshot = this.TextBuffer.CurrentSnapshot;
                 SnapshotPoint? triggerPoint = session.GetTriggerPoint(currentSnapshot);
                 if (!triggerPoint.HasValue)
-                    return content.AsReadOnly();
+                    return;
 
                 foreach (var span in this.Aggregator.GetTags(new SnapshotSpan(triggerPoint.Value, triggerPoint.Value)))
                 {
@@ -68,15 +71,17 @@
 
                                 //builder.AppendLine(span.Tag.Url.OriginalString);
                                 //builder.Append(Strings.UrlQuickInfoFollowLink);
-                                content.Add(builder.ToString());
+                                quickInfoContent.Add(builder.ToString());
                                 applicableToSpan = currentSnapshot.CreateTrackingSpan((Span)spans[0], SpanTrackingMode.EdgeExclusive);
                             }
                         }
                     }
                 }
             }
+        }
 
-            return content.AsReadOnly();
+        private void Dispose(bool disposing)
+        {
         }
     }
 }

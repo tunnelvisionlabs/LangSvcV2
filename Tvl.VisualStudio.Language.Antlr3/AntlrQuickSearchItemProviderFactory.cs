@@ -2,15 +2,15 @@
 {
     using System;
     using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Language.QuickSearch.Interfaces;
+    using Microsoft.VisualStudio.Language.NavigateTo.Interfaces;
 
-    [Export(typeof(IQuickSearchItemProviderFactory))]
-    public sealed class AntlrQuickSearchItemProviderFactory : IQuickSearchItemProviderFactory
+    [Export(typeof(INavigateToItemProviderFactory))]
+    public sealed class AntlrQuickSearchItemProviderFactory : INavigateToItemProviderFactory
     {
-        public bool TryCreateQuickSearchItemProvider(IServiceProvider serviceProvider, out IQuickSearchItemProvider provider)
+        public bool TryCreateNavigateToItemProvider(IServiceProvider serviceProvider, out INavigateToItemProvider provider)
         {
-            provider = null;
-            return false;
+            provider = new AntlrQuickSearchItemProvider(serviceProvider);
+            return true;
         }
     }
 }

@@ -4,14 +4,14 @@
     using System.Linq;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
-    using Microsoft.VisualStudio.UI.Undo;
+    using Microsoft.VisualStudio.Text.Operations;
 
     public class Commenter : ICommenter
     {
-        public Commenter(ITextView textView, IUndoHistoryRegistry undoHistoryRegistry, CommentFormat commentFormat)
+        public Commenter(ITextView textView, ITextUndoHistoryRegistry textUndoHistoryRegistry, CommentFormat commentFormat)
         {
             this.TextView = textView;
-            this.UndoHistoryRegistry = undoHistoryRegistry;
+            this.TextUndoHistoryRegistry = textUndoHistoryRegistry;
             this.CommentFormat = commentFormat;
         }
 
@@ -21,7 +21,7 @@
             private set;
         }
 
-        public IUndoHistoryRegistry UndoHistoryRegistry
+        public ITextUndoHistoryRegistry TextUndoHistoryRegistry
         {
             get;
             private set;
@@ -40,8 +40,8 @@
             if (spans.Count == 0)
                 return new NormalizedSnapshotSpanCollection();
 
-            UndoHistory undoHistory = UndoHistoryRegistry.RegisterHistory(TextView);
-            using (UndoTransaction transaction = undoHistory.CreateTransaction("Comment Selection"))
+            var undoHistory = TextUndoHistoryRegistry.RegisterHistory(TextView);
+            using (var transaction = undoHistory.CreateTransaction("Comment Selection"))
             {
                 ITextSnapshot snapshot = spans[0].Snapshot;
 
@@ -79,8 +79,8 @@
             if (spans.Count == 0)
                 return new NormalizedSnapshotSpanCollection();
 
-            UndoHistory undoHistory = UndoHistoryRegistry.RegisterHistory(TextView);
-            using (UndoTransaction transaction = undoHistory.CreateTransaction("Uncomment Selection"))
+            var undoHistory = TextUndoHistoryRegistry.RegisterHistory(TextView);
+            using (var transaction = undoHistory.CreateTransaction("Uncomment Selection"))
             {
                 ITextSnapshot snapshot = spans[0].Snapshot;
 

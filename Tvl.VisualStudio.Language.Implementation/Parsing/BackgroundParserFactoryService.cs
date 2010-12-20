@@ -5,7 +5,7 @@
     using System.ComponentModel.Composition;
     using System.Linq;
     using Microsoft.VisualStudio.Text;
-    using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Text;
 
     [Export(typeof(IBackgroundParserFactoryService))]
     internal class BackgroundParserFactoryService : IBackgroundParserFactoryService

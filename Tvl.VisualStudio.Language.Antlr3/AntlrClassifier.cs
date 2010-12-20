@@ -77,11 +77,7 @@
                 return this._actionLiteral;
 
             case AntlrColorableLexer.CHAR_LITERAL:
-                return _standardClassificationService.CharacterLiteral;
-
             case AntlrColorableLexer.STRING_LITERAL:
-                return _standardClassificationService.StringLiteral;
-
             case AntlrColorableLexer.DOUBLE_ANGLE_STRING_LITERAL:
                 return _standardClassificationService.StringLiteral;
 
