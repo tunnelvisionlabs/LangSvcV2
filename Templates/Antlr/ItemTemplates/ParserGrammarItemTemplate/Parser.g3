@@ -1,0 +1,15 @@
+﻿parser grammar $safeitemrootname$;
+
+options {
+    language=CSharp3;
+    TokenLabelType=CommonToken;
+    output=AST;
+    ASTLabelType=CommonTree;
+}
+
+@namespace{$rootnamespace$}
+
+public
+compileUnit
+    :   EOF
+    ;

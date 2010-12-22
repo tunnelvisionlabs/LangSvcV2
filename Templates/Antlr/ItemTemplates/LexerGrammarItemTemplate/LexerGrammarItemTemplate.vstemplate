@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Item" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+  <TemplateData>
+    <Name>ANTLR Lexer</Name>
+    <Description>&lt;No description available&gt;</Description>
+    <Icon>LexerGrammarItemTemplate.ico</Icon>
+    <TemplateID>7530aa98-067e-45c5-ba38-96acbd367a95</TemplateID>
+    <ProjectType>CSharp</ProjectType>
+    <RequiredFrameworkVersion>3.0</RequiredFrameworkVersion>
+    <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
+    <DefaultName>Lexer.g3</DefaultName>
+  </TemplateData>
+  <TemplateContent>
+		<References>
+			<Reference>
+				<Assembly>Antlr3.Runtime</Assembly>
+			</Reference>
+		</References>
+
+    <ProjectItem ReplaceParameters="true" CustomTool="MSBuild:Compile" ItemType="Antlr3" TargetFileName="$fileinputname$.g3">Lexer.g3</ProjectItem>
+    <ProjectItem ReplaceParameters="true" TargetFileName="$fileinputname$.g3.cs">Lexer.g3.cs</ProjectItem>
+  </TemplateContent>
+</VSTemplate>

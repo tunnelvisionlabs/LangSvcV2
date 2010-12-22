@@ -226,6 +226,38 @@
     <Content Include="VSIXProject_small.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\CombinedGrammarItemTemplate\CombinedGrammarItemTemplate.csproj">
+      <Project>{954B34BD-34F9-4AC3-8FB7-2B5651425C61}</Project>
+      <Name>CombinedGrammarItemTemplate</Name>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <TemplateType>Item</TemplateType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <VSIXSubPath>ItemTemplates</VSIXSubPath>
+    </ProjectReference>
+    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\LexerGrammarItemTemplate\LexerGrammarItemTemplate.csproj">
+      <Project>{15CE12D9-B4E9-4DB3-8434-55339D2874AF}</Project>
+      <Name>LexerGrammarItemTemplate</Name>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <TemplateType>Item</TemplateType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <VSIXSubPath>ItemTemplates</VSIXSubPath>
+    </ProjectReference>
+    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\ParserGrammarItemTemplate\ParserGrammarItemTemplate.csproj">
+      <Project>{AC7D2CF6-D8C7-41F1-B87F-3EAC16510923}</Project>
+      <Name>ParserGrammarItemTemplate</Name>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <TemplateType>Item</TemplateType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <VSIXSubPath>ItemTemplates</VSIXSubPath>
+    </ProjectReference>
+    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\TreeGrammarItemTemplate\TreeGrammarItemTemplate.csproj">
+      <Project>{7E3A333F-092A-4BB7-9A00-3F53A2496BFB}</Project>
+      <Name>TreeGrammarItemTemplate</Name>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <TemplateType>Item</TemplateType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <VSIXSubPath>ItemTemplates</VSIXSubPath>
+    </ProjectReference>
     <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
       <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
       <Name>Tvl.Core</Name>

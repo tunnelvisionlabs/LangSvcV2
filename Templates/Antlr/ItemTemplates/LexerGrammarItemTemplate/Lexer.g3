@@ -1,0 +1,12 @@
+﻿lexer grammar $safeitemrootname$;
+
+options {
+    language=CSharp3;
+    TokenLabelType=CommonToken;
+}
+
+@namespace{$rootnamespace$}
+
+WS
+    :   ' '
+    ;

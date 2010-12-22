@@ -1,0 +1,13 @@
+﻿tree grammar $safeitemrootname$;
+
+options {
+    language=CSharp3;
+    ASTLabelType=CommonTree;
+}
+
+@namespace{$rootnamespace$}
+
+public
+compileUnit
+    :   EOF
+    ;

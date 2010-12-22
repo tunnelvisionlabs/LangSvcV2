@@ -1,0 +1,28 @@
+﻿grammar $safeitemrootname$;
+
+options {
+    language=CSharp3;
+    TokenLabelType=CommonToken;
+    output=AST;
+    ASTLabelType=CommonTree;
+}
+
+@lexer::namespace{$rootnamespace$}
+@parser::namespace{$rootnamespace$}
+
+/*
+ * Parser Rules
+ */
+
+public
+compileUnit
+    :   EOF
+    ;
+
+/*
+ * Lexer Rules
+ */
+
+WS
+    :   ' '
+    ;

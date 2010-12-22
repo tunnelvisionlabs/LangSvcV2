@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
   <Identifier Id="Tvl.VisualStudio.Language.Antlr3.74dda0ee-262e-4c58-8255-d57136664d2b">
-    <Name>Tvl.VisualStudio.Language.Antlr3</Name>
+    <Name>ANTLR Language Support</Name>
     <Author>Sam Harwell</Author>
     <Version>1.0</Version>
     <Description xml:space="preserve">Language support for ANTLR grammars.</Description>
@@ -25,5 +25,6 @@
   </References>
   <Content>
     <MefComponent>|%CurrentProject%|</MefComponent>
+    <ItemTemplate>ItemTemplates</ItemTemplate>
   </Content>
 </Vsix>

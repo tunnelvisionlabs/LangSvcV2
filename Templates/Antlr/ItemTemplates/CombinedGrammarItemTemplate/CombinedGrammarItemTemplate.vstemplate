@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Item" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+  <TemplateData>
+    <Name>ANTLR Combined Parser</Name>
+    <Description>&lt;No description available&gt;</Description>
+    <Icon>CombinedGrammarItemTemplate.ico</Icon>
+    <TemplateID>ef69e268-d164-4917-aeea-e4e90606925b</TemplateID>
+    <TemplateGroupID>ANTLR</TemplateGroupID>
+    <ProjectType>CSharp</ProjectType>
+    <RequiredFrameworkVersion>3.0</RequiredFrameworkVersion>
+    <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
+    <DefaultName>Combined.g3</DefaultName>
+  </TemplateData>
+  <TemplateContent>
+		<References>
+			<Reference>
+				<Assembly>Antlr3.Runtime</Assembly>
+			</Reference>
+		</References>
+
+    <ProjectItem ReplaceParameters="true" CustomTool="MSBuild:Compile" ItemType="Antlr3" TargetFileName="$fileinputname$.g3">Combined.g3</ProjectItem>
+    <ProjectItem ReplaceParameters="true" TargetFileName="$fileinputname$.g3.lexer.cs">Combined.g3.lexer.cs</ProjectItem>
+    <ProjectItem ReplaceParameters="true" TargetFileName="$fileinputname$.g3.parser.cs">Combined.g3.parser.cs</ProjectItem>
+  </TemplateContent>
+</VSTemplate>

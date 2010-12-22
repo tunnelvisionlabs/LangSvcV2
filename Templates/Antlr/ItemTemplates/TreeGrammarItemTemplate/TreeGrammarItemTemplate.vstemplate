@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Item" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+  <TemplateData>
+    <Name>ANTLR Tree Parser</Name>
+    <Description>&lt;No description available&gt;</Description>
+    <Icon>TreeGrammarItemTemplate.ico</Icon>
+    <TemplateID>b0e09cee-8852-4edf-9c11-8e1724ef9e3a</TemplateID>
+    <ProjectType>CSharp</ProjectType>
+    <RequiredFrameworkVersion>3.0</RequiredFrameworkVersion>
+    <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
+    <DefaultName>Tree.g3</DefaultName>
+  </TemplateData>
+  <TemplateContent>
+		<References>
+			<Reference>
+				<Assembly>Antlr3.Runtime</Assembly>
+			</Reference>
+		</References>
+
+    <ProjectItem ReplaceParameters="true" CustomTool="MSBuild:Compile" ItemType="Antlr3" TargetFileName="$fileinputname$.g3">Tree.g3</ProjectItem>
+    <ProjectItem ReplaceParameters="true" TargetFileName="$fileinputname$.g3.cs">Tree.g3.cs</ProjectItem>
+  </TemplateContent>
+</VSTemplate>
