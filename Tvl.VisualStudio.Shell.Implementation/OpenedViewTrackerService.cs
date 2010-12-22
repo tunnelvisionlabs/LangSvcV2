@@ -2,11 +2,15 @@
 {
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Text.Editor;
+    using EventArgs = System.EventArgs;
+    using ITextView = Microsoft.VisualStudio.Text.Editor.ITextView;
+    using IVsEditorAdaptersFactoryService = Microsoft.VisualStudio.Editor.IVsEditorAdaptersFactoryService;
+    using IVsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
+    using IVsTextViewCreationListener = Microsoft.VisualStudio.Editor.IVsTextViewCreationListener;
 
-    //[Export(typeof(IWpfTextViewCreationListener))]
+    [Export(typeof(IVsTextViewCreationListener))]
     [Export(typeof(IOpenedViewTrackerService))]
-    public class OpenedViewTrackerService : IWpfTextViewCreationListener, IOpenedViewTrackerService
+    public class OpenedViewTrackerService : IVsTextViewCreationListener, IOpenedViewTrackerService
     {
         private readonly List<ITextView> _openedViews = new List<ITextView>();
 
@@ -14,14 +18,35 @@
         {
             get
             {
-                return _openedViews;
+                return _openedViews.ToArray();
             }
         }
 
-        public void TextViewCreated(IWpfTextView textView)
+        [Import]
+        private IVsEditorAdaptersFactoryService EditorAdaptersFactoryService
         {
-            _openedViews.Add(textView);
-            textView.Closed += (sender, e) => _openedViews.Remove(textView);
+            get;
+            set;
+        }
+
+        public void VsTextViewCreated(IVsTextView textViewAdapter)
+        {
+            ITextView textView = EditorAdaptersFactoryService.GetWpfTextView(textViewAdapter);
+            if (textView != null)
+            {
+                _openedViews.Add(textView);
+                textView.Closed += HandleTextViewClosed;
+            }
+        }
+
+        private void HandleTextViewClosed(object sender, EventArgs e)
+        {
+            ITextView view = sender as ITextView;
+            if (view != null)
+            {
+                _openedViews.Remove(view);
+                view.Closed -= HandleTextViewClosed;
+            }
         }
     }
 }
