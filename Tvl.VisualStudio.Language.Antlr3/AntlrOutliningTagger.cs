@@ -64,7 +64,7 @@
             List<ITagSpan<IOutliningRegionTag>> outliningRegions = new List<ITagSpan<IOutliningRegionTag>>();
             if (antlrParseResultArgs != null)
             {
-                dynamic resultArgs = antlrParseResultArgs.Result;
+                AntlrErrorProvidingParser.grammar__return resultArgs = antlrParseResultArgs.Result as AntlrErrorProvidingParser.grammar__return;
                 var result = resultArgs.Tree as CommonTree;
                 if (result != null)
                 {
