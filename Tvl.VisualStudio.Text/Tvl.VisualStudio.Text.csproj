@@ -160,6 +160,7 @@
     <Compile Include="Navigation\IEditorNavigationType.cs" />
     <Compile Include="Navigation\IEditorNavigationTypeRegistryService.cs" />
     <Compile Include="Navigation\IEditorNavigationTypeRegistryServiceContracts.cs" />
+    <Compile Include="Navigation\NavigationTargetStyle.cs" />
     <Compile Include="Navigation\PredefinedEditorNavigationTypes.cs" />
     <Compile Include="Tagging\BlockTypeDefinition.cs" />
     <Compile Include="Tagging\BraceMatchingTagger.cs" />

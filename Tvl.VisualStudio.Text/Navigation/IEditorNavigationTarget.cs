@@ -29,5 +29,25 @@
         {
             get;
         }
+
+        bool IsBold
+        {
+            get;
+        }
+
+        bool IsGray
+        {
+            get;
+        }
+
+        bool IsItalic
+        {
+            get;
+        }
+
+        bool IsUnderlined
+        {
+            get;
+        }
     }
 }

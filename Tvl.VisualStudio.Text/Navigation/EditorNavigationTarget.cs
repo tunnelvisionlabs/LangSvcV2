@@ -1,34 +1,22 @@
 ﻿namespace Tvl.VisualStudio.Text.Navigation
 {
     using System;
-    using System.Windows.Media;
-    using Microsoft.VisualStudio.Text;
     using System.Diagnostics.Contracts;
+    using SnapshotSpan = Microsoft.VisualStudio.Text.SnapshotSpan;
+    using ImageSource = System.Windows.Media.ImageSource;
 
     public class EditorNavigationTarget : IEditorNavigationTarget
     {
-        public EditorNavigationTarget(string name, IEditorNavigationType editorNavigationType, SnapshotSpan span)
-            : this(name, editorNavigationType, span, new SnapshotSpan(span.Start, span.End), null)
+        private readonly NavigationTargetStyle _style;
+
+        public EditorNavigationTarget(string name, IEditorNavigationType editorNavigationType, SnapshotSpan span, ImageSource glyph = null, NavigationTargetStyle style = NavigationTargetStyle.None)
+            : this(name, editorNavigationType, span, new SnapshotSpan(span.Start, span.End), glyph, style)
         {
             Contract.Requires(name != null);
             Contract.Requires(editorNavigationType != null);
         }
 
-        public EditorNavigationTarget(string name, IEditorNavigationType editorNavigationType, SnapshotSpan span, ImageSource glyph)
-            : this(name, editorNavigationType, span, new SnapshotSpan(span.Start, span.End), glyph)
-        {
-            Contract.Requires(name != null);
-            Contract.Requires(editorNavigationType != null);
-        }
-
-        public EditorNavigationTarget(string name, IEditorNavigationType editorNavigationType, SnapshotSpan span, SnapshotSpan seek)
-            : this(name, editorNavigationType, span, seek, null)
-        {
-            Contract.Requires(name != null);
-            Contract.Requires(editorNavigationType != null);
-        }
-
-        public EditorNavigationTarget(string name, IEditorNavigationType editorNavigationType, SnapshotSpan span, SnapshotSpan seek, ImageSource glyph)
+        public EditorNavigationTarget(string name, IEditorNavigationType editorNavigationType, SnapshotSpan span, SnapshotSpan seek, ImageSource glyph = null, NavigationTargetStyle style = NavigationTargetStyle.None)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
@@ -40,6 +28,7 @@
             this.EditorNavigationType = editorNavigationType;
             this.Span = span;
             this.Seek = seek;
+            this._style = style;
             this.Glyph = glyph;
         }
 
@@ -71,6 +60,38 @@
         {
             get;
             private set;
+        }
+
+        public bool IsBold
+        {
+            get
+            {
+                return (_style & NavigationTargetStyle.Bold) != 0;
+            }
+        }
+
+        public bool IsGray
+        {
+            get
+            {
+                return (_style & NavigationTargetStyle.Gray) != 0;
+            }
+        }
+
+        public bool IsItalic
+        {
+            get
+            {
+                return (_style & NavigationTargetStyle.Italic) != 0;
+            }
+        }
+
+        public bool IsUnderlined
+        {
+            get
+            {
+                return (_style & NavigationTargetStyle.Underlined) != 0;
+            }
         }
     }
 }
