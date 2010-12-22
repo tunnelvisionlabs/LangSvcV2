@@ -214,7 +214,9 @@
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <AntlrTokens Include="ANTLR.tokens" />
-    <Antlr3 Include="AntlrColorableLexer.g3" />
+    <Antlr3 Include="AntlrColorableLexer.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>

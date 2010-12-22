@@ -140,8 +140,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Antlr3 Include="GoColorizerLexer.g3" />
-    <Antlr3 Include="Go.g3" />
+    <Antlr3 Include="GoColorizerLexer.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
+    <Antlr3 Include="Go.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
