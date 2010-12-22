@@ -9,9 +9,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Tvl.VisualStudio.Tools.Antlr")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Tunnel Vision Labs")]
+[assembly: AssemblyCompany("Tunnel Vision Laboratories, LLC")]
 [assembly: AssemblyProduct("Tvl.VisualStudio.Tools.Antlr")]
-[assembly: AssemblyCopyright("Copyright © Sam Harwell 2009")]
+[assembly: AssemblyCopyright("Copyright © Sam Harwell 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Tvl.VisualStudio.Language.Markdown")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Tunnel Vision Laboratories, LLC")]
 [assembly: AssemblyProduct("Tvl.VisualStudio.Language.Markdown")]
-[assembly: AssemblyCopyright("")]
+[assembly: AssemblyCopyright("Copyright © Sam Harwell 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
