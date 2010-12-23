@@ -63,7 +63,7 @@ INTEGER
 	;
 
 WS
-	:	' ' | '\t'
+	:	(' ' | '\t')*
 	;
 
 NEWLINE

@@ -36,15 +36,28 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Alloy.g3.lexer.cs" />
+    <Compile Include="Alloy.g3.parser.cs" />
     <Compile Include="AlloyColorizerLexer.g3.cs" />
     <Compile Include="AlloyClassifier.cs" />
     <Compile Include="AlloyClassifierProvider.cs" />
     <Compile Include="AlloyCommenterProvider.cs" />
     <Compile Include="AlloyConstants.cs" />
     <Compile Include="AlloyServices.cs" />
+    <Compile Include="AlloyBraceMatchingTaggerProvider.cs" />
+    <Compile Include="AlloyBackgroundParser.cs" />
+    <Compile Include="AlloyBackgroundParserProvider.cs" />
+    <Compile Include="AlloyEditorNavigationSource.cs" />
+    <Compile Include="AlloyEditorNavigationSourceProvider.cs" />
+    <Compile Include="AlloyErrorTaggerProvider.cs" />
+    <Compile Include="AlloyOutliningTagger.cs" />
+    <Compile Include="AlloyOutliningTaggerProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Antlr3 Include="Alloy.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
     <Antlr3 Include="AlloyColorizerLexer.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
@@ -83,7 +96,7 @@
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
@@ -108,7 +121,7 @@
     </Reference>
     <Reference Include="Microsoft.VisualStudio.TextManager.Interop.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.TextManager.Interop.8.0, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
@@ -116,8 +129,11 @@
     <Reference Include="Microsoft.VisualStudio.TextManager.Interop.9.0, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Tvl.VisualStudio.Antlr\Tvl.VisualStudio.Language.Antlr.csproj">

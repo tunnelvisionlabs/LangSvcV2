@@ -1,0 +1,332 @@
+﻿grammar Alloy;
+
+options {
+    language=CSharp3;
+    TokenLabelType=IToken;
+    output=AST;
+    ASTLabelType=CommonTree;
+}
+
+tokens {
+	LBRACE		= '{';
+	COMMA		= ',';
+
+	KW_SIG		= 'sig';
+	KW_FUN		= 'fun';
+	KW_PRED		= 'pred';
+	KW_ASSERT	= 'assert';
+	KW_FACT		= 'fact';
+	KW_RUN		= 'run';
+	KW_CHECK	= 'check';
+	KW_ENUM		= 'enum';
+	KW_MODULE	= 'module';
+	KW_ABSTRACT	= 'abstract';
+	KW_ONE		= 'one';
+	KW_SOME		= 'some';
+	KW_LONE		= 'lone';
+	KW_PRIVATE	= 'private';
+}
+
+@lexer::namespace{Tvl.VisualStudio.Language.Alloy}
+@parser::namespace{Tvl.VisualStudio.Language.Alloy}
+
+/*
+ * Parser Rules
+ */
+
+public
+compilationUnit
+	:	specification EOF
+	;
+
+specification
+	:	module? open* paragraph*
+	;
+
+module
+	:	'module'^ name ('[' 'exactly'? name (',' 'exactly'? number)* ']')?
+	;
+
+open
+	:	'private'? 'open'^ name ('[' ref_ (',' ref_)* ','? ']')? ('as' name)?
+	;
+
+paragraph
+	:	factDecl | assertDecl | funDecl | cmdDecl | enumDecl | sigDecl
+	;
+
+factDecl
+	:	'fact'^ name? block
+	;
+
+assertDecl
+	:	'assert'^ name? block
+	;
+
+funDecl
+	:	'private'?
+		(	'fun'^ functionName functionParameters? functionReturn block
+		|	'pred'^ functionName functionParameters? block
+		)
+	;
+
+functionName
+	:	(ref_ '.'^)? name
+	;
+
+functionReturn
+	:	':'^ expr
+	;
+
+functionParameters
+	:	'('^ declList? ')'
+	|	'['^ declList? ']'
+	;
+
+declList
+	:	decl (','! decl)* ','!?
+	;
+
+cmdDecl
+	:	(name ':')? ('run'|'check')^ (name|block)? cmdScope
+	;
+
+cmdScope
+	:	cmdScopeFor? cmdScopeExpect?
+	;
+
+cmdScopeFor
+	:	'for'^
+		(	number ('but' typescope (',' typescope)* ','?)
+		|	typescope (',' typescope)* ','?
+		)
+	;
+
+cmdScopeExpect
+	:	'expect'^ number?
+	;
+
+typescope
+	:	'exactly'^ number (name|'int'|'seq')?
+	;
+
+sigDecl
+	:	sigQual* 'sig'^ nameDeclList sigExt? sigBody block?
+	;
+
+nameList
+	:	name (','^ name (','! name)*)?
+	;
+
+nameDeclList
+	:	nameList ','!?
+	;
+
+sigBody
+	:	'{'^ (decl (','! decl)* ','!?)? '}'
+	;
+
+enumDecl
+	:	'enum'^ name enumBody
+	;
+
+enumBody
+	:	'{'^ nameList '}'
+	;
+
+sigQual
+	:	'abstract' | 'lone' | 'one' | 'some' | 'private'
+	;
+
+sigExt
+	:	'extends'^ ref_
+	|	'in'^ ref_ ('+'! ref_)*
+	;
+
+expr
+	:	unOpExpr1
+	;
+
+unOpExpr1
+	:	('let' | quantDecls ('{' | '|')) =>
+		(	letDecls
+		|	quantDecls
+		)
+		(	block
+			-> ^(LBRACE[$block.start] letDecls? quantDecls? block)
+		|	'|' expr
+			-> ^('|' letDecls? quantDecls? expr)
+		)
+	|	binOpExpr2
+	;
+
+letDecls
+	:	'let'^ letDecl (','! letDecl)* ','!?
+	;
+
+quantDecls
+	:	quant^ decl (','! decl)* ','!?
+	;
+
+binOpExpr2
+	:	binOpExpr3 (('||'|'or')^ binOpExpr3)*
+	;
+
+binOpExpr3
+	:	binOpExpr4 (('<=>'|'iff')^ binOpExpr4)*
+	;
+
+binOpExpr4
+	:	binOpExpr5 (('=>'|'implies')^ binOpExpr4 (('else') => 'else' binOpExpr5)?)*
+	;
+
+binOpExpr5
+	:	unOpExpr6 (('&&'|'and')^ unOpExpr6)*
+	;
+
+unOpExpr6
+	:	('!'|'not')^ unOpExpr6
+	|	binOpExpr7
+	;
+
+binOpExpr7
+	:	unOpExpr8 ((('!'|'not')? compareOp^) unOpExpr8)*
+	;
+
+compareOp
+	:	'<' | '>' | '<=' | '>=' | '=' | 'in'
+	;
+
+unOpExpr8
+	:	('no'|'some'|'lone'|'one'|'set'|'seq') => ('no'|'some'|'lone'|'one'|'set'|'seq')^ unOpExpr8
+	|	binOpExpr9
+	;
+
+binOpExpr9
+	:	unOpExpr10 (('<<'|'>>'|'>>>')^ unOpExpr10)*
+	;
+
+unOpExpr10
+	:	('+'|'-')^ unOpExpr10
+	|	countOpExpr11
+	;
+
+countOpExpr11
+	:	'#'^? binOpExpr12
+	;
+
+binOpExpr12
+	:	binOpExpr13 ('++'^ binOpExpr14)*
+	;
+
+binOpExpr13
+	:	binOpExpr14 ('&'^ binOpExpr14)*
+	;
+
+binOpExpr14
+	:	binOpExpr15 (arrowOp binOpExpr15)*
+	;
+
+binOpExpr15
+	:	binOpExpr16 ('<:'^ binOpExpr16)*
+	;
+
+binOpExpr16
+	:	callExpr17 (':>'^ callExpr17)*
+	;
+
+callExpr17
+	:	binOpExpr18 ('['^ (expr (','! expr)*)? ']')*
+	;
+
+binOpExpr18
+	:	unOpExpr19 ('.'^ unOpExpr19)*
+	;
+
+unOpExpr19
+	:	('~'|'*'|'^')^ unOpExpr19
+	|	primaryExpr
+	;
+
+primaryExpr
+	:	'none'
+	|	'iden'
+	|	'univ'
+	|	'Int'
+	|	'seq/Int'
+	|	'('^ expr ')'
+	|	'@'^? name
+	|	number
+	|	block
+	//|	'{' decl (',' decl)* ','? blockOrBar '}'
+	;
+
+decl
+	:	'private'? 'disj'? nameList ':'^ 'disj'? expr
+	;
+
+letDecl
+	:	name '='^ expr
+	;
+
+quant
+	:	'all' | 'no' | 'some' | 'lone' | 'one' | 'sum'
+	;
+
+arrowOp
+	:	('some'|'one'|'lone'|'set')? '->'^ (('some'|'one'|'lone'|'set') => ('some'|'one'|'lone'|'set'))?
+	;
+
+block
+	:	'{'^ expr* '}'
+	;
+
+blockOrBar
+	:	block
+	|	'|'^ expr
+	;
+
+name
+	:	('this'|IDENTIFIER) ('/'^ IDENTIFIER)*
+	;
+
+number
+	:	INTEGER
+	;
+
+ref_
+	:	name | 'univ' | 'Int' | 'seq/Int'
+	;
+
+/*
+ * Lexer Rules
+ */
+
+IDENTIFIER
+	:	('a'..'z' | 'A'..'Z' | '_')
+		('a'..'z' | 'A'..'Z' | '_' | '0'..'9' | '\'')*
+	;
+
+INTEGER
+	:	'0'..'9'+
+	;
+
+WS
+	:	(' ' | '\t')*
+		{Skip();}
+	;
+
+NEWLINE
+	:	'\r' '\n'?	{Skip();}
+	|	'\n'		{Skip();}
+	;
+
+COMMENT
+	:	('//'|'--') ~('\r'|'\n')*
+		{Skip();}
+	;
+
+ML_COMMENT
+	:	'/*' .* '*/'
+		{Skip();}
+	;
