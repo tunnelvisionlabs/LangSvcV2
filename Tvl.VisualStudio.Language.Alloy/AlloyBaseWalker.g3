@@ -1,0 +1,226 @@
+﻿tree grammar AlloyBaseWalker;
+
+options {
+    language=CSharp3;
+	tokenVocab=Alloy;
+    ASTLabelType=CommonTree;
+}
+
+@namespace{Tvl.VisualStudio.Language.Alloy}
+
+public
+compilationUnit
+	:	specification EOF
+	;
+
+specification
+	:	module? open* paragraph*
+	;
+
+module
+	:	^(KW_MODULE name (LBRACE KW_EXACTLY? name (COMMA KW_EXACTLY? number)* RBRACE)?)
+	;
+
+open
+	:	^(KW_OPEN KW_PRIVATE? name (RBRACE ref_ (COMMA ref_)* COMMA? RBRACE)? (KW_AS name)?)
+	;
+
+paragraph
+	:	factDecl | assertDecl | funDecl | cmdDecl | enumDecl | sigDecl
+	;
+
+factDecl
+	:	^(KW_FACT name? {EnterFact($factDecl.start, $name.start);} block {HandleFact($factDecl.start, $name.start, $block.start);})
+	;
+
+assertDecl
+	:	^(KW_ASSERT name? {EnterAssert($assertDecl.start, $name.start);} block {HandleAssert($assertDecl.start, $name.start, $block.start);})
+	;
+
+funDecl
+	:	^(	KW_FUN KW_PRIVATE? functionName {EnterFunction($funDecl.start, $functionName.start, $KW_PRIVATE != null);} functionParameters? functionReturn block
+			{HandleFunction($funDecl.start, $functionName.start, $KW_PRIVATE != null, $functionParameters.parameters, $functionReturn.returnSpec, $block.start);}
+		)
+	|	^(	KW_PRED KW_PRIVATE? functionName {EnterPredicate($funDecl.start, $functionName.start, $KW_PRIVATE != null);} functionParameters? block
+			{HandlePredicate($funDecl.start, $functionName.start, $KW_PRIVATE != null, $functionParameters.parameters, $block.start);}
+		)
+	;
+
+functionName
+	:	^(DOT ref_ name)
+	|	name
+	;
+
+functionReturn returns [CommonTree returnSpec]
+	:	^(COLON expr {$returnSpec = $expr.start;} )
+	;
+
+functionParameters returns [List<CommonTree> parameters]
+	:	^(LPAREN declList? RPAREN {$parameters = $declList.parameters;} )
+	|	^(LBRACK declList? RBRACK {$parameters = $declList.parameters;} )
+	;
+
+declList returns [List<CommonTree> parameters = new List<CommonTree>()]
+	:	(decl {$parameters.Add($decl.start);} )+
+	;
+
+cmdDecl
+	:	^(	(KW_RUN|KW_CHECK)
+			(	name (COLON (name|block)?)?
+			|	block
+			)?
+			cmdScope
+		)
+	;
+
+cmdScope
+	:	cmdScopeFor? cmdScopeExpect?
+	;
+
+cmdScopeFor
+	:	^(KW_FOR (number KW_BUT)? typescopeDeclList)
+	;
+
+cmdScopeExpect
+	:	^(KW_EXPECT number?)
+	;
+
+typescopeDeclList
+	:	typescope+
+	;
+
+typescope
+	:	^(number KW_EXACTLY? (name|KW_INT|KW_SEQ)?)
+	;
+
+sigDecl
+@init {
+List<IToken> qualifiers = (state.backtracking==0) ? new List<IToken>() : null;
+}
+	:	^(	KW_SIG (sigQual {qualifiers.Add(GetToken($sigQual.start));})* nameDeclList sigExt? {EnterSignature($sigDecl.start, qualifiers, $nameDeclList.names, $sigExt.start);} sigBody block?
+			{HandleSignature($sigDecl.start, qualifiers, $nameDeclList.names, $sigExt.start, $sigBody.start, $block.start);}
+		)
+	;
+
+nameList returns [List<CommonTree> names = new List<CommonTree>()]
+	:	^(COMMA (name {$names.Add($name.start);})+)
+	|	name {$names.Add($name.start);}
+	;
+
+nameDeclList returns [List<CommonTree> names]
+	:	nameList
+		{$names = $nameList.names;}
+	;
+
+sigBody
+	:	^(LBRACE decl* RBRACE)
+	;
+
+enumDecl
+	:	^(	KW_ENUM name {EnterEnum($enumDecl.start, $name.start);} enumBody
+			{HandleEnum($enumDecl.start, $name.start, $enumBody.start);}
+		)
+	;
+
+enumBody
+	:	^(LBRACE nameList RBRACE)
+	;
+
+sigQual
+	:	KW_ABSTRACT | KW_LONE | KW_ONE | KW_SOME | KW_PRIVATE
+	;
+
+sigExt
+	:	^(KW_EXTENDS ref_)
+	|	^(KW_IN ref_+)
+	;
+
+expr
+	:	^(LBRACE (letDecls|quantDecls) block)
+	|	^(BAR (letDecls|quantDecls) expr)
+	|	^((OR|KW_OR) expr expr)
+	|	^((IFF|KW_IFF) expr expr)
+	|	^((IMPLIES|KW_IMPLIES) expr expr (^(KW_ELSE expr))?)
+	|	^((AND|KW_AND) expr expr)
+	|	^((NOT|KW_NOT) expr)
+	|	^(compareOp expr (NOT|KW_NOT)? expr)
+	|	^((KW_NO|KW_SOME|KW_LONE|KW_ONE|KW_SET|KW_SEQ) expr)
+	|	^((LSHIFT|RSHIFT|RROTATE) expr expr)
+	|	^((PLUS|MINUS) expr)
+	|	^(HASH expr)
+	|	^(INC expr expr)
+	|	^(BITAND expr expr)
+	|	// this alt needs to be corrected since the multiplicity is semantically ambiguous
+		^(ARROW expr arrowMultiplicity* expr)
+	|	^('<:' expr expr)
+	|	^(':>' expr expr)
+	|	^(LBRACK expr expr* RBRACK)
+	|	^(DOT expr expr)
+	|	^((TILDE|STAR|CARET) expr)
+	|	primaryExpr
+	;
+
+letDecls
+	:	^(KW_LET letDecl+)
+	;
+
+quantDecls
+	:	^(quant decl+)
+	;
+
+compareOp
+	:	LT | GT | LE | GE | EQ | KW_IN
+	;
+
+primaryExpr
+	:	KW_NONE
+	|	KW_IDEN
+	|	KW_UNIV
+	|	KW_INT
+	|	KW_SEQINT
+	|	^(LPAREN expr RPAREN)
+	|	^(AT name)
+	|	name
+	|	number
+	|	block
+	//|	'{' decl (',' decl)* ','? blockOrBar '}'
+	;
+
+decl
+	:	^(COLON KW_PRIVATE? KW_DISJ? nameList KW_DISJ? expr)
+	;
+
+letDecl
+	:	^(EQ name expr)
+	;
+
+quant
+	:	KW_ALL | KW_NO | KW_SOME | KW_LONE | KW_ONE | KW_SUM
+	;
+
+arrowMultiplicity
+	:	KW_SOME | KW_ONE | KW_LONE | KW_SET
+	;
+
+block
+	:	^(LBRACE expr* RBRACE)
+	;
+
+blockOrBar
+	:	block
+	|	^(BAR expr)
+	;
+
+name
+	:	^(SLASH name+)
+	|	KW_THIS
+	|	IDENTIFIER
+	;
+
+number
+	:	INTEGER
+	;
+
+ref_
+	:	name | KW_UNIV | KW_INT | KW_SEQINT
+	;

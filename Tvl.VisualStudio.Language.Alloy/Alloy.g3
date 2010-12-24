@@ -8,9 +8,70 @@ options {
 }
 
 tokens {
+	LPAREN		= '(';
+	RPAREN		= ')';
 	LBRACE		= '{';
+	RBRACE		= '}';
+	LBRACK		= '[';
+	RBRACK		= ']';
+	LT			= '<';
+	GT			= '>';
+	LE			= '<=';
+	GE			= '>=';
+	SLASH		= '/';
+	COLON		= ':';
 	COMMA		= ',';
+	NOT			= '!';
+	HASH		= '#';
+	AND			= '&&';
+	BITAND		= '&';
+	STAR		= '*';
+	PLUS		= '+';
+	MINUS		= '-';
+	INC			= '++';
+	ARROW		= '->';
+	DOT			= '.';
+	LSHIFT		= '<<';
+	RSHIFT		= '>>';
+	RROTATE		= '>>>';
+	IFF			= '<=>';
+	RMAP		= ':>';
+	LMAP		= '<:';
+	EQ			= '=';
+	IMPLIES		= '=>';
+	AT			= '@';
+	CARET		= '^';
+	BAR			= '|';
+	OR			= '||';
+	TILDE		= '~';
 
+	KW_ALL		= 'all';
+	KW_AS		= 'as';
+	KW_BUT		= 'but';
+	KW_DISJ		= 'disj';
+	KW_ELSE		= 'else';
+	KW_EXPECT	= 'expect';
+	KW_EXTENDS	= 'extends';
+	KW_FOR		= 'for';
+	KW_IDEN		= 'iden';
+	KW_IMPLIES	= 'implies';
+	KW_IN		= 'in';
+	KW_LET		= 'let';
+	KW_NO		= 'no';
+	KW_NONE		= 'none';
+	KW_SEQ		= 'seq';
+	KW_SEQINT	= 'seq/Int';
+	KW_SET		= 'set';
+	KW_SUM		= 'sum';
+	KW_THIS		= 'this';
+	KW_UNIV		= 'univ';
+	KW_INT		= 'int';
+	KW_INT2		= 'Int';
+	KW_NOT		= 'not';
+	KW_OR		= 'or';
+	KW_AND		= 'and';
+	KW_IFF		= 'iff';
+	KW_OPEN		= 'open';
 	KW_SIG		= 'sig';
 	KW_FUN		= 'fun';
 	KW_PRED		= 'pred';
@@ -25,6 +86,7 @@ tokens {
 	KW_SOME		= 'some';
 	KW_LONE		= 'lone';
 	KW_PRIVATE	= 'private';
+	KW_EXACTLY	= 'exactly';
 }
 
 @lexer::namespace{Tvl.VisualStudio.Language.Alloy}
@@ -97,8 +159,8 @@ cmdScope
 
 cmdScopeFor
 	:	'for'^
-		(	number ('but' typescope (',' typescope)* ','?)
-		|	typescope (',' typescope)* ','?
+		(	number 'but' typescopeDeclList
+		|	typescopeDeclList
 		)
 	;
 
@@ -106,8 +168,12 @@ cmdScopeExpect
 	:	'expect'^ number?
 	;
 
+typescopeDeclList
+	:	typescope (','! typescope)* ','!?
+	;
+
 typescope
-	:	'exactly'^ number (name|'int'|'seq')?
+	:	'exactly'? number^ (name|'int'|'seq')?
 	;
 
 sigDecl
@@ -177,7 +243,11 @@ binOpExpr3
 	;
 
 binOpExpr4
-	:	binOpExpr5 (('=>'|'implies')^ binOpExpr4 (('else') => 'else' binOpExpr5)?)*
+	:	binOpExpr5 (('=>'|'implies')^ binOpExpr4 (('else') => elseClause)?)*
+	;
+
+elseClause
+	:	'else'^ binOpExpr5
 	;
 
 binOpExpr5
@@ -224,7 +294,7 @@ binOpExpr13
 	;
 
 binOpExpr14
-	:	binOpExpr15 (arrowOp binOpExpr15)*
+	:	binOpExpr15 (arrowMultiplicity? '->'^ ((arrowMultiplicity) => arrowMultiplicity)? binOpExpr15)*
 	;
 
 binOpExpr15
@@ -273,8 +343,8 @@ quant
 	:	'all' | 'no' | 'some' | 'lone' | 'one' | 'sum'
 	;
 
-arrowOp
-	:	('some'|'one'|'lone'|'set')? '->'^ (('some'|'one'|'lone'|'set') => ('some'|'one'|'lone'|'set'))?
+arrowMultiplicity
+	:	('some'|'one'|'lone'|'set')
 	;
 
 block

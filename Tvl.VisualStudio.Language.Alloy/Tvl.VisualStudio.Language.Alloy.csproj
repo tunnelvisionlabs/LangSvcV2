@@ -38,11 +38,14 @@
   <ItemGroup>
     <Compile Include="Alloy.g3.lexer.cs" />
     <Compile Include="Alloy.g3.parser.cs" />
+    <Compile Include="AlloyBaseWalker.g3.cs" />
     <Compile Include="AlloyColorizerLexer.g3.cs" />
     <Compile Include="AlloyClassifier.cs" />
     <Compile Include="AlloyClassifierProvider.cs" />
     <Compile Include="AlloyCommenterProvider.cs" />
     <Compile Include="AlloyConstants.cs" />
+    <Compile Include="AlloyEditorNavigationSourceWalker.cs" />
+    <Compile Include="AlloyOutliningTaggerWalker.cs" />
     <Compile Include="AlloyServices.cs" />
     <Compile Include="AlloyBraceMatchingTaggerProvider.cs" />
     <Compile Include="AlloyBackgroundParser.cs" />
@@ -52,6 +55,7 @@
     <Compile Include="AlloyErrorTaggerProvider.cs" />
     <Compile Include="AlloyOutliningTagger.cs" />
     <Compile Include="AlloyOutliningTaggerProvider.cs" />
+    <Compile Include="BufferedTreeNodeStreamWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -59,6 +63,9 @@
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
     <Antlr3 Include="AlloyColorizerLexer.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
+    <Antlr3 Include="AlloyBaseWalker.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
     <None Include="source.extension.vsixmanifest">

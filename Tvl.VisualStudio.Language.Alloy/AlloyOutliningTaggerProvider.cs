@@ -6,6 +6,7 @@
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Shell.OutputWindow;
 
     [Export(typeof(ITaggerProvider))]
     [ContentType(AlloyConstants.AlloyContentType)]
@@ -17,6 +18,13 @@
         {
             get;
             set;
+        }
+
+        [Import]
+        public IOutputWindowService OutputWindowService
+        {
+            get;
+            private set;
         }
 
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
