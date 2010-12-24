@@ -164,7 +164,19 @@
                     {
                         dynamic resultArgs = result;
                         this.Tree.Items.Clear();
-                        this.Tree.Items.Add(resultArgs.Tree);
+                        ITree tree = resultArgs.Tree;
+                        if (tree != null)
+                        {
+                            if (!tree.IsNil)
+                            {
+                                this.Tree.Items.Add(resultArgs.Tree);
+                            }
+                            else if (tree.ChildCount > 0)
+                            {
+                                for (int i = 0; i < tree.ChildCount; i++)
+                                    this.Tree.Items.Add(tree.GetChild(i));
+                            }
+                        }
                     }
                     catch
                     {
