@@ -8,6 +8,7 @@
     using Microsoft.VisualStudio.Text.Adornments;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
+    using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
 
     public class BackgroundParserErrorTagger : ITagger<IErrorTag>
     {
@@ -48,7 +49,20 @@
         private void BackgroundParserParseComplete(object sender, ParseResultEventArgs e)
         {
             var snapshot = TextBuffer.CurrentSnapshot;
-            _tags = e.Errors.Select(error => new TagSpan<IErrorTag>(new SnapshotSpan(e.Snapshot, error.Span).TranslateTo(snapshot, SpanTrackingMode.EdgeExclusive), new ErrorTag(PredefinedErrorTypeNames.SyntaxError, error.Message))).ToArray();
+            List<TagSpan<IErrorTag>> tags = new List<TagSpan<IErrorTag>>();
+            foreach (var error in e.Errors)
+            {
+                try
+                {
+                    tags.Add(new TagSpan<IErrorTag>(new SnapshotSpan(e.Snapshot, error.Span).TranslateTo(snapshot, SpanTrackingMode.EdgeExclusive), new ErrorTag(PredefinedErrorTypeNames.SyntaxError, error.Message)));
+                }
+                catch (Exception ex)
+                {
+                    if (ErrorHandler.IsCriticalException(ex))
+                        throw;
+                }
+            }
+            _tags = tags.ToArray();
             OnTagsChanged(new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, 0, snapshot.Length)));
         }
 
