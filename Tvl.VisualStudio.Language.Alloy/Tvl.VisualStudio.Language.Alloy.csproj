@@ -43,9 +43,19 @@
     <Compile Include="AlloyClassifier.cs" />
     <Compile Include="AlloyClassifierProvider.cs" />
     <Compile Include="AlloyCommenterProvider.cs" />
+    <Compile Include="AlloyCompletionControllerProvider.cs" />
+    <Compile Include="AlloyCompletionSource.cs" />
+    <Compile Include="AlloyCompletionSourceProvider.cs" />
+    <Compile Include="AlloyCompletionTargetProvider.cs" />
     <Compile Include="AlloyConstants.cs" />
     <Compile Include="AlloyEditorNavigationSourceWalker.cs" />
+    <Compile Include="AlloyIntellisenseController.cs" />
+    <Compile Include="AlloyIntellisenseKeyPostprocessorProvider.cs" />
+    <Compile Include="AlloyIntellisenseKeyPreprocessorProvider.cs" />
+    <Compile Include="AlloyIntellisenseMouseProcessorProvider.cs" />
     <Compile Include="AlloyOutliningTaggerWalker.cs" />
+    <Compile Include="AlloyQuickInfoSource.cs" />
+    <Compile Include="AlloyQuickInfoSourceProvider.cs" />
     <Compile Include="AlloyServices.cs" />
     <Compile Include="AlloyBraceMatchingTaggerProvider.cs" />
     <Compile Include="AlloyBackgroundParser.cs" />
@@ -55,6 +65,8 @@
     <Compile Include="AlloyErrorTaggerProvider.cs" />
     <Compile Include="AlloyOutliningTagger.cs" />
     <Compile Include="AlloyOutliningTaggerProvider.cs" />
+    <Compile Include="AlloySignatureHelpSource.cs" />
+    <Compile Include="AlloySignatureHelpSourceProvider.cs" />
     <Compile Include="BufferedTreeNodeStreamWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -143,6 +155,10 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
+      <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
+      <Name>Tvl.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Antlr\Tvl.VisualStudio.Language.Antlr.csproj">
       <Project>{3852C7D0-60EA-45CC-A84C-BF66B350CF3B}</Project>
       <Name>Tvl.VisualStudio.Language.Antlr</Name>
