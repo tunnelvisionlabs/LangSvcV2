@@ -9,7 +9,7 @@
 
     internal sealed class AlloyClassifier : AntlrClassifierBase
     {
-        private static readonly HashSet<string> Keywords =
+        internal static readonly HashSet<string> Keywords =
             new HashSet<string>()
             {
                 "let",

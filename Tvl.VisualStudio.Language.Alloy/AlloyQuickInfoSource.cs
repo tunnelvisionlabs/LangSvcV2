@@ -16,9 +16,27 @@
             _textBuffer = textBuffer;
         }
 
+        public ITextBuffer TextBuffer
+        {
+            get
+            {
+                return _textBuffer;
+            }
+        }
+
         public void AugmentQuickInfoSession(IQuickInfoSession session, IList<object> quickInfoContent, out ITrackingSpan applicableToSpan)
         {
-            throw new NotImplementedException();
+            applicableToSpan = null;
+            if (session == null || quickInfoContent == null)
+                return;
+
+            if (session.TextView.TextBuffer == this.TextBuffer)
+            {
+                ITextSnapshot currentSnapshot = this.TextBuffer.CurrentSnapshot;
+                SnapshotPoint? triggerPoint = session.GetTriggerPoint(currentSnapshot);
+                if (!triggerPoint.HasValue)
+                    return;
+            }
         }
 
         public void Dispose()

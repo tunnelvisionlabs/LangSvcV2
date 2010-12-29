@@ -111,7 +111,7 @@
                 {
                     this.CompletionTarget.DismissCompletion();
                 }
-                else if (!CompletionHelper.DoCallMatch(this.CompletionInfo))
+                else if (!CompletionHelper.DoCallMatch(this.CompletionTarget))
                 {
                     this.CompletionTarget.DismissCompletion();
                 }

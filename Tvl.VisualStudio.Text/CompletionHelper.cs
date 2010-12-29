@@ -10,27 +10,65 @@
 
     public static class CompletionHelper
     {
-        public static bool DoCallMatch(CompletionInfo completionInfo)
+        public static bool DoCallMatch(ICompletionTarget completionTarget)
         {
-            ICompletionSession session = completionInfo.CompletionTarget.CompletionSession;
+            bool flag2 = false;
+            ICompletionSession session = completionTarget.CompletionSession;
             if (session != null)
             {
                 ITextSnapshot snapshot = session.TextView.TextSnapshot;
-                string text = snapshot.GetText(completionInfo.ApplicableTo.GetSpan(snapshot));
+                string text = snapshot.GetText(completionTarget.CompletionInfo.ApplicableTo.GetSpan(snapshot));
                 if (string.IsNullOrEmpty(text))
                     return false;
 
                 session.Match();
-                CompletionSet set1;
-                CompletionSet set2;
-                CompletionSet set3;
-                CompletionSet set4;
+                CompletionSet set1 = null;
+                CompletionSet set2 = null;
+                CompletionSet set3 = null;
+                CompletionSet set4 = null;
+                bool flag3 = false;
+                bool flag4 = false;
                 foreach (CompletionSet set in session.CompletionSets.Where(i => i != null && i.SelectionStatus != null && i.SelectionStatus.Completion != null))
                 {
-                    throw new NotImplementedException();
+                    flag2 = true;
+                    bool isAllTab = false;
+                    if (isAllTab)
+                    {
+                        set3 = set;
+                        flag3 = string.Equals(text, set.SelectionStatus.Completion.DisplayText, StringComparison.CurrentCultureIgnoreCase);
+                    }
+                    else
+                    {
+                        set4 = set;
+                        flag4 = string.Equals(text, set.SelectionStatus.Completion.DisplayText, StringComparison.CurrentCultureIgnoreCase);
+                    }
+                }
+
+                if (flag3 && !flag4)
+                {
+                    set1 = set3;
+                }
+                else if (set2 != null)
+                {
+                    if (set2 != set3 && set4 == null)
+                        set1 = set3;
+                }
+                else if (set4 != null)
+                {
+                    set1 = set4;
+                }
+                else
+                {
+                    set1 = set3;
+                }
+
+                if (set1 != null)
+                {
+                    session.SelectedCompletionSet = set1;
                 }
             }
-            throw new NotImplementedException();
+
+            return flag2;
         }
 
         public static void DoTriggerCompletion(ICompletionTarget completionTarget, CompletionInfoType infoType, bool signatureHelpOnly, IntellisenseInvocationType invocationType)
@@ -46,7 +84,7 @@
                 if (!signatureHelpOnly)
                 {
                     completionTarget.TriggerCompletion(trackingPoint);
-                    DoCallMatch(completionInfo);
+                    DoCallMatch(completionTarget);
                 }
 
                 if (signatureHelpOnly || (completionInfo.CompletionFlags & CompletionFlags.HasParameterInfo) != 0)

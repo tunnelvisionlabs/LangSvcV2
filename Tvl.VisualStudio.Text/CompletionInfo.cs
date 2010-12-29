@@ -15,15 +15,24 @@
             _completionTarget = completionTarget;
         }
 
-        public ICompletionTarget CompletionTarget
+        public virtual ITrackingSpan ApplicableTo
+        {
+            get;
+            set;
+        }
+
+        public virtual string TextSoFar
         {
             get
             {
-                throw new NotImplementedException();
+                if (TextSoFarTrackingSpan == null)
+                    return null;
+
+                return TextSoFarTrackingSpan.GetSpan(this.CompletionTarget.TextView.TextBuffer.CurrentSnapshot).GetText();
             }
         }
 
-        public virtual ITrackingSpan ApplicableTo
+        public virtual ITrackingSpan TextSoFarTrackingSpan
         {
             get;
             set;
@@ -53,10 +62,12 @@
             set;
         }
 
-        public virtual string TextSoFar
+        protected ICompletionTarget CompletionTarget
         {
-            get;
-            set;
+            get
+            {
+                return _completionTarget;
+            }
         }
     }
 }
