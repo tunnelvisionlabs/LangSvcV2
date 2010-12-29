@@ -14,6 +14,8 @@
     using Tvl.VisualStudio.Shell;
     using Tvl.VisualStudio.Shell.Extensions;
     using Tvl.VisualStudio.Text.Tagging;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Text.Editor;
 
     internal class AstExplorerControl : ContentControl
     {
@@ -103,8 +105,15 @@
                             IToken startToken = tokens[selected.TokenStartIndex];
                             IToken stopToken = tokens[selected.TokenStopIndex];
                             Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
-                            ITrackingSpan trackingSpan = Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
-                            Tagger.CreateTagSpan(trackingSpan, PredefinedTextMarkerTags.Vivid);
+                            Span sourceSpan = new Span(0, Snapshot.Length);
+                            if (sourceSpan.Contains(span))
+                            {
+                                ITrackingSpan trackingSpan = Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
+                                Tagger.CreateTagSpan(trackingSpan, PredefinedTextMarkerTags.Vivid);
+                                var activeView = ActiveViewTrackerService.ActiveView;
+                                if (activeView != null && activeView.TextBuffer == Snapshot.TextBuffer)
+                                    activeView.ViewScroller.EnsureSpanVisible(new SnapshotSpan(Snapshot, span), EnsureSpanVisibleOptions.ShowStart);
+                            }
                         }
                     }
                     else if (selected != null && selected.Token != null)
@@ -113,14 +122,23 @@
                         {
                             IToken token = selected.Token;
                             Span span = new Span(token.StartIndex, token.StopIndex - token.StartIndex + 1);
-                            ITrackingSpan trackingSpan = Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
-                            Tagger.CreateTagSpan(trackingSpan, PredefinedTextMarkerTags.Vivid);
+                            Span sourceSpan = new Span(0, Snapshot.Length);
+                            if (sourceSpan.Contains(span))
+                            {
+                                ITrackingSpan trackingSpan = Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
+                                Tagger.CreateTagSpan(trackingSpan, PredefinedTextMarkerTags.Vivid);
+                                var activeView = ActiveViewTrackerService.ActiveView;
+                                if (activeView != null && activeView.TextBuffer == Snapshot.TextBuffer)
+                                    activeView.ViewScroller.EnsureSpanVisible(new SnapshotSpan(Snapshot, span), EnsureSpanVisibleOptions.ShowStart);
+                            }
                         }
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                if (ErrorHandler.IsCriticalException(ex))
+                    throw;
             }
         }
 
