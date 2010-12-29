@@ -161,6 +161,7 @@
     <Compile Include="ICompletionTargetMapService.cs" />
     <Compile Include="ICompletionTargetProvider.cs" />
     <Compile Include="IContentTypeMetadata.cs" />
+    <Compile Include="IntellisenseCommandFilter.cs" />
     <Compile Include="IntellisenseInvocationType.cs" />
     <Compile Include="IntellisenseKeyPostprocessor.cs" />
     <Compile Include="IntellisenseKeyPostprocessorProvider.cs" />
