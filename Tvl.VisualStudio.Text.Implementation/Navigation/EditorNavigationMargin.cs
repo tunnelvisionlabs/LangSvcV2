@@ -1,20 +1,16 @@
 ﻿namespace Tvl.VisualStudio.Text.Navigation.Implementation
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Controls.Primitives;
-    using System.Windows.Documents;
-    using Microsoft.VisualStudio.Language.Intellisense;
-    using Microsoft.VisualStudio.Text.Editor;
-    using Microsoft.VisualStudio.Text.Tagging;
-    using Tvl.VisualStudio.Text.Tagging;
-    using System.Collections.Generic;
     using System.Windows.Input;
-    using Tvl.Events;
-    using System.Threading;
     using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Editor;
+    using Tvl.Events;
 
     internal class EditorNavigationMargin : IWpfTextViewMargin
     {
@@ -224,14 +220,30 @@
 
                 var oldSelectedItem = (IEditorNavigationTarget)control.Item2.SelectedItem;
 
+                var positionOrderedItems = control.Item2.Items.Cast<IEditorNavigationTarget>().OrderBy(i => i.Span.Start).ToArray();
                 var newSelectedItem =
-                    control.Item2.Items
-                    .Cast<IEditorNavigationTarget>()
-                    .OrderBy(item => item.Span.Start)
-                    .LastOrDefault(item => item.Span.TranslateTo(currentPosition.Snapshot, SpanTrackingMode.EdgeInclusive).Contains(currentPosition));
+                    positionOrderedItems
+                    .LastOrDefault(i => i.Span.TranslateTo(currentPosition.Snapshot, SpanTrackingMode.EdgeInclusive).Contains(currentPosition));
 
-                if (oldSelectedItem == null && newSelectedItem == null)
+                if (newSelectedItem == null)
+                {
+                    // select the first item starting after the current position
+                    newSelectedItem =
+                        positionOrderedItems.FirstOrDefault(i => i.Span.TranslateTo(currentPosition.Snapshot, SpanTrackingMode.EdgeInclusive).Start > currentPosition);
+                }
+
+                if (newSelectedItem == null)
+                {
+                    // select the last item ending before the current position
+                    newSelectedItem =
+                        positionOrderedItems.LastOrDefault(i => i.Span.TranslateTo(currentPosition.Snapshot, SpanTrackingMode.EdgeInclusive).End < currentPosition);
+                }
+
+                if (newSelectedItem == null)
+                {
+                    // select the first item
                     newSelectedItem = (IEditorNavigationTarget)control.Item2.Items[0];
+                }
 
                 bool wasUpdating = Updating;
                 try
