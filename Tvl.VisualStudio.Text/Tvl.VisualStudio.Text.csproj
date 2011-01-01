@@ -180,7 +180,6 @@
     <Compile Include="Tagging\PredefinedBlockTypeNames.cs" />
     <Compile Include="Tagging\PredefinedMarkerFormats.cs" />
     <Compile Include="Tagging\PredefinedTextMarkerTags.cs" />
-    <Compile Include="TagQuickInfoController`1.cs" />
     <Compile Include="TextViewCommandFilter.cs" />
   </ItemGroup>
   <ItemGroup>

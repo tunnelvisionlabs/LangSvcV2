@@ -152,7 +152,6 @@
     <Compile Include="AntlrLanguageElementTagger.cs" />
     <Compile Include="AntlrLanguageElementTaggerProvider.cs" />
     <Compile Include="AntlrParserTokenStream.cs" />
-    <Compile Include="AntlrQuickInfoControllerProvider.cs" />
     <Compile Include="AntlrQuickInfoSource.cs" />
     <Compile Include="AntlrQuickInfoSourceProvider.cs" />
     <Compile Include="AntlrQuickSearchItemProvider.cs" />
