@@ -33,7 +33,7 @@
 
         <Geometry x:Key="DownArrowGeometry">M 0 0 L 3 3 L 6 0 Z</Geometry>
 
-        <Style x:Key="ComboBoxFocusVisual" TargetType="{x:Type ComboBox}">
+        <Style x:Key="ComboBoxFocusVisual" TargetType="{x:Type Control}">
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate>
@@ -199,8 +199,8 @@
                         <Setter Property="BorderBrush" Value="Transparent" />
                         <Setter Property="Background" Value="Transparent" />
                         <Setter Property="Foreground" Value="{DynamicResource vsfx:VsBrushes.CommandBarTextActiveKey}" />
-                        <Setter Property="AutomationProperties.Name" Value="{Binding Text}" />
-                        <Setter Property="AutomationProperties.AutomationId" Value="{Binding Text}" />
+                        <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
+                        <Setter Property="AutomationProperties.AutomationId" Value="{Binding Name}" />
                         <Setter Property="Template" Value="{StaticResource EditorComboBoxItemTemplate}" />
                         <Setter Property="Margin" Value="2,0,2,0" />
                     </Style>
