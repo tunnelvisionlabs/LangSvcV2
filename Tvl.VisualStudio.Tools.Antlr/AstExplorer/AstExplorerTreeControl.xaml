@@ -3,20 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
-             Background="{DynamicResource VsBrush.ToolWindowBackground}">
+             Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
 
     <UserControl.Resources>
         <HierarchicalDataTemplate x:Key="TreeItemTemplate1"
-                                  x:Name="TreeItemTemplate1"
-                                  ItemsSource="{Binding Path=Children}">
+                                  ItemsSource="{Binding Path=Children, Mode=OneTime}">
             <StackPanel Orientation="Horizontal">
                 <TextBlock VerticalAlignment="Center" Width="Auto" Height="Auto" Text="{Binding Path=Text, Mode=OneTime}" HorizontalAlignment="Left" />
             </StackPanel>
         </HierarchicalDataTemplate>
     </UserControl.Resources>
     <Grid>
-        <TreeView Name="treeView1" ItemTemplate="{DynamicResource TreeItemTemplate1}" />
+        <TreeView Name="treeView1" ItemTemplate="{StaticResource TreeItemTemplate1}" />
     </Grid>
 </UserControl>

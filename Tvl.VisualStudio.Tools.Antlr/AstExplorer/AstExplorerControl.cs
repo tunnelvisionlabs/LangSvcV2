@@ -6,16 +6,16 @@
     using System.Windows.Controls;
     using Antlr.Runtime;
     using Antlr.Runtime.Tree;
+    using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.ComponentModelHost;
     using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.Events;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell;
     using Tvl.VisualStudio.Shell.Extensions;
     using Tvl.VisualStudio.Text.Tagging;
-    using Microsoft.VisualStudio;
-    using Microsoft.VisualStudio.Text.Editor;
 
     internal class AstExplorerControl : ContentControl
     {
@@ -29,8 +29,8 @@
             this.Tree = new AstExplorerTreeControl();
             this.Content = this.Tree;
 
-            this.ActiveViewTrackerService.ViewChanged += WeakEvents.AsWeak<ViewChangedEventArgs>(OnViewChanged, eh => this.ActiveViewTrackerService.ViewChanged -= eh);
-            this.Tree.SelectedItemChanged += OnTreeViewSelectedItemChanged;
+            this.ActiveViewTrackerService.ViewChanged += WeakEvents.AsWeak<ViewChangedEventArgs>(HandleViewChanged, eh => this.ActiveViewTrackerService.ViewChanged -= eh);
+            this.Tree.SelectedItemChanged += HandleTreeViewSelectedItemChanged;
         }
 
         private IActiveViewTrackerService ActiveViewTrackerService
@@ -81,7 +81,7 @@
             set;
         }
 
-        private void OnTreeViewSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private void HandleTreeViewSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             try
             {
@@ -142,12 +142,25 @@
             }
         }
 
-        private void OnViewChanged(object sender, ViewChangedEventArgs e)
+        private void HandleViewChanged(object sender, ViewChangedEventArgs e)
         {
             BackgroundParser = null;
             Tagger = null;
             Tokens = null;
             Snapshot = null;
+            Tree.Dispatcher.Invoke(
+                (Action)(() =>
+                {
+                    try
+                    {
+                        Tree.Items.Clear();
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ErrorHandler.IsCriticalException(ex))
+                            throw;
+                    }
+                }));
 
             if (e.NewView != null)
             {
@@ -156,13 +169,13 @@
                 if (backgroundParser != null)
                 {
                     Tagger = AstReferenceTaggerProvider.GetAstReferenceTagger(e.NewView.TextBuffer);
-                    backgroundParser.ParseComplete += WeakEvents.AsWeak<ParseResultEventArgs>(OnParseComplete, eh => backgroundParser.ParseComplete -= eh);
+                    backgroundParser.ParseComplete += WeakEvents.AsWeak<ParseResultEventArgs>(HandleParseComplete, eh => backgroundParser.ParseComplete -= eh);
                     backgroundParser.RequestParse();
                 }
             }
         }
 
-        private void OnParseComplete(object sender, ParseResultEventArgs e)
+        private void HandleParseComplete(object sender, ParseResultEventArgs e)
         {
             if (!object.ReferenceEquals(sender, BackgroundParser))
                 return;
@@ -196,8 +209,10 @@
                             }
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        if (ErrorHandler.IsCriticalException(ex))
+                            throw;
                     }
                 }));
         }
