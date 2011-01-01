@@ -1,11 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Tvl.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text.Editor;
+    using Tvl.VisualStudio.Language.Intellisense;
 
     internal class AlloyIntellisenseController : IntellisenseController
     {

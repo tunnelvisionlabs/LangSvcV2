@@ -1,16 +1,15 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy
 {
-    using ImageSource = System.Windows.Media.ImageSource;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Antlr.Runtime.Tree;
-    using Tvl.VisualStudio.Text.Navigation;
-    using Antlr.Runtime;
-    using Microsoft.VisualStudio.Text;
-    using Microsoft.VisualStudio.Language.Intellisense;
     using System.Collections.ObjectModel;
+    using System.Linq;
+    using Antlr.Runtime;
+    using Antlr.Runtime.Tree;
+    using Microsoft.VisualStudio.Language.Intellisense;
+    using Microsoft.VisualStudio.Text;
+    using Tvl.VisualStudio.Text.Navigation;
+    using ImageSource = System.Windows.Media.ImageSource;
 
     internal class AlloyEditorNavigationSourceWalker : AlloyBaseWalker
     {

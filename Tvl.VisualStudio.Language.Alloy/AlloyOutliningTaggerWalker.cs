@@ -1,13 +1,10 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Collections.ObjectModel;
     using Antlr.Runtime;
-    using Microsoft.VisualStudio.Text;
     using Antlr.Runtime.Tree;
+    using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
 
     internal class AlloyOutliningTaggerWalker : AlloyBaseWalker

@@ -1,15 +1,10 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Utilities;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Operations;
+    using Microsoft.VisualStudio.Utilities;
 
     [Name("AlloyCompletionSourceProvider")]
     [ContentType(AlloyConstants.AlloyContentType)]

@@ -36,10 +36,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Alloy.g3.lexer.cs" />
-    <Compile Include="Alloy.g3.parser.cs" />
-    <Compile Include="AlloyBaseWalker.g3.cs" />
-    <Compile Include="AlloyColorizerLexer.g3.cs" />
+    <Compile Include="Alloy.g3.lexer.cs">
+      <DependentUpon>Alloy.g3</DependentUpon>
+    </Compile>
+    <Compile Include="Alloy.g3.parser.cs">
+      <DependentUpon>Alloy.g3</DependentUpon>
+    </Compile>
+    <Compile Include="AlloyBaseWalker.g3.cs">
+      <DependentUpon>AlloyBaseWalker.g3</DependentUpon>
+    </Compile>
+    <Compile Include="AlloyColorizerLexer.g3.cs">
+      <DependentUpon>AlloyColorizerLexer.g3</DependentUpon>
+    </Compile>
     <Compile Include="AlloyClassifier.cs" />
     <Compile Include="AlloyClassifierProvider.cs" />
     <Compile Include="AlloyCommenterProvider.cs" />

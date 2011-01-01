@@ -1,11 +1,12 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Language.Intellisense;
-    using Microsoft.VisualStudio.Text;
+    using IQuickInfoSession = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoSession;
+    using IQuickInfoSource = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoSource;
+    using ITextBuffer = Microsoft.VisualStudio.Text.ITextBuffer;
+    using ITextSnapshot = Microsoft.VisualStudio.Text.ITextSnapshot;
+    using ITrackingSpan = Microsoft.VisualStudio.Text.ITrackingSpan;
+    using SnapshotPoint = Microsoft.VisualStudio.Text.SnapshotPoint;
 
     internal class AlloyQuickInfoSource : IQuickInfoSource
     {

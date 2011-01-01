@@ -1,11 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Antlr.Runtime.Tree;
     using Antlr.Runtime;
+    using Antlr.Runtime.Tree;
 
     [Obsolete("Hack to work around a bug with ITokenStreamInformation.")]
     internal class BufferedTreeNodeStreamWrapper : ITreeNodeStream
