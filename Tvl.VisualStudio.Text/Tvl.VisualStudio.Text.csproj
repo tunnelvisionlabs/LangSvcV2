@@ -149,26 +149,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CompletionDropDownFlags.cs" />
-    <Compile Include="CompletionFlags.cs" />
-    <Compile Include="CompletionHelper.cs" />
-    <Compile Include="CompletionInfo.cs" />
-    <Compile Include="CompletionInfoType.cs" />
-    <Compile Include="CompletionTarget.cs" />
-    <Compile Include="CompletionTargetProvider.cs" />
     <Compile Include="ICommenterProvider.cs" />
-    <Compile Include="ICompletionTarget.cs" />
-    <Compile Include="ICompletionTargetMapService.cs" />
-    <Compile Include="ICompletionTargetProvider.cs" />
     <Compile Include="IContentTypeMetadata.cs" />
-    <Compile Include="IntellisenseCommandFilter.cs" />
-    <Compile Include="IntellisenseInvocationType.cs" />
-    <Compile Include="IntellisenseKeyPostprocessor.cs" />
-    <Compile Include="IntellisenseKeyPostprocessorProvider.cs" />
-    <Compile Include="IntellisenseKeyPreprocessor.cs" />
-    <Compile Include="IntellisenseKeyPreprocessorProvider.cs" />
-    <Compile Include="IntellisenseMouseProcessor.cs" />
-    <Compile Include="IntellisenseMouseProcessorProvider.cs" />
     <Compile Include="ITextViewMappingService.cs" />
     <Compile Include="Navigation\EditorNavigationTarget.cs" />
     <Compile Include="Navigation\EditorNavigationTypeDefinition.cs" />

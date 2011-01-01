@@ -1,4 +1,4 @@
-﻿namespace Tvl.VisualStudio.Text
+﻿namespace Tvl.VisualStudio.Language.Intellisense
 {
     public enum IntellisenseInvocationType
     {

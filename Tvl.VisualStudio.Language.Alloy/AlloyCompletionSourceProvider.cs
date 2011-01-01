@@ -25,13 +25,6 @@
         }
 
         [Import]
-        public ICompletionTargetMapService CompletionTargetMapService
-        {
-            get;
-            private set;
-        }
-
-        [Import]
         public IGlyphService GlyphService
         {
             get;

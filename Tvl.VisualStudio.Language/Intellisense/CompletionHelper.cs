@@ -1,4 +1,4 @@
-﻿namespace Tvl.VisualStudio.Text
+﻿namespace Tvl.VisualStudio.Language.Intellisense
 {
     using System;
     using System.Collections.Generic;
@@ -10,8 +10,11 @@
 
     public static class CompletionHelper
     {
-        public static bool DoCallMatch(ICompletionTarget completionTarget)
+        public static bool DoCallMatch(IntellisenseController completionTarget)
         {
+#if true
+            return false;
+#else
             bool flag2 = false;
             ICompletionSession session = completionTarget.CompletionSession;
             if (session != null)
@@ -69,12 +72,13 @@
             }
 
             return flag2;
+#endif
         }
 
-        public static void DoTriggerCompletion(ICompletionTarget completionTarget, CompletionInfoType infoType, bool signatureHelpOnly, IntellisenseInvocationType invocationType)
+        public static void DoTriggerCompletion(IntellisenseController controller, CompletionInfoType infoType, bool signatureHelpOnly, IntellisenseInvocationType invocationType)
         {
-            var completionInfo = completionTarget.CompletionInfo;
-            ITextView textView = completionTarget.TextView;
+            var completionInfo = controller.CompletionInfo;
+            ITextView textView = controller.TextView;
             SnapshotPoint? point = textView.Caret.Position.Point.GetPoint(textView.TextBuffer, PositionAffinity.Predecessor);
             if (point.HasValue)
             {
@@ -83,37 +87,37 @@
                 ITrackingPoint trackingPoint = textView.TextBuffer.CurrentSnapshot.CreateTrackingPoint(point.Value.Position, PointTrackingMode.Positive);
                 if (!signatureHelpOnly)
                 {
-                    completionTarget.TriggerCompletion(trackingPoint);
-                    DoCallMatch(completionTarget);
+                    controller.TriggerCompletion(trackingPoint);
+                    DoCallMatch(controller);
                 }
 
-                if (signatureHelpOnly || (completionInfo.CompletionFlags & CompletionFlags.HasParameterInfo) != 0)
+                if (signatureHelpOnly /*|| (completionInfo.CompletionFlags & CompletionFlags.HasParameterInfo) != 0*/)
                 {
-                    completionTarget.TriggerSignatureHelp(trackingPoint);
+                    controller.TriggerSignatureHelp(trackingPoint);
                 }
 
-                if (completionTarget.CompletionSession != null)
+                if (controller.CompletionSession != null)
                 {
-                    completionTarget.IntellisenseSessionStack.MoveSessionToTop(completionTarget.CompletionSession);
+                    controller.IntellisenseSessionStack.MoveSessionToTop(controller.CompletionSession);
                 }
             }
         }
 
-        public static bool IsCompletionPresenterActive(ICompletionTarget target, bool evenIfUsingDefaultPresenter)
+        public static bool IsCompletionPresenterActive(IntellisenseController controller, bool evenIfUsingDefaultPresenter)
         {
-            if (target.CompletionBroker == null || target.CompletionSession == null || target.CompletionSession.IsDismissed)
+            if (controller.Provider.CompletionBroker == null || controller.CompletionSession == null || controller.CompletionSession.IsDismissed)
                 return false;
 
             //if (!evenIfUsingDefaultPresenter && HostableEditor._useDefaultPresenter)
             //    return false;
 
-            if (target.CompletionBroker.IsCompletionActive(target.TextView))
+            if (controller.Provider.CompletionBroker.IsCompletionActive(controller.TextView))
                 return true;
 
-            if (target.SignatureHelpBroker == null)
+            if (controller.Provider.SignatureHelpBroker == null)
                 return false;
 
-            return target.SignatureHelpBroker.IsSignatureHelpActive(target.TextView);
+            return controller.Provider.SignatureHelpBroker.IsSignatureHelpActive(controller.TextView);
         }
     }
 }

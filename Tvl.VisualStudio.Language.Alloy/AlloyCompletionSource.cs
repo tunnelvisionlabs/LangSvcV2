@@ -6,9 +6,11 @@
     using System.Text;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Language.Intellisense;
-    using Tvl.VisualStudio.Text;
+    //using Tvl.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Operations;
     using ImageSource = System.Windows.Media.ImageSource;
+    using Tvl.VisualStudio.Language.Intellisense;
+    using Microsoft.VisualStudio.Text.Editor;
 
     // see VBCompletionProvider
     internal class AlloyCompletionSource : ICompletionSource
@@ -38,14 +40,6 @@
             }
         }
 
-        public ICompletionTargetMapService CompletionTargetMapService
-        {
-            get
-            {
-                return _provider.CompletionTargetMapService;
-            }
-        }
-
         public void AugmentCompletionSession(ICompletionSession session, IList<CompletionSet> completionSets)
         {
             if (session == null || completionSets == null)
@@ -54,19 +48,21 @@
             ITrackingPoint triggerPoint = session.GetTriggerPoint(TextBuffer);
             if (triggerPoint != null)
             {
-
-                ICompletionTarget completionTarget = CompletionTargetMapService.GetCompletionTargetForTextView(session.TextView);
-                CompletionInfo completionInfo = completionTarget.CompletionInfo;
+                IntellisenseController controller = GetControllerForView(session.TextView);
+                CompletionInfo completionInfo = controller.CompletionInfo;
                 ITextSnapshot snapshot = triggerPoint.TextBuffer.CurrentSnapshot;
                 SnapshotPoint point = triggerPoint.GetPoint(snapshot);
                 ITrackingPoint point2 = triggerPoint;
-                int num4 = 0;
                 bool flag = false;
-                bool flag2 = true;
-                switch (completionInfo.InvocationType)
+                bool extend = true;
+
+                IntellisenseInvocationType invocationType = completionInfo.InvocationType;
+                CompletionInfoType infoType = completionInfo.InfoType;
+
+                switch (invocationType)
                 {
                 case IntellisenseInvocationType.Default:
-                    flag2 = completionInfo.InfoType == CompletionInfoType.GlobalInfo;
+                    extend = infoType == CompletionInfoType.GlobalInfo;
                     break;
 
                 case IntellisenseInvocationType.BackspaceDeleteOrBackTab:
@@ -82,12 +78,18 @@
                 }
 
                 TextExtent extentOfWord;
-                if (flag2)
+                if (extend)
                 {
                     ITextBuffer textBuffer = TextBuffer;
                     ITextStructureNavigator navigator = TextStructureNavigatorSelectorService.CreateTextStructureNavigator(textBuffer, textBuffer.ContentType);
                     SnapshotPoint currentPosition = new SnapshotPoint(snapshot, point2.GetPosition(snapshot));
                     extentOfWord = navigator.GetExtentOfWord(currentPosition);
+                    if (extentOfWord.Span.Start == point)
+                    {
+                        TextExtent extentOfPreviousWord = navigator.GetExtentOfWord(currentPosition - 1);
+                        if (extentOfPreviousWord.IsSignificant && extentOfPreviousWord.Span.End == point)
+                            extentOfWord = extentOfPreviousWord;
+                    }
                 }
                 else
                 {
@@ -95,7 +97,7 @@
                     extentOfWord = new TextExtent(span, false);
                 }
 
-                if (completionInfo.InvocationType == IntellisenseInvocationType.BackspaceDeleteOrBackTab && extentOfWord.Span.Length > 0)
+                if (invocationType == IntellisenseInvocationType.BackspaceDeleteOrBackTab && extentOfWord.Span.Length > 0)
                 {
                     string str3 = snapshot.GetText(extentOfWord.Span);
                     if (!string.IsNullOrWhiteSpace(str3))
@@ -118,20 +120,38 @@
                     }
                 }
 
-                int length = triggerPoint.GetPosition(snapshot) - extentOfWord.Span.Start.Position;
-                completionInfo.TextSoFarTrackingSpan = snapshot.CreateTrackingSpan(extentOfWord.Span.Start, length, SpanTrackingMode.EdgeInclusive, TrackingFidelityMode.Forward);
-                completionInfo.ApplicableTo = snapshot.CreateTrackingSpan(extentOfWord.Span, SpanTrackingMode.EdgeInclusive, TrackingFidelityMode.Forward);
+                ITrackingSpan applicableTo = snapshot.CreateTrackingSpan(extentOfWord.Span, SpanTrackingMode.EdgeInclusive, TrackingFidelityMode.Forward);
                 if (flag)
                 {
-                    completionInfo.ApplicableTo = snapshot.CreateTrackingSpan(point.Position - completionInfo.TextSoFar.Length, completionInfo.TextSoFar.Length, SpanTrackingMode.EdgeInclusive, TrackingFidelityMode.Forward);
+                    SnapshotSpan textSoFarSpan = new SnapshotSpan(snapshot, extentOfWord.Span.Start, triggerPoint.GetPoint(snapshot));
+                    string textSoFar = textSoFarSpan.GetText();
+                    applicableTo = snapshot.CreateTrackingSpan(point.Position - textSoFar.Length, textSoFar.Length, SpanTrackingMode.EdgeInclusive, TrackingFidelityMode.Forward);
                 }
 
-                completionSets.Add(new KeywordCompletionSet(completionInfo.ApplicableTo, _provider.GlyphService));
+                KeywordCompletionSet keywordCompletionSet = new KeywordCompletionSet(applicableTo, _provider.GlyphService);
+
+                //int length = triggerPoint.GetPosition(snapshot) - extentOfWord.Span.Start.Position;
+                //completionInfo.TextSoFarTrackingSpan = snapshot.CreateTrackingSpan(extentOfWord.Span.Start, length, SpanTrackingMode.EdgeInclusive, TrackingFidelityMode.Forward);
+
+                completionSets.Add(keywordCompletionSet);
             }
         }
 
         public void Dispose()
         {
+        }
+
+        private static IntellisenseController GetControllerForView(ITextView view)
+        {
+            object controllerList;
+            if (!view.Properties.TryGetProperty(typeof(IntellisenseController), out controllerList))
+                return null;
+
+            IEnumerable<IntellisenseController> controllers = controllerList as IEnumerable<IntellisenseController>;
+            if (controllers == null)
+                return null;
+
+            return controllers.OfType<AlloyIntellisenseController2>().SingleOrDefault();
         }
 
         private class KeywordCompletionSet : CompletionSet

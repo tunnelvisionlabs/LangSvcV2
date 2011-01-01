@@ -153,8 +153,6 @@
   <ItemGroup>
     <Compile Include="AutoCommentService.cs" />
     <Compile Include="CommenterFilter.cs" />
-    <Compile Include="CompletionTargetMapService.cs" />
-    <Compile Include="ICompletionTargetProviderMetadata.cs" />
     <Compile Include="Navigation\EditorNavigationAdapter.cs" />
     <Compile Include="Navigation\EditorNavigationComboBox.xaml.cs">
       <DependentUpon>EditorNavigationComboBox.xaml</DependentUpon>

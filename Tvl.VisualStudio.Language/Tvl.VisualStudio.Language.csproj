@@ -135,16 +135,27 @@
     <Reference Include="Microsoft.VisualStudio.TextManager.Interop.9.0, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Intellisense\CompletionHelper.cs" />
+    <Compile Include="Intellisense\CompletionInfo.cs" />
+    <Compile Include="Intellisense\CompletionInfoType.cs" />
+    <Compile Include="Intellisense\IntellisenseCommandFilter.cs" />
+    <Compile Include="Intellisense\IntellisenseController.cs" />
+    <Compile Include="Intellisense\IntellisenseControllerProvider.cs" />
+    <Compile Include="Intellisense\IntellisenseInvocationType.cs" />
     <Compile Include="Parsing\BackgroundParserErrorTagger.cs" />
     <Compile Include="Parsing\IBackgroundParser.cs" />
     <Compile Include="Parsing\IBackgroundParserFactoryService.cs" />
@@ -154,6 +165,16 @@
     <Compile Include="Parsing\ParseErrorEventArgs.cs" />
     <Compile Include="Parsing\ParseResultEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj">
+      <Project>{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}</Project>
+      <Name>Tvl.VisualStudio.Shell</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj">
+      <Project>{2B913C3A-3FD8-4633-81C8-683AF66741A8}</Project>
+      <Name>Tvl.VisualStudio.Text</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
