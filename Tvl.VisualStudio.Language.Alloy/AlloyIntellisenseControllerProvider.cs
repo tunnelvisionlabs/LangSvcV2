@@ -20,7 +20,7 @@
     {
         protected override IntellisenseController TryCreateIntellisenseController(ITextView textView, IList<ITextBuffer> subjectBuffers)
         {
-            return new AlloyIntellisenseController2(textView, this);
+            return new AlloyIntellisenseController(textView, this);
         }
     }
 }

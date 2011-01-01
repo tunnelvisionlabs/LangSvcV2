@@ -47,7 +47,7 @@
     <Compile Include="AlloyCompletionSourceProvider.cs" />
     <Compile Include="AlloyConstants.cs" />
     <Compile Include="AlloyEditorNavigationSourceWalker.cs" />
-    <Compile Include="AlloyIntellisenseController2.cs" />
+    <Compile Include="AlloyIntellisenseController.cs" />
     <Compile Include="AlloyIntellisenseControllerProvider.cs" />
     <Compile Include="AlloyOutliningTaggerWalker.cs" />
     <Compile Include="AlloyQuickInfoSource.cs" />

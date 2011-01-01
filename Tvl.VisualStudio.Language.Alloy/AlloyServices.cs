@@ -10,11 +10,11 @@ namespace Tvl.VisualStudio.Language.Alloy
         [Export]
         [Name(AlloyConstants.AlloyContentType)]
         [BaseDefinition("code")]
-        private static readonly ContentTypeDefinition GoContentTypeDefinition;
+        private static readonly ContentTypeDefinition AlloyContentTypeDefinition;
 
         [Export]
         [FileExtension(AlloyConstants.AlloyFileExtension)]
         [ContentType(AlloyConstants.AlloyContentType)]
-        private static readonly FileExtensionToContentTypeDefinition GoFileExtensionToContentTypeDefinition;
+        private static readonly FileExtensionToContentTypeDefinition AlloyFileExtensionToContentTypeDefinition;
     }
 }

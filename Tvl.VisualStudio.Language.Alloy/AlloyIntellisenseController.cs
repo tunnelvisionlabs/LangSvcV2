@@ -7,9 +7,9 @@
     using Tvl.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text.Editor;
 
-    internal class AlloyIntellisenseController2 : IntellisenseController
+    internal class AlloyIntellisenseController : IntellisenseController
     {
-        public AlloyIntellisenseController2(ITextView textView, IntellisenseControllerProvider provider)
+        public AlloyIntellisenseController(ITextView textView, IntellisenseControllerProvider provider)
             : base(textView, provider)
         {
         }

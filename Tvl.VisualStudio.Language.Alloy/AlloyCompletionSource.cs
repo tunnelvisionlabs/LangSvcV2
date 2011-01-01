@@ -151,7 +151,7 @@
             if (controllers == null)
                 return null;
 
-            return controllers.OfType<AlloyIntellisenseController2>().SingleOrDefault();
+            return controllers.OfType<AlloyIntellisenseController>().SingleOrDefault();
         }
 
         private class KeywordCompletionSet : CompletionSet
