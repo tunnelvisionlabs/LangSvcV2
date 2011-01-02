@@ -15,6 +15,20 @@
     [Name("AlloyIntellisenseController")]
     internal class AlloyIntellisenseControllerProvider : IntellisenseControllerProvider
     {
+        [Import]
+        public IGlyphService GlyphService
+        {
+            get;
+            private set;
+        }
+
+        [Import]
+        public AlloyIntellisenseCache IntellisenseCache
+        {
+            get;
+            private set;
+        }
+
         protected override IntellisenseController TryCreateIntellisenseController(ITextView textView, IList<ITextBuffer> subjectBuffers)
         {
             return new AlloyIntellisenseController(textView, this);
