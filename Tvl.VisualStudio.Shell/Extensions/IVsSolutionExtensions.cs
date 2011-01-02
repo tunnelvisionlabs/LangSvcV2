@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
 
@@ -9,6 +10,8 @@
     {
         public static IEnumerable<IVsHierarchy> GetProjectHierarchies(this IVsSolution solution)
         {
+            Contract.Requires(solution != null);
+
             return GetProjectHierarchies(solution, __VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION);
         }
 
@@ -16,6 +19,7 @@
         {
             if (solution == null)
                 throw new ArgumentNullException("solution");
+            Contract.EndContractBlock();
 
             Guid empty = Guid.Empty;
             IEnumHierarchies ppenum;

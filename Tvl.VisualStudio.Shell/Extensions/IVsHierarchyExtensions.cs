@@ -1,6 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Shell.Extensions
 {
     using System;
+    using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
@@ -11,6 +12,10 @@
 
         public static object GetExtensibilityObject(this IVsHierarchy hierarchy, uint itemId, bool nothrow)
         {
+            if (hierarchy == null)
+                throw new ArgumentNullException("hierarchy");
+            Contract.EndContractBlock();
+
             try
             {
                 object obj;
@@ -36,26 +41,37 @@
 
         public static object GetExtensibilityObject(this IVsHierarchy hierarchy, uint itemId)
         {
+            Contract.Requires(hierarchy != null);
             return GetExtensibilityObject(hierarchy, itemId, false);
         }
 
         public static object GetExtensibilityObjectOrDefault(this IVsHierarchy hierarchy, uint itemId)
         {
+            Contract.Requires(hierarchy != null);
             return GetExtensibilityObject(hierarchy, itemId, true);
         }
 
         public static object GetExtensibilityObject(this IVsHierarchy hierarchy)
         {
+            Contract.Requires(hierarchy != null);
             return GetExtensibilityObject(hierarchy, VSConstants.VSITEMID_ROOT, true);
         }
 
         public static void EnumHierarchyItems(this IVsHierarchy hierarchy, uint itemid, int recursionLevel, bool isSolution, bool visibleOnly, ProcessHierarchyNode processNode)
         {
+            Contract.Requires(hierarchy != null);
+            Contract.Requires(processNode != null);
             EnumHierarchyItems(hierarchy, itemid, recursionLevel, isSolution, visibleOnly, false, processNode);
         }
 
         public static void EnumHierarchyItems(this IVsHierarchy hierarchy, uint itemid, int recursionLevel, bool isSolution, bool visibleOnly, bool nothrow, ProcessHierarchyNode processNode)
         {
+            if (hierarchy == null)
+                throw new ArgumentNullException("hierarchy");
+            if (processNode == null)
+                throw new ArgumentNullException("processNode");
+            Contract.EndContractBlock();
+
             int hr;
             IntPtr nestedHierarchyObj;
             uint nestedItemId;

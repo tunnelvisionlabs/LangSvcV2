@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
     using IEnumString = Microsoft.VisualStudio.OLE.Interop.IEnumString;
@@ -11,7 +12,8 @@
         public static IEnumerable<string> GetMacroNames(this IVsCmdNameMapping commandNameMapping)
         {
             if (commandNameMapping == null)
-                throw new NullReferenceException();
+                throw new ArgumentNullException("commandNameMapping");
+            Contract.EndContractBlock();
 
             IEnumString enumString;
             if (ErrorHandler.Succeeded(commandNameMapping.EnumMacroNames(VSCMDNAMEOPTS.CNO_GETENU, out enumString)))
@@ -34,7 +36,8 @@
         public static IEnumerable<string> GetCommandNames(this IVsCmdNameMapping commandNameMapping)
         {
             if (commandNameMapping == null)
-                throw new NullReferenceException();
+                throw new ArgumentNullException("commandNameMapping");
+            Contract.EndContractBlock();
 
             IEnumString enumString;
             if (ErrorHandler.Succeeded(commandNameMapping.EnumNames(VSCMDNAMEOPTS.CNO_GETENU, out enumString)))

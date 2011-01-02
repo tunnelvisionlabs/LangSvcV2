@@ -14,7 +14,7 @@
         public static IVsCodeWindow GetCodeWindow(this IVsTextView textView)
         {
             if (textView == null)
-                throw new NullReferenceException("Value 'textView' was null in extension instance method.");
+                throw new ArgumentNullException("textView");
             Contract.EndContractBlock();
 
             IObjectWithSite objectWithSite = textView as IObjectWithSite;

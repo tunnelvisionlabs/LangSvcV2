@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
 
@@ -10,7 +11,8 @@
         private static IEnumerable<VsUIPropertyDescriptor> GetProperties(IVsUIDataSource dataSource)
         {
             if (dataSource == null)
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("dataSource");
+            Contract.EndContractBlock();
 
             IVsUIEnumDataSourceProperties verbs;
             if (ErrorHandler.Succeeded(dataSource.EnumProperties(out verbs)))
@@ -33,7 +35,8 @@
         private static IEnumerable<string> GetVerbs(IVsUIDataSource dataSource)
         {
             if (dataSource == null)
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("dataSource");
+            Contract.EndContractBlock();
 
             IVsUIEnumDataSourceVerbs verbs;
             if (ErrorHandler.Succeeded(dataSource.EnumVerbs(out verbs)))
