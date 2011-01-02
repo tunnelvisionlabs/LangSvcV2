@@ -74,6 +74,8 @@
     <Compile Include="AlloyOutliningTaggerProvider.cs" />
     <Compile Include="AlloySignatureHelpSource.cs" />
     <Compile Include="AlloySignatureHelpSourceProvider.cs" />
+    <Compile Include="AlloyTextStructureNavigator.cs" />
+    <Compile Include="AlloyTextStructureNavigatorProvider.cs" />
     <Compile Include="BufferedTreeNodeStreamWrapper.cs" />
     <Compile Include="AlloyIntellisenseCache.AlloyPositionReference.cs" />
     <Compile Include="IntellisenseModel\AlloyFile.cs" />
