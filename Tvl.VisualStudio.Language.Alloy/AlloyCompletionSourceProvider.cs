@@ -2,9 +2,12 @@
 {
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Language.Intellisense;
+    using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Operations;
+    using Microsoft.VisualStudio.TextManager.Interop;
     using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Shell.Extensions;
 
     [Name("AlloyCompletionSourceProvider")]
     [ContentType(AlloyConstants.AlloyContentType)]
@@ -24,6 +27,21 @@
         {
             get;
             private set;
+        }
+
+        [Import]
+        public SVsServiceProvider GlobalServiceProvider
+        {
+            get;
+            private set;
+        }
+
+        public IVsExpansionManager ExpansionManager
+        {
+            get
+            {
+                return GlobalServiceProvider.GetExpansionManager();
+            }
         }
 
         ICompletionSource ICompletionSourceProvider.TryCreateCompletionSource(ITextBuffer textBuffer)
