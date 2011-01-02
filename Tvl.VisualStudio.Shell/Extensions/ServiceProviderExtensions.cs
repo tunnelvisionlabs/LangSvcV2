@@ -10,11 +10,17 @@
     {
         public static TService GetService<TService>(this IServiceProvider sp)
         {
+            Contract.Requires(sp != null);
+            return sp.GetService<TService, TService>();
+        }
+
+        public static TServiceInterface GetService<TServiceClass, TServiceInterface>(this IServiceProvider sp)
+        {
             if (sp == null)
                 throw new ArgumentNullException("sp");
             Contract.EndContractBlock();
 
-            return (TService)sp.GetService(typeof(TService));
+            return (TServiceInterface)sp.GetService(typeof(TServiceClass));
         }
 
         public static IOleServiceProvider TryGetOleServiceProvider(this IServiceProvider sp)

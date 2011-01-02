@@ -87,6 +87,9 @@
     <Reference Include="Microsoft.VisualStudio.Shell.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
@@ -146,12 +149,14 @@
     <Compile Include="CommandStatus.cs" />
     <Compile Include="CommandType.cs" />
     <Compile Include="Extensions\IVsCmdNameMappingExtensions.cs" />
+    <Compile Include="Extensions\IVsExpansionManagerExtensions.cs" />
     <Compile Include="Extensions\IVsHierarchyExtensions.cs" />
     <Compile Include="Extensions\IVsSolutionExtensions.cs" />
     <Compile Include="Extensions\IVsTextViewExtensions.cs" />
     <Compile Include="Extensions\IVsUIDataSourceExtensions.cs" />
     <Compile Include="Extensions\IVsUIShellExtensions.cs" />
     <Compile Include="Extensions\ServiceProviderExtensions.cs" />
+    <Compile Include="Extensions\VsServiceProviderExtensions.cs" />
     <Compile Include="IActiveViewTrackerService.cs" />
     <Compile Include="IMonitorSelectionService.cs" />
     <Compile Include="IOpenedViewTrackerService.cs" />

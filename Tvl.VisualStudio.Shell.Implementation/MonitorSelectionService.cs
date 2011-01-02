@@ -12,15 +12,12 @@
     using Microsoft.VisualStudio.TextManager.Interop;
     using Tvl.VisualStudio.Shell.Extensions;
     using IOleCommandTarget = Microsoft.VisualStudio.OLE.Interop.IOleCommandTarget;
-    using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
     using IOleUndoManager = Microsoft.VisualStudio.OLE.Interop.IOleUndoManager;
     using VsShellUtilities = Microsoft.VisualStudio.Shell.VsShellUtilities;
 
     [Export(typeof(IMonitorSelectionService))]
-    internal sealed class MonitorSelectionService : IMonitorSelectionService
+    internal sealed class MonitorSelectionService : IMonitorSelectionService, IPartImportsSatisfiedNotification
     {
-        private SVsServiceProvider _serviceProvider;
-
         private Listener _listener;
 
         public event EventHandler<ViewChangedEventArgs> ViewChanged;
@@ -28,16 +25,8 @@
         [Import]
         private SVsServiceProvider GlobalServiceProvider
         {
-            get
-            {
-                return _serviceProvider;
-            }
-            set
-            {
-                _serviceProvider = value;
-                if (_listener == null)
-                    _listener = new Listener(this, _serviceProvider);
-            }
+            get;
+            set;
         }
 
         [Import]
@@ -53,6 +42,11 @@
             {
                 return GetTextView(_listener.CurrentDocumentFrame);
             }
+        }
+
+        void IPartImportsSatisfiedNotification.OnImportsSatisfied()
+        {
+            _listener = new Listener(this, GlobalServiceProvider);
         }
 
         private ITextView GetTextView(IVsWindowFrame frame)
@@ -114,7 +108,7 @@
             private MonitorSelectionService _service;
             private uint _adviseCookie;
 
-            public Listener(MonitorSelectionService service, IServiceProvider serviceProvider)
+            public Listener(MonitorSelectionService service, SVsServiceProvider serviceProvider)
             {
                 if (service == null)
                     throw new ArgumentNullException("service");
@@ -122,19 +116,11 @@
                     throw new ArgumentNullException("serviceProvider");
                 Contract.EndContractBlock();
 
-                IOleServiceProvider olesp = serviceProvider.TryGetOleServiceProvider();
-                if (olesp == null)
-                    throw new NotSupportedException();
-
                 _service = service;
-                _monitorSelection = olesp.TryGetGlobalService<SVsShellMonitorSelection, IVsMonitorSelection>();
-                if (_monitorSelection == null)
-                    throw new NotSupportedException();
-
+                _monitorSelection = serviceProvider.GetMonitorSelection();
                 _monitorSelection.AdviseSelectionEvents(this, out _adviseCookie);
             }
 
-            #region Properties
             public IOleUndoManager CurrentUndoManager
             {
                 get
@@ -198,7 +184,6 @@
                     return (IVsWindowFrame)GetCurrentElementValue(VSConstants.VSSELELEMID.SEID_LastWindowFrame);
                 }
             }
-            #endregion
 
             public void Dispose()
             {
