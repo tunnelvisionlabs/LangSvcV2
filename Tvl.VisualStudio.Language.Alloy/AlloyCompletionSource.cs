@@ -9,10 +9,13 @@
     using Microsoft.VisualStudio.Text.Operations;
     using Tvl.VisualStudio.Language.Intellisense;
     using ImageSource = System.Windows.Media.ImageSource;
+    using Regex = System.Text.RegularExpressions.Regex;
+    using RegexOptions = System.Text.RegularExpressions.RegexOptions;
 
-    // see VBCompletionProvider
     internal class AlloyCompletionSource : ICompletionSource
     {
+        private static readonly Regex IdentifierRegex = new Regex("^[A-Za-z_][A-Za-z_']*(/[A-Za-z_][A-Za-z_']*)*$", RegexOptions.Compiled);
+
         private readonly ITextBuffer _textBuffer;
         private readonly AlloyCompletionSourceProvider _provider;
 
@@ -75,7 +78,7 @@
                     break;
                 }
 
-                TextExtent extentOfWord;
+                TextExtent extentOfWord = default(TextExtent);
                 if (extend)
                 {
                     ITextBuffer textBuffer = TextBuffer;
@@ -85,11 +88,14 @@
                     if (extentOfWord.Span.Start == point)
                     {
                         TextExtent extentOfPreviousWord = navigator.GetExtentOfWord(currentPosition - 1);
-                        if (extentOfPreviousWord.IsSignificant && extentOfPreviousWord.Span.End == point)
+                        if (extentOfPreviousWord.IsSignificant && extentOfPreviousWord.Span.End == point && IsCompletionPrefix(extentOfPreviousWord))
                             extentOfWord = extentOfPreviousWord;
+                        else
+                            extend = false;
                     }
                 }
-                else
+
+                if (!extend || !extentOfWord.IsSignificant)
                 {
                     SnapshotSpan span = new SnapshotSpan(point, 0);
                     extentOfWord = new TextExtent(span, false);
@@ -133,6 +139,15 @@
 
                 completionSets.Add(keywordCompletionSet);
             }
+        }
+
+        private static bool IsCompletionPrefix(TextExtent extent)
+        {
+            string text = extent.Span.GetText();
+            if (string.IsNullOrEmpty(text))
+                return false;
+
+            return IdentifierRegex.IsMatch(text);
         }
 
         public void Dispose()
