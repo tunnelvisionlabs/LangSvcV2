@@ -10,13 +10,11 @@
     using Microsoft.VisualStudio.TextManager.Interop;
     using Tvl.VisualStudio.Language.Intellisense;
     using Tvl.VisualStudio.Shell.Extensions;
-    using IComparer = System.Collections.IComparer;
-    using IEqualityComparer = System.Collections.IEqualityComparer;
     using ImageSource = System.Windows.Media.ImageSource;
     using Regex = System.Text.RegularExpressions.Regex;
     using RegexOptions = System.Text.RegularExpressions.RegexOptions;
 
-    internal class AlloyCompletionSource : ICompletionSource
+    internal partial class AlloyCompletionSource : ICompletionSource
     {
         private static readonly Regex IdentifierRegex = new Regex("^[A-Za-z_][A-Za-z_']*(/[A-Za-z_][A-Za-z_']*)*$", RegexOptions.Compiled);
         private static readonly List<Completion> _keywordCompletions = new List<Completion>();
@@ -222,63 +220,6 @@
             ImageSource iconSource = glyphService.GetGlyph(StandardGlyphGroup.GlyphKeyword, StandardGlyphItem.GlyphItemPublic);
             string iconAutomationText = new IconDescription(StandardGlyphGroup.GlyphKeyword, StandardGlyphItem.GlyphItemPublic).ToString();
             return new Completion(displayText, insertionText, description, iconSource, iconAutomationText);
-        }
-
-        private sealed class CompletionDisplayNameComparer : IComparer<Completion>, IEqualityComparer<Completion>, IComparer, IEqualityComparer
-        {
-            private static readonly CompletionDisplayNameComparer _currentCulture = new CompletionDisplayNameComparer(StringComparer.CurrentCulture);
-            private readonly StringComparer _comparer;
-
-            private CompletionDisplayNameComparer(StringComparer comparer)
-            {
-                if (comparer == null)
-                    throw new ArgumentNullException("comparer");
-
-                _comparer = comparer;
-            }
-
-            public static CompletionDisplayNameComparer CurrentCulture
-            {
-                get
-                {
-                    return _currentCulture;
-                }
-            }
-
-            public int Compare(Completion x, Completion y)
-            {
-                string xs = x != null ? x.DisplayText : null;
-                string ys = y != null ? y.DisplayText : null;
-                return _comparer.Compare(xs, ys);
-            }
-
-            public bool Equals(Completion x, Completion y)
-            {
-                string xs = x != null ? x.DisplayText : null;
-                string ys = y != null ? y.DisplayText : null;
-                return _comparer.Equals(xs, ys);
-            }
-
-            public int GetHashCode(Completion obj)
-            {
-                string objs = obj != null ? obj.DisplayText : null;
-                return _comparer.GetHashCode(objs);
-            }
-
-            int IComparer.Compare(object x, object y)
-            {
-                return Compare((Completion)x, (Completion)y);
-            }
-
-            bool IEqualityComparer.Equals(object x, object y)
-            {
-                return Equals((Completion)x, (Completion)y);
-            }
-
-            int IEqualityComparer.GetHashCode(object obj)
-            {
-                return GetHashCode((Completion)obj);
-            }
         }
     }
 }
