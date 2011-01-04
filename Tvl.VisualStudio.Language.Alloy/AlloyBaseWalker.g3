@@ -136,79 +136,15 @@ sigExt
 	;
 
 expr
-	:	^(LBRACE (letDecls|quantDecls) block)
-	|	^(BAR (letDecls|quantDecls) expr)
-	|	^((OR|KW_OR) expr expr)
-	|	^((IFF|KW_IFF) expr expr)
-	|	^((IMPLIES|KW_IMPLIES) expr expr (^(KW_ELSE expr))?)
-	|	^((AND|KW_AND) expr expr)
-	|	^((NOT|KW_NOT) expr)
-	|	^(compareOp expr (NOT|KW_NOT)? expr)
-	|	^((KW_NO|KW_SOME|KW_LONE|KW_ONE|KW_SET|KW_SEQ) expr)
-	|	^((LSHIFT|RSHIFT|RROTATE) expr expr)
-	|	^((PLUS|MINUS) expr)
-	|	^(HASH expr)
-	|	^(INC expr expr)
-	|	^(BITAND expr expr)
-	|	// this alt needs to be corrected since the multiplicity is semantically ambiguous
-		^(ARROW expr arrowMultiplicity* expr)
-	|	^('<:' expr expr)
-	|	^(':>' expr expr)
-	|	^(LBRACK expr expr* RBRACK)
-	|	^(DOT expr expr)
-	|	^((TILDE|STAR|CARET) expr)
-	|	primaryExpr
-	;
-
-letDecls
-	:	^(KW_LET letDecl+)
-	;
-
-quantDecls
-	:	^(quant decl+)
-	;
-
-compareOp
-	:	LT | GT | LE | GE | EQ | KW_IN
-	;
-
-primaryExpr
-	:	KW_NONE
-	|	KW_IDEN
-	|	KW_UNIV
-	|	KW_INT
-	|	KW_SEQINT
-	|	^(LPAREN expr RPAREN)
-	|	^(AT name)
-	|	name
-	|	number
-	|	block
-	//|	'{' decl (',' decl)* ','? blockOrBar '}'
-	;
-
-decl
-	:	^(COLON KW_PRIVATE? KW_DISJ? nameList KW_DISJ? expr)
-	;
-
-letDecl
-	:	^(EQ name expr)
-	;
-
-quant
-	:	KW_ALL | KW_NO | KW_SOME | KW_LONE | KW_ONE | KW_SUM
-	;
-
-arrowMultiplicity
-	:	KW_SOME | KW_ONE | KW_LONE | KW_SET
+	:	.
 	;
 
 block
-	:	^(LBRACE expr* RBRACE)
+	:	^(LBRACE .*)
 	;
 
-blockOrBar
-	:	block
-	|	^(BAR expr)
+decl
+	:	^(COLON .*)
 	;
 
 name
