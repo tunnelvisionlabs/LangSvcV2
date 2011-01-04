@@ -51,14 +51,26 @@
     <Compile Include="AlloyClassifier.cs" />
     <Compile Include="AlloyClassifierProvider.cs" />
     <Compile Include="AlloyCommenterProvider.cs" />
-    <Compile Include="AlloyCompletionSource.CompletionDisplayNameComparer.cs" />
+    <Compile Include="AlloyCompletionSource.CompletionDisplayNameComparer.cs">
+      <DependentUpon>AlloyCompletionSource.cs</DependentUpon>
+    </Compile>
     <Compile Include="AlloyCompletionSource.cs" />
     <Compile Include="AlloyCompletionSourceProvider.cs" />
     <Compile Include="AlloyConstants.cs" />
     <Compile Include="AlloyEditorNavigationSourceWalker.cs" />
-    <Compile Include="AlloyIntellisenseCache.AlloyFileReference.cs" />
+    <Compile Include="AlloyExpressionWalker.g3.cs">
+      <DependentUpon>AlloyExpressionWalker.g3</DependentUpon>
+    </Compile>
     <Compile Include="AlloyIntellisenseCache.cs" />
-    <Compile Include="AlloyIntellisenseCache.UniqueFileComparer.cs" />
+    <Compile Include="AlloyIntellisenseCache.AlloyFileReference.cs">
+      <DependentUpon>AlloyIntellisenseCache.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AlloyIntellisenseCache.UniqueFileComparer.cs">
+      <DependentUpon>AlloyIntellisenseCache.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AlloyIntellisenseCache.AlloyPositionReference.cs">
+      <DependentUpon>AlloyIntellisenseCache.cs</DependentUpon>
+    </Compile>
     <Compile Include="AlloyIntellisenseController.cs" />
     <Compile Include="AlloyIntellisenseControllerProvider.cs" />
     <Compile Include="AlloyOutliningTaggerWalker.cs" />
@@ -78,26 +90,38 @@
     <Compile Include="AlloyTextStructureNavigator.cs" />
     <Compile Include="AlloyTextStructureNavigatorProvider.cs" />
     <Compile Include="BufferedTreeNodeStreamWrapper.cs" />
-    <Compile Include="AlloyIntellisenseCache.AlloyPositionReference.cs" />
     <Compile Include="IntellisenseModel\AlloyFile.cs" />
     <Compile Include="IntellisenseModel\Assertion.cs" />
+    <Compile Include="IntellisenseModel\BinaryExpression.cs" />
+    <Compile Include="IntellisenseModel\BlockExpression.cs" />
     <Compile Include="IntellisenseModel\Command.cs" />
+    <Compile Include="IntellisenseModel\ConditionExpression.cs" />
     <Compile Include="IntellisenseModel\Declaration.cs" />
     <Compile Include="IntellisenseModel\DeclarationAttributes.cs" />
+    <Compile Include="IntellisenseModel\DeclarationExpression.cs" />
     <Compile Include="IntellisenseModel\Element.cs" />
+    <Compile Include="IntellisenseModel\EmptySetExpression.cs" />
+    <Compile Include="IntellisenseModel\Expression.cs" />
+    <Compile Include="IntellisenseModel\ExpressionType.cs" />
     <Compile Include="IntellisenseModel\FactAttributes.cs" />
     <Compile Include="IntellisenseModel\FactBase.cs" />
     <Compile Include="IntellisenseModel\FunctionAttributes.cs" />
     <Compile Include="IntellisenseModel\FunctionBase.cs" />
+    <Compile Include="IntellisenseModel\IdentitySetExpression.cs" />
     <Compile Include="IntellisenseModel\IElementReference.cs" />
     <Compile Include="IntellisenseModel\IElementReference`1.cs" />
     <Compile Include="IntellisenseModel\Enum.cs" />
     <Compile Include="IntellisenseModel\Fact.cs" />
     <Compile Include="IntellisenseModel\Function.cs" />
+    <Compile Include="IntellisenseModel\ConstantExpression.cs" />
     <Compile Include="IntellisenseModel\Module.cs" />
+    <Compile Include="IntellisenseModel\NameExpression.cs" />
     <Compile Include="IntellisenseModel\Predicate.cs" />
+    <Compile Include="IntellisenseModel\RelationExpression.cs" />
     <Compile Include="IntellisenseModel\Signature.cs" />
     <Compile Include="IntellisenseModel\SignatureAttributes.cs" />
+    <Compile Include="IntellisenseModel\UnaryExpression.cs" />
+    <Compile Include="IntellisenseModel\UniversalSetExpression.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -108,6 +132,9 @@
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
     <Antlr3 Include="AlloyBaseWalker.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
+    <Antlr3 Include="AlloyExpressionWalker.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
     <None Include="source.extension.vsixmanifest">

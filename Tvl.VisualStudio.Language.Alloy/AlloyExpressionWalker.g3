@@ -1,0 +1,202 @@
+﻿tree grammar AlloyExpressionWalker;
+
+options {
+    language=CSharp3;
+    tokenVocab=Alloy;
+    ASTLabelType=CommonTree;
+}
+
+@namespace{Tvl.VisualStudio.Language.Alloy}
+
+@header {
+using Tvl.VisualStudio.Language.Alloy.IntellisenseModel;
+using NotImplementedException = System.NotImplementedException;
+}
+
+public
+expr returns [Expression expression]
+@init {
+	List<Expression> expressions = new List<Expression>();
+}
+	:	^(	LBRACE (letDecls|quantDecls) block
+			{throw new NotImplementedException();}
+		)
+	|	^(	BAR (letDecls|quantDecls) expr
+			{throw new NotImplementedException();}
+		)
+	|	^(	(op=OR|op=KW_OR) left=expr right=expr
+			{$expression = Expression.OrElse($left.expression, $right.expression, GetSpan($op));}
+		)
+	|	^(	(op=IFF|op=KW_IFF) left=expr right=expr
+			{$expression = Expression.Iff($left.expression, $right.expression, GetSpan($op));}
+		)
+	|	^(	(op=IMPLIES|op=KW_IMPLIES) left=expr right=expr (^((op2=KW_ELSE|op2=COMMA) e=expr))?
+			{$expression = Expression.Implies($left.expression, $right.expression, $e.expression, GetSpan($op), GetSpan($op2));}
+		)
+	|	^(	(op=AND|op=KW_AND) left=expr right=expr
+			{$expression = Expression.AndAlso($left.expression, $right.expression, GetSpan($op));}
+		)
+	|	^(	(op=NOT|op=KW_NOT) e=expr
+			{$expression = Expression.Not($e.expression, GetSpan($op));}
+		)
+	|	^(	compareOp left=expr (op=NOT|op=KW_NOT)? right=expr
+			{
+			$expression = Expression.MakeBinary($compareOp.nodeType, $left.expression, $right.expression, GetSpan($compareOp.start));
+			if ($op != null)
+				$expression = Expression.Not($expression, GetSpan($op));
+			}
+		)
+	|	^(	unaryQuantOp e=expr
+			{$expression = Expression.MakeUnary($unaryQuantOp.nodeType, $e.expression, GetSpan($unaryQuantOp.start));}
+		)
+	|	^(	shiftOp left=expr right=expr
+			{$expression = Expression.MakeBinary($shiftOp.nodeType, $left.expression, $right.expression, GetSpan($shiftOp.start));}
+		)
+	|	^(	plusMinusOp left=expr
+			(	right=expr
+				{$expression = Expression.MakeBinary($plusMinusOp.nodeType, $left.expression, $right.expression, GetSpan($plusMinusOp.start));}
+			|
+				{$expression = Expression.MakeUnary($plusMinusOp.nodeType, $left.expression, GetSpan($plusMinusOp.start));}
+			)
+		)
+	|	^(	op=COUNT e=expr
+			{$expression = Expression.Count($e.expression, GetSpan($op));}
+		)
+	|	^(	op=OVERRIDE left=expr right=expr
+			{$expression = Expression.Override($left.expression, $right.expression, GetSpan($op));}
+		)
+	|	^(	op=BITAND left=expr right=expr
+			{$expression = Expression.And($left.expression, $right.expression, GetSpan($op));}
+		)
+	|	^(	op=ARROW left=expr arrowMultiplicity? right=expr
+			{$expression = Expression.ArrowProduct($left.expression, $right.expression, GetSpan($op));}
+		)
+	|	^(	op=DOMAIN_RES left=expr right=expr
+			{$expression = Expression.DomainRestriction($left.expression, $right.expression, GetSpan($op));}
+		)
+	|	^(	op=RANGE_RES left=expr right=expr
+			{$expression = Expression.RangeRestriction($left.expression, $right.expression, GetSpan($op));}
+		)
+	|	^(	LBRACK left=expr (e=expr {expressions.Add($e.expression);})* RBRACK
+			{$expression = MakeBoxJoinOrCall($left.expression, expressions, GetSpan($LBRACK), GetSpan($RBRACK));}
+		)
+	|	^(	op=DOT left=expr right=expr
+			{$expression = Expression.DotJoin($left.expression, $right.expression, GetSpan($op));}
+		)
+	|	^(	op=TILDE e=expr
+			{$expression = Expression.Transpose($e.expression, GetSpan($op));}
+		)
+	|	^(	op=STAR e=expr
+			{$expression = Expression.ReflexiveTransitiveClosure($e.expression, GetSpan($op));}
+		)
+	|	^(	op=CARET e=expr
+			{$expression = Expression.TransitiveClosure($e.expression, GetSpan($op));}
+		)
+	|	primaryExpr
+		{$expression = $primaryExpr.expression;}
+	;
+
+nameList
+	:	^(COMMA name+)
+	|	name
+	;
+
+letDecls returns [Expression expression]
+@init {
+	List<Expression> declarations = new List<Expression>();
+}
+	:	^(	KW_LET (letDecl {declarations.Add($letDecl.expression);})+
+			{$expression = Expression.Let(declarations, GetSpan($KW_LET));}
+		)
+	;
+
+quantDecls returns [Expression expression]
+@init {
+	List<Expression> declarations = new List<Expression>();
+}
+	:	^(	quant (decl {declarations.Add($decl.expression);})+
+			{$expression = Expression.Quant($quant.nodeType, declarations, GetSpan($quant.start));}
+		)
+	;
+
+unaryQuantOp returns [ExpressionType nodeType]
+	:	KW_NO	{$nodeType = ExpressionType.None;}
+	|	KW_SOME	{$nodeType = ExpressionType.Some;}
+	|	KW_LONE	{$nodeType = ExpressionType.Lone;}
+	|	KW_ONE	{$nodeType = ExpressionType.One;}
+	|	KW_SET	{$nodeType = ExpressionType.Set;}
+	|	KW_SEQ	{$nodeType = ExpressionType.Sequence;}
+	;
+
+plusMinusOp returns [ExpressionType nodeType]
+	:	PLUS	{$nodeType = ExpressionType.UnionOrAdd;}
+	|	MINUS	{$nodeType = ExpressionType.DifferenceOrSubtract;}
+	;
+
+compareOp returns [ExpressionType nodeType]
+	:	LT		{$nodeType = ExpressionType.LessThan;}
+	|	GT		{$nodeType = ExpressionType.GreaterThan;}
+	|	LE		{$nodeType = ExpressionType.LessThanOrEqualTo;}
+	|	GE		{$nodeType = ExpressionType.GreaterThanOrEqualTo;}
+	|	EQ		{$nodeType = ExpressionType.Equal;}
+	|	KW_IN	{$nodeType = ExpressionType.Subset;}
+	;
+
+shiftOp returns [ExpressionType nodeType]
+	:	LSHIFT	{$nodeType = ExpressionType.LeftShift;}
+	|	RSHIFT	{$nodeType = ExpressionType.RightShift;}
+	|	RROTATE	{$nodeType = ExpressionType.RightRotate;}
+	;
+
+primaryExpr returns [Expression expression]
+	:	KW_NONE					{$expression = Expression.EmptySet(GetSpan($KW_NONE));}
+	|	KW_IDEN					{$expression = Expression.IdentitySet(GetSpan($KW_IDEN));}
+	|	KW_UNIV					{$expression = Expression.UniversalSet(GetSpan($KW_UNIV));}
+	|	KW_INT					{$expression = Expression.Name($KW_INT.Text, GetSpan($KW_INT));}
+	|	KW_SEQINT				{$expression = Expression.Name($KW_SEQINT.Text, GetSpan($KW_SEQINT));}
+	|	^(LPAREN expr RPAREN)	{$expression = Expression.Group($expr.expression, GetSpan($LPAREN), GetSpan($RPAREN));}
+	|	^(AT name)				{throw new NotImplementedException();}//{$expression = Expression.EmptySet(GetSpan($KW_NONE));}
+	|	name					{$expression = $name.expression;}
+	|	INTEGER					{$expression = MakeIntegerConstant($INTEGER);}
+	|	block					{$expression = $block.expression;}
+	//|	'{' decl (',' decl)* ','? blockOrBar '}'
+	;
+
+decl returns [Expression expression]
+	:	^(COLON KW_PRIVATE? KW_DISJ? nameList KW_DISJ? expr)
+	;
+
+letDecl returns [Expression expression]
+	:	^(EQ name expr)
+	;
+
+quant returns [ExpressionType nodeType]
+	:	KW_ALL	{$nodeType = ExpressionType.All;}
+	|	KW_NO	{$nodeType = ExpressionType.None;}
+	|	KW_SOME	{$nodeType = ExpressionType.Some;}
+	|	KW_LONE	{$nodeType = ExpressionType.Lone;}
+	|	KW_ONE	{$nodeType = ExpressionType.One;}
+	|	KW_SUM	{$nodeType = ExpressionType.Sum;}
+	;
+
+arrowMultiplicity
+	:	KW_SOME | KW_ONE | KW_LONE | KW_SET
+	;
+
+block returns [BlockExpression expression]
+@init{List<Expression> expressions = new List<Expression>();}
+	:	^(	LBRACE (expr {expressions.Add($expr.expression);})* RBRACE
+			{$expression = Expression.Block(expressions, GetSpan($LBRACE), GetSpan($RBRACE));}
+		)
+	;
+
+blockOrBar
+	:	block
+	|	^(BAR expr)
+	;
+
+name returns [NameExpression expression]
+	:	^(SLASH name+)
+	|	KW_THIS			{$expression = Expression.Name($KW_THIS.Text, GetSpan($KW_THIS));}
+	|	IDENTIFIER		{$expression = Expression.Name($IDENTIFIER.Text, GetSpan($IDENTIFIER));}
+	;

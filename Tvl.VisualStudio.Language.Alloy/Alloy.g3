@@ -16,27 +16,27 @@ tokens {
 	RBRACK		= ']';
 	LT			= '<';
 	GT			= '>';
-	LE			= '<=';
+	LE			= '=<';
 	GE			= '>=';
 	SLASH		= '/';
 	COLON		= ':';
 	COMMA		= ',';
 	NOT			= '!';
-	HASH		= '#';
+	COUNT		= '#';
 	AND			= '&&';
 	BITAND		= '&';
 	STAR		= '*';
 	PLUS		= '+';
 	MINUS		= '-';
-	INC			= '++';
+	OVERRIDE	= '++';
 	ARROW		= '->';
 	DOT			= '.';
 	LSHIFT		= '<<';
 	RSHIFT		= '>>';
 	RROTATE		= '>>>';
 	IFF			= '<=>';
-	RMAP		= ':>';
-	LMAP		= '<:';
+	DOMAIN_RES	= '<:';
+	RANGE_RES	= ':>';
 	EQ			= '=';
 	IMPLIES		= '=>';
 	AT			= '@';
@@ -209,6 +209,7 @@ sigExt
 	|	'in'^ ref_ ('+'! ref_)*
 	;
 
+public
 expr
 	:	unOpExpr1
 	;
@@ -243,11 +244,11 @@ binOpExpr3
 	;
 
 binOpExpr4
-	:	binOpExpr5 (('=>'|'implies')^ binOpExpr4 (('else') => elseClause)?)*
+	:	binOpExpr5 (('=>'|'implies')^ binOpExpr4 (('else'|',') => elseClause)?)*
 	;
 
 elseClause
-	:	'else'^ binOpExpr5
+	:	('else'|',')^ binOpExpr5
 	;
 
 binOpExpr5
@@ -264,7 +265,7 @@ binOpExpr7
 	;
 
 compareOp
-	:	'<' | '>' | '<=' | '>=' | '=' | 'in'
+	:	'<' | '>' | '=<' | '>=' | '=' | 'in'
 	;
 
 unOpExpr8
@@ -293,8 +294,9 @@ binOpExpr13
 	:	binOpExpr14 ('&'^ binOpExpr14)*
 	;
 
+// let unOpExpr8 handle the right hand side's multiplicity
 binOpExpr14
-	:	binOpExpr15 (arrowMultiplicity? '->'^ ((arrowMultiplicity) => arrowMultiplicity)? binOpExpr15)*
+	:	binOpExpr15 (arrowMultiplicity? '->'^ binOpExpr15)*
 	;
 
 binOpExpr15
