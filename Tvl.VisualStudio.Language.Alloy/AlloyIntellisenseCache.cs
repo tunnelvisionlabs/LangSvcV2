@@ -1,17 +1,15 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy
 {
-    using System;
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
+    using Antlr.Runtime;
+    using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio.Text;
-    using Microsoft.VisualStudio.Utilities;
-    using Tvl.Events;
-    using Tvl.Extensions;
     using Tvl.VisualStudio.Language.Alloy.IntellisenseModel;
     using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;
 
     [Export]
-    internal sealed partial class AlloyIntellisenseCache : IPartImportsSatisfiedNotification
+    internal sealed partial class AlloyIntellisenseCache
     {
         private readonly ReaderWriterLockSlim _updateLock = new ReaderWriterLockSlim();
 
@@ -23,48 +21,23 @@
             return false;
         }
 
-#if TRACK_CONTENT_TYPES
-        private readonly List<WeakReference<ITextBuffer>> _textBuffers = new List<WeakReference<ITextBuffer>>();
-
-        [Import]
-        private ITextBufferFactoryService TextBufferFactoryService
+        public Expression ParseExpression(VirtualSnapshotSpan expressionSpan)
         {
-            get;
-            set;
+            return ParseExpression(expressionSpan.SnapshotSpan);
         }
 
-        [Import]
-        private IContentTypeRegistryService ContentTypeRegistryService
+        public Expression ParseExpression(SnapshotSpan expressionSpan)
         {
-            get;
-            set;
+            string text = expressionSpan.GetText();
+            string sourceName = null;
+            AlloyLexer lexer = new AlloyLexer(new ANTLRStringStream(text, sourceName));
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            AlloyParser parser = new AlloyParser(tokens);
+            AlloyParser.expr_return tree = parser.expr();
+            BufferedTreeNodeStream treeNodeStream = new BufferedTreeNodeStream(tree.Tree);
+            AlloyExpressionWalker walker = new AlloyExpressionWalker(expressionSpan, treeNodeStream);
+            Expression result = walker.expr();
+            return result;
         }
-#endif
-
-        void IPartImportsSatisfiedNotification.OnImportsSatisfied()
-        {
-#if TRACK_CONTENT_TYPES
-            TextBufferFactoryService.TextBufferCreated += WeakEvents.AsWeak<TextBufferCreatedEventArgs>(HandleTextBufferCreated, handler => TextBufferFactoryService.TextBufferCreated -= handler);
-#endif
-        }
-
-#if TRACK_CONTENT_TYPES
-        private void HandleTextBufferCreated(object sender, TextBufferCreatedEventArgs e)
-        {
-            using (var writeLock = _updateLock.WriteLock())
-            {
-                ITextBuffer buffer = e.TextBuffer;
-                if (buffer != null)
-                {
-                    buffer.ContentTypeChanged += WeakEvents.AsWeak<ContentTypeChangedEventArgs>(HandleBufferContentTypeChanged, handler => buffer.ContentTypeChanged -= handler);
-                    _textBuffers.Add(new WeakReference<ITextBuffer>(e.TextBuffer));
-                }
-            }
-        }
-
-        private void HandleBufferContentTypeChanged(object sender, ContentTypeChangedEventArgs e)
-        {
-        }
-#endif
     }
 }
