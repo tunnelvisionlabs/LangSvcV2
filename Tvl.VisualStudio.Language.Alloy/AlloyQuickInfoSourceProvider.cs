@@ -12,9 +12,16 @@
     [Name("AlloyQuickInfoSource")]
     internal class AlloyQuickInfoSourceProvider : IQuickInfoSourceProvider
     {
+        [Import]
+        public AlloyIntellisenseCache IntellisenseCache
+        {
+            get;
+            set;
+        }
+
         public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer)
         {
-            return new AlloyQuickInfoSource(textBuffer);
+            return new AlloyQuickInfoSource(textBuffer, this);
         }
     }
 }
