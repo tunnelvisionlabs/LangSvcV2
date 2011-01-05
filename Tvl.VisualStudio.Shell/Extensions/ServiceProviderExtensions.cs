@@ -4,10 +4,19 @@
     using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell;
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
     public static class ServiceProviderExtensions
     {
+        public static SVsServiceProvider AsVsServiceProvider(this IServiceProvider sp)
+        {
+            if (sp == null)
+                throw new ArgumentNullException("sp");
+
+            return new VsServiceProviderWrapper(sp);
+        }
+
         public static TService GetService<TService>(this IServiceProvider sp)
         {
             Contract.Requires(sp != null);

@@ -4,9 +4,12 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.CallHierarchy.Package.Definitions;
+    using Microsoft.VisualStudio.ComponentModelHost;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
     using Microsoft.VisualStudio.TextManager.Interop;
+    using IGlyphService = Microsoft.VisualStudio.Language.Intellisense.IGlyphService;
     using IOleComponentManager = Microsoft.VisualStudio.OLE.Interop.IOleComponentManager;
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
     using SOleComponentManager = Microsoft.VisualStudio.OLE.Interop.SOleComponentManager;
@@ -73,15 +76,15 @@
             }
         }
 
-#if FORVS10
         public static ICallHierarchy GetCallHierarchy(this SVsServiceProvider serviceProvider)
         {
-            if (serviceProvider == null) throw new ArgumentNullException("serviceProvider"); Contract.EndContractBlock();
+            if (serviceProvider == null)
+                throw new ArgumentNullException("serviceProvider");
+            Contract.EndContractBlock();
             {
                 return serviceProvider.GetService<SCallHierarchy, ICallHierarchy>();
             }
         }
-#endif
 
         public static IVsNavigationTool GetClassView(this SVsServiceProvider serviceProvider)
         {
@@ -143,15 +146,15 @@
             }
         }
 
-#if FORVS10
         public static IComponentModel GetComponentModel(this SVsServiceProvider serviceProvider)
         {
-            if (serviceProvider == null) throw new ArgumentNullException("serviceProvider"); Contract.EndContractBlock();
+            if (serviceProvider == null)
+                throw new ArgumentNullException("serviceProvider");
+            Contract.EndContractBlock();
             {
                 return serviceProvider.GetService<SComponentModel, IComponentModel>();
             }
         }
-#endif
 
         public static IVsComponentSelectorDlg GetComponentSelectorDialog(this SVsServiceProvider serviceProvider)
         {
@@ -370,15 +373,15 @@
             }
         }
 
-#if FORVS10
         public static IGlyphService GetGlyphService(this SVsServiceProvider serviceProvider)
         {
-            if (serviceProvider == null) throw new ArgumentNullException("serviceProvider"); Contract.EndContractBlock();
+            if (serviceProvider == null)
+                throw new ArgumentNullException("serviceProvider");
+            Contract.EndContractBlock();
             {
                 return serviceProvider.GetService<IGlyphService>();
             }
         }
-#endif
 
         public static IVsHelpSystem GetHelpSystem(this SVsServiceProvider serviceProvider)
         {
@@ -963,6 +966,15 @@
             {
                 return serviceProvider.GetService<VsTextManagerClass, IVsTextManager>();
             }
+        }
+
+        public static IVsTextManager2 GetTextManager2(this SVsServiceProvider serviceProvider)
+        {
+            if (serviceProvider == null)
+                throw new ArgumentNullException("serviceProvider");
+            Contract.EndContractBlock();
+
+            return serviceProvider.GetService<VsTextManagerClass, IVsTextManager2>();
         }
 
         public static IVsThreadedWaitDialog GetThreadedWaitDialog(this SVsServiceProvider serviceProvider)
