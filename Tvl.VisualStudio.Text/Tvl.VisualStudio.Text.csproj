@@ -149,9 +149,11 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BlockCommentFormat.cs" />
     <Compile Include="ICommenterProvider.cs" />
     <Compile Include="IContentTypeMetadata.cs" />
     <Compile Include="ITextViewMappingService.cs" />
+    <Compile Include="LineCommentFormat.cs" />
     <Compile Include="Navigation\EditorNavigationTarget.cs" />
     <Compile Include="Navigation\EditorNavigationTypeDefinition.cs" />
     <Compile Include="Navigation\IEditorNavigationSource.cs" />

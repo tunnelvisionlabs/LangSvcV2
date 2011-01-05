@@ -1,6 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Text
 {
+    using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
@@ -8,29 +10,105 @@
 
     public class Commenter : ICommenter
     {
-        public Commenter(ITextView textView, ITextUndoHistoryRegistry textUndoHistoryRegistry, CommentFormat commentFormat)
+        private readonly ITextView _textView;
+        private readonly ITextUndoHistoryRegistry _textUndoHistoryRegistry;
+        private readonly ReadOnlyCollection<CommentFormat> _commentFormats;
+        private readonly ReadOnlyCollection<BlockCommentFormat> _blockFormats;
+        private readonly ReadOnlyCollection<LineCommentFormat> _lineFormats;
+        private readonly bool _useLineComments;
+
+        public Commenter(ITextView textView, ITextUndoHistoryRegistry textUndoHistoryRegistry, params CommentFormat[] commentFormats)
+            : this(textView, textUndoHistoryRegistry, commentFormats.AsEnumerable())
         {
-            this.TextView = textView;
-            this.TextUndoHistoryRegistry = textUndoHistoryRegistry;
-            this.CommentFormat = commentFormat;
+        }
+
+        public Commenter(ITextView textView, ITextUndoHistoryRegistry textUndoHistoryRegistry, IEnumerable<CommentFormat> commentFormats)
+        {
+            if (textView == null)
+                throw new ArgumentNullException("textView");
+            if (textUndoHistoryRegistry == null)
+                throw new ArgumentNullException("textUndoHistoryRegistry");
+            if (commentFormats == null)
+                throw new ArgumentNullException("commentFormats");
+
+            this._textView = textView;
+            this._textUndoHistoryRegistry = textUndoHistoryRegistry;
+            this._commentFormats = commentFormats.ToList().AsReadOnly();
+            this._blockFormats = _commentFormats.OfType<BlockCommentFormat>().ToList().AsReadOnly();
+            this._lineFormats = _commentFormats.OfType<LineCommentFormat>().ToList().AsReadOnly();
+            this._useLineComments = this._lineFormats.Count > 0;
         }
 
         public ITextView TextView
         {
-            get;
-            private set;
+            get
+            {
+                return _textView;
+            }
         }
 
         public ITextUndoHistoryRegistry TextUndoHistoryRegistry
         {
-            get;
-            private set;
+            get
+            {
+                return _textUndoHistoryRegistry;
+            }
         }
 
-        public CommentFormat CommentFormat
+        public virtual ReadOnlyCollection<CommentFormat> CommentFormats
         {
-            get;
-            private set;
+            get
+            {
+                return _commentFormats;
+            }
+        }
+
+        public virtual ReadOnlyCollection<BlockCommentFormat> BlockFormats
+        {
+            get
+            {
+                return _blockFormats;
+            }
+        }
+
+        public virtual BlockCommentFormat PreferredBlockFormat
+        {
+            get
+            {
+                var formats = BlockFormats;
+                if (formats == null || formats.Count == 0)
+                    return null;
+
+                return formats[0];
+            }
+        }
+
+        public virtual ReadOnlyCollection<LineCommentFormat> LineFormats
+        {
+            get
+            {
+                return _lineFormats;
+            }
+        }
+
+        public virtual LineCommentFormat PreferredLineFormat
+        {
+            get
+            {
+                var formats = LineFormats;
+                if (formats == null || formats.Count == 0)
+                    return null;
+
+                return formats[0];
+            }
+        }
+
+        public virtual bool UseLineComments
+        {
+            get
+            {
+                return _useLineComments;
+            }
         }
 
         public virtual NormalizedSnapshotSpanCollection CommentSpans(NormalizedSnapshotSpanCollection spans)
@@ -118,7 +196,6 @@
             /*
              * Use line comments if:
              *  UseLineComments is true
-             *  AND LineStart is not null or empty
              *  AND one of the following is true:
              *
              *  1. there is no selected text
@@ -129,35 +206,32 @@
              * Use block comments if:
              *  We are not using line comments
              *  AND some text is selected
-             *  AND BlockStart is not null or empty
-             *  AND BlockEnd is not null or empty
+             *  AND PreferredBlockFormat is not null
              */
             var startContainingLine = span.Start.GetContainingLine();
             var endContainingLine = span.End.GetContainingLine();
 
-            if (CommentFormat.UseLineComments
-                && !string.IsNullOrEmpty(CommentFormat.LineStart)
+            if (UseLineComments
                 && (span.IsEmpty ||
-                    ((startContainingLine.GetText().Substring(0, span.Start - startContainingLine.Start).Trim().Length == 0)
-                        && ((endContainingLine.GetText().Substring(0, span.End - endContainingLine.Start).Trim().Length == 0)
-                            || (endContainingLine.GetText().Substring(span.End - endContainingLine.Start).Trim().Length == 0))
+                    (string.IsNullOrWhiteSpace(startContainingLine.GetText().Substring(0, span.Start - startContainingLine.Start))
+                        && (string.IsNullOrWhiteSpace(endContainingLine.GetText().Substring(0, span.End - endContainingLine.Start))
+                            || string.IsNullOrWhiteSpace(endContainingLine.GetText().Substring(span.End - endContainingLine.Start)))
                    )))
             {
-                span = CommentLines(span, edit, CommentFormat.LineStart);
+                span = CommentLines(span, edit, PreferredLineFormat);
             }
             else if (
                 span.Length > 0
-                && !string.IsNullOrEmpty(CommentFormat.BlockStart)
-                && !string.IsNullOrEmpty(CommentFormat.BlockEnd)
+                && PreferredBlockFormat != null
                 )
             {
-                span = CommentBlock(span, edit, CommentFormat.BlockStart, CommentFormat.BlockEnd);
+                span = CommentBlock(span, edit, PreferredBlockFormat);
             }
 
             return span;
         }
 
-        protected virtual SnapshotSpan CommentLines(SnapshotSpan span, ITextEdit edit, string lineComment)
+        protected virtual SnapshotSpan CommentLines(SnapshotSpan span, ITextEdit edit, LineCommentFormat format)
         {
             /*
              * Rules for line comments:
@@ -183,14 +257,14 @@
             for (int line = span.Start.GetContainingLine().LineNumber; line <= span.End.GetContainingLine().LineNumber; line++)
             {
                 if (span.Snapshot.GetLineFromLineNumber(line).GetText().Trim().Length > 0)
-                    edit.Insert(span.Snapshot.GetLineFromLineNumber(line).Start + minindex, lineComment);
+                    edit.Insert(span.Snapshot.GetLineFromLineNumber(line).Start + minindex, format.StartText);
             }
 
             span = new SnapshotSpan(span.Start.GetContainingLine().Start, span.End.GetContainingLine().End);
             return span;
         }
 
-        protected virtual SnapshotSpan CommentBlock(SnapshotSpan span, ITextEdit edit, string blockStart, string blockEnd)
+        protected virtual SnapshotSpan CommentBlock(SnapshotSpan span, ITextEdit edit, BlockCommentFormat format)
         {
             //sp. case no selection
             if (span.IsEmpty)
@@ -199,9 +273,9 @@
             }
 
             // add start comment
-            edit.Insert(span.Start, blockStart);
+            edit.Insert(span.Start, format.StartText);
             // add end comment
-            edit.Insert(span.End, blockEnd);
+            edit.Insert(span.End, format.EndText);
 
             return span;
         }
@@ -217,31 +291,24 @@
             if (span.IsEmpty)
             {
                 if (useLineComments)
-                    span = UncommentLines(span, edit, CommentFormat.LineStart);
+                    span = UncommentLines(span, edit, LineFormats);
             }
             else
             {
-                string textblock = span.GetText().Trim();
+                SnapshotSpan resultSpan;
+                if (TryUncommentBlock(span, edit, BlockFormats, out resultSpan))
+                    return resultSpan;
 
-                if (!string.IsNullOrEmpty(CommentFormat.BlockStart)
-                    && !string.IsNullOrEmpty(CommentFormat.BlockEnd)
-                    && textblock.Length >= CommentFormat.BlockStart.Length + CommentFormat.BlockEnd.Length
-                    && textblock.StartsWith(CommentFormat.BlockStart)
-                    && textblock.EndsWith(CommentFormat.BlockEnd))
+                if (useLineComments)
                 {
-                    TrimSpan(ref span);
-                    span = UncommentBlock(span, edit, CommentFormat.BlockStart, CommentFormat.BlockEnd);
-                }
-                else if (useLineComments && !string.IsNullOrEmpty(CommentFormat.LineStart))
-                {
-                    span = UncommentLines(span, edit, CommentFormat.LineStart);
+                    span = UncommentLines(span, edit, LineFormats);
                 }
             }
 
             return span;
         }
 
-        protected virtual SnapshotSpan UncommentLines(SnapshotSpan span, ITextEdit edit, string lineComment)
+        protected virtual SnapshotSpan UncommentLines(SnapshotSpan span, ITextEdit edit, ReadOnlyCollection<LineCommentFormat> formats)
         {
             if (span.End.GetContainingLine().LineNumber > span.Start.GetContainingLine().LineNumber && span.End == span.End.GetContainingLine().Start)
             {
@@ -254,15 +321,19 @@
             }
 
             // Remove line comments
-            int clen = lineComment.Length;
             for (int line = span.Start.GetContainingLine().LineNumber; line <= span.End.GetContainingLine().LineNumber; line++)
             {
                 int i = ScanToNonWhitespaceChar(span.Snapshot.GetLineFromLineNumber(line));
                 string text = span.Snapshot.GetLineFromLineNumber(line).GetText();
-                if ((text.Length > i + clen) && text.Substring(i, clen) == lineComment)
+                foreach (var format in formats)
                 {
-                    // remove line comment.
-                    edit.Delete(span.Snapshot.GetLineFromLineNumber(line).Start.Position + i, clen);
+                    int clen = format.StartText.Length;
+                    if ((text.Length > i + clen) && text.Substring(i, clen) == format.StartText)
+                    {
+                        // remove line comment.
+                        edit.Delete(span.Snapshot.GetLineFromLineNumber(line).Start.Position + i, clen);
+                        break;
+                    }
                 }
             }
 
@@ -270,12 +341,27 @@
             return span;
         }
 
-        protected virtual SnapshotSpan UncommentBlock(SnapshotSpan span, ITextEdit edit, string blockStart, string blockEnd)
+        protected virtual bool TryUncommentBlock(SnapshotSpan span, ITextEdit edit, ReadOnlyCollection<BlockCommentFormat> formats, out SnapshotSpan result)
         {
+            foreach (var format in formats)
+            {
+                if (TryUncommentBlock(span, edit, format, out result))
+                    return true;
+            }
+
+            result = default(SnapshotSpan);
+            return false;
+        }
+
+        protected virtual bool TryUncommentBlock(SnapshotSpan span, ITextEdit edit, BlockCommentFormat format, out SnapshotSpan result)
+        {
+            string blockStart = format.StartText;
+            string blockEnd = format.EndText;
+
             int startLen = span.Start.GetContainingLine().Length;
             int endLen = span.End.GetContainingLine().Length;
 
-            SnapshotSpan result = span;
+            TrimSpan(ref span);
 
             //sp. case no selection, try and uncomment the current line.
             if (span.IsEmpty)
@@ -299,11 +385,13 @@
                         edit.Delete(linespan);
                         edit.Delete(span.Start.Position, blockStart.Length);
                         result = span;
+                        return true;
                     }
                 }
             }
 
-            return result;
+            result = default(SnapshotSpan);
+            return false;
         }
 
         protected static void TrimSpan(ref SnapshotSpan span)

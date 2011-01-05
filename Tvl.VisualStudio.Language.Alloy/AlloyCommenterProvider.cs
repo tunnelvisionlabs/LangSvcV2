@@ -11,7 +11,9 @@
     [ContentType(AlloyConstants.AlloyContentType)]
     public sealed class AlloyCommenterProvider : ICommenterProvider
     {
-        private static readonly CommentFormat CommentFormat = new CommentFormat("//", "/*", "*/");
+        private static readonly LineCommentFormat LineCommentFormat = new LineCommentFormat("//");
+        private static readonly LineCommentFormat LineCommentFormat2 = new LineCommentFormat("--");
+        private static readonly BlockCommentFormat BlockCommentFormat = new BlockCommentFormat("/*", "*/");
 
         [Import]
         private ITextUndoHistoryRegistry TextUndoHistoryRegistry
@@ -22,7 +24,7 @@
 
         public ICommenter GetCommenter(ITextView textView)
         {
-            Func<Commenter> factory = () => new Commenter(textView, TextUndoHistoryRegistry, CommentFormat);
+            Func<Commenter> factory = () => new Commenter(textView, TextUndoHistoryRegistry, LineCommentFormat, LineCommentFormat2, BlockCommentFormat);
             return textView.Properties.GetOrCreateSingletonProperty<Commenter>(factory);
         }
     }

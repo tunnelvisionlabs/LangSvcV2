@@ -11,7 +11,8 @@
     [ContentType(AntlrConstants.AntlrContentType)]
     public sealed class AntlrCommenterProvider : ICommenterProvider
     {
-        private static readonly CommentFormat AntlrCommentFormat = new CommentFormat("//", "/*", "*/");
+        private static readonly LineCommentFormat LineCommentFormat = new LineCommentFormat("//");
+        private static readonly BlockCommentFormat BlockCommentFormat = new BlockCommentFormat("/*", "*/");
 
         [Import]
         private ITextUndoHistoryRegistry TextUndoHistoryRegistry
@@ -22,7 +23,7 @@
 
         public ICommenter GetCommenter(ITextView textView)
         {
-            Func<Commenter> factory = () => new Commenter(textView, TextUndoHistoryRegistry, AntlrCommentFormat);
+            Func<Commenter> factory = () => new Commenter(textView, TextUndoHistoryRegistry, LineCommentFormat, BlockCommentFormat);
             return textView.Properties.GetOrCreateSingletonProperty<Commenter>(factory);
         }
     }
