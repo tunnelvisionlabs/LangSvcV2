@@ -14,6 +14,21 @@
     using Regex = System.Text.RegularExpressions.Regex;
     using RegexOptions = System.Text.RegularExpressions.RegexOptions;
 
+    /*
+     * Establishing identifier visibility scopes.
+     *
+     *  Need a way to express
+     *      "A parameter is visible until the following occurs in order:
+     *          1. The parentheses level (PL) drops from the level at the declaration point by 1.
+     *          2. Exactly one of the following occurs:
+     *              a. The brace level increases by one, then returns to the current level.
+     *              b. The brace level decreases by one.
+     *              c. The end of the file is reached.
+     *              d. (Not relevant to alloy, but is for other languages) A semicolon is reached.
+     *      "A local variable is visible from the declaration point until:
+     *          1. The brace level decreases by one.
+     */
+
     internal partial class AlloyCompletionSource : ICompletionSource
     {
         private static readonly Regex IdentifierRegex = new Regex("^[A-Za-z_][A-Za-z_']*(/[A-Za-z_][A-Za-z_']*)*$", RegexOptions.Compiled);

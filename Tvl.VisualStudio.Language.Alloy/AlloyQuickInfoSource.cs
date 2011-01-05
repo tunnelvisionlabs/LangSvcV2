@@ -58,9 +58,17 @@
                     return;
 
                 var selection = session.TextView.Selection.StreamSelectionSpan;
+                if (selection.IsEmpty || !selection.Contains(new VirtualSnapshotPoint(triggerPoint.Value)))
+                {
+                    SnapshotSpan? expressionSpan = Provider.IntellisenseCache.GetExpressionSpan(triggerPoint.Value);
+                    if (expressionSpan.HasValue)
+                        selection = new VirtualSnapshotSpan(expressionSpan.Value);
+                }
+
                 if (!selection.IsEmpty && selection.Contains(new VirtualSnapshotPoint(triggerPoint.Value)))
                 {
                     applicableToSpan = selection.Snapshot.CreateTrackingSpan(selection.SnapshotSpan, SpanTrackingMode.EdgeExclusive);
+
                     try
                     {
                         Expression currentExpression = Provider.IntellisenseCache.ParseExpression(selection);

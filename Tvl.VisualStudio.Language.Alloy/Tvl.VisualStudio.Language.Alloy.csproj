@@ -11,11 +11,12 @@
     <RootNamespace>Tvl.VisualStudio.Language.Alloy</RootNamespace>
     <AssemblyName>Tvl.VisualStudio.Language.Alloy</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <GeneratePkgDefFile>false</GeneratePkgDefFile>
+    <GeneratePkgDefFile>true</GeneratePkgDefFile>
+    <RegisterWithCodebase>true</RegisterWithCodebase>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
     <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
     <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
-    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -73,6 +74,11 @@
     </Compile>
     <Compile Include="AlloyIntellisenseController.cs" />
     <Compile Include="AlloyIntellisenseControllerProvider.cs" />
+    <Compile Include="AlloyIntellisenseTag.cs" />
+    <Compile Include="AlloyIntellisenseTagger.cs" />
+    <Compile Include="AlloyIntellisenseTaggerProvider.cs" />
+    <Compile Include="AlloyLanguageInfo.cs" />
+    <Compile Include="AlloyLanguagePackage.cs" />
     <Compile Include="AlloyOutliningTaggerWalker.cs" />
     <Compile Include="AlloyQuickInfoSource.cs" />
     <Compile Include="AlloyQuickInfoSourceProvider.cs" />
@@ -90,6 +96,7 @@
     <Compile Include="AlloyTextStructureNavigator.cs" />
     <Compile Include="AlloyTextStructureNavigatorProvider.cs" />
     <Compile Include="BufferedTreeNodeStreamWrapper.cs" />
+    <Compile Include="CodeWindowManager.cs" />
     <Compile Include="IntellisenseModel\AlloyFile.cs" />
     <Compile Include="IntellisenseModel\Assertion.cs" />
     <Compile Include="IntellisenseModel\BinaryExpression.cs" />
@@ -122,6 +129,8 @@
     <Compile Include="IntellisenseModel\SignatureAttributes.cs" />
     <Compile Include="IntellisenseModel\UnaryExpression.cs" />
     <Compile Include="IntellisenseModel\UniversalSetExpression.cs" />
+    <Compile Include="AlloyIntellisenseTagType.cs" />
+    <Compile Include="LanguagePreferences.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -146,6 +155,9 @@
       <HintPath>..\External\Antlr\Antlr3.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.CoreUtility, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
@@ -237,7 +249,13 @@
       <Name>Tvl.VisualStudio.Text</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="VSPackage.resx">
+      <SubType>Designer</SubType>
+      <LogicalName>VSPackage.resources</LogicalName>
+      <MergeWithCTO>true</MergeWithCTO>
+    </EmbeddedResource>
+  </ItemGroup>
   <PropertyGroup>
     <!-- Folder containing AntlrBuildTask.dll -->
     <AntlrBuildTaskPath>$(SolutionDir)External\Antlr</AntlrBuildTaskPath>
