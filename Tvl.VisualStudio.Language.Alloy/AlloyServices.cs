@@ -12,9 +12,12 @@ namespace Tvl.VisualStudio.Language.Alloy
         [BaseDefinition("code")]
         private static readonly ContentTypeDefinition AlloyContentTypeDefinition;
 
-        [Export]
-        [FileExtension(AlloyConstants.AlloyFileExtension)]
-        [ContentType(AlloyConstants.AlloyContentType)]
-        private static readonly FileExtensionToContentTypeDefinition AlloyFileExtensionToContentTypeDefinition;
+        /* The FileExtensionToContentTypeDefinition export is not necessary when the package provides an
+         * IVsLanguageInfo implementation.
+         */
+        //[Export]
+        //[FileExtension(AlloyConstants.AlloyFileExtension)]
+        //[ContentType(AlloyConstants.AlloyContentType)]
+        //private static readonly FileExtensionToContentTypeDefinition AlloyFileExtensionToContentTypeDefinition;
     }
 }

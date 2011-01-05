@@ -4,8 +4,11 @@
 
     public static class AlloyConstants
     {
+        /* The language name (used for the language service) and content type must be the same
+         * due to the way Visual Studio internally registers file extensions and content types.
+         */
         public const string AlloyLanguageName = "Alloy";
-        public const string AlloyContentType = "Alloy";
+        public const string AlloyContentType = AlloyLanguageName;
         public const string AlloyFileExtension = ".als";
 
         // product registration
