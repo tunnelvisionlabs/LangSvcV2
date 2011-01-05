@@ -76,51 +76,49 @@
         {
             switch (token.Type)
             {
-            case AlloyColorizerLexer.EQ:
-            case AlloyColorizerLexer.NEQ:
-            //case AlloyColorizerLexer.EQEQ:
-            case AlloyColorizerLexer.PLUS:
-            //case AlloyColorizerLexer.PLUSEQ:
-            case AlloyColorizerLexer.MINUS:
-            //case AlloyColorizerLexer.MINUSEQ:
-            //case AlloyColorizerLexer.TIMES:
-            //case AlloyColorizerLexer.TIMESEQ:
-            //case AlloyColorizerLexer.DIV:
-            //case AlloyColorizerLexer.DIVEQ:
+            case AlloyColorizerLexer.LPAREN:
+            case AlloyColorizerLexer.RPAREN:
+            case AlloyColorizerLexer.LBRACE:
+            case AlloyColorizerLexer.RBRACE:
+            case AlloyColorizerLexer.LBRACK:
+            case AlloyColorizerLexer.RBRACK:
+                return _standardClassificationService.Operator;
+
             case AlloyColorizerLexer.LT:
             case AlloyColorizerLexer.GT:
             case AlloyColorizerLexer.LE:
             case AlloyColorizerLexer.GE:
+            case AlloyColorizerLexer.COLON:
+            case AlloyColorizerLexer.COMMA:
             case AlloyColorizerLexer.NOT:
+            case AlloyColorizerLexer.COUNT:
             case AlloyColorizerLexer.AND:
             case AlloyColorizerLexer.BITAND:
-            //case AlloyColorizerLexer.ANDEQ:
-            case AlloyColorizerLexer.OR:
-            //case AlloyColorizerLexer.BITOR:
-            //case AlloyColorizerLexer.OREQ:
-            //case AlloyColorizerLexer.COLON:
-            case AlloyColorizerLexer.INC:
-            //case AlloyColorizerLexer.DEC:
-            //case AlloyColorizerLexer.XOR:
-            //case AlloyColorizerLexer.XOREQ:
-            //case AlloyColorizerLexer.MOD:
-            //case AlloyColorizerLexer.MODEQ:
+            case AlloyColorizerLexer.STAR:
+            case AlloyColorizerLexer.PLUS:
+            case AlloyColorizerLexer.MINUS:
+            case AlloyColorizerLexer.OVERRIDE:
+            case AlloyColorizerLexer.ARROW:
+            case AlloyColorizerLexer.DOT:
             case AlloyColorizerLexer.LSHIFT:
             case AlloyColorizerLexer.RSHIFT:
-            //case AlloyColorizerLexer.LSHIFTEQ:
-            //case AlloyColorizerLexer.RSHIFTEQ:
+            case AlloyColorizerLexer.RROTATE:
+            case AlloyColorizerLexer.IFF:
+            case AlloyColorizerLexer.DOMAIN_RES:
+            case AlloyColorizerLexer.RANGE_RES:
+            case AlloyColorizerLexer.EQ:
+            case AlloyColorizerLexer.IMPLIES:
+            case AlloyColorizerLexer.AT:
+            case AlloyColorizerLexer.CARET:
+            case AlloyColorizerLexer.BAR:
+            case AlloyColorizerLexer.OR:
+            case AlloyColorizerLexer.TILDE:
                 return _standardClassificationService.Operator;
-
-            //case AlloyColorizerLexer.CHAR_LITERAL:
-            //    return _standardClassificationService.CharacterLiteral;
-
-            //case AlloyColorizerLexer.STRING_LITERAL:
-            //case AlloyColorizerLexer.RAW_STRING_LITERAL:
-            //    return _standardClassificationService.StringLiteral;
 
             case AlloyColorizerLexer.INTEGER:
                 return _standardClassificationService.NumberLiteral;
 
+            case AlloyColorizerLexer.SLASH:
             case AlloyColorizerLexer.IDENTIFIER:
                 if (Keywords.Contains(token.Text))
                     return _standardClassificationService.Keyword;
@@ -130,6 +128,9 @@
             case AlloyColorizerLexer.COMMENT:
             case AlloyColorizerLexer.ML_COMMENT:
                 return _standardClassificationService.Comment;
+
+            case AlloyColorizerLexer.WS:
+                return _standardClassificationService.WhiteSpace;
 
             default:
                 return null;

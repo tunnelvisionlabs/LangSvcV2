@@ -7,55 +7,46 @@ options {
 
 @namespace{Tvl.VisualStudio.Language.Alloy}
 
-//LET		: 'let';
-//ALL		: 'all';
-//NO		: 'no';
-//SOME	: 'some';
-//LONE	: 'lone';
-//ONE		: 'one';
-//SET		: 'set';
-//SEQ		: 'seq';
-//SUM		: 'sum';
-//IN		: 'in';
-//ELSE	: 'else';
-//PRIVATE	: 'private';
-//MODULE	: 'module';
-OR		: '||';
-IFF		: '<=>';
-IMPLIES	: '=>';
-AND		: '&&';
-NOT		: '!';
-EQ		: '=';
-LT		: '<';
-GT		: '>';
-LE		: '<=';
-GE		: '>=';
-NEQ		: '!=';
-NLT		: '!<';
-NGT		: '!>';
-NLE		: '!<=';
-NGE		: '!>=';
-LSHIFT	: '<<';
-RSHIFT	: '>>';
-RROTATE	: '>>>';
-PLUS	: '+';
-MINUS	: '-';
-COUNT	: '#';
-INC		: '++';
-BITAND	: '&';
-MAP		: '->';
-LC		: '<:';
-GC		: ':>';
-LBRACK	: '[';
-RBRACK	: ']';
-DOT		: '.';
-TILDE	: '~';
-STAR	: '*';
-CARET	: '^';
+LPAREN		: '(';
+RPAREN		: ')';
+LBRACE		: '{';
+RBRACE		: '}';
+LBRACK		: '[';
+RBRACK		: ']';
+LT			: '<';
+GT			: '>';
+LE			: '=<';
+GE			: '>=';
+SLASH		: '/';
+COLON		: ':';
+COMMA		: ',';
+NOT			: '!';
+COUNT		: '#';
+AND			: '&&';
+BITAND		: '&';
+STAR		: '*';
+PLUS		: '+';
+MINUS		: '-';
+OVERRIDE	: '++';
+ARROW		: '->';
+DOT			: '.';
+LSHIFT		: '<<';
+RSHIFT		: '>>';
+RROTATE		: '>>>';
+IFF			: '<=>';
+DOMAIN_RES	: '<:';
+RANGE_RES	: ':>';
+EQ			: '=';
+IMPLIES		: '=>';
+AT			: '@';
+CARET		: '^';
+BAR			: '|';
+OR			: '||';
+TILDE		: '~';
 
 IDENTIFIER
 	:	('a'..'z' | 'A'..'Z' | '_')
-		('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*
+		('a'..'z' | 'A'..'Z' | '_' | '0'..'9' | '\'' | '"')*
 	;
 
 INTEGER
@@ -67,8 +58,8 @@ WS
 	;
 
 NEWLINE
-	:	'\r' '\n'?
-	|	'\n'
+	:	'\r' '\n'?	{Skip();}
+	|	'\n'		{Skip();}
 	;
 
 COMMENT
