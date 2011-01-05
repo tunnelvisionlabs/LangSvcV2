@@ -6,6 +6,7 @@
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.TextManager.Interop;
     using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Text;
     using IConnectionPointContainer = Microsoft.VisualStudio.OLE.Interop.IConnectionPointContainer;
     using IServiceContainer = System.ComponentModel.Design.IServiceContainer;
 

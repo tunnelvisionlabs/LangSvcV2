@@ -1,5 +1,6 @@
-﻿namespace Tvl.VisualStudio.Language.Alloy
+﻿namespace Tvl.VisualStudio.Text
 {
+    using System;
     using System.Linq;
     using Microsoft.VisualStudio;
     using FONTCOLORPREFERENCES2 = Microsoft.VisualStudio.TextManager.Interop.FONTCOLORPREFERENCES2;
@@ -18,11 +19,21 @@
             _preferences = preferences;
         }
 
+        public event EventHandler PreferencesChanged;
+
         public LANGPREFERENCES2 RawPreferences
         {
             get
             {
                 return _preferences;
+            }
+        }
+
+        public bool ShowDropdownBar
+        {
+            get
+            {
+                return _preferences.fDropdownBar != 0;
             }
         }
 
@@ -61,6 +72,13 @@
             }
 
             return VSConstants.S_OK;
+        }
+
+        protected virtual void OnPreferencesChanged(EventArgs e)
+        {
+            var t = PreferencesChanged;
+            if (t != null)
+                t(this, e);
         }
     }
 }

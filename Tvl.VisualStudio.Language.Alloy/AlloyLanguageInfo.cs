@@ -3,67 +3,36 @@
     using System;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
-    using Microsoft.VisualStudio.ComponentModelHost;
-    using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.Shell;
-    using Microsoft.VisualStudio.Text;
-    using Microsoft.VisualStudio.TextManager.Interop;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Text;
 
     [Guid(AlloyConstants.AlloyLanguageGuidString)]
-    internal class AlloyLanguageInfo : IVsLanguageInfo
+    internal class AlloyLanguageInfo : LanguageInfo
     {
-        private readonly SVsServiceProvider _serviceProvider;
-
         public AlloyLanguageInfo(SVsServiceProvider serviceProvider)
+            : base(serviceProvider)
         {
-            if (serviceProvider == null)
-                throw new ArgumentNullException("serviceProvider");
-
-            _serviceProvider = serviceProvider;
         }
 
-        public IComponentModel ComponentModel
+        public override LanguagePreferences LanguagePreferences
         {
             get
             {
-                return _serviceProvider.GetComponentModel();
+                return ComponentModel.GetService<AlloyLanguagePackage>().LanguagePreferences;
             }
         }
 
-        int IVsLanguageInfo.GetCodeWindowManager(IVsCodeWindow pCodeWin, out IVsCodeWindowManager ppCodeWinMgr)
+        public override string LanguageName
         {
-            IVsEditorAdaptersFactoryService adaptersFactory = ComponentModel.GetService<IVsEditorAdaptersFactoryService>();
-
-            IVsTextLines textLines;
-            ErrorHandler.ThrowOnFailure(pCodeWin.GetBuffer(out textLines));
-            IVsTextBuffer bufferAdapter = (IVsTextBuffer)textLines;
-            ITextBuffer textBuffer = adaptersFactory.GetDataBuffer(bufferAdapter);
-            if (textBuffer == null)
+            get
             {
-                ppCodeWinMgr = null;
-                return VSConstants.E_FAIL;
+                return AlloyConstants.AlloyLanguageName;
             }
-
-            ppCodeWinMgr = textBuffer.Properties.GetOrCreateSingletonProperty<CodeWindowManager>(() => new CodeWindowManager());
-            return VSConstants.S_OK;
         }
 
-        int IVsLanguageInfo.GetColorizer(IVsTextLines pBuffer, out IVsColorizer ppColorizer)
-        {
-            ppColorizer = null;
-            return VSConstants.E_FAIL;
-        }
-
-        int IVsLanguageInfo.GetFileExtensions(out string pbstrExtensions)
+        public override int GetFileExtensions(out string pbstrExtensions)
         {
             pbstrExtensions = AlloyConstants.AlloyFileExtension;
-            return VSConstants.S_OK;
-        }
-
-        int IVsLanguageInfo.GetLanguageName(out string bstrName)
-        {
-            bstrName = AlloyConstants.AlloyLanguageName;
             return VSConstants.S_OK;
         }
     }

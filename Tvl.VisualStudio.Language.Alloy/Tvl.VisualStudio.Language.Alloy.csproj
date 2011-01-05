@@ -96,7 +96,6 @@
     <Compile Include="AlloyTextStructureNavigator.cs" />
     <Compile Include="AlloyTextStructureNavigatorProvider.cs" />
     <Compile Include="BufferedTreeNodeStreamWrapper.cs" />
-    <Compile Include="CodeWindowManager.cs" />
     <Compile Include="IntellisenseModel\AlloyFile.cs" />
     <Compile Include="IntellisenseModel\Assertion.cs" />
     <Compile Include="IntellisenseModel\BinaryExpression.cs" />
@@ -130,7 +129,6 @@
     <Compile Include="IntellisenseModel\UnaryExpression.cs" />
     <Compile Include="IntellisenseModel\UniversalSetExpression.cs" />
     <Compile Include="AlloyIntellisenseTagType.cs" />
-    <Compile Include="LanguagePreferences.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
