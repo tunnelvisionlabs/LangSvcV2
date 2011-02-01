@@ -17,9 +17,7 @@
 
         public EditorNavigationSourceAggregator(IEnumerable<IEditorNavigationSource> sources)
         {
-            if (sources == null)
-                throw new ArgumentNullException("sources");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(sources != null, "sources");
 
             this._sources = sources.ToArray();
 
@@ -51,6 +49,7 @@
             try
             {
                 Dispose(true);
+                OnDisposed(EventArgs.Empty);
                 GC.SuppressFinalize(this);
             }
             finally
@@ -74,6 +73,13 @@
         protected virtual void Dispose(bool disposing)
         {
             IsDisposed = true;
+        }
+
+        protected virtual void OnDisposed(EventArgs e)
+        {
+            var t = Disposed;
+            if (t != null)
+                t(this, e);
         }
 
         private void OnNavigationTargetsChanged(EventArgs e)

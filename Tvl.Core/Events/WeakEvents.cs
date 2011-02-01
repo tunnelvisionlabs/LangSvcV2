@@ -8,9 +8,7 @@
     {
         public static EventHandler AsWeak(EventHandler handler, Action<EventHandler> unregister)
         {
-            if (handler == null)
-                throw new ArgumentNullException("handler");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(handler != null, "handler");
 
             if (handler.Method.IsStatic)
                 return handler;
@@ -24,9 +22,7 @@
         public static EventHandler<TEventArgs> AsWeak<TEventArgs>(this EventHandler<TEventArgs> handler, Action<EventHandler<TEventArgs>> unregister)
             where TEventArgs : EventArgs
         {
-            if (handler == null)
-                throw new ArgumentNullException("handler");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(handler != null, "handler");
 
             if (handler.Method.IsStatic)
                 return handler;

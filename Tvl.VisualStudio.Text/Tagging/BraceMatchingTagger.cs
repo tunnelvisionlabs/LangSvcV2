@@ -22,15 +22,10 @@
 
         public BraceMatchingTagger(ITextView textView, ITextBuffer sourceBuffer, IClassifier aggregator, IEnumerable<KeyValuePair<char, char>> matchingCharacters)
         {
-            if (textView == null)
-                throw new ArgumentNullException("text");
-            if (sourceBuffer == null)
-                throw new ArgumentNullException("sourceBuffer");
-            if (aggregator == null)
-                throw new ArgumentNullException("aggregator");
-            if (matchingCharacters == null)
-                throw new ArgumentNullException("matchingCharacters");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(textView != null, "textView");
+            Contract.Requires<ArgumentNullException>(sourceBuffer != null, "sourceBuffer");
+            Contract.Requires<ArgumentNullException>(aggregator != null, "aggregator");
+            Contract.Requires<ArgumentNullException>(matchingCharacters != null, "matchingCharacters");
 
             this.TextView = textView;
             this.SourceBuffer = sourceBuffer;
@@ -252,7 +247,9 @@
 
         private void UpdateAtCaretPosition(CaretPosition caretPosition)
         {
+#pragma warning disable 420 // 'field name': a reference to a volatile field will not be treated as volatile
             var revision = Interlocked.Increment(ref _requestNumber);
+#pragma warning restore 420
 
             CurrentChar = caretPosition.Point.GetPoint(SourceBuffer, caretPosition.Affinity);
             if (!CurrentChar.HasValue)

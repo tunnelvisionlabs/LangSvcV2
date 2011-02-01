@@ -19,7 +19,8 @@
     public sealed class TextViewMappingService : ITextViewMappingService, IWpfTextViewConnectionListener
     {
         private static readonly IWpfTextView[] EmptyViews = new IWpfTextView[0];
-        private readonly ConcurrentDictionary<WeakReference<ITextBuffer>, List<WeakReference<IWpfTextView>>> _bufferToViewsMap;
+        private readonly ConcurrentDictionary<WeakReference<ITextBuffer>, List<WeakReference<IWpfTextView>>> _bufferToViewsMap =
+            new ConcurrentDictionary<WeakReference<ITextBuffer>, List<WeakReference<IWpfTextView>>>();
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         #region ITextViewMappingService Members

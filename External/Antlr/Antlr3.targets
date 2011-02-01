@@ -1,6 +1,6 @@
 ﻿<!--
    [The "BSD licence"]
-   Copyright (c) 2009 Sam Harwell
+   Copyright (c) 2011 Sam Harwell
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -115,13 +115,6 @@
       <AntlrGeneratedCodeFiles Remove="@(AntlrGeneratedCodeFiles)" />
     </ItemGroup>
 
-    <!--
-             When performing an intellisense compile, we don't want to abort the compile if 
-             MarkupCompilePass1 fails.  This would prevent the list of files from being handed 
-             off to the compiler, thereby breaking all intellisense.  For intellisense compiles
-             we set ContinueOnError to true.  The property defined here is used as the value
-             for ContinueOnError on the MarkupCompilePass1 task.
-        -->
     <PropertyGroup>
       <_IntellisenseOnlyCompile>false</_IntellisenseOnlyCompile>
       <_IntellisenseOnlyCompile Condition="'$(BuildingProject)' != 'true'">true</_IntellisenseOnlyCompile>

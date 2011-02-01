@@ -6,7 +6,7 @@
     using System.Linq;
 
     [ContractClassFor(typeof(IEditorNavigationTypeRegistryService))]
-    public sealed class IEditorNavigationTypeRegistryServiceContracts : IEditorNavigationTypeRegistryService
+    public abstract class IEditorNavigationTypeRegistryServiceContracts : IEditorNavigationTypeRegistryService
     {
         IEditorNavigationType IEditorNavigationTypeRegistryService.CreateEditorNavigationType(EditorNavigationTypeDefinition definition, string type, IEnumerable<IEditorNavigationType> baseTypes)
         {

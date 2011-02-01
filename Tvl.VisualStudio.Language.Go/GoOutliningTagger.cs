@@ -7,6 +7,7 @@
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
+    using Antlr.Runtime;
 
     internal sealed class GoOutliningTagger : ITagger<IOutliningRegionTag>
     {
@@ -17,13 +18,9 @@
 
         public GoOutliningTagger(ITextBuffer textBuffer, IBackgroundParser backgroundParser, GoOutliningTaggerProvider provider)
         {
-            if (textBuffer == null)
-                throw new ArgumentNullException("textBuffer");
-            if (backgroundParser == null)
-                throw new ArgumentNullException("backgroundParser");
-            if (provider == null)
-                throw new ArgumentNullException("provider");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
+            Contract.Requires<ArgumentNullException>(provider != null, "provider");
 
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;
@@ -64,8 +61,8 @@
             List<ITagSpan<IOutliningRegionTag>> outliningRegions = new List<ITagSpan<IOutliningRegionTag>>();
             if (antlrParseResultArgs != null)
             {
-                dynamic resultArgs = antlrParseResultArgs.Result;
-                var result = resultArgs.Tree as CommonTree;
+                IAstRuleReturnScope resultArgs = antlrParseResultArgs.Result as IAstRuleReturnScope;
+                CommonTree result = resultArgs != null ? resultArgs.Tree as CommonTree : null;
                 if (result != null && result.Children != null)
                 {
                     foreach (CommonTree child in result.Children)

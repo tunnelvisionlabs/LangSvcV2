@@ -7,7 +7,7 @@
 
     public class AntlrParseResultEventArgs : ParseResultEventArgs
     {
-        public AntlrParseResultEventArgs(ITextSnapshot snapshot, IList<ParseErrorEventArgs> errors, IList<IToken> tokens, ParserRuleReturnScope<IToken> result)
+        public AntlrParseResultEventArgs(ITextSnapshot snapshot, IList<ParseErrorEventArgs> errors, IList<IToken> tokens, IRuleReturnScope result)
             : base(snapshot, errors)
         {
             Tokens = tokens as ReadOnlyCollection<IToken>;
@@ -23,7 +23,7 @@
             private set;
         }
 
-        public IRuleReturnScope<IToken> Result
+        public IRuleReturnScope Result
         {
             get;
             private set;

@@ -10,9 +10,7 @@
     {
         public static IEnumerable<IVsWindowFrame> GetToolWindows(this IVsUIShell shell)
         {
-            if (shell == null)
-                throw new ArgumentNullException("shell");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(shell != null, "shell");
 
             IEnumWindowFrames frames;
             ErrorHandler.ThrowOnFailure(shell.GetToolWindowEnum(out frames));

@@ -13,9 +13,7 @@
     {
         public static IVsCodeWindow GetCodeWindow(this IVsTextView textView)
         {
-            if (textView == null)
-                throw new ArgumentNullException("textView");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(textView != null, "textView");
 
             IObjectWithSite objectWithSite = textView as IObjectWithSite;
             if (objectWithSite == null)

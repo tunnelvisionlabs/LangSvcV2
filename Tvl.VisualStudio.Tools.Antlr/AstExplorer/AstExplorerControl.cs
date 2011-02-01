@@ -193,9 +193,9 @@
                 {
                     try
                     {
-                        dynamic resultArgs = result;
                         this.Tree.Items.Clear();
-                        ITree tree = resultArgs.Tree;
+                        IAstRuleReturnScope resultArgs = result as IAstRuleReturnScope;
+                        ITree tree = resultArgs != null ? resultArgs.Tree as ITree : null;
                         if (tree != null)
                         {
                             if (!tree.IsNil)

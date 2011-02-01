@@ -18,11 +18,8 @@
 
         public BackgroundParserErrorTagger(ITextBuffer textBuffer, IBackgroundParser backgroundParser)
         {
-            if (textBuffer == null)
-                throw new ArgumentNullException("textBuffer");
-            if (backgroundParser == null)
-                throw new ArgumentNullException("backgroundParser");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
 
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;

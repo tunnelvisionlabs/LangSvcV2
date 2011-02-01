@@ -110,11 +110,8 @@
 
             public Listener(MonitorSelectionService service, SVsServiceProvider serviceProvider)
             {
-                if (service == null)
-                    throw new ArgumentNullException("service");
-                if (serviceProvider == null)
-                    throw new ArgumentNullException("serviceProvider");
-                Contract.EndContractBlock();
+                Contract.Requires<ArgumentNullException>(service != null, "service");
+                Contract.Requires<ArgumentNullException>(serviceProvider != null, "serviceProvider");
 
                 _service = service;
                 _monitorSelection = serviceProvider.GetMonitorSelection();

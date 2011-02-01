@@ -25,18 +25,14 @@
 
         public static TServiceInterface GetService<TServiceClass, TServiceInterface>(this IServiceProvider sp)
         {
-            if (sp == null)
-                throw new ArgumentNullException("sp");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(sp != null, "sp");
 
             return (TServiceInterface)sp.GetService(typeof(TServiceClass));
         }
 
         public static IOleServiceProvider TryGetOleServiceProvider(this IServiceProvider sp)
         {
-            if (sp == null)
-                throw new ArgumentNullException("sp");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(sp != null, "sp");
 
             return (IOleServiceProvider)sp.GetService(typeof(IOleServiceProvider));
         }
@@ -44,9 +40,7 @@
         public static TServiceInterface TryGetGlobalService<TServiceClass, TServiceInterface>(this IOleServiceProvider sp)
             where TServiceInterface : class
         {
-            if (sp == null)
-                throw new ArgumentNullException("sp");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(sp != null, "sp");
 
             Guid guidService = typeof(TServiceClass).GUID;
             Guid riid = typeof(TServiceClass).GUID;

@@ -11,9 +11,7 @@
     {
         public static IEnumerable<string> GetMacroNames(this IVsCmdNameMapping commandNameMapping)
         {
-            if (commandNameMapping == null)
-                throw new ArgumentNullException("commandNameMapping");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(commandNameMapping != null, "commandNameMapping");
 
             IEnumString enumString;
             if (ErrorHandler.Succeeded(commandNameMapping.EnumMacroNames(VSCMDNAMEOPTS.CNO_GETENU, out enumString)))
@@ -35,9 +33,7 @@
 
         public static IEnumerable<string> GetCommandNames(this IVsCmdNameMapping commandNameMapping)
         {
-            if (commandNameMapping == null)
-                throw new ArgumentNullException("commandNameMapping");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(commandNameMapping != null, "commandNameMapping");
 
             IEnumString enumString;
             if (ErrorHandler.Succeeded(commandNameMapping.EnumNames(VSCMDNAMEOPTS.CNO_GETENU, out enumString)))

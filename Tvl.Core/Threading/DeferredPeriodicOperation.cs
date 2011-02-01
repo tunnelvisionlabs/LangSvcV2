@@ -10,7 +10,7 @@
         private TimeSpan _deferPeriod;
         private TimeSpan _minimumPeriod;
         private bool _dirty;
-        private int _operating;
+        //private int _operating;
 
         public DeferredPeriodicOperation(Action action, TimeSpan deferPeriod, TimeSpan minimumPeriod, bool requiresInitialOperation)
         {

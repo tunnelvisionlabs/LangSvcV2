@@ -23,13 +23,9 @@
 
         public AntlrEditorNavigationSource(ITextBuffer textBuffer, IBackgroundParser backgroundParser, IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
         {
-            if (textBuffer == null)
-                throw new ArgumentNullException("textBuffer");
-            if (backgroundParser == null)
-                throw new ArgumentNullException("backgroundParser");
-            if (editorNavigationTypeRegistryService == null)
-                throw new ArgumentNullException("editorNavigationTypeRegistryService");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
+            Contract.Requires<ArgumentNullException>(editorNavigationTypeRegistryService != null, "editorNavigationTypeRegistryService");
 
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;
@@ -89,8 +85,8 @@
             List<IEditorNavigationTarget> navigationTargets = new List<IEditorNavigationTarget>();
             if (antlrParseResultArgs != null)
             {
-                dynamic resultArgs = antlrParseResultArgs.Result;
-                var result = resultArgs.Tree as CommonTree;
+                IAstRuleReturnScope resultArgs = antlrParseResultArgs.Result as IAstRuleReturnScope;
+                var result = resultArgs != null ? resultArgs.Tree as CommonTree : null;
                 if (result != null)
                 {
                     foreach (CommonTree child in result.Children)

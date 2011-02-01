@@ -5,13 +5,11 @@
     using Microsoft.VisualStudio.Text;
 
     [ContractClassFor(typeof(IBackgroundParserFactoryService))]
-    public sealed class IBackgroundParserFactoryServiceContracts : IBackgroundParserFactoryService
+    public abstract class IBackgroundParserFactoryServiceContracts : IBackgroundParserFactoryService
     {
         IBackgroundParser IBackgroundParserFactoryService.GetBackgroundParser(ITextBuffer buffer)
         {
-            if (buffer == null)
-                throw new ArgumentNullException("buffer");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
             throw new NotImplementedException();
         }
     }

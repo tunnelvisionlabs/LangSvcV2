@@ -7,7 +7,7 @@
 
     internal sealed class AntlrCompletionIntellisenseController : IIntellisenseController
     {
-        private ICompletionBroker _broker;
+        //private ICompletionBroker _broker;
 
         /// <summary>
         /// Called when a new subject ITextBuffer appears in the graph of buffers associated with

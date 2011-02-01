@@ -1,4 +1,7 @@
-﻿namespace Tvl.VisualStudio.Shell.Commands
+﻿// Field 'field name' is never assigned to, and will always have its default value null
+#pragma warning disable 649
+
+namespace Tvl.VisualStudio.Shell.Commands
 {
     using System;
     using System.Collections.Generic;

@@ -19,9 +19,7 @@
 
         public static VsExpansion[] EnumerateExpansions(this IVsExpansionManager expansionManager, Guid language, string[] snippetTypes, bool shortcutsOnly)
         {
-            if (expansionManager == null)
-                throw new ArgumentNullException("expansionManager");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(expansionManager != null, "expansionManager");
 
             bool includeNullType = false;
             bool includeDuplicates = false;

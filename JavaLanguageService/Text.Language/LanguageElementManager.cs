@@ -54,7 +54,7 @@
 
         private IEnumerable<LanguageElementTag> GetAllLanguageElementsInternal(SnapshotSpan span)
         {
-            IEnumerable<LanguageElementTag> elements;
+            //IEnumerable<LanguageElementTag> elements;
             EnsureValid(span);
             if (!this.enabled)
                 return new LanguageElementTag[0];
@@ -85,6 +85,13 @@
         private void UpdateAfterChange(SnapshotSpan changedSpan)
         {
             throw new NotImplementedException();
+        }
+
+        private void OnLanguageElementsChanged(LanguageElementsChangedEventArgs e)
+        {
+            var t = LanguageElementsChanged;
+            if (t != null)
+                t(this, e);
         }
     }
 }

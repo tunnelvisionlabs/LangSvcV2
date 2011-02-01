@@ -33,5 +33,12 @@
         {
             yield break;
         }
+
+        private void OnTagsChanged(SnapshotSpanEventArgs e)
+        {
+            var t = TagsChanged;
+            if (t != null)
+                t(this, e);
+        }
     }
 }

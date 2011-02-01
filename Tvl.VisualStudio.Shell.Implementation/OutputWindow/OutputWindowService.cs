@@ -9,6 +9,7 @@
     using Microsoft.VisualStudio.Shell.Interop;
     using Tvl.VisualStudio.Shell.Extensions;
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+    using System.Diagnostics.Contracts;
 
     [Export(typeof(IOutputWindowService))]
     internal sealed class OutputWindowService : IOutputWindowService

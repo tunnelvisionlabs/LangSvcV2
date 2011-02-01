@@ -7,7 +7,7 @@
     using System.Diagnostics.Contracts;
 
     [ContractClassFor(typeof(IOutputWindowPane))]
-    public sealed class IOutputWindowPaneContracts : IOutputWindowPane
+    public abstract class IOutputWindowPaneContracts : IOutputWindowPane
     {
         public string Name
         {
@@ -30,16 +30,12 @@
 
         public void Write(string text)
         {
-            if (text == null)
-                throw new ArgumentNullException("text");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(text != null);
         }
 
         public void WriteLine(string text)
         {
-            if (text == null)
-                throw new ArgumentNullException("text");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(text != null);
         }
 
         public void Dispose()

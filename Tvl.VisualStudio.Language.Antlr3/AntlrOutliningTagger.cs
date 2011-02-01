@@ -17,13 +17,9 @@
 
         public AntlrOutliningTagger(ITextBuffer textBuffer, IBackgroundParser backgroundParser, AntlrOutliningTaggerProvider provider)
         {
-            if (textBuffer == null)
-                throw new ArgumentNullException("textBuffer");
-            if (backgroundParser == null)
-                throw new ArgumentNullException("backgroundParser");
-            if (provider == null)
-                throw new ArgumentNullException("provider");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
+            Contract.Requires<ArgumentNullException>(provider != null, "provider");
 
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;

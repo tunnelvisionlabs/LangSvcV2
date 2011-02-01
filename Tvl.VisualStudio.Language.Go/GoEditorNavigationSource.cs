@@ -11,6 +11,7 @@
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Text.Navigation;
+    using Antlr.Runtime;
 
     internal sealed class GoEditorNavigationSource : IEditorNavigationSource
     {
@@ -23,13 +24,9 @@
 
         public GoEditorNavigationSource(ITextBuffer textBuffer, IBackgroundParser backgroundParser, GoEditorNavigationSourceProvider provider)
         {
-            if (textBuffer == null)
-                throw new ArgumentNullException("textBuffer");
-            if (backgroundParser == null)
-                throw new ArgumentNullException("backgroundParser");
-            if (provider == null)
-                throw new ArgumentNullException("provider");
-            Contract.EndContractBlock();
+            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
+            Contract.Requires<ArgumentNullException>(provider != null, "provider");
 
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;
@@ -103,8 +100,8 @@
                 //    navigationTargets.Add(target);
                 //}
 
-                dynamic resultArgs = antlrParseResultArgs.Result;
-                var result = resultArgs.Tree as CommonTree;
+                IAstRuleReturnScope resultArgs = antlrParseResultArgs.Result as IAstRuleReturnScope;
+                var result = resultArgs != null ? resultArgs.Tree as CommonTree : null;
                 if (result != null && result.Children != null)
                 {
                     foreach (CommonTree child in result.Children)
