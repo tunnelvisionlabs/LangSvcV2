@@ -36,6 +36,13 @@
             private set;
         }
 
+        [Import]
+        public AlloyIntellisenseCache IntellisenseCache
+        {
+            get;
+            private set;
+        }
+
         public IVsExpansionManager ExpansionManager
         {
             get

@@ -13,6 +13,7 @@
     using ImageSource = System.Windows.Media.ImageSource;
     using Regex = System.Text.RegularExpressions.Regex;
     using RegexOptions = System.Text.RegularExpressions.RegexOptions;
+    using Tvl.VisualStudio.Language.Alloy.IntellisenseModel;
 
     /*
      * Establishing identifier visibility scopes.
@@ -159,15 +160,43 @@
                     applicableTo = snapshot.CreateTrackingSpan(point.Position - textSoFar.Length, textSoFar.Length, SpanTrackingMode.EdgeInclusive, TrackingFidelityMode.Forward);
                 }
 
+                List<Completion> context = GetContextCompletions(triggerPoint.GetPoint(snapshot), (AlloyIntellisenseController)controller, session);
                 List<Completion> keywords = GetOrCreateKeywordCompletions(Provider.GlyphService);
                 List<Completion> snippets = GetSnippetCompletions(Provider.ExpansionManager, Provider.GlyphService);
+                //List<Completion> signatures = GetSignatureCompletions();
+                //List<Completion> relations = GetRelationCompletions();
+                //List<Completion> predicates = GetPredicateCompletions();
+                //List<Completion> functions = GetFunctionCompletions();
+                //SnapshotSpan? Provider.IntellisenseCache.GetExpressionSpan(triggerPoint.GetPoint(snapshot));
 
-                IEnumerable<Completion> completions = keywords.Concat(snippets);
+                IEnumerable<Completion> completions = context.Concat(keywords).Concat(snippets);
                 IEnumerable<Completion> orderedCompletions = completions.Distinct(CompletionDisplayNameComparer.CurrentCulture).OrderBy(i => i.DisplayText, StringComparer.CurrentCultureIgnoreCase);
 
                 CompletionSet completionSet = new CompletionSet("AlloyCompletions", "Alloy Completions", applicableTo, orderedCompletions, EmptyCompletions);
                 completionSets.Add(completionSet);
             }
+        }
+
+        private List<Completion> GetContextCompletions(SnapshotPoint triggerPoint, AlloyIntellisenseController controller, ICompletionSession session)
+        {
+            // Alloy has the strange property that almost any globally visible token can be used throughout an expression (work out the subtle details later).
+            Element element;
+            if (!Provider.IntellisenseCache.TryResolveContext(AlloyIntellisenseCache.AlloyPositionReference.FromSnapshotPoint(triggerPoint), out element))
+                return new List<Completion>();
+
+            List<Element> scopedDeclarations = element.GetScopedDeclarations().ToList();
+            List<Completion> completions = new List<Completion>();
+            foreach (var decl in scopedDeclarations)
+            {
+                if (decl == null)
+                    continue;
+
+                Completion completion = decl.CreateCompletion(controller, session);
+                if (completion != null)
+                    completions.Add(completion);
+            }
+
+            return completions;
         }
 
         private static bool IsCompletionPrefix(TextExtent extent)

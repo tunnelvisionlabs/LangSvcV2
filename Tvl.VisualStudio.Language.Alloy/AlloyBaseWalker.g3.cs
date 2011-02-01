@@ -12,7 +12,7 @@
         private readonly IOutputWindowService _outputWindowService;
 
         public AlloyBaseWalker(ITreeNodeStream input, ITextSnapshot snapshot, IOutputWindowService outputWindowService)
-            : base(new BufferedTreeNodeStreamWrapper(input))
+            : base(input)
         {
             _snapshot = snapshot;
             _outputWindowService = outputWindowService;

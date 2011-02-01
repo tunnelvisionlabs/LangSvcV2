@@ -31,7 +31,9 @@
 
         protected override IntellisenseController TryCreateIntellisenseController(ITextView textView, IList<ITextBuffer> subjectBuffers)
         {
-            return new AlloyIntellisenseController(textView, this);
+            AlloyIntellisenseController controller = new AlloyIntellisenseController(textView, this);
+            textView.Properties[typeof(AlloyIntellisenseController)] = controller;
+            return controller;
         }
     }
 }

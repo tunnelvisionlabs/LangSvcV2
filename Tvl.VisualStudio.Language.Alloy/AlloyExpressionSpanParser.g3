@@ -1,0 +1,71 @@
+﻿parser grammar AlloyExpressionSpanParser;
+
+options {
+    language=CSharp3;
+	tokenVocab=Alloy;
+    TokenLabelType=CommonToken;
+}
+
+@namespace{Tvl.VisualStudio.Language.Alloy}
+
+public
+expr
+	:	unaryPreOp* suffixedPrimaryExpr (binaryOp unaryPreOp* suffixedPrimaryExpr)*
+	;
+
+singleExpr
+	:	expr EOF
+	;
+
+binaryOp
+	:	(	BAR
+		|	OR | KW_OR
+		|	IFF | KW_IFF
+		|	IMPLIES | KW_IMPLIES
+		|	COMMA | KW_ELSE
+		|	AND | KW_AND
+		|	LT | GT | LE | GE | EQ | KW_IN
+		|	LSHIFT | RSHIFT | RROTATE
+		|	PLUS | MINUS
+		|	OVERRIDE
+		|	BITAND
+		|	DOMAIN_RES | RANGE_RES
+		|	DOT
+		|	COLON
+		)
+	|	(KW_SOME | KW_ONE | KW_LONE | KW_SET)? ARROW
+	;
+
+unaryPreOp
+	:	TILDE | STAR | CARET | NOT
+	|	KW_NOT
+	|	KW_PRIVATE
+	|	KW_DISJ
+	;
+
+suffixedPrimaryExpr
+	:	primaryExpr
+		(	LBRACK expr RBRACK
+		)*
+	;
+
+primaryExpr
+	:	KW_NONE
+	|	KW_IDEN
+	|	KW_UNIV
+	|	KW_INT2
+	|	KW_SEQINT
+	|	LPAREN expr RPAREN
+	|	AT? name
+	|	INTEGER
+	|	block
+	;
+
+block
+	:	LBRACE expr* RBRACE
+	;
+
+name
+	:	(KW_THIS|IDENTIFIER) (SLASH IDENTIFIER)*
+	;
+

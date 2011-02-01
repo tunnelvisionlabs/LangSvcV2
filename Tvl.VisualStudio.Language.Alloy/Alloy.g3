@@ -244,7 +244,7 @@ binOpExpr3
 	;
 
 binOpExpr4
-	:	binOpExpr5 (('=>'|'implies')^ binOpExpr4 (('else'|',') => elseClause)?)*
+	:	binOpExpr5 (options{k=1; greedy=true;} : ('=>'|'implies')^ binOpExpr4 (options{k=1; greedy=true;} : elseClause)?)*
 	;
 
 elseClause

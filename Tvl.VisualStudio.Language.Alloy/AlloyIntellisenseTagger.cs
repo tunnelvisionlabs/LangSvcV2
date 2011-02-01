@@ -97,6 +97,24 @@
          *      IDENTIFIER
          *      INTEGER
          *      '}'
+         *  5. inner expression tokens (which cannot lead or trail)
+         *      '/'
+         *      '|'
+         *      '||', 'or'
+         *      '<=>', 'iff'
+         *      '=>', 'implies'
+         *      'else', ','
+         *      '&&', 'and'
+         *      '<', '>', '=<', '>=', '=', 'in'
+         *      '<<', '>>', '>>>'
+         *      '++'
+         *      '&'
+         *      '->'
+         *      '<:'
+         *      ':>'
+         *      '['
+         *      '.'
+         *      'disj', ':'
          */
 
         public IEnumerable<ITagSpan<AlloyIntellisenseTag>> GetTags(NormalizedSnapshotSpanCollection spans)
@@ -107,6 +125,7 @@
                 SnapshotSpan documentSpan = new SnapshotSpan(snapshot, 0, snapshot.Length);
                 var tags = ClassificationTagAggregator.GetTags(documentSpan);
                 //var openBraces = tags.Where(i => i.Tag.ClassificationType.c
+                _initialized = true;
             }
 
             //SnapshotSpan span;span.TranslateTo(null, SpanTrackingMode.
