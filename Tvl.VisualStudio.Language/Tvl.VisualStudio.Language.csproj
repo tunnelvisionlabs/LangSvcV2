@@ -113,6 +113,9 @@
     <Reference Include="Microsoft.VisualStudio.Shell.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
@@ -170,6 +173,8 @@
     <Compile Include="Intellisense\CompletionHelper.cs" />
     <Compile Include="Intellisense\CompletionInfo.cs" />
     <Compile Include="Intellisense\CompletionInfoType.cs" />
+    <Compile Include="Intellisense\CompletionSource.cs" />
+    <Compile Include="Intellisense\CompletionSourceProvider.cs" />
     <Compile Include="Intellisense\IntellisenseCommandFilter.cs" />
     <Compile Include="Intellisense\IntellisenseController.cs" />
     <Compile Include="Intellisense\IntellisenseControllerProvider.cs" />

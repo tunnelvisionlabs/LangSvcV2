@@ -8,29 +8,16 @@
     using Microsoft.VisualStudio.TextManager.Interop;
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Language.Intellisense;
 
     [Name("AlloyCompletionSourceProvider")]
     [ContentType(AlloyConstants.AlloyContentType)]
     [Order(Before = "default")]
     [Export(typeof(ICompletionSourceProvider))]
-    internal class AlloyCompletionSourceProvider : ICompletionSourceProvider
+    internal class AlloyCompletionSourceProvider : CompletionSourceProvider
     {
         [Import]
         public ITextStructureNavigatorSelectorService TextStructureNavigatorSelectorService
-        {
-            get;
-            private set;
-        }
-
-        [Import]
-        public IGlyphService GlyphService
-        {
-            get;
-            private set;
-        }
-
-        [Import]
-        public SVsServiceProvider GlobalServiceProvider
         {
             get;
             private set;
@@ -43,15 +30,7 @@
             private set;
         }
 
-        public IVsExpansionManager ExpansionManager
-        {
-            get
-            {
-                return GlobalServiceProvider.GetExpansionManager();
-            }
-        }
-
-        ICompletionSource ICompletionSourceProvider.TryCreateCompletionSource(ITextBuffer textBuffer)
+        public override ICompletionSource TryCreateCompletionSource(ITextBuffer textBuffer)
         {
             return new AlloyCompletionSource(textBuffer, this);
         }

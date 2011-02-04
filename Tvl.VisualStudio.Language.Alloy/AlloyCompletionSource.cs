@@ -7,13 +7,10 @@
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Operations;
-    using Microsoft.VisualStudio.TextManager.Interop;
+    using Tvl.VisualStudio.Language.Alloy.IntellisenseModel;
     using Tvl.VisualStudio.Language.Intellisense;
-    using Tvl.VisualStudio.Shell.Extensions;
-    using ImageSource = System.Windows.Media.ImageSource;
     using Regex = System.Text.RegularExpressions.Regex;
     using RegexOptions = System.Text.RegularExpressions.RegexOptions;
-    using Tvl.VisualStudio.Language.Alloy.IntellisenseModel;
 
     /*
      * Establishing identifier visibility scopes.
@@ -30,34 +27,20 @@
      *          1. The brace level decreases by one.
      */
 
-    internal partial class AlloyCompletionSource : ICompletionSource
+    internal partial class AlloyCompletionSource : CompletionSource
     {
         private static readonly Regex IdentifierRegex = new Regex("^[A-Za-z_][A-Za-z_']*(/[A-Za-z_][A-Za-z_']*)*$", RegexOptions.Compiled);
-        private static readonly List<Completion> _keywordCompletions = new List<Completion>();
-        private static readonly Completion[] EmptyCompletions = new Completion[0];
-
-        private readonly ITextBuffer _textBuffer;
-        private readonly AlloyCompletionSourceProvider _provider;
 
         public AlloyCompletionSource(ITextBuffer textBuffer, AlloyCompletionSourceProvider provider)
+            : base(textBuffer, provider, AlloyConstants.AlloyLanguageGuid)
         {
-            this._textBuffer = textBuffer;
-            this._provider = provider;
         }
 
-        public ITextBuffer TextBuffer
+        public new AlloyCompletionSourceProvider Provider
         {
             get
             {
-                return _textBuffer;
-            }
-        }
-
-        public AlloyCompletionSourceProvider Provider
-        {
-            get
-            {
-                return _provider;
+                return (AlloyCompletionSourceProvider)base.Provider;
             }
         }
 
@@ -69,7 +52,15 @@
             }
         }
 
-        public void AugmentCompletionSession(ICompletionSession session, IList<CompletionSet> completionSets)
+        public override IEnumerable<string> Keywords
+        {
+            get
+            {
+                return AlloyClassifier.Keywords;
+            }
+        }
+
+        public override void AugmentCompletionSession(ICompletionSession session, IList<CompletionSet> completionSets)
         {
             if (session == null || completionSets == null)
                 return;
@@ -160,9 +151,9 @@
                     applicableTo = snapshot.CreateTrackingSpan(point.Position - textSoFar.Length, textSoFar.Length, SpanTrackingMode.EdgeInclusive, TrackingFidelityMode.Forward);
                 }
 
-                List<Completion> context = GetContextCompletions(triggerPoint.GetPoint(snapshot), (AlloyIntellisenseController)controller, session);
-                List<Completion> keywords = GetOrCreateKeywordCompletions(Provider.GlyphService);
-                List<Completion> snippets = GetSnippetCompletions(Provider.ExpansionManager, Provider.GlyphService);
+                IEnumerable<Completion> context = GetContextCompletions(triggerPoint.GetPoint(snapshot), (AlloyIntellisenseController)controller, session);
+                IEnumerable<Completion> keywords = GetKeywordCompletions();
+                IEnumerable<Completion> snippets = GetSnippetCompletions();
                 //List<Completion> signatures = GetSignatureCompletions();
                 //List<Completion> relations = GetRelationCompletions();
                 //List<Completion> predicates = GetPredicateCompletions();
@@ -208,10 +199,6 @@
             return IdentifierRegex.IsMatch(text);
         }
 
-        public void Dispose()
-        {
-        }
-
         private static IntellisenseController GetControllerForView(ITextView view)
         {
             object controllerList;
@@ -223,47 +210,6 @@
                 return null;
 
             return controllers.OfType<AlloyIntellisenseController>().SingleOrDefault();
-        }
-
-        private static List<Completion> GetOrCreateKeywordCompletions(IGlyphService glyphService)
-        {
-            if (_keywordCompletions.Count == 0)
-            {
-                _keywordCompletions.AddRange(AlloyClassifier.Keywords.Select(i => CreateKeywordCompletion(i, glyphService)));
-            }
-
-            return _keywordCompletions;
-        }
-
-        private static List<Completion> GetSnippetCompletions(IVsExpansionManager expansionManager, IGlyphService glyphService)
-        {
-            List<Completion> snippetCompletions = new List<Completion>();
-            Guid languageGuid = AlloyConstants.AlloyLanguageGuid;
-            VsExpansion[] expansions = expansionManager.EnumerateExpansions(languageGuid, new string[] { "Expansion" }, false);
-            ImageSource iconSource = glyphService.GetGlyph(StandardGlyphGroup.GlyphCSharpExpansion, StandardGlyphItem.GlyphItemPublic);
-            string iconAutomationText = new IconDescription(StandardGlyphGroup.GlyphCSharpExpansion, StandardGlyphItem.GlyphItemPublic).ToString();
-            foreach (var expansion in expansions)
-            {
-                if (string.IsNullOrEmpty(expansion.shortcut))
-                    continue;
-
-                string displayText = expansion.shortcut;
-                string insertionText = expansion.shortcut;
-                string description = expansion.description;
-                snippetCompletions.Add(new Completion(displayText, insertionText, description, iconSource, iconAutomationText));
-            }
-
-            return snippetCompletions;
-        }
-
-        private static Completion CreateKeywordCompletion(string keyword, IGlyphService glyphService)
-        {
-            string displayText = keyword;
-            string insertionText = keyword;
-            string description = null;
-            ImageSource iconSource = glyphService.GetGlyph(StandardGlyphGroup.GlyphKeyword, StandardGlyphItem.GlyphItemPublic);
-            string iconAutomationText = new IconDescription(StandardGlyphGroup.GlyphKeyword, StandardGlyphItem.GlyphItemPublic).ToString();
-            return new Completion(displayText, insertionText, description, iconSource, iconAutomationText);
         }
     }
 }
