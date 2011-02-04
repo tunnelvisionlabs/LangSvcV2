@@ -1,18 +1,20 @@
 ﻿namespace Tvl.VisualStudio.Language.Intellisense
 {
     using System;
-    using Microsoft.VisualStudio;
-    using Microsoft.VisualStudio.Shell;
-    using Microsoft.VisualStudio.TextManager.Interop;
-    using Tvl.VisualStudio.Shell;
-    using Microsoft.VisualStudio.Language.Intellisense;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
-    using System.Collections.Generic;
-    using Microsoft.VisualStudio.Text.Editor;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Language.Intellisense;
+    using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Editor;
+    using Microsoft.VisualStudio.TextManager.Interop;
+    using Tvl.Extensions;
+    using Tvl.VisualStudio.Shell;
     using Tvl.VisualStudio.Text;
     using OLECMDEXECOPT = Microsoft.VisualStudio.OLE.Interop.OLECMDEXECOPT;
+    using VSOBJGOTOSRCTYPE = Microsoft.VisualStudio.Shell.Interop.VSOBJGOTOSRCTYPE;
 
     public class IntellisenseCommandFilter : TextViewCommandFilter
     {
@@ -106,62 +108,122 @@
         {
             bool handled = Controller.PreprocessCommand(ref commandGroup, commandId, (OLECMDEXECOPT)executionOptions, pvaIn, pvaOut);
 
-            if (!handled)
+            try
             {
-                IIntellisenseCommandTarget sessionStack = Controller.IntellisenseSessionStack as IIntellisenseCommandTarget;
-                IntellisenseKeyboardCommand? command = TranslateKeyboardCommand(commandGroup, commandId);
-                if (sessionStack != null && command.HasValue)
-                    handled = sessionStack.ExecuteKeyboardCommand(command.Value);
-            }
-
-            if (commandGroup == VsMenus.guidStandardCommandSet2K)
-            {
-                switch ((VSConstants.VSStd2KCmdID)commandId)
+                if (!handled)
                 {
-                case VSConstants.VSStd2KCmdID.UP_EXT:
-                    if (DismissAllCompletionSessions() || AnySignatureHelpSessions())
-                    {
-                        commandId = (uint)VSConstants.VSStd2KCmdID.UP;
-                        handled = false;
-                    }
-                    break;
-
-                case VSConstants.VSStd2KCmdID.DOWN_EXT:
-                    if (DismissAllCompletionSessions() || AnySignatureHelpSessions())
-                    {
-                        commandId = (uint)VSConstants.VSStd2KCmdID.DOWN;
-                        handled = false;
-                    }
-                    break;
-
-                case ECMD_SMARTTASKS:
-                    ExpandSmartTagUnderCaret();
-                    handled = true;
-                    break;
-
-                case VSConstants.VSStd2KCmdID.SHOWMEMBERLIST:
-                    CompletionHelper.DoTriggerCompletion(Controller, CompletionInfoType.ContextInfo, false, IntellisenseInvocationType.Default);
-                    return true;
-
-                case VSConstants.VSStd2KCmdID.COMPLETEWORD:
-                    CompletionHelper.DoTriggerCompletion(Controller, CompletionInfoType.GlobalInfo, false, IntellisenseInvocationType.Default);
-                    return true;
-
-                case VSConstants.VSStd2KCmdID.PARAMINFO:
-                    CompletionHelper.DoTriggerCompletion(Controller, CompletionInfoType.ContextInfo, true, IntellisenseInvocationType.Default);
-                    return true;
-
-                case VSConstants.VSStd2KCmdID.QUICKINFO:
-                    throw new NotImplementedException();
-
-                case VSConstants.VSStd2KCmdID.ToggleConsumeFirstCompletionMode:
-                    _isInConsumeFirstCompletionMode = !_isInConsumeFirstCompletionMode;
-                    handled = true;
-                    break;
-
-                default:
-                    break;
+                    IIntellisenseCommandTarget sessionStack = Controller.IntellisenseSessionStack as IIntellisenseCommandTarget;
+                    IntellisenseKeyboardCommand? command = TranslateKeyboardCommand(commandGroup, commandId);
+                    if (sessionStack != null && command.HasValue)
+                        handled = sessionStack.ExecuteKeyboardCommand(command.Value);
                 }
+
+                if (commandGroup == VsMenus.guidStandardCommandSet97)
+                {
+                    VSOBJGOTOSRCTYPE? gotoSourceType = null;
+                    switch ((VSConstants.VSStd97CmdID)commandId)
+                    {
+                    case VSConstants.VSStd97CmdID.GotoDecl:
+                        {
+                            if (!Controller.SupportsGotoDeclaration)
+                                throw new NotSupportedException("The IntelliSense controller does not support the Go To Declaration operation.");
+
+                            gotoSourceType = VSOBJGOTOSRCTYPE.GS_DECLARATION;
+                            handled = true;
+                            break;
+                        }
+
+                    case VSConstants.VSStd97CmdID.GotoDefn:
+                        {
+                            if (!Controller.SupportsGotoDefinition)
+                                throw new NotSupportedException("The IntelliSense controller does not support the Go To Definition operation.");
+
+                            gotoSourceType = VSOBJGOTOSRCTYPE.GS_DEFINITION;
+                            handled = true;
+                            break;
+                        }
+
+                    case VSConstants.VSStd97CmdID.GotoRef:
+                        {
+                            if (!Controller.SupportsGotoReference)
+                                throw new NotSupportedException("The IntelliSense controller does not support the Go To Reference operation.");
+
+                            gotoSourceType = VSOBJGOTOSRCTYPE.GS_REFERENCE;
+                            handled = true;
+                            break;
+                        }
+
+                    default:
+                        break;
+                    }
+
+                    if (gotoSourceType.HasValue)
+                    {
+                        ITextView textView = Controller.TextView;
+                        SnapshotPoint? point = textView.Caret.Position.Point.GetPoint(textView.TextBuffer, PositionAffinity.Predecessor);
+                        ITrackingPoint triggerPoint = textView.TextBuffer.CurrentSnapshot.CreateTrackingPoint(point.Value.Position, PointTrackingMode.Positive);
+                        Controller.GoToSource(gotoSourceType.Value, triggerPoint);
+                        handled = true;
+                    }
+                }
+                else if (commandGroup == VsMenus.guidStandardCommandSet2K)
+                {
+                    switch ((VSConstants.VSStd2KCmdID)commandId)
+                    {
+                    case VSConstants.VSStd2KCmdID.UP_EXT:
+                        if (DismissAllCompletionSessions() || AnySignatureHelpSessions())
+                        {
+                            commandId = (uint)VSConstants.VSStd2KCmdID.UP;
+                            handled = false;
+                        }
+                        break;
+
+                    case VSConstants.VSStd2KCmdID.DOWN_EXT:
+                        if (DismissAllCompletionSessions() || AnySignatureHelpSessions())
+                        {
+                            commandId = (uint)VSConstants.VSStd2KCmdID.DOWN;
+                            handled = false;
+                        }
+                        break;
+
+                    case ECMD_SMARTTASKS:
+                        ExpandSmartTagUnderCaret();
+                        handled = true;
+                        break;
+
+                    case VSConstants.VSStd2KCmdID.SHOWMEMBERLIST:
+                        CompletionHelper.DoTriggerCompletion(Controller, CompletionInfoType.ContextInfo, false, IntellisenseInvocationType.Default);
+                        handled = true;
+                        break;
+
+                    case VSConstants.VSStd2KCmdID.COMPLETEWORD:
+                        CompletionHelper.DoTriggerCompletion(Controller, CompletionInfoType.GlobalInfo, false, IntellisenseInvocationType.Default);
+                        handled = true;
+                        break;
+
+                    case VSConstants.VSStd2KCmdID.PARAMINFO:
+                        CompletionHelper.DoTriggerCompletion(Controller, CompletionInfoType.ContextInfo, true, IntellisenseInvocationType.Default);
+                        handled = true;
+                        break;
+
+                    case VSConstants.VSStd2KCmdID.QUICKINFO:
+                        throw new NotImplementedException();
+
+                    case VSConstants.VSStd2KCmdID.ToggleConsumeFirstCompletionMode:
+                        _isInConsumeFirstCompletionMode = !_isInConsumeFirstCompletionMode;
+                        handled = true;
+                        break;
+
+                    default:
+                        break;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Controller.PostprocessCommand();
+                e.PreserveStackTrace();
+                throw;
             }
 
             if (handled)

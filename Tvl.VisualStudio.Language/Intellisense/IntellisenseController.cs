@@ -2,18 +2,20 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
-    using System.Text;
+    using System.Threading.Tasks;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
-    using OLECMDEXECOPT = Microsoft.VisualStudio.OLE.Interop.OLECMDEXECOPT;
-    using VsMenus = Microsoft.VisualStudio.Shell.VsMenus;
-    using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
-    using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+    using Tvl.Extensions;
     using IVsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
     using Marshal = System.Runtime.InteropServices.Marshal;
-    using System.Diagnostics;
+    using OLECMDEXECOPT = Microsoft.VisualStudio.OLE.Interop.OLECMDEXECOPT;
+    using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
+    using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+    using VsMenus = Microsoft.VisualStudio.Shell.VsMenus;
+    using VSOBJGOTOSRCTYPE = Microsoft.VisualStudio.Shell.Interop.VSOBJGOTOSRCTYPE;
 
     public class IntellisenseController : IIntellisenseController
     {
@@ -219,6 +221,29 @@
             {
                 return _isProcessingCommand;
             }
+        }
+
+        public virtual void GoToSource(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
+        {
+            Task<IEnumerable<INavigateToTarget>> task = GoToSourceAsync(gotoSourceType, triggerPoint).HandleNonCriticalExceptions();
+            var resultContinuation = task.ContinueWith(HandleGoToSourceResult, TaskContinuationOptions.OnlyOnRanToCompletion).HandleNonCriticalExceptions();
+        }
+
+        public virtual Task<IEnumerable<INavigateToTarget>> GoToSourceAsync(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
+        {
+            return Task.Factory.StartNew(() => GoToSourceImpl(gotoSourceType, triggerPoint));
+        }
+
+        public virtual IEnumerable<INavigateToTarget> GoToSourceImpl(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
+        {
+            return new INavigateToTarget[0];
+        }
+
+        protected virtual void HandleGoToSourceResult(Task<IEnumerable<INavigateToTarget>> task)
+        {
+            INavigateToTarget target = task.Result.FirstOrDefault();
+            if (target != null)
+                target.NavigateTo();
         }
 
         public virtual void TriggerCompletion(ITrackingPoint triggerPoint)

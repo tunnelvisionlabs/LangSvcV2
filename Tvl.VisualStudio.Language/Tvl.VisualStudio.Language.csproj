@@ -176,10 +176,13 @@
     <Compile Include="Intellisense\CompletionInfoType.cs" />
     <Compile Include="Intellisense\CompletionSource.cs" />
     <Compile Include="Intellisense\CompletionSourceProvider.cs" />
+    <Compile Include="Intellisense\FileSystemNavigateToTarget.cs" />
+    <Compile Include="Intellisense\INavigateToTarget.cs" />
     <Compile Include="Intellisense\IntellisenseCommandFilter.cs" />
     <Compile Include="Intellisense\IntellisenseController.cs" />
     <Compile Include="Intellisense\IntellisenseControllerProvider.cs" />
     <Compile Include="Intellisense\IntellisenseInvocationType.cs" />
+    <Compile Include="Intellisense\SnapshotSpanNavigateToTarget.cs" />
     <Compile Include="Parsing\BackgroundParserErrorTagger.cs" />
     <Compile Include="Parsing\IBackgroundParser.cs" />
     <Compile Include="Parsing\IBackgroundParserFactoryService.cs" />
@@ -191,6 +194,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
+      <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
+      <Name>Tvl.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj">
       <Project>{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}</Project>
       <Name>Tvl.VisualStudio.Shell</Name>
