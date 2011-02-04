@@ -210,7 +210,7 @@
             string insertionText = ruleName;
             string description = string.Empty;
             string iconAutomationText = string.Empty;
-            ImageSource iconSource = char.IsLower(ruleName[0]) ? Provider.LexerRuleGlyph : Provider.ParserRuleGlyph;
+            ImageSource iconSource = char.IsLower(ruleName[0]) ? Provider.ParserRuleGlyph : Provider.LexerRuleGlyph;
             return new Completion(displayText, insertionText, description, iconSource, iconAutomationText);
         }
 
