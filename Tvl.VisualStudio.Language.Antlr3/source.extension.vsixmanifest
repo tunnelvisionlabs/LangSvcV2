@@ -25,6 +25,7 @@
   </References>
   <Content>
     <MefComponent>|%CurrentProject%|</MefComponent>
+    <VsPackage>|%CurrentProject%|</VsPackage>
     <ItemTemplate>ItemTemplates</ItemTemplate>
   </Content>
 </Vsix>
