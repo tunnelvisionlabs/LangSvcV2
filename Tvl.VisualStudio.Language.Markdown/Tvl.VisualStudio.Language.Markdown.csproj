@@ -3,7 +3,6 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.20305</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <ProjectGuid>{D75E40E8-4672-4F50-ADFB-2788F315E442}</ProjectGuid>
@@ -12,7 +11,6 @@
     <RootNamespace>Tvl.VisualStudio.Language.Markdown</RootNamespace>
     <AssemblyName>Tvl.VisualStudio.Language.Markdown</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <RegisterWithCodebase>true</RegisterWithCodebase>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
@@ -218,27 +216,22 @@
     <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
       <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
       <Name>Tvl.Core</Name>
-      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Antlr\Tvl.VisualStudio.Language.Antlr.csproj">
       <Project>{3852C7D0-60EA-45CC-A84C-BF66B350CF3B}</Project>
       <Name>Tvl.VisualStudio.Language.Antlr</Name>
-      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Language\Tvl.VisualStudio.Language.csproj">
       <Project>{90E28BCA-BD13-475B-B051-7A7D852A6206}</Project>
       <Name>Tvl.VisualStudio.Language</Name>
-      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj">
       <Project>{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}</Project>
       <Name>Tvl.VisualStudio.Shell</Name>
-      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj">
       <Project>{2B913C3A-3FD8-4633-81C8-683AF66741A8}</Project>
       <Name>Tvl.VisualStudio.Text</Name>
-      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

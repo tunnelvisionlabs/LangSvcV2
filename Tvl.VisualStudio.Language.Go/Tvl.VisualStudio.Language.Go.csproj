@@ -218,7 +218,6 @@
     <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj">
       <Project>{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}</Project>
       <Name>Tvl.VisualStudio.Shell</Name>
-      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Text.Antlr\Tvl.VisualStudio.Text.Antlr.csproj">
       <Project>{0DB55D37-484F-4F2A-8679-C58E234AD504}</Project>
