@@ -99,7 +99,11 @@
     <Compile Include="Events\WeakEventHandler`1.cs" />
     <Compile Include="Events\WeakEventHandler`2.cs" />
     <Compile Include="Events\WeakEvents.cs" />
+    <Compile Include="Extensions\ArrayExtensions.ArraySegment`1.cs" />
+    <Compile Include="Extensions\ArrayExtensions.cs" />
+    <Compile Include="Extensions\ExceptionExtensions.cs" />
     <Compile Include="Extensions\ReaderWriterLockSlimExtensions.cs" />
+    <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="IDisposableObject.cs" />
     <Compile Include="Interop\Variant.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
