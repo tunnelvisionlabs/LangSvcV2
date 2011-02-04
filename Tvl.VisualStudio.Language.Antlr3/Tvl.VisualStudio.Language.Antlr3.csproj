@@ -185,10 +185,6 @@
     <Compile Include="AntlrClassifierProvider.cs" />
     <Compile Include="AntlrColorableLexerHelper.cs" />
     <Compile Include="AntlrCommenterProvider.cs" />
-    <Compile Include="AntlrCompletionIntellisenseController.cs" />
-    <Compile Include="AntlrCompletionIntellisenseControllerProvider.cs" />
-    <Compile Include="AntlrCompletionSource.cs" />
-    <Compile Include="AntlrCompletionSourceProvider.cs" />
     <Compile Include="AntlrConstants.cs" />
     <Compile Include="AntlrEditorNavigationSource.cs" />
     <Compile Include="AntlrEditorNavigationSourceProvider.cs" />
@@ -206,8 +202,6 @@
     <Compile Include="AntlrServices.cs" />
     <Compile Include="AntlrOutliningTagger.cs" />
     <Compile Include="AntlrOutliningTaggerProvider.cs" />
-    <Compile Include="IntellisenseCommandFilter.cs" />
-    <Compile Include="IntellisenseCommandFilterProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
