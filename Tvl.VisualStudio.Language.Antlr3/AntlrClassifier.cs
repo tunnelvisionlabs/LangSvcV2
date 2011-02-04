@@ -49,6 +49,14 @@
             this._actionLiteral = classificationTypeRegistryService.GetClassificationType(AntlrClassificationTypeNames.ActionLiteral);
         }
 
+        public static HashSet<string> Keywords
+        {
+            get
+            {
+                return keywords;
+            }
+        }
+
         protected override Lexer CreateLexer(ICharStream input)
         {
             return new AntlrColorableLexer(input);

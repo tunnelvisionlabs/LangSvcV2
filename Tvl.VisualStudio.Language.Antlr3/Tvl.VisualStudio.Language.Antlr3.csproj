@@ -175,6 +175,10 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AntlrIntellisenseController.cs" />
+    <Compile Include="AntlrIntellisenseControllerProvider.cs" />
+    <Compile Include="AntlrCompletionSource.cs" />
+    <Compile Include="AntlrCompletionSourceProvider.cs" />
     <Compile Include="AntlrLanguagePackage.cs" />
     <Compile Include="AntlrLanguageInfo.cs" />
     <Compile Include="AntlrBackgroundParser.cs" />
