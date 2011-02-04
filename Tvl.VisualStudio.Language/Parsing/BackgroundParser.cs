@@ -3,10 +3,12 @@
     using System;
     using System.Threading;
     using Microsoft.VisualStudio.Text;
+    using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
+    using Timer = System.Timers.Timer;
 
     public abstract class BackgroundParser : IBackgroundParser, IDisposable
     {
-        private System.Timers.Timer _timer;
+        private Timer _timer;
         private DateTimeOffset _lastEdit;
         private bool _dirty;
         private int _parsing;
@@ -19,10 +21,11 @@
             this.TextBuffer.PostChanged += TextBufferPostChanged;
 
             this._dirty = true;
-            this._timer = new System.Timers.Timer(2000);
+            this._timer = new Timer(1500);
             this._timer.Elapsed += OnParseTimerElapsed;
             this._lastEdit = DateTimeOffset.MinValue;
             this._timer.Start();
+            TryReparse();
         }
 
         public ITextBuffer TextBuffer
@@ -90,6 +93,11 @@
 
         private void OnParseTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+            TryReparse();
+        }
+
+        private void TryReparse()
+        {
             if (!_dirty)
                 return;
 
@@ -118,8 +126,10 @@
                 _dirty = false;
                 ReParseImpl();
             }
-            catch
+            catch (Exception ex)
             {
+                if (ErrorHandler.IsCriticalException(ex))
+                    throw;
             }
         }
     }

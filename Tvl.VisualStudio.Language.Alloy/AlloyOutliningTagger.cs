@@ -6,6 +6,7 @@
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
+    using System.Linq;
 
     internal sealed class AlloyOutliningTagger : ITagger<IOutliningRegionTag>
     {
@@ -14,7 +15,7 @@
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        public AlloyOutliningTagger(ITextBuffer textBuffer, IBackgroundParser backgroundParser, AlloyOutliningTaggerProvider provider)
+        public AlloyOutliningTagger(ITextBuffer textBuffer, AlloyBackgroundParser backgroundParser, AlloyOutliningTaggerProvider provider)
         {
             Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
             Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
@@ -23,8 +24,6 @@
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;
             this._provider = provider;
-
-            this._outliningRegions = new List<ITagSpan<IOutliningRegionTag>>();
 
             this.BackgroundParser.ParseComplete += OnBackgroundParseComplete;
         }
@@ -35,7 +34,7 @@
             set;
         }
 
-        private IBackgroundParser BackgroundParser
+        private AlloyBackgroundParser BackgroundParser
         {
             get;
             set;
@@ -43,7 +42,14 @@
 
         public IEnumerable<ITagSpan<IOutliningRegionTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            return _outliningRegions;
+            if (_outliningRegions == null)
+            {
+                var previousParseResult = BackgroundParser.PreviousParseResult;
+                if (previousParseResult != null)
+                    UpdateTags(previousParseResult);
+            }
+
+            return _outliningRegions ?? Enumerable.Empty<ITagSpan<IOutliningRegionTag>>();
         }
 
         private void OnTagsChanged(SnapshotSpanEventArgs e)
@@ -55,17 +61,22 @@
 
         private void OnBackgroundParseComplete(object sender, ParseResultEventArgs e)
         {
-            List<ITagSpan<IOutliningRegionTag>> outliningRegions = null;
             AntlrParseResultEventArgs antlrParseResultArgs = e as AntlrParseResultEventArgs;
-            if (antlrParseResultArgs != null)
-            {
-                AlloyParser.compilationUnit_return parseResult = antlrParseResultArgs.Result as AlloyParser.compilationUnit_return;
-                if (parseResult != null)
-                    outliningRegions = AlloyOutliningTaggerWalker.ExtractOutliningRegions(parseResult, antlrParseResultArgs.Tokens, _provider, e.Snapshot);
-            }
+            if (antlrParseResultArgs == null)
+                return;
+
+            UpdateTags(antlrParseResultArgs);
+        }
+
+        private void UpdateTags(AntlrParseResultEventArgs antlrParseResultArgs)
+        {
+            List<ITagSpan<IOutliningRegionTag>> outliningRegions = null;
+            AlloyParser.compilationUnit_return parseResult = antlrParseResultArgs.Result as AlloyParser.compilationUnit_return;
+            if (parseResult != null)
+                outliningRegions = AlloyOutliningTaggerWalker.ExtractOutliningRegions(parseResult, antlrParseResultArgs.Tokens, _provider, antlrParseResultArgs.Snapshot);
 
             this._outliningRegions = outliningRegions ?? new List<ITagSpan<IOutliningRegionTag>>();
-            OnTagsChanged(new SnapshotSpanEventArgs(new SnapshotSpan(e.Snapshot, new Span(0, e.Snapshot.Length))));
+            OnTagsChanged(new SnapshotSpanEventArgs(new SnapshotSpan(antlrParseResultArgs.Snapshot, new Span(0, antlrParseResultArgs.Snapshot.Length))));
         }
     }
 }

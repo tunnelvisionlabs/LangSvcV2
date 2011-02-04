@@ -6,13 +6,14 @@
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Text.Navigation;
+    using System.Linq;
 
     internal sealed class AlloyEditorNavigationSource : IEditorNavigationSource
     {
         private List<IEditorNavigationTarget> _navigationTargets;
         private readonly AlloyEditorNavigationSourceProvider _provider;
 
-        public AlloyEditorNavigationSource(ITextBuffer textBuffer, IBackgroundParser backgroundParser, AlloyEditorNavigationSourceProvider provider)
+        public AlloyEditorNavigationSource(ITextBuffer textBuffer, AlloyBackgroundParser backgroundParser, AlloyEditorNavigationSourceProvider provider)
         {
             Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
             Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
@@ -21,8 +22,6 @@
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;
             this._provider = provider;
-
-            this._navigationTargets = new List<IEditorNavigationTarget>();
 
             this.BackgroundParser.ParseComplete += OnBackgroundParseComplete;
         }
@@ -35,7 +34,7 @@
             set;
         }
 
-        private IBackgroundParser BackgroundParser
+        private AlloyBackgroundParser BackgroundParser
         {
             get;
             set;
@@ -57,7 +56,14 @@
 
         public IEnumerable<IEditorNavigationTarget> GetNavigationTargets()
         {
-            return _navigationTargets;
+            if (_navigationTargets == null)
+            {
+                var previousParseResult = BackgroundParser.PreviousParseResult;
+                if (previousParseResult != null)
+                    UpdateNavigationTargets(previousParseResult);
+            }
+
+            return _navigationTargets ?? Enumerable.Empty<IEditorNavigationTarget>();
         }
 
         private void OnNavigationTargetsChanged(EventArgs e)
@@ -69,13 +75,23 @@
 
         private void OnBackgroundParseComplete(object sender, ParseResultEventArgs e)
         {
-            List<IEditorNavigationTarget> navigationTargets = null;
             AntlrParseResultEventArgs antlrParseResultArgs = e as AntlrParseResultEventArgs;
+            if (antlrParseResultArgs == null)
+                return;
+
+            UpdateNavigationTargets(antlrParseResultArgs);
+        }
+
+        private void UpdateNavigationTargets(AntlrParseResultEventArgs antlrParseResultArgs)
+        {
+            Contract.Requires(antlrParseResultArgs != null);
+
+            List<IEditorNavigationTarget> navigationTargets = null;
             if (antlrParseResultArgs != null)
             {
                 AlloyParser.compilationUnit_return parseResult = antlrParseResultArgs.Result as AlloyParser.compilationUnit_return;
                 if (parseResult != null)
-                    navigationTargets = AlloyEditorNavigationSourceWalker.ExtractNavigationTargets(parseResult, antlrParseResultArgs.Tokens, _provider, e.Snapshot);
+                    navigationTargets = AlloyEditorNavigationSourceWalker.ExtractNavigationTargets(parseResult, antlrParseResultArgs.Tokens, _provider, antlrParseResultArgs.Snapshot);
             }
 
             this._navigationTargets = navigationTargets ?? new List<IEditorNavigationTarget>();

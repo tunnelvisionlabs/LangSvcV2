@@ -1,13 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Antlr3
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Tvl.VisualStudio.Text;
-    using Microsoft.VisualStudio.Utilities;
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Text.Navigation;
 
@@ -47,7 +42,7 @@
 
         public IEditorNavigationSource TryCreateEditorNavigationSource(ITextBuffer textBuffer)
         {
-            var backgroundParser = BackgroundParserFactoryService.GetBackgroundParser(textBuffer);
+            var backgroundParser = BackgroundParserFactoryService.GetBackgroundParser(textBuffer) as AntlrBackgroundParser;
             if (backgroundParser == null)
                 return null;
 

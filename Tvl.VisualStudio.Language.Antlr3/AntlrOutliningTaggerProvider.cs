@@ -21,7 +21,7 @@
 
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
-            Func<AntlrOutliningTagger> creator = () => new AntlrOutliningTagger(buffer, BackgroundParserFactoryService.GetBackgroundParser(buffer), this);
+            Func<AntlrOutliningTagger> creator = () => new AntlrOutliningTagger(buffer, (AntlrBackgroundParser)BackgroundParserFactoryService.GetBackgroundParser(buffer), this);
             return buffer.Properties.GetOrCreateSingletonProperty(creator) as ITagger<T>;
         }
     }

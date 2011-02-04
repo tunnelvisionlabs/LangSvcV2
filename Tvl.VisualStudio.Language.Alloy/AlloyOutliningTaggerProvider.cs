@@ -29,7 +29,7 @@
 
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
-            Func<AlloyOutliningTagger> creator = () => new AlloyOutliningTagger(buffer, BackgroundParserFactoryService.GetBackgroundParser(buffer), this);
+            Func<AlloyOutliningTagger> creator = () => new AlloyOutliningTagger(buffer, (AlloyBackgroundParser)BackgroundParserFactoryService.GetBackgroundParser(buffer), this);
             return buffer.Properties.GetOrCreateSingletonProperty(creator) as ITagger<T>;
         }
     }

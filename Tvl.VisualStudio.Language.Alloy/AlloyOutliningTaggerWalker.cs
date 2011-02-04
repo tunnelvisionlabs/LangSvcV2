@@ -70,6 +70,9 @@
             var startToken = _tokens[subchild.TokenStartIndex];
             var stopToken = _tokens[subchild.TokenStopIndex];
             Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
+            if (_snapshot.GetLineNumberFromPosition(span.Start) == _snapshot.GetLineNumberFromPosition(span.End))
+                return;
+
             SnapshotSpan snapshotSpan = new SnapshotSpan(_snapshot, span);
             IOutliningRegionTag tag = new OutliningRegionTag();
             TagSpan<IOutliningRegionTag> tagSpan = new TagSpan<IOutliningRegionTag>(snapshotSpan, tag);

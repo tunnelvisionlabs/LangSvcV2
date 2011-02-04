@@ -61,7 +61,7 @@
 
         public IEditorNavigationSource TryCreateEditorNavigationSource(ITextBuffer textBuffer)
         {
-            var backgroundParser = BackgroundParserFactoryService.GetBackgroundParser(textBuffer);
+            var backgroundParser = BackgroundParserFactoryService.GetBackgroundParser(textBuffer) as AlloyBackgroundParser;
             if (backgroundParser == null)
                 return null;
 

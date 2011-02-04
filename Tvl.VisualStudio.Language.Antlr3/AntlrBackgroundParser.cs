@@ -22,6 +22,12 @@
             private set;
         }
 
+        public AntlrParseResultEventArgs PreviousParseResult
+        {
+            get;
+            private set;
+        }
+
         protected override void ReParseImpl()
         {
             var outputWindow = OutputWindowService.TryGetPane(AntlrConstants.AntlrIntellisenseOutputWindow);
@@ -68,6 +74,12 @@
                 {
                 }
             }
+        }
+
+        protected override void OnParseComplete(ParseResultEventArgs e)
+        {
+            PreviousParseResult = e as AntlrParseResultEventArgs;
+            base.OnParseComplete(e);
         }
     }
 }

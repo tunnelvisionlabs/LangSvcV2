@@ -19,7 +19,7 @@
         private readonly IEditorNavigationTypeRegistryService _editorNavigationTypeRegistryService;
 
         private readonly UniformGrid _container;
-        private Tuple<IEditorNavigationType, ComboBox>[] _navigationControls;
+        private readonly Tuple<IEditorNavigationType, ComboBox>[] _navigationControls;
 
         public EditorNavigationMargin(IWpfTextView wpfTextView, IEnumerable<IEditorNavigationSource> sources, IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
         {
@@ -75,12 +75,13 @@
                 this._container.Children.Add(controlPair.Item2);
             }
 
+            this._wpfTextView.Caret.PositionChanged += OnCaretPositionChanged;
             foreach (var source in this._sources)
             {
                 source.NavigationTargetsChanged += WeakEvents.AsWeak(OnNavigationTargetsChanged, eh => source.NavigationTargetsChanged -= eh);
+                UpdateNavigationTargets(source);
             }
 
-            this._wpfTextView.Caret.PositionChanged += OnCaretPositionChanged;
         }
 
         public bool Disposed
