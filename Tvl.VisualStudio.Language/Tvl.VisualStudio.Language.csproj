@@ -170,6 +170,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Intellisense\CompletionDisplayNameComparer.cs" />
     <Compile Include="Intellisense\CompletionHelper.cs" />
     <Compile Include="Intellisense\CompletionInfo.cs" />
     <Compile Include="Intellisense\CompletionInfoType.cs" />

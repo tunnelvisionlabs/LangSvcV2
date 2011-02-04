@@ -98,9 +98,6 @@
     <Compile Include="AlloyClassifier.cs" />
     <Compile Include="AlloyClassifierProvider.cs" />
     <Compile Include="AlloyCommenterProvider.cs" />
-    <Compile Include="AlloyCompletionSource.CompletionDisplayNameComparer.cs">
-      <DependentUpon>AlloyCompletionSource.cs</DependentUpon>
-    </Compile>
     <Compile Include="AlloyCompletionSource.cs" />
     <Compile Include="AlloyCompletionSourceProvider.cs" />
     <Compile Include="AlloyConstants.cs" />
