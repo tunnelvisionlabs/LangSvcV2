@@ -2,12 +2,8 @@
 {
     using System;
     using System.Runtime.InteropServices;
-    using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
-    using Microsoft.VisualStudio.TextManager.Interop;
     using Tvl.VisualStudio.Shell.Extensions;
-    using Tvl.VisualStudio.Text;
-    using IConnectionPointContainer = Microsoft.VisualStudio.OLE.Interop.IConnectionPointContainer;
     using IServiceContainer = System.ComponentModel.Design.IServiceContainer;
 
     [PackageRegistration(UseManagedResourcesOnly = true)]
@@ -33,50 +29,30 @@
     public class AlloyLanguagePackage : Package
     {
         private static AlloyLanguagePackage _instance;
-
-        private LanguagePreferences _languagePreferences;
-        private IDisposable _languagePreferencesCookie;
+        private AlloyLanguageInfo _languageInfo;
 
         public AlloyLanguagePackage()
         {
             _instance = this;
         }
 
-        public LanguagePreferences LanguagePreferences
-        {
-            get
-            {
-                return _languagePreferences;
-            }
-        }
-
         protected override void Initialize()
         {
             base.Initialize();
 
-            SVsServiceProvider serviceProvider = this.AsVsServiceProvider();
-
             // register the language service
-            var languageInfo = new AlloyLanguageInfo(serviceProvider);
-            ((IServiceContainer)this).AddService(typeof(AlloyLanguageInfo), languageInfo, true);
-
-            IVsTextManager2 textManager = serviceProvider.GetTextManager2();
-            LANGPREFERENCES2[] langPreferences = new LANGPREFERENCES2[1];
-            langPreferences[0].guidLang = typeof(AlloyLanguageInfo).GUID;
-            ErrorHandler.ThrowOnFailure(textManager.GetUserPreferences2(null, null, langPreferences, null));
-            _languagePreferences = new LanguagePreferences(langPreferences[0]);
-
-            _languagePreferencesCookie = ((IConnectionPointContainer)textManager).Advise<LanguagePreferences, IVsTextManagerEvents2>(_languagePreferences);
+            _languageInfo = new AlloyLanguageInfo(this.AsVsServiceProvider());
+            ((IServiceContainer)this).AddService(typeof(AlloyLanguageInfo), _languageInfo, true);
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                if (_languagePreferencesCookie != null)
+                if (_languageInfo != null)
                 {
-                    _languagePreferencesCookie.Dispose();
-                    _languagePreferencesCookie = null;
+                    _languageInfo.Dispose();
+                    _languageInfo = null;
                 }
             }
 

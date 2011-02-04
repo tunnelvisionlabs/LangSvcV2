@@ -1,8 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy
 {
     using System;
+    using System.Collections.Generic;
     using System.Runtime.InteropServices;
-    using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
     using Tvl.VisualStudio.Text;
 
@@ -10,16 +10,8 @@
     internal class AlloyLanguageInfo : LanguageInfo
     {
         public AlloyLanguageInfo(SVsServiceProvider serviceProvider)
-            : base(serviceProvider)
+            : base(serviceProvider, typeof(AlloyLanguageInfo).GUID)
         {
-        }
-
-        public override LanguagePreferences LanguagePreferences
-        {
-            get
-            {
-                return ComponentModel.GetService<AlloyLanguagePackage>().LanguagePreferences;
-            }
         }
 
         public override string LanguageName
@@ -30,10 +22,12 @@
             }
         }
 
-        public override int GetFileExtensions(out string pbstrExtensions)
+        public override IEnumerable<string> FileExtensions
         {
-            pbstrExtensions = AlloyConstants.AlloyFileExtension;
-            return VSConstants.S_OK;
+            get
+            {
+                yield return AlloyConstants.AlloyFileExtension;
+            }
         }
     }
 }
