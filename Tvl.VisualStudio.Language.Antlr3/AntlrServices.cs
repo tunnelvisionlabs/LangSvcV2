@@ -65,34 +65,40 @@ namespace Tvl.VisualStudio.Language.Antlr3
         [Export(typeof(EditorFormatDefinition))]
         [ClassificationType(ClassificationTypeNames = AntlrClassificationTypeNames.ParserRule)]
         [Name(AntlrClassificationTypeNames.ParserRule)]
+        [UserVisible(true)]
         public sealed class ParserRuleFormatDefinition : ClassificationFormatDefinition
         {
             public ParserRuleFormatDefinition()
             {
                 this.ForegroundColor = Colors.SlateBlue;
+                this.DisplayName = "ANTLR Parser Rule";
             }
         }
 
         [Export(typeof(EditorFormatDefinition))]
         [ClassificationType(ClassificationTypeNames = AntlrClassificationTypeNames.LexerRule)]
         [Name(AntlrClassificationTypeNames.LexerRule)]
+        [UserVisible(true)]
         public sealed class LexerRuleFormatDefinition : ClassificationFormatDefinition
         {
             public LexerRuleFormatDefinition()
             {
                 this.ForegroundColor = Colors.DarkBlue;
+                this.DisplayName = "ANTLR Lexer Rule";
             }
         }
 
         [Export(typeof(EditorFormatDefinition))]
         [ClassificationType(ClassificationTypeNames = AntlrClassificationTypeNames.ActionLiteral)]
         [Name(AntlrClassificationTypeNames.ActionLiteral)]
+        [UserVisible(true)]
         public sealed class ActionLiteralFormatDefinition : ClassificationFormatDefinition
         {
             public ActionLiteralFormatDefinition()
             {
-                this.ForegroundColor = Colors.Black;
-                this.BackgroundColor = Colors.LightGray;
+                this.ForegroundColor = null;
+                this.BackgroundColor = Colors.LavenderBlush;
+                this.DisplayName = "ANTLR Action Literal";
             }
         }
     }
