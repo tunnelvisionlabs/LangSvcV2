@@ -9,13 +9,20 @@
 
     internal sealed class AntlrQuickInfoSource : IQuickInfoSource
     {
-        public AntlrQuickInfoSource(ITextBuffer textBuffer, ITagAggregator<ClassificationTag> aggregator)
+        public AntlrQuickInfoSource(ITextBuffer textBuffer, AntlrBackgroundParser backgroundParser, ITagAggregator<ClassificationTag> aggregator)
         {
             this.Aggregator = aggregator;
+            this.BackgroundParser = backgroundParser;
             this.TextBuffer = textBuffer;
         }
 
         public ITextBuffer TextBuffer
+        {
+            get;
+            private set;
+        }
+
+        public AntlrBackgroundParser BackgroundParser
         {
             get;
             private set;
@@ -63,11 +70,28 @@
                             if (span4.Contains(triggerPoint.Value))
                             {
                                 StringBuilder builder = new StringBuilder();
-
-                                if (span.Tag.ClassificationType.IsOfType(AntlrClassificationTypeNames.LexerRule))
-                                    builder.Append("Found a lexer rule.");
+                                string ruleName = span2.GetText();
+                                var rules = BackgroundParser.RuleSpans;
+                                KeyValuePair<ITrackingSpan, ITrackingPoint> value;
+                                if (rules == null || !rules.TryGetValue(ruleName, out value))
+                                {
+#if DEBUG
+                                    if (span.Tag.ClassificationType.IsOfType(AntlrClassificationTypeNames.LexerRule))
+                                        builder.Append("Found an unknown lexer rule.");
+                                    else
+                                        builder.Append("Found an unknown parser rule.");
+#else
+                                    return;
+#endif
+                                }
                                 else
-                                    builder.Append("Found a parser rule.");
+                                {
+                                    Span ruleSpan = value.Key.GetSpan(triggerPoint.Value.Snapshot);
+                                    if (ruleSpan.Contains(triggerPoint.Value.Position))
+                                        return;
+
+                                    builder.Append(value.Key.GetText(span2.Snapshot));
+                                }
 
                                 //builder.AppendLine(span.Tag.Url.OriginalString);
                                 //builder.Append(Strings.UrlQuickInfoFollowLink);

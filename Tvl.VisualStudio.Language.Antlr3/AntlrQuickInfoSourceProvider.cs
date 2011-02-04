@@ -1,14 +1,11 @@
 ﻿namespace Tvl.VisualStudio.Language.Antlr3
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
+    using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
-    using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Utilities;
     using Microsoft.VisualStudio.Text.Tagging;
+    using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Language.Parsing;
 
     [Export(typeof(IQuickInfoSourceProvider))]
     [Order]
@@ -16,6 +13,13 @@
     [Name("AntlrQuickInfoSource")]
     public sealed class AntlrQuickInfoSourceProvider : IQuickInfoSourceProvider
     {
+        [Import]
+        private IBackgroundParserFactoryService BackgroundParserFactoryService
+        {
+            get;
+            set;
+        }
+
         [Import]
         internal IBufferTagAggregatorFactoryService AggregatorFactory
         {
@@ -25,7 +29,8 @@
 
         public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer)
         {
-            return new AntlrQuickInfoSource(textBuffer, AggregatorFactory.CreateTagAggregator<ClassificationTag>(textBuffer));
+            var backgroundParser = BackgroundParserFactoryService.GetBackgroundParser(textBuffer) as AntlrBackgroundParser;
+            return new AntlrQuickInfoSource(textBuffer, backgroundParser, AggregatorFactory.CreateTagAggregator<ClassificationTag>(textBuffer));
         }
     }
 }
