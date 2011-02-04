@@ -78,6 +78,8 @@
                 var result = resultArgs.Tree as CommonTree;
                 if (result != null)
                 {
+                    ITextSnapshot snapshot = antlrParseResultArgs.Snapshot;
+
                     foreach (CommonTree child in result.Children)
                     {
                         if (child == null || string.IsNullOrEmpty(child.Text))
@@ -85,11 +87,30 @@
 
                         if (child.Text == "rule" && child.ChildCount > 0 || child.Text.StartsWith("tokens"))
                         {
+                            string blockHint;
+                            if (child.Text == "rule")
+                            {
+                                string ruleName = child.Children[0].Text;
+                                // don't try to outline the artificial tokens rule
+                                if (ruleName == "Tokens")
+                                    continue;
+
+                                blockHint = child.Children[0].Text + "...";
+                            }
+                            else
+                            {
+                                // this is the special tokens{} block of a combined grammar
+                                blockHint = "Tokens...";
+                            }
+
                             var startToken = antlrParseResultArgs.Tokens[child.TokenStartIndex];
                             var stopToken = antlrParseResultArgs.Tokens[child.TokenStopIndex];
                             Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
+                            if (snapshot.GetLineNumberFromPosition(span.Start) == snapshot.GetLineNumberFromPosition(span.End))
+                                continue;
+
                             SnapshotSpan snapshotSpan = new SnapshotSpan(antlrParseResultArgs.Snapshot, span);
-                            IOutliningRegionTag tag = new OutliningRegionTag();
+                            IOutliningRegionTag tag = new OutliningRegionTag(blockHint, snapshotSpan.GetText());
                             TagSpan<IOutliningRegionTag> tagSpan = new TagSpan<IOutliningRegionTag>(snapshotSpan, tag);
                             outliningRegions.Add(tagSpan);
                         }
