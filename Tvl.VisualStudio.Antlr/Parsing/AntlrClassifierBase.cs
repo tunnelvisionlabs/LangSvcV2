@@ -16,7 +16,7 @@
         public event EventHandler<ClassificationChangedEventArgs> ClassificationChanged;
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public IList<ClassificationSpan> GetClassificationSpans(SnapshotSpan span)
+        public virtual IList<ClassificationSpan> GetClassificationSpans(SnapshotSpan span)
         {
             UpdateMultilineTokens(ref span);
 
@@ -33,9 +33,9 @@
                 if (token.StartIndex > span.End.Position)
                     break;
 
-                var classificationSpan = GetClassificationSpanForToken(token, span.Snapshot);
-                if (classificationSpan != null)
-                    classificationSpans.Add(classificationSpan);
+                var tokenClassificationSpans = GetClassificationSpansForToken(token, span.Snapshot);
+                if (tokenClassificationSpans != null)
+                    classificationSpans.AddRange(tokenClassificationSpans);
 
                 if (token.StopIndex >= span.End.Position)
                     break;
@@ -53,16 +53,16 @@
 
         protected abstract Lexer CreateLexer(ICharStream input);
 
-        protected virtual ClassificationSpan GetClassificationSpanForToken(IToken token, ITextSnapshot snapshot)
+        protected virtual IEnumerable<ClassificationSpan> GetClassificationSpansForToken(IToken token, ITextSnapshot snapshot)
         {
             var classification = ClassifyToken(token);
             if (classification != null)
             {
                 var span = new SnapshotSpan(snapshot, token.StartIndex, token.StopIndex - token.StartIndex + 1);
-                return new ClassificationSpan(span, classification);
+                return new ClassificationSpan[] { new ClassificationSpan(span, classification) };
             }
 
-            return null;
+            return Enumerable.Empty<ClassificationSpan>();
         }
 
         protected virtual IClassificationType ClassifyToken(IToken token)
