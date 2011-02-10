@@ -108,7 +108,7 @@
 
         private int ExecCommand(ref Guid guidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
-            int rc = (int)OleConstants.MSOCMDERR_E_NOTSUPPORTED;
+            int rc = VSConstants.S_OK;
 
             if (!HandlePreExec(ref guidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut) && _next != null)
             {
