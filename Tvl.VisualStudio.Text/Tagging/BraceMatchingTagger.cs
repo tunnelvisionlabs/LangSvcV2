@@ -5,15 +5,14 @@
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Linq;
+    using System.Threading;
     using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Tagging;
-    using Tvl.Threading;
-    using System.Threading;
 
-    public sealed class BraceMatchingTagger : ITagger<TextMarkerTag>
+    public class BraceMatchingTagger : ITagger<TextMarkerTag>
     {
         private volatile int _requestNumber;
         private object _updateLock = new object();
@@ -32,8 +31,8 @@
             this.Aggregator = aggregator;
             this.MatchingCharacters = matchingCharacters.ToList().AsReadOnly();
 
-            this.TextView.Caret.PositionChanged += OnCaretPositionChanged;
-            this.TextView.LayoutChanged += OnTextViewLayoutChanged;
+            this.TextView.Caret.PositionChanged += HandleCaretPositionChanged;
+            this.TextView.LayoutChanged += HandleTextViewLayoutChanged;
         }
 
         public ITextView TextView
@@ -72,7 +71,20 @@
             set;
         }
 
-        private static bool IsInCommentOrLiteral(IClassifier aggregator, SnapshotPoint point, PositionAffinity affinity)
+        public IEnumerable<ITagSpan<TextMarkerTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+        {
+            return Tags;
+        }
+
+        protected virtual bool IsClassificationTypeIgnored(IClassificationType classificationType)
+        {
+            Contract.Requires<ArgumentNullException>(classificationType != null, "classificationType");
+
+            return classificationType.IsOfType(PredefinedClassificationTypeNames.Comment)
+                || classificationType.IsOfType(PredefinedClassificationTypeNames.Literal);
+        }
+
+        protected virtual bool IsInIgnoredSpan(IClassifier aggregator, SnapshotPoint point, PositionAffinity affinity)
         {
             Contract.Requires(aggregator != null);
 
@@ -84,12 +96,13 @@
             if (relevant == null || relevant.ClassificationType == null)
                 return false;
 
-            return relevant.ClassificationType.IsOfType(PredefinedClassificationTypeNames.Comment)
-                || relevant.ClassificationType.IsOfType(PredefinedClassificationTypeNames.Literal);
+            return IsClassificationTypeIgnored(relevant.ClassificationType);
         }
 
-        private bool FindMatchingCloseChar(int revision, SnapshotPoint start, IClassifier aggregator, char open, char close, int maxLines, out SnapshotSpan pairSpan)
+        protected virtual bool FindMatchingCloseChar(int revision, SnapshotPoint start, IClassifier aggregator, char open, char close, int maxLines, out SnapshotSpan pairSpan)
         {
+            Contract.Requires(aggregator != null);
+
             pairSpan = new SnapshotSpan(start.Snapshot, 1, 1);
             ITextSnapshotLine line = start.GetContainingLine();
             string lineText = line.GetText();
@@ -112,7 +125,7 @@
 
                     char currentChar = lineText[offset];
                     // TODO: is this the correct affinity
-                    if (currentChar == close && !IsInCommentOrLiteral(aggregator, new SnapshotPoint(start.Snapshot, offset + line.Start.Position), PositionAffinity.Successor))
+                    if (currentChar == close && !IsInIgnoredSpan(aggregator, new SnapshotPoint(start.Snapshot, offset + line.Start.Position), PositionAffinity.Successor))
                     {
                         if (openCount > 0)
                         {
@@ -125,7 +138,7 @@
                         }
                     }
                     // TODO: is this the correct affinity
-                    else if (currentChar == open && !IsInCommentOrLiteral(aggregator, new SnapshotPoint(start.Snapshot, offset + line.Start.Position), PositionAffinity.Successor))
+                    else if (currentChar == open && !IsInIgnoredSpan(aggregator, new SnapshotPoint(start.Snapshot, offset + line.Start.Position), PositionAffinity.Successor))
                     {
                         openCount++;
                     }
@@ -146,8 +159,10 @@
             return false;
         }
 
-        private bool FindMatchingOpenChar(int revision, SnapshotPoint start, IClassifier aggregator, char open, char close, int maxLines, out SnapshotSpan pairSpan)
+        protected virtual bool FindMatchingOpenChar(int revision, SnapshotPoint start, IClassifier aggregator, char open, char close, int maxLines, out SnapshotSpan pairSpan)
         {
+            Contract.Requires(aggregator != null);
+
             pairSpan = new SnapshotSpan(start, start);
             ITextSnapshotLine line = start.GetContainingLine();
             int lineNumber = line.LineNumber;
@@ -179,7 +194,7 @@
 
                     char currentChar = lineText[offset];
                     // TODO: is this the correct affinity
-                    if (currentChar == open && !IsInCommentOrLiteral(aggregator, new SnapshotPoint(start.Snapshot, offset + line.Start.Position), PositionAffinity.Successor))
+                    if (currentChar == open && !IsInIgnoredSpan(aggregator, new SnapshotPoint(start.Snapshot, offset + line.Start.Position), PositionAffinity.Successor))
                     {
                         if (closeCount > 0)
                         {
@@ -192,7 +207,7 @@
                         }
                     }
                     // TODO: is this the correct affinity
-                    else if (currentChar == close && !IsInCommentOrLiteral(aggregator, new SnapshotPoint(start.Snapshot, offset + line.Start.Position), PositionAffinity.Successor))
+                    else if (currentChar == close && !IsInIgnoredSpan(aggregator, new SnapshotPoint(start.Snapshot, offset + line.Start.Position), PositionAffinity.Successor))
                     {
                         closeCount++;
                     }
@@ -213,36 +228,92 @@
             return false;
         }
 
-        private void OnTagsChanged(SnapshotSpanEventArgs e)
+        protected virtual void OnTagsChanged(SnapshotSpanEventArgs e)
         {
+            Contract.Requires<ArgumentNullException>(e != null, "e");
+
             var t = TagsChanged;
             if (t != null)
                 t(this, e);
         }
 
-        private bool IsMatchStartCharacter(char c)
+        protected virtual bool IsMatchStartCharacter(char c)
         {
             return MatchingCharacters.Any(pair => pair.Key == c);
         }
 
-        private bool IsMatchCloseCharacter(char c)
+        protected virtual bool IsMatchCloseCharacter(char c)
         {
             return MatchingCharacters.Any(pair => pair.Value == c);
         }
 
-        private char GetMatchCloseCharacter(char c)
+        protected virtual char GetMatchCloseCharacter(char c)
         {
             return MatchingCharacters.First(pair => pair.Key == c).Value;
         }
 
-        private char GetMatchOpenCharacter(char c)
+        protected virtual char GetMatchOpenCharacter(char c)
         {
             return MatchingCharacters.First(pair => pair.Value == c).Key;
         }
 
-        public IEnumerable<ITagSpan<TextMarkerTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+        protected virtual bool TryRecalculateTags(int revision, SnapshotPoint point, int searchDistance, out IEnumerable<TagSpan<TextMarkerTag>> tags)
         {
-            return Tags;
+            // get the current char and the previous char
+            char currentText = point.GetChar();
+            // if current char is 0 (beginning of buffer), don't move it back
+            SnapshotPoint lastChar = point == 0 ? point : point - 1;
+            char lastText = lastChar.GetChar();
+            SnapshotSpan pairSpan = new SnapshotSpan();
+
+            if (IsMatchStartCharacter(currentText) && !IsInIgnoredSpan(Aggregator, point, TextView.Caret.Position.Affinity))
+            {
+                char closeChar = GetMatchCloseCharacter(currentText);
+                /* TODO: Need to improve handling of larger blocks. this won't highlight if the matching brace is more
+                 *       than 1 screen's worth of lines away. Changing this to 10 * TextView.TextViewLines.Count seemed
+                 *       to improve the situation.
+                 */
+                if (FindMatchingCloseChar(revision, point, Aggregator, currentText, closeChar, searchDistance, out pairSpan))
+                {
+                    tags = new TagSpan<TextMarkerTag>[]
+                        {
+                            new TagSpan<TextMarkerTag>(new SnapshotSpan(point, 1), PredefinedTextMarkerTags.BraceHighlight),
+                            new TagSpan<TextMarkerTag>(pairSpan, PredefinedTextMarkerTags.BraceHighlight)
+                        };
+
+                    return true;
+                }
+                else
+                {
+                    tags = new TagSpan<TextMarkerTag>[0];
+                    return false;
+                }
+            }
+            else if (IsMatchCloseCharacter(lastText) && !IsInIgnoredSpan(Aggregator, point, TextView.Caret.Position.Affinity))
+            {
+                var open = GetMatchOpenCharacter(lastText);
+                if (FindMatchingOpenChar(revision, lastChar, Aggregator, open, lastText, searchDistance, out pairSpan))
+                {
+                    tags = new TagSpan<TextMarkerTag>[]
+                        {
+                            new TagSpan<TextMarkerTag>(new SnapshotSpan(lastChar, 1), PredefinedTextMarkerTags.BraceHighlight),
+                            new TagSpan<TextMarkerTag>(pairSpan, PredefinedTextMarkerTags.BraceHighlight)
+                        };
+
+                    return true;
+                }
+                else
+                {
+                    tags = new TagSpan<TextMarkerTag>[0];
+                    return false;
+                }
+            }
+            else
+            {
+                // successfully identified that there are no matching braces
+                tags = new TagSpan<TextMarkerTag>[0];
+                return true;
+            }
         }
 
         private void UpdateAtCaretPosition(CaretPosition caretPosition)
@@ -343,72 +414,13 @@
             return false;
         }
 
-        private bool TryRecalculateTags(int revision, SnapshotPoint point, int searchDistance, out IEnumerable<TagSpan<TextMarkerTag>> tags)
-        {
-            // get the current char and the previous char
-            char currentText = point.GetChar();
-            // if current char is 0 (beginning of buffer), don't move it back
-            SnapshotPoint lastChar = point == 0 ? point : point - 1;
-            char lastText = lastChar.GetChar();
-            SnapshotSpan pairSpan = new SnapshotSpan();
-
-            if (IsMatchStartCharacter(currentText) && !IsInCommentOrLiteral(Aggregator, point, TextView.Caret.Position.Affinity))
-            {
-                char closeChar = GetMatchCloseCharacter(currentText);
-                /* TODO: Need to improve handling of larger blocks. this won't highlight if the matching brace is more
-                 *       than 1 screen's worth of lines away. Changing this to 10 * TextView.TextViewLines.Count seemed
-                 *       to improve the situation.
-                 */
-                if (FindMatchingCloseChar(revision, point, Aggregator, currentText, closeChar, searchDistance, out pairSpan))
-                {
-                    tags = new TagSpan<TextMarkerTag>[]
-                        {
-                            new TagSpan<TextMarkerTag>(new SnapshotSpan(point, 1), PredefinedTextMarkerTags.BraceHighlight),
-                            new TagSpan<TextMarkerTag>(pairSpan, PredefinedTextMarkerTags.BraceHighlight)
-                        };
-
-                    return true;
-                }
-                else
-                {
-                    tags = new TagSpan<TextMarkerTag>[0];
-                    return false;
-                }
-            }
-            else if (IsMatchCloseCharacter(lastText) && !IsInCommentOrLiteral(Aggregator, point, TextView.Caret.Position.Affinity))
-            {
-                var open = GetMatchOpenCharacter(lastText);
-                if (FindMatchingOpenChar(revision, lastChar, Aggregator, open, lastText, searchDistance, out pairSpan))
-                {
-                    tags = new TagSpan<TextMarkerTag>[]
-                        {
-                            new TagSpan<TextMarkerTag>(new SnapshotSpan(lastChar, 1), PredefinedTextMarkerTags.BraceHighlight),
-                            new TagSpan<TextMarkerTag>(pairSpan, PredefinedTextMarkerTags.BraceHighlight)
-                        };
-
-                    return true;
-                }
-                else
-                {
-                    tags = new TagSpan<TextMarkerTag>[0];
-                    return false;
-                }
-            }
-            else
-            {
-                // successfully identified that there are no matching braces
-                tags = new TagSpan<TextMarkerTag>[0];
-                return true;
-            }
-        }
-
-        private void OnTextViewLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
+        private void HandleTextViewLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
         {
             if (e.NewSnapshot != e.OldSnapshot)
                 UpdateAtCaretPosition(TextView.Caret.Position);
         }
 
-        private void OnCaretPositionChanged(object sender, CaretPositionChangedEventArgs e)
+        private void HandleCaretPositionChanged(object sender, CaretPositionChangedEventArgs e)
         {
             UpdateAtCaretPosition(e.NewPosition);
         }
