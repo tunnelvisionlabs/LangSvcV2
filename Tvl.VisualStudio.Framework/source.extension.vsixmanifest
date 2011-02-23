@@ -23,5 +23,9 @@
     <MefComponent>|Tvl.VisualStudio.Shell.Implementation|</MefComponent>
     <MefComponent>|Tvl.VisualStudio.Text.Implementation|</MefComponent>
     <MefComponent>|Tvl.VisualStudio.Language.Implementation|</MefComponent>
+    <MefComponent>|Tvl.VisualStudio.Text|</MefComponent>
+    <MefComponent>|Tvl.VisualStudio.Language|</MefComponent>
+    <MefComponent>|Tvl.VisualStudio.Shell|</MefComponent>
+    <MefComponent>|Tvl.Core|</MefComponent>
   </Content>
 </Vsix>
