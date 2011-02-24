@@ -173,7 +173,10 @@
                 Updating = true;
                 var targets = source.GetNavigationTargets().ToArray();
                 Action action = () => UpdateNavigationTargets(targets);
-                VisualElement.Dispatcher.Invoke(action);
+                if (VisualElement.Dispatcher.Thread == Thread.CurrentThread)
+                    action();
+                else
+                    VisualElement.Dispatcher.Invoke(action);
             }
             finally
             {
