@@ -59,6 +59,23 @@ public StringTemplateGroup TemplateGroup
 }
 >>
 
+ruleLabelDefs() ::= <<
+<[ruleDescriptor.tokenLabels,ruleDescriptor.tokenListLabels,ruleDescriptor.wildcardTreeLabels,ruleDescriptor.wildcardTreeListLabels]
+    :{<labelType> <it.label.text> = default(<labelType>);}; separator="\n"
+>
+<ruleDescriptor.tokenListLabels
+    :{List\<<labelType>\> list_<it.label.text> = null;}; separator="\n"
+>
+<ruleDescriptor.ruleListLabels
+    :{List\<StringTemplate\> list_<it.label.text> = null;}; separator="\n"
+>
+<ruleDescriptor.wildcardTreeListLabels
+    :{List\<<ASTLabelType>\> list_<it.label.text> = null;}; separator="\n"
+>
+<ruleDescriptor.ruleLabels:ruleLabelDef(label=it); separator="\n">
+<ruleDescriptor.ruleListLabels:ruleLabelDef(label=it); separator="\n">
+>>
+
 /** x+=rule when output=template */
 ruleRefAndListLabel(rule,label,elementIndex,args,scope) ::= <<
 <ruleRef(...)>
