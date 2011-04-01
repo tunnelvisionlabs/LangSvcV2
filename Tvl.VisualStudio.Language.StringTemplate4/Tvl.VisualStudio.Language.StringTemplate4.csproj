@@ -81,6 +81,19 @@
     <CodeContractsReferenceAssembly>DoNotBuild</CodeContractsReferenceAssembly>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ClassifierLexer.cs" />
+    <Compile Include="GroupClassifierLexer.g3.cs">
+      <DependentUpon>GroupClassifierLexer.g3</DependentUpon>
+    </Compile>
+    <Compile Include="InsideClassifierLexer.g3.cs">
+      <DependentUpon>InsideClassifierLexer.g3</DependentUpon>
+    </Compile>
+    <Compile Include="OutsideClassifierLexer.g3.cs">
+      <DependentUpon>OutsideClassifierLexer.g3</DependentUpon>
+    </Compile>
+    <Compile Include="StringTemplateBraceMatchingTagger.cs" />
+    <Compile Include="StringTemplateClassificationTypeNames.cs" />
+    <Compile Include="StringTemplateClassificationTypes.cs" />
     <Compile Include="StringTemplateOutliningTagger.cs" />
     <Compile Include="StringTemplateOutliningTaggerProvider.cs" />
     <Compile Include="StringTemplateEditorNavigationSource.cs" />
@@ -103,6 +116,15 @@
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
     </None>
+    <Antlr3 Include="InsideClassifierLexer.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
+    <Antlr3 Include="OutsideClassifierLexer.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
+    <Antlr3 Include="GroupClassifierLexer.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>

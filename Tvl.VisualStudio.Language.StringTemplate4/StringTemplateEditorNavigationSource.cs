@@ -80,13 +80,16 @@
                 var result = antlrParseResultArgs.Result as StringTemplateBackgroundParser.TemplateGroupRuleReturnScope;
                 if (result != null)
                 {
-                    foreach (var template in result.Group.Templates)
+                    foreach (var template in result.Group.CompiledTemplates)
                     {
                         if (template.isAnonSubtemplate)
                             continue;
 
+                        if (template.NativeGroup != result.Group)
+                            continue;
+
                         string name = template.name.Substring(template.name.LastIndexOf('/') + 1);
-                        IEnumerable<string> args = template.formalArguments != null ? template.formalArguments.Select(i => i.Name) : Enumerable.Empty<string>();
+                        IEnumerable<string> args = template.FormalArguments != null ? template.FormalArguments.Select(i => i.Name) : Enumerable.Empty<string>();
                         string sig = string.Format("{0}({1})", name, string.Join(", ", args));
                         IEditorNavigationType navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Members);
                         Interval sourceInterval = result.Group.GetTemplateInformation(template).GroupInterval;

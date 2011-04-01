@@ -3,10 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
+    using Antlr4.StringTemplate.Misc;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
-    using Antlr4.StringTemplate.Misc;
 
     internal sealed class StringTemplateOutliningTagger : ITagger<IOutliningRegionTag>
     {
@@ -63,13 +63,19 @@
                 var result = antlrParseResultArgs.Result as StringTemplateBackgroundParser.TemplateGroupRuleReturnScope;
                 if (result != null)
                 {
-                    foreach (var template in result.Group.Templates)
+                    foreach (var template in result.Group.CompiledTemplates)
                     {
                         if (template.isAnonSubtemplate)
                             continue;
 
+                        if (template.NativeGroup != result.Group)
+                            continue;
+
                         Interval sourceInterval = result.Group.GetTemplateInformation(template).GroupInterval;
                         SnapshotSpan span = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, sourceInterval.Length));
+                        if (e.Snapshot.GetLineNumberFromPosition(span.Start) == e.Snapshot.GetLineNumberFromPosition(span.End))
+                            continue;
+
                         IOutliningRegionTag tag = new OutliningRegionTag();
                         outliningRegions.Add(new TagSpan<IOutliningRegionTag>(span, tag));
                     }

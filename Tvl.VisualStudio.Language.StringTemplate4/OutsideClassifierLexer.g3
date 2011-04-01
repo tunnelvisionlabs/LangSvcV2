@@ -1,0 +1,35 @@
+﻿lexer grammar OutsideClassifierLexer;
+
+options {
+    language=CSharp3;
+    TokenLabelType=CommonToken;
+	tokenVocab=GroupClassifierLexer;
+}
+
+@namespace{Tvl.VisualStudio.Language.StringTemplate4}
+
+LANGLE : '<';
+
+COMMENT
+	:	'<!' .* '!>'
+	;
+
+ESCAPE_TAG
+	:	'<\\' .* '>'
+	;
+
+ESCAPE_CHAR
+	:	'\\' .
+	;
+
+NEWLINE
+	:	('\n' | '\r')*
+	;
+
+TEXT
+	:	(	~('}'|'<'|'\n'|'\r'|'"'|'>')
+		|	{AnonymousTemplateLevel==0}? => '}'
+		|	{Outermost!=ClassifierLexer.OutermostTemplate.String}? => '"'
+		|	{Outermost!=ClassifierLexer.OutermostTemplate.BigString || input.LA(2)!='>'}? => '>'
+		)*
+	;

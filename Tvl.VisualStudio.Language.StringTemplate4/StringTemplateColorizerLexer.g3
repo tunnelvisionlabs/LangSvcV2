@@ -46,27 +46,10 @@ BIGSTRING
 	;
 
 ANONYMOUS_TEMPLATE
-    :	'{'
-    	{
-		IToken templateToken = new CommonToken(input, ANONYMOUS_TEMPLATE, 0, CharIndex, CharIndex);
-		TemplateLexer lexer = new TemplateLexer(group.errMgr, input, templateToken, group.delimiterStartChar, group.delimiterStopChar);
-		lexer.subtemplateDepth = 1;
-		IToken t = lexer.NextToken();
-		while ( lexer.subtemplateDepth>=1 || t.Type!=TemplateLexer.RCURLY )
-		{
-			if (t.Type == TemplateLexer.EOF_TYPE)
-			{
-				MismatchedTokenException e = new MismatchedTokenException('}', input);
-				string msg = "missing final '}' in {...} anonymous template";
-    			group.errMgr.GroupLexerError(ErrorType.SYNTAX_ERROR, SourceName, e, msg);
-				break;
-			}
-			t = lexer.NextToken();
-		}
-		}
-    	// don't match '}' here; our little {...} scanner loop matches it
-    	// to terminate.
-    ;
+	:	'{' {HandleAnonymousTemplate();}
+		// don't match '}' here; our little {...} scanner loop matches it
+		// to terminate.
+	;
 
 COMMENT
     :   '/*' .* '*/'

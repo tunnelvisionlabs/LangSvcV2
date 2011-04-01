@@ -2,15 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using Antlr.Runtime;
+    using Antlr.Runtime.Tree;
+    using Antlr4.StringTemplate.Compiler;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow;
-    using Antlr4.StringTemplate.Compiler;
-    using Antlr4.StringTemplate;
-    using Antlr.Runtime.Tree;
-    using System.Diagnostics.Contracts;
 
     public class StringTemplateBackgroundParser : BackgroundParser
     {
@@ -59,14 +58,8 @@
                     };
 
                 TemplateGroupWrapper group = new TemplateGroupWrapper('<', '>');
-
-                bool save = TemplateGroup.debug;
-                TemplateGroup.debug = true;
-                parser.group(group, "InternalParse");
-                TemplateGroup.debug = save;
-
+                parser.group(group, string.Empty);
                 TemplateGroupRuleReturnScope returnScope = BuiltAstForGroupTemplates(group);
-
                 OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, tokens.GetTokens(), returnScope));
             }
             catch (Exception e)
@@ -91,7 +84,7 @@
         {
             ITreeAdaptor adaptor = new CommonTreeAdaptor();
             object tree = adaptor.Nil();
-            foreach (var template in group.Templates)
+            foreach (var template in group.CompiledTemplates)
             {
                 adaptor.AddChild(tree, template.ast);
             }

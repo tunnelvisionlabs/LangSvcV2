@@ -1,0 +1,53 @@
+﻿lexer grammar InsideClassifierLexer;
+
+options {
+	language=CSharp3;
+	TokenLabelType=CommonToken;
+	tokenVocab=OutsideClassifierLexer;
+}
+
+@namespace{Tvl.VisualStudio.Language.StringTemplate4}
+
+DOT : '.';
+ELLIPSIS : '...';
+COMMA : ',';
+COLON : ':';
+SEMI : ';';
+LPAREN : '(';
+RPAREN : ')';
+LBRACK : '[';
+RBRACK : ']';
+EQUALS : '=';
+NOT : '!';
+AT : '@';
+OR : '||';
+AND : '&&';
+LBRACE : '{';
+RBRACE : '}';
+LANGLE : '<';
+RANGLE : '>';
+
+EXPR_IDENTIFIER
+	:	('a'..'z' | 'A'..'Z' | '_')
+		('a'..'z' | 'A'..'Z' | '0'..'9' | '_' | '/')*
+	;
+
+WS
+	:	(' '|'\t')*
+	;
+
+NEWLINE
+	:	('\r'|'\n')*
+	;
+
+STRING
+	:	'"'
+		(	~('"'|'\\')
+		|	'\\' .
+		)*
+		'"'
+	;
+
+ANYCHAR
+	:	.
+	;

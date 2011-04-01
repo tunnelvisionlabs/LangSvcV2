@@ -1,0 +1,53 @@
+﻿lexer grammar GroupClassifierLexer;
+
+options {
+    language=CSharp3;
+    TokenLabelType=CommonToken;
+}
+
+@namespace{Tvl.VisualStudio.Language.StringTemplate4}
+
+LPAREN : '(';
+RPAREN : ')';
+COMMA : ',';
+DOT : '.';
+COLON : ':';
+DEFINED : '::=';
+EQUALS : '=';
+AT : '@';
+LBRACK : '[';
+RBRACK : ']';
+LBRACE : '{';
+RBRACE : '}';
+QUOTE : '"';
+
+BEGIN_BIGSTRING
+	:	'<<'
+	;
+
+END_BIGSTRING
+	:	'>>'
+	;
+
+ID	:	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'-'|'_')*
+	;
+
+COMMENT
+	:	'/*' .* '*/'
+	;
+
+LINE_COMMENT
+	:	'//' (~('\r'|'\n'))*
+	;
+
+WS
+	:	(' '|'\t')*
+	;
+
+NEWLINE
+	:	('\r'|'\n')*
+	;
+
+ANYCHAR
+	:	.
+	;
