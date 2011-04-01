@@ -78,7 +78,7 @@
             this._standardClassificationService = standardClassificationService;
         }
 
-        protected override Lexer CreateLexer(ICharStream input)
+        protected override ITokenSource CreateLexer(ICharStream input)
         {
             return new JavaColorizerLexer(input);
         }

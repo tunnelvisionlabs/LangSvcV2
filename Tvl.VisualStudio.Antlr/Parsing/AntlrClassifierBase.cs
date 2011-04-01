@@ -20,9 +20,8 @@
         {
             UpdateMultilineTokens(ref span);
 
-            SnapshotCharStream input = new SnapshotCharStream(span.Snapshot);
-            input.Seek(span.Start.Position);
-            Lexer lexer = CreateLexer(input);
+            ICharStream input = CreateInputStream(span);
+            ITokenSource lexer = CreateLexer(input);
             List<ClassificationSpan> classificationSpans = new List<ClassificationSpan>();
             while (true)
             {
@@ -43,7 +42,10 @@
 
             if (classificationSpans.Count > 0)
             {
-                var finalSpan = new Span(span.Start.Position, classificationSpans[classificationSpans.Count - 1].Span.End.Position - span.Start.Position);
+                int startPosition = classificationSpans[0].Span.Start.Position;
+                int endPosition = classificationSpans[classificationSpans.Count - 1].Span.End.Position;
+                int length = endPosition - startPosition;
+                var finalSpan = new Span(startPosition, length);
                 _multilineTokens.RemoveAll(classificationSpan => classificationSpan.IsEmpty || classificationSpan.IntersectsWith(finalSpan));
                 _multilineTokens.AddRange(classificationSpans.Where(IsMultilineClassificationSpan).Select(classificationSpan => classificationSpan.Span));
             }
@@ -51,7 +53,14 @@
             return classificationSpans;
         }
 
-        protected abstract Lexer CreateLexer(ICharStream input);
+        protected abstract ITokenSource CreateLexer(ICharStream input);
+
+        protected virtual ICharStream CreateInputStream(SnapshotSpan span)
+        {
+            SnapshotCharStream input = new SnapshotCharStream(span.Snapshot);
+            input.Seek(span.Start.Position);
+            return input;
+        }
 
         protected virtual IEnumerable<ClassificationSpan> GetClassificationSpansForToken(IToken token, ITextSnapshot snapshot)
         {

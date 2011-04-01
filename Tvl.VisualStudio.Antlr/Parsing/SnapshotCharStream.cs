@@ -4,7 +4,7 @@
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
 
-    public sealed class SnapshotCharStream : ICharStream
+    public class SnapshotCharStream : ICharStream
     {
         //private string _readaheadCache;
         //private int _readaheadCachePosition;

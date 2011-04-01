@@ -57,7 +57,7 @@
             }
         }
 
-        protected override Lexer CreateLexer(ICharStream input)
+        protected override ITokenSource CreateLexer(ICharStream input)
         {
             return new AntlrColorableLexer(input);
         }

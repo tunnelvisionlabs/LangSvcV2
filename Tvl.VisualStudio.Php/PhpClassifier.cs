@@ -126,7 +126,7 @@
             this._globalObject = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.GlobalObject);
         }
 
-        protected override Lexer CreateLexer(ICharStream input)
+        protected override ITokenSource CreateLexer(ICharStream input)
         {
             return new PhpColorizerLexer(input);
         }
