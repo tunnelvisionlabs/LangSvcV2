@@ -1,15 +1,12 @@
-﻿#define NEW_CLASSIFIER
-
-namespace Tvl.VisualStudio.Language.StringTemplate4
+﻿namespace Tvl.VisualStudio.Language.StringTemplate4
 {
+    using System;
     using System.Collections.Generic;
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
     using Tvl.VisualStudio.Language.Parsing;
-    using System;
-    using System.Linq;
 
     internal sealed class StringTemplateClassifier : AntlrClassifierBase
     {
@@ -41,24 +38,17 @@ namespace Tvl.VisualStudio.Language.StringTemplate4
 
         protected override ITokenSource CreateLexer(ICharStream input)
         {
-#if NEW_CLASSIFIER
             return new ClassifierLexer((ClassifierLexer.Stream)input);
-#else
-            return new StringTemplateColorizerLexer(input);
-#endif
         }
 
-#if NEW_CLASSIFIER
         protected override ICharStream CreateInputStream(SnapshotSpan span)
         {
             ClassifierLexer.Stream stream = new ClassifierLexer.Stream(span);
             return stream;
         }
-#endif
 
         protected override IClassificationType ClassifyToken(IToken token)
         {
-#if NEW_CLASSIFIER
             switch (token.Type)
             {
             case GroupClassifierLexer.ID:
@@ -112,31 +102,6 @@ namespace Tvl.VisualStudio.Language.StringTemplate4
             default:
                 return null;
             }
-#else
-            switch (token.Type)
-            {
-            case StringTemplateColorizerLexer.ID:
-                if (Array.IndexOf(_keywords, token.Text) >= 0)
-                    return _standardClassificationService.Keyword;
-
-                return _standardClassificationService.Identifier;
-
-            case StringTemplateColorizerLexer.STRING:
-            case StringTemplateColorizerLexer.BIGSTRING:
-            case StringTemplateColorizerLexer.ANONYMOUS_TEMPLATE:
-                return _standardClassificationService.StringLiteral;
-
-            case StringTemplateColorizerLexer.LINE_COMMENT:
-            case StringTemplateColorizerLexer.COMMENT:
-                return _standardClassificationService.Comment;
-
-            case StringTemplateColorizerLexer.WS:
-                return _standardClassificationService.WhiteSpace;
-
-            default:
-                return null;
-            }
-#endif
         }
 
         protected override IEnumerable<ClassificationSpan> GetClassificationSpansForToken(IToken token, ITextSnapshot snapshot)

@@ -102,9 +102,6 @@
     <Compile Include="StringTemplateBackgroundParser.cs" />
     <Compile Include="StringTemplateBackgroundParserProvider.cs" />
     <Compile Include="StringTemplateBraceMatchingTaggerProvider.cs" />
-    <Compile Include="StringTemplateColorizerLexer.g3.cs">
-      <DependentUpon>StringTemplateColorizerLexer.g3</DependentUpon>
-    </Compile>
     <Compile Include="StringTemplateServices.cs" />
     <Compile Include="StringTemplateConstants.cs" />
     <Compile Include="StringTemplateClassifier.cs" />
@@ -128,9 +125,6 @@
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
-    <Antlr3 Include="StringTemplateColorizerLexer.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Antlr3.Runtime">
