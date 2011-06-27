@@ -5,6 +5,7 @@
     using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr.Runtime.Tree;
+    using IAstRuleReturnScope = Antlr.Runtime.IAstRuleReturnScope;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
@@ -74,7 +75,7 @@
             List<ITagSpan<IOutliningRegionTag>> outliningRegions = new List<ITagSpan<IOutliningRegionTag>>();
             if (antlrParseResultArgs != null)
             {
-                AntlrErrorProvidingParser.grammar__return resultArgs = antlrParseResultArgs.Result as AntlrErrorProvidingParser.grammar__return;
+                IAstRuleReturnScope resultArgs = antlrParseResultArgs.Result as IAstRuleReturnScope;
                 var result = resultArgs.Tree as CommonTree;
                 if (result != null)
                 {
