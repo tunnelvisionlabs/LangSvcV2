@@ -216,9 +216,9 @@
                                     <ColumnDefinition MinWidth="12" Width="0" />
                                 </Grid.ColumnDefinitions>
                                 <Popup Name="PART_Popup" AllowsTransparency="true" Grid.ColumnSpan="2" Placement="Bottom" Margin="1" PopupAnimation="{DynamicResource {x:Static SystemParameters.ComboBoxPopupAnimation}}" IsOpen="{Binding Path=IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}">
-                                    <vsui:SystemDropShadowChrome Name="Shdw" MaxHeight="{TemplateBinding MaxDropDownHeight}" MinWidth="{Binding ElementName=MainGrid, Path=ActualWidth}">
+                                    <vsui:SystemDropShadowChrome Name="Shdw" MaxHeight="{TemplateBinding MaxDropDownHeight}" Width="{Binding ElementName=MainGrid, Path=ActualWidth}">
                                         <Border Name="DropDownBorder" BorderThickness="1" BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.DropDownPopupBorderKey}}">
-                                            <ScrollViewer CanContentScroll="true">
+                                            <ScrollViewer CanContentScroll="true" HorizontalScrollBarVisibility="Disabled">
                                                 <ItemsPresenter Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Contained" />
                                             </ScrollViewer>
                                         </Border>
