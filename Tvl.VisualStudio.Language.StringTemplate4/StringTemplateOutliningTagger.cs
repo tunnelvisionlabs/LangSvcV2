@@ -28,6 +28,7 @@
             this._outliningRegions = new List<ITagSpan<IOutliningRegionTag>>();
 
             this.BackgroundParser.ParseComplete += OnBackgroundParseComplete;
+            this.BackgroundParser.RequestParse();
         }
 
         private ITextBuffer TextBuffer
@@ -63,18 +64,17 @@
                 var result = antlrParseResultArgs.Result as StringTemplateBackgroundParser.TemplateGroupRuleReturnScope;
                 if (result != null)
                 {
-                    foreach (var template in result.Group.CompiledTemplates)
+                    foreach (var templateInfo in result.Group.GetTemplateInformation())
                     {
-                        if (template.IsAnonSubtemplate)
-                            continue;
+                        var template = templateInfo.Template;
 
-                        if (template.NativeGroup != result.Group)
+                        if (template.IsAnonSubtemplate)
                             continue;
 
                         if (template.IsRegion && template.RegionDefType != Antlr4.StringTemplate.Template.RegionType.Explicit)
                             continue;
 
-                        Interval sourceInterval = result.Group.GetTemplateInformation(template).GroupInterval;
+                        Interval sourceInterval = templateInfo.GroupInterval;
                         SnapshotSpan span = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, sourceInterval.Length));
                         if (e.Snapshot.GetLineNumberFromPosition(span.Start) == e.Snapshot.GetLineNumberFromPosition(span.End))
                             continue;

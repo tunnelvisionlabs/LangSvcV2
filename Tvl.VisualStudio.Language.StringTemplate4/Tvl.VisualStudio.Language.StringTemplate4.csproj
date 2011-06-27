@@ -98,6 +98,7 @@
     <Compile Include="StringTemplateBraceMatchingTagger.cs" />
     <Compile Include="StringTemplateClassificationTypeNames.cs" />
     <Compile Include="StringTemplateClassificationTypes.cs" />
+    <Compile Include="StringTemplateEditorNavigationTypes.cs" />
     <Compile Include="StringTemplateOutliningTagger.cs" />
     <Compile Include="StringTemplateOutliningTaggerProvider.cs" />
     <Compile Include="StringTemplateEditorNavigationSource.cs" />
