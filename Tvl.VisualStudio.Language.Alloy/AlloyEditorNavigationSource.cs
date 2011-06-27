@@ -3,10 +3,12 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
+    using System.Linq;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Text.Navigation;
-    using System.Linq;
+
+    using IAstRuleReturnScope = Antlr.Runtime.IAstRuleReturnScope;
 
     internal sealed class AlloyEditorNavigationSource : IEditorNavigationSource
     {
@@ -89,7 +91,7 @@
             List<IEditorNavigationTarget> navigationTargets = null;
             if (antlrParseResultArgs != null)
             {
-                AlloyParser.compilationUnit_return parseResult = antlrParseResultArgs.Result as AlloyParser.compilationUnit_return;
+                IAstRuleReturnScope parseResult = antlrParseResultArgs.Result as IAstRuleReturnScope;
                 if (parseResult != null)
                     navigationTargets = AlloyEditorNavigationSourceWalker.ExtractNavigationTargets(parseResult, antlrParseResultArgs.Tokens, _provider, antlrParseResultArgs.Snapshot);
             }

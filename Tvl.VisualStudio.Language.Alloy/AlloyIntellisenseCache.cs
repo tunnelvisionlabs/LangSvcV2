@@ -64,7 +64,7 @@
             AlloyLexer lexer = new AlloyLexer(new ANTLRStringStream(text, sourceName));
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             AlloyParser parser = new AlloyParser(tokens);
-            AlloyParser.expr_return tree = parser.expr();
+            IAstRuleReturnScope tree = parser.expr();
             BufferedTreeNodeStream treeNodeStream = new BufferedTreeNodeStream(tree.Tree);
             AlloyExpressionWalker walker = new AlloyExpressionWalker(expressionSpan, treeNodeStream);
             Expression result = walker.expr();

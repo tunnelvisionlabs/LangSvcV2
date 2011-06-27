@@ -22,7 +22,7 @@
             _snapshot = snapshot;
         }
 
-        public static List<ITagSpan<IOutliningRegionTag>> ExtractOutliningRegions(AlloyParser.compilationUnit_return parseResult, ReadOnlyCollection<IToken> tokens, AlloyOutliningTaggerProvider provider, ITextSnapshot snapshot)
+        public static List<ITagSpan<IOutliningRegionTag>> ExtractOutliningRegions(IAstRuleReturnScope parseResult, ReadOnlyCollection<IToken> tokens, AlloyOutliningTaggerProvider provider, ITextSnapshot snapshot)
         {
             BufferedTreeNodeStream input = new BufferedTreeNodeStream(parseResult.Tree);
             AlloyOutliningTaggerWalker walker = new AlloyOutliningTaggerWalker(input, tokens, provider, snapshot);

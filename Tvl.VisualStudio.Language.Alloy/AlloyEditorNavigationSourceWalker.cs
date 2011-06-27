@@ -34,7 +34,7 @@
             }
         }
 
-        public static List<IEditorNavigationTarget> ExtractNavigationTargets(AlloyParser.compilationUnit_return parseResult, ReadOnlyCollection<IToken> tokens, AlloyEditorNavigationSourceProvider provider, ITextSnapshot snapshot)
+        public static List<IEditorNavigationTarget> ExtractNavigationTargets(IAstRuleReturnScope parseResult, ReadOnlyCollection<IToken> tokens, AlloyEditorNavigationSourceProvider provider, ITextSnapshot snapshot)
         {
             BufferedTreeNodeStream input = new BufferedTreeNodeStream(parseResult.Tree);
             AlloyEditorNavigationSourceWalker walker = new AlloyEditorNavigationSourceWalker(input, tokens, provider, snapshot);

@@ -3,10 +3,12 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
+    using System.Linq;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
-    using System.Linq;
+
+    using IAstRuleReturnScope = Antlr.Runtime.IAstRuleReturnScope;
 
     internal sealed class AlloyOutliningTagger : ITagger<IOutliningRegionTag>
     {
@@ -71,7 +73,7 @@
         private void UpdateTags(AntlrParseResultEventArgs antlrParseResultArgs)
         {
             List<ITagSpan<IOutliningRegionTag>> outliningRegions = null;
-            AlloyParser.compilationUnit_return parseResult = antlrParseResultArgs.Result as AlloyParser.compilationUnit_return;
+            IAstRuleReturnScope parseResult = antlrParseResultArgs.Result as IAstRuleReturnScope;
             if (parseResult != null)
                 outliningRegions = AlloyOutliningTaggerWalker.ExtractOutliningRegions(parseResult, antlrParseResultArgs.Tokens, _provider, antlrParseResultArgs.Snapshot);
 
