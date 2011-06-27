@@ -1,6 +1,7 @@
 ﻿namespace Tvl.Events
 {
     using System;
+    using System.Diagnostics.Contracts;
 
     public class WeakEventHandler<T, TEventArgs> : IWeakEventHandler<TEventArgs>
         where T : class
@@ -15,6 +16,8 @@
 
         public WeakEventHandler(EventHandler<TEventArgs> handler, Action<EventHandler<TEventArgs>> unregister)
         {
+            Contract.Requires<ArgumentNullException>(handler != null, "handler");
+
             _target = new WeakReference(handler.Target);
             _openHandler = (OpenEventHandler)Delegate.CreateDelegate(typeof(OpenEventHandler), null, handler.Method);
             _handler = Invoke;

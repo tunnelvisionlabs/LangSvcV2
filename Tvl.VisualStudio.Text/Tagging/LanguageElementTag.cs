@@ -1,5 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Text.Tagging
 {
+    using System;
+    using System.Diagnostics.Contracts;
     using System.Windows.Media;
     using Microsoft.VisualStudio.Text;
 
@@ -7,6 +9,11 @@
     {
         public LanguageElementTag(string name, string category, ImageSource glyph, SnapshotSpan target)
         {
+            Contract.Requires<ArgumentNullException>(name != null, "name");
+            Contract.Requires<ArgumentNullException>(category != null, "category");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(name));
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(category));
+
             this.Name = name;
             this.Category = category;
             this.Glyph = glyph;

@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.Language.Intellisense;
@@ -32,10 +33,8 @@
 
         public IntellisenseController(ITextView textView, IntellisenseControllerProvider provider)
         {
-            if (textView == null)
-                throw new ArgumentNullException("textView");
-            if (provider == null)
-                throw new ArgumentNullException("provider");
+            Contract.Requires<ArgumentNullException>(textView != null, "textView");
+            Contract.Requires<ArgumentNullException>(provider != null, "provider");
 
             _provider = provider;
             _completionInfo = new Lazy<CompletionInfo>(CreateCompletionInfo);
@@ -46,6 +45,8 @@
         {
             get
             {
+                Contract.Ensures(Contract.Result<IntellisenseControllerProvider>() != null);
+
                 return _provider;
             }
         }
@@ -225,22 +226,31 @@
 
         public virtual void GoToSource(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
         {
+            Contract.Requires<ArgumentNullException>(triggerPoint != null, "triggerPoint");
+
             Task<IEnumerable<INavigateToTarget>> task = GoToSourceAsync(gotoSourceType, triggerPoint).HandleNonCriticalExceptions();
             var resultContinuation = task.ContinueWith(HandleGoToSourceResult, TaskContinuationOptions.OnlyOnRanToCompletion).HandleNonCriticalExceptions();
         }
 
         public virtual Task<IEnumerable<INavigateToTarget>> GoToSourceAsync(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
         {
+            Contract.Requires<ArgumentNullException>(triggerPoint != null, "triggerPoint");
+
             return Task.Factory.StartNew(() => GoToSourceImpl(gotoSourceType, triggerPoint));
         }
 
         public virtual IEnumerable<INavigateToTarget> GoToSourceImpl(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
         {
+            Contract.Requires<ArgumentNullException>(triggerPoint != null, "triggerPoint");
+            Contract.Ensures(Contract.Result<IEnumerable<INavigateToTarget>>() != null);
+
             return new INavigateToTarget[0];
         }
 
         protected virtual void HandleGoToSourceResult(Task<IEnumerable<INavigateToTarget>> task)
         {
+            Contract.Requires<ArgumentNullException>(task != null, "task");
+
             INavigateToTarget target = task.Result.FirstOrDefault();
             if (target != null)
                 target.NavigateTo();
@@ -248,6 +258,8 @@
 
         public virtual void TriggerCompletion(ITrackingPoint triggerPoint)
         {
+            Contract.Requires<ArgumentNullException>(triggerPoint != null, "triggerPoint");
+
             DismissCompletion();
             ICompletionSession session = Provider.CompletionBroker.TriggerCompletion(TextView, triggerPoint, true);
             if (session != null)
@@ -260,6 +272,8 @@
 
         public virtual void TriggerSignatureHelp(ITrackingPoint triggerPoint)
         {
+            Contract.Requires<ArgumentNullException>(triggerPoint != null, "triggerPoint");
+
             DismissSignatureHelp();
             ISignatureHelpSession session = Provider.SignatureHelpBroker.TriggerSignatureHelp(TextView, triggerPoint, true);
             if (session != null)
@@ -271,6 +285,8 @@
 
         public virtual void TriggerQuickInfo(ITrackingPoint triggerPoint)
         {
+            Contract.Requires<ArgumentNullException>(triggerPoint != null, "triggerPoint");
+
             DismissQuickInfo();
             IQuickInfoSession session = Provider.QuickInfoBroker.TriggerQuickInfo(TextView, triggerPoint, true);
             if (session != null)
@@ -282,6 +298,8 @@
 
         public virtual void TriggerSmartTag(ITrackingPoint triggerPoint, SmartTagType type, SmartTagState state)
         {
+            Contract.Requires<ArgumentNullException>(triggerPoint != null, "triggerPoint");
+
             DismissSmartTag();
             ISmartTagSession session = Provider.SmartTagBroker.CreateSmartTagSession(TextView, type, triggerPoint, state);
             if (session != null)
@@ -461,6 +479,8 @@
 
         public virtual void OnVsTextViewCreated(IVsTextView textViewAdapter)
         {
+            Contract.Requires<ArgumentNullException>(textViewAdapter != null, "textViewAdapter");
+
             _commandFilter = CreateIntellisenseCommandFilter(textViewAdapter);
             if (_commandFilter != null)
                 _commandFilter.Enabled = true;
@@ -483,6 +503,8 @@
 
         protected virtual void Attach(ITextView textView)
         {
+            Contract.Requires<ArgumentNullException>(textView != null, "textView");
+
             if (_textView != null)
                 throw new InvalidOperationException();
 
@@ -492,6 +514,8 @@
 
         protected virtual void Detach(ITextView textView)
         {
+            Contract.Requires<ArgumentNullException>(textView != null, "textView");
+
             DismissAll();
 
             if (_commandFilter != null)
@@ -506,19 +530,26 @@
 
         protected virtual void ConnectSubjectBuffer(ITextBuffer subjectBuffer)
         {
+            Contract.Requires<ArgumentNullException>(subjectBuffer != null, "subjectBuffer");
         }
 
         protected virtual void DisconnectSubjectBuffer(ITextBuffer subjectBuffer)
         {
+            Contract.Requires<ArgumentNullException>(subjectBuffer != null, "subjectBuffer");
         }
 
         protected virtual CompletionInfo CreateCompletionInfo()
         {
+            Contract.Ensures(Contract.Result<CompletionInfo>() != null);
+
             return new CompletionInfo(this);
         }
 
         protected virtual IntellisenseCommandFilter CreateIntellisenseCommandFilter(IVsTextView textViewAdapter)
         {
+            Contract.Requires<ArgumentNullException>(textViewAdapter != null, "textViewAdapter");
+            Contract.Ensures(Contract.Result<IntellisenseCommandFilter>() != null);
+
             return new IntellisenseCommandFilter(textViewAdapter, this);
         }
 

@@ -1,8 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Text
 {
-    using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio.Text;
 
+    [ContractClass(typeof(Contracts.ICommenterContracts))]
     public interface ICommenter
     {
         /// <summary>

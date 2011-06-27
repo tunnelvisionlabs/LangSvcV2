@@ -1,6 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Text
 {
     using System;
+    using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.TextManager.Interop;
@@ -15,12 +16,9 @@
 
         public CodeWindowManager(IVsCodeWindow codeWindow, SVsServiceProvider serviceProvider, LanguagePreferences languagePreferences)
         {
-            if (codeWindow == null)
-                throw new ArgumentNullException("codeWindow");
-            if (serviceProvider == null)
-                throw new ArgumentNullException("serviceProvider");
-            if (languagePreferences == null)
-                throw new ArgumentNullException("languagePreferences");
+            Contract.Requires<ArgumentNullException>(codeWindow != null, "codeWindow");
+            Contract.Requires<ArgumentNullException>(serviceProvider != null, "serviceProvider");
+            Contract.Requires<ArgumentNullException>(languagePreferences != null, "languagePreferences");
 
             _codeWindow = codeWindow;
             _serviceProvider = serviceProvider;
@@ -71,9 +69,19 @@
             return VSConstants.S_OK;
         }
 
-        public virtual int OnNewView(IVsTextView pView)
+        public virtual int OnNewView(IVsTextView view)
         {
+            Contract.Requires<ArgumentNullException>(view != null, "view");
+
             return VSConstants.S_OK;
+        }
+
+        int IVsCodeWindowManager.OnNewView(IVsTextView pView)
+        {
+            if (pView == null)
+                throw new ArgumentNullException("pView");
+
+            return OnNewView(pView);
         }
 
         public virtual int RemoveAdornments()
@@ -90,6 +98,8 @@
 
         protected virtual int AddDropdownBar(int comboBoxCount, IVsDropdownBarClient client)
         {
+            Contract.Requires<ArgumentNullException>(client != null, "client");
+
             IVsDropdownBarManager manager = CodeWindow as IVsDropdownBarManager;
             if (manager == null)
                 throw new NotSupportedException();
@@ -131,6 +141,8 @@
 
         protected virtual void HandleLanguagePreferencesChanged(object sender, EventArgs e)
         {
+            Contract.Requires<ArgumentNullException>(e != null, "e");
+
             int comboBoxCount;
             IVsDropdownBarClient client;
             if (_dropdownBarClient == null && LanguagePreferences.ShowDropdownBar && TryCreateDropdownBarClient(out comboBoxCount, out client))

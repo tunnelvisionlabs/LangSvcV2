@@ -1,6 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Intellisense
 {
-    using ITrackingSpan = Microsoft.VisualStudio.Text.ITrackingSpan;
+    using System;
+    using System.Diagnostics.Contracts;
 
     public class CompletionInfo
     {
@@ -8,6 +9,8 @@
 
         public CompletionInfo(IntellisenseController controller)
         {
+            Contract.Requires<ArgumentNullException>(controller != null, "controller");
+
             _controller = controller;
         }
 
@@ -68,6 +71,8 @@
         {
             get
             {
+                Contract.Ensures(Contract.Result<IntellisenseController>() != null);
+
                 return _controller;
             }
         }

@@ -1,6 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Shell.Extensions
 {
     using System;
+    using System.Diagnostics.Contracts;
     using IConnectionPoint = Microsoft.VisualStudio.OLE.Interop.IConnectionPoint;
     using IConnectionPointContainer = Microsoft.VisualStudio.OLE.Interop.IConnectionPointContainer;
 
@@ -10,10 +11,9 @@
             where TObject : class, TEventInterface
             where TEventInterface : class
         {
-            if (container == null)
-                throw new ArgumentNullException("container");
-            if (@object == null)
-                throw new ArgumentNullException("object");
+            Contract.Requires<ArgumentNullException>(container != null, "container");
+            Contract.Requires<ArgumentNullException>(@object != null, "object");
+            Contract.Ensures(Contract.Result<IDisposable>() != null);
 
             Guid eventGuid = typeof(TEventInterface).GUID;
             IConnectionPoint connectionPoint;
@@ -29,8 +29,7 @@
         public static void Unadvise<TEventInterface>(this IConnectionPointContainer container, uint cookie)
             where TEventInterface : class
         {
-            if (container == null)
-                throw new ArgumentNullException("container");
+            Contract.Requires<ArgumentNullException>(container != null, "container");
 
             if (cookie == 0)
                 return;
@@ -51,6 +50,8 @@
 
             public ConnectionPointCookie(IConnectionPoint connectionPoint, uint cookie)
             {
+                Contract.Requires(connectionPoint != null);
+
                 _connectionPoint = new WeakReference<IConnectionPoint>(connectionPoint);
                 _cookie = cookie;
             }

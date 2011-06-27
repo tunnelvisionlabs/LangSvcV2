@@ -1,11 +1,10 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
+    using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio.Text.Editor;
 
+    [ContractClass(typeof(Contracts.IOpenedViewTrackerServiceContracts))]
     public interface IOpenedViewTrackerService
     {
         IEnumerable<ITextView> OpenedViews

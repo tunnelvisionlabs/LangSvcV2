@@ -11,6 +11,7 @@
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Tvl.Events;
+    using System.Diagnostics.Contracts;
 
     internal class EditorNavigationMargin : IWpfTextViewMargin
     {
@@ -23,6 +24,10 @@
 
         public EditorNavigationMargin(IWpfTextView wpfTextView, IEnumerable<IEditorNavigationSource> sources, IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
         {
+            Contract.Requires<ArgumentNullException>(wpfTextView != null, "wpfTextView");
+            Contract.Requires<ArgumentNullException>(sources != null, "sources");
+            Contract.Requires<ArgumentNullException>(editorNavigationTypeRegistryService != null, "editorNavigationTypeRegistryService");
+
             this._wpfTextView = wpfTextView;
             this._sources = sources;
             this._editorNavigationTypeRegistryService = editorNavigationTypeRegistryService;
@@ -106,6 +111,8 @@
         {
             get
             {
+                Contract.Ensures(Contract.Result<FrameworkElement>() != null);
+
                 return _container;
             }
         }
@@ -162,6 +169,8 @@
 
         private void UpdateNavigationTargets(IEditorNavigationSource source)
         {
+            Contract.Requires<ArgumentNullException>(source != null, "source");
+
             lock (this)
             {
                 if (Updating)
@@ -186,6 +195,8 @@
 
         private void UpdateNavigationTargets(IEnumerable<IEditorNavigationTarget> targets)
         {
+            Contract.Requires<ArgumentNullException>(targets != null, "targets");
+
             foreach (var group in targets.GroupBy(target => target.EditorNavigationType))
             {
                 var navigationControl = this._navigationControls.FirstOrDefault(control => control.Item1 == group.Key);

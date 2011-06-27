@@ -1,5 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Intellisense
 {
+    using System;
+    using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
@@ -9,6 +11,10 @@
     {
         public FileSystemNavigateToTarget(string fileName, int line, int column, ServiceProvider serviceProvider)
         {
+            Contract.Requires<ArgumentNullException>(fileName != null, "fileName");
+            Contract.Requires<ArgumentNullException>(serviceProvider != null, "serviceProvider");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(fileName));
+
             FileName = fileName;
             Line = line;
             Column = column;

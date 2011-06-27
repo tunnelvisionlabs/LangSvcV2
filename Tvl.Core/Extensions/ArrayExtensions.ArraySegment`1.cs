@@ -141,12 +141,16 @@
 
             public IEnumerator<T> GetEnumerator()
             {
+                Contract.Ensures(Contract.Result<IEnumerator<T>>() != null);
+
                 for (int i = 0; i < _count; i++)
                     yield return _array[_offset + i];
             }
 
             IEnumerator IEnumerable.GetEnumerator()
             {
+                Contract.Ensures(Contract.Result<IEnumerator>() != null);
+
                 return GetEnumerator();
             }
 

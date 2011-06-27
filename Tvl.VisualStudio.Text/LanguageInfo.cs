@@ -10,6 +10,7 @@
     using Microsoft.VisualStudio.TextManager.Interop;
     using Tvl.VisualStudio.Shell.Extensions;
     using IConnectionPointContainer = Microsoft.VisualStudio.OLE.Interop.IConnectionPointContainer;
+    using System.Diagnostics.Contracts;
 
     public abstract class LanguageInfo : IVsLanguageInfo, IDisposable
     {
@@ -82,10 +83,20 @@
             GC.SuppressFinalize(this);
         }
 
-        public virtual int GetColorizer(IVsTextLines pBuffer, out IVsColorizer ppColorizer)
+        public virtual int GetColorizer(IVsTextLines buffer, out IVsColorizer colorizer)
         {
-            ppColorizer = null;
+            Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
+
+            colorizer = null;
             return VSConstants.E_FAIL;
+        }
+
+        int IVsLanguageInfo.GetColorizer(IVsTextLines buffer, out IVsColorizer colorizer)
+        {
+            if (buffer == null)
+                throw new ArgumentNullException("buffer");
+
+            return GetColorizer(buffer, out colorizer);
         }
 
         int IVsLanguageInfo.GetCodeWindowManager(IVsCodeWindow pCodeWin, out IVsCodeWindowManager ppCodeWinMgr)
@@ -132,11 +143,17 @@
 
         protected virtual LanguagePreferences CreateLanguagePreferences(LANGPREFERENCES2 preferences)
         {
+            Contract.Ensures(Contract.Result<LanguagePreferences>() != null);
+
             return new LanguagePreferences(preferences);
         }
 
         protected virtual IVsCodeWindowManager GetCodeWindowManager(IVsCodeWindow codeWindow, ITextBuffer textBuffer)
         {
+            Contract.Requires<ArgumentNullException>(codeWindow != null, "codeWindow");
+            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Contract.Ensures(Contract.Result<IVsCodeWindowManager>() != null);
+
             return textBuffer.Properties.GetOrCreateSingletonProperty<CodeWindowManager>(() => new CodeWindowManager(codeWindow, ServiceProvider, LanguagePreferences));
         }
     }

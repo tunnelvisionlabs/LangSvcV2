@@ -73,7 +73,14 @@
 
         public IEnumerable<ITagSpan<TextMarkerTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
+            Contract.Requires<ArgumentNullException>(spans != null, "spans");
+
             return Tags;
+        }
+
+        IEnumerable<ITagSpan<TextMarkerTag>> ITagger<TextMarkerTag>.GetTags(NormalizedSnapshotSpanCollection spans)
+        {
+            return GetTags(spans);
         }
 
         protected virtual bool IsClassificationTypeIgnored(IClassificationType classificationType)

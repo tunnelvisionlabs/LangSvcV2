@@ -12,6 +12,9 @@
 
     public class BackgroundParserErrorTagger : ITagger<IErrorTag>
     {
+        private readonly ITextBuffer _textBuffer;
+        private readonly IBackgroundParser _backgroundParser;
+
         private ITagSpan<IErrorTag>[] _tags;
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
@@ -21,26 +24,42 @@
             Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
             Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
 
-            this.TextBuffer = textBuffer;
-            this.BackgroundParser = backgroundParser;
-            this.BackgroundParser.ParseComplete += new EventHandler<ParseResultEventArgs>(BackgroundParserParseComplete);
+            this._textBuffer = textBuffer;
+            this._backgroundParser = backgroundParser;
+            this._backgroundParser.ParseComplete += new EventHandler<ParseResultEventArgs>(BackgroundParserParseComplete);
         }
 
         public ITextBuffer TextBuffer
         {
-            get;
-            private set;
+            get
+            {
+                Contract.Ensures(Contract.Result<ITextBuffer>() != null);
+
+                return _textBuffer;
+            }
         }
 
         public IBackgroundParser BackgroundParser
         {
-            get;
-            private set;
+            get
+            {
+                Contract.Ensures(Contract.Result<IBackgroundParser>() != null);
+
+                return _backgroundParser;
+            }
         }
 
         public IEnumerable<ITagSpan<IErrorTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
+            Contract.Requires<ArgumentNullException>(spans != null, "spans");
+            Contract.Ensures(Contract.Result<IEnumerable<ITagSpan<IErrorTag>>>() != null);
+
             return _tags;
+        }
+
+        IEnumerable<ITagSpan<IErrorTag>> ITagger<IErrorTag>.GetTags(NormalizedSnapshotSpanCollection spans)
+        {
+            return GetTags(spans);
         }
 
         private void BackgroundParserParseComplete(object sender, ParseResultEventArgs e)
@@ -65,6 +84,8 @@
 
         private void OnTagsChanged(SnapshotSpanEventArgs e)
         {
+            Contract.Requires(e != null);
+
             var t = TagsChanged;
             if (t != null)
                 t(this, e);

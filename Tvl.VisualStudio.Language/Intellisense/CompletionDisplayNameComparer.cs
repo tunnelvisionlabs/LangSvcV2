@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using Completion = Microsoft.VisualStudio.Language.Intellisense.Completion;
     using IComparer = System.Collections.IComparer;
     using IEqualityComparer = System.Collections.IEqualityComparer;
@@ -19,8 +20,7 @@
 
         public CompletionDisplayNameComparer(StringComparer comparer)
         {
-            if (comparer == null)
-                throw new ArgumentNullException("comparer");
+            Contract.Requires<ArgumentNullException>(comparer != null, "comparer");
 
             _comparer = comparer;
         }

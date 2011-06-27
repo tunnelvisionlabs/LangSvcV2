@@ -11,6 +11,7 @@
             Contract.Requires<ArgumentNullException>(array != null, "array");
             Contract.Requires<ArgumentOutOfRangeException>(startIndex >= 0);
             Contract.Requires<ArgumentException>(startIndex <= array.Length);
+            Contract.Ensures(Contract.Result<IList<T>>() != null);
 
             if (startIndex == 0)
                 return array;
@@ -25,6 +26,7 @@
             Contract.Requires<ArgumentOutOfRangeException>(count >= 0);
             Contract.Requires<ArgumentException>(startIndex <= array.Length);
             Contract.Requires<ArgumentException>(checked(startIndex + count) <= array.Length);
+            Contract.Ensures(Contract.Result<IList<T>>() != null);
 
             if (startIndex == 0 && count == array.Length)
                 return array;
@@ -35,6 +37,7 @@
         public static T[] CloneArray<T>(this T[] array)
         {
             Contract.Requires<ArgumentNullException>(array != null, "array");
+            Contract.Ensures(Contract.Result<T[]>() != null);
 
             return (T[])array.Clone();
         }

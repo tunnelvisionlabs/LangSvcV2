@@ -176,6 +176,9 @@
     <Compile Include="CommandOptions.cs" />
     <Compile Include="CommandStatus.cs" />
     <Compile Include="CommandType.cs" />
+    <Compile Include="Contracts\IActiveViewTrackerServiceContracts.cs" />
+    <Compile Include="Contracts\IMonitorSelectionServiceContracts.cs" />
+    <Compile Include="Contracts\IOpenedViewTrackerServiceContracts.cs" />
     <Compile Include="Extensions\IConnectionPointContainerExtensions.cs" />
     <Compile Include="Extensions\IVsCmdNameMappingExtensions.cs" />
     <Compile Include="Extensions\IVsExpansionManagerExtensions.cs" />

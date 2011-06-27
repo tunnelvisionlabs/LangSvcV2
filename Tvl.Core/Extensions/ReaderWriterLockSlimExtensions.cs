@@ -2,29 +2,27 @@
 {
     using System;
     using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;
+    using System.Diagnostics.Contracts;
 
     public static class ReaderWriterLockSlimExtensions
     {
         public static ReadLockHelper ReadLock(this ReaderWriterLockSlim readerWriterLock)
         {
-            if (readerWriterLock == null)
-                throw new ArgumentNullException("readerWriterLock");
+            Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
 
             return new ReadLockHelper(readerWriterLock);
         }
 
         public static UpgradeableReadLockHelper UpgradableReadLock(this ReaderWriterLockSlim readerWriterLock)
         {
-            if (readerWriterLock == null)
-                throw new ArgumentNullException("readerWriterLock");
+            Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
 
             return new UpgradeableReadLockHelper(readerWriterLock);
         }
 
         public static WriteLockHelper WriteLock(this ReaderWriterLockSlim readerWriterLock)
         {
-            if (readerWriterLock == null)
-                throw new ArgumentNullException("readerWriterLock");
+            Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
 
             return new WriteLockHelper(readerWriterLock);
         }
@@ -35,6 +33,8 @@
 
             public ReadLockHelper(ReaderWriterLockSlim readerWriterLock)
             {
+                Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+
                 readerWriterLock.EnterReadLock();
                 this._readerWriterLock = readerWriterLock;
             }
@@ -52,6 +52,8 @@
 
             public UpgradeableReadLockHelper(ReaderWriterLockSlim readerWriterLock)
             {
+                Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+
                 this._readerWriterLock = readerWriterLock;
                 this._readonly = false;
                 this._readerWriterLock.EnterUpgradeableReadLock();
@@ -92,6 +94,8 @@
 
             public WriteLockHelper(ReaderWriterLockSlim readerWriterLock)
             {
+                Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+
                 readerWriterLock.EnterWriteLock();
                 this._readerWriterLock = readerWriterLock;
             }

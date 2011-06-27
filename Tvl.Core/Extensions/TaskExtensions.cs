@@ -11,6 +11,7 @@
             where T : Task
         {
             Contract.Requires<ArgumentNullException>(task != null, "task");
+            Contract.Ensures(Contract.Result<T>() != null);
 
             task.ContinueWith(HandleNonCriticalExceptionsCore, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
             return task;

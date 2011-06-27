@@ -9,6 +9,7 @@
     using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.TextManager.Interop;
     using Microsoft.VisualStudio;
+    using System.Diagnostics.Contracts;
 
     [Export(typeof(IActiveViewTrackerService))]
     internal sealed class ActiveViewTrackerService : IActiveViewTrackerService
@@ -80,6 +81,8 @@
 
         private bool IsViewOnScreen(ITextView view)
         {
+            Contract.Requires<ArgumentNullException>(view != null, "view");
+
             IVsTextView viewAdapter = VsEditorAdaptersFactoryService.GetViewAdapter(view);
             IServiceProvider sp = viewAdapter as IServiceProvider;
             if (sp == null)

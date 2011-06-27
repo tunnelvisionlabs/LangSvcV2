@@ -1,6 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing
 {
     using System;
+    using System.Diagnostics.Contracts;
     using System.Threading;
     using Microsoft.VisualStudio.Text;
     using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
@@ -8,7 +9,9 @@
 
     public abstract class BackgroundParser : IBackgroundParser, IDisposable
     {
-        private Timer _timer;
+        private readonly ITextBuffer _textBuffer;
+        private readonly Timer _timer;
+
         private DateTimeOffset _lastEdit;
         private bool _dirty;
         private int _parsing;
@@ -17,8 +20,10 @@
 
         public BackgroundParser(ITextBuffer textBuffer)
         {
-            this.TextBuffer = textBuffer;
-            this.TextBuffer.PostChanged += TextBufferPostChanged;
+            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+
+            this._textBuffer = textBuffer;
+            this._textBuffer.PostChanged += TextBufferPostChanged;
 
             this._dirty = true;
             this._timer = new Timer(1500);
@@ -30,8 +35,12 @@
 
         public ITextBuffer TextBuffer
         {
-            get;
-            private set;
+            get
+            {
+                Contract.Ensures(Contract.Result<ITextBuffer>() != null);
+
+                return _textBuffer;
+            }
         }
 
         public bool Disposed
@@ -75,6 +84,8 @@
 
         protected virtual void OnParseComplete(ParseResultEventArgs e)
         {
+            Contract.Requires<ArgumentNullException>(e != null, "e");
+
             var t = ParseComplete;
             if (t != null)
                 t(this, e);

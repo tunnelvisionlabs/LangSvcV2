@@ -18,6 +18,7 @@
         public static IEnumerable<IVsHierarchy> GetProjectHierarchies(this IVsSolution solution, __VSENUMPROJFLAGS flags)
         {
             Contract.Requires<ArgumentNullException>(solution != null, "solution");
+            Contract.Ensures(Contract.Result<IEnumerable<IVsHierarchy>>() != null);
 
             Guid empty = Guid.Empty;
             IEnumHierarchies ppenum;

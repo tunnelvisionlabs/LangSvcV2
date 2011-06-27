@@ -9,6 +9,7 @@
         public static EventHandler AsWeak(EventHandler handler, Action<EventHandler> unregister)
         {
             Contract.Requires<ArgumentNullException>(handler != null, "handler");
+            Contract.Ensures(Contract.Result<EventHandler>() != null);
 
             if (handler.Method.IsStatic)
                 return handler;
@@ -23,6 +24,7 @@
             where TEventArgs : EventArgs
         {
             Contract.Requires<ArgumentNullException>(handler != null, "handler");
+            Contract.Ensures(Contract.Result<EventHandler<TEventArgs>>() != null);
 
             if (handler.Method.IsStatic)
                 return handler;

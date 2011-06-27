@@ -9,7 +9,7 @@
         IOutputWindowPane IOutputWindowService.TryGetPane(string name)
         {
             Contract.Requires<ArgumentNullException>(name != null, "name");
-            Contract.Requires<ArgumentException>(name.Length > 0);
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(name));
 
             throw new NotImplementedException();
         }

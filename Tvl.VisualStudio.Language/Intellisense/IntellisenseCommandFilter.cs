@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
     using System.Linq;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Language.Intellisense;
@@ -27,8 +28,8 @@
         public IntellisenseCommandFilter(IVsTextView textViewAdapter, IntellisenseController controller)
             : base(textViewAdapter)
         {
-            if (controller == null)
-                throw new ArgumentNullException("controller");
+            Contract.Requires(textViewAdapter != null);
+            Contract.Requires<ArgumentNullException>(controller != null, "controller");
 
             _controller = controller;
         }
@@ -37,6 +38,8 @@
         {
             get
             {
+                Contract.Ensures(Contract.Result<IntellisenseController>() != null);
+
                 return _controller;
             }
         }

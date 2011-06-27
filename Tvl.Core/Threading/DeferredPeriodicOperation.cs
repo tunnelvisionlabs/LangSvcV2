@@ -1,6 +1,7 @@
 ﻿namespace Tvl.Threading
 {
     using System;
+    using System.Diagnostics.Contracts;
 
     public class DeferredPeriodicOperation : IDisposable
     {
@@ -14,6 +15,8 @@
 
         public DeferredPeriodicOperation(Action action, TimeSpan deferPeriod, TimeSpan minimumPeriod, bool requiresInitialOperation)
         {
+            Contract.Requires<ArgumentNullException>(action != null, "action");
+
             this._action = action;
             this._lastDefer = DateTimeOffset.MinValue;
             this._deferPeriod = deferPeriod;

@@ -7,6 +7,7 @@
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
+    using System.Diagnostics.Contracts;
 
     public abstract class AntlrClassifierBase : IClassifier
     {
@@ -18,6 +19,8 @@
         [MethodImpl(MethodImplOptions.Synchronized)]
         public virtual IList<ClassificationSpan> GetClassificationSpans(SnapshotSpan span)
         {
+            Contract.Ensures(Contract.Result<IList<ClassificationSpan>>() != null);
+
             UpdateMultilineTokens(ref span);
 
             ICharStream input = CreateInputStream(span);
@@ -64,6 +67,10 @@
 
         protected virtual IEnumerable<ClassificationSpan> GetClassificationSpansForToken(IToken token, ITextSnapshot snapshot)
         {
+            Contract.Requires<ArgumentNullException>(token != null, "token");
+            Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
+            Contract.Ensures(Contract.Result<IEnumerable<ClassificationSpan>>() != null);
+
             var classification = ClassifyToken(token);
             if (classification != null)
             {
@@ -76,11 +83,15 @@
 
         protected virtual IClassificationType ClassifyToken(IToken token)
         {
+            Contract.Requires<ArgumentNullException>(token != null, "token");
+
             return null;
         }
 
         protected virtual void OnClassificationChanged(ClassificationChangedEventArgs e)
         {
+            Contract.Requires<ArgumentNullException>(e != null, "e");
+
             var t = ClassificationChanged;
             if (t != null)
                 t(this, e);
@@ -88,6 +99,8 @@
 
         private static bool IsMultilineClassificationSpan(ClassificationSpan span)
         {
+            Contract.Requires<ArgumentNullException>(span != null, "span");
+
             if (span.Span.IsEmpty)
                 return false;
 

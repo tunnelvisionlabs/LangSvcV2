@@ -7,6 +7,8 @@
 
     public class EditorNavigationTarget : IEditorNavigationTarget
     {
+        private readonly string _name;
+        private readonly IEditorNavigationType _editorNavigationType;
         private readonly NavigationTargetStyle _style;
 
         public EditorNavigationTarget(string name, IEditorNavigationType editorNavigationType, SnapshotSpan span, ImageSource glyph = null, NavigationTargetStyle style = NavigationTargetStyle.None)
@@ -21,24 +23,32 @@
             Contract.Requires<ArgumentNullException>(name != null, "name");
             Contract.Requires<ArgumentNullException>(editorNavigationType != null, "editorNavigationType");
 
-            this.Name = name;
-            this.EditorNavigationType = editorNavigationType;
+            this._name = name;
+            this._editorNavigationType = editorNavigationType;
             this.Span = span;
             this.Seek = seek;
             this._style = style;
             this.Glyph = glyph;
         }
 
-        public IEditorNavigationType EditorNavigationType
-        {
-            get;
-            private set;
-        }
-
         public string Name
         {
-            get;
-            private set;
+            get
+            {
+                Contract.Ensures(Contract.Result<string>() != null);
+
+                return _name;
+            }
+        }
+
+        public IEditorNavigationType EditorNavigationType
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<IEditorNavigationType>() != null);
+
+                return _editorNavigationType;
+            }
         }
 
         public ImageSource Glyph

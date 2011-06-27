@@ -92,6 +92,10 @@
 
         protected virtual Completion CreateKeywordCompletion(string keyword)
         {
+            Contract.Requires<ArgumentNullException>(keyword != null, "keyword");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(keyword));
+            Contract.Ensures(Contract.Result<Completion>() != null);
+
             string displayText = keyword;
             string insertionText = keyword;
             string description = null;
@@ -102,6 +106,8 @@
 
         protected virtual IEnumerable<Completion> GetSnippetCompletions()
         {
+            Contract.Ensures(Contract.Result<IEnumerable<Completion>>() != null);
+
             if (LanguageGuid == Guid.Empty)
                 return EmptyCompletions;
 
