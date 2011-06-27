@@ -1,5 +1,5 @@
 /*
- * [The "BSD licence"]
+ * [The "BSD license"]
  * Copyright (c) 2011 Terence Parr
  * All rights reserved.
  *
@@ -32,20 +32,11 @@
 /** Template subgroup to add template rewrite output
  *  If debugging, then you'll also get STDbg.stg loaded.
  */
-group ST;
 
 @outputFile.imports() ::= <<
 <@super.imports()>
 using Antlr3.ST;
 using Antlr3.ST.Language;
->>
-
-/** Add this to each rule's return value struct */
-@returnScope.ruleReturnMembers() ::= <<
-private StringTemplate _st;
-public StringTemplate Template { get { return _st; } set { _st = value; } }
-public override string ToString() { return (Template==null) ? string.Empty : Template.ToString(); }
-<@super.ruleReturnMembers()>
 >>
 
 @genericParser.members() ::= <<
@@ -59,27 +50,14 @@ public StringTemplateGroup TemplateGroup
 }
 >>
 
-ruleLabelDefs() ::= <<
-<[ruleDescriptor.tokenLabels,ruleDescriptor.tokenListLabels,ruleDescriptor.wildcardTreeLabels,ruleDescriptor.wildcardTreeListLabels]
-    :{<labelType> <it.label.text> = default(<labelType>);}; separator="\n"
->
-<ruleDescriptor.tokenListLabels
-    :{List\<<labelType>\> list_<it.label.text> = null;}; separator="\n"
->
-<ruleDescriptor.ruleListLabels
-    :{List\<StringTemplate\> list_<it.label.text> = null;}; separator="\n"
->
-<ruleDescriptor.wildcardTreeListLabels
-    :{List\<<ASTLabelType>\> list_<it.label.text> = null;}; separator="\n"
->
-<ruleDescriptor.ruleLabels:ruleLabelDef(label=it); separator="\n">
-<ruleDescriptor.ruleListLabels:ruleLabelDef(label=it); separator="\n">
->>
+ruleReturnBaseType() ::= <%
+Template<if(TREE_PARSER)>Tree<else>Parser<endif>RuleReturnScope\<StringTemplate, <labelType>>
+%>
 
 /** x+=rule when output=template */
 ruleRefAndListLabel(rule,label,elementIndex,args,scope) ::= <<
 <ruleRef(...)>
-<listLabelElem(elem=label+".Template",elemType="StringTemplate",...)>
+<listLabelElem(elem={<label>.Template},elemType="StringTemplate",...)>
 >>
 
 rewriteTemplate(alts) ::= <<
@@ -111,7 +89,7 @@ replaceTextInLine() ::= <<
 <endif>
 >>
 
-rewriteTemplateAlt() ::= <<
+rewriteTemplateAlt(it) ::= <<
 // <it.description>
 <if(it.pred)>
 if (<it.pred>)
@@ -135,19 +113,19 @@ null;
  *  an attribute to build a bigger template; you get a self-embedded
  *  template.
  */
-rewriteExternalTemplate(name,args) ::= <<
+rewriteExternalTemplate(name,args) ::= <%
 TemplateGroup.GetInstanceOf("<name>"<optionalArguments(args)>)
->>
+%>
 
 /** expr is a string expression that says what template to load */
-rewriteIndirectTemplate(expr,args) ::= <<
+rewriteIndirectTemplate(expr,args) ::= <%
 TemplateGroup.GetInstanceOf(<expr><optionalArguments(args)>)
->>
+%>
 
 /** Invoke an inline template with a set of attribute name/value pairs */
-rewriteInlineTemplate(args, template) ::= <<
+rewriteInlineTemplate(args, template) ::= <%
 new StringTemplate(TemplateGroup, "<template>"<optionalArguments(args)>)
->>
+%>
 
 optionalArguments(args) ::= <<
 <if(args)>,
@@ -155,7 +133,7 @@ optionalArguments(args) ::= <<
 <endif>
 >>
 
-optionalArgument() ::= <<
+optionalArgument(it) ::= <<
 {"<it.name>", <it.value>}
 >>
 
