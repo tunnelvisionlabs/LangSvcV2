@@ -60,8 +60,6 @@
             while (true)
             {
                 IToken token = lexer.NextToken();
-                if (token.Type == CharStreamConstants.EndOfFile)
-                    break;
 
                 // endLinePrevious is the line number the previous token ended on
                 int endLinePrevious;
@@ -70,13 +68,18 @@
                 else
                     endLinePrevious = span.Snapshot.GetLineNumberFromPosition(span.Start) - 1;
 
-                if (TokensSkippedLines(span.Snapshot, endLinePrevious, token))
+                int startLineCurrent;
+                if (token.Type == CharStreamConstants.EndOfFile)
+                    startLineCurrent = span.Snapshot.LineCount;
+                else
+                    startLineCurrent = span.Snapshot.GetLineNumberFromPosition(token.StartIndex);
+
+                if (startLineCurrent > endLinePrevious + 1)
                 {
                     int firstMultilineLine = endLinePrevious;
                     if (previousToken == null || TokenEndsAtEndOfLine(span.Snapshot, previousToken))
                         firstMultilineLine++;
 
-                    int startLineCurrent = span.Snapshot.GetLineNumberFromPosition(token.StartIndex);
                     for (int i = firstMultilineLine; i < startLineCurrent; i++)
                     {
                         if (!_lineStates[i].MultilineToken || lineStateChanged)
@@ -85,6 +88,9 @@
                         SetLineState(i, LineStateInfo.Multiline);
                     }
                 }
+
+                if (token.Type == CharStreamConstants.EndOfFile)
+                    break;
 
                 previousToken = token;
 
@@ -165,7 +171,7 @@
                 _firstChangedLine++;
             }
 
-            if (!state.IsDirty && _lastChangedLine.HasValue && (_lastChangedLine == line || _lastChangedLine == line + 1))
+            if (!state.IsDirty && _lastChangedLine.HasValue && _lastChangedLine == line)
             {
                 _firstChangedLine = null;
                 _lastChangedLine = null;
@@ -357,7 +363,7 @@
 
                 if (_lastChangedLine.HasValue && _lastChangedLine.Value > lineNumberFromPosition)
                 {
-                    _lastChangedLine = _lastChangedLine.Value + change.LineCountDelta;
+                    _lastChangedLine += change.LineCountDelta;
                 }
 
                 for (int i = lineNumberFromPosition; i <= num2; i++)
