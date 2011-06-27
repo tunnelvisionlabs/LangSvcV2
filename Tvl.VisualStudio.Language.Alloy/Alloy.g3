@@ -214,6 +214,55 @@ expr
 	:	unOpExpr1
 	;
 
+//expr2
+//	:	primaryExpr2
+//	|	('~'|'*'|'^')^ expr2
+//	|	expr2 '.'^ expr2
+//	|	expr2 '['^ (expr2 (','! expr2)*)? ']'
+//	|	expr2 ':>'^ expr2
+//	|	expr2 '<:'^ expr2
+//	|	expr2 arrowMultiplicity? '->'^ expr2
+//	|	expr2 '&'^ expr2
+//	|	expr2 '++'^ expr2
+//	|	'#'^ expr2
+//	|	('+'|'-')^ expr2
+//	|	expr2 ('<<'|'>>'|'>>>')^ expr2
+//	|	expr2 ('!'|'not')? ('<'|'>'|'=<'|'>='|'='|'in')^ expr2
+//	|	('!'|'not')^ expr2
+//	|	expr2 ('&&'|'and')^ expr2
+//	|	expr2 ('=>'|'implies')^ expr2 (('else'|',') => ('else'|',') expr2)?
+//	|	expr2 ('<=>'|'iff')^ expr2
+//	|	expr2 ('||'|'or')^ expr2
+//	|	'let'^ letDecl2 (','! letDecl2)* ','? (block2 | '|' expr2)
+//	|	quant^ decl2 (','! decl2)* ','!? (block2 | '|' expr2)
+//	|	('no'|'some'|'lone'|'one'|'set'|'seq')^ expr2
+//	;
+
+//primaryExpr2
+//	:	'none'
+//	|	'iden'
+//	|	'univ'
+//	|	'Int'
+//	|	'seq/Int'
+//	|	'('^ expr ')'
+//	|	'@'^? name
+//	|	number
+//	|	block2
+//	//|	'{' decl (',' decl)* ','? blockOrBar '}'
+//	;
+
+//block2
+//	:	'{'^ expr* '}'
+//	;
+
+//decl2
+//	:	'private'? 'disj'? nameList ':'^ 'disj'? expr
+//	;
+
+//letDecl2
+//	:	name '='^ expr
+//	;
+
 unOpExpr1
 	:	('let' | quantDecls ('{' | '|')) =>
 		(	letDecls
@@ -353,10 +402,10 @@ block
 	:	'{'^ expr* '}'
 	;
 
-blockOrBar
-	:	block
-	|	'|'^ expr
-	;
+//blockOrBar
+//	:	block
+//	|	'|'^ expr
+//	;
 
 name
 	:	('this'|IDENTIFIER) ('/'^ IDENTIFIER)*
