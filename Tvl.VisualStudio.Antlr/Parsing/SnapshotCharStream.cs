@@ -1,6 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing
 {
+    using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
 
@@ -26,6 +28,8 @@
 
         public SnapshotCharStream(ITextSnapshot snapshot)
         {
+            Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
+
             this.Snapshot = snapshot;
         }
 
@@ -79,7 +83,7 @@
             return Snapshot.GetText(startIndex, length);
         }
 
-        public void Consume()
+        public virtual void Consume()
         {
             //System.out.println("prev p="+p+", c="+(char)data[p]);
             if (Index < Count)
@@ -99,7 +103,7 @@
             }
         }
 
-        public int LA(int i)
+        public virtual int LA(int i)
         {
             if (i == 0)
             {
