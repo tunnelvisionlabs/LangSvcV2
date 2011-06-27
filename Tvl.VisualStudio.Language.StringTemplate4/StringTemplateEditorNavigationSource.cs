@@ -9,6 +9,7 @@
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Text.Navigation;
+
     using ImageSource = System.Windows.Media.ImageSource;
 
     internal sealed class StringTemplateEditorNavigationSource : IEditorNavigationSource
@@ -80,25 +81,55 @@
                 var result = antlrParseResultArgs.Result as StringTemplateBackgroundParser.TemplateGroupRuleReturnScope;
                 if (result != null)
                 {
-                    foreach (var template in result.Group.CompiledTemplates)
+                    foreach (var templateInfo in result.Group.GetTemplateInformation())
                     {
-                        if (template.isAnonSubtemplate)
+                        Antlr4.StringTemplate.Compiler.CompiledTemplate template = templateInfo.Template;
+
+                        if (template.IsAnonSubtemplate)
                             continue;
 
-                        if (template.NativeGroup != result.Group)
-                            continue;
-
-                        string name = template.name.Substring(template.name.LastIndexOf('/') + 1);
-                        IEnumerable<string> args = template.FormalArguments != null ? template.FormalArguments.Select(i => i.Name) : Enumerable.Empty<string>();
-                        string sig = string.Format("{0}({1})", name, string.Join(", ", args));
-                        IEditorNavigationType navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Members);
-                        Interval sourceInterval = result.Group.GetTemplateInformation(template).GroupInterval;
-                        SnapshotSpan span = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, sourceInterval.Length));
-                        SnapshotSpan seek = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, 0));
-                        ImageSource glyph = _provider.GetGlyph(StandardGlyphGroup.GlyphGroupTemplate, StandardGlyphItem.GlyphItemPublic);
-                        NavigationTargetStyle style = NavigationTargetStyle.None;
-                        navigationTargets.Add(new EditorNavigationTarget(sig, navigationType, span, seek, glyph, style));
+                        bool isRegion = !string.IsNullOrEmpty(templateInfo.EnclosingTemplateName);
+                        if (isRegion)
+                        {
+                            string sig = string.Format("{0}.{1}()", templateInfo.EnclosingTemplateName, templateInfo.NameToken.Text);
+                            //string sig = string.Format("{0}({1})", name, string.Join(", ", args));
+                            IEditorNavigationType navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Members);
+                            Interval sourceInterval = templateInfo.GroupInterval;
+                            SnapshotSpan span = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, sourceInterval.Length));
+                            SnapshotSpan seek = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, 0));
+                            ImageSource glyph = _provider.GetGlyph(StandardGlyphGroup.GlyphGroupTemplate, StandardGlyphItem.GlyphItemPublic);
+                            NavigationTargetStyle style = NavigationTargetStyle.None;
+                            navigationTargets.Add(new EditorNavigationTarget(sig, navigationType, span, seek, glyph, style));
+                        }
+                        else
+                        {
+                            // always pull the name from the templateInfo because the template itself could be an aliased template
+                            string name = templateInfo.NameToken.Text;
+                            IEnumerable<string> args = template.FormalArguments != null ? template.FormalArguments.Select(i => i.Name) : Enumerable.Empty<string>();
+                            string sig = string.Format("{0}({1})", name, string.Join(", ", args));
+                            IEditorNavigationType navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Types);
+                            Interval sourceInterval = templateInfo.GroupInterval;
+                            SnapshotSpan span = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, sourceInterval.Length));
+                            SnapshotSpan seek = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, 0));
+                            bool isAlias = false;
+                            StandardGlyphGroup glyphGroup = isAlias ? StandardGlyphGroup.GlyphGroupTypedef : StandardGlyphGroup.GlyphGroupTemplate;
+                            ImageSource glyph = _provider.GetGlyph(StandardGlyphGroup.GlyphGroupTemplate, StandardGlyphItem.GlyphItemPublic);
+                            NavigationTargetStyle style = NavigationTargetStyle.None;
+                            navigationTargets.Add(new EditorNavigationTarget(sig, navigationType, span, seek, glyph, style));
+                        }
                     }
+
+                    //foreach (var dictionaryInfo in result.Group.GetDictionaryInformation())
+                    //{
+                    //    string name = dictionaryInfo.Name;
+                    //    IEditorNavigationType navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Members);
+                    //    Interval sourceInterval = dictionaryInfo.GroupInterval;
+                    //    SnapshotSpan span = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, sourceInterval.Length));
+                    //    SnapshotSpan seek = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, 0));
+                    //    ImageSource glyph = _provider.GetGlyph(StandardGlyphGroup.GlyphGroupModule, StandardGlyphItem.GlyphItemPublic);
+                    //    NavigationTargetStyle style = NavigationTargetStyle.None;
+                    //    navigationTargets.Add(new EditorNavigationTarget(sig, navigationType, span, seek, glyph, style));
+                    //}
                 }
             }
 

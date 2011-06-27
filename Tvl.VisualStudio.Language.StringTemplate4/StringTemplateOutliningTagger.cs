@@ -65,10 +65,13 @@
                 {
                     foreach (var template in result.Group.CompiledTemplates)
                     {
-                        if (template.isAnonSubtemplate)
+                        if (template.IsAnonSubtemplate)
                             continue;
 
                         if (template.NativeGroup != result.Group)
+                            continue;
+
+                        if (template.IsRegion && template.RegionDefType != Antlr4.StringTemplate.Template.RegionType.Explicit)
                             continue;
 
                         Interval sourceInterval = result.Group.GetTemplateInformation(template).GroupInterval;

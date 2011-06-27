@@ -19,13 +19,17 @@ LBRACK : '[';
 RBRACK : ']';
 EQUALS : '=';
 NOT : '!';
-AT : '@';
+//AT : '@';
 OR : '||';
 AND : '&&';
 LBRACE : '{';
 RBRACE : '}';
 LANGLE : '<';
 RANGLE : '>';
+
+REGION_REF
+	:	'@' EXPR_IDENTIFIER
+	;
 
 EXPR_IDENTIFIER
 	:	('a'..'z' | 'A'..'Z' | '_')

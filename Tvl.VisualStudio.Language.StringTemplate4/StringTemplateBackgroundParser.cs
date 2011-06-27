@@ -58,7 +58,7 @@
                     };
 
                 TemplateGroupWrapper group = new TemplateGroupWrapper('<', '>');
-                parser.group(group, string.Empty);
+                parser.group(group, "/");
                 TemplateGroupRuleReturnScope returnScope = BuiltAstForGroupTemplates(group);
                 OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, tokens.GetTokens(), returnScope));
             }
@@ -86,7 +86,7 @@
             object tree = adaptor.Nil();
             foreach (var template in group.CompiledTemplates)
             {
-                adaptor.AddChild(tree, template.ast);
+                adaptor.AddChild(tree, template.Ast);
             }
 
             return new TemplateGroupRuleReturnScope(group, (CommonTree)tree);

@@ -3,10 +3,9 @@
     using System;
     using System.Diagnostics.Contracts;
     using Antlr.Runtime;
-    using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
 
-    internal class ClassifierLexer : ITokenSource
+    internal class ClassifierLexer : ITokenSourceWithState<ClassifierLexer.LexerState>
     {
         private readonly ICharStream _input;
         private readonly InsideClassifierLexer _insideLexer;
@@ -16,8 +15,15 @@
         private TemplateLexerMode _mode;
         private OutermostTemplate _outermost;
         private int _anonymousTemplateLevel;
+        private bool _inComment;
 
-        public ClassifierLexer(ClassifierLexer.Stream input)
+        public ClassifierLexer(ICharStream input)
+            : this(input, LexerState.Initial)
+        {
+            Contract.Requires(input != null);
+        }
+
+        public ClassifierLexer(ICharStream input, LexerState state)
         {
             Contract.Requires<ArgumentNullException>(input != null, "input");
 
@@ -26,7 +32,11 @@
             _outsideLexer = new OutsideClassifierLexer(input, this);
             _groupLexer = new GroupClassifierLexer(input);
 
-            input.DeriveState(this);
+            var stream = input as StringTemplateClassifier.StringTemplateEscapedCharStream;
+            if (stream != null)
+                stream.Lexer = this;
+
+            State = state;
         }
 
         public string SourceName
@@ -49,7 +59,7 @@
         {
             get
             {
-                return new LexerState(_mode, _outermost, _anonymousTemplateLevel);
+                return new LexerState(_mode, _outermost, _anonymousTemplateLevel, _inComment);
             }
 
             set
@@ -57,6 +67,7 @@
                 _mode = value.Mode;
                 _outermost = value.Outermost;
                 _anonymousTemplateLevel = value.AnonymousTemplateLevel;
+                _inComment = value.InComment;
             }
         }
 
@@ -99,6 +110,24 @@
             }
         }
 
+        internal bool InComment
+        {
+            get
+            {
+                return _inComment;
+            }
+
+            set
+            {
+                _inComment = value;
+            }
+        }
+
+        public LexerState GetCurrentState()
+        {
+            return State;
+        }
+
         public IToken NextToken()
         {
             IToken token = null;
@@ -124,6 +153,7 @@
 
             // when true, the outermost template's closing token is '>>'. otherwise, '"' is the closing token
             bool insideBigString = Outermost == OutermostTemplate.BigString;
+            bool insideBigStringLine = Outermost == OutermostTemplate.BigStringLine;
 
             IToken token = null;
 
@@ -141,12 +171,14 @@
                         Mode = TemplateLexerMode.Expression;
                 }
                 else if ((insideBigString && AnonymousTemplateLevel == 0 && _input.LA(1) == '>' && _input.LA(2) == '>')
-                    || (!insideBigString && AnonymousTemplateLevel == 0 && _input.LA(1) == '"'))
+                    || (insideBigStringLine && AnonymousTemplateLevel == 0 && _input.LA(1) == '%' && _input.LA(2) == '>')
+                    || (!insideBigString && !insideBigStringLine && AnonymousTemplateLevel == 0 && _input.LA(1) == '"'))
                 {
                     // no longer inside the template - let the group lexer prepare the closing template token
                     token = _groupLexer.NextToken();
                     Mode = TemplateLexerMode.Group;
                     Outermost = OutermostTemplate.None;
+                    InComment = false;
                 }
                 else
                 {
@@ -198,11 +230,11 @@
                     break;
 
                 case '<':
-                    if (_input.LA(2) == '<')
+                    if (_input.LA(2) == '<' || _input.LA(2) == '%')
                     {
                         token = _groupLexer.NextToken();
                         Mode = TemplateLexerMode.Template;
-                        Outermost = OutermostTemplate.BigString;
+                        Outermost = token.Type == GroupClassifierLexer.BEGIN_BIGSTRINGLINE ? OutermostTemplate.BigStringLine : OutermostTemplate.BigString;
                         break;
                     }
                     else
@@ -233,53 +265,48 @@
             None,
             String,
             BigString,
+            BigStringLine,
         }
 
-        internal struct LexerState
+        internal struct LexerState : IEquatable<LexerState>
         {
             internal static readonly LexerState Initial = new LexerState();
 
             internal readonly TemplateLexerMode Mode;
             internal readonly OutermostTemplate Outermost;
             internal readonly int AnonymousTemplateLevel;
+            internal readonly bool InComment;
 
-            public LexerState(TemplateLexerMode mode, OutermostTemplate outermost, int anonymousTemplateLevel)
+            public LexerState(TemplateLexerMode mode, OutermostTemplate outermost, int anonymousTemplateLevel, bool inComment)
             {
                 Mode = mode;
                 Outermost = outermost;
                 AnonymousTemplateLevel = anonymousTemplateLevel;
-            }
-        }
-
-        internal class Stream : SnapshotCharStream
-        {
-            private Span _span;
-
-            public Stream(SnapshotSpan span)
-                : base(span.Snapshot)
-            {
-                _span = span.Span;
+                InComment = inComment;
             }
 
-            internal void DeriveState(ClassifierLexer lexer)
+            public bool Equals(LexerState other)
             {
-                int targetPosition = this.Index;
-                this.Seek(0);
+                return AnonymousTemplateLevel == other.AnonymousTemplateLevel
+                    && Mode == other.Mode
+                    && Outermost == other.Outermost
+                    && InComment == other.InComment;
+            }
 
-                lexer.State = LexerState.Initial;
-                LexerState savedState = lexer.State;
-                int savedIndex = this.Index;
-                while (this.Index < targetPosition)
-                {
-                    savedState = lexer.State;
-                    lexer.NextToken();
-                }
+            public override bool Equals(object obj)
+            {
+                if (!(obj is LexerState))
+                    return false;
 
-                if (Index > targetPosition)
-                {
-                    lexer.State = savedState;
-                    Seek(savedIndex);
-                }
+                return Equals((LexerState)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return this.AnonymousTemplateLevel.GetHashCode()
+                    ^ this.Mode.GetHashCode()
+                    ^ this.Outermost.GetHashCode()
+                    ^ this.InComment.GetHashCode();
             }
         }
     }

@@ -29,6 +29,14 @@ END_BIGSTRING
 	:	'>>'
 	;
 
+BEGIN_BIGSTRINGLINE
+	:	'<%'
+	;
+
+END_BIGSTRINGLINE
+	:	'%>'
+	;
+
 ID	:	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'-'|'_')*
 	;
 
