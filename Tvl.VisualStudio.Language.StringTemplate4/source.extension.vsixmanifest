@@ -23,5 +23,6 @@
   </References>
   <Content>
     <MefComponent>|%CurrentProject%|</MefComponent>
+    <VsPackage>|%CurrentProject%|</VsPackage>
   </Content>
 </Vsix>
