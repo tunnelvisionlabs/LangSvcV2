@@ -15,9 +15,9 @@ namespace Tvl.VisualStudio.Language.StringTemplate4
         /* The FileExtensionToContentTypeDefinition export is not necessary when the package provides an
          * IVsLanguageInfo implementation.
          */
-        [Export]
-        [FileExtension(StringTemplateConstants.StringTemplateFileExtension)]
-        [ContentType(StringTemplateConstants.StringTemplateContentType)]
-        private static readonly FileExtensionToContentTypeDefinition StringTemplateFileExtensionToContentTypeDefinition;
+        //[Export]
+        //[FileExtension(StringTemplateConstants.StringTemplateGroupFileExtension)]
+        //[ContentType(StringTemplateConstants.StringTemplateContentType)]
+        //private static readonly FileExtensionToContentTypeDefinition StringTemplateGroupFileExtensionToContentTypeDefinition;
     }
 }

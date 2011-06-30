@@ -9,7 +9,10 @@
          */
         public const string StringTemplateLanguageName = "StringTemplate";
         public const string StringTemplateContentType = StringTemplateLanguageName;
-        public const string StringTemplateFileExtension = ".stg";
+        public const string StringTemplateGroupFileExtension = ".stg";
+        public const string StringTemplateTemplateFileExtension = ".st";
+        public const string StringTemplateGroup4FileExtension = ".stg4";
+        public const string StringTemplateTemplate4FileExtension = ".st4";
 
         // product registration
         public const int StringTemplateLanguageResourceId = 100;
