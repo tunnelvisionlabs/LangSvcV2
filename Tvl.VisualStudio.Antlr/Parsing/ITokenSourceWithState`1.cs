@@ -3,6 +3,7 @@
     using Antlr.Runtime;
 
     public interface ITokenSourceWithState<T> : ITokenSource
+        where T : struct
     {
         T GetCurrentState();
     }

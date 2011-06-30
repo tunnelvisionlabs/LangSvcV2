@@ -9,6 +9,7 @@
     using Microsoft.VisualStudio.Text.Classification;
 
     public abstract class AntlrClassifierBase<TState> : IClassifier
+        where TState : struct
     {
         private readonly List<LineStateInfo> _lineStates = new List<LineStateInfo>();
         private readonly ITextBuffer _textBuffer;
@@ -55,6 +56,7 @@
             bool lineStateChanged = false;
 
             int extendMultilineSpanToLine = 0;
+            SnapshotSpan extendedSpan = span;
             bool spanExtended = false;
 
             while (true)
@@ -116,48 +118,55 @@
                         || _lineStates[line].MultilineToken
                         || !_stateComparer.Equals(_lineStates[line].EndLineState, stateAtEndOfLine);
 
+                    // even if the state didn't change, we call SetLineState to make sure the _first/_lastChangedLine values get updated.
+                    SetLineState(line, new LineStateInfo(stateAtEndOfLine));
+
                     if (lineStateChanged)
                     {
-                        SetLineState(line, new LineStateInfo(stateAtEndOfLine));
                         if (line < span.Snapshot.LineCount - 1)
                         {
                             /* update the span's end position or the line state change won't be reflected
                              * in the editor
                              */
                             int endPosition = span.Snapshot.GetLineFromLineNumber(line + 1).EndIncludingLineBreak;
-                            if (endPosition > span.End)
+                            if (endPosition > extendedSpan.End)
                             {
                                 spanExtended = true;
-                                span = new SnapshotSpan(span.Snapshot, Span.FromBounds(span.Start, endPosition));
+                                extendedSpan = new SnapshotSpan(extendedSpan.Snapshot, Span.FromBounds(extendedSpan.Start, endPosition));
                             }
                         }
                     }
                 }
 
-                if (token.StartIndex > span.End.Position && !lineStateChanged)
+                if (token.StartIndex > span.End.Position)
                     break;
 
                 var tokenClassificationSpans = GetClassificationSpansForToken(token, span.Snapshot);
                 if (tokenClassificationSpans != null)
                     classificationSpans.AddRange(tokenClassificationSpans);
 
-                if (token.StopIndex + 1 >= span.End.Position && !lineStateChanged)
+                if (token.StopIndex + 1 >= span.End.Position)
                     break;
             }
 
             if (extendMultilineSpanToLine > 0)
             {
                 int endPosition = extendMultilineSpanToLine < span.Snapshot.LineCount ? span.Snapshot.GetLineFromLineNumber(extendMultilineSpanToLine).EndIncludingLineBreak : span.Snapshot.Length;
-                if (endPosition > span.End)
+                if (endPosition > extendedSpan.End)
                 {
                     spanExtended = true;
-                    span = new SnapshotSpan(span.Snapshot, Span.FromBounds(span.Start, endPosition));
+                    extendedSpan = new SnapshotSpan(extendedSpan.Snapshot, Span.FromBounds(extendedSpan.Start, endPosition));
                 }
             }
 
             if (spanExtended)
             {
-                OnClassificationChanged(new ClassificationChangedEventArgs(span));
+                /* Subtract 1 from each of these because the spans include the line break on their last
+                 * line, forcing it to appear as the first position on the following line.
+                 */
+                int firstLine = extendedSpan.Snapshot.GetLineNumberFromPosition(span.End);
+                int lastLine = extendedSpan.Snapshot.GetLineNumberFromPosition(extendedSpan.End) - 1;
+                ForceReclassifyLines(firstLine, lastLine);
             }
 
             return classificationSpans;
@@ -189,17 +198,10 @@
             int endPosition = span.End.Position;
 
             ITextSnapshotLine firstDirtyLine = null;
-            ITextSnapshotLine lastDirtyLine = null;
             if (_firstChangedLine.HasValue)
             {
                 firstDirtyLine = span.Snapshot.GetLineFromLineNumber(_firstChangedLine.Value);
                 start = Math.Min(start, firstDirtyLine.Start.Position);
-            }
-
-            if (_lastChangedLine.HasValue)
-            {
-                lastDirtyLine = span.Snapshot.GetLineFromLineNumber(_lastChangedLine.Value);
-                endPosition = Math.Max(endPosition, lastDirtyLine.EndIncludingLineBreak.Position);
             }
 
             TState state = default(TState);
@@ -301,7 +303,7 @@
         public virtual void ForceReclassifyLines(int startLine, int endLine)
         {
             _firstChangedLine = _firstChangedLine.HasValue ? Math.Min(_firstChangedLine.Value, startLine) : startLine;
-            _lastChangedLine = _lastChangedLine.HasValue ? Math.Min(_lastChangedLine.Value, endLine) : endLine;
+            _lastChangedLine = _lastChangedLine.HasValue ? Math.Max(_lastChangedLine.Value, endLine) : endLine;
 
             ITextSnapshot snapshot = _textBuffer.CurrentSnapshot;
             int start = snapshot.GetLineFromLineNumber(startLine).Start;
