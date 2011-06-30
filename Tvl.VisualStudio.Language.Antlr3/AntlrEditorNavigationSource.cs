@@ -40,6 +40,7 @@
             this._parserRuleGlyph = new BitmapImage(new Uri(string.Format("pack://application:,,,/{0};component/Resources/parsericon.png", assemblyName)));
 
             this.BackgroundParser.ParseComplete += OnBackgroundParseComplete;
+            this.BackgroundParser.RequestParse();
         }
 
         private ITextBuffer TextBuffer

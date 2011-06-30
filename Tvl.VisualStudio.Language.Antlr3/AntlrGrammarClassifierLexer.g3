@@ -1,4 +1,4 @@
-﻿lexer grammar AntlrColorableLexer;
+﻿lexer grammar AntlrGrammarClassifierLexer;
 
 options
 {
@@ -7,6 +7,8 @@ options
 }
 
 @namespace{Tvl.VisualStudio.Language.Antlr3}
+@modifier{internal}
+@ctorModifier{private}
 
 /*//////////////////////////////////////////////////////////////////////////*/
 //////////////////////////////////////////////////////////////////////////////
@@ -29,9 +31,12 @@ REFERENCE
 WS
 	:	(	' '
 		|	'\t'
-		|	('\r')? '\n'
-		)
+		)+
 		{Skip();}
+	;
+
+NEWLINE
+	:	'\r'? '\n'
 	;
 
 COMMENT
@@ -39,7 +44,19 @@ COMMENT
 	;
 
 ML_COMMENT
-	:	'/*' .* '*/'
+	:	'/*' CONTINUE_COMMENT {$type = state.type;}
+	;
+
+fragment END_COMMENT : ;
+
+fragment
+CONTINUE_COMMENT
+	:	(	~('\r'|'\n'|'*')
+		|	{input.LA(2) != '/'}? => '*'
+		)*
+		(	'*/' {state.type = END_COMMENT;}
+		|	{state.type = CONTINUE_COMMENT;}
+		)
 	;
 
 CHAR_LITERAL
@@ -108,11 +125,15 @@ RANGE : '..' ;
 
 NOT :	'~' ;
 
+LBRACK:	'['	;
+
+RBRACK:	']'	;
+
+LCURLY:	'{'	;
+
 RCURLY:	'}'	;
 
 DOLLAR : '$' ;
-
-STRAY_BRACKET : ']' ;
 
 // closes a bracket action
 ESCAPE_BRACKET
@@ -160,76 +181,6 @@ XDIGIT
 
 INT
 	:	('0'..'9')+
-	;
-
-ARG_ACTION
-	:	'['
-		NESTED_ARG_ACTION
-		(	']'
-		|	// allowed to skip in colorizer
-		)
-	;
-
-fragment
-NESTED_ARG_ACTION
-	:	(	('\\]') => '\\' ']'
-		|	'\\' c=~(']')
-		|	ACTION_STRING_LITERAL
-		|	ACTION_CHAR_LITERAL
-		|	c=~('\\'|'"'|'\''|']')
-		)*
-	;
-
-ACTION
-	:	'{' {ActionLevel++;}
-		(	ACTION
-		|	ACTION_CHAR_LITERAL
-		|	('//' | '/*') => COMMENT
-		|	ACTION_STRING_LITERAL
-		|	ACTION_ESC
-		|	~('{'|'\''|'"'|'\\'|'}')
-		)*
-		(	'}' {ActionLevel--;}
-		|	// allowed to skip in colorizer
-		)
-		(	{ActionLevel==0}? => ('?' {$type = SEMPRED;})? )?
-	;
-
-fragment
-ACTION_CHAR_LITERAL
-	:	'\''
-		(	ACTION_ESC
-		|	~('\\'|'\'')
-		)*
-		'\''
-	;
-
-fragment
-ACTION_STRING_LITERAL
-	:	'"'
-		(	ACTION_ESC
-		|	~('\\'|'"')
-		)*
-		'"'
-	;
-
-fragment
-ACTION_ESC
-	:	'\\\''
-	|	'\\\"'
-	|	'\\' ~('\''|'"')
-	;
-
-fragment
-WS_LOOP
-	:	(	WS
-		|	COMMENT
-		)*
-	;
-
-fragment
-WS_OPT
-	:	WS?
 	;
 
 ANYCHAR

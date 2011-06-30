@@ -2,20 +2,46 @@
 {
     using System;
     using System.Collections.Generic;
-    using Antlr.Runtime;
-    using Antlr.Runtime.Tree;
-    using global::Antlr3;
-    using global::Antlr3.Tool;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow;
 
+    using AntlrTool = global::Antlr3.AntlrTool;
+    using CommonTree = Antlr.Runtime.Tree.CommonTree;
+    using Contract = System.Diagnostics.Contracts.Contract;
+    using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
+    using ErrorManager = global::Antlr3.Tool.ErrorManager;
+    using Grammar = global::Antlr3.Tool.Grammar;
+    using IAstRuleReturnScope = Antlr.Runtime.IAstRuleReturnScope;
+    using IToken = Antlr.Runtime.IToken;
+
     public class AntlrBackgroundParser : BackgroundParser
     {
+        private static bool _initialized;
+
         public AntlrBackgroundParser(ITextBuffer textBuffer, IOutputWindowService outputWindowService)
             : base(textBuffer)
         {
+            Contract.Requires<ArgumentNullException>(outputWindowService != null, "outputWindowService");
+
             this.OutputWindowService = outputWindowService;
+
+            if (!_initialized)
+            {
+                try
+                {
+                    // have to create an instance of the tool to make sure the error manager gets initialized
+                    new AntlrTool();
+                }
+                catch (Exception e)
+                {
+                    if (ErrorHandler.IsCriticalException(e))
+                        throw;
+                }
+
+
+                _initialized = true;
+            }
         }
 
         public IOutputWindowService OutputWindowService

@@ -26,6 +26,7 @@
         //CodeSense = true,
         RequestStockColors = true)]
     [ProvideLanguageExtension(typeof(AntlrLanguageInfo), AntlrConstants.AntlrFileExtension)]
+    [ProvideLanguageExtension(typeof(AntlrLanguageInfo), AntlrConstants.AntlrFileExtension2)]
     public class AntlrLanguagePackage : Package
     {
         private static AntlrLanguagePackage _instance;

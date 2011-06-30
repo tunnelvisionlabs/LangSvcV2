@@ -7,7 +7,7 @@
     using Microsoft.VisualStudio.Text.Classification;
     using Tvl.VisualStudio.Language.Parsing;
 
-    internal class AntlrClassifier : AntlrClassifierBase
+    internal class AntlrClassifier : AntlrClassifierBase<AntlrClassifierLexerState>
     {
         private static readonly HashSet<string> keywords =
             new HashSet<string>
@@ -36,9 +36,16 @@
 
         private readonly IClassificationType _parserRule;
         private readonly IClassificationType _lexerRule;
+
+        private readonly IClassificationType _astOperator;
+
         private readonly IClassificationType _actionLiteral;
+        private readonly IClassificationType _actionComment;
+        private readonly IClassificationType _actionStringLiteral;
+        private readonly IClassificationType _actionSymbolReference;
 
         public AntlrClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService, IClassificationTypeRegistryService classificationTypeRegistryService)
+            : base(textBuffer)
         {
             this._textBuffer = textBuffer;
             this._standardClassificationService = standardClassificationService;
@@ -46,7 +53,13 @@
 
             this._parserRule = classificationTypeRegistryService.GetClassificationType(AntlrClassificationTypeNames.ParserRule);
             this._lexerRule = classificationTypeRegistryService.GetClassificationType(AntlrClassificationTypeNames.LexerRule);
+
+            this._astOperator = classificationTypeRegistryService.GetClassificationType(AntlrClassificationTypeNames.AstOperator);
+
             this._actionLiteral = classificationTypeRegistryService.GetClassificationType(AntlrClassificationTypeNames.ActionLiteral);
+            this._actionComment = classificationTypeRegistryService.GetClassificationType(AntlrClassificationTypeNames.ActionComment);
+            this._actionStringLiteral = classificationTypeRegistryService.GetClassificationType(AntlrClassificationTypeNames.ActionStringLiteral);
+            this._actionSymbolReference = classificationTypeRegistryService.GetClassificationType(AntlrClassificationTypeNames.ActionSymbolReference);
         }
 
         public static HashSet<string> Keywords
@@ -57,16 +70,21 @@
             }
         }
 
-        protected override ITokenSource CreateLexer(ICharStream input)
+        protected override AntlrClassifierLexerState GetStartState()
         {
-            return new AntlrColorableLexer(input);
+            return AntlrClassifierLexerState.Initial;
+        }
+
+        protected override ITokenSourceWithState<AntlrClassifierLexerState> CreateLexer(ICharStream input, AntlrClassifierLexerState state)
+        {
+            return new AntlrClassifierLexer(input, state);
         }
 
         protected override IClassificationType ClassifyToken(IToken token)
         {
             switch (token.Type)
             {
-            case AntlrColorableLexer.IDENTIFIER:
+            case AntlrGrammarClassifierLexer.IDENTIFIER:
                 string text = token.Text;
                 if (keywords.Contains(text))
                     return _standardClassificationService.Keyword;
@@ -76,45 +94,67 @@
                 else
                     return this._lexerRule;
 
-            case AntlrColorableLexer.COMMENT:
-            case AntlrColorableLexer.ML_COMMENT:
+            case AntlrGrammarClassifierLexer.LABEL:
+                return _standardClassificationService.SymbolDefinition;
+
+            case AntlrGrammarClassifierLexer.COMMENT:
+            case AntlrGrammarClassifierLexer.ML_COMMENT:
                 return _standardClassificationService.Comment;
 
-            case AntlrColorableLexer.ACTION:
-            case AntlrColorableLexer.ARG_ACTION:
-                return this._actionLiteral;
-
-            case AntlrColorableLexer.CHAR_LITERAL:
-            case AntlrColorableLexer.STRING_LITERAL:
-            case AntlrColorableLexer.DOUBLE_ANGLE_STRING_LITERAL:
+            case AntlrGrammarClassifierLexer.CHAR_LITERAL:
+            case AntlrGrammarClassifierLexer.STRING_LITERAL:
+            case AntlrGrammarClassifierLexer.DOUBLE_ANGLE_STRING_LITERAL:
                 return _standardClassificationService.StringLiteral;
 
-            case AntlrColorableLexer.DIRECTIVE:
+            case AntlrActionClassifierLexer.ACTION_COMMENT:
+            case AntlrActionClassifierLexer.ACTION_ML_COMMENT:
+                return _actionComment;
+
+            case AntlrGrammarClassifierLexer.ACTION:
+            case AntlrGrammarClassifierLexer.ARG_ACTION:
+            case AntlrActionClassifierLexer.ACTION_TEXT:
+            case AntlrGrammarClassifierLexer.LBRACK:
+            case AntlrGrammarClassifierLexer.LCURLY:
+            case AntlrGrammarClassifierLexer.RBRACK:
+            case AntlrGrammarClassifierLexer.RCURLY:
+                return _actionLiteral;
+
+            case AntlrActionClassifierLexer.ACTION_CHAR_LITERAL:
+            case AntlrActionClassifierLexer.ACTION_STRING_LITERAL:
+                return _actionStringLiteral;
+
+            case AntlrActionClassifierLexer.ACTION_REFERENCE:
+                return _actionSymbolReference;
+
+            case AntlrGrammarClassifierLexer.DIRECTIVE:
                 return _standardClassificationService.PreprocessorKeyword;
 
-            case AntlrColorableLexer.REFERENCE:
+            case AntlrGrammarClassifierLexer.REFERENCE:
                 return _standardClassificationService.SymbolReference;
 
-            case AntlrColorableLexer.AMPERSAND:
-            //case AntlrColorableLexer.COMMA:
-            case AntlrColorableLexer.QUESTION:
-            //case AntlrColorableLexer.COLON:
-            //case AntlrColorableLexer.STAR:
-            case AntlrColorableLexer.PLUS:
-            case AntlrColorableLexer.ASSIGN:
-            case AntlrColorableLexer.PLUS_ASSIGN:
-            case AntlrColorableLexer.IMPLIES:
-            case AntlrColorableLexer.REWRITE:
-            //case AntlrColorableLexer.SEMI:
-            case AntlrColorableLexer.ROOT:
-            case AntlrColorableLexer.BANG:
-            //case AntlrColorableLexer.OR:
-            //case AntlrColorableLexer.WILDCARD:
-            case AntlrColorableLexer.ETC:
-            case AntlrColorableLexer.RANGE:
-            case AntlrColorableLexer.NOT:
-            case AntlrColorableLexer.DOLLAR:
-                return _standardClassificationService.Operator;
+            case AntlrGrammarClassifierLexer.AMPERSAND:
+            //case AntlrGrammarClassifierLexer.COMMA:
+            case AntlrGrammarClassifierLexer.QUESTION:
+            //case AntlrGrammarClassifierLexer.COLON:
+            //case AntlrGrammarClassifierLexer.STAR:
+            case AntlrGrammarClassifierLexer.PLUS:
+            case AntlrGrammarClassifierLexer.ASSIGN:
+            case AntlrGrammarClassifierLexer.PLUS_ASSIGN:
+            case AntlrGrammarClassifierLexer.IMPLIES:
+            //case AntlrGrammarClassifierLexer.SEMI:
+            //case AntlrGrammarClassifierLexer.OR:
+            //case AntlrGrammarClassifierLexer.WILDCARD:
+            case AntlrGrammarClassifierLexer.ETC:
+            case AntlrGrammarClassifierLexer.RANGE:
+            case AntlrGrammarClassifierLexer.NOT:
+            case AntlrGrammarClassifierLexer.DOLLAR:
+                //return _standardClassificationService.Operator;
+                goto default;
+
+            case AntlrGrammarClassifierLexer.BANG:
+            case AntlrGrammarClassifierLexer.REWRITE:
+            case AntlrGrammarClassifierLexer.ROOT:
+                return _astOperator;
 
             default:
                 return base.ClassifyToken(token);

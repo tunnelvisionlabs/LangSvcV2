@@ -1,0 +1,80 @@
+﻿lexer grammar AntlrActionClassifierLexer;
+
+options {
+	language=CSharp3;
+	TokenLabelType=CommonToken;
+	tokenVocab=AntlrGrammarClassifierLexer;
+}
+
+@namespace{Tvl.VisualStudio.Language.Antlr3}
+@modifier{internal}
+@ctorModifier{private}
+
+ACTION_REFERENCE
+	:	'$' IDENTIFIER
+	;
+
+fragment
+IDENTIFIER
+	:	('a'..'z' | 'A'..'Z' | '_')
+		('a'..'z' | 'A'..'Z' | '0'..'9' | '_')*
+	;
+
+DOLLAR : '$' ;
+
+ACTION_CHAR_LITERAL
+	:	'\''
+		(	ACTION_ESCAPE
+		|	~('\\' | '\'')
+		)*
+		'\''
+	;
+
+ACTION_STRING_LITERAL
+	:	'"'
+		(	ACTION_ESCAPE
+		|	~('\\' | '"')
+		)*
+		'"'
+	;
+
+ACTION_COMMENT
+	:	'//' ~('\r' | '\n')*
+	;
+
+ACTION_ML_COMMENT
+	:	'/*' CONTINUE_COMMENT {$type = state.type;}
+	;
+
+fragment END_COMMENT : ;
+
+fragment
+CONTINUE_COMMENT
+	:	(	~('\r'|'\n'|'*')
+		|	{input.LA(2) != '/'}? => '*'
+		)*
+		(	'*/' {state.type = END_COMMENT;}
+		|	{state.type = CONTINUE_COMMENT;}
+		)
+	;
+
+ACTION_ESCAPE
+	:	'\\' .
+	;
+
+ACTION_TEXT
+	:	(	~('\r' | '\n' | '\\' | '/' | '{' | '}' | ']' | '$' | '\'' | '"')
+		|	{Mode != AntlrClassifierLexerMode.Action}? => ('{' | '}')
+		|	{Mode != AntlrClassifierLexerMode.ArgAction}? => ']'
+		|	{!IsIdStartChar(input.LA(2))}? => '$'
+		|	{input.LA(2) != '/' && input.LA(2) != '*'}? => '/'
+		)+
+	;
+
+NEWLINE
+	:	'\r'? '\n'
+	;
+
+ANY_CHAR
+	:	.
+	;
