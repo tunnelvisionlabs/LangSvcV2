@@ -30,7 +30,6 @@
             this._timer.Elapsed += OnParseTimerElapsed;
             this._lastEdit = DateTimeOffset.MinValue;
             this._timer.Start();
-            TryReparse();
         }
 
         public ITextBuffer TextBuffer
