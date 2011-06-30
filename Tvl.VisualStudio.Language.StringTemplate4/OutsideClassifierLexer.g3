@@ -12,8 +12,8 @@ LANGLE : '<';
 
 fragment
 RANGLE
-	:	{Outermost == ClassifierLexer2.OutermostTemplate.BigString}? => '\\>'
-	|	{Outermost != ClassifierLexer2.OutermostTemplate.BigString || input.LA(2) != '>'}? => '>'
+	:	{Outermost == ClassifierLexer.OutermostTemplate.BigString}? => '\\>'
+	|	{Outermost != ClassifierLexer.OutermostTemplate.BigString || input.LA(2) != '>'}? => '>'
 	;
 
 COMMENT
@@ -39,7 +39,7 @@ ESCAPE_TAG
 ESCAPE_CHAR
 	:	'\\' c=.
 		{
-			if ($c != '>' && (Outermost != ClassifierLexer2.OutermostTemplate.String || $c != '"'))
+			if ($c != '>' && (Outermost != ClassifierLexer.OutermostTemplate.String || $c != '"'))
 				$type = TEXT;
 		}
 	;
@@ -51,8 +51,8 @@ NEWLINE
 TEXT
 	:	(	~('}'|'<'|'\n'|'\r'|'"'|'>'|'\\'|'%')
 		|	{AnonymousTemplateLevel == 0}? => '}'
-		|	{Outermost != ClassifierLexer2.OutermostTemplate.String}? => '"'
-		|	{Outermost != ClassifierLexer2.OutermostTemplate.BigString || input.LA(2) != '>'}? => '>'
-		|	{Outermost != ClassifierLexer2.OutermostTemplate.BigStringLine || input.LA(2) != '>'}? => '%'
+		|	{Outermost != ClassifierLexer.OutermostTemplate.String}? => '"'
+		|	{Outermost != ClassifierLexer.OutermostTemplate.BigString || input.LA(2) != '>'}? => '>'
+		|	{Outermost != ClassifierLexer.OutermostTemplate.BigStringLine || input.LA(2) != '>'}? => '%'
 		)*
 	;
