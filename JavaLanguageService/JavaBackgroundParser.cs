@@ -44,9 +44,7 @@
                             outputWindow.WriteLine(message);
                     };
 
-                //var result = parser.compilationUnit();
-                parser.compilationUnit();
-                IAstRuleReturnScope result = null;
+                var result = parser.compilationUnit();
                 OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, tokens.GetTokens(), result));
             }
             catch (Exception e)

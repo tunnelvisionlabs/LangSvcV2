@@ -10,7 +10,7 @@
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
 
-    //[Export(typeof(ITaggerProvider))]
+    [Export(typeof(ITaggerProvider))]
     [ContentType(Constants.JavaContentType)]
     [TagType(typeof(IOutliningRegionTag))]
     public sealed class OutliningTaggerProvider : ITaggerProvider

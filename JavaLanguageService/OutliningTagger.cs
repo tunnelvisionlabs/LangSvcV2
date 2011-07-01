@@ -7,17 +7,31 @@
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
+    using System.Diagnostics.Contracts;
+    using Antlr.Runtime;
+    using Antlr.Runtime.Tree;
 
     internal sealed class OutliningTagger : ITagger<IOutliningRegionTag>
     {
+        private List<ITagSpan<IOutliningRegionTag>> _outliningRegions;
+
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        public OutliningTagger(ITextBuffer sourceBuffer, IBackgroundParser backgroundParser)
+        public OutliningTagger(ITextBuffer textBuffer, IBackgroundParser backgroundParser)
         {
-            this.SourceBuffer = sourceBuffer;
+            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
+
+            this.TextBuffer = textBuffer;
+            this.BackgroundParser = backgroundParser;
+
+            _outliningRegions = new List<ITagSpan<IOutliningRegionTag>>();
+
+            BackgroundParser.ParseComplete += HandleBackgroundParseComplete;
+            BackgroundParser.RequestParse(false);
         }
 
-        public ITextBuffer SourceBuffer
+        public ITextBuffer TextBuffer
         {
             get;
             private set;
@@ -31,7 +45,7 @@
 
         public IEnumerable<ITagSpan<IOutliningRegionTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            yield break;
+            return _outliningRegions;
         }
 
         private void OnTagsChanged(SnapshotSpanEventArgs e)
@@ -39,6 +53,60 @@
             var t = TagsChanged;
             if (t != null)
                 t(this, e);
+        }
+
+        private void HandleBackgroundParseComplete(object sender, ParseResultEventArgs e)
+        {
+            AntlrParseResultEventArgs antlrParseResultArgs = e as AntlrParseResultEventArgs;
+            if (antlrParseResultArgs == null)
+                return;
+
+            UpdateTags(antlrParseResultArgs);
+        }
+
+        private void UpdateTags(AntlrParseResultEventArgs antlrParseResultArgs)
+        {
+            List<ITagSpan<IOutliningRegionTag>> outliningRegions = new List<ITagSpan<IOutliningRegionTag>>();
+
+            IAstRuleReturnScope resultArgs = antlrParseResultArgs.Result as IAstRuleReturnScope;
+            var result = resultArgs != null ? resultArgs.Tree as CommonTree : null;
+            if (result != null)
+            {
+                ITextSnapshot snapshot = antlrParseResultArgs.Snapshot;
+
+                for (CommonTreeNodeStream treeNodeStream = new CommonTreeNodeStream(result);
+                    treeNodeStream.LA(1) != CharStreamConstants.EndOfFile;
+                    treeNodeStream.Consume())
+                {
+                    switch (treeNodeStream.LA(1))
+                    {
+                    case Java2Lexer.TYPE_BODY:
+                    case Java2Lexer.METHOD_BODY:
+                        CommonTree child = treeNodeStream.LT(1) as CommonTree;
+                        if (child != null)
+                        {
+                            var startToken = antlrParseResultArgs.Tokens[child.TokenStartIndex];
+                            var stopToken = antlrParseResultArgs.Tokens[child.TokenStopIndex];
+                            Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
+                            if (snapshot.GetLineNumberFromPosition(span.Start) == snapshot.GetLineNumberFromPosition(span.End))
+                                continue;
+
+                            SnapshotSpan snapshotSpan = new SnapshotSpan(antlrParseResultArgs.Snapshot, span);
+                            IOutliningRegionTag tag = new OutliningRegionTag("...", snapshotSpan.GetText());
+                            TagSpan<IOutliningRegionTag> tagSpan = new TagSpan<IOutliningRegionTag>(snapshotSpan, tag);
+                            outliningRegions.Add(tagSpan);
+                        }
+
+                        break;
+
+                    default:
+                        continue;
+                    }
+                }
+            }
+
+            this._outliningRegions = outliningRegions;
+            OnTagsChanged(new SnapshotSpanEventArgs(new SnapshotSpan(antlrParseResultArgs.Snapshot, new Span(0, antlrParseResultArgs.Snapshot.Length))));
         }
     }
 }

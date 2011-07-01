@@ -188,6 +188,8 @@
     <Compile Include="JavaLanguageInfo.cs" />
     <Compile Include="JavaLanguagePackage.cs" />
     <Compile Include="JavaUnicodeStream.cs" />
+    <Compile Include="JavaEditorNavigationSourceProvider.cs" />
+    <Compile Include="JavaEditorNavigationSource.cs" />
     <Compile Include="Text\CancellationPolicy.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="JavaClassifier.cs" />
