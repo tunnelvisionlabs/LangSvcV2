@@ -3,7 +3,7 @@
   <Identifier Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6">
     <Name>Visual Studio Extensibility Framework</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Description xml:space="preserve">Supporting framework for managed extensions.</Description>
     <Locale>1033</Locale>
     <Icon>VSIXProject_small.png</Icon>
