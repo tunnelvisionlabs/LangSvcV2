@@ -242,6 +242,8 @@
   <ItemGroup>
     <EmbeddedResource Include="VSPackage.resx">
       <SubType>Designer</SubType>
+      <LogicalName>VSPackage.resources</LogicalName>
+      <MergeWithCTO>true</MergeWithCTO>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
