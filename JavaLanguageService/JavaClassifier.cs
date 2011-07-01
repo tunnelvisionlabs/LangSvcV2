@@ -9,7 +9,7 @@
     using System.Reflection;
     using Tvl.VisualStudio.Language.Parsing;
 
-    internal sealed class JavaClassifier : AntlrClassifierBase
+    internal sealed class JavaClassifier : AntlrClassifierBase<JavaClassifierLexerState>
     {
         private static readonly HashSet<string> Keywords =
             new HashSet<string>()
@@ -73,20 +73,27 @@
         private readonly IStandardClassificationService _standardClassificationService;
 
         public JavaClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService)
+            : base(textBuffer)
         {
             this._textBuffer = textBuffer;
             this._standardClassificationService = standardClassificationService;
         }
 
-        protected override ITokenSource CreateLexer(ICharStream input)
+        protected override JavaClassifierLexerState GetStartState()
         {
-            return new JavaColorizerLexer(input);
+            return JavaClassifierLexerState.Initial;
+        }
+
+        protected override ITokenSourceWithState<JavaClassifierLexerState> CreateLexer(ICharStream input, JavaClassifierLexerState state)
+        {
+            return new JavaClassifierLexer(input, state);
         }
 
         protected override IClassificationType ClassifyToken(IToken token)
         {
             switch (token.Type)
             {
+#if false // operator coloring was just annoying
             case JavaColorizerLexer.EQ:
             case JavaColorizerLexer.NEQ:
             case JavaColorizerLexer.EQEQ:
@@ -125,9 +132,11 @@
             case JavaColorizerLexer.ROR:
             case JavaColorizerLexer.ROREQ:
                 return _standardClassificationService.Operator;
+#endif
 
             case JavaColorizerLexer.CHAR_LITERAL:
-                return _standardClassificationService.CharacterLiteral;
+                //return _standardClassificationService.CharacterLiteral;
+                return _standardClassificationService.StringLiteral;
 
             case JavaColorizerLexer.STRING_LITERAL:
                 return _standardClassificationService.StringLiteral;
