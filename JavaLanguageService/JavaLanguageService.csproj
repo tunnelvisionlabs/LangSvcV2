@@ -167,6 +167,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BraceMatchingTaggerProvider.cs" />
+    <Compile Include="Java2.g3.lexer.cs">
+      <DependentUpon>Java2.g3</DependentUpon>
+    </Compile>
+    <Compile Include="Java2.g3.parser.cs">
+      <DependentUpon>Java2.g3</DependentUpon>
+    </Compile>
     <Compile Include="JavaBackgroundParser.cs" />
     <Compile Include="JavaBackgroundParserProvider.cs" />
     <Compile Include="JavaClassifierLexer.cs" />
@@ -205,6 +211,10 @@
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
     </None>
+    <None Include="Java2.g3" />
+    <AntlrTokens Include="Java2.tokens">
+      <DependentUpon>Java2.g3</DependentUpon>
+    </AntlrTokens>
     <None Include="Text\Tagger`1.cs" />
   </ItemGroup>
   <ItemGroup>

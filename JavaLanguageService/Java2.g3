@@ -1,0 +1,5233 @@
+/*
+ [The "BSD licence"]
+ Copyright (c) 2007-2008 Terence Parr
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. The name of the author may not be used to endorse or promote products
+    derived from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/*
+ * This file is modified by Yang Jiang (yang.jiang.z@gmail.com), taken from the original
+ * java grammar in www.antlr.org, with the goal to provide a standard ANTLR grammar 
+ * for java, as well as an implementation to construct the same AST trees as javac does.  
+ * 
+ * The major changes of this version as compared to the original version include:
+ * 1) Top level rules are changed to include all of their sub-components. 
+ *    For example, the rule
+ * 
+ *      classOrInterfaceDeclaration
+ *          :   classOrInterfaceModifiers (classDeclaration | interfaceDeclaration)
+ *      ;
+ *
+ *    is changed to
+ * 
+ *      classOrInterfaceDeclaration
+ *          :   classDeclaration | interfaceDeclaration
+ *      ;
+ *    
+ *    with classOrInterfaceModifiers been moved inside classDeclaration and 
+ *    interfaceDeclaration.
+ * 
+ * 2) The original version is not quite clear on certain rules like memberDecl, 
+ *    where it mixed the styles of listing of top level rules and listing of sub rules.
+ *
+ *    memberDecl
+ *      :   genericMethodOrConstructorDecl
+ *      |   memberDeclaration
+ *      |   'void' Identifier voidMethodDeclaratorRest   
+ *      |   Identifier constructorDeclaratorRest
+ *      |   interfaceDeclaration
+ *      |   classDeclaration
+ *      ;
+ *
+ *    This is changed to a 
+ *
+ *    memberDecl
+ *      :   fieldDeclaration        
+ *      |   methodDeclaration
+ *      |   classDeclaration
+ *      |   interfaceDeclaration
+ *      ;
+ *    by folding similar rules into single rule.
+ *
+ * 3) Some syntactical predicates are added for efficiency, although this is not necessary 
+ *    for correctness.
+ *
+ * 4) Lexer part is rewritten completely to construct tokens needed for the parser.
+ * 
+ * 5) This grammar adds more source level support
+ *
+ *
+ * This grammar also adds bug fixes.
+ *
+ * 1) Adding typeArguments to superSuffix to alHexSignificandlow input like 
+ *      super.<TYPE>method()
+ * 
+ * 2) Adding typeArguments to innerCreator to allow input like 
+ *      new Type1<String, Integer>().new Type2<String>()
+ * 
+ * 3) conditionalExpression is changed to 
+ *    conditionalExpression
+ *      :   conditionalOrExpression ( '?' expression ':' conditionalExpression )?
+ *      ;
+ *    to accept input like 
+ *      true?1:2=3
+ *    
+ *    Note: note this is by no means a valid input, by the grammar should be able to parse 
+ *    this as 
+ *            (true?1:2)=3  
+ *    rather than    
+ *            true?1:(2=3)
+ *
+ *  
+ *  Know problems:
+ *    Won't pass input containing unicode sequence like this 
+ *      char c = '\uffff'
+ *      String s = "\uffff";
+ *    Because Antlr does not treat '\uffff' as an valid char. This will be fixed in the next Antlr 
+ *    release.
+ * 
+ *  Things to do:
+ *    More effort to make this grammar faster.
+ *    Error reporting/recovering.
+ *  
+ *  
+ *  NOTE: If you try to compile this file from command line and Antlr gives an exception 
+ *    like error message while compiling, add option 
+ *    -Xconversiontimeout 100000
+ *    to the command line.  
+ *    If it still doesn't work or the compilation process
+ *    takes too long, try to comment out the following two lines:
+ *    |    {isValidSurrogateIdentifierStart((char)input.LT(1), (char)input.LT(2))}?=>('\ud800'..'\udbff') ('\udc00'..'\udfff')
+ *    |    {isValidSurrogateIdentifierPart((char)input.LT(1), (char)input.LT(2))}?=>('\ud800'..'\udbff') ('\udc00'..'\udfff')
+ *   
+ *
+ *  Below are comments found in the original version. 
+ */
+
+
+/** A Java 1.5 grammar for ANTLR v3 derived from the spec
+ *
+ *  This is a very close representation of the spec; the changes
+ *  are comestic (remove left recursion) and also fixes (the spec
+ *  isn't exactly perfect).  I have run this on the 1.4.2 source
+ *  and some nasty looking enums from 1.5, but have not really
+ *  tested for 1.5 compatibility.
+ *
+ *  I built this with: java -Xmx100M org.antlr.Tool java.g
+ *  and got two errors that are ok (for now):
+ *  java.g:691:9: Decision can match input such as
+ *    "'0'..'9'{'E', 'e'}{'+', '-'}'0'..'9'{'D', 'F', 'd', 'f'}"
+ *    using multiple alternatives: 3, 4
+ *  As a result, alternative(s) 4 were disabled for that input
+ *  java.g:734:35: Decision can match input such as "{'$', 'A'..'Z',
+ *    '_', 'a'..'z', '\u00C0'..'\u00D6', '\u00D8'..'\u00F6',
+ *    '\u00F8'..'\u1FFF', '\u3040'..'\u318F', '\u3300'..'\u337F',
+ *    '\u3400'..'\u3D2D', '\u4E00'..'\u9FFF', '\uF900'..'\uFAFF'}"
+ *    using multiple alternatives: 1, 2
+ *  As a result, alternative(s) 2 were disabled for that input
+ *
+ *  You can turn enum on/off as a keyword :)
+ *
+ *  Version 1.0 -- initial release July 5, 2006 (requires 3.0b2 or higher)
+ *
+ *  Primary author: Terence Parr, July 2006
+ *
+ *  Version 1.0.1 -- corrections by Koen Vanderkimpen & Marko van Dooren,
+ *      October 25, 2006;
+ *      fixed normalInterfaceDeclaration: now uses typeParameters instead
+ *          of typeParameter (according to JLS, 3rd edition)
+ *      fixed castExpression: no longer allows expression next to type
+ *          (according to semantics in JLS, in contrast with syntax in JLS)
+ *
+ *  Version 1.0.2 -- Terence Parr, Nov 27, 2006
+ *      java spec I built this from had some bizarre for-loop control.
+ *          Looked weird and so I looked elsewhere...Yep, it's messed up.
+ *          simplified.
+ *
+ *  Version 1.0.3 -- Chris Hogue, Feb 26, 2007
+ *      Factored out an annotationName rule and used it in the annotation rule.
+ *          Not sure why, but typeName wasn't recognizing references to inner
+ *          annotations (e.g. @InterfaceName.InnerAnnotation())
+ *      Factored out the elementValue section of an annotation reference.  Created
+ *          elementValuePair and elementValuePairs rules, then used them in the
+ *          annotation rule.  Allows it to recognize annotation references with
+ *          multiple, comma separated attributes.
+ *      Updated elementValueArrayInitializer so that it allows multiple elements.
+ *          (It was only allowing 0 or 1 element).
+ *      Updated localVariableDeclaration to allow annotations.  Interestingly the JLS
+ *          doesn't appear to indicate this is legal, but it does work as of at least
+ *          JDK 1.5.0_06.
+ *      Moved the Identifier portion of annotationTypeElementRest to annotationMethodRest.
+ *          Because annotationConstantRest already references variableDeclarator which
+ *          has the Identifier portion in it, the parser would fail on constants in
+ *          annotation definitions because it expected two identifiers.
+ *      Added optional trailing ';' to the alternatives in annotationTypeElementRest.
+ *          Wouldn't handle an inner interface that has a trailing ';'.
+ *      Swapped the expression and type rule reference order in castExpression to
+ *          make it check for genericized casts first.  It was failing to recognize a
+ *          statement like  "Class<Byte> TYPE = (Class<Byte>)...;" because it was seeing
+ *          'Class<Byte' in the cast expression as a less than expression, then failing
+ *          on the '>'.
+ *      Changed createdName to use typeArguments instead of nonWildcardTypeArguments.
+ *         
+ *      Changed the 'this' alternative in primary to allow 'identifierSuffix' rather than
+ *          just 'arguments'.  The case it couldn't handle was a call to an explicit
+ *          generic method invocation (e.g. this.<E>doSomething()).  Using identifierSuffix
+ *          may be overly aggressive--perhaps should create a more constrained thisSuffix rule?
+ *
+ *  Version 1.0.4 -- Hiroaki Nakamura, May 3, 2007
+ *
+ *  Fixed formalParameterDecls, localVariableDeclaration, forInit,
+ *  and forVarControl to use variableModifier* not 'final'? (annotation)?
+ *
+ *  Version 1.0.5 -- Terence, June 21, 2007
+ *  --a[i].foo didn't work. Fixed unaryExpression
+ *
+ *  Version 1.0.6 -- John Ridgway, March 17, 2008
+ *      Made "assert" a switchable keyword like "enum".
+ *      Fixed compilationUnit to disallow "annotation importDeclaration ...".
+ *      Changed "Identifier ('.' Identifier)*" to "qualifiedName" in more
+ *          places.
+ *      Changed modifier* and/or variableModifier* to classOrInterfaceModifiers,
+ *          modifiers or variableModifiers, as appropriate.
+ *      Renamed "bound" to "typeBound" to better match language in the JLS.
+ *      Added "memberDeclaration" which rewrites to methodDeclaration or
+ *      fieldDeclaration and pulled type into memberDeclaration.  So we parse
+ *          type and then move on to decide whether we're dealing with a field
+ *          or a method.
+ *      Modified "constructorDeclaration" to use "constructorBody" instead of
+ *          "methodBody".  constructorBody starts with explicitConstructorInvocation,
+ *          then goes on to blockStatement*.  Pulling explicitConstructorInvocation
+ *          out of expressions allowed me to simplify "primary".
+ *      Changed variableDeclarator to simplify it.
+ *      Changed type to use classOrInterfaceType, thus simplifying it; of course
+ *          I then had to add classOrInterfaceType, but it is used in several
+ *          places.
+ *      Fixed annotations, old version allowed "@X(y,z)", which is illegal.
+ *      Added optional comma to end of "elementValueArrayInitializer"; as per JLS.
+ *      Changed annotationTypeElementRest to use normalClassDeclaration and
+ *          normalInterfaceDeclaration rather than classDeclaration and
+ *          interfaceDeclaration, thus getting rid of a couple of grammar ambiguities.
+ *      Split localVariableDeclaration into localVariableDeclarationStatement
+ *          (includes the terminating semi-colon) and localVariableDeclaration.
+ *          This allowed me to use localVariableDeclaration in "forInit" clauses,
+ *           simplifying them.
+ *      Changed switchBlockStatementGroup to use multiple labels.  This adds an
+ *          ambiguity, but if one uses appropriately greedy parsing it yields the
+ *           parse that is closest to the meaning of the switch statement.
+ *      Renamed "forVarControl" to "enhancedForControl" -- JLS language.
+ *      Added semantic predicates to test for shift operations rather than other
+ *          things.  Thus, for instance, the string "< <" will never be treated
+ *          as a left-shift operator.
+ *      In "creator" we rule out "nonWildcardTypeArguments" on arrayCreation,
+ *          which are illegal.
+ *      Moved "nonWildcardTypeArguments into innerCreator.
+ *      Removed 'super' superSuffix from explicitGenericInvocation, since that
+ *          is only used in explicitConstructorInvocation at the beginning of a
+ *           constructorBody.  (This is part of the simplification of expressions
+ *           mentioned earlier.)
+ *      Simplified primary (got rid of those things that are only used in
+ *          explicitConstructorInvocation).
+ *      Lexer -- removed "Exponent?" from FloatingPointLiteral choice 4, since it
+ *          led to an ambiguity.
+ *
+ *      This grammar successfully parses every .java file in the JDK 1.5 source
+ *          tree (excluding those whose file names include '-', which are not
+ *          valid Java compilation units).
+ *
+ *  Known remaining problems:
+ *      "Letter" and "JavaIDDigit" are wrong.  The actual specification of
+ *      "Letter" should be "a character for which the method
+ *      Character.isJavaIdentifierStart(int) returns true."  A "Java
+ *      letter-or-digit is a character for which the method
+ *      Character.isJavaIdentifierPart(int) returns true."
+ */
+
+grammar Java2;
+
+options {
+    backtrack=true;
+    memoize=true;
+    tokenVocab=Java;
+    superClass=AntlrJavacParser;
+}
+
+scope GScope {
+    Name name;
+    String className;
+    String methodName;
+}
+
+@header {
+    package com.sun.tools.javac.antlr;
+    import com.sun.tools.javac.tree.JCTree.*;
+    import com.sun.tools.javac.tree.JCTree;
+    import com.sun.tools.javac.tree.TreeMaker;
+    import com.sun.tools.javac.util.Context;
+    import com.sun.tools.javac.util.*;
+    import com.sun.tools.javac.code.*;
+    import com.sun.tools.javac.code.TypeTags;
+}
+
+@lexer::header {
+    package com.sun.tools.javac.antlr;
+    import com.sun.tools.javac.code.Source;
+    import com.sun.tools.javac.util.Context;
+    import com.sun.tools.javac.util.Log;
+    import com.sun.tools.javac.util.Name;
+    import com.sun.tools.javac.util.Names;
+    import com.sun.tools.javac.util.Position;
+}
+
+@members {
+    boolean debug = true;
+    
+    // temp variables
+    private int ti = 0;
+    private String ts = null;    
+    
+    public JavaParser(TokenStream input, AntlrParserFactory fac, boolean keepDocComments, boolean keepEndPosition, boolean keepLineMap, char[] rawInput) {
+        this(input);
+        //NOTE: Don't try to put this in super class constructor, must call the antlr generated constructor first.
+        super.init(fac, keepDocComments, keepEndPosition, keepLineMap, rawInput);
+    }
+    
+    public JCCompilationUnit parseCompilationUnit() {
+        if(super.isLexingError()==true){
+            // Errors should be logged in lexer already, no more parsing.
+            return TREE_BLANK;
+        }
+        
+        if(input.LA(1)==-1){
+            // Blank input, end of file reached.
+            return TREE_BLANK;
+        }
+        
+        try{
+            return this.compilationUnit().tree;
+        } catch (Exception e) {
+           if(debug){
+               e.printStackTrace();
+           }
+           //TODO: could be various reasons, how to track? 
+           log.error(0, "premature.eof"); 
+           return TREE_BLANK;
+        }
+    }            
+    
+
+    protected boolean enumSupported() {
+        return source.allowGenerics();
+    }
+
+    protected boolean assertSupported() {
+        return source.allowAsserts();
+    }
+
+    protected boolean varArgSupported() {
+        return source.allowVarargs();
+    }
+
+    protected boolean foreachSupported() {
+        return source.allowForeach();
+    }
+
+    protected boolean staticImportSupported() {
+        return source.allowStaticImport();
+    }
+
+    protected boolean annotationSupported() {
+        return source.allowAnnotations();
+    }
+
+    protected boolean genericSupported() {
+        return source.allowGenerics();
+    }
+
+    protected void checkEnum(Token token) {
+        if (enumSupported() == false && enumErrorDisplayed == false) {
+            log.error(((AntlrJavacToken) token).getStartIndex(), "enums.not.supported.in.source", source.name);
+            enumErrorDisplayed = true;
+        }
+    }
+
+    protected void checkAssert(Token token) {
+        if (assertSupported() == false && assertErrorDisplayed == false) {
+            log.error(((AntlrJavacToken) token).getStartIndex(), "assert.as.identifier", source.name);
+            assertErrorDisplayed = true;
+        }
+    }
+
+    protected void checkVarArg(Token token) {
+        if (varArgSupported() == false && varArgErrorDisplayed == false) {
+            log.error(((AntlrJavacToken) token).getStartIndex(), "varargs.not.supported.in.source", source.name);
+            varArgErrorDisplayed = true;
+        }
+    }
+
+    protected void checkForeach(Token token) {
+        if (foreachSupported() == false && foreachErrorDisplayed == false) {
+            log.error(((AntlrJavacToken) token).getStartIndex(), "foreach.not.supported.in.source", source.name);
+            foreachErrorDisplayed = true;
+        }
+    }
+
+    protected void checkStaticImport(Token token) {
+        if (staticImportSupported() == false && staticImportErrorDisplayed == false) {
+            log.error(((AntlrJavacToken) token).getStartIndex(), "static.import.not.supported.in.source", source.name);
+            staticImportErrorDisplayed = true;
+        }
+    }
+
+    protected void checkAnnotation(Token token) {
+        if (annotationSupported() == false && annotationErrorDisplayed == false) {
+            log.error(((AntlrJavacToken) token).getStartIndex(), "annotations.not.supported.in.source", source.name);
+            annotationErrorDisplayed = true;
+        }
+    }
+
+    protected void checkGeneric(Token token) {
+        if (genericSupported() == false && genericErrorDisplayed == false) {
+            log.error(((AntlrJavacToken) token).getStartIndex(), "generics.not.supported.in.source", source.name);
+            genericErrorDisplayed = true;
+        }
+    }
+}
+
+@lexer::members {
+    
+    /* NOTE: Lots of the code below should be put into a super class. But Antlr does not have 
+     * superClass option support for combined lexer grammar yet. 
+     */
+    
+    protected Context context;
+    protected Names names;
+    protected Source source;
+    protected Log log;    
+
+    /** Whether or not to keep a line map. Not used now. */
+    private boolean keepLineMap;
+
+    /** Radix of number tokens. */
+    private int radix = 10;
+    
+    /** Buffer holding String and char literal's content. */
+    StringBuffer stringBuffer = new StringBuffer();
+    
+    public JavaLexer(CharStream input, com.sun.tools.javac.util.Context context, boolean keepLineMap){
+        super(input,new RecognizerSharedState());
+        this.context = context;
+        this.log = Log.instance(context);
+        this.names = Names.instance(context);
+        this.source = Source.instance(context);
+        this.keepLineMap = keepLineMap;    
+    }
+    
+    public Name stringToName(String s) {
+        return names.fromString(s);
+    }    
+
+    protected char digitsToChar(int base, int... cs) {
+        int ret = 0;
+        if (cs == null || cs.length == 0) {
+            return 0;
+        }
+        for (int i = 0; i < cs.length; i++) {
+            ret = ret * base + Character.digit(cs[i], base);
+        }
+        return (char) ret;
+    }  
+  
+    /**
+     * Override Antlr default implementation, no recovering.  
+     */
+    public void reportError(RecognitionException e) {
+        // super.recover(e);  no recovering
+        e.printStackTrace();
+        log.error("illegal.unicode.esc");// TODO Antlr - exception process in lexer
+    }
+
+    /**
+     * Override default implementation. Nothing will be printed out.
+     */
+    public void displayRecognitionError(String[] tokenNames, RecognitionException e) {
+    }    
+    
+    protected boolean enumSupported() {
+        return source.allowGenerics();
+    }
+
+    protected boolean assertSupported() {
+        return source.allowAsserts();
+    }
+        
+    private boolean isValidSurrogateIdentifierStart(char high, char low){
+        if (Character.isSurrogatePair(high, low) && Character.isJavaIdentifierStart(Character.toCodePoint(high, low))){
+            return true;
+        } 
+        return false;
+    }
+    private boolean isValidSurrogateIdentifierPart(char high, char low){
+        if (Character.isSurrogatePair(high, low) && Character.isJavaIdentifierPart(Character.toCodePoint(high, low))){
+            return true;
+        }
+        return false;
+    } 
+            
+    /**
+     * Overridden default Antlr implementation to generated AntlrToken. 
+     * Default implementation generates CommonToken. 
+     */    
+    public Token emit(){
+        AntlrJavacToken antlrToken = new AntlrJavacToken(input, state.type, state.channel, state.tokenStartCharIndex, getCharIndex() - 1);
+        antlrToken.setLine(state.tokenStartLine);
+        antlrToken.setText(state.text);
+        antlrToken.setCharPositionInLine(state.tokenStartCharPositionInLine);
+        emit(antlrToken);
+        /* Code above is copied from antlr. */
+                
+        int stype = state.type;
+        switch (stype) {
+        case LONGLITERAL :
+        case INTLITERAL :
+        case FLOATLITERAL :
+        case DOUBLELITERAL :
+            String stringVal = antlrToken.getText();
+            if(radix == 16){
+                stringVal = stringVal.substring(2,stringVal.length());
+            }else if(radix == 8 && "0".equals(stringVal) == false){
+                stringVal = stringVal.substring(1,stringVal.length());
+            }
+            if(stype == LONGLITERAL){
+                stringVal = stringVal.substring(0,stringVal.length()-1);
+            }
+            antlrToken.stringVal = stringVal;
+            antlrToken.radix = radix;
+            return antlrToken;
+            
+        case STRINGLITERAL :
+        case CHARLITERAL :
+            antlrToken.stringVal = stringBuffer.toString();
+            stringBuffer.delete(0,stringBuffer.length());
+            return antlrToken;
+                        
+        case IDENTIFIER :
+            antlrToken.name = stringToName(antlrToken.getText());
+            return antlrToken;
+        }// end switch
+        return antlrToken;
+    }// end emit()   
+}
+
+
+/*
+ * Override default exception handling.
+ */ 
+@rulecatch {
+    catch (RecognitionException e) {
+        if(e.token!=null && e.token instanceof AntlrJavacToken){
+            log.error(((AntlrJavacToken)e.token).getStartIndex(), "not.stmt");
+        }
+        else{
+            //TODO: Error reporting
+            log.error(((CommonToken)e.token).getStartIndex(), "not.stmt");  
+        }
+        
+        input.consume();
+        if(debug){
+            e.printStackTrace();
+        }    
+    }
+}
+
+/********************************************************************************************
+                          Parser section
+*********************************************************************************************/
+           
+compilationUnit returns [JCCompilationUnit tree]
+        @init {
+            JCExpression pid = null;
+            com.sun.tools.javac.util.List<JCAnnotation> packageAnnotations =
+                com.sun.tools.javac.util.List.<JCAnnotation>nil();
+            ListBuffer<JCTree> defs = new ListBuffer<JCTree>();
+        }
+        @after {
+            int pos = 0;
+            try {
+                pos =((AntlrJavacToken) $start).getStartIndex();
+            } catch (Exception e) {
+                log.error(((CommonToken)retval.start).getStartIndex(), "expected3", "class", "interface", "enum"); 
+            }
+
+            $tree = T.at(pos).TopLevel(packageAnnotations, pid, defs.toList());
+            if (defs.elems.isEmpty() && $stop != null) {
+                pu.storeEnd($tree, $stop);
+            }
+            if ($stop != null) {
+                pu.attach($tree, ((AntlrJavacToken) $start).docComment);
+            }
+            if (keepDocComment == true) {
+                $tree.docComments = pu.getDocComments();
+            }
+            if (keepEndPosition == true) {
+                $tree.endPositions = pu.getEndPositions();
+            }            
+            if (keepLineMap == true) {
+                $tree.lineMap = com.sun.tools.javac.util.Position.makeLineMap(rawInput, rawInput.length, false);
+            }
+            
+            Token t = input.LT(1);
+            if (t == null || t.getType() > 0) {
+                if (t instanceof AntlrJavacToken) {
+                    log.error(((AntlrJavacToken)t).getStartIndex(), "expected3", "class", "interface", "enum");
+                } else {
+                    log.error(((CommonToken)t).getStartIndex(), "expected3", "class", "interface", "enum"); 
+                }
+            }
+        }
+    :   (   (annotations
+                {
+                    packageAnnotations = $annotations.list;
+                    pu.storeEnd(T.at(0).Modifiers(0, packageAnnotations),$annotations.stop);
+                }
+            )?
+            packageDeclaration
+                {
+                    pid=$packageDeclaration.tree;
+                }
+        )?
+        (importDeclaration
+            {
+                defs.append($importDeclaration.tree);
+            }
+        )*
+        (typeDeclaration
+            {
+                defs.append($typeDeclaration.tree);
+            }
+        )*
+    ;
+
+packageDeclaration returns [JCExpression tree]
+    :   'package' qualifiedName
+            {
+                tree=$qualifiedName.tree;
+            }
+        ';'
+    ;
+
+importDeclaration  returns [JCTree tree]
+        @init {
+            JCExpression pid = null ;
+            boolean importStatic = false;
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+        @after {
+            $tree = T.at(pos).Import(pid,importStatic);
+            pu.storeEnd($tree, $stop);
+        }
+    :   'import' (sta1='static'
+            {
+                importStatic = true;
+                checkStaticImport($sta1);               
+            }
+        )?
+        id1=IDENTIFIER do1='.' ast='*'
+            {
+                pid = T.at(((AntlrJavacToken) $id1).getStartIndex()).Ident(((AntlrJavacToken) $id1).name);
+                pu.storeEnd(pid, $id1);
+                pid = T.at(((AntlrJavacToken) $do1).getStartIndex()).Select(pid, names.asterisk);
+                pu.storeEnd(pid,ast);
+            }
+        ';'
+       
+    |   'import' (sta2='static'
+            {
+                importStatic = true;
+                checkStaticImport($sta2);              
+            }
+        )?
+        id2=IDENTIFIER
+            {
+                pid = T.at(((AntlrJavacToken) $id2).getStartIndex()).Ident(((AntlrJavacToken) $id2).name);
+                pu.storeEnd(pid, $id2);
+            }
+        (do2='.' id3=IDENTIFIER
+            {
+                pid = T.at(((AntlrJavacToken) $do2).getStartIndex()).Select(pid, ((AntlrJavacToken) $id3).name);
+                pu.storeEnd(pid,id3);
+            }
+        )+
+        (do3='.' ast2='*'
+            {
+                pid = T.at(((AntlrJavacToken) $do3).getStartIndex()).Select(pid, names.asterisk);
+                pu.storeEnd(pid,ast2);
+            }
+        )?
+        ';'
+    ;
+
+qualifiedImportName returns [JCExpression tree]
+        @init {
+            JCExpression pid = null;
+        }
+        @after {
+            $tree = pid;
+        }
+    :   id1=IDENTIFIER
+            {
+                pid = T.at($id1.getTokenIndex()).Ident(((AntlrJavacToken) $id1).name);
+                pu.storeEnd(pid, $id1);
+            }
+        ('.' id2=IDENTIFIER
+            {
+                pid = T.at($id2.getTokenIndex()).Select(pid, ((AntlrJavacToken) $id2).name);
+                pu.storeEnd(pid,$id2);
+            }
+        )*
+    ;
+
+typeDeclaration returns [JCTree tree]
+    :   classOrInterfaceDeclaration
+            {
+                $tree=$classOrInterfaceDeclaration.tree;
+            }
+    |   se=';'
+            {
+                $tree = T.at(((AntlrJavacToken) $se).getStartIndex()).Skip();
+                pu.storeEnd($tree, $se);
+            }
+    ;
+
+classOrInterfaceDeclaration returns [JCClassDecl tree]
+    :   (classHeader | enumHeader) => classDeclaration
+            {
+                $tree=$classDeclaration.tree;
+            }
+    |   interfaceDeclaration
+            {
+                $tree=$interfaceDeclaration.tree;
+            }
+    ;
+
+modifiers  returns [JCModifiers tree]
+        @init {
+            ListBuffer<JCAnnotation> annotations = new ListBuffer<JCAnnotation>();
+            long flags = 0, flag = 0;
+            if (((AntlrJavacToken) $start).deprecated == true) {
+                flags |= Flags.DEPRECATED;
+            }
+        }
+        @after {
+            // look ahead for interface or enums
+            ti = input.LA(1);
+            if (ti == INTERFACE) {
+                flags |= Flags.INTERFACE;
+            } else if (ti == ENUM) {
+                flags |= Flags.ENUM;
+            }
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+            if (flags == 0 && annotations.isEmpty()) {
+                pos = Position.NOPOS;
+            }
+            $tree = T.at(pos).Modifiers(flags, annotations.toList());
+            if (pos != Position.NOPOS ) {
+                if ($stop!=null) {
+                    pu.storeEnd($tree, $stop);
+                } else {
+                    Token t = input.LT(-1);
+                    if (t==null) {
+                        pu.storeEnd($tree, 0);
+                    }
+                }
+            }
+        }
+    :
+    (   options { k=1; backtrack=false; }:  {input.LA(1)==MONKEYS_AT && input.LA(2)!=INTERFACE}? an=annotation
+            {
+                // The lookahead of the next two tokens gives antlr little help so it doesn't go too far
+                // trying parse everything to figure out which route to go.
+                annotations.append($an.tree); /* don't set flag for annotations */
+            }
+    |   pub='public'
+            {
+                flag = Flags.PUBLIC;
+                if ((flags & flag) != 0) {
+                    log.error(((AntlrJavacToken)$pub).getStartIndex(), "repeated.modifier");
+                } else {
+                    flags |= flag;
+                }
+            }
+    |   pro='protected'
+            {
+                flag = Flags.PROTECTED;
+                if ((flags & flag) != 0) {
+                    log.error(((AntlrJavacToken)$pro).getStartIndex(), "repeated.modifier");
+                } else {
+                    flags |= flag;
+                }
+            }
+    |   pri='private'
+            {
+                flag = Flags.PRIVATE;
+                if ((flags & flag) != 0) {
+                    log.error(((AntlrJavacToken)$pri).getStartIndex(), "repeated.modifier");
+                } else {
+                    flags |= flag;
+                }
+            }
+    |   st='static'
+            {
+                flag = Flags.STATIC;
+                if ((flags & flag) != 0) {
+                    log.error(((AntlrJavacToken)$st).getStartIndex(), "repeated.modifier");
+                } else {
+                    flags |= flag;
+                }
+            }
+    |   ab='abstract'
+            {
+                flag = Flags.ABSTRACT;
+                if ((flags & flag) != 0) {
+                    log.error(((AntlrJavacToken)$ab).getStartIndex(), "repeated.modifier");
+                } else {
+                    flags |= flag;
+                }
+            }
+    |   fi='final'
+            {
+                flag = Flags.FINAL;
+                if ((flags & flag) != 0) {
+                    log.error(((AntlrJavacToken)$fi).getStartIndex(), "repeated.modifier");
+                } else {
+                    flags |= flag;
+                }
+            }
+    |   na='native'
+            {
+                flag = Flags.NATIVE;
+                if ((flags & flag) != 0) {
+                    log.error(((AntlrJavacToken)$na).getStartIndex(), "repeated.modifier");
+                } else {
+                    flags |= flag;
+                }
+            }
+    |   syn='synchronized'
+            {
+                flag = Flags.SYNCHRONIZED;
+                if ((flags & flag) != 0) {
+                    log.error(((AntlrJavacToken)$syn).getStartIndex(), "repeated.modifier");
+                } else {
+                    flags |= flag;
+                }
+            }
+    |   tra='transient'
+            {
+                flag = Flags.TRANSIENT;
+                if ((flags & flag) != 0) {
+                    log.error(((AntlrJavacToken)$tra).getStartIndex(), "repeated.modifier");
+                } else {
+                    flags |= flag;
+                }
+            }
+    |   vo='volatile'
+            {
+                flag = Flags.VOLATILE;
+                if ((flags & flag) != 0) {
+                    log.error(((AntlrJavacToken)$vo).getStartIndex(), "repeated.modifier");
+                } else {
+                    flags |= flag;
+                }
+            }
+    |   str='strictfp'
+            {
+                flag = Flags.STRICTFP;
+                if ((flags & flag) != 0) {
+                    log.error(((AntlrJavacToken)$str).getStartIndex(), "repeated.modifier");
+                } else {
+                    flags |= flag;
+                }
+            }
+    )*
+    ;
+
+
+variableModifiers returns [JCModifiers tree]
+        @init {
+            ListBuffer<JCAnnotation> annotations = new ListBuffer<JCAnnotation>();
+            long flags = 0, flag = 0;
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+        @after {
+            $tree = T.at(pos).Modifiers(flags, annotations.toList());
+            if ((flags != 0 || annotations.isEmpty() == false) && $stop != null) {
+                pu.storeEnd($tree, $stop);
+            }
+        }
+    :   (   fin='final'
+                {
+                    flag = Flags.FINAL;
+                    if ((flags & flag) != 0) {
+                        log.error(((AntlrJavacToken)$fin).getStartIndex(), "repeated.modifier");
+                    }
+                    flags |= flag;
+                }
+        |   an=annotation
+                {
+                    annotations.append($an.tree);
+                }
+        )*
+    ;
+
+classDeclaration returns [JCClassDecl tree]
+    :   (modifiers 'class')=>normalClassDeclaration
+            {
+                $tree = $normalClassDeclaration.tree;
+            }
+    |   enumDeclaration
+            {
+                $tree=$enumDeclaration.tree;
+            }
+    ;
+
+normalClassDeclaration returns [JCClassDecl tree]
+        scope GScope;
+        @init {
+            Name name = null;
+            com.sun.tools.javac.util.List<JCTypeParameter> typarams = com.sun.tools.javac.util.List.nil();
+            com.sun.tools.javac.util.List<JCExpression> implementing = com.sun.tools.javac.util.List.nil();
+            com.sun.tools.javac.util.List<JCTree> defs = null;
+            String dc = ((AntlrJavacToken) $start).docComment;
+            JCTree extending = null;
+            JCModifiers mods = null;
+            int pos = 0;
+        }
+        @after {
+            $tree = T.at(pos).ClassDef(mods, name, typarams, extending, implementing, defs);
+            pu.storeEnd($tree, $stop);
+            pu.attach($tree,dc);
+        }
+    :   modifiers  cla='class' IDENTIFIER
+            {
+                mods = $modifiers.tree;
+                pos = ((AntlrJavacToken) $cla).getStartIndex();
+                name = ((AntlrJavacToken) $IDENTIFIER).name;
+                $GScope::name = name;
+                $GScope::className=$IDENTIFIER.getText();
+            }
+        (typeParameters
+            {
+                typarams=$typeParameters.list;
+            }
+        )?
+        ('extends' type
+            {
+                extending=$type.tree;
+            }
+        )?
+        ('implements' typeList
+            {
+                implementing=$typeList.list;
+            }
+        )?            
+        classBody
+            {
+                defs = $classBody.list;
+            }
+    ;
+
+typeParameters returns [com.sun.tools.javac.util.List<JCTypeParameter> list]
+        @init {
+            ListBuffer<JCTypeParameter> typarams = new ListBuffer<JCTypeParameter>();
+        }
+        @after {
+            $list=typarams.toList();
+        }
+    :   lb='<'
+            {
+                checkGeneric($lb);
+            }
+            ty1=typeParameter
+                {
+                    typarams.append(ty1.tree);                    
+                }
+            (',' ty2=typeParameter
+                {
+                    typarams.append(ty2.tree);
+                }
+            )*
+        '>'
+    ;
+
+typeParameter returns [JCTypeParameter tree]
+        @init {
+            com.sun.tools.javac.util.List<JCExpression> bounds = com.sun.tools.javac.util.List.nil();
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+            Name name = null;
+        }
+        @after {
+            $tree = T.at(pos).TypeParameter(name, bounds);
+            pu.storeEnd($tree, $stop);
+        }
+    :   IDENTIFIER
+            {
+                name = ((AntlrJavacToken) $IDENTIFIER).name;
+            }
+        ('extends' typeBound
+            {
+                bounds = $typeBound.list;
+                pos = ((AntlrJavacToken) $IDENTIFIER).getStartIndex();
+            }
+        )?
+    ;
+
+typeBound returns [com.sun.tools.javac.util.List<JCExpression> list]
+        @init {
+            ListBuffer<JCExpression> bounds = new ListBuffer<JCExpression>();
+        }
+        @after {
+            $list = bounds.toList();
+        }
+    :   ty1=type
+            {
+                bounds.append($ty1.tree);
+            }
+        ('&' ty2=type
+            {
+                bounds.append($ty2.tree);
+            }
+        )*
+    ;
+
+enumDeclaration returns [JCClassDecl tree]
+        scope GScope;
+        @init {
+            com.sun.tools.javac.util.List<JCExpression> implementing = com.sun.tools.javac.util.List.nil();
+            com.sun.tools.javac.util.List<JCTree> defs = null;
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+            String dc = ((AntlrJavacToken) $start).docComment;
+            JCModifiers mods = null;
+            Name name = null;
+            int pos1=0;
+        }
+        @after {
+            JCModifiers newMods = T.at(pos).Modifiers(mods.flags | Flags.ENUM, mods.annotations);
+            $tree = T.at(pos1).ClassDef(newMods, name, com.sun.tools.javac.util.List.<JCTypeParameter>nil(), null, implementing,defs);
+            pu.storeEnd($tree, $stop);
+            pu.attach($tree, dc);
+        }
+    :   modifiers 
+        (    enu='enum'
+        |    {source.allowEnums()==false&&input.LT(1).getText().equals("enum")}?=> id1=IDENTIFIER 
+                {
+                    checkEnum($id1);
+                }
+        ) 
+        enumName=IDENTIFIER
+            {
+                mods = $modifiers.tree;
+                if($enu != null){
+                    pos1 = ((AntlrJavacToken) $enu).getStartIndex();
+                }else{
+                    pos1 = ((AntlrJavacToken) $id1).getStartIndex();
+                }
+                name = ((AntlrJavacToken) $enumName).name;
+                $GScope::name = name;
+            }
+        ('implements' typeList
+            {
+                implementing = $typeList.list;
+            }
+        )?
+            {
+                $GScope::className=$enumName.getText();
+            }
+        enumBody
+            {
+                defs = $enumBody.list;
+            }
+    ;
+
+enumBody returns [com.sun.tools.javac.util.List<JCTree> list]
+        @init {
+            com.sun.tools.javac.util.ListBuffer<JCTree> buf = new com.sun.tools.javac.util.ListBuffer<JCTree>();
+        }
+        @after {
+            $list = buf.toList();
+        }
+    :   '{'(enumConstants
+            {
+                buf.appendList($enumConstants.list);
+            }
+        )? ','? (enumBodyDeclarations
+            {
+                buf.appendList($enumBodyDeclarations.list);
+            }
+        )? '}'
+    ;
+
+enumConstants returns [com.sun.tools.javac.util.List<JCTree> list]
+        @init {
+            ListBuffer<JCTree> buf = new ListBuffer<JCTree>();
+        }
+        @after {
+            $list = buf.toList();
+        }
+    :   en1=enumConstant
+            {
+                buf.append($en1.tree);
+            }
+        (',' en2=enumConstant
+            {
+                buf.append($en2.tree);
+            }
+        )*
+    ;
+
+/**
+ * NOTE: here differs from the javac grammar, missing TypeArguments.
+ * EnumeratorDeclaration = AnnotationsOpt [TypeArguments] IDENTIFIER [ Arguments ] [ "{" ClassBody "}" ]
+ */
+enumConstant returns [JCTree tree]
+        @init {
+            int flags = Flags.PUBLIC | Flags.STATIC | Flags.FINAL | Flags.ENUM;
+            if (((AntlrJavacToken) $start).deprecated == true) {
+                flags |= Flags.DEPRECATED;
+            }
+            com.sun.tools.javac.util.List<JCAnnotation> annotations = com.sun.tools.javac.util.List.nil();;
+            com.sun.tools.javac.util.List<JCExpression> typeArgs = com.sun.tools.javac.util.List.nil();;
+            com.sun.tools.javac.util.List<JCExpression> args = com.sun.tools.javac.util.List.nil();;
+            com.sun.tools.javac.util.List<JCTree> defs = null;
+            JCIdent enumIdent = T.at(Position.NOPOS).Ident($GScope::name);
+            String dc = ((AntlrJavacToken) $start).docComment;
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+            int identPos = 0, createPos = Position.NOPOS;
+            JCModifiers mods = null;
+            Name name = null;
+            JCClassDecl body = null;
+        }
+        @after {
+            mods = T.at(annotations.isEmpty() ? Position.NOPOS : pos).Modifiers(flags, annotations);
+            if (defs != null) {
+                JCModifiers mods1 = T.at(Position.NOPOS).Modifiers(Flags.ENUM | Flags.STATIC);
+                body = T.at(identPos).AnonymousClassDef(mods1, defs);
+                pu.storeEnd(body, $stop);
+            }
+            if (args.isEmpty() == true && defs == null) {
+                createPos = Position.NOPOS;
+            }
+            JCNewClass create = T.at(createPos).NewClass(null, typeArgs, enumIdent, args, body);
+            if (createPos != Position.NOPOS) {
+                pu.storeEnd(create, $stop);
+            }
+            $tree = T.at(pos).VarDef(mods, name, enumIdent, create);
+            pu.storeEnd($tree, $stop);
+            pu.attach($tree, dc);
+        }
+    :   (annotations
+            {
+                annotations = $annotations.list;
+            }
+        )?
+        IDENTIFIER
+            {
+                name = ((AntlrJavacToken) $IDENTIFIER).name;
+                identPos = ((AntlrJavacToken) $IDENTIFIER).getStartIndex();
+            }
+        (arguments
+            {
+                args = $arguments.list;
+                createPos = ((AntlrJavacToken) $arguments.start).getStartIndex();
+            }
+        )?
+        (classBody
+            {
+                defs = $classBody.list;
+                if (createPos == Position.NOPOS)
+                    createPos = ((AntlrJavacToken) $classBody.start).getStartIndex();
+            }
+        )?
+        /* TODO: $GScope::name = names.empty. enum constant body is actually
+        an anonymous class, where constructor isn't allowed, have to add this check*/
+    ;
+
+enumBodyDeclarations returns [com.sun.tools.javac.util.List<JCTree> list]
+        @init {
+            ListBuffer<JCTree> buf = new ListBuffer<JCTree>();
+        }
+        @after {
+            $list = buf.toList();
+        }
+    :   ';' (classBodyDeclaration
+            {
+                buf.appendList($classBodyDeclaration.list);
+            }
+        )*
+    ;
+
+interfaceDeclaration returns [JCClassDecl tree]
+    :   (interfaceHeader)=>normalInterfaceDeclaration
+            {
+                $tree = $normalInterfaceDeclaration.tree;
+            }
+    |   (annotationHeader)=>annotationTypeDeclaration
+            {
+                $tree = $annotationTypeDeclaration.tree;
+            }
+    ;
+
+normalInterfaceDeclaration returns [JCClassDecl tree]
+        scope GScope;
+        @init {
+            com.sun.tools.javac.util.List<JCTypeParameter> typarams = com.sun.tools.javac.util.List.nil();
+            com.sun.tools.javac.util.List<JCExpression> extending = com.sun.tools.javac.util.List.nil();
+            com.sun.tools.javac.util.List<JCTree> defs = null;
+            String dc = ((AntlrJavacToken) $start).docComment;
+            JCModifiers mods = null;
+            Name name = null;
+            int pos = 0;
+        }
+        @after {
+            $tree = T.at(pos).ClassDef(mods, name, typarams, null, extending, defs);
+            pu.storeEnd($tree, $stop);
+            pu.attach($tree,dc);
+        }
+    :   modifiers inf='interface' IDENTIFIER
+            {
+                mods = $modifiers.tree;
+                name = ((AntlrJavacToken) $IDENTIFIER).name;
+                pos = ((AntlrJavacToken) $inf).getStartIndex();
+            }
+        (typeParameters
+            {
+                typarams = $typeParameters.list;
+            }
+        )?
+        ('extends' typeList
+            {
+                extending = $typeList.list;
+            }
+        )?
+            {
+                $GScope::className=$IDENTIFIER.getText();
+            }
+        interfaceBody            
+            {
+                defs = $interfaceBody.list;
+            }
+    ;
+
+typeList returns [com.sun.tools.javac.util.List<JCExpression> list]
+        @init {
+            ListBuffer<JCExpression> ts = new ListBuffer<JCExpression>();
+        }
+        @after {
+            $list = ts.toList();
+        }
+    :   ty1=type
+            {
+                ts.append($ty1.tree);
+            }
+        (',' ty2=type
+            {
+                ts.append($ty2.tree);
+            }
+        )*
+    ;
+
+classBody returns [com.sun.tools.javac.util.List<JCTree> list]
+        @init {
+            ListBuffer<JCTree> defs = new ListBuffer<JCTree>();
+        }
+        @after {
+            $list = defs.toList();
+        }
+    :   '{' (classBodyDeclaration
+            {
+                defs.appendList($classBodyDeclaration.list);
+            }
+        )* '}'
+    ;
+
+interfaceBody returns [com.sun.tools.javac.util.List<JCTree> list]
+        @init {
+            ListBuffer<JCTree> defs = new ListBuffer<JCTree>();
+        }
+        @after {
+            $list = defs.toList();
+        }
+    :   '{' (interfaceBodyDeclaration
+            {
+                defs.appendList($interfaceBodyDeclaration.list);
+            }
+        )* '}'
+    ;
+
+classBodyDeclaration returns [com.sun.tools.javac.util.List<JCTree> list]
+        @init {
+            ListBuffer<JCTree> buf = new ListBuffer<JCTree>();
+        }
+        @after {
+            $list = buf.toList();
+        }
+    :   ';'
+            {
+                buf.append(T.at(Position.NOPOS).Block(0, com.sun.tools.javac.util.List.<JCStatement> nil()));
+            }
+    |   st=staticBlock
+            {
+                buf.append($st.tree);
+            }
+    |   bl=block
+            {
+                buf.append($bl.tree);
+            }
+    |   me=memberDecl
+            {
+                buf.appendList($me.list);
+            }
+    ;
+
+memberDecl returns [com.sun.tools.javac.util.List<JCTree> list]
+        @init {
+            ListBuffer<JCTree> buf = new ListBuffer<JCTree>();
+            $list = com.sun.tools.javac.util.List.nil();
+        }
+        @after {
+            $list = buf.toList();
+        }
+    :   (fieldHeader)  => fieldDeclaration
+            {
+                pu.appendList(buf, $fieldDeclaration.list);
+            }
+    |   (methodHeader) => methodDeclaration
+            {
+                buf.append($methodDeclaration.tree);
+            }
+    |   (classHeader | enumHeader) => classDeclaration
+            {
+                buf.append($classDeclaration.tree);
+            }
+    |   (interfaceHeader | annotationHeader) => interfaceDeclaration
+            {
+                buf.append($interfaceDeclaration.tree);
+            }
+    ;
+
+methodDeclaration returns [JCMethodDecl tree]
+        //scope GScope;
+        @init {
+            com.sun.tools.javac.util.List<JCVariableDecl> params = com.sun.tools.javac.util.List.nil();
+            com.sun.tools.javac.util.List<JCTypeParameter> typarams = com.sun.tools.javac.util.List.nil();
+            com.sun.tools.javac.util.List<JCExpression> thrown = com.sun.tools.javac.util.List.nil();
+            ListBuffer<JCStatement> ctors = new ListBuffer<JCStatement>();
+            String dc = ((AntlrJavacToken) $start).docComment;
+            ArrayList<Integer> poss = new ArrayList<Integer>();
+            ArrayList<Integer> eposs = new ArrayList<Integer>();
+            JCModifiers mods = null;
+            JCExpression type = null;
+            Name name = null;
+            JCBlock body = null;
+            int pos = 0;
+        }
+        @after {
+            for (ti = poss.size() - 1; ti >= 0; ti--) {
+                type = T.at(poss.get(ti)).TypeArray(type);
+                pu.storeEnd(type,eposs.get(eposs.size()-1)+1);
+            }
+            $tree = T.at(pos).MethodDef(mods, name, type, typarams, params, thrown, body, null);
+            pu.storeEnd($tree, $stop);
+            pu.attach($tree,dc);
+        }
+    :
+        /* For constructor, return type is null, name is 'init' */
+        (modifiers typeParameters? IDENTIFIER '(')=> mo2=modifiers
+            {
+                mods = $mo2.tree;
+            }
+        (ty2=typeParameters
+            {
+                typarams = $ty2.list;
+            }
+        )?
+        id2=IDENTIFIER
+            {
+                Name tname = $GScope::name;
+                if (((AntlrJavacToken) $id2).name != tname) {
+                    log.error(((AntlrJavacToken)$id2).getStartIndex(), "invalid.meth.decl.ret.type.req");
+                }
+                type = null;
+                name = names.init;
+                pos = ((AntlrJavacToken) $id2).getStartIndex();
+                pu.storeEnd(T.Ident(((AntlrJavacToken) $id2).name), $id2);
+            }
+        fo2=formalParameters
+            {
+                params = $fo2.list;
+            }
+        ('throws' qu2=qualifiedNameList
+            {
+                thrown = $qu2.list;
+            }
+        )?
+            {
+                $GScope::methodName=$id2.getText();
+            }
+        lbr='{' 
+        (ex1=explicitConstructorInvocation
+                {
+                    ctors.append($ex1.tree);
+                }
+        )?
+        (bl2=blockStatement
+            {
+                if ($bl2.tree == null) {
+                    ctors.appendList($bl2.list);
+                } else {
+                    ctors.append($bl2.tree);
+                }
+            }
+        )*
+        rbr='}'
+            {
+                body = T.at(((AntlrJavacToken) $lbr).getStartIndex()).Block(0, ctors.toList());
+                pu.storeEnd(body,$rbr);
+            }
+    |   mo1=modifiers
+            {
+                mods = $mo1.tree;
+            }
+        (ty1=typeParameters
+            {
+                typarams = $ty1.list;
+            }
+        )?
+        (ty=type
+            {
+                type = $ty.tree;
+            }
+        |   vod='void'
+                {
+                    type = T.at(((AntlrJavacToken) $vod).getStartIndex()).TypeIdent(TypeTags.VOID);
+                    pu.storeEnd(type, $vod);
+                }
+        )
+        id1=IDENTIFIER
+            {
+                name = ((AntlrJavacToken) $id1).name;
+                pos = ((AntlrJavacToken) $id1).getStartIndex();
+            }
+        fo1=formalParameters
+            {
+                params = $fo1.list;
+            }
+        (lb='[' rb=']'
+            {
+                poss.add(((AntlrJavacToken) $lb).getStartIndex());
+                eposs.add(((AntlrJavacToken) $rb).getStartIndex());
+            }
+        )*
+        ('throws' qu1=qualifiedNameList
+            {
+                thrown = $qu1.list;
+            }
+        )?            
+        (
+            {
+                $GScope::methodName=$id1.getText();
+            }        
+            bl=block
+                {
+                    body = $bl.tree;
+                }
+        |   ';' 
+        )
+    ;
+
+fieldDeclaration returns [com.sun.tools.javac.util.List<JCVariableDecl> list]
+        @init {
+            ListBuffer<JCVariableDecl> listBuffer = new ListBuffer<JCVariableDecl>();
+            ArrayList<Integer> pos = new ArrayList<Integer>();
+            String dc = ((AntlrJavacToken) $start).docComment;
+            JCModifiers mods = null;
+            JCExpression type = null;
+            Name name = null;
+            JCExpression init = null;
+            JCTree ptree = null;
+        }
+        @after {
+            $list = listBuffer.toList();
+            if (ptree != null) {
+                pu.storeEnd(ptree, $stop);
+            }
+        }
+    :   mo=modifiers
+            {
+                mods = $mo.tree;
+            }
+        ty=type
+            {
+                type=$ty.tree;
+            }
+        va1=variableDeclarator
+            {
+                JCExpression ntype = pu.makeTypeArray(type,$va1.i, $va1.dimPosition, $va1.endPosition);
+                JCVariableDecl tree = T.at($va1.pos).VarDef(mods, $va1.name, ntype, $va1.tree);
+                pu.attach(tree, dc);
+                listBuffer.append(tree);
+                ptree = tree;
+            }
+        (cm=',' va2=variableDeclarator
+            {
+                JCExpression ntype = pu.makeTypeArray(type,$va2.i, $va2.dimPosition, $va2.endPosition);
+                JCVariableDecl tree = T.at(va2.pos).VarDef(mods, $va2.name, ntype, $va2.tree);
+                pu.storeEnd(ptree, $cm);
+                ptree = tree;
+                pu.attach(tree, dc);
+                listBuffer.append(tree);
+            }
+        )*
+        ';'
+    ;
+
+variableDeclarator returns [Name name, JCExpression tree, int i, int pos, ArrayList dimPosition, ArrayList endPosition]
+        @init {
+            $i = 0;
+            $dimPosition = new ArrayList();
+            $endPosition = new ArrayList();
+        }
+    :   id=IDENTIFIER
+            {
+                $pos = ((AntlrJavacToken) $id).getStartIndex();
+                $name = ((AntlrJavacToken) $id).name;
+            }
+        (lbr='[' rbr=']'
+            {
+                $i = $i+1;
+                $dimPosition.add(((AntlrJavacToken) $lbr).getStartIndex());
+                $endPosition.add(((AntlrJavacToken) $rbr).getStopIndex());
+            }
+        )*
+        ('=' va=variableInitializer
+            {
+                $tree = $va.tree;
+            }
+        )?
+    ;
+
+/**
+ *TODO: add predicates
+ */
+interfaceBodyDeclaration returns [com.sun.tools.javac.util.List<JCTree> list]
+        @init {
+            ListBuffer<JCTree> buf = new ListBuffer<JCTree>();
+        }
+        @after {
+            $list = buf.toList();
+        }
+    :
+        interfaceFieldDeclaration
+            {
+                buf.appendList($interfaceFieldDeclaration.list);
+            }
+    |   interfaceMethodDeclaration
+            {
+                buf.append($interfaceMethodDeclaration.tree);
+            }
+    |   interfaceDeclaration
+            {
+                buf.append($interfaceDeclaration.tree);
+            }
+    |   classDeclaration
+            {
+                buf.append($classDeclaration.tree);
+            }
+    |   ';'
+            {
+                buf.append(T.at(Position.NOPOS).Block(0, com.sun.tools.javac.util.List.<JCStatement> nil()));
+            }
+    ;
+
+interfaceMethodDeclaration returns [JCMethodDecl tree]
+        @init {
+            com.sun.tools.javac.util.List<JCVariableDecl> params = com.sun.tools.javac.util.List.nil();
+            com.sun.tools.javac.util.List<JCTypeParameter> typarams = com.sun.tools.javac.util.List.nil();
+            com.sun.tools.javac.util.List<JCExpression> thrown = com.sun.tools.javac.util.List.nil();
+            String dc = ((AntlrJavacToken) $start).docComment;
+            ArrayList<Integer> poss = new ArrayList<Integer>();
+            ArrayList<Integer> eposs = new ArrayList<Integer>();
+            JCModifiers mods = null;
+            JCExpression type = null;
+            Name name = null;
+            int pos = 0;
+        }
+        @after {
+            for (ti = poss.size() - 1; ti>= 0; ti--) {
+                type = T.at(poss.get(ti)).TypeArray(type);
+                pu.storeEnd(type, eposs.get(eposs.size() - 1) + 1);
+            }
+            $tree = T.at(pos).MethodDef(mods, name, type, typarams, params, thrown, null, null);
+            pu.storeEnd($tree, $stop);
+            pu.attach($tree,dc);
+        }
+    :   modifiers
+            {
+                mods = $modifiers.tree;
+            }
+        (typeParameters
+            {
+                typarams = $typeParameters.list;
+            }
+        )?
+        (type
+            {
+                type = $type.tree;
+            }
+        | vod='void'
+            {
+                type = T.at(((AntlrJavacToken) $vod).getStartIndex()).TypeIdent(TypeTags.VOID);
+                pu.storeEnd(type, $vod);
+            }
+        )
+        IDENTIFIER
+            {
+                name = ((AntlrJavacToken) $IDENTIFIER).name;
+                pos = ((AntlrJavacToken) $IDENTIFIER).getStartIndex();
+            }
+        formalParameters
+            {
+                params = $formalParameters.list;
+            }
+        (lbr='[' rbr=']'
+            {
+                poss.add(((AntlrJavacToken) $lbr).getStartIndex());
+                eposs.add(((AntlrJavacToken) $rbr).getStartIndex());
+            }
+        )*
+        ('throws' qu=qualifiedNameList
+            {
+                thrown = $qu.list;
+            }
+        )? ';'
+    ;
+
+/**
+ * NOTE, should not use variableDeclarator here, as it doesn't necessary require
+ * an initializer, while an interface field does, or judge by the returned value.
+ * But this gives better diagnostic message, or antlr won't predict this rule.
+ */
+interfaceFieldDeclaration returns [com.sun.tools.javac.util.List<JCTree> list]
+        @init {
+            ListBuffer<JCTree> listBuffer = new ListBuffer<JCTree>();
+            JCModifiers mods = null;
+            JCExpression type = null;
+            Name name = null;
+            JCExpression init = null;
+            String dc = ((AntlrJavacToken) $start).docComment;
+            JCTree ptree = null;
+        }
+        @after {
+            $list = listBuffer.toList();
+            if (ptree != null) {
+                pu.storeEnd(ptree, $stop);
+            }
+        }
+    :   modifiers type va1=variableDeclarator
+            {
+                mods = $modifiers.tree;
+                type = $type.tree;
+                JCExpression ntype = pu.makeTypeArray(type,$va1.i, $va1.dimPosition, $va1.endPosition);
+                if ($va1.tree == null) {
+                   log.error(((CommonToken)input.LT(1)).getStartIndex(), "expected", "=");
+                }
+                JCTree tree = T.at($va1.pos).VarDef(mods, $va1.name, ntype, $va1.tree);
+                ptree = tree;
+                pu.attach(tree,dc);
+                listBuffer.append(tree);
+            }
+        (cm=',' va2=variableDeclarator
+            {
+                JCExpression ntype = pu.makeTypeArray(type,$va2.i, $va2.dimPosition, $va2.endPosition);
+                if ($va2.tree == null) {
+                   log.error(((CommonToken)input.LT(1)).getStartIndex(), "expected", "=");
+                }
+                JCTree tree = T.at($va2.pos).VarDef(mods, $va2.name, ntype, $va2.tree);
+                pu.storeEnd(ptree, $cm);
+                ptree = tree;
+                pu.attach(tree,dc);
+                listBuffer.append(tree);
+            }
+        )*
+        ';'
+    ;
+
+
+type returns [JCExpression tree]
+        @init {
+            JCExpression t = null;
+            ArrayList<Integer> poss = new ArrayList<Integer>();
+            ArrayList<Integer> eposs = new ArrayList<Integer>();
+        }
+        @after {
+            for (ti = poss.size() - 1; ti >= 0; ti--) {
+                t = T.at(poss.get(ti)).TypeArray(t);
+                pu.storeEnd(t, eposs.get(eposs.size() - 1) + 1);
+            }
+            $tree = t;
+        }
+    :   classOrInterfaceType
+            {
+                t = $classOrInterfaceType.tree;
+            }
+        (lb1='[' rb1=']'
+            {
+                poss.add(((AntlrJavacToken) $lb1).getStartIndex());
+                eposs.add(((AntlrJavacToken) $rb1).getStartIndex());
+            }
+        )*
+    |   primitiveType
+            {
+                t = $primitiveType.tree;
+            }
+        (lb2='[' rb2=']'
+            {
+                poss.add(((AntlrJavacToken) $lb2).getStartIndex());
+                eposs.add(((AntlrJavacToken) $rb2).getStartIndex());
+            }
+        )*
+    ;
+
+
+classOrInterfaceType returns [JCExpression tree]
+        @init {
+            JCExpression t = null;
+            Name name = null;
+        }
+        @after {
+            $tree = t;
+        }
+    :   id1=IDENTIFIER
+            {
+                t = T.at(((AntlrJavacToken) $id1).getStartIndex()).Ident(((AntlrJavacToken) $id1).name);
+                pu.storeEnd(t, $id1);
+            }
+        (ty1=typeArguments
+            {
+                t = T.at(((AntlrJavacToken) $ty1.start).getStartIndex()).TypeApply(t, $ty1.list);
+                pu.storeEnd(t, $ty1.stop);
+            }
+        )?
+        (dt='.' id2=IDENTIFIER
+                {
+                    t = T.at(((AntlrJavacToken) $dt).getStartIndex()).Select(t, ((AntlrJavacToken) $id2).name);
+                    pu.storeEnd(t,$id2);
+                }
+            (ty2=typeArguments
+                {
+                    t = T.at(((AntlrJavacToken) $ty2.start).getStartIndex()).TypeApply(t, $ty2.list);
+                    pu.storeEnd(t, $ty2.stop);
+                }
+            )?
+        )*
+    ;
+
+primitiveType  returns [JCPrimitiveTypeTree tree]
+        @init {
+            int i = -1;
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+        @after {
+            $tree = T.at(pos).TypeIdent(i);
+            pu.storeEnd($tree, $stop);
+        }
+    :   'boolean'
+            {
+                i = TypeTags.BOOLEAN;
+            }
+    |   'char'
+            {
+                i = TypeTags.CHAR;
+            }
+    |   'byte'
+            {
+                i = TypeTags.BYTE;
+            }
+    |   'short'
+            {
+                i = TypeTags.SHORT;
+            }
+    |   'int'
+            {
+                i = TypeTags.INT;
+            }
+    |   'long'
+            {
+                i = TypeTags.LONG;
+            }
+    |   'float'
+            {
+                i = TypeTags.FLOAT;
+            }
+    |   'double'
+            {
+                i = TypeTags.DOUBLE;
+            }
+    ;
+
+typeArguments returns [com.sun.tools.javac.util.List<JCExpression> list]
+        @init {
+            ListBuffer<JCExpression> args = new ListBuffer<JCExpression>();
+        }
+        @after {
+            $list = args.toList();
+        }
+    :   lb='<' ty1=typeArgument
+            {
+                args.append($ty1.tree);
+                checkGeneric($lb);
+            }
+        (',' ty2=typeArgument
+            {
+                args.append($ty2.tree);
+            }
+        )* '>'
+    ;
+
+typeArgument returns [JCExpression tree]
+        @init {
+            TypeBoundKind bound = null;
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+        @after {
+            if ($tree == null) {
+                $tree = T.at(pos).Wildcard(bound, null);
+                pu.storeEnd($tree, $stop);
+            }
+        }
+    :   tya=type
+            {
+                $tree = $tya.tree;
+            }
+    |   '?'
+            {
+                bound = T.at(Position.NOPOS).TypeBoundKind(BoundKind.UNBOUND);
+            }
+        ((ex='extends'
+                {
+                    bound = T.at(((AntlrJavacToken) $ex).getStartIndex()).TypeBoundKind(BoundKind.EXTENDS);
+                    pu.storeEnd(bound, $ex);
+                }
+            | su='super'
+                {
+                    bound = T.at(((AntlrJavacToken) $su).getStartIndex()).TypeBoundKind(BoundKind.SUPER);
+                    pu.storeEnd(bound, $su);
+                }
+            )
+            tyb=type
+                {
+                    $tree = T.at(pos).Wildcard(bound, $tyb.tree);
+                }
+        )?
+    ;
+
+qualifiedNameList returns [com.sun.tools.javac.util.List<JCExpression> list]
+        @init {
+            ListBuffer<JCExpression> ts = new ListBuffer<JCExpression>();
+        }
+        @after {
+            $list = ts.toList();
+        }
+    :   qu1=qualifiedName
+            {
+                ts.append($qu1.tree);
+            }
+        (',' qu2=qualifiedName
+            {
+                ts.append($qu2.tree);
+            }
+        )*
+    ;
+
+formalParameters returns [com.sun.tools.javac.util.List<JCVariableDecl> list]
+        @init {
+            $list = com.sun.tools.javac.util.List.nil();
+        }
+    :   '('(formalParameterDecls
+            {
+                $list = $formalParameterDecls.list;
+            }
+        )? ')'
+    ;
+
+formalParameterDecls returns [com.sun.tools.javac.util.List<JCVariableDecl> list]
+        @init {
+            ListBuffer<JCVariableDecl> params = new ListBuffer<JCVariableDecl>();
+        }
+        @after {
+            $list = params.toList();
+        }
+    :   el1=ellipsisParameterDecl
+            {
+                params.append($el1.tree);
+            }
+    |   no1=normalParameterDecl
+            {
+                params.append($no1.tree);
+            }
+        (',' no2=normalParameterDecl
+            {
+                params.append($no2.tree);
+            }
+        )*
+    |   (no3=normalParameterDecl
+            {
+                params.append($no3.tree);
+            }
+        ',')+ el2=ellipsisParameterDecl
+            {
+                params.append($el2.tree);
+            }
+    ;
+
+normalParameterDecl returns [JCVariableDecl tree]
+        @init {
+            JCModifiers mods = null;
+            JCExpression paraType = null;
+            Name name = null;
+            ArrayList<Integer> poss = new ArrayList<Integer>();
+            ArrayList<Integer> eposs = new ArrayList<Integer>();
+            int pos = 0;
+        }
+        @after {
+            for (ti = poss.size() - 1 ; ti >= 0; ti--) {
+                paraType = T.at(poss.get(ti)).TypeArray(paraType);
+                pu.storeEnd(paraType,eposs.get(eposs.size()-1)+1);
+            }
+            $tree = T.at(pos).VarDef(mods, name, paraType, null);
+            pu.storeEnd($tree, $stop);
+        }
+    :   variableModifiers type IDENTIFIER
+            {
+                mods = $variableModifiers.tree;
+                mods.flags |= Flags.PARAMETER;
+                paraType = $type.tree;
+                name = ((AntlrJavacToken) $IDENTIFIER).name;
+                pos = ((AntlrJavacToken) $IDENTIFIER).getStartIndex();
+            }
+        (lbr='[' rbr=']'
+            {
+                poss.add(((AntlrJavacToken) $lbr).getStartIndex());
+                eposs.add(((AntlrJavacToken) $rbr).getStartIndex());
+            }
+        )*
+    ;
+
+ellipsisParameterDecl returns [JCVariableDecl tree]
+        @init {
+            JCModifiers mods = null;
+            JCExpression paraType = null;
+            Name name = null;
+            int pos = 0;
+        }
+        @after {
+            $tree = T.at(pos).VarDef(mods, name, paraType, null);
+            pu.storeEnd($tree, $stop);
+        }
+    :   variableModifiers
+            {
+                mods = $variableModifiers.tree;
+                mods.flags |= Flags.PARAMETER;
+                mods.flags |= Flags.VARARGS;
+            }
+        type  dots='...' 
+            {
+                paraType = T.at(((AntlrJavacToken) $dots).getStartIndex()).TypeArray($type.tree);
+                pu.storeEnd(paraType, $dots);
+                checkVarArg($dots);
+            }
+        IDENTIFIER
+            {
+                name = ((AntlrJavacToken) $IDENTIFIER).name; pos = ((AntlrJavacToken) $IDENTIFIER).getStartIndex();
+            }
+    ;
+
+
+explicitConstructorInvocation returns [JCStatement tree]
+        @init {
+            com.sun.tools.javac.util.List<JCExpression> typeArgs = null;
+            JCExpression expr = null;
+            int pos = 0, supPos = 0;
+        }
+        @after {
+            $tree = T.at(((AntlrJavacToken) $start).getStartIndex()).Exec(pu.checkExprStat(expr));
+            pu.storeEnd($tree, $stop);
+        }
+    :   (nw=nonWildcardTypeArguments
+            {
+                typeArgs = $nw.list;
+                supPos = ((AntlrJavacToken) $nw.start).getStartIndex();
+            }
+        )?     //NOTE: the position of Identifier 'super' is set to the type args position here
+        (ths='this'
+            {
+                expr = T.at(((AntlrJavacToken) $ths).getStartIndex()).Ident(names._this);
+                pu.storeEnd(expr, $ths);
+            }
+        |   sup='super'
+            {
+                if (supPos == 0)
+                    supPos = ((AntlrJavacToken) $sup).getStartIndex();
+                expr = T.at(supPos).Ident(names._super);
+            }
+        )
+        ag1=arguments ';'
+            {
+                expr = T.at(((AntlrJavacToken) $ag1.start).getStartIndex()).Apply(typeArgs, expr, $ag1.list);
+                pu.storeEnd(expr, $ag1.stop);
+            }
+
+    |   pr=primary
+            {
+                expr = $pr.tree;
+            }
+        dt2='.'
+        (nw2=nonWildcardTypeArguments
+            {
+                typeArgs = $nw2.list;
+            }
+        )?
+        sup2='super'
+            {
+                expr = T.at(((AntlrJavacToken) $dt2).getStartIndex()).Select(expr, names._super);
+                pu.storeEnd(expr, $sup2);
+            }
+        ag2=arguments ';'
+            {
+                expr = T.at(((AntlrJavacToken) $ag2.start).getStartIndex()).Apply(typeArgs, expr, $ag2.list);
+                pu.storeEnd(expr,$ag2.stop);
+            }
+    ;
+
+qualifiedName returns [JCExpression tree]
+        @init {
+            JCExpression pid = null;
+        }
+        @after {
+            $tree = pid;
+        }
+    :   id1=IDENTIFIER
+            {
+                pid = T.at(((AntlrJavacToken) $id1).getStartIndex()).Ident(((AntlrJavacToken) $id1).name);
+                pu.storeEnd(pid, $id1);
+            }
+        (dt='.' id2=IDENTIFIER
+            {
+                pid = T.at(((AntlrJavacToken) $dt).getStartIndex()).Select(pid, ((AntlrJavacToken) $id2).name);
+                pu.storeEnd(pid, $id2);
+            }
+        )*
+    ;
+
+annotations returns [com.sun.tools.javac.util.List<JCAnnotation> list]
+        @init {
+            ListBuffer<JCAnnotation> buf = new ListBuffer<JCAnnotation>();
+        }
+        @after {
+            $list = buf.toList();
+        }
+    :   (an=annotation
+            {
+                buf.append($an.tree);
+            }
+        )+
+    ;
+
+
+/**
+ *  Using an annotation. 
+ * '@' is flaged in modifier
+ */
+annotation returns [JCAnnotation tree]
+        @init {
+            JCTree annoName = null;
+            ListBuffer<JCExpression> buf = new ListBuffer<JCExpression>();
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+        @after {
+            $tree = T.at(pos).Annotation(annoName, buf.toList());
+            pu.storeEnd($tree, $stop);
+        }
+    :   at1='@' qualifiedName
+            {
+                annoName = $qualifiedName.tree;
+                checkAnnotation($at1);
+            }
+        (   '('   
+                  (   elementValuePairs
+                          {
+                              buf.appendList($elementValuePairs.list);
+                          }
+                  |   elementValue
+                          {
+                              buf.append($elementValue.tree);
+                          }
+                  )? 
+            ')' 
+        )?
+    ;
+
+elementValuePairs returns [com.sun.tools.javac.util.List<JCExpression> list]
+        @init {
+            ListBuffer<JCExpression> buf = new ListBuffer<JCExpression>();
+        }
+        @after {
+            $list = buf.toList();
+        }
+    :   el=elementValuePair
+            {
+                buf.append($el.tree);
+            }
+        (',' el2=elementValuePair
+            {
+                buf.append($el2.tree);
+            }
+        )*
+    ;
+
+elementValuePair returns [JCExpression tree]
+    :   IDENTIFIER eq='=' elementValue
+            {
+                $tree = T.at(((AntlrJavacToken) $IDENTIFIER).getStartIndex()).Ident(((AntlrJavacToken) $IDENTIFIER).name);
+                pu.storeEnd($tree, $IDENTIFIER);
+                $tree = T.at(((AntlrJavacToken) $eq).getStartIndex()).Assign($tree, $elementValue.tree);
+                pu.storeEnd($tree, $elementValue.stop);
+            }
+    ;
+
+elementValue returns [JCExpression tree]
+    :   conditionalExpression
+            {
+                $tree = $conditionalExpression.tree;
+            }
+    |   annotation
+            {
+                $tree = $annotation.tree;
+            }
+    |   elementValueArrayInitializer
+            {
+                $tree = $elementValueArrayInitializer.tree;
+            }
+    ;
+
+elementValueArrayInitializer returns [JCNewArray tree]
+        @init {
+            ListBuffer<JCExpression> buf = new ListBuffer<JCExpression>();
+            int pos = 0;
+        }
+        @after {
+            $tree = T.at(pos).NewArray(null, com.sun.tools.javac.util.List.<JCExpression> nil(), buf.toList());
+            pu.storeEnd($tree, $stop);
+        }
+    :   lbr='{'
+            {
+                pos = ((AntlrJavacToken) $lbr).getStartIndex();
+            }
+        (el1=elementValue
+                {
+                    buf.append($el1.tree);
+                }
+            (',' el2=elementValue
+                {
+                    buf.append($el2.tree);
+                }
+            )*
+        )? (',')? '}'
+    ;
+
+
+/**
+ * Annotation declaration.
+ */
+annotationTypeDeclaration returns [JCClassDecl tree]
+        @init {
+            com.sun.tools.javac.util.List<JCExpression> extending = com.sun.tools.javac.util.List.nil();
+            com.sun.tools.javac.util.List<JCTree> defs = null;
+            String dc = ((AntlrJavacToken) $start).docComment;
+            JCModifiers mods = null;
+            Name name = null;
+            int pos = 0;
+        }
+        @after {
+            $tree = T.at(pos).ClassDef(mods, name, com.sun.tools.javac.util.List.<JCTypeParameter> nil(), null, extending, defs);
+            pu.storeEnd($tree, $stop);
+            pu.attach($tree,dc);
+        }
+    :   modifiers mat='@'
+            {
+                mods = $modifiers.tree; mods.flags |= (Flags.ANNOTATION | Flags.INTERFACE);
+                pu.storeEnd(mods, $mat);
+                checkAnnotation($mat);
+            }
+        inf='interface'
+            {
+                pos = ((AntlrJavacToken) $inf).getStartIndex();
+            }
+        IDENTIFIER
+            {
+                name = ((AntlrJavacToken) $IDENTIFIER).name;
+            }
+        annotationTypeBody
+            {
+                defs = $annotationTypeBody.list;
+            }
+    ;
+
+
+annotationTypeBody returns [com.sun.tools.javac.util.List<JCTree> list]
+        @init {
+            ListBuffer<JCTree> defs = new ListBuffer<JCTree>();
+        }
+        @after {
+            $list = defs.toList();
+        }
+    :   '{' (annotationTypeElementDeclaration
+            {
+                defs.appendList($annotationTypeElementDeclaration.list);
+            }
+        )* '}'
+    ;
+
+/**
+ * NOTE: here use interfaceFieldDeclaration for field declared inside annotation. they are sytactically the same.
+ */
+annotationTypeElementDeclaration returns [com.sun.tools.javac.util.List<JCTree> list]
+        @init {
+            ListBuffer<JCTree> buf = new ListBuffer<JCTree>();
+        }
+        @after {
+            $list = buf.toList();
+        }
+    :   annotationMethodDeclaration
+            {
+                buf.append($annotationMethodDeclaration.tree);
+            }
+    |   interfaceFieldDeclaration
+            {
+                buf.appendList($interfaceFieldDeclaration.list);
+            }
+    |   normalClassDeclaration
+            {
+                buf.append($normalClassDeclaration.tree);
+            }
+    |   normalInterfaceDeclaration
+            {
+                buf.append($normalInterfaceDeclaration.tree);
+            }
+    |   enumDeclaration
+            {
+                buf.append($enumDeclaration.tree);
+            }
+    |   annotationTypeDeclaration
+            {
+                buf.append($annotationTypeDeclaration.tree);
+            }
+    |   ';'
+            {
+                buf.append(T.at(Position.NOPOS).Block(0, com.sun.tools.javac.util.List.<JCStatement> nil()));
+            }
+    ;
+
+annotationMethodDeclaration returns [JCTree tree]
+        @init {
+            com.sun.tools.javac.util.List<JCVariableDecl> params = com.sun.tools.javac.util.List.nil();
+            com.sun.tools.javac.util.List<JCTypeParameter> typarams = com.sun.tools.javac.util.List.nil();
+            com.sun.tools.javac.util.List<JCExpression> thrown = com.sun.tools.javac.util.List.nil();
+            String dc = ((AntlrJavacToken) $start).docComment;
+            JCModifiers mods = null;
+            JCExpression type = null;
+            Name name = null;
+            JCExpression defaultValue = null;
+            int pos = 0;
+        }
+        @after {
+            $tree = T.at(pos).MethodDef(mods, name, type, typarams, params, thrown, null, defaultValue);
+            pu.storeEnd($tree, $stop);
+            pu.attach($tree,dc);
+        }
+    :   modifiers type IDENTIFIER
+            {
+                mods = $modifiers.tree;
+                type = $type.tree;
+                name = ((AntlrJavacToken) $IDENTIFIER).name;
+                pos = ((AntlrJavacToken) $IDENTIFIER).getStartIndex();
+            }
+        '(' ')' ('default' elementValue
+                {
+                    defaultValue = $elementValue.tree;
+                }
+            )?
+        ';'
+        ;
+
+block returns [JCBlock tree]
+        @init {
+            ListBuffer<JCStatement> stats = new ListBuffer<JCStatement>();
+            int pos = 0;
+        }
+        @after {
+            $tree = T.at(pos).Block(0, stats.toList());
+            pu.storeEnd($tree, $stop);
+        }
+    :   lbr='{'
+            {
+                pos = ((AntlrJavacToken) $lbr).getStartIndex();
+            }
+        (bl=blockStatement
+            {
+                if ($bl.tree == null) {
+                    stats.appendList($bl.list);
+                } else {
+                    stats.append($bl.tree);
+                }
+            }
+        )*
+        '}'
+    ;
+
+staticBlock returns [JCBlock tree]
+        @init {
+            ListBuffer<JCStatement> stats = new ListBuffer<JCStatement>();
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+        @after {
+            $tree = T.at(pos).Block(Flags.STATIC, stats.toList());
+            pu.storeEnd($tree, $stop);
+            // construct a dummy static modifiers for end position
+            pu.storeEnd(T.at(pos).Modifiers(Flags.STATIC,  com.sun.tools.javac.util.List.<JCAnnotation>nil()),$st);
+        }
+    :   st='static' '{' (blockStatement
+            {
+                if ($blockStatement.tree == null) {
+                    stats.appendList($blockStatement.list);
+                } else {
+                    stats.append($blockStatement.tree);
+                }
+            }
+        )* '}'
+    ;
+
+/*
+ * this could return a list or a tree, caller has to test null and use properly.
+ */
+blockStatement returns [JCStatement tree, com.sun.tools.javac.util.List<JCStatement> list]
+        @init {
+            $tree = null;
+            $list = null;
+        }
+    :   (localVariableHeader)=>localVariableDeclarationStatement
+            {
+                $list = $localVariableDeclarationStatement.list;
+            }
+    |   (typeHeader)=>classOrInterfaceDeclaration
+            {
+                $tree = $classOrInterfaceDeclaration.tree;
+            }
+    |   statement
+            {   
+                $tree = $statement.tree;
+            }
+    ;
+
+
+localVariableDeclarationStatement returns [com.sun.tools.javac.util.List<JCStatement> list]
+        @after {
+            if ($list.isEmpty() == false) {
+                pu.storeEnd($list.last(), $stop); // position is the separator position
+            }
+        }
+    :   localVariableDeclaration
+            {
+                $list = $localVariableDeclaration.list;
+            }
+        ';'
+    ;
+
+localVariableDeclaration returns [com.sun.tools.javac.util.List<JCStatement> list]
+        @init {
+            ListBuffer<JCStatement> listBuffer = new ListBuffer<JCStatement>();
+            JCModifiers mods = null;
+            JCExpression type = null;
+            Name name = null;
+            JCExpression init = null;
+            JCTree ptree = null;
+        }
+        @after {
+            $list = listBuffer.toList();
+            if (ptree != null) {
+                pu.storeEnd(ptree, $stop);
+            }
+        }
+    :   variableModifiers type
+            {
+                mods = $variableModifiers.tree;
+                type = $type.tree;
+            }
+        va1=variableDeclarator
+            {
+                JCExpression ntype = pu.makeTypeArray(type,$va1.i, $va1.dimPosition, $va1.endPosition);
+                JCStatement ntype1 = T.at($va1.pos).VarDef(mods, $va1.name, ntype, $va1.tree);
+                //pu.storeEnd(ntype1, $va1.stop);
+                ptree = ntype1;
+                listBuffer.append(ntype1);
+            }
+        (cm=',' va2=variableDeclarator
+            {
+                JCExpression ntype = pu.makeTypeArray(type,$va2.i, $va2.dimPosition, $va2.endPosition);
+                JCStatement ntype1 = T.at($va2.pos).VarDef(mods, $va2.name, ntype, $va2.tree);
+                pu.storeEnd(ptree, $cm);
+                ptree = ntype1;
+                listBuffer.append(ntype1);
+            }
+        )*
+    ;
+
+statement returns [JCStatement tree]
+        @init {
+            boolean flag = false;
+        }
+    :   bl=block 
+            {
+                $tree = $bl.tree;
+            }
+            
+    |   (    ass='assert' 
+        |    {source.allowAsserts()==false&&input.LT(1).getText().equals("assert")}?=> asid=IDENTIFIER
+                 {
+                    checkAssert($asid);
+                 }
+        )
+        as1=expression (':' as2=expression)? sm1=';'
+            {
+                int aspos;
+                if($ass!=null){
+                    aspos = ((AntlrJavacToken) $ass).getStartIndex();
+                }else{
+                    aspos = ((AntlrJavacToken) $asid).getStartIndex();
+                }
+                
+                $tree = T.at(aspos).Assert($as1.tree, $as2.tree);
+                pu.storeEnd($tree, $sm1);
+            }
+            
+    |   ift='if' cond=parExpression thenpart=statement (options {k=1;}: ('else')=> 'else' elsepart=statement)?
+            {
+                $tree = T.at(((AntlrJavacToken) $ift).getStartIndex()).If($cond.tree, $thenpart.tree, $elsepart.tree);
+            }
+    |   fo=forstatement
+            {
+                $tree = $fo.tree;
+            }
+    |   whl='while' pe=parExpression ws=statement
+            {
+                JCExpression cond1 = $pe.tree;
+                JCStatement body1 = $ws.tree;
+                $tree = T.at(((AntlrJavacToken) $whl).getStartIndex()).WhileLoop(cond1, body1);
+            }
+    |   doo='do' ds=statement 'while' de=parExpression sm2=';'
+            {
+                JCStatement body2 = $ds.tree;
+                JCExpression cond2 = $de.tree;
+                $tree = T.at(((AntlrJavacToken) $doo).getStartIndex()).DoLoop(body2, cond2);
+                pu.storeEnd($tree, $sm2);
+            }
+    |   tr=trystatement
+            {
+                $tree = $tr.tree;
+            }
+    |   swi='switch' sp=parExpression '{' sg=switchBlockStatementGroups rbr1='}'
+            {
+                JCExpression selector = $sp.tree;
+                com.sun.tools.javac.util.List<JCCase> cases = $sg.list;
+                $tree = T.at(((AntlrJavacToken) $swi).getStartIndex()).Switch(selector, cases);
+                pu.storeEnd($tree, $rbr1);
+            }
+    |   syn='synchronized' sp=parExpression sb=block
+            {
+                JCExpression lock = $sp.tree;
+                JCBlock body = $sb.tree;
+                $tree = T.at(((AntlrJavacToken) $syn).getStartIndex()).Synchronized(lock, body);
+            }
+    |   rtn='return' (rex=expression {flag=true;})? sm5=';'
+            {
+                JCExpression result = null;
+                if (flag == true) {
+                    result = $rex.tree;
+                }
+                $tree = T.at(((AntlrJavacToken) $rtn).getStartIndex()).Return(result);
+                pu.storeEnd($tree, $sm5);
+            }
+    |   thw='throw' te=expression smw=';'
+            {
+                JCExpression exc = $te.tree;
+                $tree = T.at(((AntlrJavacToken) $thw).getStartIndex()).Throw(exc);
+                pu.storeEnd($tree, $smw);
+            }
+    |   brk='break'
+            (id2=IDENTIFIER
+                {
+                    flag = true;
+                }
+            )? sm7=';'
+                {
+                    Name label = null;
+                    if (flag == true) {
+                        label = ((AntlrJavacToken) $id2).name;
+                    }
+                    $tree = T.at(((AntlrJavacToken) $brk).getStartIndex()).Break(label);
+                    pu.storeEnd($tree, $sm7);
+                }
+    |   cnt='continue'
+            (id3=IDENTIFIER
+                {
+                    flag = true;
+                }
+            )? sm8=';'
+                {
+                    Name label = null;
+                    if (flag == true) {
+                        label = ((AntlrJavacToken) $id3).name;
+                    }
+                    $tree = T.at(((AntlrJavacToken) $cnt).getStartIndex()).Continue(label);
+                    pu.storeEnd($tree, $sm8);
+                }
+    |   ex3=expression  sm3=';'     // was statementExpression,
+            {  
+                $tree = T.at(((AntlrJavacToken) $ex3.start).getStartIndex()).Exec(pu.checkExprStat($ex3.tree));
+                pu.storeEnd($tree, $sm3);
+            }
+    |   id4=IDENTIFIER ':' st4=statement
+            {   
+                Name name = ((AntlrJavacToken) $id4).name;
+                JCStatement stat = $st4.tree;
+                $tree = T.at(((AntlrJavacToken) $id4).getStartIndex()).Labelled(name, stat);
+                //NOTE: error in jc parser,
+                pu.storeEnd(T.Ident(((AntlrJavacToken) $id4).name),$id4);
+            }
+    |   smi=';'
+            {
+                $tree = T.at(((AntlrJavacToken) $smi).getStartIndex()).Skip();
+                pu.storeEnd($tree, $smi);
+            }
+
+    ;
+
+switchBlockStatementGroups returns [com.sun.tools.javac.util.List<JCCase> list]
+        @init {
+            com.sun.tools.javac.util.ListBuffer<JCCase> buf = new com.sun.tools.javac.util.ListBuffer<JCCase>();
+        }
+        @after {
+            $list = buf.toList();
+        }
+    :   (switchBlockStatementGroup {buf.append($switchBlockStatementGroup.tree);})*
+    ;
+
+switchBlockStatementGroup returns [JCCase tree]
+        @init {
+            com.sun.tools.javac.util.ListBuffer<JCStatement> stmts = new com.sun.tools.javac.util.ListBuffer<JCStatement>();
+            JCExpression pat = null;
+            int pos = 0;
+        }
+        @after {
+            $tree = T.at(pos).Case(pat, stmts.toList());
+            if (stmts.isEmpty()) {
+                pu.storeEnd($tree, $stop);
+            }
+        }
+    :
+        switchLabel
+            {
+                pat = $switchLabel.tree;
+                pos = ((AntlrJavacToken) $switchLabel.start).getStartIndex();
+            }
+        (blockStatement
+            {
+                if ($blockStatement.tree != null) {
+                    stmts.append($blockStatement.tree);
+                } else {
+                    stmts.appendList($blockStatement.list);
+                }
+            }
+        )*
+    ;
+
+switchLabel returns [JCExpression tree]
+    :   'case' expression ':'
+            {
+                $tree = $expression.tree;
+            }
+    |   'default' ':'
+            {
+                $tree = null;
+            }
+    ;
+
+
+trystatement returns [JCStatement tree]
+        @init {
+            com.sun.tools.javac.util.List<JCCatch> catchers = com.sun.tools.javac.util.List.nil();
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+            JCBlock body = null;
+            JCBlock finalizer = null;
+        }
+        @after {
+            $tree = T.at(pos).Try(body, catchers, finalizer);
+        }
+    :   'try' bl=block
+            {
+                body = $bl.tree;
+            }
+        (   ca1=catches 'finally' bl2=block
+                {
+                    catchers = $ca1.list;
+                    finalizer = $bl2.tree;
+                }
+        |   ca2=catches
+                {
+                    catchers = $ca2.list;
+                }
+        |   'finally' bl3=block
+                {
+                    finalizer = $bl3.tree;
+                }
+        )
+     ;
+
+catches returns [com.sun.tools.javac.util.List<JCCatch> list]
+        @init {
+            com.sun.tools.javac.util.ListBuffer<JCCatch> buf = new com.sun.tools.javac.util.ListBuffer<JCCatch>();
+        }
+        @after {
+            $list = buf.toList();
+        }
+    :   ca1=catchClause
+            {
+                buf.append($ca1.tree);
+            }
+        (ca2=catchClause
+            {
+                buf.append($ca2.tree);
+            }
+        )*
+    ;
+
+catchClause returns [JCCatch tree]
+        @init {
+             JCVariableDecl formal = null;
+             JCBlock body = null;
+             int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+        @after {
+            $tree = T.at(pos).Catch(formal, body);
+        }
+    :   'catch' '(' formalParameter
+            {
+                formal = $formalParameter.tree;
+            }
+        ')' block {body = $block.tree;}
+    ;
+
+formalParameter returns [JCVariableDecl tree]
+        @init {
+            JCModifiers mods = null;
+            JCExpression type = null;
+            Name name = null;
+            ArrayList<Integer> poss = new ArrayList<Integer>();
+            ArrayList<Integer> eposs = new ArrayList<Integer>();
+            int pos = 0;
+        }
+        @after {
+            for (ti = poss.size() - 1; ti >= 0; ti--) {
+                type = T.at(poss.get(ti)).TypeArray(type);
+                pu.storeEnd(type, eposs.get(eposs.size() - 1) + 1);
+            }
+            mods.flags = mods.flags | Flags.PARAMETER;
+            $tree = T.at(pos).VarDef(mods, name, type, null);
+            pu.storeEnd($tree, $stop);
+        }
+    :   variableModifiers type IDENTIFIER
+            {
+                mods = $variableModifiers.tree;
+                type = $type.tree;
+                name = ((AntlrJavacToken) $IDENTIFIER).name;
+                pos = ((AntlrJavacToken) $IDENTIFIER).getStartIndex();
+            }
+        (lbr='[' rbr=']'
+            {
+                poss.add(((AntlrJavacToken) $lbr).getStartIndex());
+                eposs.add(((AntlrJavacToken) $rbr).getStartIndex());
+            }
+        )*
+    ;
+
+forstatement returns [JCStatement tree]
+        @init {
+            boolean hasInit = false, hasUpdate = false, hasCond = false;
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+    :   
+        // enhanced for loop
+        'for' '(' variableModifiers type IDENTIFIER cole=':' 
+            {
+                checkForeach($cole);
+            } 
+        ex1=expression ')' st1=statement
+            {
+                JCVariableDecl var = T.at(((AntlrJavacToken) $IDENTIFIER).getStartIndex()).VarDef($variableModifiers.tree, ((AntlrJavacToken) $IDENTIFIER).name, $type.tree, null);
+                pu.storeEnd(var, $IDENTIFIER);
+                JCExpression expr = $ex1.tree;
+                JCStatement body = $st1.tree;
+                $tree = T.at(pos).ForeachLoop(var, expr, body);
+            }
+            
+        // normal for loop
+    |   'for' '(' (forInit
+                    {
+                        hasInit = true;
+                    }
+                )? ';' (ex2=expression
+                    {
+                        hasCond = true;
+                    }
+                )? ';' (expressionList
+                    {
+                        hasUpdate = true;
+                    }
+                )? ')' st2=statement
+            {
+                JCExpression cond = null;
+                if (hasCond == true) {
+                    cond = $ex2.tree;
+                }
+                com.sun.tools.javac.util.List<JCStatement> inits;
+                if (hasInit == false) {
+                    inits = com.sun.tools.javac.util.List.nil();
+                } else {
+                    inits = $forInit.list;
+                }
+                com.sun.tools.javac.util.List<JCExpressionStatement> steps;
+                if (hasUpdate == false) {
+                    steps = com.sun.tools.javac.util.List.nil();
+                } else {
+                    steps = pu.toExprStatementList($expressionList.list, $expressionList.endPos);
+                }
+                JCStatement body = $st2.tree;
+                $tree = T.at(pos).ForLoop(inits, cond, steps, body);
+            }
+    ;
+
+forInit returns [com.sun.tools.javac.util.List<JCStatement> list]
+    :   localVariableDeclaration
+            {
+                $list = $localVariableDeclaration.list;
+            }
+    |   expressionList
+            {
+                $list = pu.toStatementList($expressionList.list, $expressionList.endPos);
+            }
+    ;
+
+parExpression returns [JCExpression tree]
+    :   lbr='(' expression rbr=')'
+            {
+                $tree = T.at(((AntlrJavacToken) $lbr).getStartIndex()).Parens($expression.tree);
+                pu.storeEnd($tree, $rbr);
+            }
+    ;
+
+expressionList returns [com.sun.tools.javac.util.List<JCExpression> list, java.util.ArrayList endPos]
+        @init {
+            ListBuffer<JCExpression> buf = new ListBuffer<JCExpression>();
+            $endPos = new ArrayList();
+        }
+        @after {
+            $list = buf.toList();
+        }
+    :   ex1=expression
+            {
+                buf.append($ex1.tree);
+                $endPos.add(new Integer(((AntlrJavacToken) $ex1.stop).getStopIndex()));
+            }
+        (',' ex2=expression
+            {
+            buf.append($ex2.tree);
+            $endPos.add(new Integer(((AntlrJavacToken) $ex2.stop).getStopIndex()));
+            }
+        )*
+    ;
+
+
+expression returns [JCExpression tree]
+        @init {
+            JCExpression expr = null, val = null;
+            int opcode = 0;
+            boolean flag = false;
+            int pos = 0;
+        }
+        @after {
+            if (val == null) {
+                $tree = expr;
+            } else {
+                if (opcode == -1) {
+                    $tree = T.at(pos).Assign(expr, val);
+                    pu.storeEnd($tree, $stop);
+                } else {
+                    $tree = T.at(pos).Assignop(opcode, expr, val);
+                }
+            }
+        }
+    :   conditionalExpression
+            {
+                expr = $conditionalExpression.tree;
+            }
+        (assignmentOperator ex=expression
+            {
+                opcode = $assignmentOperator.i;
+                pos = ((AntlrJavacToken) $assignmentOperator.start).getStartIndex();
+                val = $ex.tree;
+            }
+        )?
+    ;
+
+
+assignmentOperator returns [int i]
+    :   '='
+            {
+                $i = -1;
+            }
+    |   '+='
+            {
+                $i = JCTree.PLUS_ASG;
+            }
+    |   '-='
+            {
+                $i = JCTree.MINUS_ASG;
+            }
+    |   '*='
+            {
+                $i = JCTree.MUL_ASG;
+            }
+    |   '/='
+            {
+                $i = JCTree.DIV_ASG;
+            }
+    |   '&='
+            {
+                $i = JCTree.BITAND_ASG;
+            }
+    |   '|='
+            {
+                $i = JCTree.BITOR_ASG;
+            }
+    |   '^='
+            {
+                $i = JCTree.BITXOR_ASG;
+            }
+    |   '%='
+            {
+                $i = JCTree.MOD_ASG;
+            }
+    |   ('<' '<' '=')=> t1='<' t2='<' t3='='
+            {
+                if (pu.verifyPosition($t1, $t2, $t3) == true) {
+                    $i = JCTree.SL_ASG;
+                } else {
+                    log.error(((AntlrJavacToken)$t1).getStartIndex(), "not.stmt");
+                }
+            }
+    |   ('>' '>' '>' '=')=> t1='>' t2='>' t3='>' t4='='
+            {
+                if (pu.verifyPosition($t1, $t2, $t3, $t4) == true) {
+                    $i = JCTree.USR_ASG;
+                } else {
+                    log.error(((AntlrJavacToken)$t1).getStartIndex(), "not.stmt");
+                }
+            }
+    |   ('>' '>' '=')=> t1='>' t2='>' t3='='
+            {
+                if (pu.verifyPosition($t1, $t2, $t3) == true) {
+                    $i = JCTree.SR_ASG;
+                } else {
+                    log.error(((AntlrJavacToken)$t1).getStartIndex(), "not.stmt");
+                }
+            }
+    ;
+
+conditionalExpression returns [JCExpression tree]
+        @init {
+            JCExpression t=null, t1=null, t2=null;
+            int pos = 0;
+        }
+        @after {
+            if (t1 == null) {
+                $tree = t;
+            } else {
+                $tree = T.at(pos).Conditional(t, t1, t2);
+            }
+        }
+    :   con=conditionalOrExpression
+            {
+                t=$con.tree;
+            }
+        (que='?' expression ':' ex2=conditionalExpression
+            {
+                t1 = $expression.tree;
+                pos = ((AntlrJavacToken) $que).getStartIndex();
+                t2=$ex2.tree;
+            }
+        )?
+    ;
+
+conditionalOrExpression returns [JCExpression tree]
+        @init {
+            JCExpression lhs=null, rhs=null;
+        }
+        @after {
+            $tree = lhs;
+        }
+    :   co1=conditionalAndExpression
+            {
+                lhs=$co1.tree;
+            }
+        (opr='||' co2=conditionalAndExpression
+            {
+                rhs=$co2.tree;
+                lhs=T.at(((AntlrJavacToken) $opr).getStartIndex()).Binary(JCTree.OR, lhs, rhs);
+            }
+        )*
+    ;
+
+conditionalAndExpression returns [JCExpression tree]
+        @init {
+            JCExpression lhs=null, rhs=null;
+        }
+        @after {
+            $tree = lhs;
+        }
+    :   in1=inclusiveOrExpression
+            {
+                lhs=$in1.tree;
+            }
+        (opr='&&' in2=inclusiveOrExpression
+            {
+                rhs=$in2.tree;
+                lhs=T.at(((AntlrJavacToken) $opr).getStartIndex()).Binary(JCTree.AND, lhs, rhs);
+            }
+        )*
+    ;
+
+inclusiveOrExpression returns [JCExpression tree]
+        @init {
+            JCExpression lhs=null, rhs=null;
+        }
+        @after {
+            $tree = lhs;
+        }
+    :   ex1=exclusiveOrExpression
+            {
+                lhs = $ex1.tree;
+            }
+        (opr='|' ex2=exclusiveOrExpression
+            {
+                rhs = $ex2.tree;
+                lhs = T.at(((AntlrJavacToken) $opr).getStartIndex()).Binary(JCTree.BITOR, lhs, rhs);
+            }
+        )*
+    ;
+
+exclusiveOrExpression returns [JCExpression tree]
+        @init {
+            JCExpression lhs=null, rhs=null;
+        }
+        @after {
+            $tree = lhs;
+        }
+    :   an1=andExpression
+            {
+                lhs = $an1.tree;
+            }
+        (opr='^' an2=andExpression
+            {
+                rhs = $an2.tree;
+                lhs = T.at(((AntlrJavacToken) $opr).getStartIndex()).Binary(JCTree.BITXOR, lhs, rhs);
+            }
+        )*
+    ;
+
+andExpression returns [JCExpression tree]
+        @init {
+            JCExpression lhs=null, rhs=null;
+        }
+        @after {
+            $tree = lhs;
+        }
+    :   eq1=equalityExpression
+            {
+                lhs = $eq1.tree;
+            }
+        (opr='&' eq2=equalityExpression
+            {
+                rhs = $eq2.tree;
+                lhs = T.at(((AntlrJavacToken) $opr).getStartIndex()).Binary(JCTree.BITAND, lhs, rhs);
+            }
+        )*
+    ;
+
+equalityExpression returns [JCExpression tree]
+        @init {
+            JCExpression lhs=null, rhs=null;
+            com.sun.tools.javac.parser.Token token=null;
+            int opcode=0;
+            int pos = 0;
+        }
+        @after {
+            $tree = lhs;
+        }
+    :   in1=instanceOfExpression
+            {
+                lhs=$in1.tree;
+            }
+        (   
+            (   eqeq='=='
+                {
+                    opcode=JCTree.EQ;
+                    pos = ((AntlrJavacToken) $eqeq).getStartIndex();
+                }
+            |   beq='!='
+                {
+                    opcode=JCTree.NE;
+                    pos = ((AntlrJavacToken) $beq).getStartIndex();
+                }
+            )
+            in2=instanceOfExpression
+                {
+                    rhs=$in2.tree;
+                    lhs=T.at(pos).Binary(opcode, lhs, rhs);
+                }
+        )*
+    ;
+
+instanceOfExpression returns [JCExpression tree]
+        @init {
+            JCExpression lhs=null, rhs=null;
+        }
+        @after {
+            $tree = lhs;
+        }
+    :   rex=relationalExpression
+            {
+                lhs = $rex.tree;
+            }
+        (opr='instanceof' ty=type
+            {
+                rhs = $ty.tree;
+                lhs = T.at(((AntlrJavacToken) $opr).getStartIndex()).TypeTest(lhs, rhs);
+            }
+        )?
+    ;
+
+relationalExpression returns [JCExpression tree]
+        @init {
+            JCExpression lhs=null, rhs=null;
+            int opcode = 0;
+        }
+        @after {
+            $tree = lhs;
+        }
+    :   sh1=shiftExpression
+            {
+                lhs=$sh1.tree;
+            }
+        (op=relationalOp sh2=shiftExpression
+            {
+                opcode = $op.i;
+                rhs = $sh2.tree;
+                lhs = T.at(((AntlrJavacToken) $op.start).getStartIndex()).Binary(opcode, lhs, rhs);
+            }
+        )*
+    ;
+
+relationalOp returns [int i]
+    :   ('<' '=')=> t1='<' t2='='
+            {
+                if (pu.verifyPosition($t1, $t2) == true) {
+                    $i = JCTree.LE;
+                } else {
+                    log.error(((AntlrJavacToken)$t1).getStartIndex(), "not.stmt");
+                }
+            }
+    |   ('>' '=')=> t1='>' t2='='
+            {
+                if (pu.verifyPosition($t1, $t2) == true) {
+                    $i = JCTree.GE;
+                } else {
+                    log.error(((AntlrJavacToken)$t1).getStartIndex(), "not.stmt");
+                }
+            }
+
+    |   '<'
+            {
+                $i = JCTree.LT;
+            }
+    |   '>'
+            {
+                $i = JCTree.GT;
+            }
+    ;
+
+shiftExpression returns [JCExpression tree]
+        @init {
+            JCExpression lhs = null, rhs = null;
+            com.sun.tools.javac.parser.Token token = null;
+            int opcode = 0;
+        }
+        @after {
+            $tree = lhs;
+        }
+    :   ad1=additiveExpression
+            {
+                lhs = $ad1.tree;
+            }
+        (st=shiftOp ad2=additiveExpression
+            {
+                opcode = $st.i;
+                rhs = $ad2.tree;
+                lhs = T.at(((AntlrJavacToken) $st.start).getStartIndex()).Binary(opcode, lhs, rhs);
+            }
+        )*
+    ;
+
+
+shiftOp returns [int i]
+    :   ('<' '<')=> t1='<' t2='<'
+            {
+                if (pu.verifyPosition($t1, $t2) == true) {
+                    $i = JCTree.SL;
+                } else {
+                    log.error(((AntlrJavacToken)$t1).getStartIndex(), "not.stmt");
+                }
+            }
+    |   ('>' '>' '>')=> t1='>' t2='>' t3='>'
+            {
+                if (pu.verifyPosition($t1, $t2, $t3) == true) {
+                    $i = JCTree.USR;
+                } else {
+                    log.error(((AntlrJavacToken)$t1).getStartIndex(), "not.stmt");
+                }
+            }
+    |   ('>' '>')=> t1='>' t2='>'
+            {
+                if (pu.verifyPosition($t1, $t2) == true) {
+                    $i = JCTree.SR;
+                } else {
+                    log.error(((AntlrJavacToken)$t1).getStartIndex(), "not.stmt");
+                }
+            }
+    ;
+
+
+additiveExpression returns [JCExpression tree]
+        @init {
+            StringBuffer buf = new StringBuffer();
+            JCExpression lhs=null, rhs=null;
+            boolean folding = true;
+            int opcode = 0;
+            int count = 1;
+            int pos = 0;
+        }
+        @after {
+            if (folding == false || count == 1) {
+                $tree = lhs;
+            } else {
+                $tree = T.at(pos).Literal(TypeTags.CLASS, buf.toString());
+                pu.storeEnd($tree, $stop);
+            }
+        }
+    :   ml1=multiplicativeExpression
+             {
+                 lhs = $ml1.tree;
+                 if (lhs.getKind() != com.sun.source.tree.Tree.Kind.STRING_LITERAL) {
+                     folding = false; buf = null;
+                 } else {
+                     buf.append(((JCLiteral)lhs).value.toString());
+                 }
+             }
+        (   
+            (   plu='+'
+                    {
+                        opcode = JCTree.PLUS;
+                        pos = ((AntlrJavacToken) $plu).getStartIndex();
+                    }
+            |   min='-'
+                    {
+                        opcode = JCTree.MINUS;
+                        pos = ((AntlrJavacToken) $min).getStartIndex();
+                    }
+            )
+            ml2=multiplicativeExpression
+                {
+                    rhs = $ml2.tree;
+                    lhs = T.at(pos).Binary(opcode, lhs, rhs);
+                    if (folding == true && opcode == JCTree.PLUS && rhs.getKind() == com.sun.source.tree.Tree.Kind.STRING_LITERAL) {
+                        buf.append(((JCLiteral)rhs).value.toString());
+                    } else {
+                        folding = false;
+                        buf = null;
+                    }
+                    count++;
+                }
+         )*
+    ;
+
+multiplicativeExpression returns [JCExpression tree]
+        @init {
+            JCExpression lhs=null, rhs=null;
+            int opcode = 0;
+            int pos = 0;
+        }
+        @after {
+            $tree = lhs;
+        }
+    :
+        un1=unaryExpression
+            {
+                lhs = $un1.tree;
+            }
+        (   
+            (   opr1='*'
+                    {
+                        opcode = JCTree.MUL;
+                        pos = ((AntlrJavacToken) $opr1).getStartIndex();
+                    }
+            |   opr2='/'
+                    {
+                        opcode = JCTree.DIV;
+                        pos = ((AntlrJavacToken) $opr2).getStartIndex();
+                    }
+            |   opr3='%'
+                    {
+                        opcode = JCTree.MOD;
+                        pos = ((AntlrJavacToken) $opr3).getStartIndex();
+                    }
+            )
+            un2=unaryExpression
+                {
+                    rhs = $un2.tree;
+                    lhs = T.at(pos).Binary(opcode, lhs, rhs);
+                }
+        )*
+    ;
+
+/**
+ * NOTE: for '+' and '-', if the next token is int or long interal, then it's not a unary expression.
+ *       it's a literal with signed value. INTLTERAL AND LONG LITERAL are added here for this.
+ */
+unaryExpression returns [JCExpression tree]
+        @init {
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+    :   '+'  un1=unaryExpression
+            {
+                $tree = T.at(pos).Unary(JCTree.POS, $un1.tree);
+            }
+    |   '-' INTLITERAL
+            {
+                $tree = pu.parseMinusInt($INTLITERAL, pos);
+            }
+    |   '-' LONGLITERAL
+            {
+                $tree = pu.parseMinusInt($LONGLITERAL, pos);
+            }
+    |   '-' un2=unaryExpression
+            {
+                $tree = T.at(pos).Unary(JCTree.NEG, $un2.tree);
+            }
+    |   '++' un3=unaryExpression
+            {
+                $tree = T.at(pos).Unary(JCTree.PREINC, $un3.tree);
+            }
+    |   '--' un4=unaryExpression
+            {
+                $tree = T.at(pos).Unary(JCTree.PREDEC, $un4.tree);
+            }
+    |   unaryExpressionNotPlusMinus
+            {
+                $tree=$unaryExpressionNotPlusMinus.tree;
+            }
+    ;
+
+unaryExpressionNotPlusMinus returns [JCExpression tree]
+        @init {
+            JCExpression expr = null;
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+        @after {
+            $tree = expr;
+        }
+    :   '~' un1=unaryExpression
+            {
+                expr = T.at(pos).Unary(JCTree.COMPL, $un1.tree);
+            }
+    |   '!' un2=unaryExpression
+            {
+                expr = T.at(pos).Unary(JCTree.NOT, $un2.tree);
+            }
+    |   ca=castExpression
+            {
+                expr=$ca.tree;
+            }
+    |   pr=primary
+            {
+                expr=$pr.tree;
+            }
+        (se=selector[expr]
+            {
+                expr=$se.tree;
+            }
+        )*
+        (   pp='++'
+                {
+                    expr = T.at(((AntlrJavacToken) $pp).getStartIndex()).Unary(JCTree.POSTINC,expr);
+                    pu.storeEnd(expr, $pp);
+                }
+        |   mm='--'
+                {
+                    expr = T.at(((AntlrJavacToken) $mm).getStartIndex()).Unary(JCTree.POSTDEC,expr);
+                    pu.storeEnd(expr, $mm);
+                }
+        )?
+    ;
+
+castExpression returns [JCExpression tree]
+        @init {
+            JCExpression clazz = null, expr=null;
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+        @after {
+            $tree = T.at(pos).TypeCast(clazz, expr);
+        }
+    :   '(' primitiveType ')' unaryExpression
+            {
+                clazz=$primitiveType.tree; expr=$unaryExpression.tree;
+            }
+    |   '(' type ')' unaryExpressionNotPlusMinus
+            {
+                clazz=$type.tree;
+                expr=$unaryExpressionNotPlusMinus.tree;
+            }
+    ;
+
+/**
+ * have to use scope here, parameter passing isn't well supported in antlr.
+ */
+primary returns [JCExpression tree]
+        scope {
+            JCExpression prim;
+        }
+        @init {
+            JCExpression expr = null;
+            ArrayList<Integer> poss = null;
+            ArrayList<Integer> eposs = null;
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+        @after {
+            $tree = expr;
+
+        }
+    :   par=parExpression            {expr = $par.tree; }
+    |   thi1='this'
+            {
+                expr = T.at(pos).Ident(names._this);
+                pu.storeEnd(expr, $thi1);
+                $primary::prim = expr;
+                // check "this.class
+                if (input.LA(2) == CLASS && input.LA(1) == DOT) {
+                    log.error(pos, "expected", "identifier");
+                }
+            }
+        (dt1='.' id1=IDENTIFIER
+            {
+                expr = T.at(((AntlrJavacToken) $dt1).getStartIndex()).Select(expr, ((AntlrJavacToken)id1).name);
+                pu.storeEnd(expr, $id1);
+                $primary::prim = expr;
+            }
+        )*
+        (id2=identifierSuffix
+            {
+                expr = $id2.tree;
+            }
+        )?
+    |   id5=IDENTIFIER
+            {
+                expr = T.at(pos).Ident(((AntlrJavacToken) id5).name);
+                pu.storeEnd(expr, $id5);
+                $primary::prim = expr;
+            }
+        (dt2='.' id6=IDENTIFIER
+            {
+                expr = T.at(((AntlrJavacToken) $dt2).getStartIndex()).Select(expr, ((AntlrJavacToken)id6).name);
+                pu.storeEnd(expr, $id6);
+                $primary::prim=expr;
+            }
+        )*
+        (id7=identifierSuffix
+            {
+                expr=$id7.tree;
+            }
+        )?
+    |   sup1='super'
+            {
+                expr = T.at(pos).Ident(names._super);
+            }
+        su=superSuffix[expr]
+            {
+                expr=$su.tree;
+            }
+    |   li=literal
+            {
+                expr=$li.tree;
+            }
+    |   cr=creator
+            {
+                expr=$cr.tree;
+            }
+    |   pr=primitiveType
+            {
+                expr=$pr.tree;
+                poss=new ArrayList<Integer>();
+                eposs=new ArrayList<Integer>();
+            }
+        (lbr='[' rbr=']'
+            {
+                poss.add(((AntlrJavacToken) $lbr).getStartIndex());
+                eposs.add(((AntlrJavacToken) $rbr).getStartIndex());
+            }
+        )*
+        {
+            for (ti = poss.size() - 1; ti >= 0; ti--) {
+                expr = T.at(poss.get(ti)).TypeArray(expr);
+                pu.storeEnd(expr, eposs.get(eposs.size() - 1) + 1);
+            }
+        }
+        dt3='.' cla='class'
+            {
+                expr = T.at(((AntlrJavacToken) $dt3).getStartIndex()).Select(expr, names._class);
+                pu.storeEnd(expr, $cla);
+            }
+    |   vod='void' dt4='.' cla2='class'
+            {
+                expr = T.at(pos).TypeIdent(TypeTags.VOID);
+                pu.storeEnd(expr, $vod);
+                expr = T.at(((AntlrJavacToken) $dt4).getStartIndex()).Select(expr, names._class);
+                pu.storeEnd(expr, $cla2);
+            }
+    ;
+
+
+superSuffix [JCExpression p] returns [JCExpression tree]
+        @init {
+            JCExpression expr = $p;
+            com.sun.tools.javac.util.List<JCExpression> typeArgs = com.sun.tools.javac.util.List.nil();
+            com.sun.tools.javac.util.List<JCExpression> args = null;
+            Name name = null;
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+            int pos1 = 0;
+        }
+        @after {
+            $tree = expr;
+        }
+    :   ag1=arguments
+            {
+                expr = T.at(pos).Apply(typeArgs, expr, $ag1.list);
+                pu.storeEnd(expr, $ag1.stop);
+            }
+    |   '.' (ty=typeArguments
+            {
+                typeArgs = $ty.list;
+            }
+        )?
+        IDENTIFIER
+            {
+                name  =((AntlrJavacToken) $IDENTIFIER).name;
+            }
+        (ag2=arguments
+            {
+                args = $ag2.list;
+                pos1 = ((AntlrJavacToken) $ag2.start).getStartIndex();
+            }
+        )?
+            {
+                expr = T.at(pos).Select(expr, name);
+                pu.storeEnd(expr, $IDENTIFIER);
+                if (args != null) {
+                    expr = T.at(pos1).Apply(typeArgs, expr, args);
+                    if (input.LA(1) == DOT) {
+                        pu.storeEnd(expr, input.LT(1)); // NOTE, should delete this, jc bug
+                    } else {
+                        pu.storeEnd(expr, $ag2.stop);
+                    }
+                }
+            }
+    ;
+
+identifierSuffix returns [JCExpression tree]
+        @init {
+            JCExpression expr = $primary::prim;
+            ArrayList<Integer> poss = null;
+            ArrayList<Integer> eposs = null;
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+        @after {
+            $tree = expr;
+        }
+    :   (   lbr1='[' rbr1=']'
+                {
+                    if (poss == null) {
+                        poss = new ArrayList<Integer>();
+                        eposs = new ArrayList<Integer>();
+                    }
+                    poss.add(((AntlrJavacToken) $lbr1).getStartIndex());
+                    eposs.add(((AntlrJavacToken) $rbr1).getStartIndex());
+                }
+        )+
+        dt1='.' cla1='class'
+            {
+                for (ti = poss.size() - 1; ti >= 0; ti--) {
+                    expr = T.at(poss.get(ti)).TypeArray(expr);
+                    pu.storeEnd(expr, eposs.get(eposs.size() - 1) + 1);
+                }
+                expr = T.at(((AntlrJavacToken) $dt1).getStartIndex()).Select(expr, names._class);
+                pu.storeEnd(expr, $cla1);
+            }
+    |   (lbr2='[' exp=expression rbr2=']'
+            {
+                expr = T.at(((AntlrJavacToken) $lbr2).getStartIndex()).Indexed(expr, $exp.tree);
+                pu.storeEnd(expr, $rbr2);
+            }
+        )+
+    |   ag1=arguments
+            {
+                com.sun.tools.javac.util.List<JCExpression> typeArgs = com.sun.tools.javac.util.List.nil();
+                com.sun.tools.javac.util.List<JCExpression> args = $ag1.list;
+                expr = T.at(pos).Apply(typeArgs, expr, args);
+                pu.storeEnd(expr, $ag1.stop);
+            }
+    |   '.' cla2='class'
+            {
+                expr = T.at(pos).Select(expr, names._class);
+                pu.storeEnd(expr, $cla2);
+            }
+    |   '.' nw=nonWildcardTypeArguments id=IDENTIFIER ags=arguments
+            {
+                expr = T.at(pos).Select(expr, ((AntlrJavacToken) $id).name);
+                pu.storeEnd(expr, $id);
+                com.sun.tools.javac.util.List<JCExpression> typeArgs = $nw.list;
+                com.sun.tools.javac.util.List<JCExpression> args = $ags.list;
+                expr = T.at(((AntlrJavacToken) $ags.start).getStartIndex()).Apply(typeArgs, expr, args);
+                pu.storeEnd(expr, $ags.stop);
+            }
+    |   '.' thi='this'
+            {
+                expr = T.at(pos).Select(expr, names._this);
+                pu.storeEnd(expr, $thi);
+            }
+    |   '.' sup1='super' ag2=arguments
+            {
+                expr = T.at(pos).Select(expr, names._super);
+                pu.storeEnd(expr, $sup1);
+                com.sun.tools.javac.util.List<JCExpression> typeArgs = com.sun.tools.javac.util.List.nil();
+                com.sun.tools.javac.util.List<JCExpression> args = $ag2.list;
+                expr = T.at(((AntlrJavacToken) $ag2.start).getStartIndex()).Apply(typeArgs, expr, args);
+                pu.storeEnd(expr, $ag2.stop);
+            }
+    |   in=innerCreator[expr]
+            {
+                expr = $in.tree;
+            }
+    ;
+
+selector [JCExpression p] returns [JCExpression tree]
+        @init {
+            JCExpression expr=$p;
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+        @after {
+            $tree = expr;
+        }
+    :   '.' IDENTIFIER
+            {
+                expr = T.at(pos).Select(expr, ((AntlrJavacToken) $IDENTIFIER).name);
+                pu.storeEnd(expr, $IDENTIFIER);
+            }
+        (arguments
+             {
+                com.sun.tools.javac.util.List<JCExpression> typeArgs = com.sun.tools.javac.util.List.nil();
+                com.sun.tools.javac.util.List<JCExpression> args = $arguments.list;
+                expr = T.at(((AntlrJavacToken) $arguments.start).getStartIndex()).Apply(typeArgs, expr, args);
+                pu.storeEnd(expr, $arguments.stop);
+             }
+        )?
+    |   '.' thi='this'
+            {
+                expr = T.at(pos).Select(expr, names._this);
+                pu.storeEnd(expr, $thi);
+            }
+    |   '.' sup1='super'
+            {
+                expr = T.at(pos).Select(expr, names._super);
+                pu.storeEnd(expr, $sup1);
+            }
+        su=superSuffix[expr]
+            {
+                expr = $su.tree;
+            }
+    |   innerCreator[expr]
+            {
+                expr = $innerCreator.tree;
+            }
+    |   '[' expression rb=']'
+            {
+                expr = T.at(pos).Indexed(expr, $expression.tree);
+                pu.storeEnd(expr, $rb);
+            }
+    ;
+
+creator returns [JCExpression tree]
+        @init {
+                JCExpression expr = null;
+                JCExpression encl=null;
+                com.sun.tools.javac.util.List<JCExpression> typeArgs = com.sun.tools.javac.util.List.nil();
+                JCExpression createdName = null;;
+                com.sun.tools.javac.util.List<JCExpression> args = com.sun.tools.javac.util.List.nil();
+                JCClassDecl body = null;
+                int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+    :   'new' nonWildcardTypeArguments cr1=classOrInterfaceType cl1=classCreatorRest
+            {
+                typeArgs = $nonWildcardTypeArguments.list;
+                createdName = $cr1.tree;
+                args = $cl1.list;
+                body = $cl1.tree;
+                $tree = T.at(pos).NewClass(null, typeArgs, createdName, args, body);
+                pu.storeEnd($tree, $cl1.stop);
+            }
+    |   'new' cr2=classOrInterfaceType cl2=classCreatorRest
+            {
+                createdName = $cr2.tree;
+                args = $cl2.list;
+                body = $cl2.tree;
+                $tree = T.at(pos).NewClass(null, typeArgs, createdName, args, body);
+                pu.storeEnd($tree, $cl2.stop);
+            }
+    |   arrayCreator
+            {
+                $tree = $arrayCreator.tree;
+            }
+    ;
+
+arrayCreator returns [JCExpression tree]
+        @init {
+            ListBuffer<JCExpression> dims = new ListBuffer<JCExpression>();
+            JCExpression expr = null;
+            ArrayList<Integer> poss = null;
+            ArrayList<Integer> eposs = null;
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+        @after {
+            $tree = expr;
+            pu.storeEnd($tree, $stop);
+        }
+    :   'new' cr1=createdName
+            {
+                expr=$cr1.tree;
+            }
+        '[' ']'
+        (lbr1='[' rbr1=']'
+            {
+                if (poss == null) {
+                    poss = new ArrayList<Integer>();
+                    eposs = new ArrayList<Integer>();
+                }
+                poss.add(((AntlrJavacToken) $lbr1).getStartIndex());
+                eposs.add(((AntlrJavacToken) $rbr1).getStartIndex());
+            }
+        )*
+        ar=arrayInitializer
+            {
+                if (poss != null)
+                    for (ti = poss.size() - 1; ti >= 0; ti--) {
+                         expr = T.at(poss.get(ti)).TypeArray(expr);
+                         pu.storeEnd(expr, eposs.get(eposs.size()-1)+1);
+                    }
+                expr = T.at(pos).NewArray(expr, com.sun.tools.javac.util.List.<JCExpression>nil(), $ar.list);
+            }
+
+    |   'new' cr2=createdName
+            {
+                expr = $cr2.tree;
+            }
+        '[' ex1=expression
+            {
+                dims.append($ex1.tree);
+            }
+        ']'
+        (   '[' ex2=expression
+                {
+                    dims.append($ex2.tree);
+                }
+            ']'
+        )*
+        (lbr2='[' rbr2=']'
+            {
+                if (poss == null) {
+                    poss = new ArrayList<Integer>();
+                    eposs = new ArrayList<Integer>();
+                }
+                poss.add(((AntlrJavacToken) $lbr2).getStartIndex());
+                eposs.add(((AntlrJavacToken) $rbr2).getStartIndex());
+            }
+        )*
+            {
+                if (poss != null)
+                    for (ti = poss.size() - 1; ti >= 0; ti--) {
+                        expr = T.at(poss.get(ti)).TypeArray(expr);
+                        pu.storeEnd(expr, eposs.get(eposs.size() - 1) + 1);
+                    }
+                    expr = T.at(pos).NewArray(expr, dims.toList(), null);
+            }
+    ;
+
+variableInitializer returns [JCExpression tree]
+    :   arrayInitializer
+            {
+                $tree = T.at(((AntlrJavacToken) $arrayInitializer.start).getStartIndex()).NewArray(null, com.sun.tools.javac.util.List.<JCExpression>nil(), $arrayInitializer.list);
+                pu.storeEnd($tree, $arrayInitializer.stop);
+            }
+    |   expression
+            {
+                $tree=$expression.tree;
+            }
+    ;
+
+arrayInitializer returns [com.sun.tools.javac.util.List<JCExpression> list]
+        @init {
+            ListBuffer<JCExpression> buf = new ListBuffer<JCExpression>();
+        }
+        @after {
+            $list = buf.toList();
+        }
+    :   '{' 
+            (va1=variableInitializer
+                {
+                    buf.append($va1.tree);
+                }
+                (',' va2=variableInitializer
+                    {
+                        buf.append($va2.tree);
+                    }
+                )*
+            )? 
+            (',')? 
+        '}'             //Yang's fix, position change.
+    ;
+
+
+createdName returns [JCExpression tree]
+    :   classOrInterfaceType
+            {
+                $tree=$classOrInterfaceType.tree;
+            }
+    |   primitiveType
+            {
+                $tree=$primitiveType.tree;
+            }
+    ;
+
+innerCreator [JCExpression p] returns [JCExpression tree]
+        @init {
+            JCExpression expr = $p;
+            com.sun.tools.javac.util.List<JCExpression> typeArgs = null; // if no args, list is null
+            JCExpression createdName = null;
+            com.sun.tools.javac.util.List<JCExpression> args = null;
+
+        }
+        @after {
+            $tree = expr;
+        }
+    :   '.' nl='new'
+        (nonWildcardTypeArguments
+            {
+                typeArgs = $nonWildcardTypeArguments.list;
+            }
+        )?
+        IDENTIFIER
+            {
+                createdName = T.at(((AntlrJavacToken) $IDENTIFIER).getStartIndex()).Ident(((AntlrJavacToken) $IDENTIFIER).name);
+                pu.storeEnd(createdName, $IDENTIFIER);
+            }
+        (typeArguments
+            {
+                createdName = T.at(((AntlrJavacToken) $IDENTIFIER).getStartIndex()).TypeApply(createdName, $typeArguments.list);
+                pu.storeEnd(createdName, $typeArguments.stop);
+            }
+        )?
+        classCreatorRest
+            {
+                expr = T.at(((AntlrJavacToken) $nl).getStartIndex()).NewClass(expr, typeArgs, createdName, $classCreatorRest.list, $classCreatorRest.tree);
+                pu.storeEnd(expr, $classCreatorRest.stop);
+            }
+    ;
+
+
+classCreatorRest returns [com.sun.tools.javac.util.List<JCExpression> list, JCClassDecl tree]
+        @init {
+            $tree = null;
+        }
+    :   arguments
+            {
+                $list=$arguments.list;
+            }
+        (classBody
+            {
+                JCModifiers mods = T.at(Position.NOPOS).Modifiers(0);
+                $tree = T.at(((AntlrJavacToken) $classBody.start).getStartIndex()).AnonymousClassDef(mods, $classBody.list);
+                pu.storeEnd($tree, $classBody.stop);
+            }
+        )?
+    ;
+
+
+nonWildcardTypeArguments returns [com.sun.tools.javac.util.List<JCExpression> list]
+    :   lb='<' typeList
+            {
+                $list=$typeList.list;
+                checkGeneric($lb);
+            }
+        '>'
+    ;
+
+arguments returns [com.sun.tools.javac.util.List<JCExpression> list]
+        @after {
+            if ($list == null) {
+                $list = com.sun.tools.javac.util.List.nil();
+            }
+        }
+    :   '(' (ex=expressionList
+            {
+                $list=$ex.list;
+            }
+        )? ')'
+    ;
+
+literal returns [JCExpression tree]
+        @init {
+            AntlrJavacToken token;
+            String val = null;
+            int pos = ((AntlrJavacToken) $start).getStartIndex();
+        }
+    :   INTLITERAL
+            {
+                $tree = pu.parseInt($INTLITERAL);
+            }
+    |   LONGLITERAL
+            {
+                $tree = pu.parseInt($LONGLITERAL);
+            }
+    |   FLOATLITERAL
+            {
+                $tree = pu.parseFloat($FLOATLITERAL);
+            }
+    |   DOUBLELITERAL
+            {
+                $tree = pu.parseFloat($DOUBLELITERAL);
+            }
+    |   CHARLITERAL
+            {
+                $tree = T.at(pos).Literal(TypeTags.CHAR, ((AntlrJavacToken) $CHARLITERAL).stringVal.charAt(0) + 0);
+                pu.storeEnd($tree, $CHARLITERAL);
+            }
+    |   STRINGLITERAL
+            {
+                $tree = T.at(pos).Literal(TypeTags.CLASS, ((AntlrJavacToken) $STRINGLITERAL).stringVal);
+                pu.storeEnd($tree, $STRINGLITERAL);
+            }
+    |   TRUE
+            {
+                $tree = T.at(pos).Literal(TypeTags.BOOLEAN, 1);
+                pu.storeEnd($tree, $TRUE);
+            }
+    |   FALSE
+            {
+                $tree = T.at(pos).Literal(TypeTags.BOOLEAN, 0);
+                pu.storeEnd($tree, $FALSE);
+            }
+    |   NULL
+            {
+                $tree = T.at(pos).Literal(TypeTags.BOT, null);
+                pu.storeEnd($tree, $NULL);
+            }
+    ;
+
+/**
+ * These are headers help to make syntatical predicates, not necessary but helps to make grammar faster.
+ */
+ 
+classHeader 
+    :   modifiers 'class' IDENTIFIER
+    ;
+
+enumHeader 
+    :   modifiers ('enum'|IDENTIFIER) IDENTIFIER
+    ;
+
+interfaceHeader 
+    :   modifiers 'interface' IDENTIFIER
+    ;
+
+annotationHeader 
+    :   modifiers '@' 'interface' IDENTIFIER
+    ;
+
+typeHeader 
+    :   modifiers ('class'|'enum'|('@' ? 'interface')) IDENTIFIER
+    ;
+
+methodHeader 
+    :   modifiers typeParameters? (type|'void')? IDENTIFIER '('
+    ;
+
+fieldHeader 
+    :   modifiers type IDENTIFIER ('['']')* ('='|','|';')
+    ;
+
+localVariableHeader 
+    :   variableModifiers type IDENTIFIER ('['']')* ('='|','|';')
+    ;
+
+
+
+
+/********************************************************************************************
+                  Lexer section
+*********************************************************************************************/
+
+LONGLITERAL
+    :   IntegerNumber LongSuffix
+    ;
+
+    
+INTLITERAL
+    :   IntegerNumber 
+    ;
+    
+fragment
+IntegerNumber
+    :   '0'  
+            {
+                radix = 8; // jc bug. '0' parsed as octal.
+            } 
+    |   '1'..'9' ('0'..'9')*    // decimal
+            {
+                radix = 10;
+            }
+    |   '0' ('0'..'7')+         // octal
+            {
+                radix = 8;
+            }
+    |   HexPrefix HexDigit+     // hex
+            {
+                radix = 16;
+            }   
+    ;
+
+fragment
+HexPrefix
+    :   '0x' | '0X'
+    ;
+        
+fragment
+HexDigit
+    :   ('0'..'9'|'a'..'f'|'A'..'F')
+    ;
+
+fragment
+LongSuffix
+    :   'l' | 'L'
+    ;
+
+
+fragment
+NonIntegerNumber 
+    @init{  
+        radix = 10;
+    }
+    :   ('0' .. '9')+ '.' ('0' .. '9')* Exponent?  
+    |   '.' ( '0' .. '9' )+ Exponent?  
+    |   ('0' .. '9')+ Exponent  
+    |   ('0' .. '9')+ 
+    |   {
+            boolean hasHex=false;
+            radix=16;
+        }
+        HexPrefix (HexDigit {hasHex=true;})* 
+        (    () 
+        |    ('.' (HexDigit {hasHex=true;})* ) 
+        ) 
+        ( 'p' | 'P' ) 
+        ( '+' | '-' )? 
+        ( '0' .. '9' )+ 
+            { 
+                if(hasHex==false){
+                         log.error(input.index(),"invalid.hex.number");
+                }
+            }
+        ;
+        
+fragment 
+Exponent    
+    :   ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+ 
+    ;
+    
+fragment 
+FloatSuffix
+    :   'f' | 'F' 
+    ;     
+
+fragment
+DoubleSuffix
+    :   'd' | 'D'
+    ;
+        
+FLOATLITERAL
+    :   NonIntegerNumber FloatSuffix
+    ;
+    
+DOUBLELITERAL
+    :   NonIntegerNumber DoubleSuffix?
+    ;
+
+CHARLITERAL
+    :   '\'' 
+        (   EscapeSequence[stringBuffer] 
+        |   c=~( '\'' | '\\' | '\r' | '\n' )
+                {
+                    stringBuffer.append((char)$c);
+                }
+        ) 
+        '\''
+    ; 
+
+STRINGLITERAL
+    :   '"' 
+        (   EscapeSequence[stringBuffer]
+        |   c=~( '\\' | '"' | '\r' | '\n' )
+                {
+                    stringBuffer.append((char)$c);
+                }        
+        )* 
+        '"' 
+    ;
+
+fragment
+EscapeSequence [StringBuffer buf]
+    :   '\\' (
+                 'b'  
+                     {
+                         buf.append('\b');
+                     } 
+             |   't'  
+                     {
+                         buf.append('\t');
+                     } 
+             |   'n'
+                     {
+                         buf.append('\n');
+                     } 
+             |   'f'    
+                     {
+                         buf.append('\f');
+                     } 
+             |   'r'
+                     {
+                         buf.append('\r');
+                     } 
+             |   '\"'
+                     {
+                         buf.append('\"');
+                     } 
+             |   '\'' 
+                     { 
+                         buf.append('\'');
+                     } 
+             |   '\\'
+                     {
+                         buf.append('\\');
+                     } 
+             |       {
+                         buf.append(digitsToChar(8, input.LA(1), input.LA(2), input.LA(3)));
+                     }
+                 ('0'..'3') ('0'..'7') ('0'..'7')
+             |       {
+                         buf.append(digitsToChar(8, input.LA(1), input.LA(2)));
+                     }
+                 ('0'..'7') ('0'..'7') 
+             |       {
+                         buf.append(digitsToChar(8, input.LA(1)));
+                     }
+                 ('0'..'7')
+             )          
+;     
+
+WS  
+    :   (
+             ' '
+        |    '\r'
+        |    '\t'
+        |    '\u000C'
+        |    '\n'
+        ) 
+            {
+                skip();
+            }
+    ;
+    
+COMMENT
+        @init{
+            boolean isJavaDoc = false;
+        }
+    :   '/*'
+            {
+                if((char)input.LA(1) == '*'){
+                    isJavaDoc = true;
+                }
+            }
+        (options {greedy=false;} : . )* 
+        '*/'
+            {
+                if(isJavaDoc==true){
+                    $channel=HIDDEN;
+                }else{
+                    skip();
+                }
+            }
+    ;
+
+LINE_COMMENT
+    :   '//' ~('\n'|'\r')*  ('\r\n' | '\r' | '\n') 
+                {
+                    skip();
+                }
+    |   '//' ~('\n'|'\r')*     // a line comment could appear at the end of the file without CR/LF
+            {
+                skip();
+            }
+    ;   
+        
+ABSTRACT
+    :   'abstract'
+    ;
+    
+ASSERT
+    :   'assert'
+            {
+                if(assertSupported()==false){  
+                    $type = IDENTIFIER;
+                }
+            }
+    ;
+    
+BOOLEAN
+    :   'boolean'
+    ;
+    
+BREAK
+    :   'break'
+    ;
+    
+BYTE
+    :   'byte'
+    ;
+    
+CASE
+    :   'case'
+    ;
+    
+CATCH
+    :   'catch'
+    ;
+    
+CHAR
+    :   'char'
+    ;
+    
+CLASS
+    :   'class'
+    ;
+    
+CONST
+    :   'const'
+    ;
+
+CONTINUE
+    :   'continue'
+    ;
+
+DEFAULT
+    :   'default'
+    ;
+
+DO
+    :   'do'
+    ;
+
+DOUBLE
+    :   'double'
+    ;
+
+ELSE
+    :   'else'
+    ;
+
+ENUM
+    :   'enum'   
+            {
+                if(enumSupported()==false){
+                    $type=IDENTIFIER;
+                }
+            }
+    ;             
+
+EXTENDS
+    :   'extends'
+    ;
+
+FINAL
+    :   'final'
+    ;
+
+FINALLY
+    :   'finally'
+    ;
+
+FLOAT
+    :   'float'
+    ;
+
+FOR
+    :   'for'
+    ;
+
+GOTO
+    :   'goto'
+    ;
+
+IF
+    :   'if'
+    ;
+
+IMPLEMENTS
+    :   'implements'
+    ;
+
+IMPORT
+    :   'import'
+    ;
+
+INSTANCEOF
+    :   'instanceof'
+    ;
+
+INT
+    :   'int'
+    ;
+
+INTERFACE
+    :   'interface'
+    ;
+
+LONG
+    :   'long'
+    ;
+
+NATIVE
+    :   'native'
+    ;
+
+NEW
+    :   'new'
+    ;
+
+PACKAGE
+    :   'package'
+    ;
+
+PRIVATE
+    :   'private'
+    ;
+
+PROTECTED
+    :   'protected'
+    ;
+
+PUBLIC
+    :   'public'
+    ;
+
+RETURN
+    :   'return'
+    ;
+
+SHORT
+    :   'short'
+    ;
+
+STATIC
+    :   'static'
+    ;
+
+STRICTFP
+    :   'strictfp'
+    ;
+
+SUPER
+    :   'super'
+    ;
+
+SWITCH
+    :   'switch'
+    ;
+
+SYNCHRONIZED
+    :   'synchronized'
+    ;
+
+THIS
+    :   'this'
+    ;
+
+THROW
+    :   'throw'
+    ;
+
+THROWS
+    :   'throws'
+    ;
+
+TRANSIENT
+    :   'transient'
+    ;
+
+TRY
+    :   'try'
+    ;
+
+VOID
+    :   'void'
+    ;
+
+VOLATILE
+    :   'volatile'
+    ;
+
+WHILE
+    :   'while'
+    ;
+
+TRUE
+    :   'true'
+    ;
+
+FALSE
+    :   'false'
+    ;
+
+NULL
+    :   'null'
+    ;
+
+LPAREN
+    :   '('
+    ;
+
+RPAREN
+    :   ')'
+    ;
+
+LBRACE
+    :   '{'
+    ;
+
+RBRACE
+    :   '}'
+    ;
+
+LBRACKET
+    :   '['
+    ;
+
+RBRACKET
+    :   ']'
+    ;
+
+SEMI
+    :   ';'
+    ;
+
+COMMA
+    :   ','
+    ;
+
+DOT
+    :   '.'
+    ;
+
+ELLIPSIS
+    :   '...'
+    ;
+
+EQ
+    :   '='
+    ;
+
+BANG
+    :   '!'
+    ;
+
+TILDE
+    :   '~'
+    ;
+
+QUES
+    :   '?'
+    ;
+
+COLON
+    :   ':'
+    ;
+
+EQEQ
+    :   '=='
+    ;
+
+AMPAMP
+    :   '&&'
+    ;
+
+BARBAR
+    :   '||'
+    ;
+
+PLUSPLUS
+    :   '++'
+    ;
+
+SUBSUB
+    :   '--'
+    ;
+
+PLUS
+    :   '+'
+    ;
+
+SUB
+    :   '-'
+    ;
+
+STAR
+    :   '*'
+    ;
+
+SLASH
+    :   '/'
+    ;
+
+AMP
+    :   '&'
+    ;
+
+BAR
+    :   '|'
+    ;
+
+CARET
+    :   '^'
+    ;
+
+PERCENT
+    :   '%'
+    ;
+
+PLUSEQ
+    :   '+='
+    ; 
+    
+SUBEQ
+    :   '-='
+    ;
+
+STAREQ
+    :   '*='
+    ;
+
+SLASHEQ
+    :   '/='
+    ;
+
+AMPEQ
+    :   '&='
+    ;
+
+BAREQ
+    :   '|='
+    ;
+
+CARETEQ
+    :   '^='
+    ;
+
+PERCENTEQ
+    :   '%='
+    ;
+
+MONKEYS_AT
+    :   '@'
+    ;
+
+BANGEQ
+    :   '!='
+    ;
+
+GT
+    :   '>'
+    ;
+
+LT
+    :   '<'
+    ;        
+              
+IDENTIFIER
+    :   IdentifierStart IdentifierPart*
+    ;
+
+fragment
+SurrogateIdentifer 
+    :   ('\ud800'..'\udbff') ('\udc00'..'\udfff') 
+    ;                 
+
+fragment
+IdentifierStart
+    :   '\u0024'
+    |   '\u0041'..'\u005a'
+    |   '\u005f'
+    |   '\u0061'..'\u007a'
+    |   '\u00a2'..'\u00a5'
+    |   '\u00aa'
+    |   '\u00b5'
+    |   '\u00ba'
+    |   '\u00c0'..'\u00d6'
+    |   '\u00d8'..'\u00f6'
+    |   '\u00f8'..'\u0236'
+    |   '\u0250'..'\u02c1'
+    |   '\u02c6'..'\u02d1'
+    |   '\u02e0'..'\u02e4'
+    |   '\u02ee'
+    |   '\u037a'
+    |   '\u0386'
+    |   '\u0388'..'\u038a'
+    |   '\u038c'
+    |   '\u038e'..'\u03a1'
+    |   '\u03a3'..'\u03ce'
+    |   '\u03d0'..'\u03f5'
+    |   '\u03f7'..'\u03fb'
+    |   '\u0400'..'\u0481'
+    |   '\u048a'..'\u04ce'
+    |   '\u04d0'..'\u04f5'
+    |   '\u04f8'..'\u04f9'
+    |   '\u0500'..'\u050f'
+    |   '\u0531'..'\u0556'
+    |   '\u0559'
+    |   '\u0561'..'\u0587'
+    |   '\u05d0'..'\u05ea'
+    |   '\u05f0'..'\u05f2'
+    |   '\u0621'..'\u063a'
+    |   '\u0640'..'\u064a'
+    |   '\u066e'..'\u066f'
+    |   '\u0671'..'\u06d3'
+    |   '\u06d5'
+    |   '\u06e5'..'\u06e6'
+    |   '\u06ee'..'\u06ef'
+    |   '\u06fa'..'\u06fc'
+    |   '\u06ff'
+    |   '\u0710'
+    |   '\u0712'..'\u072f'
+    |   '\u074d'..'\u074f'
+    |   '\u0780'..'\u07a5'
+    |   '\u07b1'
+    |   '\u0904'..'\u0939'
+    |   '\u093d'
+    |   '\u0950'
+    |   '\u0958'..'\u0961'
+    |   '\u0985'..'\u098c'
+    |   '\u098f'..'\u0990'
+    |   '\u0993'..'\u09a8'
+    |   '\u09aa'..'\u09b0'
+    |   '\u09b2'
+    |   '\u09b6'..'\u09b9'
+    |   '\u09bd'
+    |   '\u09dc'..'\u09dd'
+    |   '\u09df'..'\u09e1'
+    |   '\u09f0'..'\u09f3'
+    |   '\u0a05'..'\u0a0a'
+    |   '\u0a0f'..'\u0a10'
+    |   '\u0a13'..'\u0a28'
+    |   '\u0a2a'..'\u0a30'
+    |   '\u0a32'..'\u0a33'
+    |   '\u0a35'..'\u0a36'
+    |   '\u0a38'..'\u0a39'
+    |   '\u0a59'..'\u0a5c'
+    |   '\u0a5e'
+    |   '\u0a72'..'\u0a74'
+    |   '\u0a85'..'\u0a8d'
+    |   '\u0a8f'..'\u0a91'
+    |   '\u0a93'..'\u0aa8'
+    |   '\u0aaa'..'\u0ab0'
+    |   '\u0ab2'..'\u0ab3'
+    |   '\u0ab5'..'\u0ab9'
+    |   '\u0abd'
+    |   '\u0ad0'
+    |   '\u0ae0'..'\u0ae1'
+    |   '\u0af1'
+    |   '\u0b05'..'\u0b0c'
+    |   '\u0b0f'..'\u0b10'
+    |   '\u0b13'..'\u0b28'
+    |   '\u0b2a'..'\u0b30'
+    |   '\u0b32'..'\u0b33'
+    |   '\u0b35'..'\u0b39'
+    |   '\u0b3d'
+    |   '\u0b5c'..'\u0b5d'
+    |   '\u0b5f'..'\u0b61'
+    |   '\u0b71'
+    |   '\u0b83'
+    |   '\u0b85'..'\u0b8a'
+    |   '\u0b8e'..'\u0b90'
+    |   '\u0b92'..'\u0b95'
+    |   '\u0b99'..'\u0b9a'
+    |   '\u0b9c'
+    |   '\u0b9e'..'\u0b9f'
+    |   '\u0ba3'..'\u0ba4'
+    |   '\u0ba8'..'\u0baa'
+    |   '\u0bae'..'\u0bb5'
+    |   '\u0bb7'..'\u0bb9'
+    |   '\u0bf9'
+    |   '\u0c05'..'\u0c0c'
+    |   '\u0c0e'..'\u0c10'
+    |   '\u0c12'..'\u0c28'
+    |   '\u0c2a'..'\u0c33'
+    |   '\u0c35'..'\u0c39'
+    |   '\u0c60'..'\u0c61'
+    |   '\u0c85'..'\u0c8c'
+    |   '\u0c8e'..'\u0c90'
+    |   '\u0c92'..'\u0ca8'
+    |   '\u0caa'..'\u0cb3'
+    |   '\u0cb5'..'\u0cb9'
+    |   '\u0cbd'
+    |   '\u0cde'
+    |   '\u0ce0'..'\u0ce1'
+    |   '\u0d05'..'\u0d0c'
+    |   '\u0d0e'..'\u0d10'
+    |   '\u0d12'..'\u0d28'
+    |   '\u0d2a'..'\u0d39'
+    |   '\u0d60'..'\u0d61'
+    |   '\u0d85'..'\u0d96'
+    |   '\u0d9a'..'\u0db1'
+    |   '\u0db3'..'\u0dbb'
+    |   '\u0dbd'
+    |   '\u0dc0'..'\u0dc6'
+    |   '\u0e01'..'\u0e30'
+    |   '\u0e32'..'\u0e33'
+    |   '\u0e3f'..'\u0e46'
+    |   '\u0e81'..'\u0e82'
+    |   '\u0e84'
+    |   '\u0e87'..'\u0e88'
+    |   '\u0e8a'
+    |   '\u0e8d'
+    |   '\u0e94'..'\u0e97'
+    |   '\u0e99'..'\u0e9f'
+    |   '\u0ea1'..'\u0ea3'
+    |   '\u0ea5'
+    |   '\u0ea7'
+    |   '\u0eaa'..'\u0eab'
+    |   '\u0ead'..'\u0eb0'
+    |   '\u0eb2'..'\u0eb3'
+    |   '\u0ebd'
+    |   '\u0ec0'..'\u0ec4'
+    |   '\u0ec6'
+    |   '\u0edc'..'\u0edd'
+    |   '\u0f00'
+    |   '\u0f40'..'\u0f47'
+    |   '\u0f49'..'\u0f6a'
+    |   '\u0f88'..'\u0f8b'
+    |   '\u1000'..'\u1021'
+    |   '\u1023'..'\u1027'
+    |   '\u1029'..'\u102a'
+    |   '\u1050'..'\u1055'
+    |   '\u10a0'..'\u10c5'
+    |   '\u10d0'..'\u10f8'
+    |   '\u1100'..'\u1159'
+    |   '\u115f'..'\u11a2'
+    |   '\u11a8'..'\u11f9'
+    |   '\u1200'..'\u1206'
+    |   '\u1208'..'\u1246'
+    |   '\u1248'
+    |   '\u124a'..'\u124d'
+    |   '\u1250'..'\u1256'
+    |   '\u1258'
+    |   '\u125a'..'\u125d'
+    |   '\u1260'..'\u1286'
+    |   '\u1288'
+    |   '\u128a'..'\u128d'
+    |   '\u1290'..'\u12ae'
+    |   '\u12b0'
+    |   '\u12b2'..'\u12b5'
+    |   '\u12b8'..'\u12be'
+    |   '\u12c0'
+    |   '\u12c2'..'\u12c5'
+    |   '\u12c8'..'\u12ce'
+    |   '\u12d0'..'\u12d6'
+    |   '\u12d8'..'\u12ee'
+    |   '\u12f0'..'\u130e'
+    |   '\u1310'
+    |   '\u1312'..'\u1315'
+    |   '\u1318'..'\u131e'
+    |   '\u1320'..'\u1346'
+    |   '\u1348'..'\u135a'
+    |   '\u13a0'..'\u13f4'
+    |   '\u1401'..'\u166c'
+    |   '\u166f'..'\u1676'
+    |   '\u1681'..'\u169a'
+    |   '\u16a0'..'\u16ea'
+    |   '\u16ee'..'\u16f0'
+    |   '\u1700'..'\u170c'
+    |   '\u170e'..'\u1711'
+    |   '\u1720'..'\u1731'
+    |   '\u1740'..'\u1751'
+    |   '\u1760'..'\u176c'
+    |   '\u176e'..'\u1770'
+    |   '\u1780'..'\u17b3'
+    |   '\u17d7' 
+    |   '\u17db'..'\u17dc'
+    |   '\u1820'..'\u1877'
+    |   '\u1880'..'\u18a8'
+    |   '\u1900'..'\u191c'
+    |   '\u1950'..'\u196d'
+    |   '\u1970'..'\u1974'
+    |   '\u1d00'..'\u1d6b'
+    |   '\u1e00'..'\u1e9b'
+    |   '\u1ea0'..'\u1ef9'
+    |   '\u1f00'..'\u1f15'
+    |   '\u1f18'..'\u1f1d'
+    |   '\u1f20'..'\u1f45'
+    |   '\u1f48'..'\u1f4d'
+    |   '\u1f50'..'\u1f57'
+    |   '\u1f59'
+    |   '\u1f5b'
+    |   '\u1f5d'
+    |   '\u1f5f'..'\u1f7d'
+    |   '\u1f80'..'\u1fb4'
+    |   '\u1fb6'..'\u1fbc'
+    |   '\u1fbe'
+    |   '\u1fc2'..'\u1fc4'
+    |   '\u1fc6'..'\u1fcc'
+    |   '\u1fd0'..'\u1fd3'
+    |   '\u1fd6'..'\u1fdb'
+    |   '\u1fe0'..'\u1fec'
+    |   '\u1ff2'..'\u1ff4'
+    |   '\u1ff6'..'\u1ffc'
+    |   '\u203f'..'\u2040'
+    |   '\u2054'
+    |   '\u2071'
+    |   '\u207f'
+    |   '\u20a0'..'\u20b1'
+    |   '\u2102'
+    |   '\u2107'
+    |   '\u210a'..'\u2113'
+    |   '\u2115'
+    |   '\u2119'..'\u211d'
+    |   '\u2124'
+    |   '\u2126'
+    |   '\u2128'
+    |   '\u212a'..'\u212d'
+    |   '\u212f'..'\u2131'
+    |   '\u2133'..'\u2139'
+    |   '\u213d'..'\u213f'
+    |   '\u2145'..'\u2149'
+    |   '\u2160'..'\u2183'
+    |   '\u3005'..'\u3007'
+    |   '\u3021'..'\u3029'
+    |   '\u3031'..'\u3035'
+    |   '\u3038'..'\u303c'
+    |   '\u3041'..'\u3096'
+    |   '\u309d'..'\u309f'
+    |   '\u30a1'..'\u30ff'
+    |   '\u3105'..'\u312c'
+    |   '\u3131'..'\u318e'
+    |   '\u31a0'..'\u31b7'
+    |   '\u31f0'..'\u31ff'
+    |   '\u3400'..'\u4db5'
+    |   '\u4e00'..'\u9fa5'
+    |   '\ua000'..'\ua48c'
+    |   '\uac00'..'\ud7a3'
+    |   '\uf900'..'\ufa2d'
+    |   '\ufa30'..'\ufa6a'
+    |   '\ufb00'..'\ufb06'
+    |   '\ufb13'..'\ufb17'
+    |   '\ufb1d'
+    |   '\ufb1f'..'\ufb28'
+    |   '\ufb2a'..'\ufb36'
+    |   '\ufb38'..'\ufb3c'
+    |   '\ufb3e'
+    |   '\ufb40'..'\ufb41'
+    |   '\ufb43'..'\ufb44'
+    |   '\ufb46'..'\ufbb1'
+    |   '\ufbd3'..'\ufd3d'
+    |   '\ufd50'..'\ufd8f'
+    |   '\ufd92'..'\ufdc7'
+    |   '\ufdf0'..'\ufdfc'
+    |   '\ufe33'..'\ufe34'
+    |   '\ufe4d'..'\ufe4f'
+    |   '\ufe69'
+    |   '\ufe70'..'\ufe74'
+    |   '\ufe76'..'\ufefc'
+    |   '\uff04'
+    |   '\uff21'..'\uff3a'
+    |   '\uff3f'
+    |   '\uff41'..'\uff5a'
+    |   '\uff65'..'\uffbe'
+    |   '\uffc2'..'\uffc7'
+    |   '\uffca'..'\uffcf'
+    |   '\uffd2'..'\uffd7'
+    |   '\uffda'..'\uffdc'
+    |   '\uffe0'..'\uffe1'
+    |   '\uffe5'..'\uffe6'
+    |   {isValidSurrogateIdentifierStart((char)input.LA(1), (char)input.LA(2))}?=>('\ud800'..'\udbff') ('\udc00'..'\udfff') 
+    ;                
+                       
+fragment 
+IdentifierPart
+    :   '\u0000'..'\u0008'
+    |   '\u000e'..'\u001b'
+    |   '\u0024'
+    |   '\u0030'..'\u0039'
+    |   '\u0041'..'\u005a'
+    |   '\u005f'
+    |   '\u0061'..'\u007a'
+    |   '\u007f'..'\u009f'
+    |   '\u00a2'..'\u00a5'
+    |   '\u00aa'
+    |   '\u00ad'
+    |   '\u00b5'
+    |   '\u00ba'
+    |   '\u00c0'..'\u00d6'
+    |   '\u00d8'..'\u00f6'
+    |   '\u00f8'..'\u0236'
+    |   '\u0250'..'\u02c1'
+    |   '\u02c6'..'\u02d1'
+    |   '\u02e0'..'\u02e4'
+    |   '\u02ee'
+    |   '\u0300'..'\u0357'
+    |   '\u035d'..'\u036f'
+    |   '\u037a'
+    |   '\u0386'
+    |   '\u0388'..'\u038a'
+    |   '\u038c'
+    |   '\u038e'..'\u03a1'
+    |   '\u03a3'..'\u03ce'
+    |   '\u03d0'..'\u03f5'
+    |   '\u03f7'..'\u03fb'
+    |   '\u0400'..'\u0481'
+    |   '\u0483'..'\u0486'
+    |   '\u048a'..'\u04ce'
+    |   '\u04d0'..'\u04f5'
+    |   '\u04f8'..'\u04f9'
+    |   '\u0500'..'\u050f'
+    |   '\u0531'..'\u0556'
+    |   '\u0559'
+    |   '\u0561'..'\u0587'
+    |   '\u0591'..'\u05a1'
+    |   '\u05a3'..'\u05b9'
+    |   '\u05bb'..'\u05bd'
+    |   '\u05bf'
+    |   '\u05c1'..'\u05c2'
+    |   '\u05c4'
+    |   '\u05d0'..'\u05ea'
+    |   '\u05f0'..'\u05f2'
+    |   '\u0600'..'\u0603'
+    |   '\u0610'..'\u0615'
+    |   '\u0621'..'\u063a'
+    |   '\u0640'..'\u0658'
+    |   '\u0660'..'\u0669'
+    |   '\u066e'..'\u06d3'
+    |   '\u06d5'..'\u06dd'
+    |   '\u06df'..'\u06e8'
+    |   '\u06ea'..'\u06fc'
+    |   '\u06ff'
+    |   '\u070f'..'\u074a'
+    |   '\u074d'..'\u074f'
+    |   '\u0780'..'\u07b1'
+    |   '\u0901'..'\u0939'
+    |   '\u093c'..'\u094d'
+    |   '\u0950'..'\u0954'
+    |   '\u0958'..'\u0963'
+    |   '\u0966'..'\u096f'
+    |   '\u0981'..'\u0983'
+    |   '\u0985'..'\u098c'
+    |   '\u098f'..'\u0990'
+    |   '\u0993'..'\u09a8'
+    |   '\u09aa'..'\u09b0'
+    |   '\u09b2'
+    |   '\u09b6'..'\u09b9'
+    |   '\u09bc'..'\u09c4'
+    |   '\u09c7'..'\u09c8'
+    |   '\u09cb'..'\u09cd'
+    |   '\u09d7'
+    |   '\u09dc'..'\u09dd'
+    |   '\u09df'..'\u09e3'
+    |   '\u09e6'..'\u09f3'
+    |   '\u0a01'..'\u0a03'
+    |   '\u0a05'..'\u0a0a'
+    |   '\u0a0f'..'\u0a10'
+    |   '\u0a13'..'\u0a28'
+    |   '\u0a2a'..'\u0a30'
+    |   '\u0a32'..'\u0a33'
+    |   '\u0a35'..'\u0a36'
+    |   '\u0a38'..'\u0a39'
+    |   '\u0a3c'
+    |   '\u0a3e'..'\u0a42'
+    |   '\u0a47'..'\u0a48'
+    |   '\u0a4b'..'\u0a4d'
+    |   '\u0a59'..'\u0a5c'
+    |   '\u0a5e'
+    |   '\u0a66'..'\u0a74'
+    |   '\u0a81'..'\u0a83'
+    |   '\u0a85'..'\u0a8d'
+    |   '\u0a8f'..'\u0a91'
+    |   '\u0a93'..'\u0aa8'
+    |   '\u0aaa'..'\u0ab0'
+    |   '\u0ab2'..'\u0ab3'
+    |   '\u0ab5'..'\u0ab9'
+    |   '\u0abc'..'\u0ac5'
+    |   '\u0ac7'..'\u0ac9'
+    |   '\u0acb'..'\u0acd'
+    |   '\u0ad0'
+    |   '\u0ae0'..'\u0ae3'
+    |   '\u0ae6'..'\u0aef'
+    |   '\u0af1'
+    |   '\u0b01'..'\u0b03'
+    |   '\u0b05'..'\u0b0c'        
+    |   '\u0b0f'..'\u0b10'
+    |   '\u0b13'..'\u0b28'
+    |   '\u0b2a'..'\u0b30'
+    |   '\u0b32'..'\u0b33'
+    |   '\u0b35'..'\u0b39'
+    |   '\u0b3c'..'\u0b43'
+    |   '\u0b47'..'\u0b48'
+    |   '\u0b4b'..'\u0b4d'
+    |   '\u0b56'..'\u0b57'
+    |   '\u0b5c'..'\u0b5d'
+    |   '\u0b5f'..'\u0b61'
+    |   '\u0b66'..'\u0b6f'
+    |   '\u0b71'
+    |   '\u0b82'..'\u0b83'
+    |   '\u0b85'..'\u0b8a'
+    |   '\u0b8e'..'\u0b90'
+    |   '\u0b92'..'\u0b95'
+    |   '\u0b99'..'\u0b9a'
+    |   '\u0b9c'
+    |   '\u0b9e'..'\u0b9f'
+    |   '\u0ba3'..'\u0ba4'
+    |   '\u0ba8'..'\u0baa'
+    |   '\u0bae'..'\u0bb5'
+    |   '\u0bb7'..'\u0bb9'
+    |   '\u0bbe'..'\u0bc2'
+    |   '\u0bc6'..'\u0bc8'
+    |   '\u0bca'..'\u0bcd'
+    |   '\u0bd7'
+    |   '\u0be7'..'\u0bef'
+    |   '\u0bf9'
+    |   '\u0c01'..'\u0c03'
+    |   '\u0c05'..'\u0c0c'
+    |   '\u0c0e'..'\u0c10'
+    |   '\u0c12'..'\u0c28'
+    |   '\u0c2a'..'\u0c33'
+    |   '\u0c35'..'\u0c39'
+    |   '\u0c3e'..'\u0c44'
+    |   '\u0c46'..'\u0c48'
+    |   '\u0c4a'..'\u0c4d'
+    |   '\u0c55'..'\u0c56'
+    |   '\u0c60'..'\u0c61'
+    |   '\u0c66'..'\u0c6f'        
+    |   '\u0c82'..'\u0c83'
+    |   '\u0c85'..'\u0c8c'
+    |   '\u0c8e'..'\u0c90'
+    |   '\u0c92'..'\u0ca8'
+    |   '\u0caa'..'\u0cb3'
+    |   '\u0cb5'..'\u0cb9'
+    |   '\u0cbc'..'\u0cc4'
+    |   '\u0cc6'..'\u0cc8'
+    |   '\u0cca'..'\u0ccd'
+    |   '\u0cd5'..'\u0cd6'
+    |   '\u0cde'
+    |   '\u0ce0'..'\u0ce1'
+    |   '\u0ce6'..'\u0cef'
+    |   '\u0d02'..'\u0d03'
+    |   '\u0d05'..'\u0d0c'
+    |   '\u0d0e'..'\u0d10'
+    |   '\u0d12'..'\u0d28'
+    |   '\u0d2a'..'\u0d39'
+    |   '\u0d3e'..'\u0d43'
+    |   '\u0d46'..'\u0d48'
+    |   '\u0d4a'..'\u0d4d'
+    |   '\u0d57'
+    |   '\u0d60'..'\u0d61'
+    |   '\u0d66'..'\u0d6f'
+    |   '\u0d82'..'\u0d83'
+    |   '\u0d85'..'\u0d96'
+    |   '\u0d9a'..'\u0db1'
+    |   '\u0db3'..'\u0dbb'
+    |   '\u0dbd'
+    |   '\u0dc0'..'\u0dc6'
+    |   '\u0dca'
+    |   '\u0dcf'..'\u0dd4'
+    |   '\u0dd6'
+    |   '\u0dd8'..'\u0ddf'
+    |   '\u0df2'..'\u0df3'
+    |   '\u0e01'..'\u0e3a'
+    |   '\u0e3f'..'\u0e4e'
+    |   '\u0e50'..'\u0e59'
+    |   '\u0e81'..'\u0e82'
+    |   '\u0e84'
+    |   '\u0e87'..'\u0e88'        
+    |   '\u0e8a'
+    |   '\u0e8d'
+    |   '\u0e94'..'\u0e97'
+    |   '\u0e99'..'\u0e9f'
+    |   '\u0ea1'..'\u0ea3'
+    |   '\u0ea5'
+    |   '\u0ea7'
+    |   '\u0eaa'..'\u0eab'
+    |   '\u0ead'..'\u0eb9'
+    |   '\u0ebb'..'\u0ebd'
+    |   '\u0ec0'..'\u0ec4'
+    |   '\u0ec6'
+    |   '\u0ec8'..'\u0ecd'
+    |   '\u0ed0'..'\u0ed9'
+    |   '\u0edc'..'\u0edd'
+    |   '\u0f00'
+    |   '\u0f18'..'\u0f19'
+    |   '\u0f20'..'\u0f29'
+    |   '\u0f35'
+    |   '\u0f37'
+    |   '\u0f39'
+    |   '\u0f3e'..'\u0f47'
+    |   '\u0f49'..'\u0f6a'
+    |   '\u0f71'..'\u0f84'
+    |   '\u0f86'..'\u0f8b'
+    |   '\u0f90'..'\u0f97'
+    |   '\u0f99'..'\u0fbc'
+    |   '\u0fc6'
+    |   '\u1000'..'\u1021'
+    |   '\u1023'..'\u1027'
+    |   '\u1029'..'\u102a'
+    |   '\u102c'..'\u1032'
+    |   '\u1036'..'\u1039'
+    |   '\u1040'..'\u1049'
+    |   '\u1050'..'\u1059'
+    |   '\u10a0'..'\u10c5'
+    |   '\u10d0'..'\u10f8'
+    |   '\u1100'..'\u1159'
+    |   '\u115f'..'\u11a2'
+    |   '\u11a8'..'\u11f9'
+    |   '\u1200'..'\u1206'        
+    |   '\u1208'..'\u1246'
+    |   '\u1248'
+    |   '\u124a'..'\u124d'
+    |   '\u1250'..'\u1256'
+    |   '\u1258'
+    |   '\u125a'..'\u125d'
+    |   '\u1260'..'\u1286'
+    |   '\u1288'        
+    |   '\u128a'..'\u128d'
+    |   '\u1290'..'\u12ae'
+    |   '\u12b0'
+    |   '\u12b2'..'\u12b5'
+    |   '\u12b8'..'\u12be'
+    |   '\u12c0'
+    |   '\u12c2'..'\u12c5'
+    |   '\u12c8'..'\u12ce'
+    |   '\u12d0'..'\u12d6'
+    |   '\u12d8'..'\u12ee'
+    |   '\u12f0'..'\u130e'
+    |   '\u1310'
+    |   '\u1312'..'\u1315'
+    |   '\u1318'..'\u131e'
+    |   '\u1320'..'\u1346'
+    |   '\u1348'..'\u135a'
+    |   '\u1369'..'\u1371'
+    |   '\u13a0'..'\u13f4'
+    |   '\u1401'..'\u166c'
+    |   '\u166f'..'\u1676'
+    |   '\u1681'..'\u169a'
+    |   '\u16a0'..'\u16ea'
+    |   '\u16ee'..'\u16f0'
+    |   '\u1700'..'\u170c'
+    |   '\u170e'..'\u1714'
+    |   '\u1720'..'\u1734'
+    |   '\u1740'..'\u1753'
+    |   '\u1760'..'\u176c'
+    |   '\u176e'..'\u1770'
+    |   '\u1772'..'\u1773'
+    |   '\u1780'..'\u17d3'
+    |   '\u17d7'
+    |   '\u17db'..'\u17dd'
+    |   '\u17e0'..'\u17e9'
+    |   '\u180b'..'\u180d'
+    |   '\u1810'..'\u1819'
+    |   '\u1820'..'\u1877'
+    |   '\u1880'..'\u18a9'
+    |   '\u1900'..'\u191c'
+    |   '\u1920'..'\u192b'
+    |   '\u1930'..'\u193b'
+    |   '\u1946'..'\u196d'
+    |   '\u1970'..'\u1974'
+    |   '\u1d00'..'\u1d6b'
+    |   '\u1e00'..'\u1e9b'
+    |   '\u1ea0'..'\u1ef9'
+    |   '\u1f00'..'\u1f15'
+    |   '\u1f18'..'\u1f1d'
+    |   '\u1f20'..'\u1f45'
+    |   '\u1f48'..'\u1f4d'
+    |   '\u1f50'..'\u1f57'
+    |   '\u1f59'
+    |   '\u1f5b'
+    |   '\u1f5d'
+    |   '\u1f5f'..'\u1f7d'
+    |   '\u1f80'..'\u1fb4'
+    |   '\u1fb6'..'\u1fbc'        
+    |   '\u1fbe'
+    |   '\u1fc2'..'\u1fc4'
+    |   '\u1fc6'..'\u1fcc'
+    |   '\u1fd0'..'\u1fd3'
+    |   '\u1fd6'..'\u1fdb'
+    |   '\u1fe0'..'\u1fec'
+    |   '\u1ff2'..'\u1ff4'
+    |   '\u1ff6'..'\u1ffc'
+    |   '\u200c'..'\u200f'
+    |   '\u202a'..'\u202e'
+    |   '\u203f'..'\u2040'
+    |   '\u2054'
+    |   '\u2060'..'\u2063'
+    |   '\u206a'..'\u206f'
+    |   '\u2071'
+    |   '\u207f'
+    |   '\u20a0'..'\u20b1'
+    |   '\u20d0'..'\u20dc'
+    |   '\u20e1'
+    |   '\u20e5'..'\u20ea'
+    |   '\u2102'
+    |   '\u2107'
+    |   '\u210a'..'\u2113'
+    |   '\u2115'
+    |   '\u2119'..'\u211d'
+    |   '\u2124'
+    |   '\u2126'
+    |   '\u2128'
+    |   '\u212a'..'\u212d'
+    |   '\u212f'..'\u2131'
+    |   '\u2133'..'\u2139'
+    |   '\u213d'..'\u213f'
+    |   '\u2145'..'\u2149'
+    |   '\u2160'..'\u2183'
+    |   '\u3005'..'\u3007'
+    |   '\u3021'..'\u302f'        
+    |   '\u3031'..'\u3035'
+    |   '\u3038'..'\u303c'
+    |   '\u3041'..'\u3096'
+    |   '\u3099'..'\u309a'
+    |   '\u309d'..'\u309f'
+    |   '\u30a1'..'\u30ff'
+    |   '\u3105'..'\u312c'
+    |   '\u3131'..'\u318e'
+    |   '\u31a0'..'\u31b7'
+    |   '\u31f0'..'\u31ff'
+    |   '\u3400'..'\u4db5'
+    |   '\u4e00'..'\u9fa5'
+    |   '\ua000'..'\ua48c'
+    |   '\uac00'..'\ud7a3'
+    |   '\uf900'..'\ufa2d'
+    |   '\ufa30'..'\ufa6a'
+    |   '\ufb00'..'\ufb06'
+    |   '\ufb13'..'\ufb17'
+    |   '\ufb1d'..'\ufb28'
+    |   '\ufb2a'..'\ufb36'
+    |   '\ufb38'..'\ufb3c'
+    |   '\ufb3e'
+    |   '\ufb40'..'\ufb41'
+    |   '\ufb43'..'\ufb44'
+    |   '\ufb46'..'\ufbb1'
+    |   '\ufbd3'..'\ufd3d'
+    |   '\ufd50'..'\ufd8f'
+    |   '\ufd92'..'\ufdc7'
+    |   '\ufdf0'..'\ufdfc'
+    |   '\ufe00'..'\ufe0f'
+    |   '\ufe20'..'\ufe23'
+    |   '\ufe33'..'\ufe34'
+    |   '\ufe4d'..'\ufe4f'
+    |   '\ufe69'
+    |   '\ufe70'..'\ufe74'
+    |   '\ufe76'..'\ufefc'
+    |   '\ufeff'
+    |   '\uff04'
+    |   '\uff10'..'\uff19'
+    |   '\uff21'..'\uff3a'
+    |   '\uff3f'
+    |   '\uff41'..'\uff5a'
+    |   '\uff65'..'\uffbe'
+    |   '\uffc2'..'\uffc7'
+    |   '\uffca'..'\uffcf'
+    |   '\uffd2'..'\uffd7'
+    |   '\uffda'..'\uffdc'
+    |   '\uffe0'..'\uffe1'
+    |   '\uffe5'..'\uffe6'
+    |   '\ufff9'..'\ufffb' 
+    |   {isValidSurrogateIdentifierPart((char)input.LA(1), (char)input.LA(2))}?=>('\ud800'..'\udbff') ('\udc00'..'\udfff')
+    ;
