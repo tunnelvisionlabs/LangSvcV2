@@ -36,7 +36,7 @@
         {
             get
             {
-                return "StringTemplate Classifier";
+                return "ANTLR Classifier";
             }
         }
 
