@@ -32,7 +32,6 @@ WS
 	:	(	' '
 		|	'\t'
 		)+
-		{Skip();}
 	;
 
 NEWLINE

@@ -156,6 +156,10 @@
             case AntlrGrammarClassifierLexer.ROOT:
                 return _astOperator;
 
+            case AntlrGrammarClassifierLexer.WS:
+                return null;
+                //return _standardClassificationService.WhiteSpace;
+
             default:
                 return base.ClassifyToken(token);
             }
