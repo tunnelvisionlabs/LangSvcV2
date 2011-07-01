@@ -28,7 +28,7 @@
             this._outliningRegions = new List<ITagSpan<IOutliningRegionTag>>();
 
             this.BackgroundParser.ParseComplete += OnBackgroundParseComplete;
-            this.BackgroundParser.RequestParse();
+            this.BackgroundParser.RequestParse(false);
         }
 
         private ITextBuffer TextBuffer

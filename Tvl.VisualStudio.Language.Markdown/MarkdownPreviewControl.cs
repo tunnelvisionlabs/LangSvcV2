@@ -157,7 +157,7 @@
                 {
                     ToolWindowPane.Caption = "Markdown Preview - ";
                     backgroundParser.ParseComplete += WeakEvents.AsWeak<ParseResultEventArgs>(OnParseComplete, eh => backgroundParser.ParseComplete -= eh);
-                    backgroundParser.RequestParse();
+                    backgroundParser.RequestParse(false);
                 }
             }
 

@@ -69,10 +69,9 @@
             }
         }
 
-        public void RequestParse()
+        public void RequestParse(bool forceReparse)
         {
-            if (_parsing == 0 && !_dirty)
-                MarkDirty();
+            TryReparse(forceReparse);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -103,10 +102,10 @@
 
         private void OnParseTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            TryReparse();
+            TryReparse(_dirty);
         }
 
-        private void TryReparse()
+        private void TryReparse(bool forceReparse)
         {
             if (!_dirty)
                 return;

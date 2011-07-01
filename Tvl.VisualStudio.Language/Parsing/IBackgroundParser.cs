@@ -6,6 +6,6 @@
     {
         event EventHandler<ParseResultEventArgs> ParseComplete;
 
-        void RequestParse();
+        void RequestParse(bool forceReparse);
     }
 }

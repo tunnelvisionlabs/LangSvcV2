@@ -28,7 +28,7 @@
             this._provider = provider;
 
             this.BackgroundParser.ParseComplete += OnBackgroundParseComplete;
-            this.BackgroundParser.RequestParse();
+            this.BackgroundParser.RequestParse(false);
         }
 
         private ITextBuffer TextBuffer

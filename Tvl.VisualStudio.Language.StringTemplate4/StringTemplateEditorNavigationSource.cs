@@ -30,7 +30,7 @@
             this._navigationTargets = new List<IEditorNavigationTarget>();
 
             this.BackgroundParser.ParseComplete += OnBackgroundParseComplete;
-            this.BackgroundParser.RequestParse();
+            this.BackgroundParser.RequestParse(false);
         }
 
         public event EventHandler NavigationTargetsChanged;

@@ -170,7 +170,7 @@
                 {
                     Tagger = AstReferenceTaggerProvider.GetAstReferenceTagger(e.NewView.TextBuffer);
                     backgroundParser.ParseComplete += WeakEvents.AsWeak<ParseResultEventArgs>(HandleParseComplete, eh => backgroundParser.ParseComplete -= eh);
-                    backgroundParser.RequestParse();
+                    backgroundParser.RequestParse(false);
                 }
             }
         }

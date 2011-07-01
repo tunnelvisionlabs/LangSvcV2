@@ -33,7 +33,7 @@
             this._lastEdit = DateTimeOffset.MinValue;
             this._timer.Start();
 
-            this.BackgroundParser.RequestParse();
+            this.BackgroundParser.RequestParse(false);
         }
 
         public ITextBuffer TextBuffer
