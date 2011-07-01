@@ -28,9 +28,9 @@
             {
                 var snapshot = TextBuffer.CurrentSnapshot;
                 SnapshotCharStream input = new SnapshotCharStream(snapshot);
-                JavaLexer lexer = new JavaLexer(input);
+                Java2Lexer lexer = new Java2Lexer(new JavaUnicodeStream(input));
                 CommonTokenStream tokens = new CommonTokenStream(lexer);
-                JavaParser parser = new JavaParser(tokens);
+                Java2Parser parser = new Java2Parser(tokens);
                 List<ParseErrorEventArgs> errors = new List<ParseErrorEventArgs>();
                 parser.ParseError += (sender, e) =>
                     {
@@ -44,7 +44,9 @@
                             outputWindow.WriteLine(message);
                     };
 
-                var result = parser.compilationUnit();
+                //var result = parser.compilationUnit();
+                parser.compilationUnit();
+                IAstRuleReturnScope result = null;
                 OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, tokens.GetTokens(), result));
             }
             catch (Exception e)

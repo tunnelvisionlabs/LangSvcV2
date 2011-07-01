@@ -187,6 +187,7 @@
     </Compile>
     <Compile Include="JavaLanguageInfo.cs" />
     <Compile Include="JavaLanguagePackage.cs" />
+    <Compile Include="JavaUnicodeStream.cs" />
     <Compile Include="Text\CancellationPolicy.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="JavaClassifier.cs" />
@@ -211,7 +212,9 @@
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
     </None>
-    <None Include="Java2.g3" />
+    <Antlr3 Include="Java2.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
     <AntlrTokens Include="Java2.tokens">
       <DependentUpon>Java2.g3</DependentUpon>
     </AntlrTokens>
