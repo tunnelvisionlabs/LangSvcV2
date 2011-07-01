@@ -2,13 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Runtime.CompilerServices;
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
-    using System.Diagnostics.Contracts;
 
+    [Obsolete]
     public abstract class AntlrClassifierBase : IClassifier
     {
         private ITextSnapshot _multilineTokenReference;
