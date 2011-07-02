@@ -89,6 +89,30 @@
             return new JavaClassifierLexer(input, state);
         }
 
+        protected override bool IsMultilineToken(ITextSnapshot snapshot, ITokenSource lexer, IToken token)
+        {
+            JavaClassifierLexer javaLexer = lexer as JavaClassifierLexer;
+            if (javaLexer != null && javaLexer.CharStream.Line >= token.Line)
+                return false;
+
+            int startLine = snapshot.GetLineNumberFromPosition(token.StartIndex);
+            int stopLine = snapshot.GetLineNumberFromPosition(token.StopIndex + 1);
+            return startLine != stopLine;
+        }
+
+        protected override bool TokenEndsAtEndOfLine(ITextSnapshot snapshot, ITokenSource lexer, IToken token)
+        {
+            JavaClassifierLexer javaLexer = lexer as JavaClassifierLexer;
+            if (javaLexer != null)
+            {
+                int c = javaLexer.CharStream.LA(1);
+                return c == '\r' || c == '\n';
+            }
+
+            ITextSnapshotLine line = snapshot.GetLineFromPosition(token.StopIndex + 1);
+            return line.End <= token.StopIndex + 1 && line.EndIncludingLineBreak >= token.StopIndex + 1;
+        }
+
         protected override IClassificationType ClassifyToken(IToken token)
         {
             switch (token.Type)

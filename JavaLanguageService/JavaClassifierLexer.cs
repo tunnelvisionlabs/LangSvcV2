@@ -29,6 +29,14 @@
             State = state;
         }
 
+        public ICharStream CharStream
+        {
+            get
+            {
+                return _input;
+            }
+        }
+
         public string SourceName
         {
             get
