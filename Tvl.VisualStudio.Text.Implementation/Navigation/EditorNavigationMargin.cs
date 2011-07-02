@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Threading;
     using System.Windows;
@@ -11,7 +12,6 @@
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Tvl.Events;
-    using System.Diagnostics.Contracts;
 
     internal class EditorNavigationMargin : IWpfTextViewMargin
     {
@@ -21,6 +21,9 @@
 
         private readonly UniformGrid _container;
         private readonly Tuple<IEditorNavigationType, EditorNavigationComboBox>[] _navigationControls;
+
+        private readonly Dictionary<IEditorNavigationTarget, IEditorNavigationTarget> _owners =
+            new Dictionary<IEditorNavigationTarget, IEditorNavigationTarget>();
 
         public EditorNavigationMargin(IWpfTextView wpfTextView, IEnumerable<IEditorNavigationSource> sources, IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
         {
@@ -172,20 +175,14 @@
             if (navigationType == null || comboBox == null || target == null)
                 return true;
 
-            foreach (string enclosingType in navigationType.Definition.EnclosingTypes)
-            {
-                foreach (var control in _navigationControls.Where(i => i.Item1.IsOfType(enclosingType)))
-                {
-                    IEditorNavigationTarget selectedItem = control.Item2.SelectedItem as IEditorNavigationTarget;
-                    if (selectedItem == null)
-                        continue;
+            if (!navigationType.Definition.EnclosingTypes.Any())
+                return true;
 
-                    if (!target.Span.OverlapsWith(selectedItem.Span))
-                        return false;
-                }
-            }
+            IEditorNavigationTarget owner;
+            if (!_owners.TryGetValue(target, out owner))
+                return true;
 
-            return true;
+            return _navigationControls.Select(i => i.Item2.SelectedItem).OfType<IEditorNavigationTarget>().Contains(owner);
         }
 
         private void UpdateNavigationTargets(IEditorNavigationSource source)
@@ -228,6 +225,36 @@
                 combo.Items.Clear();
                 foreach (var item in group.OrderBy(i => i.Name, StringComparer.CurrentCultureIgnoreCase))
                     combo.Items.Add(item);
+            }
+
+            _owners.Clear();
+            foreach (var childControl in _navigationControls)
+            {
+                IEditorNavigationType navigationType = childControl.Item1;
+                string enclosingType = navigationType.Definition.EnclosingTypes.FirstOrDefault();
+                if (string.IsNullOrEmpty(enclosingType))
+                    continue;
+
+                foreach (var childItem in childControl.Item2.Items.OfType<IEditorNavigationTarget>())
+                {
+                    foreach (var control in _navigationControls.Where(i => i.Item1.IsOfType(enclosingType)))
+                    {
+                        IEditorNavigationTarget best =
+                            control.Item2.Items.Cast<IEditorNavigationTarget>()
+                            .Where(i => i.Span.OverlapsWith(childItem.Span))
+                            .OrderBy(i => i.Span.Length)
+                            .FirstOrDefault();
+
+                        if (best != null)
+                        {
+                            _owners[childItem] = best;
+                            goto nextChild;
+                        }
+                    }
+
+                nextChild:
+                    continue;
+                }
             }
 
             UpdateSelectedNavigationTargets();
