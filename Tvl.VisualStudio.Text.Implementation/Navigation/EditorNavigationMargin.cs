@@ -20,7 +20,7 @@
         private readonly IEditorNavigationTypeRegistryService _editorNavigationTypeRegistryService;
 
         private readonly UniformGrid _container;
-        private readonly Tuple<IEditorNavigationType, ComboBox>[] _navigationControls;
+        private readonly Tuple<IEditorNavigationType, EditorNavigationComboBox>[] _navigationControls;
 
         public EditorNavigationMargin(IWpfTextView wpfTextView, IEnumerable<IEditorNavigationSource> sources, IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
         {
@@ -37,7 +37,7 @@
                 .SelectMany(source => source.GetNavigationTypes())
                 .Distinct()
                 //.OrderBy(...)
-                .Select(type => Tuple.Create(type, default(ComboBox)))
+                .Select(type => Tuple.Create(type, default(EditorNavigationComboBox)))
                 .ToArray();
 
             if (this._navigationControls.Length == 0)
@@ -60,7 +60,7 @@
             _navigationControls = Array.ConvertAll(_navigationControls,
                 pair =>
                 {
-                    ComboBox comboBox =
+                    EditorNavigationComboBox comboBox =
                         new EditorNavigationComboBox()
                         {
                             Cursor = Cursors.Arrow,
@@ -167,6 +167,27 @@
             }
         }
 
+        private bool ComboBoxFilter(IEditorNavigationType navigationType, EditorNavigationComboBox comboBox, IEditorNavigationTarget target)
+        {
+            if (navigationType == null || comboBox == null || target == null)
+                return true;
+
+            foreach (string enclosingType in navigationType.Definition.EnclosingTypes)
+            {
+                foreach (var control in _navigationControls.Where(i => i.Item1.IsOfType(enclosingType)))
+                {
+                    IEditorNavigationTarget selectedItem = control.Item2.SelectedItem as IEditorNavigationTarget;
+                    if (selectedItem == null)
+                        continue;
+
+                    if (!target.Span.OverlapsWith(selectedItem.Span))
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
         private void UpdateNavigationTargets(IEditorNavigationSource source)
         {
             Contract.Requires<ArgumentNullException>(source != null, "source");
@@ -230,6 +251,9 @@
 
             foreach (var control in this._navigationControls)
             {
+                control.Item2.Items.Filter = null;
+                control.Item2.Items.Filter = obj => ComboBoxFilter(control.Item1, control.Item2, obj as IEditorNavigationTarget);
+
                 if (!control.Item2.HasItems)
                     continue;
 
