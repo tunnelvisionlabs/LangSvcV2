@@ -2,14 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Text.Tagging;
-    using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Language.Parsing;
     using System.Diagnostics.Contracts;
     using Antlr.Runtime;
     using Antlr.Runtime.Tree;
+    using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Tagging;
+    using Tvl.VisualStudio.Language.Parsing;
 
     internal sealed class OutliningTagger : ITagger<IOutliningRegionTag>
     {
@@ -74,6 +72,33 @@
             {
                 ITextSnapshot snapshot = antlrParseResultArgs.Snapshot;
 
+                // outline all the imports
+                IList<ITree> children = result.Children;
+                for (int i = 0; i < children.Count; i++)
+                {
+                    if (children[i].Type != Java2Lexer.IMPORT)
+                        continue;
+
+                    int firstImport = i;
+                    while (i < children.Count - 1 && children[i + 1].Type == Java2Lexer.IMPORT)
+                        i++;
+
+                    int lastImport = i;
+
+                    // start 1 token after the first 'import' token
+                    var startToken = antlrParseResultArgs.Tokens[children[firstImport].TokenStartIndex + 1];
+                    var stopToken = antlrParseResultArgs.Tokens[children[lastImport].TokenStopIndex];
+                    Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
+                    if (snapshot.GetLineNumberFromPosition(span.Start) == snapshot.GetLineNumberFromPosition(span.End))
+                        continue;
+
+                    SnapshotSpan snapshotSpan = new SnapshotSpan(antlrParseResultArgs.Snapshot, span);
+                    IOutliningRegionTag tag = new OutliningRegionTag("...", snapshotSpan.GetText());
+                    TagSpan<IOutliningRegionTag> tagSpan = new TagSpan<IOutliningRegionTag>(snapshotSpan, tag);
+                    outliningRegions.Add(tagSpan);
+                }
+
+                // outline the type and method bodies
                 for (CommonTreeNodeStream treeNodeStream = new CommonTreeNodeStream(result);
                     treeNodeStream.LA(1) != CharStreamConstants.EndOfFile;
                     treeNodeStream.Consume())
