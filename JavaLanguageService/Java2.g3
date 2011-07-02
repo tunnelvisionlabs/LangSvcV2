@@ -586,7 +586,8 @@ methodDeclaration
         IDENTIFIER<METHOD_IDENTIFIER>^
         formalParameters
         throwsSpec?
-		constructorMethodBody
+		//constructorMethodBody
+		uncheckedMethodBody
 
     |   modifiers
         typeParameters?
@@ -597,7 +598,7 @@ methodDeclaration
         formalParameters
         ('[' ']')*
         throwsSpec?
-        (   methodBody
+        (   uncheckedMethodBody //methodBody
         |   ';' 
         )
     ;
@@ -611,6 +612,22 @@ constructorMethodBody
 
 methodBody
 	:	'{'<METHOD_BODY>^ blockStatement* '}'
+	;
+
+uncheckedMethodBody
+	:	'{'<METHOD_BODY>^
+			(	~('{'|'}')!
+			|	genericBlock!
+			)*
+		'}'
+	;
+
+genericBlock
+	:	'{'<BLOCK>^
+			(	~('{'|'}')
+			|	genericBlock
+			)*
+		'}'
 	;
 
 throwsSpec
