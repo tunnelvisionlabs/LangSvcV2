@@ -179,12 +179,12 @@
     <Compile Include="JavaClassifierLexerMode.cs" />
     <Compile Include="JavaClassifierLexerState.cs" />
     <Compile Include="JavaErrorTaggerProvider.cs" />
-    <Compile Include="JavaParserHelper.cs">
+    <None Include="JavaParserHelper.cs">
       <DependentUpon>Java.g3</DependentUpon>
-    </Compile>
-    <Compile Include="JavaLexerHelper.cs">
+    </None>
+    <None Include="JavaLexerHelper.cs">
       <DependentUpon>Java.g3</DependentUpon>
-    </Compile>
+    </None>
     <Compile Include="JavaLanguageInfo.cs" />
     <Compile Include="JavaLanguagePackage.cs" />
     <Compile Include="JavaUnicodeStream.cs" />
@@ -226,9 +226,9 @@
     <Antlr3 Include="JavaColorizerLexer.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
-    <Antlr3 Include="Java.g3">
+    <None Include="Java.g3">
       <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
+    </None>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
