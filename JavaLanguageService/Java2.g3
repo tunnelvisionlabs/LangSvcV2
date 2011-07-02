@@ -269,7 +269,6 @@ grammar Java2;
 options {
 	language=CSharp3;
 	backtrack=true;
-	memoize=true;
 	tokenVocab=Java2;
 	output=AST;
 	ASTLabelType=CommonTree;
