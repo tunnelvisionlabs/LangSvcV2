@@ -15,6 +15,9 @@
         private readonly ITextBuffer _textBuffer;
         private readonly IEqualityComparer<TState> _stateComparer;
 
+        private int? _firstDirtyLine;
+        private int? _lastDirtyLine;
+
         private int? _firstChangedLine;
         private int? _lastChangedLine;
 
@@ -42,6 +45,7 @@
         {
             Contract.Ensures(Contract.Result<IList<ClassificationSpan>>() != null);
 
+            Span requestedSpan = span;
             TState startState = AdjustParseSpan(ref span);
 
             ICharStream input = CreateInputStream(span);
@@ -49,6 +53,7 @@
             List<ClassificationSpan> classificationSpans = new List<ClassificationSpan>();
 
             IToken previousToken = null;
+            bool previousTokenEndsLine = false;
 
             /* this is held outside the loop because only tokens which end at the end of a line
              * impact its value.
@@ -63,31 +68,34 @@
             {
                 IToken token = lexer.NextToken();
 
-                // endLinePrevious is the line number the previous token ended on
-                int endLinePrevious;
-                if (previousToken != null)
-                    endLinePrevious = span.Snapshot.GetLineNumberFromPosition(previousToken.StopIndex + 1);
-                else
-                    endLinePrevious = span.Snapshot.GetLineNumberFromPosition(span.Start) - 1;
-
                 int startLineCurrent;
                 if (token.Type == CharStreamConstants.EndOfFile)
                     startLineCurrent = span.Snapshot.LineCount;
                 else
-                    startLineCurrent = span.Snapshot.GetLineNumberFromPosition(token.StartIndex);
+                    startLineCurrent = token.Line;
 
-                if (startLineCurrent > endLinePrevious + 1)
+                if (previousToken == null || previousToken.Line < startLineCurrent - 1)
                 {
-                    int firstMultilineLine = endLinePrevious;
-                    if (previousToken == null || TokenEndsAtEndOfLine(span.Snapshot, previousToken))
-                        firstMultilineLine++;
+                    // endLinePrevious is the line number the previous token ended on
+                    int endLinePrevious;
+                    if (previousToken != null)
+                        endLinePrevious = span.Snapshot.GetLineNumberFromPosition(previousToken.StopIndex + 1);
+                    else
+                        endLinePrevious = span.Snapshot.GetLineNumberFromPosition(span.Start) - 1;
 
-                    for (int i = firstMultilineLine; i < startLineCurrent; i++)
+                    if (startLineCurrent > endLinePrevious + 1)
                     {
-                        if (!_lineStates[i].MultilineToken || lineStateChanged)
-                            extendMultilineSpanToLine = i + 1;
+                        int firstMultilineLine = endLinePrevious;
+                        if (previousToken == null || previousTokenEndsLine)
+                            firstMultilineLine++;
 
-                        SetLineState(i, LineStateInfo.Multiline);
+                        for (int i = firstMultilineLine; i < startLineCurrent; i++)
+                        {
+                            if (!_lineStates[i].MultilineToken || lineStateChanged)
+                                extendMultilineSpanToLine = i + 1;
+
+                            SetLineState(i, LineStateInfo.Multiline);
+                        }
                     }
                 }
 
@@ -95,8 +103,9 @@
                     break;
 
                 previousToken = token;
+                previousTokenEndsLine = TokenEndsAtEndOfLine(span.Snapshot, lexer, token);
 
-                if (IsMultilineToken(span.Snapshot, token))
+                if (IsMultilineToken(span.Snapshot, lexer, token))
                 {
                     int startLine = span.Snapshot.GetLineNumberFromPosition(token.StartIndex);
                     int stopLine = span.Snapshot.GetLineNumberFromPosition(token.StopIndex + 1);
@@ -109,13 +118,13 @@
                     }
                 }
 
-                if (TokenEndsAtEndOfLine(span.Snapshot, token))
+                bool tokenEndsLine = previousTokenEndsLine;
+                if (tokenEndsLine)
                 {
                     TState stateAtEndOfLine = lexer.GetCurrentState();
                     int line = span.Snapshot.GetLineNumberFromPosition(token.StopIndex + 1);
                     lineStateChanged =
-                        _lineStates[line].IsDirty
-                        || _lineStates[line].MultilineToken
+                        _lineStates[line].MultilineToken
                         || !_stateComparer.Equals(_lineStates[line].EndLineState, stateAtEndOfLine);
 
                     // even if the state didn't change, we call SetLineState to make sure the _first/_lastChangedLine values get updated.
@@ -138,8 +147,11 @@
                     }
                 }
 
-                if (token.StartIndex > span.End.Position)
+                if (token.StartIndex >= span.End.Position)
                     break;
+
+                if (token.StopIndex < requestedSpan.Start)
+                    continue;
 
                 var tokenClassificationSpans = GetClassificationSpansForToken(token, span.Snapshot);
                 if (tokenClassificationSpans != null)
@@ -175,15 +187,15 @@
         protected virtual void SetLineState(int line, LineStateInfo state)
         {
             _lineStates[line] = state;
-            if (!state.IsDirty && _firstChangedLine.HasValue && _firstChangedLine == line)
+            if (!state.IsDirty && _firstDirtyLine.HasValue && _firstDirtyLine == line)
             {
-                _firstChangedLine++;
+                _firstDirtyLine++;
             }
 
-            if (!state.IsDirty && _lastChangedLine.HasValue && _lastChangedLine == line)
+            if (!state.IsDirty && _lastDirtyLine.HasValue && _lastDirtyLine == line)
             {
-                _firstChangedLine = null;
-                _lastChangedLine = null;
+                _firstDirtyLine = null;
+                _lastDirtyLine = null;
             }
         }
 
@@ -198,9 +210,9 @@
             int endPosition = span.End.Position;
 
             ITextSnapshotLine firstDirtyLine = null;
-            if (_firstChangedLine.HasValue)
+            if (_firstDirtyLine.HasValue)
             {
-                firstDirtyLine = span.Snapshot.GetLineFromLineNumber(_firstChangedLine.Value);
+                firstDirtyLine = span.Snapshot.GetLineFromLineNumber(_firstDirtyLine.Value);
                 start = Math.Min(start, firstDirtyLine.Start.Position);
             }
 
@@ -235,22 +247,38 @@
             return startLineCurrent > endLinePrevious + 1;
         }
 
-        private static bool IsMultilineToken(ITextSnapshot snapshot, IToken token)
+        protected virtual bool IsMultilineToken(ITextSnapshot snapshot, ITokenSource lexer, IToken token)
         {
+            Lexer lexerLexer = lexer as Lexer;
+            if (lexerLexer != null && lexerLexer.Line >= token.Line)
+                return false;
+
             int startLine = snapshot.GetLineNumberFromPosition(token.StartIndex);
             int stopLine = snapshot.GetLineNumberFromPosition(token.StopIndex + 1);
             return startLine != stopLine;
         }
 
-        private static bool TokenEndsAtEndOfLine(ITextSnapshot snapshot, IToken token)
+        protected virtual bool TokenEndsAtEndOfLine(ITextSnapshot snapshot, ITokenSource lexer, IToken token)
         {
+            Lexer lexerLexer = lexer as Lexer;
+            if (lexerLexer != null)
+            {
+                int c = lexerLexer.CharStream.LA(1);
+                return c == '\r' || c == '\n';
+            }
+
             ITextSnapshotLine line = snapshot.GetLineFromPosition(token.StopIndex + 1);
             return line.End <= token.StopIndex + 1 && line.EndIncludingLineBreak >= token.StopIndex + 1;
         }
 
         protected virtual ICharStream CreateInputStream(SnapshotSpan span)
         {
-            SnapshotCharStream input = new SnapshotCharStream(span.Snapshot);
+            SnapshotCharStream input;
+            if (span.Length > 1000)
+                input = new SnapshotCharStream(span.Snapshot, span.Span);
+            else
+                input = new SnapshotCharStream(span.Snapshot);
+
             input.Seek(span.Start.Position);
             return input;
         }
@@ -302,12 +330,12 @@
 
         public virtual void ForceReclassifyLines(int startLine, int endLine)
         {
-            _firstChangedLine = _firstChangedLine.HasValue ? Math.Min(_firstChangedLine.Value, startLine) : startLine;
-            _lastChangedLine = _lastChangedLine.HasValue ? Math.Max(_lastChangedLine.Value, endLine) : endLine;
+            _firstDirtyLine = _firstDirtyLine.HasValue ? Math.Min(_firstDirtyLine.Value, startLine) : startLine;
+            _lastDirtyLine = _lastDirtyLine.HasValue ? Math.Max(_lastDirtyLine.Value, endLine) : endLine;
 
             ITextSnapshot snapshot = _textBuffer.CurrentSnapshot;
             int start = snapshot.GetLineFromLineNumber(startLine).Start;
-            int end = snapshot.GetLineFromLineNumber(endLine).Start;
+            int end = snapshot.GetLineFromLineNumber(endLine).EndIncludingLineBreak;
             var e = new ClassificationChangedEventArgs(new SnapshotSpan(_textBuffer.CurrentSnapshot, Span.FromBounds(start, end)));
             OnClassificationChanged(e);
         }
@@ -333,15 +361,10 @@
                     int startLine = _firstChangedLine.Value;
                     int endLine = Math.Min(_lastChangedLine.Value, e.After.LineCount - 1);
 
-                    int start = e.After.GetLineFromLineNumber(startLine).Start;
-                    int end;
-                    if (endLine >= e.After.LineCount)
-                        end = e.After.Length;
-                    else
-                        end = e.After.GetLineFromLineNumber(endLine).Start;
+                    _firstChangedLine = null;
+                    _lastChangedLine = null;
 
-                    var e2 = new ClassificationChangedEventArgs(new SnapshotSpan(e.After, Span.FromBounds(start, end)));
-                    OnClassificationChanged(e2);
+                    ForceReclassifyLines(startLine, endLine);
                 }
             }
         }
@@ -361,6 +384,11 @@
                     TState endLineState = _lineStates[lineNumberFromPosition].EndLineState;
                     LineStateInfo element = new LineStateInfo(endLineState);
                     _lineStates.InsertRange(lineNumberFromPosition, Enumerable.Repeat(element, change.LineCountDelta));
+                }
+
+                if (_lastDirtyLine.HasValue && _lastDirtyLine.Value > lineNumberFromPosition)
+                {
+                    _lastDirtyLine += change.LineCountDelta;
                 }
 
                 if (_lastChangedLine.HasValue && _lastChangedLine.Value > lineNumberFromPosition)

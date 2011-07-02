@@ -8,8 +8,11 @@
 
     public class SnapshotCharStream : ICharStream
     {
-        //private string _readaheadCache;
-        //private int _readaheadCachePosition;
+        private bool _explicitCache;
+
+        private int _currentSnapshotLineStartIndex;
+
+        private string _currentSnapshotLine;
 
         /** <summary>tracks how deep mark() calls are nested</summary> */
         private int _markDepth = 0;
@@ -31,6 +34,17 @@
             Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
 
             this.Snapshot = snapshot;
+            UpdateCachedLine();
+        }
+
+        public SnapshotCharStream(ITextSnapshot snapshot, Span cachedSpan)
+        {
+            Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
+
+            this.Snapshot = snapshot;
+            _explicitCache = true;
+            _currentSnapshotLineStartIndex = cachedSpan.Start;
+            _currentSnapshotLine = snapshot.GetText(cachedSpan);
         }
 
         public ITextSnapshot Snapshot
@@ -85,57 +99,57 @@
 
         public virtual void Consume()
         {
-            //System.out.println("prev p="+p+", c="+(char)data[p]);
-            if (Index < Count)
+            int la = LA(1);
+            if (la < 0)
+                return;
+
+            if (la == '\n')
+            {
+                Line++;
+                CharPositionInLine = 0;
+            }
+            else
             {
                 CharPositionInLine++;
-                if (Snapshot.GetText(Index, 1)[0] == '\n')
-                {
-                    /*
-                    System.out.println("newline char found on line: "+line+
-                                       "@ pos="+charPositionInLine);
-                    */
-                    Line++;
-                    CharPositionInLine = 0;
-                }
-                Index++;
-                //System.out.println("p moves to "+p+" (c='"+(char)data[p]+"')");
             }
+
+            Index++;
+            UpdateCachedLine();
         }
 
         public virtual int LA(int i)
         {
             if (i == 0)
             {
-                return 0; // undefined
+                // undefined
+                return 0;
             }
+
             if (i < 0)
             {
-                i++; // e.g., translate LA(-1) to use offset i=0; then data[p+0-1]
+                // e.g., translate LA(-1) to use offset i=0; then data[p+0-1]
+                i++;
                 if ((Index + i - 1) < 0)
                 {
-                    return CharStreamConstants.EndOfFile; // invalid; no char before first char
+                    // invalid; no char before first char
+                    return CharStreamConstants.EndOfFile;
                 }
             }
 
             if ((Index + i - 1) >= Count)
             {
-                //System.out.println("char LA("+i+")=EOF; p="+p);
                 return CharStreamConstants.EndOfFile;
             }
-            //System.out.println("char LA("+i+")="+(char)data[p+i-1]+"; p="+p);
-            //System.out.println("LA("+i+"); p="+p+" n="+n+" data.length="+data.length);
-
-
-            // first check if the data is in the line cache
-            //if (_readaheadCache != null)
-            //{
-            //    int readaheadIndex = _readaheadCachePosition + i - 1;
-            //    if (readaheadIndex >= 0 && readaheadIndex < _readaheadCache.Length)
-            //        return _readaheadCache[readaheadIndex];
-            //}
 
             int actualIndex = Index + i - 1;
+
+            if (_currentSnapshotLine != null
+                && actualIndex >= _currentSnapshotLineStartIndex
+                && actualIndex < _currentSnapshotLineStartIndex + _currentSnapshotLine.Length)
+            {
+                return _currentSnapshotLine[actualIndex - _currentSnapshotLineStartIndex];
+            }
+
             return Snapshot.GetText(actualIndex, 1)[0];
         }
 
@@ -144,8 +158,10 @@
             if (_markers == null)
             {
                 _markers = new List<CharStreamState>();
-                _markers.Add(null); // depth 0 means no backtracking, leave blank
+                // depth 0 means no backtracking, leave blank
+                _markers.Add(null);
             }
+
             _markDepth++;
             CharStreamState state = null;
             if (_markDepth >= _markers.Count)
@@ -157,6 +173,7 @@
             {
                 state = _markers[_markDepth];
             }
+
             state.p = Index;
             state.line = Line;
             state.charPositionInLine = CharPositionInLine;
@@ -180,11 +197,14 @@
         public void Rewind(int marker)
         {
             CharStreamState state = _markers[marker];
-            // restore stream state
-            Seek(state.p);
+
+            // Restore stream state (don't use Seek because it calls UpdateCachedLine() unnecessarily).
+            Index = state.p;
             Line = state.line;
             CharPositionInLine = state.charPositionInLine;
             Release(marker);
+
+            UpdateCachedLine();
         }
 
         public void Seek(int index)
@@ -196,8 +216,30 @@
             var line = Snapshot.GetLineFromPosition(Index);
             Line = line.LineNumber;
             CharPositionInLine = Index - line.Start.Position;
-            //_readaheadCache = line.GetText();
-            //_readaheadCachePosition = CharPositionInLine;
+            UpdateCachedLine();
+        }
+
+        private void UpdateCachedLine()
+        {
+            if (_explicitCache)
+                return;
+
+            if (_currentSnapshotLine == null
+                || Index < _currentSnapshotLineStartIndex
+                || Index >= _currentSnapshotLineStartIndex + _currentSnapshotLine.Length)
+            {
+                if (Index >= 0 || Index < Count)
+                {
+                    ITextSnapshotLine line = Snapshot.GetLineFromPosition(Index);
+                    _currentSnapshotLineStartIndex = line.Start;
+                    _currentSnapshotLine = line.GetTextIncludingLineBreak();
+                }
+                else
+                {
+                    _currentSnapshotLine = null;
+                    _currentSnapshotLineStartIndex = 0;
+                }
+            }
         }
     }
 }
