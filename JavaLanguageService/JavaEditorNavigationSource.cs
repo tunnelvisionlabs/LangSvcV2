@@ -5,13 +5,13 @@
     using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr.Runtime;
+    using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Text.Navigation;
-
     using ImageSource = System.Windows.Media.ImageSource;
-    using Antlr.Runtime.Tree;
+    using StringBuilder = System.Text.StringBuilder;
 
     internal sealed class JavaEditorNavigationSource : IEditorNavigationSource
     {
@@ -102,6 +102,7 @@
                     switch (treeNodeStream.LA(1))
                     {
                     case Java2Lexer.PACKAGE:
+                        // ^('package' qualifiedName)
                         {
                             CommonTree child = treeNodeStream.LT(1) as CommonTree;
                             if (child != null && child.ChildCount > 0)
@@ -112,14 +113,36 @@
 
                         break;
 
+                    case Java2Lexer.VARIABLE_IDENTIFIER:
+                        // ^(FIELD_DECLARATION (.* ^(VARIABLE_IDENTIFIER))*)
+                        {
+                            CommonTree child = treeNodeStream.LT(1) as CommonTree;
+                            if (child != null && child.HasAncestor(Java2Lexer.FIELD_DECLARATION))
+                            {
+                                string name = child.Token.Text;
+                                IEditorNavigationType navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Members);
+                                var startToken = antlrParseResultArgs.Tokens[child.TokenStartIndex];
+                                var stopToken = antlrParseResultArgs.Tokens[child.TokenStopIndex];
+                                SnapshotSpan span = new SnapshotSpan(snapshot, new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1));
+                                SnapshotSpan seek = new SnapshotSpan(snapshot, new Span(child.Token.StartIndex, 0));
+                                StandardGlyphGroup glyphGroup = StandardGlyphGroup.GlyphGroupJSharpField;
+                                StandardGlyphItem glyphItem = GetGlyphItemFromChildModifier((CommonTree)child.GetAncestor(Java2Lexer.FIELD_DECLARATION));
+                                ImageSource glyph = _provider.GetGlyph(glyphGroup, glyphItem);
+                                NavigationTargetStyle style = NavigationTargetStyle.None;
+                                navigationTargets.Add(new EditorNavigationTarget(name, navigationType, span, seek, glyph, style));
+                            }
+                        }
+
+                        break;
+
                     case Java2Lexer.METHOD_IDENTIFIER:
+                        // ^(METHOD_IDENTIFIER ^(FORMAL_PARAMETERS formalParameterDecls?) ^(METHOD_BODY .* END_METHOD_BODY))
                         {
                             CommonTree child = treeNodeStream.LT(1) as CommonTree;
                             if (child != null)
                             {
                                 string name = child.Token.Text;
-                                //IEnumerable<string> args = template.FormalArguments != null ? template.FormalArguments.Select(i => i.Name) : Enumerable.Empty<string>();
-                                var args = Enumerable.Empty<string>();
+                                IEnumerable<string> args = ProcessArguments((CommonTree)child.GetFirstChildWithType(Java2Lexer.FORMAL_PARAMETERS));
                                 string sig = string.Format("{0}({1})", name, string.Join(", ", args));
                                 IEditorNavigationType navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Members);
                                 var startToken = antlrParseResultArgs.Tokens[child.TokenStartIndex];
@@ -202,67 +225,100 @@
                 }
             }
 
-#if false
-            if (antlrParseResultArgs != null)
-            {
-                var result = antlrParseResultArgs.Result as IAstRuleReturnScope;
-                if (result != null)
-                {
-                    foreach (var templateInfo in result.Group.GetTemplateInformation())
-                    {
-                        Antlr4.Java.Compiler.CompiledTemplate template = templateInfo.Template;
-
-                        if (template.IsAnonSubtemplate)
-                            continue;
-
-                        bool isRegion = !string.IsNullOrEmpty(templateInfo.EnclosingTemplateName);
-                        if (isRegion)
-                        {
-                            string sig = string.Format("{0}.{1}()", templateInfo.EnclosingTemplateName, templateInfo.NameToken.Text);
-                            //string sig = string.Format("{0}({1})", name, string.Join(", ", args));
-                            IEditorNavigationType navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(JavaEditorNavigationTypes.Templates);
-                            Interval sourceInterval = templateInfo.GroupInterval;
-                            SnapshotSpan span = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, sourceInterval.Length));
-                            SnapshotSpan seek = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, 0));
-                            ImageSource glyph = _provider.GetGlyph(StandardGlyphGroup.GlyphGroupNamespace, StandardGlyphItem.GlyphItemPublic);
-                            NavigationTargetStyle style = NavigationTargetStyle.None;
-                            navigationTargets.Add(new EditorNavigationTarget(sig, navigationType, span, seek, glyph, style));
-                        }
-                        else
-                        {
-                            // always pull the name from the templateInfo because the template itself could be an aliased template
-                            string name = templateInfo.NameToken.Text;
-                            IEnumerable<string> args = template.FormalArguments != null ? template.FormalArguments.Select(i => i.Name) : Enumerable.Empty<string>();
-                            string sig = string.Format("{0}({1})", name, string.Join(", ", args));
-                            IEditorNavigationType navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(JavaEditorNavigationTypes.Templates);
-                            Interval sourceInterval = templateInfo.GroupInterval;
-                            SnapshotSpan span = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, sourceInterval.Length));
-                            SnapshotSpan seek = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, 0));
-                            bool isAlias = false;
-                            StandardGlyphGroup glyphGroup = isAlias ? StandardGlyphGroup.GlyphGroupTypedef : StandardGlyphGroup.GlyphGroupTemplate;
-                            ImageSource glyph = _provider.GetGlyph(StandardGlyphGroup.GlyphGroupTemplate, StandardGlyphItem.GlyphItemPublic);
-                            NavigationTargetStyle style = NavigationTargetStyle.None;
-                            navigationTargets.Add(new EditorNavigationTarget(sig, navigationType, span, seek, glyph, style));
-                        }
-                    }
-
-                    //foreach (var dictionaryInfo in result.Group.GetDictionaryInformation())
-                    //{
-                    //    string name = dictionaryInfo.Name;
-                    //    IEditorNavigationType navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Members);
-                    //    Interval sourceInterval = dictionaryInfo.GroupInterval;
-                    //    SnapshotSpan span = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, sourceInterval.Length));
-                    //    SnapshotSpan seek = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, 0));
-                    //    ImageSource glyph = _provider.GetGlyph(StandardGlyphGroup.GlyphGroupModule, StandardGlyphItem.GlyphItemPublic);
-                    //    NavigationTargetStyle style = NavigationTargetStyle.None;
-                    //    navigationTargets.Add(new EditorNavigationTarget(sig, navigationType, span, seek, glyph, style));
-                    //}
-                }
-            }
-#endif
-
             this._navigationTargets = navigationTargets;
             OnNavigationTargetsChanged(EventArgs.Empty);
+        }
+
+        private static IEnumerable<string> ProcessArguments(CommonTree tree)
+        {
+            foreach (CommonTree child in tree.Children)
+            {
+                if (child.Type != Java2Lexer.RPAREN)
+                {
+                    IEnumerable<string> modifiers = GetParameterModifiers(child);
+                    string name = child.Text;
+                    string type = GetParameterType(child);
+
+                    StringBuilder builder = new StringBuilder();
+                    foreach (var mod in modifiers)
+                        builder.Append(mod).Append(' ');
+
+                    builder.Append(type).Append(' ');
+                    builder.Append(name);
+                    yield return builder.ToString();
+                }
+            }
+        }
+
+        private static string GetParameterType(CommonTree tree)
+        {
+            int index = 0;
+
+            while (index < tree.ChildCount)
+            {
+                switch (tree.GetChild(index).Type)
+                {
+                case Java2Lexer.MONKEYS_AT:
+                case Java2Lexer.FINAL:
+                    index++;
+                    continue;
+
+                default:
+                    break;
+                }
+
+                break;
+            }
+
+            string typeText = GetTypeText((CommonTree)tree.GetChild(index));
+
+            if (tree.GetFirstChildWithType(Java2Lexer.ELLIPSIS) != null)
+                typeText = typeText + "...";
+
+            return typeText;
+        }
+
+        private static string GetTypeText(CommonTree tree)
+        {
+            if (tree.Type == Java2Lexer.ARRAY_TYPE)
+                return GetTypeText((CommonTree)tree.GetChild(0)) + "[]";
+
+            // this covers primitiveType
+            if (tree.ChildCount == 0)
+                return tree.Text;
+
+            if (tree.Type == Java2Lexer.DOT)
+                return GetTypeText((CommonTree)tree.GetChild(0)) + "." + GetTypeText((CommonTree)tree.GetChild(1));
+
+            // if we get here, we know the tree is ^(IDENTIFIER typeArguments)
+            string name = tree.Text;
+            IEnumerable<string> typeArguments = ((CommonTree)tree.GetChild(0)).Children.Select(GetTypeArgumentText);
+            return string.Format("{0}<{1}>", name, string.Join(", ", typeArguments));
+        }
+
+        private static string GetTypeArgumentText(ITree tree)
+        {
+            if (tree.Type != Java2Lexer.QUES)
+                return GetTypeText((CommonTree)tree);
+
+            if (tree.ChildCount == 0)
+                return tree.Text;
+
+            // if we get here, we know the tree is ^('?' (('extends' | 'super') type))
+            string extendsOrSuper = tree.GetChild(0).Text;
+            string extendedType = GetTypeText((CommonTree)tree.GetChild(1));
+            return string.Format("? {0} {1}", extendsOrSuper, extendedType);
+        }
+
+        private static IEnumerable<string> GetParameterModifiers(CommonTree tree)
+        {
+            foreach (var child in tree.Children)
+            {
+                if (child.Type == Java2Lexer.FINAL)
+                    return new string[] { "final" };
+            }
+
+            return new string[0];
         }
 
         private static string GetQualifiedIdentifier(ITree tree)

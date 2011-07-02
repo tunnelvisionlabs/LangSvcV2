@@ -286,6 +286,9 @@ tokens {
 	ENUM_CONSTANT_IDENTIFIER;
 	METHOD_IDENTIFIER;
 	VARIABLE_IDENTIFIER;
+	PARAMETER_IDENTIFIER;
+
+	FORMAL_PARAMETERS;
 
 	FIELD_DECLARATION;
 	ARRAY_TYPE;
@@ -724,23 +727,23 @@ qualifiedNameList
     ;
 
 formalParameters
-    :   '('^ formalParameterDecls? ')'
+    :   '('<FORMAL_PARAMETERS>^ formalParameterDecls? ')'
     ;
 
 formalParameterDecls
     :   ellipsisParameterDecl
-    |   normalParameterDecl (',' normalParameterDecl)*
-    |   (normalParameterDecl ',')+ ellipsisParameterDecl
+    |   normalParameterDecl (','! normalParameterDecl)*
+    |   (normalParameterDecl ','!)+ ellipsisParameterDecl
     ;
 
 normalParameterDecl
-    :   variableModifiers type IDENTIFIER^ ('[' ']')*
+    :   variableModifiers type IDENTIFIER<PARAMETER_IDENTIFIER>^ ('[' ']')*
     ;
 
 ellipsisParameterDecl
     :   variableModifiers
         type '...'
-        IDENTIFIER^
+        IDENTIFIER<PARAMETER_IDENTIFIER>^
     ;
 
 
