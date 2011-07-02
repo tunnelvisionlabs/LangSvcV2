@@ -17,9 +17,5 @@ namespace JavaLanguageService
         [FileExtension(Constants.JavaFileExtension)]
         [ContentType(Constants.JavaContentType)]
         private static readonly FileExtensionToContentTypeDefinition JavaFileExtensionToContentTypeDefinition;
-
-        [Export]
-        [Name(Constants.AntlrIntellisenseOutputWindow)]
-        private static readonly OutputWindowDefinition AntlrIntellisenseOutputWindowDefinition;
     }
 }

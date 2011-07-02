@@ -18,9 +18,16 @@
             set;
         }
 
+        [Import]
+        private ITextDocumentFactoryService TextDocumentFactoryService
+        {
+            get;
+            set;
+        }
+
         public IBackgroundParser CreateParser(ITextBuffer textBuffer)
         {
-            Func<AntlrBackgroundParser> creator = () => new AntlrBackgroundParser(textBuffer, OutputWindowService);
+            Func<AntlrBackgroundParser> creator = () => new AntlrBackgroundParser(textBuffer, TextDocumentFactoryService, OutputWindowService);
             return textBuffer.Properties.GetOrCreateSingletonProperty<AntlrBackgroundParser>(creator);
         }
     }

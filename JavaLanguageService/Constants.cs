@@ -17,8 +17,6 @@
         public const string JavaLanguagePackageDetailsResourceString = "#111";
         public const string JavaLanguagePackageProductVersionString = "1.0";
 
-        public const string AntlrIntellisenseOutputWindow = "ANTLR IntelliSense Engine";
-
         public const string JavaLanguagePackageGuidString = "1782E1AA-0FBD-4982-B6A8-A1110D95CA57";
         public static readonly Guid JavaLanguagePackageGuid = new Guid("{" + JavaLanguagePackageGuidString + "}");
 

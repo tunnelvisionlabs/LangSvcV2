@@ -18,9 +18,16 @@
             set;
         }
 
+        [Import]
+        private ITextDocumentFactoryService TextDocumentFactoryService
+        {
+            get;
+            set;
+        }
+
         public IBackgroundParser CreateParser(ITextBuffer textBuffer)
         {
-            Func<AlloyBackgroundParser> creator = () => new AlloyBackgroundParser(textBuffer, OutputWindowService);
+            Func<AlloyBackgroundParser> creator = () => new AlloyBackgroundParser(textBuffer, TextDocumentFactoryService, OutputWindowService);
             return textBuffer.Properties.GetOrCreateSingletonProperty<AlloyBackgroundParser>(creator);
         }
     }

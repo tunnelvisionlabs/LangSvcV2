@@ -20,8 +20,6 @@
         public const string StringTemplateLanguagePackageDetailsResourceString = "#111";
         public const string StringTemplateLanguagePackageProductVersionString = "1.0";
 
-        public const string AntlrIntellisenseOutputWindow = "ANTLR IntelliSense Engine";
-
         public const string StringTemplateLanguagePackageGuidString = "C087AB33-E4AE-42A9-8FFF-1139EA53C522";
         public static readonly Guid StringTemplateLanguagePackageGuid = new Guid("{" + StringTemplateLanguagePackageGuidString + "}");
 

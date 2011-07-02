@@ -7,11 +7,12 @@
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow;
+    using Stopwatch = System.Diagnostics.Stopwatch;
 
     public class GoBackgroundParser : BackgroundParser
     {
-        public GoBackgroundParser(ITextBuffer textBuffer, IOutputWindowService outputWindowService)
-            : base(textBuffer)
+        public GoBackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+            : base(textBuffer, textDocumentFactoryService, outputWindowService)
         {
             this.OutputWindowService = outputWindowService;
         }
@@ -24,9 +25,11 @@
 
         protected override void ReParseImpl()
         {
-            var outputWindow = OutputWindowService.TryGetPane(GoConstants.AntlrIntellisenseOutputWindow);
+            var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
             try
             {
+                Stopwatch stopwatch = Stopwatch.StartNew();
+
                 var snapshot = TextBuffer.CurrentSnapshot;
                 SnapshotCharStream input = new SnapshotCharStream(snapshot);
                 GoLexer lexer = new GoLexer(input);
@@ -56,7 +59,7 @@
                     };
 
                 var result = parser.compilationUnit();
-                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, tokens.GetTokens(), result));
+                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), result));
             }
             catch (Exception e)
             {

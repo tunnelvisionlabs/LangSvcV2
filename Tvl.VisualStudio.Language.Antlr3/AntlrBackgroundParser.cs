@@ -14,13 +14,14 @@
     using Grammar = global::Antlr3.Tool.Grammar;
     using IAstRuleReturnScope = Antlr.Runtime.IAstRuleReturnScope;
     using IToken = Antlr.Runtime.IToken;
+    using Stopwatch = System.Diagnostics.Stopwatch;
 
     public class AntlrBackgroundParser : BackgroundParser
     {
         private static bool _initialized;
 
-        public AntlrBackgroundParser(ITextBuffer textBuffer, IOutputWindowService outputWindowService)
-            : base(textBuffer)
+        public AntlrBackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+            : base(textBuffer, textDocumentFactoryService, outputWindowService)
         {
             Contract.Requires<ArgumentNullException>(outputWindowService != null, "outputWindowService");
 
@@ -64,9 +65,11 @@
 
         protected override void ReParseImpl()
         {
-            var outputWindow = OutputWindowService.TryGetPane(AntlrConstants.AntlrIntellisenseOutputWindow);
+            var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
             try
             {
+                Stopwatch stopwatch = Stopwatch.StartNew();
+
                 var snapshot = TextBuffer.CurrentSnapshot;
                 var input = new SnapshotCharStream(snapshot);
                 var lexer = new AntlrErrorProvidingLexer(input);
@@ -93,7 +96,7 @@
                 ErrorManager.SetErrorListener(new AntlrErrorProvidingParser.ErrorListener());
                 Grammar g = new Grammar();
                 var result = parser.grammar_(g);
-                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, tokens.GetTokens(), result));
+                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), result));
             }
             catch (Exception e)
             {

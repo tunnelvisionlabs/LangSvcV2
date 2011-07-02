@@ -11,8 +11,8 @@
     {
         private MarkdownSharp.Markdown _markdownTransform = new MarkdownSharp.Markdown();
 
-        public MarkdownBackgroundParser(ITextBuffer textBuffer, IOutputWindowService outputWindowService)
-            : base(textBuffer)
+        public MarkdownBackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+            : base(textBuffer, textDocumentFactoryService, outputWindowService)
         {
             this.OutputWindowService = outputWindowService;
         }
@@ -25,7 +25,7 @@
 
         protected override void ReParseImpl()
         {
-            var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.General);
+            var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
             try
             {
                 var snapshot = TextBuffer.CurrentSnapshot;

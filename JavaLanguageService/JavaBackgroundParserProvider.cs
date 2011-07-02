@@ -12,15 +12,22 @@
     public sealed class JavaBackgroundParserProvider : IBackgroundParserProvider
     {
         [Import]
-        private IOutputWindowService OutputWindowService
+        public IOutputWindowService OutputWindowService
         {
             get;
-            set;
+            private set;
+        }
+
+        [Import]
+        public ITextDocumentFactoryService TextDocumentFactoryService
+        {
+            get;
+            private set;
         }
 
         public IBackgroundParser CreateParser(ITextBuffer textBuffer)
         {
-            Func<JavaBackgroundParser> creator = () => new JavaBackgroundParser(textBuffer, OutputWindowService);
+            Func<JavaBackgroundParser> creator = () => new JavaBackgroundParser(textBuffer, this);
             return textBuffer.Properties.GetOrCreateSingletonProperty<JavaBackgroundParser>(creator);
         }
     }

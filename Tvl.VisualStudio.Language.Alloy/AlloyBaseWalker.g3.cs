@@ -44,7 +44,7 @@
 
         public override void DisplayRecognitionError(string[] tokenNames, RecognitionException e)
         {
-            var outputWindow = OutputWindowService.TryGetPane(AlloyConstants.AntlrIntellisenseOutputWindow);
+            var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
             if (outputWindow != null)
             {
                 string header = GetErrorHeader(e);

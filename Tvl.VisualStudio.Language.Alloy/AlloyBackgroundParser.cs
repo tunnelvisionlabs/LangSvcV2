@@ -7,11 +7,12 @@
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow;
+    using Stopwatch = System.Diagnostics.Stopwatch;
 
     public class AlloyBackgroundParser : BackgroundParser
     {
-        public AlloyBackgroundParser(ITextBuffer textBuffer, IOutputWindowService outputWindowService)
-            : base(textBuffer)
+        public AlloyBackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+            : base(textBuffer, textDocumentFactoryService, outputWindowService)
         {
             this.OutputWindowService = outputWindowService;
         }
@@ -30,9 +31,11 @@
 
         protected override void ReParseImpl()
         {
-            var outputWindow = OutputWindowService.TryGetPane(AlloyConstants.AntlrIntellisenseOutputWindow);
+            var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
             try
             {
+                Stopwatch stopwatch = Stopwatch.StartNew();
+
                 var snapshot = TextBuffer.CurrentSnapshot;
                 SnapshotCharStream input = new SnapshotCharStream(snapshot);
                 AlloyLexer lexer = new AlloyLexer(input);
@@ -61,7 +64,7 @@
                     };
 
                 var result = parser.compilationUnit();
-                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, tokens.GetTokens(), result));
+                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), result));
             }
             catch (Exception e)
             {

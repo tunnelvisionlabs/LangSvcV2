@@ -4,7 +4,5 @@
     {
         public const string GoContentType = "go";
         public const string GoFileExtension = ".go";
-
-        public const string AntlrIntellisenseOutputWindow = "ANTLR IntelliSense Engine";
     }
 }

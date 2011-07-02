@@ -10,11 +10,12 @@
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow;
+    using Stopwatch = System.Diagnostics.Stopwatch;
 
     public class StringTemplateBackgroundParser : BackgroundParser
     {
-        public StringTemplateBackgroundParser(ITextBuffer textBuffer, IOutputWindowService outputWindowService)
-            : base(textBuffer)
+        public StringTemplateBackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+            : base(textBuffer, textDocumentFactoryService, outputWindowService)
         {
             this.OutputWindowService = outputWindowService;
         }
@@ -27,9 +28,11 @@
 
         protected override void ReParseImpl()
         {
-            var outputWindow = OutputWindowService.TryGetPane(StringTemplateConstants.AntlrIntellisenseOutputWindow);
+            var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
             try
             {
+                Stopwatch stopwatch = Stopwatch.StartNew();
+
                 var snapshot = TextBuffer.CurrentSnapshot;
                 SnapshotCharStream input = new SnapshotCharStream(snapshot);
                 GroupLexer lexer = new GroupLexer(input);
@@ -60,7 +63,7 @@
                 TemplateGroupWrapper group = new TemplateGroupWrapper('<', '>');
                 parser.group(group, "/");
                 TemplateGroupRuleReturnScope returnScope = BuiltAstForGroupTemplates(group);
-                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, tokens.GetTokens(), returnScope));
+                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), returnScope));
             }
             catch (Exception e)
             {

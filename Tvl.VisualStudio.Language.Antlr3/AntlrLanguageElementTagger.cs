@@ -101,7 +101,7 @@
         private void ReParse()
         {
             _dirty = false;
-            var outputWindow = OutputWindowService.TryGetPane(AntlrConstants.AntlrIntellisenseOutputWindow);
+            var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
             try
             {
                 Grammar g = new Grammar();

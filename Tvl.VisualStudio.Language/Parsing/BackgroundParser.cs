@@ -1,15 +1,21 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing
 {
+    using Path = System.IO.Path;
     using System;
     using System.Diagnostics.Contracts;
     using System.Threading;
     using Microsoft.VisualStudio.Text;
+    using Tvl.VisualStudio.Shell.OutputWindow;
     using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
     using Timer = System.Timers.Timer;
+    using System.Diagnostics;
 
     public abstract class BackgroundParser : IBackgroundParser, IDisposable
     {
         private readonly ITextBuffer _textBuffer;
+        private readonly ITextDocumentFactoryService _textDocumentFactoryService;
+        private readonly IOutputWindowService _outputWindowService;
+        private readonly string _outputWindowName;
         private readonly Timer _timer;
 
         private DateTimeOffset _lastEdit;
@@ -18,11 +24,25 @@
 
         public event EventHandler<ParseResultEventArgs> ParseComplete;
 
+        [Obsolete]
         public BackgroundParser(ITextBuffer textBuffer)
+        {
+        }
+
+        public BackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+            : this(textBuffer, textDocumentFactoryService, outputWindowService, PredefinedOutputWindowPanes.TvlIntellisense)
+        {
+        }
+
+        public BackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService, string outputPaneName)
         {
             Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
 
             this._textBuffer = textBuffer;
+            this._textDocumentFactoryService = textDocumentFactoryService;
+            this._outputWindowService = outputWindowService;
+            this._outputWindowName = outputPaneName;
+
             this._textBuffer.PostChanged += TextBufferPostChanged;
 
             this._dirty = true;
@@ -133,7 +153,62 @@
             try
             {
                 _dirty = false;
-                ReParseImpl();
+
+                IOutputWindowPane outputWindow = null;
+                if (_outputWindowService != null && !string.IsNullOrEmpty(_outputWindowName))
+                    outputWindow = _outputWindowService.TryGetPane(_outputWindowName);
+
+                Stopwatch stopwatch = Stopwatch.StartNew();
+
+                string message = "{0}: Background parse {1} in {2}ms. {3}";
+
+                string filename = "<Unknown File>";
+                ITextDocument textDocument;
+                if (_textDocumentFactoryService.TryGetTextDocument(TextBuffer, out textDocument))
+                {
+                    filename = textDocument.FilePath;
+                    if (filename != null)
+                        filename = filename.Substring(filename.LastIndexOfAny(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }) + 1);
+                }
+
+                try
+                {
+                    ReParseImpl();
+
+                    try
+                    {
+                        if (outputWindow != null)
+                        {
+                            long time = stopwatch.ElapsedMilliseconds;
+                            outputWindow.WriteLine(string.Format(message, filename, "succeeded", time, string.Empty));
+                        }
+                    }
+                    catch (Exception e3)
+                    {
+                        if (ErrorHandler.IsCriticalException(e3))
+                            throw;
+                    }
+                }
+                catch (Exception e2)
+                {
+                    if (ErrorHandler.IsCriticalException(e2))
+                        throw;
+
+                    try
+                    {
+                        if (outputWindow != null)
+                        {
+                            long time = stopwatch.ElapsedMilliseconds;
+                            outputWindow.WriteLine(string.Format(message, filename, "failed", time, e2.Message));
+                        }
+                    }
+                    catch (Exception e3)
+                    {
+                        if (ErrorHandler.IsCriticalException(e3))
+                            throw;
+                    }
+                }
+
             }
             catch (Exception ex)
             {

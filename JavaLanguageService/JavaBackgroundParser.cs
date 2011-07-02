@@ -2,64 +2,77 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow;
 
+    using Stopwatch = System.Diagnostics.Stopwatch;
+
     public class JavaBackgroundParser : BackgroundParser
     {
-        public JavaBackgroundParser(ITextBuffer textBuffer, IOutputWindowService outputWindowService)
-            : base(textBuffer)
+        private readonly JavaBackgroundParserProvider _provider;
+
+        public JavaBackgroundParser(ITextBuffer textBuffer, JavaBackgroundParserProvider provider)
+            : base(textBuffer, provider.TextDocumentFactoryService, provider.OutputWindowService)
         {
-            this.OutputWindowService = outputWindowService;
+            Contract.Requires<ArgumentNullException>(provider != null, "provider");
+
+            _provider = provider;
         }
 
         public IOutputWindowService OutputWindowService
         {
-            get;
-            private set;
+            get
+            {
+                return _provider.OutputWindowService;
+            }
+        }
+
+        public ITextDocumentFactoryService TextDocumentFactoryService
+        {
+            get
+            {
+                return _provider.TextDocumentFactoryService;
+            }
         }
 
         protected override void ReParseImpl()
         {
-            var outputWindow = OutputWindowService.TryGetPane(Constants.AntlrIntellisenseOutputWindow);
-            try
-            {
-                var snapshot = TextBuffer.CurrentSnapshot;
-                SnapshotCharStream input = new SnapshotCharStream(snapshot);
-                Java2Lexer lexer = new Java2Lexer(new JavaUnicodeStream(input));
-                CommonTokenStream tokens = new CommonTokenStream(lexer);
-                Java2Parser parser = new Java2Parser(tokens);
-                List<ParseErrorEventArgs> errors = new List<ParseErrorEventArgs>();
-                parser.ParseError += (sender, e) =>
-                    {
-                        errors.Add(e);
+            var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
 
-                        string message = e.Message;
-                        if (message.Length > 100)
-                            message = message.Substring(0, 100) + " ...";
+            Stopwatch stopwatch = Stopwatch.StartNew();
 
-                        if (outputWindow != null)
-                            outputWindow.WriteLine(message);
-                    };
+            string filename = "<Unknown File>";
+            ITextDocument textDocument;
+            if (TextDocumentFactoryService.TryGetTextDocument(TextBuffer, out textDocument))
+                filename = textDocument.FilePath;
 
-                var result = parser.compilationUnit();
-                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, tokens.GetTokens(), result));
-            }
-            catch (Exception e)
-            {
-                try
+            var snapshot = TextBuffer.CurrentSnapshot;
+            ANTLRStringStream input = new ANTLRStringStream(snapshot.GetText());
+            Java2Lexer lexer = new Java2Lexer(new JavaUnicodeStream(input));
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            Java2Parser parser = new Java2Parser(tokens);
+            List<ParseErrorEventArgs> errors = new List<ParseErrorEventArgs>();
+            parser.ParseError += (sender, e) =>
                 {
+                    errors.Add(e);
+
+                    string message = e.Message;
+                    if (message.Length > 100)
+                        message = message.Substring(0, 100) + " ...";
+
+                    ITextSnapshotLine startLine = snapshot.GetLineFromPosition(e.Span.Start);
+                    int line = startLine.LineNumber;
+                    int column = e.Span.Start - startLine.Start;
+
                     if (outputWindow != null)
-                    {
-                        outputWindow.WriteLine(e.Message);
-                    }
-                }
-                catch
-                {
-                }
-            }
+                        outputWindow.WriteLine(string.Format("{0}({1}:{2}): {3}", filename, line, column, message));
+                };
+
+            var result = parser.compilationUnit();
+            OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), result));
         }
     }
 }

@@ -17,8 +17,6 @@
         public const string AlloyLanguagePackageDetailsResourceString = "#111";
         public const string AlloyLanguagePackageProductVersionString = "1.0";
 
-        public const string AntlrIntellisenseOutputWindow = "ANTLR IntelliSense Engine";
-
         public const string AlloyLanguagePackageGuidString = "E18267CE-5A78-46DF-87AE-21891D8FB2DE";
         public static readonly Guid AlloyLanguagePackageGuid = new Guid("{" + AlloyLanguagePackageGuidString + "}");
 

@@ -18,9 +18,16 @@
             set;
         }
 
+        [Import]
+        private ITextDocumentFactoryService TextDocumentFactoryService
+        {
+            get;
+            set;
+        }
+
         public IBackgroundParser CreateParser(ITextBuffer textBuffer)
         {
-            Func<StringTemplateBackgroundParser> creator = () => new StringTemplateBackgroundParser(textBuffer, OutputWindowService);
+            Func<StringTemplateBackgroundParser> creator = () => new StringTemplateBackgroundParser(textBuffer, TextDocumentFactoryService, OutputWindowService);
             return textBuffer.Properties.GetOrCreateSingletonProperty<StringTemplateBackgroundParser>(creator);
         }
     }
