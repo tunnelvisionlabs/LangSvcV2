@@ -1,0 +1,57 @@
+﻿lexer grammar PhpHtmlTagClassifierLexer;
+
+options {
+	language=CSharp3;
+	TokenLabelType=CommonToken;
+	tokenVocab=PhpHtmlTextClassifierLexer;
+}
+
+@namespace{Tvl.VisualStudio.Language.Php}
+@modifier{internal}
+@ctorModifier{private}
+
+HTML_CLOSE_TAG
+	:	'/'? '>'
+	;
+
+EQUALS
+	:	'='
+	;
+
+WS
+	:	(' ' | '\t')+
+	;
+
+NEWLINE
+	:	'\r'? '\n'
+	;
+
+NAME
+	:	~(	C0_CONTROL_CHAR
+		|	C1_CONTROL_CHAR
+		|	' ' | '"' | '\'' | '>' | '/' | '='
+		)+
+	;
+
+SINGLE_QUOTE_STRING
+	:	'\'' .* '\''
+	;
+
+DOUBLE_QUOTE_STRING
+	:	'"' .* '"'
+	;
+
+fragment
+C0_CONTROL_CHAR
+	:	'\u0000'..'\u001F'
+	|	'\u007f'
+	;
+
+fragment
+C1_CONTROL_CHAR
+	:	'\u0080'..'\u009f'
+	;
+
+ANY_CHAR
+	:	.
+	;

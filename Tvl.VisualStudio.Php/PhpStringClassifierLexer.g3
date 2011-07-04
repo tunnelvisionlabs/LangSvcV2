@@ -1,0 +1,42 @@
+﻿lexer grammar PhpStringClassifierLexer;
+
+options {
+	language=CSharp3;
+	TokenLabelType=CommonToken;
+	tokenVocab=PhpDocCommentClassifierLexer;
+}
+
+@namespace{Tvl.VisualStudio.Language.Php}
+
+PHP_STRING_ARROW
+	:	'->'
+	;
+
+//LBRACE
+//	:	{input.LA(2) == '$'}? => '{'
+//	;
+
+PHP_STRING_ESCAPE
+	:	'\\' .
+	;
+
+PHP_SIMPLE_STRING_REFERENCE
+	:	'$' ('a'..'z' | 'A'..'Z' | '0'..'9' | '_' | '$')*
+	;
+
+PHP_STRING_IDENTIFIER
+	:	('a'..'z' | 'A'..'Z' | '_' | '$')
+		('a'..'z' | 'A'..'Z' | '0'..'9' | '_' | '$')*
+	;
+
+PHP_STRING_TEXT
+	:	~('\r' | '\n')
+	;
+
+NEWLINE
+	:	'\r'? '\n'
+	;
+
+ANYCHAR
+	:	.
+	;

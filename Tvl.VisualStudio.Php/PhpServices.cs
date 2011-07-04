@@ -16,16 +16,6 @@ namespace Tvl.VisualStudio.Language.Php
         private static readonly ContentTypeDefinition PhpContentTypeDefinition;
 
         [Export]
-        [FileExtension(PhpConstants.PhpFileExtension)]
-        [ContentType(PhpConstants.PhpContentType)]
-        private static readonly FileExtensionToContentTypeDefinition PhpFileExtensionToContentTypeDefinition;
-
-        [Export]
-        [FileExtension(PhpConstants.PhpFileExtension2)]
-        [ContentType(PhpConstants.PhpContentType)]
-        private static readonly FileExtensionToContentTypeDefinition PhpFileExtensionToContentTypeDefinition2;
-
-        [Export]
         [BaseDefinition(PredefinedClassificationTypeNames.Identifier)]
         [Name(PhpClassificationTypeNames.GlobalFunction)]
         private static readonly ClassificationTypeDefinition PredefinedGlobalFunctionClassificationType;

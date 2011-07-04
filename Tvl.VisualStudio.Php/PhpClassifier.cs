@@ -7,7 +7,7 @@
     using Microsoft.VisualStudio.Text.Classification;
     using Tvl.VisualStudio.Language.Parsing;
 
-    internal sealed class PhpClassifier : AntlrClassifierBase
+    internal sealed class PhpClassifier : AntlrClassifierBase<PhpClassifierLexerState>
     {
         private static readonly HashSet<string> Keywords =
             new HashSet<string>()
@@ -116,7 +116,12 @@
         private readonly IClassificationType _globalFunction;
         private readonly IClassificationType _globalObject;
 
+        private readonly IClassificationType _docCommentText;
+        private readonly IClassificationType _docCommentTag;
+        private readonly IClassificationType _docCommentInvalidTag;
+
         public PhpClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService, IClassificationTypeRegistryService classificationTypeRegistryService)
+            : base(textBuffer)
         {
             this._textBuffer = textBuffer;
             this._standardClassificationService = standardClassificationService;
@@ -124,43 +129,68 @@
 
             this._globalFunction = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.GlobalFunction);
             this._globalObject = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.GlobalObject);
+
+            this._docCommentText = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.DocCommentText);
+            this._docCommentTag = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.DocCommentTag);
+            this._docCommentInvalidTag = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.DocCommentInvalidTag);
         }
 
-        protected override ITokenSource CreateLexer(ICharStream input)
+        protected override PhpClassifierLexerState GetStartState()
         {
-            return new PhpColorizerLexer(input);
+            return PhpClassifierLexerState.Initial;
+        }
+
+        protected override ITokenSourceWithState<PhpClassifierLexerState> CreateLexer(ICharStream input, PhpClassifierLexerState state)
+        {
+            return new PhpClassifierLexer(input, state);
         }
 
         protected override IClassificationType ClassifyToken(IToken token)
         {
             switch (token.Type)
             {
-            case PhpColorizerLexer.CHAR_LITERAL:
-                return _standardClassificationService.CharacterLiteral;
-
-            case PhpColorizerLexer.STRING_LITERAL:
+            case PhpHtmlTagClassifierLexer.SINGLE_QUOTE_STRING:
+            case PhpHtmlTagClassifierLexer.DOUBLE_QUOTE_STRING:
+            case PhpCodeClassifierLexer.PHP_SINGLE_STRING_LITERAL:
+            case PhpCodeClassifierLexer.PHP_DOUBLE_STRING_LITERAL:
+            case PhpCodeClassifierLexer.PHP_HEREDOC_TEXT:
                 return _standardClassificationService.StringLiteral;
 
-            case PhpColorizerLexer.NUMBER:
+            case PhpCodeClassifierLexer.PHP_NUMBER:
                 return _standardClassificationService.NumberLiteral;
 
-            case PhpColorizerLexer.OPEN_PHP_TAG:
-            case PhpColorizerLexer.CLOSE_PHP_TAG:
-                return _standardClassificationService.Keyword;
-
-            case PhpColorizerLexer.IDENTIFIER:
+            case PhpCodeClassifierLexer.PHP_IDENTIFIER:
                 if (Keywords.Contains(token.Text))
                     return _standardClassificationService.Keyword;
                 else if (BuiltinFunctions.Contains(token.Text))
                     return _globalFunction;
                 else if (BuiltinObjects.Contains(token.Text))
                     return _globalObject;
+                else if (token.Text[0] == '$')
+                    return _standardClassificationService.SymbolDefinition;
 
                 return _standardClassificationService.Identifier;
 
-            case PhpColorizerLexer.COMMENT:
-            case PhpColorizerLexer.ML_COMMENT:
+            case PhpHtmlTextClassifierLexer.HTML_START_CODE:
+            case PhpCodeClassifierLexer.CLOSE_PHP_TAG:
+                return _standardClassificationService.Keyword;
+
+            case PhpHtmlTextClassifierLexer.HTML_COMMENT:
+            case PhpCodeClassifierLexer.PHP_COMMENT:
+            case PhpCodeClassifierLexer.PHP_ML_COMMENT:
                 return _standardClassificationService.Comment;
+
+            case PhpDocCommentClassifierLexer.DOC_COMMENT_TEXT:
+                return _docCommentText;
+
+            case PhpDocCommentClassifierLexer.DOC_COMMENT_TAG:
+                return _docCommentTag;
+
+            case PhpDocCommentClassifierLexer.DOC_COMMENT_INVALID_TAG:
+                return _docCommentInvalidTag;
+
+            case PhpHtmlTextClassifierLexer.HTML_CDATA:
+                return _standardClassificationService.ExcludedCode;
 
             default:
                 return null;

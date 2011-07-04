@@ -1,0 +1,147 @@
+﻿lexer grammar PhpCodeClassifierLexer;
+
+options {
+	language=CSharp3;
+	TokenLabelType=CommonToken;
+	tokenVocab=PhpHtmlTagClassifierLexer;
+}
+
+@namespace{Tvl.VisualStudio.Language.Php}
+@modifier{internal}
+@ctorModifier{private}
+
+CLOSE_PHP_TAG
+	:	'?>'
+	;
+
+fragment PHP_HEREDOC_TEXT : ;
+fragment PHP_HEREDOC_END : ;
+
+fragment
+PHP_HEREDOC_START
+	:	'<<<' PHP_IDENTIFIER {input.LA(1) == '\r' || input.LA(1) == '\n'}?
+		{state.type = PHP_HEREDOC_START;}
+	;
+
+PHP_LSHIFT
+	:	(PHP_HEREDOC_START) => PHP_HEREDOC_START {$type = state.type;}
+	|	'<<'
+	;
+
+PHP_RSHIFT	: '>>';
+PHP_LT		: '<';
+PHP_GT		: '>';
+PHP_ARROW	: '->';
+PHP_LBRACE	: '{';
+PHP_RBRACE	: '}';
+PHP_LBRACK	: '[';
+PHP_RBRACK	: ']';
+
+fragment
+CONTINUE_HEREDOC
+	:	(	options{greedy=true; k=1;} :
+			PHP_IDENTIFIER (options{greedy=true; k=1;} : ';')? {CheckHeredocEnd = input.LA(1) == '\r' || input.LA(1) == '\n';}
+		|	{CheckHeredocEnd = false;}
+		)
+		~('\r' | '\n')*
+		{state.type = CONTINUE_HEREDOC;}
+	;
+
+PHP_IDENTIFIER
+	:	('a'..'z' | 'A'..'Z' | '_' | '$')
+		('a'..'z' | 'A'..'Z' | '0'..'9' | '_' | '$')*
+	;
+
+PHP_NUMBER
+	:	(	'0'..'9'
+		| 	'.' '0'..'9'
+		)
+		(PHP_IDENTIFIER PHP_NUMBER?)?
+	;
+
+PHP_COMMENT
+	:	'//' (~('\r' | '\n'))*
+	;
+
+DOC_COMMENT_START
+	:	{input.LT(4) != '/'}? => '/**'
+	;
+
+EMPTY_BLOCK_COMMENT
+	:	'/**/' {$type = PHP_ML_COMMENT;}
+	;
+
+PHP_ML_COMMENT
+	:	'/*' ~'*' .* '*/'
+	;
+
+fragment END_SINGLE_STRING : ;
+fragment END_DOUBLE_STRING : ;
+
+PHP_SINGLE_STRING_LITERAL
+	:	'\'' CONTINUE_SINGLE_STRING {$type = state.type;}
+	;
+
+PHP_DOUBLE_STRING_LITERAL
+	:	'"' {$type = CONTINUE_DOUBLE_STRING;}
+	;
+
+fragment
+CONTINUE_SINGLE_STRING
+	:	(	~('\r' | '\n' | '\'' | '\\')
+		|	'\\' ('\'' | '\\')
+		|	{input.LA(2) != '\'' && input.LA(2) != '\\'}? => '\\'
+		)*
+		(	'\''		{state.type = END_SINGLE_STRING;}
+		|				{state.type = CONTINUE_SINGLE_STRING;}
+		)
+	;
+
+fragment DOUBLE_STRING_ESCAPE : ;
+
+fragment
+CONTINUE_DOUBLE_STRING
+	:	'->'													{state.type = PHP_ARROW;}
+	|	'['														{state.type = PHP_LBRACK;}
+	|	']'														{state.type = PHP_RBRACK;}
+	|	(PHP_IDENTIFIER) => PHP_IDENTIFIER						{state.type = PHP_IDENTIFIER;}
+	|	(' ' | '\t')+											{state.type = WS;}
+	|	{IsDoubleQuoteEscapeChar(input.LA(2))}? =>
+		'\\'
+		(	('n' | 'r' | 't' | 'v' | 'f' | '\\' | '$' | '"')	{state.type = DOUBLE_STRING_ESCAPE;}
+		|	'0'..'7' ('0'..'7' ('0'..'7')?)?					{state.type = DOUBLE_STRING_ESCAPE;}
+		|	'x'
+			(	HEXDIGIT HEXDIGIT?								{state.type = DOUBLE_STRING_ESCAPE;}
+			|													{state.type = CONTINUE_DOUBLE_STRING;}
+			)
+		)
+	|	{input.LA(2) == '$'}? => '{'							{state.type = PHP_LBRACE;}
+	|	{StringBraceLevel > 0}? => '}'							{state.type = PHP_RBRACE;}
+	//|	PHP_NUMBER
+	|	(	~('\r' | '\n' | '"' | '\\' | '$' | '-' | '[' | ']' | '{' | '}' | ' ' | '\t')
+		|	{!IsDoubleQuoteEscapeChar(input.LA(2))}? => '\\'
+		|	{input.LA(2) != '>'}? => '-'
+		|	{input.LA(2) != '$'}? => '{'
+		|	{StringBraceLevel == 0}? => '}'
+		)*
+		(	'"'		{state.type = END_DOUBLE_STRING;}
+		|			{state.type = CONTINUE_DOUBLE_STRING;}
+		)
+	;
+
+fragment
+HEXDIGIT
+	:	'0'..'9' | 'a'..'f' | 'A'..'F'
+	;
+
+WS
+	:	(' ' | '\t')+
+	;
+
+NEWLINE
+	:	'\r'? '\n'
+	;
+
+ANYCHAR
+	:	.
+	;
