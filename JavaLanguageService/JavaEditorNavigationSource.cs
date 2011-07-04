@@ -95,6 +95,27 @@
 
                 string package = string.Empty;
 
+                /* ^('package' qualifiedName)
+                 *
+                 * ^(CLASS_TYPE_IDENTIFIER modifiers .* ^(TYPE_BODY .* '}'))
+                 *
+                 * ^(INTERFACE_TYPE_IDENTIFIER modifiers .* ^(TYPE_BODY .* '}'))
+                 * 
+                 * ^(FIELD_DECLARATION modifiers (.* ^(VARIABLE_IDENTIFIER .*))*)
+                 * 
+                 * ^(METHOD_IDENTIFIER modifiers .* ^(FORMAL_PARAMETERS .* ')') .* ^(METHOD_BODY .* '}'))
+                 */
+
+                /* STATEMENT COMPLETION (description unrelated to this file)
+                 * 
+                 * IDENTIFIER ('.' IDENTIFIER)*
+                 * 
+                 * ^(CALL IDENTIFIER .*)
+                 * 
+                 * ^('(' ^('==' .*) ')')
+                 * 
+                 */
+
                 for (CommonTreeNodeStream treeNodeStream = new CommonTreeNodeStream(result);
                     treeNodeStream.LA(1) != CharStreamConstants.EndOfFile;
                     treeNodeStream.Consume())

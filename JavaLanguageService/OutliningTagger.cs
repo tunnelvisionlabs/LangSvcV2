@@ -76,6 +76,15 @@
                 IList<ITree> children = result.Children;
                 for (int i = 0; i < children.Count; i++)
                 {
+                    /*
+                     *  ^('import' 'static'? IDENTIFIER+ '*'?)
+                     *  
+                     *  ^('import' 'static'? IDENTIFIER+ '*'? ';')
+                     *  
+                     *  ^('import' 'static'? IDENTIFIER+ '*'? ';') ^('import' 'static'? IDENTIFIER+ '*'? ';')+
+                     *  
+                     *  ^('import' .* ';') ^('import' .* ';')+
+                     */
                     if (children[i].Type != Java2Lexer.IMPORT)
                         continue;
 
@@ -97,6 +106,12 @@
                     TagSpan<IOutliningRegionTag> tagSpan = new TagSpan<IOutliningRegionTag>(snapshotSpan, tag);
                     outliningRegions.Add(tagSpan);
                 }
+
+                /*
+                 * ^(TYPE_BODY .* '}')
+                 * 
+                 * ^(METHOD_BODY .* '}')
+                 */
 
                 // outline the type and method bodies
                 for (CommonTreeNodeStream treeNodeStream = new CommonTreeNodeStream(result);
