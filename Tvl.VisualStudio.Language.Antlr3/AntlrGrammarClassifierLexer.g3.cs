@@ -45,29 +45,7 @@
 
         public override IToken NextToken()
         {
-            IToken token = null;
-            while (token == null)
-            {
-                state.token = null;
-                state.channel = TokenChannels.Default;
-                state.tokenStartCharIndex = input.Index;
-                state.tokenStartCharPositionInLine = input.CharPositionInLine;
-                state.tokenStartLine = input.Line;
-                state.text = null;
-
-                if (InComment)
-                {
-                    mCONTINUE_COMMENT();
-                    if (state.token == null)
-                        Emit();
-
-                    token = state.token;
-                }
-                else
-                {
-                    token = base.NextToken();
-                }
-            }
+            IToken token = base.NextToken();
 
             switch (token.Type)
             {
@@ -86,6 +64,14 @@
             }
 
             return token;
+        }
+
+        protected override void ParseNextToken()
+        {
+            if (InComment)
+                mCONTINUE_COMMENT();
+            else
+                base.ParseNextToken();
         }
     }
 }
