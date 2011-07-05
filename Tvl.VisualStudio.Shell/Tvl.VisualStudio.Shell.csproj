@@ -200,6 +200,7 @@
     <Compile Include="OutputWindow\PredefinedOutputWindowPanes.cs" />
     <Compile Include="PriorityCommandFilter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProvideDebuggerExceptionAttribute.cs" />
     <Compile Include="WpfToolWindowPane.cs" />
     <Compile Include="ViewChangedEventArgs.cs" />
   </ItemGroup>
