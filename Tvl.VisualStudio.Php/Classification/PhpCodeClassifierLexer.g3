@@ -6,7 +6,7 @@ options {
 	tokenVocab=PhpHtmlTagClassifierLexer;
 }
 
-@namespace{Tvl.VisualStudio.Language.Php}
+@namespace{Tvl.VisualStudio.Language.Php.Classification}
 @modifier{internal}
 @ctorModifier{private}
 

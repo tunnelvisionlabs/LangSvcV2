@@ -1,4 +1,4 @@
-﻿namespace Tvl.VisualStudio.Language.Php
+﻿namespace Tvl.VisualStudio.Language.Php.Classification
 {
     internal struct PhpClassifierLexerState : System.IEquatable<PhpClassifierLexerState>
     {

@@ -1,4 +1,4 @@
-﻿namespace Tvl.VisualStudio.Language.Php
+﻿namespace Tvl.VisualStudio.Language.Php.Classification
 {
     public static class PhpClassificationTypeNames
     {

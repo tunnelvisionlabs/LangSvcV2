@@ -1,4 +1,4 @@
-﻿namespace Tvl.VisualStudio.Language.Php
+﻿namespace Tvl.VisualStudio.Language.Php.Classification
 {
     using Tvl.VisualStudio.Language.Parsing;
     using Antlr.Runtime;
