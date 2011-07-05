@@ -5,6 +5,7 @@
     using Microsoft.VisualStudio.Shell;
     using Tvl.VisualStudio.Shell.Extensions;
     using IServiceContainer = System.ComponentModel.Design.IServiceContainer;
+    using Tvl.VisualStudio.Shell;
 
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration(AntlrConstants.AntlrLanguagePackageNameResourceString, AntlrConstants.AntlrLanguagePackageDetailsResourceString, AntlrConstants.AntlrLanguagePackageProductVersionString/*, IconResourceID = 400*/)]
@@ -27,6 +28,23 @@
         RequestStockColors = true)]
     [ProvideLanguageExtension(typeof(AntlrLanguageInfo), AntlrConstants.AntlrFileExtension)]
     [ProvideLanguageExtension(typeof(AntlrLanguageInfo), AntlrConstants.AntlrFileExtension2)]
+
+    [ProvideDebuggerException(typeof(Antlr.Runtime.EarlyExitException))]
+    [ProvideDebuggerException(typeof(Antlr.Runtime.FailedPredicateException))]
+    [ProvideDebuggerException(typeof(Antlr.Runtime.MismatchedNotSetException))]
+    [ProvideDebuggerException(typeof(Antlr.Runtime.MismatchedRangeException))]
+    [ProvideDebuggerException(typeof(Antlr.Runtime.MismatchedSetException))]
+    [ProvideDebuggerException(typeof(Antlr.Runtime.MismatchedTokenException))]
+    [ProvideDebuggerException(typeof(Antlr.Runtime.MismatchedTreeNodeException))]
+    [ProvideDebuggerException(typeof(Antlr.Runtime.MissingTokenException))]
+    [ProvideDebuggerException(typeof(Antlr.Runtime.NoViableAltException))]
+    [ProvideDebuggerException(typeof(Antlr.Runtime.RecognitionException))]
+    [ProvideDebuggerException(typeof(Antlr.Runtime.UnwantedTokenException))]
+
+    [ProvideDebuggerException(typeof(Antlr.Runtime.Tree.RewriteCardinalityException))]
+    [ProvideDebuggerException(typeof(Antlr.Runtime.Tree.RewriteEarlyExitException))]
+    [ProvideDebuggerException(typeof(Antlr.Runtime.Tree.RewriteEmptyStreamException))]
+
     public class AntlrLanguagePackage : Package
     {
         private static AntlrLanguagePackage _instance;
