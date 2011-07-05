@@ -14,7 +14,7 @@ HTML_CLOSE_TAG
 	;
 
 HTML_START_CODE
-	:	'<?' 'php'?
+	:	'<?php'
 	;
 
 HTML_END_CODE
@@ -29,14 +29,14 @@ HTML_CDATA
 	:	'<![CDATA[' .* ']]>'
 	;
 
+HTML_START_TAG
+	:	{IsTagStart(input)}? => '<' ('/'|'!')?
+	;
+
 HTML_TEXT
 	:	(	~('\r' | '\n' | '<' | '&')
 		|	{!IsTagStart(input)}? => '<'
 		)+
-	;
-
-HTML_START_TAG
-	:	{IsTagStart(input)}? => '<' '/'?
 	;
 
 HTML_CHAR_REF

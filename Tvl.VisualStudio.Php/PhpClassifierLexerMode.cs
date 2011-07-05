@@ -5,6 +5,7 @@
         HtmlText,
         HtmlTag,
         PhpCode,
+        PhpCodeWithinTag,
         PhpDocComment,
     }
 }

@@ -163,6 +163,7 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PhpClassifierConstants.cs" />
     <Compile Include="PhpBraceMatchingTaggerProvider.cs" />
     <Compile Include="PhpClassificationTypeNames.cs" />
     <Compile Include="PhpClassificationTypes.cs" />

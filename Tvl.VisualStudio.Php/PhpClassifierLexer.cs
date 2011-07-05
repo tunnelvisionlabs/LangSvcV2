@@ -18,6 +18,7 @@
         private string _heredocIdentifier;
         private int _stringBraceLevel;
         private bool _inStringExpression;
+        private int _htmlTagState;
 
         public PhpClassifierLexer(ICharStream input)
             : this(input, PhpClassifierLexerState.Initial)
@@ -40,6 +41,7 @@
             _heredocIdentifier = state.HeredocIdentifier;
             _stringBraceLevel = state.StringBraceLevel;
             _inStringExpression = state.InStringExpression;
+            _htmlTagState = state.HtmlTagState;
         }
 
         public PhpClassifierLexerMode Mode
@@ -107,6 +109,19 @@
             }
         }
 
+        public int HtmlTagState
+        {
+            get
+            {
+                return _htmlTagState;
+            }
+
+            set
+            {
+                _htmlTagState = value;
+            }
+        }
+
         public string SourceName
         {
             get
@@ -125,7 +140,7 @@
 
         public PhpClassifierLexerState GetCurrentState()
         {
-            return new PhpClassifierLexerState(_mode, _inString, _heredocIdentifier, _stringBraceLevel, _inStringExpression);
+            return new PhpClassifierLexerState(_mode, _inString, _heredocIdentifier, _stringBraceLevel, _inStringExpression, _htmlTagState);
         }
 
         public IToken NextToken()
@@ -166,6 +181,7 @@
                 break;
 
             case PhpClassifierLexerMode.PhpCode:
+            case PhpClassifierLexerMode.PhpCodeWithinTag:
                 token = _codeLexer.NextToken();
 
                 switch (token.Type)
@@ -176,7 +192,7 @@
                     break;
 
                 case PhpDocCommentClassifierLexer.CLOSE_PHP_TAG:
-                    _mode = PhpClassifierLexerMode.HtmlText;
+                    _mode = (_mode == PhpClassifierLexerMode.PhpCode) ? PhpClassifierLexerMode.HtmlText : PhpClassifierLexerMode.HtmlTag;
                     break;
 
                 default:
@@ -192,6 +208,10 @@
                 {
                 case PhpHtmlTagClassifierLexer.HTML_CLOSE_TAG:
                     _mode = PhpClassifierLexerMode.HtmlText;
+                    break;
+
+                case PhpHtmlTagClassifierLexer.HTML_START_CODE:
+                    _mode = PhpClassifierLexerMode.PhpCodeWithinTag;
                     break;
 
                 default:

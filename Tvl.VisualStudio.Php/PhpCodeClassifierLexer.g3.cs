@@ -76,35 +76,7 @@
 
         public override IToken NextToken()
         {
-            IToken token = null;
-            while (token == null)
-            {
-                state.token = null;
-                state.channel = TokenChannels.Default;
-                state.tokenStartCharIndex = input.Index;
-                state.tokenStartCharPositionInLine = input.CharPositionInLine;
-                state.tokenStartLine = input.Line;
-                state.text = null;
-
-                if (InString && !string.IsNullOrEmpty(HeredocIdentifier))
-                {
-                    if (HeredocIdentifier == "'")
-                        mCONTINUE_SINGLE_STRING();
-                    else if (HeredocIdentifier == "\"")
-                        mCONTINUE_DOUBLE_STRING();
-                    else
-                        mCONTINUE_HEREDOC();
-
-                    if (state.token == null)
-                        Emit();
-
-                    token = state.token;
-                }
-                else
-                {
-                    token = base.NextToken();
-                }
-            }
+            IToken token = base.NextToken();
 
             if (token.Type == CONTINUE_HEREDOC && CheckHeredocEnd)
             {
@@ -205,6 +177,23 @@
             }
 
             return token;
+        }
+
+        protected override void ParseNextToken()
+        {
+            if (InString && !string.IsNullOrEmpty(HeredocIdentifier))
+            {
+                if (HeredocIdentifier == "'")
+                    mCONTINUE_SINGLE_STRING();
+                else if (HeredocIdentifier == "\"")
+                    mCONTINUE_DOUBLE_STRING();
+                else
+                    mCONTINUE_HEREDOC();
+            }
+            else
+            {
+                base.ParseNextToken();
+            }
         }
 
         private static bool IsDoubleQuoteEscapeChar(int c)

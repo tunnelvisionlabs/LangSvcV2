@@ -7,108 +7,10 @@
     using Microsoft.VisualStudio.Text.Classification;
     using Tvl.VisualStudio.Language.Parsing;
 
-    internal sealed class PhpClassifier : AntlrClassifierBase<PhpClassifierLexerState>
+    using StringComparer = System.StringComparer;
+
+    internal sealed partial class PhpClassifier : AntlrClassifierBase<PhpClassifierLexerState>
     {
-        private static readonly HashSet<string> Keywords =
-            new HashSet<string>()
-            {
-                "and",
-                "or",
-                "xor",
-                "__FILE__",
-                "exception",
-                "__LINE__",
-                "as",
-                "break",
-                "case",
-                "class",
-                "const",
-                "continue",
-                "declare",
-                "default",
-                "do",
-                "else",
-                "elseif",
-                "enddeclare",
-                "endfor",
-                "endforeach",
-                "endif",
-                "endswitch",
-                "endwhile",
-                "extends",
-                "for",
-                "foreach",
-                "function",
-                "global",
-                "if",
-                "new",
-                "return",
-                "static",
-                "switch",
-                "use",
-                "var",
-                "while",
-                "__FUNCTION__",
-                "__CLASS__",
-                "__METHOD__",
-                "final",
-                "php_user_filter",
-                "interface",
-                "implements",
-                "instanceof",
-                "public",
-                "private",
-                "protected",
-                "abstract",
-                "clone",
-                "try",
-                "catch",
-                "throw",
-                "this",
-                "final",
-                "__NAMESPACE__",
-                "namespace",
-                "__DIR__",
-            };
-
-        private static readonly HashSet<string> BuiltinFunctions =
-            new HashSet<string>()
-            {
-                "array",
-                "die",
-                "echo",
-                "empty",
-                "eval",
-                "exit",
-                "include",
-                "include_once",
-                "isset",
-                "list",
-                "print",
-                "require",
-                "require_once",
-                "unset",
-            };
-
-        private static readonly HashSet<string> BuiltinObjects =
-            new HashSet<string>()
-            {
-                "$GLOBALS",
-                "$_SERVER",
-                "$_GET",
-                "$_POST",
-                "$_FILES",
-                "$_REQUEST",
-                "$_SESSION",
-                "$_ENV",
-                "$_COOKIE",
-                "$php_errormsg",
-                "$HTTP_RAW_POST_DATA",
-                "$http_response_header",
-                "$argc",
-                "$argv",
-            };
-
         private readonly ITextBuffer _textBuffer;
         private readonly IStandardClassificationService _standardClassificationService;
         private readonly IClassificationTypeRegistryService _classificationTypeRegistryService;
@@ -119,6 +21,15 @@
         private readonly IClassificationType _docCommentText;
         private readonly IClassificationType _docCommentTag;
         private readonly IClassificationType _docCommentInvalidTag;
+
+        private readonly IClassificationType _htmlAttributeName;
+        private readonly IClassificationType _htmlAttributeValue;
+        private readonly IClassificationType _htmlComment;
+        private readonly IClassificationType _htmlElementName;
+        private readonly IClassificationType _htmlEntity;
+        private readonly IClassificationType _htmlOperator;
+        private readonly IClassificationType _htmlServerSideScript;
+        private readonly IClassificationType _htmlTagDelimiter;
 
         public PhpClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService, IClassificationTypeRegistryService classificationTypeRegistryService)
             : base(textBuffer)
@@ -133,6 +44,15 @@
             this._docCommentText = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.DocCommentText);
             this._docCommentTag = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.DocCommentTag);
             this._docCommentInvalidTag = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.DocCommentInvalidTag);
+
+            this._htmlAttributeName = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlAttributeName);
+            this._htmlAttributeValue = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlAttributeValue);
+            this._htmlComment = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlComment);
+            this._htmlElementName = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlElementName);
+            this._htmlEntity = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlEntity);
+            this._htmlOperator = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlOperator);
+            this._htmlServerSideScript = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlServerSideScript);
+            this._htmlTagDelimiter = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlTagDelimiter);
         }
 
         protected override PhpClassifierLexerState GetStartState()
@@ -149,8 +69,6 @@
         {
             switch (token.Type)
             {
-            case PhpHtmlTagClassifierLexer.SINGLE_QUOTE_STRING:
-            case PhpHtmlTagClassifierLexer.DOUBLE_QUOTE_STRING:
             case PhpCodeClassifierLexer.PHP_SINGLE_STRING_LITERAL:
             case PhpCodeClassifierLexer.PHP_DOUBLE_STRING_LITERAL:
             case PhpCodeClassifierLexer.PHP_HEREDOC_TEXT:
@@ -164,18 +82,45 @@
                     return _standardClassificationService.Keyword;
                 else if (BuiltinFunctions.Contains(token.Text))
                     return _globalFunction;
-                else if (BuiltinObjects.Contains(token.Text))
+                else if (BuiltinObjects.Contains(token.Text) || PredefinedConstants.Contains(token.Text))
                     return _globalObject;
                 else if (token.Text[0] == '$')
                     return _standardClassificationService.SymbolDefinition;
 
                 return _standardClassificationService.Identifier;
 
+            // HTML Server-Side Script
             case PhpHtmlTextClassifierLexer.HTML_START_CODE:
             case PhpCodeClassifierLexer.CLOSE_PHP_TAG:
-                return _standardClassificationService.Keyword;
+                return _htmlServerSideScript;
 
+            // HTML Entity??
+
+            // HTML Attribute Name
+            case PhpHtmlTagClassifierLexer.HTML_ATTRIBUTE_NAME:
+                return _htmlAttributeName;
+
+            // HTML Attribute Value
+            case PhpHtmlTagClassifierLexer.HTML_ATTRIBUTE_VALUE:
+                return _htmlAttributeValue;
+
+            // HTML Entity Name
+            case PhpHtmlTagClassifierLexer.HTML_ELEMENT_NAME:
+                return _htmlElementName;
+
+            // HTML Operator
+            case PhpHtmlTagClassifierLexer.HTML_OPERATOR:
+                return _htmlOperator;
+
+            // HTML Comment
             case PhpHtmlTextClassifierLexer.HTML_COMMENT:
+                return _htmlComment;
+
+            // HTML Tag Delimiter
+            case PhpHtmlTextClassifierLexer.HTML_START_TAG:
+            case PhpHtmlTagClassifierLexer.HTML_CLOSE_TAG:
+                return _htmlTagDelimiter;
+
             case PhpCodeClassifierLexer.PHP_COMMENT:
             case PhpCodeClassifierLexer.PHP_ML_COMMENT:
                 return _standardClassificationService.Comment;
