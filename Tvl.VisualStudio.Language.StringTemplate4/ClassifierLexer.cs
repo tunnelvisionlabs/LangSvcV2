@@ -160,6 +160,7 @@
             switch (Mode)
             {
             case TemplateLexerMode.Template:
+            case TemplateLexerMode.AnonymousTemplateParameters:
                 if (AnonymousTemplateLevel > 0 && _input.LA(1) == '}')
                 {
                     // no longer inside the template - let the group lexer prepare the closing template token
@@ -188,6 +189,38 @@
                         //expressionLevel++;
                         Mode = TemplateLexerMode.Expression;
                     }
+                    else if (token.Type == OutsideClassifierLexer.PIPE)
+                    {
+                        Mode = TemplateLexerMode.Template;
+                    }
+                    else if (Mode == TemplateLexerMode.AnonymousTemplateParameters)
+                    {
+                        switch (token.Type)
+                        {
+                        case OutsideClassifierLexer.ID:
+                            token.Type = OutsideClassifierLexer.PARAMETER_DEFINITION;
+                            break;
+
+                        default:
+                            break;
+                        }
+                    }
+                    else if (Mode == TemplateLexerMode.Template)
+                    {
+                        switch (token.Type)
+                        {
+                        case OutsideClassifierLexer.ID:
+                        case OutsideClassifierLexer.PIPE:
+                        case OutsideClassifierLexer.COMMA:
+                        case OutsideClassifierLexer.WS:
+                        case OutsideClassifierLexer.COMMENT:
+                            token.Type = OutsideClassifierLexer.TEXT;
+                            break;
+
+                        default:
+                            break;
+                        }
+                    }
                 }
 
                 break;
@@ -207,7 +240,7 @@
                     if (token.Type == InsideClassifierLexer.LBRACE)
                     {
                         AnonymousTemplateLevel++;
-                        Mode = TemplateLexerMode.Template;
+                        Mode = CheckAnonymousTemplateForParameters();
                     }
                 }
                 break;
@@ -219,7 +252,7 @@
                 case '{':
                     token = _groupLexer.NextToken();
                     AnonymousTemplateLevel++;
-                    Mode = TemplateLexerMode.Template;
+                    Mode = CheckAnonymousTemplateForParameters();
                     Outermost = OutermostTemplate.None;
                     break;
 
@@ -253,11 +286,64 @@
             return token;
         }
 
+        private TemplateLexerMode CheckAnonymousTemplateForParameters()
+        {
+            int position = _input.Mark();
+            LexerState currentState = State;
+
+            try
+            {
+                Mode = TemplateLexerMode.AnonymousTemplateParameters;
+                bool previousWasArg = false;
+                while (true)
+                {
+                    IToken token = NextToken();
+                    switch (token.Type)
+                    {
+                    case OutsideClassifierLexer.COMMA:
+                        if (!previousWasArg)
+                            return TemplateLexerMode.Template;
+
+                        previousWasArg = false;
+                        continue;
+
+                    case OutsideClassifierLexer.PARAMETER_DEFINITION:
+                    case OutsideClassifierLexer.ID:
+                        if (previousWasArg)
+                            return TemplateLexerMode.Template;
+
+                        previousWasArg = true;
+                        continue;
+
+                    case OutsideClassifierLexer.PIPE:
+                        if (previousWasArg)
+                            return TemplateLexerMode.AnonymousTemplateParameters;
+
+                        return TemplateLexerMode.Template;
+
+                    case OutsideClassifierLexer.WS:
+                    case OutsideClassifierLexer.COMMENT:
+                    case OutsideClassifierLexer.NEWLINE:
+                        continue;
+
+                    default:
+                        return TemplateLexerMode.Template;
+                    }
+                }
+            }
+            finally
+            {
+                _input.Rewind(position);
+                State = currentState;
+            }
+        }
+
         internal enum TemplateLexerMode
         {
             Group,
             Template,
             Expression,
+            AnonymousTemplateParameters,
         }
 
         internal enum OutermostTemplate

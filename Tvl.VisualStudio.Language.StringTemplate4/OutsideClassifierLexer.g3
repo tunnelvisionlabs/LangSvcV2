@@ -8,7 +8,17 @@ options {
 
 @namespace{Tvl.VisualStudio.Language.StringTemplate4}
 
-LANGLE : '<';
+LANGLE	: '<';
+COMMA	: ',';
+PIPE	: '|';
+
+ID
+	:	('a'..'z' | 'A'..'Z' | '_')+
+	;
+
+WS
+	:	' ' | '\t'
+	;
 
 fragment
 RANGLE
@@ -49,7 +59,7 @@ NEWLINE
 	;
 
 TEXT
-	:	(	~('}'|'<'|'\n'|'\r'|'"'|'>'|'\\'|'%')
+	:	(	~('}'|'<'|'\n'|'\r'|'"'|'>'|'\\'|'%'|'a'..'z'|'A'..'Z'|'_'|' '|'\t'|'|')
 		|	{AnonymousTemplateLevel == 0}? => '}'
 		|	{Outermost != ClassifierLexer.OutermostTemplate.String}? => '"'
 		|	{Outermost != ClassifierLexer.OutermostTemplate.BigString || input.LA(2) != '>'}? => '>'

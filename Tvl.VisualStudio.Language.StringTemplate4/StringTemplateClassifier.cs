@@ -70,6 +70,9 @@
 
                 return _standardClassificationService.Identifier;
 
+            case GroupClassifierLexer.PARAMETER_DEFINITION:
+                return _standardClassificationService.Identifier;
+
             case InsideClassifierLexer.EXPR_IDENTIFIER:
                 if (Array.IndexOf(_expressionKeywords, token.Text) >= 0)
                     return _standardClassificationService.Keyword;
