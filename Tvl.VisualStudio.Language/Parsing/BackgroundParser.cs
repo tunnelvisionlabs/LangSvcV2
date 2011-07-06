@@ -199,7 +199,7 @@
                         if (outputWindow != null)
                         {
                             long time = stopwatch.ElapsedMilliseconds;
-                            outputWindow.WriteLine(string.Format(message, filename, "failed", time, e2.Message));
+                            outputWindow.WriteLine(string.Format(message, filename, "failed", time, e2.Message + e2.StackTrace));
                         }
                     }
                     catch (Exception e3)
