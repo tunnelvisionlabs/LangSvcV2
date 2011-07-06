@@ -22,22 +22,6 @@
             _provider = provider;
         }
 
-        public IOutputWindowService OutputWindowService
-        {
-            get
-            {
-                return _provider.OutputWindowService;
-            }
-        }
-
-        public ITextDocumentFactoryService TextDocumentFactoryService
-        {
-            get
-            {
-                return _provider.TextDocumentFactoryService;
-            }
-        }
-
         protected override void ReParseImpl()
         {
             var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);

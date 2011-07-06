@@ -24,11 +24,6 @@
 
         public event EventHandler<ParseResultEventArgs> ParseComplete;
 
-        [Obsolete]
-        public BackgroundParser(ITextBuffer textBuffer)
-        {
-        }
-
         public BackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
             : this(textBuffer, textDocumentFactoryService, outputWindowService, PredefinedOutputWindowPanes.TvlIntellisense)
         {
@@ -37,6 +32,8 @@
         public BackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService, string outputPaneName)
         {
             Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Contract.Requires<ArgumentNullException>(textDocumentFactoryService != null, "textDocumentFactoryService");
+            Contract.Requires<ArgumentNullException>(outputWindowService != null, "outputWindowService");
 
             this._textBuffer = textBuffer;
             this._textDocumentFactoryService = textDocumentFactoryService;
@@ -86,6 +83,22 @@
                 IsDisposing = false;
                 Disposed = true;
                 GC.SuppressFinalize(this);
+            }
+        }
+
+        protected ITextDocumentFactoryService TextDocumentFactoryService
+        {
+            get
+            {
+                return _textDocumentFactoryService;
+            }
+        }
+
+        protected IOutputWindowService OutputWindowService
+        {
+            get
+            {
+                return _outputWindowService;
             }
         }
 

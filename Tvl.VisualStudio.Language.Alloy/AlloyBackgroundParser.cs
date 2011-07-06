@@ -14,13 +14,6 @@
         public AlloyBackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
             : base(textBuffer, textDocumentFactoryService, outputWindowService)
         {
-            this.OutputWindowService = outputWindowService;
-        }
-
-        public IOutputWindowService OutputWindowService
-        {
-            get;
-            private set;
         }
 
         public AntlrParseResultEventArgs PreviousParseResult

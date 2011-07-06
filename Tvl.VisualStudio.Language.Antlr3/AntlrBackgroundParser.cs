@@ -25,8 +25,6 @@
         {
             Contract.Requires<ArgumentNullException>(outputWindowService != null, "outputWindowService");
 
-            this.OutputWindowService = outputWindowService;
-
             if (!_initialized)
             {
                 try
@@ -43,12 +41,6 @@
 
                 _initialized = true;
             }
-        }
-
-        public IOutputWindowService OutputWindowService
-        {
-            get;
-            private set;
         }
 
         public AntlrParseResultEventArgs PreviousParseResult
