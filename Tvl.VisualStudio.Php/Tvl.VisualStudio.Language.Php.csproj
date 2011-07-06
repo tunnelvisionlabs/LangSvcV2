@@ -164,6 +164,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classification\PhpClassifierConstants.cs" />
+    <Compile Include="Navigation\PhpEditorNavigationBackgroundParser.cs" />
+    <Compile Include="Navigation\PhpEditorNavigationParser.g3.cs" />
+    <Compile Include="Navigation\PhpEditorNavigationParseResultEventArgs.cs" />
+    <Compile Include="Navigation\PhpEditorNavigationSource.cs" />
+    <Compile Include="Navigation\PhpEditorNavigationSourceProvider.cs" />
     <Compile Include="Outlining\PhpOutliningLexer.cs" />
     <Compile Include="Outlining\PhpOutliningParseResultEventArgs.cs" />
     <Compile Include="PhpBraceMatchingTaggerProvider.cs" />
@@ -215,6 +220,9 @@
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
     <Antlr3 Include="Outlining\PhpOutliningParser.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
+    <Antlr3 Include="Navigation\PhpEditorNavigationParser.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
     <None Include="source.extension.vsixmanifest">
