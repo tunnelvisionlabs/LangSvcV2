@@ -228,6 +228,8 @@
     <Antlr3 Include="Navigation\PhpEditorNavigationParser.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
+    <AntlrTokens Include="Classification\PhpClassifierConstants.tokens" />
+    <None Include="Classification\PhpClassifierConstants.xlsx" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>

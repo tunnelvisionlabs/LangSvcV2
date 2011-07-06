@@ -3,6 +3,7 @@
 options {
     language=CSharp3;
     TokenLabelType=CommonToken;
+	tokenVocab=PhpClassifierConstants;
 }
 
 @namespace{Tvl.VisualStudio.Language.Php.Classification}

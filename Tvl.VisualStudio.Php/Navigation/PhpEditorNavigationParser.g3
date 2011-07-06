@@ -37,7 +37,7 @@ codeElement
 	:	classOrInterfaceDefinition
 	|	functionDefinition
 	|	codeBlock
-	|	~(CLOSE_PHP_TAG|FUNCTION|LBRACE|RBRACE|CLASS|INTERFACE)
+	|	~(CLOSE_PHP_TAG|'function'|LBRACE|RBRACE|'class'|'interface')
 	;
 
 codeBlock
@@ -56,23 +56,23 @@ htmlLiteral
 
 classOrInterfaceDefinition
 @after{_navigationTrees.Add($tree);}
-	:	(	CLASS PHP_IDENTIFIER<CLASS_IDENTIFIER>^
-		|	INTERFACE PHP_IDENTIFIER<INTERFACE_IDENTIFIER>^
+	:	(	'class' PHP_IDENTIFIER<CLASS_IDENTIFIER>^
+		|	'interface' PHP_IDENTIFIER<INTERFACE_IDENTIFIER>^
 		)
 		extendsList? implementsList? codeBlock
 	;
 
 extendsList
-	:	EXTENDS PHP_IDENTIFIER (COMMA PHP_IDENTIFIER)*
+	:	'extends' PHP_IDENTIFIER (COMMA PHP_IDENTIFIER)*
 	;
 
 implementsList
-	:	IMPLEMENTS PHP_IDENTIFIER (COMMA PHP_IDENTIFIER)*
+	:	'implements' PHP_IDENTIFIER (COMMA PHP_IDENTIFIER)*
 	;
 
 functionDefinition
 @after{_navigationTrees.Add($tree);}
-	:	FUNCTION PHP_IDENTIFIER<FUNCTION_IDENTIFIER>^ functionParameterList codeBlock
+	:	'function' PHP_IDENTIFIER<FUNCTION_IDENTIFIER>^ functionParameterList codeBlock
 	;
 
 functionParameterList
@@ -84,7 +84,7 @@ functionParameters
 	;
 
 functionParameter
-	:	AMP? PHP_IDENTIFIER<PARAMETER_IDENTIFIER>^ parameterDefaultValue?
+	:	AND? PHP_IDENTIFIER<PARAMETER_IDENTIFIER>^ parameterDefaultValue?
 	;
 
 parameterDefaultValue

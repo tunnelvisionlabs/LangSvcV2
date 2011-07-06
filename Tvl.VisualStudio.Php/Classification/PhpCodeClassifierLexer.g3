@@ -11,11 +11,11 @@ options {
 @ctorModifier{private}
 
 // keywords
-fragment CLASS : ;
-fragment EXTENDS : ;
-fragment FUNCTION : ;
-fragment IMPLEMENTS : ;
-fragment INTERFACE : ;
+fragment KW_CLASS : ;
+fragment KW_EXTENDS : ;
+fragment KW_FUNCTION : ;
+fragment KW_IMPLEMENTS : ;
+fragment KW_INTERFACE : ;
 
 CLOSE_PHP_TAG
 	:	'?>'
@@ -30,24 +30,59 @@ PHP_HEREDOC_START
 		{state.type = PHP_HEREDOC_START;}
 	;
 
+LSHIFTEQ: '<<=';
+
 LSHIFT
 	:	(PHP_HEREDOC_START) => PHP_HEREDOC_START {$type = state.type;}
 	|	'<<'
 	;
 
+ADDEQ	: '+=';
+SUBEQ	: '-=';
+MULEQ	: '*=';
+DIVEQ	: '/=';
+DOTEQ	: '.=';
+MODEQ	: '%=';
+ANDEQ	: '&=';
+OREQ	: '|=';
+XOREQ	: '^=';
+RSHIFTEQ: '>>=';
+ASSOC	: '=>';
+
 RSHIFT	: '>>';
+LE		: '<=';
 LT		: '<';
+GE		: '>=';
 GT		: '>';
+INC		: '++';
+DEC		: '--';
+TILDE	: '~';
 ARROW	: '->';
+SUB		: '-';
+AT		: '@';
+NOT		: '!';
+MUL		: '*';
+DOT		: '.';
+LTGT	: '<>';
+ANDAND	: '&&';
+AND		: '&';
+XOR		: '^';
+OROR	: '||';
+OR		: '|';
+QUESTION: '?';
+COLON	: ':';
 LBRACE	: '{';
 RBRACE	: '}';
 LBRACK	: '[';
 RBRACK	: ']';
 LPAREN	: '(';
 RPAREN	: ')';
-AMP		: '&';
-EQ		: '=';
 COMMA	: ',';
+NEQEQ	: '!==';
+NEQ		: '!=';
+EQEQEQ	: '===';
+EQEQ	: '==';
+EQ		: '=';
 
 fragment
 CONTINUE_HEREDOC

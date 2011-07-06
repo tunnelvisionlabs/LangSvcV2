@@ -259,7 +259,7 @@
                     continue;
 
                 bool byRef = false;
-                if (argTree.ChildCount > 0 && argTree.GetChild(0).Type == PhpEditorNavigationParser.AMP)
+                if (argTree.ChildCount > 0 && argTree.GetChild(0).Type == PhpEditorNavigationParser.AND)
                     byRef = true;
 
                 if (byRef)
