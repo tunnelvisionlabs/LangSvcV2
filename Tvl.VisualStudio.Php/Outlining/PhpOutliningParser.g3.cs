@@ -1,13 +1,26 @@
 ﻿namespace Tvl.VisualStudio.Language.Php.Outlining
 {
     using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using Antlr.Runtime;
+    using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
 
     partial class PhpOutliningParser
     {
+        private readonly List<CommonTree> _outlineTrees = new List<CommonTree>();
+
         public event EventHandler<ParseErrorEventArgs> ParseError;
+
+        internal ReadOnlyCollection<CommonTree> OutliningTrees
+        {
+            get
+            {
+                return _outlineTrees.AsReadOnly();
+            }
+        }
 
         public override void DisplayRecognitionError(string[] tokenNames, RecognitionException e)
         {

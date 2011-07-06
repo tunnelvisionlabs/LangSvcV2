@@ -10,6 +10,13 @@ options {
 @modifier{internal}
 @ctorModifier{private}
 
+// keywords
+fragment CLASS : ;
+fragment EXTENDS : ;
+fragment FUNCTION : ;
+fragment IMPLEMENTS : ;
+fragment INTERFACE : ;
+
 CLOSE_PHP_TAG
 	:	'?>'
 	;
@@ -23,19 +30,24 @@ PHP_HEREDOC_START
 		{state.type = PHP_HEREDOC_START;}
 	;
 
-PHP_LSHIFT
+LSHIFT
 	:	(PHP_HEREDOC_START) => PHP_HEREDOC_START {$type = state.type;}
 	|	'<<'
 	;
 
-PHP_RSHIFT	: '>>';
-PHP_LT		: '<';
-PHP_GT		: '>';
-PHP_ARROW	: '->';
-PHP_LBRACE	: '{';
-PHP_RBRACE	: '}';
-PHP_LBRACK	: '[';
-PHP_RBRACK	: ']';
+RSHIFT	: '>>';
+LT		: '<';
+GT		: '>';
+ARROW	: '->';
+LBRACE	: '{';
+RBRACE	: '}';
+LBRACK	: '[';
+RBRACK	: ']';
+LPAREN	: '(';
+RPAREN	: ')';
+AMP		: '&';
+EQ		: '=';
+COMMA	: ',';
 
 fragment
 CONTINUE_HEREDOC
@@ -101,9 +113,9 @@ fragment DOUBLE_STRING_ESCAPE : ;
 
 fragment
 CONTINUE_DOUBLE_STRING
-	:	'->'													{state.type = PHP_ARROW;}
-	|	'['														{state.type = PHP_LBRACK;}
-	|	']'														{state.type = PHP_RBRACK;}
+	:	'->'													{state.type = ARROW;}
+	|	'['														{state.type = LBRACK;}
+	|	']'														{state.type = RBRACK;}
 	|	(PHP_IDENTIFIER) => PHP_IDENTIFIER						{state.type = PHP_IDENTIFIER;}
 	|	(' ' | '\t')+											{state.type = WS;}
 	|	{IsDoubleQuoteEscapeChar(input.LA(2))}? =>
@@ -115,8 +127,8 @@ CONTINUE_DOUBLE_STRING
 			|													{state.type = CONTINUE_DOUBLE_STRING;}
 			)
 		)
-	|	{input.LA(2) == '$'}? => '{'							{state.type = PHP_LBRACE;}
-	|	{StringBraceLevel > 0}? => '}'							{state.type = PHP_RBRACE;}
+	|	{input.LA(2) == '$'}? => '{'							{state.type = LBRACE;}
+	|	{StringBraceLevel > 0}? => '}'							{state.type = RBRACE;}
 	//|	PHP_NUMBER
 	|	(	~('\r' | '\n' | '"' | '\\' | '$' | '-' | '[' | ']' | '{' | '}' | ' ' | '\t')
 		|	{!IsDoubleQuoteEscapeChar(input.LA(2))}? => '\\'

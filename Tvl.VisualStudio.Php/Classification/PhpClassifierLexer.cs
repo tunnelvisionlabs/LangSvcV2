@@ -143,7 +143,7 @@
             return new PhpClassifierLexerState(_mode, _inString, _heredocIdentifier, _stringBraceLevel, _inStringExpression, _htmlTagState);
         }
 
-        public IToken NextToken()
+        public virtual IToken NextToken()
         {
             IToken token = null;
             do
@@ -158,7 +158,7 @@
             return token;
         }
 
-        private IToken NextTokenCore()
+        protected virtual IToken NextTokenCore()
         {
             IToken token = null;
 

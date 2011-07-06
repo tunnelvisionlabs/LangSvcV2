@@ -5,7 +5,6 @@
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
-    using Tvl.VisualStudio.Language.Php.Classification;
     using Tvl.VisualStudio.Shell.OutputWindow;
     using Stopwatch = System.Diagnostics.Stopwatch;
 
@@ -30,14 +29,6 @@
             _textDocumentFactoryService = textDocumentFactoryService;
         }
 
-        public IOutputWindowService OutputWindowService
-        {
-            get
-            {
-                return _outputWindowService;
-            }
-        }
-
         internal static PhpOutliningBackgroundParser CreateParser(ITextBuffer textBuffer, IOutputWindowService outputWindowService, ITextDocumentFactoryService textDocumentFactoryService)
         {
             if (textBuffer == null)
@@ -56,9 +47,14 @@
 
             Stopwatch stopwatch = Stopwatch.StartNew();
 
+            string filename = "<Unknown File>";
+            ITextDocument textDocument;
+            if (TextDocumentFactoryService.TryGetTextDocument(TextBuffer, out textDocument))
+                filename = textDocument.FilePath;
+
             var snapshot = TextBuffer.CurrentSnapshot;
             var input = new SnapshotCharStream(snapshot, new Span(0, snapshot.Length));
-            var lexer = new PhpClassifierLexer(input);
+            var lexer = new PhpOutliningLexer(input);
             var tokens = new CommonTokenStream(lexer);
             var parser = new PhpOutliningParser(tokens);
 
@@ -71,12 +67,16 @@
                 if (message.Length > 100)
                     message = message.Substring(0, 100) + " ...";
 
+                ITextSnapshotLine startLine = snapshot.GetLineFromPosition(e.Span.Start);
+                int line = startLine.LineNumber;
+                int column = e.Span.Start - startLine.Start;
+
                 if (outputWindow != null)
-                    outputWindow.WriteLine(message);
+                    outputWindow.WriteLine(string.Format("{0}({1}:{2}): {3}", filename, line, column, message));
             };
 
             var result = parser.compileUnit();
-            OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), result));
+            OnParseComplete(new PhpOutliningParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), result, parser.OutliningTrees));
         }
     }
 }

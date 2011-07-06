@@ -100,21 +100,21 @@
 
                 break;
 
-            case PHP_ARROW:
-            case PHP_LBRACK:
-            case PHP_RBRACK:
+            case ARROW:
+            case LBRACK:
+            case RBRACK:
                 if (InString && !InStringExpression)
                     token.Type = textTokenType;
 
                 break;
 
-            case PHP_LBRACE:
+            case LBRACE:
                 if (InString)
                     StringBraceLevel++;
 
                 break;
 
-            case PHP_RBRACE:
+            case RBRACE:
                 if (InString)
                     StringBraceLevel--;
 

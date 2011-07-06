@@ -21,5 +21,72 @@ htmlText
 	;
 
 code
-	:	HTML_START_CODE^ .* CLOSE_PHP_TAG
+@after{_outlineTrees.Add($tree);}
+	:	HTML_START_CODE^ codeElement* CLOSE_PHP_TAG
+	;
+
+codeElement
+	:	classOrInterfaceDefinition
+	|	functionDefinition
+	|	codeBlock
+	|	~(CLOSE_PHP_TAG|FUNCTION|LBRACE|RBRACE|CLASS|INTERFACE)
+	;
+
+codeBlock
+	:	LBRACE^
+			(	codeElement
+			|	htmlLiteral
+			)*
+		RBRACE
+	;
+
+htmlLiteral
+	:	CLOSE_PHP_TAG^
+			.*
+		HTML_START_CODE
+	;
+
+classOrInterfaceDefinition
+	:	(CLASS | INTERFACE) PHP_IDENTIFIER^ extendsList? implementsList? codeBlock
+		{_outlineTrees.Add($codeBlock.tree);}
+	;
+
+extendsList
+	:	EXTENDS PHP_IDENTIFIER (COMMA PHP_IDENTIFIER)*
+	;
+
+implementsList
+	:	IMPLEMENTS PHP_IDENTIFIER (COMMA PHP_IDENTIFIER)*
+	;
+
+functionDefinition
+	:	FUNCTION PHP_IDENTIFIER^ functionParameterList codeBlock
+		{_outlineTrees.Add($codeBlock.tree);}
+	;
+
+functionParameterList
+	:	LPAREN^ functionParameters? RPAREN
+	;
+
+functionParameters
+	:	functionParameter (COMMA! functionParameter)*
+	;
+
+functionParameter
+	:	AMP? PHP_IDENTIFIER^ parameterDefaultValue?
+	;
+
+parameterDefaultValue
+	:	EQ^
+		(	~(COMMA|LPAREN|RPAREN)
+		|	nestedParens
+		)*
+	;
+
+nestedParens
+	:	LPAREN^
+			(	~(LPAREN|RPAREN)
+			|	nestedParens
+			)*
+		RPAREN
 	;

@@ -164,6 +164,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classification\PhpClassifierConstants.cs" />
+    <Compile Include="Outlining\PhpOutliningLexer.cs" />
+    <Compile Include="Outlining\PhpOutliningParseResultEventArgs.cs" />
     <Compile Include="PhpBraceMatchingTaggerProvider.cs" />
     <Compile Include="Classification\PhpClassificationTypeNames.cs" />
     <Compile Include="Classification\PhpClassificationTypes.cs" />

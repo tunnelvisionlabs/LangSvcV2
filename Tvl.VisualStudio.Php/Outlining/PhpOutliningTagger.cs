@@ -65,41 +65,61 @@
 
         private void OnBackgroundParseComplete(object sender, ParseResultEventArgs e)
         {
-            AntlrParseResultEventArgs antlrParseResultArgs = e as AntlrParseResultEventArgs;
+            PhpOutliningParseResultEventArgs antlrParseResultArgs = e as PhpOutliningParseResultEventArgs;
             if (antlrParseResultArgs == null)
                 return;
 
             UpdateTags(antlrParseResultArgs);
         }
 
-        private void UpdateTags(AntlrParseResultEventArgs antlrParseResultArgs)
+        private void UpdateTags(PhpOutliningParseResultEventArgs antlrParseResultArgs)
         {
             List<ITagSpan<IOutliningRegionTag>> outliningRegions = new List<ITagSpan<IOutliningRegionTag>>();
+
             if (antlrParseResultArgs != null)
             {
-                IAstRuleReturnScope resultArgs = antlrParseResultArgs.Result as IAstRuleReturnScope;
-                var result = resultArgs.Tree as CommonTree;
-                if (result != null)
+                ITextSnapshot snapshot = antlrParseResultArgs.Snapshot;
+
+                foreach (CommonTree child in antlrParseResultArgs.OutliningTrees)
                 {
-                    ITextSnapshot snapshot = antlrParseResultArgs.Snapshot;
+                    if (child.Type == CharStreamConstants.EndOfFile)
+                        continue;
 
-                    foreach (CommonTree child in result.Children)
-                    {
-                        if (child.Type == CharStreamConstants.EndOfFile)
-                            continue;
+                    var startToken = antlrParseResultArgs.Tokens[child.TokenStartIndex];
+                    var stopToken = antlrParseResultArgs.Tokens[child.TokenStopIndex];
+                    Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
+                    if (snapshot.GetLineNumberFromPosition(span.Start) == snapshot.GetLineNumberFromPosition(span.End))
+                        continue;
 
-                        var startToken = antlrParseResultArgs.Tokens[child.TokenStartIndex];
-                        var stopToken = antlrParseResultArgs.Tokens[child.TokenStopIndex];
-                        Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
-                        if (snapshot.GetLineNumberFromPosition(span.Start) == snapshot.GetLineNumberFromPosition(span.End))
-                            continue;
-
-                        SnapshotSpan snapshotSpan = new SnapshotSpan(antlrParseResultArgs.Snapshot, span);
-                        IOutliningRegionTag tag = new OutliningRegionTag("...", string.Empty);
-                        TagSpan<IOutliningRegionTag> tagSpan = new TagSpan<IOutliningRegionTag>(snapshotSpan, tag);
-                        outliningRegions.Add(tagSpan);
-                    }
+                    SnapshotSpan snapshotSpan = new SnapshotSpan(antlrParseResultArgs.Snapshot, span);
+                    IOutliningRegionTag tag = new OutliningRegionTag("...", string.Empty);
+                    TagSpan<IOutliningRegionTag> tagSpan = new TagSpan<IOutliningRegionTag>(snapshotSpan, tag);
+                    outliningRegions.Add(tagSpan);
                 }
+
+                //IAstRuleReturnScope resultArgs = antlrParseResultArgs.Result as IAstRuleReturnScope;
+                //var result = resultArgs.Tree as CommonTree;
+                //if (result != null)
+                //{
+                //    ITextSnapshot snapshot = antlrParseResultArgs.Snapshot;
+
+                //    foreach (CommonTree child in result.Children)
+                //    {
+                //        if (child.Type == CharStreamConstants.EndOfFile)
+                //            continue;
+
+                //        var startToken = antlrParseResultArgs.Tokens[child.TokenStartIndex];
+                //        var stopToken = antlrParseResultArgs.Tokens[child.TokenStopIndex];
+                //        Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
+                //        if (snapshot.GetLineNumberFromPosition(span.Start) == snapshot.GetLineNumberFromPosition(span.End))
+                //            continue;
+
+                //        SnapshotSpan snapshotSpan = new SnapshotSpan(antlrParseResultArgs.Snapshot, span);
+                //        IOutliningRegionTag tag = new OutliningRegionTag("...", string.Empty);
+                //        TagSpan<IOutliningRegionTag> tagSpan = new TagSpan<IOutliningRegionTag>(snapshotSpan, tag);
+                //        outliningRegions.Add(tagSpan);
+                //    }
+                //}
             }
 
             this._outliningRegions = outliningRegions;

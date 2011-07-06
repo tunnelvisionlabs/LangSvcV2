@@ -6,7 +6,69 @@
 
     partial class PhpClassifier
     {
-        private static readonly HashSet<string> Keywords =
+        internal static readonly Dictionary<string, int> KeywordTokenTypes =
+            new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+            {
+                //{ "and", PhpCodeClassifierLexer.AND },
+                //{ "or", PhpCodeClassifierLexer.OR },
+                //{ "xor", PhpCodeClassifierLexer.XOR },
+                //{ "__FILE__", PhpCodeClassifierLexer.__FILE__ },
+                //{ "exception", PhpCodeClassifierLexer.EXCEPTION },
+                //{ "__LINE__", PhpCodeClassifierLexer.__LINE__ },
+                //{ "as", PhpCodeClassifierLexer.AS },
+                //{ "break", PhpCodeClassifierLexer.BREAK },
+                //{ "case", PhpCodeClassifierLexer.CASE },
+                { "class", PhpCodeClassifierLexer.CLASS },
+                //{ "const", PhpCodeClassifierLexer.CONST },
+                //{ "continue", PhpCodeClassifierLexer.CONTINUE },
+                //{ "declare", PhpCodeClassifierLexer.DECLARE },
+                //{ "default", PhpCodeClassifierLexer.DEFAULT },
+                //{ "do", PhpCodeClassifierLexer.DO },
+                //{ "else", PhpCodeClassifierLexer.ELSE },
+                //{ "elseif", PhpCodeClassifierLexer.ELSEIF },
+                //{ "enddeclare", PhpCodeClassifierLexer.ENDDECLARE },
+                //{ "endfor", PhpCodeClassifierLexer.ENDFOR },
+                //{ "endforeach", PhpCodeClassifierLexer.ENDFOREACH },
+                //{ "endif", PhpCodeClassifierLexer.ENDIF },
+                //{ "endswitch", PhpCodeClassifierLexer.ENDSWITCH },
+                //{ "endwhile", PhpCodeClassifierLexer.ENDWHILE },
+                { "extends", PhpCodeClassifierLexer.EXTENDS },
+                //{ "for", PhpCodeClassifierLexer.FOR },
+                //{ "foreach", PhpCodeClassifierLexer.FOREACH },
+                { "function", PhpCodeClassifierLexer.FUNCTION },
+                //{ "global", PhpCodeClassifierLexer.GLOBAL },
+                //{ "if", PhpCodeClassifierLexer.IF },
+                { "implements", PhpCodeClassifierLexer.IMPLEMENTS },
+                { "interface", PhpCodeClassifierLexer.INTERFACE },
+                //{ "new", PhpCodeClassifierLexer.NEW },
+                //{ "return", PhpCodeClassifierLexer.RETURN },
+                //{ "static", PhpCodeClassifierLexer.STATIC },
+                //{ "switch", PhpCodeClassifierLexer.SWITCH },
+                //{ "use", PhpCodeClassifierLexer.USE },
+                //{ "var", PhpCodeClassifierLexer.VAR },
+                //{ "while", PhpCodeClassifierLexer.WHILE },
+                //{ "__FUNCTION__", PhpCodeClassifierLexer.__FUNCTION__ },
+                //{ "__CLASS__", PhpCodeClassifierLexer.__CLASS__ },
+                //{ "__METHOD__", PhpCodeClassifierLexer.__METHOD__ },
+                //{ "final", PhpCodeClassifierLexer.FINAL },
+                //{ "php_user_filter", PhpCodeClassifierLexer.PHP_USER_FILTER },
+                //{ "instanceof", PhpCodeClassifierLexer.INSTANCEOF },
+                //{ "public", PhpCodeClassifierLexer.PUBLIC },
+                //{ "private", PhpCodeClassifierLexer.PRIVATE },
+                //{ "protected", PhpCodeClassifierLexer.PROTECTED },
+                //{ "abstract", PhpCodeClassifierLexer.ABSTRACT },
+                //{ "clone", PhpCodeClassifierLexer.CLONE },
+                //{ "try", PhpCodeClassifierLexer.TRY },
+                //{ "catch", PhpCodeClassifierLexer.CATCH },
+                //{ "throw", PhpCodeClassifierLexer.THROW },
+                //{ "this", PhpCodeClassifierLexer.THIS },
+                //{ "final", PhpCodeClassifierLexer.FINAL },
+                //{ "__NAMESPACE__", PhpCodeClassifierLexer.__NAMESPACE__ },
+                //{ "namespace", PhpCodeClassifierLexer.NAMESPACE },
+                //{ "__DIR__", PhpCodeClassifierLexer.__DIR__ },
+            };
+
+        internal static readonly HashSet<string> Keywords =
             new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
                 "and",
@@ -68,7 +130,7 @@
                 "__DIR__",
             };
 
-        private static readonly HashSet<string> BuiltinFunctions =
+        internal static readonly HashSet<string> BuiltinFunctions =
             new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
                 "array",
@@ -87,7 +149,7 @@
                 "unset",
             };
 
-        private static readonly HashSet<string> BuiltinObjects =
+        internal static readonly HashSet<string> BuiltinObjects =
             new HashSet<string>(StringComparer.Ordinal)
             {
                 "$GLOBALS",
@@ -106,7 +168,7 @@
                 "$argv",
             };
 
-        private static readonly HashSet<string> PredefinedConstants =
+        internal static readonly HashSet<string> PredefinedConstants =
             new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
                 "PHP_VERSION",
