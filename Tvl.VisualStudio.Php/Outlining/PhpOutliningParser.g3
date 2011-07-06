@@ -1,0 +1,25 @@
+﻿parser grammar PhpOutliningParser;
+
+options {
+    language=CSharp3;
+    TokenLabelType=CommonToken;
+    output=AST;
+    ASTLabelType=CommonTree;
+	tokenVocab=PhpDocCommentClassifierLexer;
+}
+
+@parser::namespace{Tvl.VisualStudio.Language.Php.Outlining}
+
+public
+compileUnit
+	:	(htmlText | code)*
+		EOF // need at least 2 nodes or the outliner will not work (expects to process children of a nil node, not a single standalone node)
+	;
+
+htmlText
+	:	~HTML_START_CODE^ (options{greedy=true;} : ~HTML_START_CODE)*
+	;
+
+code
+	:	HTML_START_CODE^ .* CLOSE_PHP_TAG
+	;

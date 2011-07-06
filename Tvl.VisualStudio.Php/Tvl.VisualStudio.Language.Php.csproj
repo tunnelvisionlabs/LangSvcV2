@@ -186,6 +186,11 @@
     <Compile Include="Classification\PhpHtmlTextClassifierLexer.g3.cs">
       <DependentUpon>PhpHtmlTextClassifierLexer.g3</DependentUpon>
     </Compile>
+    <Compile Include="Outlining\PhpOutliningBackgroundParser.cs" />
+    <Compile Include="Outlining\PhpOutliningParser.g3.cs">
+    </Compile>
+    <Compile Include="Outlining\PhpOutliningTagger.cs" />
+    <Compile Include="Outlining\PhpOutliningTaggerProvider.cs" />
     <Compile Include="PhpServices.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PhpLanguageInfo.cs" />
@@ -205,6 +210,9 @@
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
     <Antlr3 Include="Classification\PhpCodeClassifierLexer.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
+    <Antlr3 Include="Outlining\PhpOutliningParser.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
     <None Include="source.extension.vsixmanifest">
