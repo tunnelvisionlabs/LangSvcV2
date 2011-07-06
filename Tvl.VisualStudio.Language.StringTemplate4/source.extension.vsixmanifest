@@ -3,7 +3,7 @@
   <Identifier Id="Tvl.VisualStudio.Language.StringTemplate4.8d218670-f9fc-43e9-bf0c-9dc2a729db36">
     <Name>StringTemplate 4 Language Support</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Description xml:space="preserve">Language support for StringTemplate 4.</Description>
     <Locale>1033</Locale>
     <SupportedProducts>
@@ -17,7 +17,7 @@
     <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
   </Identifier>
   <References>
-    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.0.1">
+    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.0.2">
       <Name>Visual Studio Extensibility Framework</Name>
     </Reference>
   </References>
