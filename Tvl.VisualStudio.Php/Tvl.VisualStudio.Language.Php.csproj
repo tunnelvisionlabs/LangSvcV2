@@ -165,7 +165,9 @@
   <ItemGroup>
     <Compile Include="Classification\PhpClassifierConstants.cs" />
     <Compile Include="Navigation\PhpEditorNavigationBackgroundParser.cs" />
-    <Compile Include="Navigation\PhpEditorNavigationParser.g3.cs" />
+    <Compile Include="Navigation\PhpEditorNavigationParser.g3.cs">
+      <DependentUpon>PhpEditorNavigationParser.g3</DependentUpon>
+    </Compile>
     <Compile Include="Navigation\PhpEditorNavigationParseResultEventArgs.cs" />
     <Compile Include="Navigation\PhpEditorNavigationSource.cs" />
     <Compile Include="Navigation\PhpEditorNavigationSourceProvider.cs" />
@@ -195,6 +197,7 @@
     </Compile>
     <Compile Include="Outlining\PhpOutliningBackgroundParser.cs" />
     <Compile Include="Outlining\PhpOutliningParser.g3.cs">
+      <DependentUpon>PhpOutliningParser.g3</DependentUpon>
     </Compile>
     <Compile Include="Outlining\PhpOutliningTagger.cs" />
     <Compile Include="Outlining\PhpOutliningTaggerProvider.cs" />
