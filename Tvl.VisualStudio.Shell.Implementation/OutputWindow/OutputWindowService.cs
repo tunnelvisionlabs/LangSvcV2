@@ -1,23 +1,23 @@
 ﻿namespace Tvl.VisualStudio.Shell.OutputWindow.Implementation
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
     using System.Linq;
-    using Microsoft.VisualStudio;
-    using Microsoft.VisualStudio.Shell;
-    using Microsoft.VisualStudio.Shell.Interop;
     using Tvl.VisualStudio.Shell.Extensions;
+
+    using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
-    using System.Diagnostics.Contracts;
+    using IVsOutputWindow = Microsoft.VisualStudio.Shell.Interop.IVsOutputWindow;
+    using IVsOutputWindowPane = Microsoft.VisualStudio.Shell.Interop.IVsOutputWindowPane;
+    using SVsOutputWindow = Microsoft.VisualStudio.Shell.Interop.SVsOutputWindow;
+    using SVsServiceProvider = Microsoft.VisualStudio.Shell.SVsServiceProvider;
+    using VSConstants = Microsoft.VisualStudio.VSConstants;
 
     [Export(typeof(IOutputWindowService))]
     internal sealed class OutputWindowService : IOutputWindowService
     {
-        public OutputWindowService()
-        {
-        }
-
         [Import]
         private SVsServiceProvider GlobalServiceProvider
         {
@@ -40,14 +40,16 @@
                 { PredefinedOutputWindowPanes.General, VSConstants.GUID_OutWindowGeneralPane },
             };
 
-        private readonly Dictionary<string, IOutputWindowPane> _panes = new Dictionary<string, IOutputWindowPane>();
+        private readonly ConcurrentDictionary<string, IOutputWindowPane> _panes =
+            new ConcurrentDictionary<string, IOutputWindowPane>();
 
         public IOutputWindowPane TryGetPane(string name)
         {
-            IOutputWindowPane pane = null;
-            if (_panes.TryGetValue(name, out pane))
-                return pane;
+            return _panes.GetOrAdd(name, CreateWindowPane);
+        }
 
+        private IOutputWindowPane CreateWindowPane(string name)
+        {
             var olesp = (IOleServiceProvider)GlobalServiceProvider.GetService(typeof(IOleServiceProvider));
             var outputWindow = olesp.TryGetGlobalService<SVsOutputWindow, IVsOutputWindow>();
             if (outputWindow == null)
@@ -75,8 +77,7 @@
             if (ErrorHandler.Failed(ErrorHandler.CallWithCOMConvention(() => outputWindow.GetPane(ref guid, out vspane))))
                 return null;
 
-            pane = new VsOutputWindowPaneAdapter(vspane);
-            _panes[name] = pane;
+            IOutputWindowPane pane = new VsOutputWindowPaneAdapter(vspane);
             return pane;
         }
     }
