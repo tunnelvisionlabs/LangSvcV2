@@ -66,51 +66,36 @@
         protected override void ReParseImpl()
         {
             var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
-            try
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            var snapshot = TextBuffer.CurrentSnapshot;
+            var input = new SnapshotCharStream(snapshot, new Span(0, snapshot.Length));
+            var lexer = new AntlrErrorProvidingLexer(input);
+            var tokens = new AntlrParserTokenStream(lexer);
+            var parser = new AntlrErrorProvidingParser(tokens);
+
+            lexer.Parser = parser;
+            tokens.Parser = parser;
+
+            List<ParseErrorEventArgs> errors = new List<ParseErrorEventArgs>();
+            parser.ParseError += (sender, e) =>
             {
-                Stopwatch stopwatch = Stopwatch.StartNew();
+                errors.Add(e);
 
-                var snapshot = TextBuffer.CurrentSnapshot;
-                var input = new SnapshotCharStream(snapshot);
-                var lexer = new AntlrErrorProvidingLexer(input);
-                var tokens = new AntlrParserTokenStream(lexer);
-                var parser = new AntlrErrorProvidingParser(tokens);
+                string message = e.Message;
+                if (message.Length > 100)
+                    message = message.Substring(0, 100) + " ...";
 
-                lexer.Parser = parser;
-                tokens.Parser = parser;
+                if (outputWindow != null)
+                    outputWindow.WriteLine(message);
+            };
 
-                List<ParseErrorEventArgs> errors = new List<ParseErrorEventArgs>();
-                parser.ParseError += (sender, e) =>
-                {
-                    errors.Add(e);
-
-                    string message = e.Message;
-                    if (message.Length > 100)
-                        message = message.Substring(0, 100) + " ...";
-
-                    if (outputWindow != null)
-                        outputWindow.WriteLine(message);
-                };
-
-                AntlrTool.ToolPathRoot = typeof(AntlrTool).Assembly.Location;
-                ErrorManager.SetErrorListener(new AntlrErrorProvidingParser.ErrorListener());
-                Grammar g = new Grammar();
-                var result = parser.grammar_(g);
-                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), result));
-            }
-            catch (Exception e)
-            {
-                try
-                {
-                    if (outputWindow != null)
-                    {
-                        outputWindow.WriteLine(e.Message);
-                    }
-                }
-                catch
-                {
-                }
-            }
+            AntlrTool.ToolPathRoot = typeof(AntlrTool).Assembly.Location;
+            ErrorManager.SetErrorListener(new AntlrErrorProvidingParser.ErrorListener());
+            Grammar g = new Grammar();
+            var result = parser.grammar_(g);
+            OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), result));
         }
 
         protected override void OnParseComplete(ParseResultEventArgs e)
