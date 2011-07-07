@@ -6,12 +6,12 @@
     using System.Threading;
     using System.Windows.Media;
     using System.Windows.Threading;
+    using Antlr.Runtime;
     using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Text.Navigation;
-    using Antlr.Runtime;
 
     internal sealed class GoEditorNavigationSource : IEditorNavigationSource
     {
@@ -34,7 +34,8 @@
 
             this._navigationTargets = new List<IEditorNavigationTarget>();
 
-            this.BackgroundParser.ParseComplete += OnBackgroundParseComplete;
+            this.BackgroundParser.ParseComplete += HandleBackgroundParseComplete;
+            this.BackgroundParser.RequestParse(false);
         }
 
         private ITextBuffer TextBuffer
@@ -83,7 +84,7 @@
                 t(this, e);
         }
 
-        private void OnBackgroundParseComplete(object sender, ParseResultEventArgs e)
+        private void HandleBackgroundParseComplete(object sender, ParseResultEventArgs e)
         {
             AntlrParseResultEventArgs antlrParseResultArgs = e as AntlrParseResultEventArgs;
             List<IEditorNavigationTarget> navigationTargets = new List<IEditorNavigationTarget>();
@@ -102,6 +103,8 @@
 
                 IAstRuleReturnScope resultArgs = antlrParseResultArgs.Result as IAstRuleReturnScope;
                 var result = resultArgs != null ? resultArgs.Tree as CommonTree : null;
+                string packageName = string.Empty;
+
                 if (result != null && result.Children != null)
                 {
                     foreach (CommonTree child in result.Children)
@@ -113,7 +116,7 @@
                         {
                         case GoLexer.KW_PACKAGE:
                             {
-                                var packageName = ((CommonTree)child.Children[0]).Token.Text;
+                                packageName = ((CommonTree)child.Children[0]).Token.Text;
                                 if (string.IsNullOrWhiteSpace(packageName))
                                     continue;
 
@@ -138,15 +141,47 @@
                                 if (string.IsNullOrWhiteSpace(typeName))
                                     continue;
 
+                                for (ITree parent = typeSpec.Parent; parent != null; parent = parent.Parent)
+                                {
+                                    if (parent.Type == GoParser.TYPE_IDENTIFIER)
+                                        typeName = parent.Text + "." + typeName;
+                                }
+
+                                if (!string.IsNullOrWhiteSpace(packageName))
+                                    typeName = packageName + "." + typeName;
+
                                 var navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Types);
                                 var startToken = antlrParseResultArgs.Tokens[typeSpec.TokenStartIndex];
                                 var stopToken = antlrParseResultArgs.Tokens[typeSpec.TokenStopIndex];
                                 Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
                                 SnapshotSpan ruleSpan = new SnapshotSpan(e.Snapshot, span);
                                 SnapshotSpan ruleSeek = new SnapshotSpan(e.Snapshot, new Span(typeSpec.Token.StartIndex, 0));
-                                var glyph = GetGlyph(StandardGlyphGroup.GlyphGroupMethod, char.IsUpper(typeName[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate);
+                                var glyph = GetGlyph(GetGlyphGroupForType(typeSpec), char.IsUpper(typeName[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate);
                                 navigationTargets.Add(new EditorNavigationTarget(typeName, navigationType, ruleSpan, ruleSeek, glyph));
+
+                                if (typeSpec.ChildCount > 0 && typeSpec.Children[0].Type == GoLexer.KW_STRUCT)
+                                {
+                                    foreach (CommonTree fieldSpec in ((CommonTree)typeSpec.Children[0]).Children)
+                                    {
+                                        if (fieldSpec.Type != GoParser.FIELD_DECLARATION)
+                                            continue;
+
+                                        foreach (CommonTree fieldNameIdentifier in ((CommonTree)fieldSpec.GetFirstChildWithType(GoParser.AST_VARS)).Children)
+                                        {
+                                            string fieldName = fieldNameIdentifier.Text;
+                                            navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Members);
+                                            startToken = antlrParseResultArgs.Tokens[fieldNameIdentifier.TokenStartIndex];
+                                            stopToken = antlrParseResultArgs.Tokens[fieldSpec.TokenStopIndex];
+                                            span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
+                                            ruleSpan = new SnapshotSpan(e.Snapshot, span);
+                                            ruleSeek = new SnapshotSpan(e.Snapshot, new Span(fieldNameIdentifier.Token.StartIndex, 0));
+                                            glyph = GetGlyph(StandardGlyphGroup.GlyphGroupField, char.IsUpper(fieldName[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate);
+                                            navigationTargets.Add(new EditorNavigationTarget(fieldName, navigationType, ruleSpan, ruleSeek, glyph));
+                                        }
+                                    }
+                                }
                             }
+
                             break;
 
                         case GoLexer.KW_CONST:
@@ -178,13 +213,27 @@
                             {
                                 // the first child is either a receiver (method) or an identifier with the name of the function
                                 var token = ((CommonTree)child.Children[0]).Token;
-                                if (token.Type == GoLexer.LPAREN)
+                                if (token.Type == GoLexer.METHOD_RECEIVER)
                                     token = ((CommonTree)child.Children[1]).Token;
 
                                 var functionName = token.Text;
                                 if (string.IsNullOrWhiteSpace(functionName))
                                     continue;
 
+                                ITree receiver = child.GetFirstChildWithType(GoParser.METHOD_RECEIVER);
+                                if (receiver != null)
+                                {
+                                    string receiverName;
+                                    if (receiver.ChildCount >= 2)
+                                        receiverName = receiver.GetChild(receiver.ChildCount - 2).Text;
+                                    else
+                                        receiverName = "?";
+
+                                    functionName = receiverName + "." + functionName;
+                                }
+
+                                IEnumerable<string> args = ProcessFunctionParameters(child);
+                                string sig = string.Format("{0}({1})", functionName, string.Join(", ", args));
                                 var navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Members);
                                 var startToken = antlrParseResultArgs.Tokens[child.TokenStartIndex];
                                 var stopToken = antlrParseResultArgs.Tokens[child.TokenStopIndex];
@@ -192,7 +241,7 @@
                                 SnapshotSpan ruleSpan = new SnapshotSpan(e.Snapshot, span);
                                 SnapshotSpan ruleSeek = new SnapshotSpan(e.Snapshot, new Span(child.Token.StartIndex, 0));
                                 var glyph = GetGlyph(StandardGlyphGroup.GlyphGroupMethod, char.IsUpper(functionName[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate);
-                                navigationTargets.Add(new EditorNavigationTarget(functionName, navigationType, ruleSpan, ruleSeek, glyph));
+                                navigationTargets.Add(new EditorNavigationTarget(sig, navigationType, ruleSpan, ruleSeek, glyph));
                             }
 
                             break;
@@ -200,64 +249,69 @@
                         default:
                             continue;
                         }
-
-                        //    if (child.Text == "rule" && child.ChildCount > 0)
-                        //    {
-                        //        var ruleName = child.GetChild(0).Text;
-                        //        if (string.IsNullOrEmpty(ruleName))
-                        //            continue;
-
-                        //        var navigationType = char.IsUpper(ruleName[0]) ? _lexerRuleNavigationType : _parserRuleNavigationType;
-                        //        IToken startToken = antlrParseResultArgs.Tokens[child.TokenStartIndex];
-                        //        IToken stopToken = antlrParseResultArgs.Tokens[child.TokenStopIndex];
-                        //        Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
-                        //        SnapshotSpan ruleSpan = new SnapshotSpan(e.Snapshot, span);
-                        //        SnapshotSpan ruleSeek = new SnapshotSpan(e.Snapshot, new Span(((CommonTree)child.GetChild(0)).Token.StartIndex, 0));
-                        //        var glyph = char.IsUpper(ruleName[0]) ? _lexerRuleGlyph : _parserRuleGlyph;
-                        //        _navigationTargets.Add(new EditorNavigationTarget(ruleName, navigationType, ruleSpan, ruleSeek, glyph));
-                        //    }
-                        //    else if (child.Text.StartsWith("tokens"))
-                        //    {
-                        //        foreach (CommonTree tokenChild in child.Children)
-                        //        {
-                        //            if (tokenChild.Text == "=" && tokenChild.ChildCount == 2)
-                        //            {
-                        //                var ruleName = tokenChild.GetChild(0).Text;
-                        //                if (string.IsNullOrEmpty(ruleName))
-                        //                    continue;
-
-                        //                var navigationType = char.IsUpper(ruleName[0]) ? _lexerRuleNavigationType : _parserRuleNavigationType;
-                        //                IToken startToken = antlrParseResultArgs.Tokens[tokenChild.TokenStartIndex];
-                        //                IToken stopToken = antlrParseResultArgs.Tokens[tokenChild.TokenStopIndex];
-                        //                Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
-                        //                SnapshotSpan ruleSpan = new SnapshotSpan(e.Snapshot, span);
-                        //                SnapshotSpan ruleSeek = new SnapshotSpan(e.Snapshot, new Span(((CommonTree)tokenChild.GetChild(0)).Token.StartIndex, 0));
-                        //                var glyph = char.IsUpper(ruleName[0]) ? _lexerRuleGlyph : _parserRuleGlyph;
-                        //                _navigationTargets.Add(new EditorNavigationTarget(ruleName, navigationType, ruleSpan, ruleSeek, glyph));
-                        //            }
-                        //            else if (tokenChild.ChildCount == 0)
-                        //            {
-                        //                var ruleName = tokenChild.Text;
-                        //                if (string.IsNullOrEmpty(ruleName))
-                        //                    continue;
-
-                        //                var navigationType = char.IsUpper(ruleName[0]) ? _lexerRuleNavigationType : _parserRuleNavigationType;
-                        //                IToken startToken = antlrParseResultArgs.Tokens[tokenChild.TokenStartIndex];
-                        //                IToken stopToken = antlrParseResultArgs.Tokens[tokenChild.TokenStopIndex];
-                        //                Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
-                        //                SnapshotSpan ruleSpan = new SnapshotSpan(e.Snapshot, span);
-                        //                SnapshotSpan ruleSeek = new SnapshotSpan(e.Snapshot, new Span(tokenChild.Token.StartIndex, 0));
-                        //                var glyph = char.IsUpper(ruleName[0]) ? _lexerRuleGlyph : _parserRuleGlyph;
-                        //                _navigationTargets.Add(new EditorNavigationTarget(ruleName, navigationType, ruleSpan, ruleSeek, glyph));
-                        //            }
-                        //        }
-                        //    }
                     }
                 }
             }
 
             this._navigationTargets = navigationTargets;
             OnNavigationTargetsChanged(EventArgs.Empty);
+        }
+
+        private IEnumerable<string> ProcessFunctionParameters(CommonTree child)
+        {
+            CommonTree parameterTree = child.GetFirstChildWithType(GoLexer.LPAREN) as CommonTree;
+            if (parameterTree == null)
+                yield break;
+
+            foreach (CommonTree parameter in parameterTree.Children)
+            {
+                if (parameter.Type == GoLexer.RPAREN)
+                    continue;
+
+                if (parameter.ChildCount == 0)
+                {
+                    yield return parameter.Text;
+                }
+                else if (parameter.ChildCount == 1)
+                {
+                    yield return string.Format("{0} {1}", parameter.Text, GetTypeString((CommonTree)parameter.GetChild(0)));
+                }
+                else
+                {
+                    yield return "<unknown parameter>";
+                }
+            }
+        }
+
+        private string GetTypeString(ITree parameterType)
+        {
+            if (parameterType != null && parameterType.Type == GoLexer.ELLIP && parameterType.ChildCount == 1)
+                return "..." + GetTypeString(parameterType.GetChild(0));
+
+            return GoTypeFormatter.FormatType(parameterType);
+        }
+
+        private StandardGlyphGroup GetGlyphGroupForType(CommonTree typeSpec)
+        {
+            if (typeSpec.ChildCount > 0)
+            {
+                switch (typeSpec.Children[0].Type)
+                {
+                case GoLexer.KW_STRUCT:
+                    return StandardGlyphGroup.GlyphGroupStruct;
+
+                case GoLexer.KW_INTERFACE:
+                    return StandardGlyphGroup.GlyphGroupInterface;
+
+                case GoLexer.KW_FUNC:
+                    return StandardGlyphGroup.GlyphGroupMethod;
+
+                default:
+                    return StandardGlyphGroup.GlyphGroupType;
+                }
+            }
+
+            return StandardGlyphGroup.GlyphGroupType;
         }
 
         private ImageSource GetGlyph(StandardGlyphGroup group, StandardGlyphItem item)

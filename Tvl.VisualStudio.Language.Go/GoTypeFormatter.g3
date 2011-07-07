@@ -1,0 +1,378 @@
+﻿tree grammar GoTypeFormatter;
+
+options {
+	language=CSharp3;
+	ASTLabelType=CommonTree;
+	tokenVocab=Go;
+}
+
+@namespace{Tvl.VisualStudio.Language.Go}
+@ctorModifier{private}
+@modifier{internal}
+
+type returns [string result]
+	:	typeName			{$result = HandleExpectedType($typeName.result);}
+	|	typeLit				{$result = HandleExpectedType($typeLit.result);}
+	|	^('(' t=type ')')	{$result = "(" + HandleExpectedType($t.result) + ")";}
+	;
+
+typeNoParens returns [string result]
+	:	typeName			{$result = HandleExpectedType($typeName.result);}
+	|	typeLit				{$result = HandleExpectedType($typeLit.result);}
+	;
+
+typeName returns [string result]
+	:	qualifiedIdent		{$result = HandleExpectedType($qualifiedIdent.result);}
+	;
+
+typeLit returns [string result]
+	:	arrayType			{$result = HandleExpectedType($arrayType.result);}
+	|	structType			{$result = HandleExpectedType($structType.result);}
+	|	pointerType			{$result = HandleExpectedType($pointerType.result);}
+	|	functionType		{$result = HandleExpectedType($functionType.result);}
+	|	interfaceType		{$result = HandleExpectedType($interfaceType.result);}
+	|	sliceType			{$result = HandleExpectedType($sliceType.result);}
+	|	mapType				{$result = HandleExpectedType($mapType.result);}
+	|	channelType			{$result = HandleExpectedType($channelType.result);}
+	;
+
+// Array types
+
+arrayType returns [string result]
+	:	^('[' arrayLength elementType)
+		{$result = string.Format("[{0}]{1}", HandleExpectedType($arrayLength.result), HandleExpectedType($elementType.result));}
+	;
+
+arrayLength returns [string result]
+	:	expression			{$result = HandleExpectedType($expression.result);}
+	;
+
+elementType returns [string result]
+	:	type				{$result = HandleExpectedType($type.result);}
+	;
+
+// Slice types
+
+sliceType returns [string result]
+	:	^('[' ']' elementType)	{$result = "[]" + HandleExpectedType($elementType.result);}
+	;
+
+// Struct types
+
+structType returns [string result]
+	:	^('struct' fieldDecl*)	{$result = "struct";}
+	;
+
+fieldDecl
+	:	(	^(FIELD_DECLARATION ^(AST_VARS fieldIdentifierList) type tag?)
+		|	^(ANONYMOUS_FIELD_DECLARATION anonymousField tag?)
+		)
+	;
+
+fieldIdentifierList
+	:	FIELD_IDENTIFIER+
+	;
+
+anonymousField
+	:	'*'? typeName
+	;
+
+tag
+	:	STRING_LITERAL
+	;
+
+// Pointer types
+
+pointerType returns [string result]
+	:	^('*' baseType)		{$result = "*" + HandleExpectedType($baseType.result);}
+	;
+
+baseType returns [string result]
+	:	type				{$result = HandleExpectedType($type.result);}
+	;
+
+// Function types
+
+functionType returns [string result]
+	:	^('func' signature)	{$result = "func";}
+	;
+
+signature
+	//:	parameters ((result) => result)?
+	:	parameters
+		(	('(') => parameters
+		|	typeNoParens?
+		)
+	;
+
+parameters
+	:	^('(' parameterList? ')')
+	;
+
+parameterList
+	:	parameterDecl+
+	;
+
+parameterDecl
+	:	(IDENTIFIER ~('.'|','|')')) =>
+		// using IDENTIFIER instead of identifierList because parameterDecl is only used by the parameterList rule, which is itself comma separated
+		^(IDENTIFIER parameterType)
+	|	parameterType
+	;
+
+parameterType
+	:	^('...' type)
+	|	type
+	;
+
+// Interface types
+
+interfaceType returns [string result]
+	:	^('interface' methodSpec*)	{$result = "interface";}
+	;
+
+methodSpec
+	:	^(methodName signature)
+	|	interfaceTypeName
+	;
+
+methodName
+	:	METHOD_IDENTIFIER
+	;
+
+interfaceTypeName
+	:	typeName
+	;
+
+// Map types
+
+mapType returns [string result]
+	:	^('map' keyType elementType)	{$result = string.Format("map[{0}]{1}", HandleExpectedType($keyType.result), HandleExpectedType($elementType.result));}
+	;
+
+keyType returns [string result]
+	:	type					{$result = HandleExpectedType($type.result);}
+	;
+
+// Channel types
+
+channelType returns [string result]
+	:	recvChannel				{$result = HandleExpectedType($recvChannel.result);}
+	|	sendChannel				{$result = HandleExpectedType($sendChannel.result);}
+	|	channel					{$result = HandleExpectedType($channel.result);}
+	;
+
+channel returns [string result]
+	:	^('chan' elementType)	{$result = "chan" + HandleExpectedType($elementType.result);}
+	;
+
+sendChannel returns [string result]
+	:	^(AST_SENDCHAN elementType)	{$result = "chan<-" + HandleExpectedType($elementType.result);}
+	;
+
+recvChannel returns [string result]
+	:	^(AST_RECVCHAN elementType)	{$result = "<-chan" + HandleExpectedType($elementType.result);}
+	;
+
+expressionList
+	:	expression+
+	;
+
+/*
+ * Blocks
+ */
+
+block
+	:	unparsedBlock
+	|	statementBlock
+	;
+
+unparsedBlock
+	:	UNPARSED_BLOCK
+	;
+
+statementBlock
+	:	^('{' .*)
+	;
+
+body
+	:	block
+	;
+
+/*
+ * Expressions
+ */
+
+// Operands
+
+operand returns [string result]
+	:	literal				{$result = HandleExpectedType($literal.result);}
+	|	methodExpr			{$result = HandleExpectedType($methodExpr.result);}
+	|	qualifiedIdent		{$result = HandleExpectedType($qualifiedIdent.result);}
+	|	'(' expression ')'	{$result = "(" + HandleExpectedType($expression.result) + ")";}
+	;
+
+literal returns [string result]
+	:	basicLit			{$result = HandleExpectedType($basicLit.result);}
+	|	compositeLit		{$result = HandleExpectedType($compositeLit.result);}
+	|	functionLit			{$result = HandleExpectedType($functionLit.result);}
+	;
+
+basicLit returns [string result]
+	:	NUMBER				{$result = HandleExpectedType($NUMBER.text);}
+	|	CHAR_LITERAL		{$result = HandleExpectedType($CHAR_LITERAL.text);}
+	|	STRING_LITERAL		{$result = HandleExpectedType($STRING_LITERAL.text);}
+	;
+
+// Qualified identifiers
+
+qualifiedIdent returns [string result]
+	:	^('.' left=qualifiedIdent IDENTIFIER)	{$result = string.Format("{0}.{1}", HandleExpectedType($left.result), $IDENTIFIER.text);}
+	|	IDENTIFIER								{$result = $IDENTIFIER.text;}
+	;
+
+// Composite literals
+
+compositeLit returns [string result]
+	:	^(AST_COMPOSITE_LITERAL literalType (elementList ','?)? '}')
+	;
+
+literalType returns [string result]
+	:	structType						{$result = HandleExpectedType($structType.result);}
+	|	arrayType						{$result = HandleExpectedType($arrayType.result);}
+	|	^('[' '...' ']' elementType)	{$result = HandleExpectedType($elementType.result);}
+	|	sliceType						{$result = HandleExpectedType($sliceType.result);}
+	|	mapType							{$result = HandleExpectedType($mapType.result);}
+	|	typeName						{$result = HandleExpectedType($typeName.result);}
+	|	^('(' subType=literalType ')')	{$result = "(" + HandleExpectedType($subType.result) + ")";}
+	;
+
+elementList
+	:	element (',' element)*
+	;
+
+element
+	:	((key ':') => key ':')? value
+	;
+
+key
+	:	// fieldName |
+		elementIndex
+	;
+
+fieldName
+	:	IDENTIFIER
+	;
+
+elementIndex
+	:	expression
+	;
+
+value
+	:	expression
+	;
+
+// Function literals
+
+functionLit returns [string result]
+	:	functionType body	{$result = "func";}
+	;
+
+
+// Primary expressions
+
+primaryExpr returns [string result]
+	:	(	operand											{$result = HandleExpectedType($operand.result);}
+		//|	conversion
+		//|	builtinCall
+		)
+	|	^(AST_SELECTOR left=primaryExpr selector)			{$result = HandleExpectedType($left.result) + HandleExpectedType($selector.result);}
+	|	^(AST_INDEX_OR_SLICE left=primaryExpr indexOrSlice)	{$result = HandleExpectedType($left.result) + HandleExpectedType($indexOrSlice.result);}
+	|	^(AST_TYPE_ASSERTION left=primaryExpr typeAssertion){$result = HandleExpectedType($left.result) + HandleExpectedType($typeAssertion.result);}
+	|	^(AST_CALL left=primaryExpr call)					{$result = HandleExpectedType($left.result) + HandleExpectedType($call.result);}
+	;
+
+selector returns [string result]
+	:	^('.' IDENTIFIER)								{$result = "." + HandleExpectedType($IDENTIFIER.text);}
+	;
+
+indexOrSlice returns [string result]
+	:	index							{$result = HandleExpectedType($index.result);}
+	|	slice							{$result = HandleExpectedType($slice.result);}
+	;
+
+index returns [string result]
+	:	^(AST_INDEX expression ']')		{$result = "[" + HandleExpectedType($expression.result) + "]";}
+	;
+
+slice returns [string result]
+	:	^(AST_SLICE left=expression ':' right=expression? ']')
+		{$result = string.Format("[{0}:{1}]", HandleExpectedType($left.result), HandleExpectedType($right.result));}
+	;
+
+typeAssertion returns [string result]
+	:	^('.' '(' type ')')				{$result = string.Format(".({0})", HandleExpectedType($type.result));}
+	;
+
+call returns [string result]
+	:	^(	'('
+			(	options {backtrack=true;}
+			:	expressionList ','?
+			|	type (',' expressionList)? ','?
+			)?
+			')'
+		)								{$result = "()";}
+	;
+
+expression returns [string result]
+	:	^(binaryOp left=unaryExpr right=unaryExpr)
+		{$result = string.Format("{0}{1}{2}", HandleExpectedType($left.result), $binaryOp.text, HandleExpectedType($right.result));}
+	|	unaryExpr
+		{$result = HandleExpectedType($unaryExpr.result);}
+	;
+
+unaryExpr returns [string result]
+	:	^(unaryOp sub=unaryExpr)	{$result = $unaryOp.text + HandleExpectedType($sub.result);}
+	|	primaryExpr					{$result = HandleExpectedType($primaryExpr.result);}
+	;
+
+binaryOp returns [string result]
+	:	logOp					{$result = HandleExpectedType($logOp.text);}
+	|	comOp					{$result = HandleExpectedType($comOp.text);}
+	|	relOp					{$result = HandleExpectedType($relOp.text);}
+	|	addOp					{$result = HandleExpectedType($addOp.text);}
+	|	mulOp					{$result = HandleExpectedType($mulOp.text);}
+	;
+
+logOp
+	:	'||' | '&&'
+	;
+
+comOp
+	:	'<-'
+	;
+
+relOp
+	:	'==' | '!=' | '<' | '<=' | '>' | '>='
+	;
+
+addOp
+	:	'+' | '-' | '|' | '^'
+	;
+
+mulOp
+	:	'*' | '/' | '%' | '<<' | '>>' | '&' | '&^'
+	;
+
+unaryOp
+	:	AST_POSITIVE | AST_NEGATE | '!' | AST_COMPLEMENT | AST_DEREFERENCE | AST_ADDRESSOF | AST_RECEIVE
+	;
+
+methodExpr returns [string result]
+	:	^(AST_METHOD_EXPRESSION receiverType methodName)
+	;
+
+receiverType returns [string result]
+	:	typeName
+	|	'(' '*' typeName ')'
+	;

@@ -166,6 +166,10 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GoClassifierLexer.cs" />
+    <Compile Include="GoClassifierLexerMode.cs" />
+    <Compile Include="GoClassifierLexerState.cs" />
+    <Compile Include="GoColorizerLexer.g3.cs" />
     <Compile Include="GoEditorNavigationSource.cs" />
     <Compile Include="GoEditorNavigationSourceProvider.cs" />
     <Compile Include="GoBraceMatchingTaggerProvider.cs" />
@@ -186,6 +190,9 @@
     <Compile Include="GoErrorTaggerProvider.cs" />
     <Compile Include="GoOutliningTagger.cs" />
     <Compile Include="GoOutliningTaggerProvider.cs" />
+    <Compile Include="GoTypeFormatter.g3.cs">
+      <DependentUpon>GoTypeFormatter.g3</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -198,6 +205,9 @@
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
     </None>
+    <Antlr3 Include="GoTypeFormatter.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>

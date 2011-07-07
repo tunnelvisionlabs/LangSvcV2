@@ -94,6 +94,33 @@ tokens
 	AST_RECVCHAN;
 	AST_CONST;
 	AST_TYPE;
+
+	AST_SELECTOR;
+	AST_INDEX_OR_SLICE;
+	AST_TYPE_ASSERTION;
+	AST_CALL;
+	AST_SLICE;
+	AST_INDEX;
+	AST_METHOD_EXPRESSION;
+	AST_COMPOSITE_LITERAL;
+
+	AST_POSITIVE;
+	AST_NEGATE;
+	AST_COMPLEMENT;
+	AST_ADDRESSOF;
+	AST_DEREFERENCE;
+	AST_RECEIVE;
+
+	UNPARSED_BLOCK;
+
+	FIELD_DECLARATION;
+	ANONYMOUS_FIELD_DECLARATION;
+	METHOD_RECEIVER;
+
+	FIELD_IDENTIFIER;
+	TYPE_IDENTIFIER;
+	FUNCTION_IDENTIFIER;
+	METHOD_IDENTIFIER;
 }
 
 @lexer::namespace{Tvl.VisualStudio.Language.Go}
@@ -106,7 +133,7 @@ tokens
 type
 	:	typeName
 	|	typeLit
-	|	'(' type ')'
+	|	'('^ type ')'
 	;
 
 typeNoParens
@@ -152,19 +179,23 @@ sliceType
 // Struct types
 
 structType
-	:	'struct'
-		'{'
-		(	'}'
-		|	fieldDecl (';' fieldDecl)* ';'? '}'
+	:	'struct'^
+		'{'!
+		(	'}'!
+		|	fieldDecl (';'! fieldDecl)* ';'!? '}'!
 		)
-		-> ^('struct' fieldDecl*)
 	;
 
 fieldDecl
-	:	(	identifierList type
-		|	anonymousField
+	:	(	fieldIdentifierList type tag?
+			-> ^(FIELD_DECLARATION[$start] ^(AST_VARS fieldIdentifierList) type tag?)
+		|	anonymousField tag?
+			-> ^(ANONYMOUS_FIELD_DECLARATION[$start] anonymousField tag?)
 		)
-		tag?
+	;
+
+fieldIdentifierList
+	:	IDENTIFIER<FIELD_IDENTIFIER> (','! IDENTIFIER<FIELD_IDENTIFIER>)*
 	;
 
 anonymousField
@@ -205,38 +236,41 @@ signature
 //	;
 
 parameters
-	:	'('^ (parameterList ','?)? ')'
+	:	'('^ (parameterList ','!?)? ')'
 	;
 
 parameterList
-	:	parameterDecl (',' parameterDecl)*
+	:	parameterDecl (','! parameterDecl)*
 	;
 
 parameterDecl
-	:	(IDENTIFIER ~'.') =>
+	:	(IDENTIFIER ~('.'|','|')')) =>
 		// using IDENTIFIER instead of identifierList because parameterDecl is only used by the parameterList rule, which is itself comma separated
-		IDENTIFIER (type|'...')?
-	|	(type|'...')
+		IDENTIFIER^ parameterType
+	|	parameterType
+	;
+
+parameterType
+	:	'...'^? type
 	;
 
 // Interface types
 
 interfaceType
-	:	'interface'
-		'{'
-		(	'}'
-		|	methodSpec (';' methodSpec)* ';'? '}'
+	:	'interface'^
+		'{'!
+		(	'}'!
+		|	methodSpec (';'! methodSpec)* ';'!? '}'!
 		)
-		-> ^('interface' methodSpec*)
 	;
 
 methodSpec
-	:	methodName signature
+	:	methodName^ signature
 	|	interfaceTypeName
 	;
 
 methodName
-	:	IDENTIFIER
+	:	IDENTIFIER<METHOD_IDENTIFIER>
 	;
 
 interfaceTypeName
@@ -266,13 +300,11 @@ channel
 	;
 
 sendChannel
-	:	chan='chan' '<-' elementType
-		-> ^(AST_SENDCHAN[$chan] elementType)
+	:	'chan'<AST_SENDCHAN>^ '<-'! elementType
 	;
 
 recvChannel
-	:	'<-' chan='chan' elementType
-		-> ^(AST_RECVCHAN[$chan] elementType)
+	:	'<-'! 'chan'<AST_RECVCHAN>^ elementType
 	;
 
 /*
@@ -280,6 +312,14 @@ recvChannel
  */
 
 block
+	:	'{'<UNPARSED_BLOCK>^
+			(	~('{'|'}')!
+			|	block!
+			)*
+		'}'!
+	;
+
+statementBlock
 	:	'{'^
 		statement (';'! statement)*
 		'}'!
@@ -304,11 +344,10 @@ topLevelDecl
 // Constant declarations
 
 constDecl
-	:	'const'
+	:	'const'^
 		(	constSpec
-		|	'(' (constSpec ';')* ')'
+		|	'('! (constSpec ';'!)* ')'!
 		)
-		-> ^('const' constSpec*)
 	;
 
 constSpec
@@ -328,25 +367,23 @@ expressionList
 // Type declarations
 
 typeDecl
-	:	'type'
+	:	'type'^
 		(	typeSpec
-		|	'(' (typeSpec ';')* ')'
+		|	'('! (typeSpec ';'!)* ')'!
 		)
-		-> ^('type' typeSpec*)
 	;
 
 typeSpec
-	:	IDENTIFIER^ type
+	:	IDENTIFIER<TYPE_IDENTIFIER>^ type
 	;
 
 // Variable declarations
 
 varDecl
-	:	'var'
+	:	'var'^
 		(	varSpec
-		|	'(' (varSpec ';')* ')'
+		|	'('! (varSpec ';'!)* ')'!
 		)
-		-> ^('var' varSpec*)
 	;
 
 varSpec
@@ -367,7 +404,7 @@ shortVarDecl
 // Function declarations
 
 functionDecl
-	:	'func'^ IDENTIFIER signature body?
+	:	'func'^ IDENTIFIER<FUNCTION_IDENTIFIER> signature body?
 	;
 
 body
@@ -381,7 +418,7 @@ methodDecl
 	;
 
 receiver
-	:	'('^ IDENTIFIER? '*'? baseTypeName ')'
+	:	'('<METHOD_RECEIVER>^ IDENTIFIER? '*'? baseTypeName ')'
 	;
 
 baseTypeName
@@ -424,7 +461,7 @@ qualifiedIdent
 // Composite literals
 
 compositeLit
-	:	literalType '{' (elementList ','?)? '}'
+	:	literalType '{'<AST_COMPOSITE_LITERAL>^ (elementList ','?)? '}'
 	;
 
 literalType
@@ -472,15 +509,20 @@ functionLit
 
 primaryExpr
 	:	(	operand
+			-> operand
 		//|	conversion
 		//|	builtinCall
 		)
 		(	selector
+			-> ^(AST_SELECTOR $primaryExpr selector)
 		|	indexOrSlice
+			-> ^(AST_INDEX_OR_SLICE $primaryExpr indexOrSlice)
 		//|	index
 		//|	slice
 		|	typeAssertion
+			-> ^(AST_TYPE_ASSERTION $primaryExpr typeAssertion)
 		|	call
+			-> ^(AST_CALL $primaryExpr call)
 		)*
 	;
 
@@ -489,13 +531,15 @@ selector
 	;
 
 indexOrSlice
-	:	'['^
-		expression
+	:	lb='['
+		left=expression
 		(	// slice
-			':' expression?
+			':' right=expression? ']'
+			-> ^(AST_SLICE[$lb] $left ':' $right? ']')
 		|	// index
+			']'
+			-> ^(AST_INDEX[$lb] $left ']')
 		)
-		']'
 	;
 
 //index
@@ -578,7 +622,7 @@ mulOp
 	;
 
 unaryOp
-	:	'+' | '-' | '!' | '^' | '*' | '&' | '<-'
+	:	'+'<AST_POSITIVE> | '-'<AST_NEGATE> | '!' | '^'<AST_COMPLEMENT> | '*'<AST_DEREFERENCE> | '&'<AST_ADDRESSOF> | '<-'<AST_RECEIVE>
 	;
 
 // Operator precedence
@@ -591,7 +635,7 @@ unaryOp
 // Method expressions
 
 methodExpr
-	:	receiverType '.' methodName
+	:	receiverType '.'<AST_METHOD_EXPRESSION>^ methodName
 	;
 
 receiverType

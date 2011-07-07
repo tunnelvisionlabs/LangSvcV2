@@ -7,7 +7,7 @@
     using Microsoft.VisualStudio.Text.Classification;
     using Tvl.VisualStudio.Language.Parsing;
 
-    internal sealed class GoClassifier : AntlrClassifierBase
+    internal sealed class GoClassifier : AntlrClassifierBase<GoClassifierLexerState>
     {
         private static readonly HashSet<string> Keywords =
             new HashSet<string>()
@@ -44,21 +44,28 @@
         private readonly IClassificationTypeRegistryService _classificationTypeRegistryService;
 
         public GoClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService, IClassificationTypeRegistryService classificationTypeRegistryService)
+            : base(textBuffer)
         {
             this._textBuffer = textBuffer;
             this._standardClassificationService = standardClassificationService;
             this._classificationTypeRegistryService = classificationTypeRegistryService;
         }
 
-        protected override ITokenSource CreateLexer(ICharStream input)
+        protected override GoClassifierLexerState GetStartState()
         {
-            return new GoColorizerLexer(input);
+            return GoClassifierLexerState.Initial;
+        }
+
+        protected override ITokenSourceWithState<GoClassifierLexerState> CreateLexer(ICharStream input, GoClassifierLexerState state)
+        {
+            return new GoClassifierLexer(input, state);
         }
 
         protected override IClassificationType ClassifyToken(IToken token)
         {
             switch (token.Type)
             {
+#if false
             case GoColorizerLexer.EQ:
             case GoColorizerLexer.NEQ:
             case GoColorizerLexer.EQEQ:
@@ -93,6 +100,7 @@
             case GoColorizerLexer.LSHIFTEQ:
             case GoColorizerLexer.RSHIFTEQ:
                 return _standardClassificationService.Operator;
+#endif
 
             case GoColorizerLexer.CHAR_LITERAL:
                 return _standardClassificationService.CharacterLiteral;

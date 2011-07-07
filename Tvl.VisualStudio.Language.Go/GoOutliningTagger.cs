@@ -3,11 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
+    using Antlr.Runtime;
     using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
-    using Antlr.Runtime;
 
     internal sealed class GoOutliningTagger : ITagger<IOutliningRegionTag>
     {
@@ -28,7 +28,8 @@
 
             this._outliningRegions = new List<ITagSpan<IOutliningRegionTag>>();
 
-            this.BackgroundParser.ParseComplete += OnBackgroundParseComplete;
+            this.BackgroundParser.ParseComplete += HandleBackgroundParseComplete;
+            this.BackgroundParser.RequestParse(false);
         }
 
         private ITextBuffer TextBuffer
@@ -55,7 +56,7 @@
                 t(this, e);
         }
 
-        private void OnBackgroundParseComplete(object sender, ParseResultEventArgs e)
+        private void HandleBackgroundParseComplete(object sender, ParseResultEventArgs e)
         {
             AntlrParseResultEventArgs antlrParseResultArgs = e as AntlrParseResultEventArgs;
             List<ITagSpan<IOutliningRegionTag>> outliningRegions = new List<ITagSpan<IOutliningRegionTag>>();

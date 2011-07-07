@@ -6,6 +6,8 @@ options
 }
 
 @namespace{Tvl.VisualStudio.Language.Go}
+@modifier{internal}
+@ctorModifier{private}
 
 /*//////////////////////////////////////////////////////////////////////////*/
 //////////////////////////////////////////////////////////////////////////////
@@ -82,7 +84,19 @@ COMMENT
 	;
 
 ML_COMMENT
-	:	'/*' .* '*/'
+	:	'/*' CONTINUE_COMMENT {$type = state.type;}
+	;
+
+fragment END_COMMENT : ;
+
+fragment
+CONTINUE_COMMENT
+	:	(	~('\r'|'\n'|'*')
+		|	{input.LA(2) != '/'}? => '*'
+		)*
+		(	'*/' {state.type = END_COMMENT;}
+		|	{state.type = CONTINUE_COMMENT;}
+		)
 	;
 
 CHAR_LITERAL
@@ -102,12 +116,28 @@ STRING_LITERAL
 	;
 
 RAW_STRING_LITERAL
-	:	'`' .* '`'
+	:	'`' CONTINUE_STRING {$type = state.type;}
+	;
+
+fragment END_STRING : ;
+
+fragment
+CONTINUE_STRING
+	:	(	~('\r'|'\n'|'`'|'\\')
+		|	'\\' (options{greedy=true;} : '`')?
+		)*
+		(	'`' {state.type = END_STRING;}
+		|		{state.type = CONTINUE_STRING;}
+		)
 	;
 
 WS
 	:	(' ' | '\t')+
-		{Skip();}
+	;
+
+NEWLINE
+	:	'\r' '\n'?
+	|	'\n'
 	;
 
 ANYCHAR
