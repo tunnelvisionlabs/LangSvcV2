@@ -25,7 +25,7 @@
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;
             this.OutputWindowService = outputWindowService;
-            this.BackgroundParser.ParseComplete += OnBackgroundParseComplete;
+            this.BackgroundParser.ParseComplete += HandleBackgroundParseComplete;
 
             this._dirty = false;
             this._timer = new System.Timers.Timer(2000);
@@ -66,7 +66,7 @@
                 t(this, e);
         }
 
-        private void OnBackgroundParseComplete(object sender, ParseResultEventArgs e)
+        private void HandleBackgroundParseComplete(object sender, ParseResultEventArgs e)
         {
             if (e.Errors.Count == 0)
             {

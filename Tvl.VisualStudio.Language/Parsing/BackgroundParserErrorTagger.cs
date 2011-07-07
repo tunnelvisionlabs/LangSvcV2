@@ -26,7 +26,8 @@
 
             this._textBuffer = textBuffer;
             this._backgroundParser = backgroundParser;
-            this._backgroundParser.ParseComplete += new EventHandler<ParseResultEventArgs>(BackgroundParserParseComplete);
+            this._backgroundParser.ParseComplete += HandleBackgroundParserParseComplete;
+            this._backgroundParser.RequestParse(false);
         }
 
         public ITextBuffer TextBuffer
@@ -62,7 +63,7 @@
             return GetTags(spans);
         }
 
-        private void BackgroundParserParseComplete(object sender, ParseResultEventArgs e)
+        private void HandleBackgroundParserParseComplete(object sender, ParseResultEventArgs e)
         {
             var snapshot = TextBuffer.CurrentSnapshot;
             List<TagSpan<IErrorTag>> tags = new List<TagSpan<IErrorTag>>();

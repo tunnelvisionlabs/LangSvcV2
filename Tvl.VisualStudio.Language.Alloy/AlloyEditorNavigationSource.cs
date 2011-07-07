@@ -25,7 +25,8 @@
             this.BackgroundParser = backgroundParser;
             this._provider = provider;
 
-            this.BackgroundParser.ParseComplete += OnBackgroundParseComplete;
+            this.BackgroundParser.ParseComplete += HandleBackgroundParseComplete;
+            this.BackgroundParser.RequestParse(false);
         }
 
         public event EventHandler NavigationTargetsChanged;
@@ -75,7 +76,7 @@
                 t(this, e);
         }
 
-        private void OnBackgroundParseComplete(object sender, ParseResultEventArgs e)
+        private void HandleBackgroundParseComplete(object sender, ParseResultEventArgs e)
         {
             AntlrParseResultEventArgs antlrParseResultArgs = e as AntlrParseResultEventArgs;
             if (antlrParseResultArgs == null)

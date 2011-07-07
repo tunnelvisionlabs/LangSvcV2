@@ -39,7 +39,7 @@
             this._lexerRuleGlyph = new BitmapImage(new Uri(string.Format("pack://application:,,,/{0};component/Resources/lexericon.png", assemblyName)));
             this._parserRuleGlyph = new BitmapImage(new Uri(string.Format("pack://application:,,,/{0};component/Resources/parsericon.png", assemblyName)));
 
-            this.BackgroundParser.ParseComplete += OnBackgroundParseComplete;
+            this.BackgroundParser.ParseComplete += HandleBackgroundParseComplete;
             this.BackgroundParser.RequestParse(false);
         }
 
@@ -86,7 +86,7 @@
                 t(this, e);
         }
 
-        private void OnBackgroundParseComplete(object sender, ParseResultEventArgs e)
+        private void HandleBackgroundParseComplete(object sender, ParseResultEventArgs e)
         {
             AntlrParseResultEventArgs antlrParseResultArgs = e as AntlrParseResultEventArgs;
             if (antlrParseResultArgs == null)

@@ -156,7 +156,7 @@
                 if (backgroundParser != null)
                 {
                     ToolWindowPane.Caption = "Markdown Preview - ";
-                    backgroundParser.ParseComplete += WeakEvents.AsWeak<ParseResultEventArgs>(OnParseComplete, eh => backgroundParser.ParseComplete -= eh);
+                    backgroundParser.ParseComplete += WeakEvents.AsWeak<ParseResultEventArgs>(HandleBackgroundParseComplete, eh => backgroundParser.ParseComplete -= eh);
                     backgroundParser.RequestParse(false);
                 }
             }
@@ -170,7 +170,7 @@
             }
         }
 
-        private void OnParseComplete(object sender, ParseResultEventArgs e)
+        private void HandleBackgroundParseComplete(object sender, ParseResultEventArgs e)
         {
             if (!object.ReferenceEquals(sender, BackgroundParser))
                 return;

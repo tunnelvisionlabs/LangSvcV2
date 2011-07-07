@@ -31,7 +31,7 @@
             this._backgroundParser = PhpOutliningBackgroundParser.CreateParser(textBuffer, provider.OutputWindowService, provider.TextDocumentFactoryService);
             this._provider = provider;
 
-            this.BackgroundParser.ParseComplete += OnBackgroundParseComplete;
+            this.BackgroundParser.ParseComplete += HandleBackgroundParseComplete;
             this.BackgroundParser.RequestParse(false);
         }
 
@@ -63,7 +63,7 @@
                 t(this, e);
         }
 
-        private void OnBackgroundParseComplete(object sender, ParseResultEventArgs e)
+        private void HandleBackgroundParseComplete(object sender, ParseResultEventArgs e)
         {
             PhpOutliningParseResultEventArgs antlrParseResultArgs = e as PhpOutliningParseResultEventArgs;
             if (antlrParseResultArgs == null)
