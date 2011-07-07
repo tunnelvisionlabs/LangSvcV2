@@ -6,6 +6,8 @@ options {
 }
 
 @namespace{Tvl.VisualStudio.Language.Alloy}
+@modifier{internal}
+@ctorModifier{private}
 
 LPAREN		: '(';
 RPAREN		: ')';
@@ -58,8 +60,8 @@ WS
 	;
 
 NEWLINE
-	:	'\r' '\n'?	{Skip();}
-	|	'\n'		{Skip();}
+	:	'\r' '\n'?
+	|	'\n'
 	;
 
 COMMENT
@@ -67,7 +69,19 @@ COMMENT
 	;
 
 ML_COMMENT
-	:	'/*' .* '*/'
+	:	'/*' CONTINUE_COMMENT {$type = state.type;}
+	;
+
+fragment END_COMMENT : ;
+
+fragment
+CONTINUE_COMMENT
+	:	(	~('\r'|'\n'|'*')
+		|	{input.LA(2) != '/'}? => '*'
+		)*
+		(	'*/' {state.type = END_COMMENT;}
+		|	{state.type = CONTINUE_COMMENT;}
+		)
 	;
 
 ANY_CHAR

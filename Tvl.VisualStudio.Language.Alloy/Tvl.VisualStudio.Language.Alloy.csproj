@@ -96,6 +96,9 @@
       <DependentUpon>AlloyBaseWalker.g3</DependentUpon>
     </Compile>
     <Compile Include="AlloyClassificationTypeNames.cs" />
+    <Compile Include="AlloyClassifierLexer.cs" />
+    <Compile Include="AlloyClassifierLexerMode.cs" />
+    <Compile Include="AlloyClassifierLexerState.cs" />
     <Compile Include="AlloyColorizerLexer.g3.cs">
       <DependentUpon>AlloyColorizerLexer.g3</DependentUpon>
     </Compile>

@@ -7,7 +7,7 @@
     using Microsoft.VisualStudio.Text.Classification;
     using Tvl.VisualStudio.Language.Parsing;
 
-    internal sealed class AlloyClassifier : AntlrClassifierBase
+    internal sealed class AlloyClassifier : AntlrClassifierBase<AlloyClassifierLexerState>
     {
         internal static readonly HashSet<string> Keywords =
             new HashSet<string>()
@@ -61,15 +61,21 @@
         private readonly IClassificationTypeRegistryService _classificationTypeRegistryService;
 
         public AlloyClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService, IClassificationTypeRegistryService classificationTypeRegistryService)
+            : base(textBuffer)
         {
             this._textBuffer = textBuffer;
             this._standardClassificationService = standardClassificationService;
             this._classificationTypeRegistryService = classificationTypeRegistryService;
         }
 
-        protected override ITokenSource CreateLexer(ICharStream input)
+        protected override AlloyClassifierLexerState GetStartState()
         {
-            return new AlloyColorizerLexer(input);
+            return AlloyClassifierLexerState.Initial;
+        }
+
+        protected override ITokenSourceWithState<AlloyClassifierLexerState> CreateLexer(ICharStream input, AlloyClassifierLexerState state)
+        {
+            return new AlloyClassifierLexer(input, state);
         }
 
         protected override IClassificationType ClassifyToken(IToken token)
