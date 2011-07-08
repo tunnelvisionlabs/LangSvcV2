@@ -199,6 +199,10 @@
     <Antlr3 Include="AlloyExpressionSpanParser.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
+    <Content Include="..\External\Eula.rtf">
+      <Link>Eula.rtf</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
     </None>

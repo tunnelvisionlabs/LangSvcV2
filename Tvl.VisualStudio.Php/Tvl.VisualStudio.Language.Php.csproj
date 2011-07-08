@@ -207,6 +207,10 @@
     <Compile Include="PhpLanguagePackage.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\External\Eula.rtf">
+      <Link>Eula.rtf</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
     </None>

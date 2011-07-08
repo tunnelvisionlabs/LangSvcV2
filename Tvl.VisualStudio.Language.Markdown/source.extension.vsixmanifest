@@ -6,6 +6,7 @@
     <Version>1.0.0</Version>
     <Description>Simple support for markdown.</Description>
     <Locale>1033</Locale>
+    <License>Eula.rtf</License>
     <Icon>VSIXProject_small.png</Icon>
     <PreviewImage>VSIXProject_large.png</PreviewImage>
     <SupportedProducts>

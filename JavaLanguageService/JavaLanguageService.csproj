@@ -179,6 +179,10 @@
     <Compile Include="JavaClassifierLexerMode.cs" />
     <Compile Include="JavaClassifierLexerState.cs" />
     <Compile Include="JavaErrorTaggerProvider.cs" />
+    <Content Include="..\External\Eula.rtf">
+      <Link>Eula.rtf</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="JavaParserHelper.cs">
       <DependentUpon>Java.g3</DependentUpon>
     </None>
