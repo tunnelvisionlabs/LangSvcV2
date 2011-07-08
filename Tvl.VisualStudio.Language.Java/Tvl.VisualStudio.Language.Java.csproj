@@ -179,12 +179,10 @@
     <Compile Include="JavaClassifierLexerMode.cs" />
     <Compile Include="JavaClassifierLexerState.cs" />
     <Compile Include="JavaErrorTaggerProvider.cs" />
-    <None Include="JavaParserHelper.cs">
-      <DependentUpon>Java.g3</DependentUpon>
-    </None>
-    <None Include="JavaLexerHelper.cs">
-      <DependentUpon>Java.g3</DependentUpon>
-    </None>
+    <Content Include="..\External\Eula.rtf">
+      <Link>Eula.rtf</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Compile Include="JavaLanguageInfo.cs" />
     <Compile Include="JavaLanguagePackage.cs" />
     <Compile Include="JavaUnicodeStream.cs" />
@@ -194,7 +192,9 @@
     <Compile Include="Constants.cs" />
     <Compile Include="JavaClassifier.cs" />
     <Compile Include="JavaClassifierProvider.cs" />
-    <Compile Include="JavaColorizerLexer.g3.cs" />
+    <Compile Include="JavaColorizerLexer.g3.cs">
+      <DependentUpon>JavaColorizerLexer.g3</DependentUpon>
+    </Compile>
     <Compile Include="JavaCommenterProvider.cs" />
     <Compile Include="JavaIntellisenseController.cs" />
     <Compile Include="JavaIntellisenseControllerProvider.cs" />
@@ -226,9 +226,6 @@
     <Antlr3 Include="JavaColorizerLexer.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
-    <None Include="Java.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -245,6 +242,13 @@
     <ProjectReference Include="..\Tvl.VisualStudio.Antlr\Tvl.VisualStudio.Language.Antlr.csproj">
       <Project>{3852C7D0-60EA-45CC-A84C-BF66B350CF3B}</Project>
       <Name>Tvl.VisualStudio.Language.Antlr</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.Framework\Tvl.VisualStudio.Framework.csproj">
+      <Project>{E5568831-E802-481F-A34F-D7DC69DD9C4F}</Project>
+      <Name>Tvl.VisualStudio.Framework</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>False</Private>
+      <IncludeOutputGroupsInVSIX>CreateVsixContainer</IncludeOutputGroupsInVSIX>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Language\Tvl.VisualStudio.Language.csproj">
       <Project>{90E28BCA-BD13-475B-B051-7A7D852A6206}</Project>
