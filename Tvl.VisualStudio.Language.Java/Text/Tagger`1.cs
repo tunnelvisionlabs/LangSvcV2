@@ -1,4 +1,4 @@
-﻿namespace JavaLanguageService.Text
+﻿namespace Tvl.VisualStudio.Language.Java.Text
 {
     using System;
     using System.Collections.Generic;

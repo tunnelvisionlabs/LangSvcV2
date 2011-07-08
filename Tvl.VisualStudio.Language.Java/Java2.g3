@@ -310,8 +310,8 @@ tokens {
 	RSHIFT;
 }
 
-@lexer::namespace{JavaLanguageService}
-@parser::namespace{JavaLanguageService}
+@lexer::namespace{Tvl.VisualStudio.Language.Java}
+@parser::namespace{Tvl.VisualStudio.Language.Java}
 
 @lexer::ctorModifier{private}
 

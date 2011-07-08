@@ -1,4 +1,4 @@
-﻿namespace JavaLanguageService
+﻿namespace Tvl.VisualStudio.Language.Java
 {
     using System;
     using System.Diagnostics.Contracts;

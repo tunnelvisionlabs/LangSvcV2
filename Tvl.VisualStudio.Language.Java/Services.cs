@@ -1,6 +1,6 @@
 ﻿#pragma warning disable 169 // The field 'fieldname' is never used
 
-namespace JavaLanguageService
+namespace Tvl.VisualStudio.Language.Java
 {
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Utilities;

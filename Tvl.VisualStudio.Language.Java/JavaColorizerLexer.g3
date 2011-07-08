@@ -6,7 +6,7 @@ options
 	tokenVocab=Java;
 }
 
-@namespace{JavaLanguageService}
+@namespace{Tvl.VisualStudio.Language.Java}
 @modifier{internal}
 @ctorModifier{private}
 
