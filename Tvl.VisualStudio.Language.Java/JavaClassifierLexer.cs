@@ -9,6 +9,7 @@
     {
         private readonly ICharStream _input;
         private readonly JavaColorizerLexer _languageLexer;
+        private readonly JavaDocCommentClassifierLexer _commentLexer;
 
         private JavaClassifierLexerMode _mode;
         private bool _inComment;
@@ -25,6 +26,7 @@
 
             _input = input;
             _languageLexer = new JavaColorizerLexer(input, this);
+            _commentLexer = new JavaDocCommentClassifierLexer(input, this);
 
             State = state;
         }
@@ -119,9 +121,37 @@
 
             switch (Mode)
             {
+            case JavaClassifierLexerMode.JavaDocComment:
+                token = _commentLexer.NextToken();
+
+                switch (token.Type)
+                {
+                case JavaDocCommentClassifierLexer.END_COMMENT:
+                    _mode = JavaClassifierLexerMode.JavaCode;
+                    token.Type = JavaDocCommentClassifierLexer.DOC_COMMENT_TEXT;
+                    break;
+
+                default:
+                    break;
+                }
+
+                break;
+
             case JavaClassifierLexerMode.JavaCode:
             default:
                 token = _languageLexer.NextToken();
+
+                switch (token.Type)
+                {
+                case JavaColorizerLexer.DOC_COMMENT_START:
+                    _mode = JavaClassifierLexerMode.JavaDocComment;
+                    token.Type = JavaDocCommentClassifierLexer.DOC_COMMENT_TEXT;
+                    break;
+
+                default:
+                    break;
+                }
+
                 break;
             }
 

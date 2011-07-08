@@ -3,5 +3,6 @@
     public enum JavaClassifierLexerMode
     {
         JavaCode,
+        JavaDocComment,
     }
 }

@@ -17,12 +17,19 @@
             set;
         }
 
+        [Import]
+        private IClassificationTypeRegistryService ClassificationTypeRegistryService
+        {
+            get;
+            set;
+        }
+
         public IClassifier GetClassifier(ITextBuffer textBuffer)
         {
             if (textBuffer == null)
                 return null;
 
-            return new JavaClassifier(textBuffer, StandardClassificationService);
+            return new JavaClassifier(textBuffer, StandardClassificationService, ClassificationTypeRegistryService);
         }
     }
 }

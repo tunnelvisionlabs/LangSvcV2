@@ -5,8 +5,6 @@
     using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
-    using System;
-    using System.Reflection;
     using Tvl.VisualStudio.Language.Parsing;
 
     internal sealed class JavaClassifier : AntlrClassifierBase<JavaClassifierLexerState>
@@ -71,12 +69,22 @@
 
         private readonly ITextBuffer _textBuffer;
         private readonly IStandardClassificationService _standardClassificationService;
+        private readonly IClassificationTypeRegistryService _classificationTypeRegistryService;
 
-        public JavaClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService)
+        private readonly IClassificationType _docCommentText;
+        private readonly IClassificationType _docCommentTag;
+        private readonly IClassificationType _docCommentInvalidTag;
+
+        public JavaClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService, IClassificationTypeRegistryService classificationTypeRegistryService)
             : base(textBuffer)
         {
             this._textBuffer = textBuffer;
             this._standardClassificationService = standardClassificationService;
+            this._classificationTypeRegistryService = classificationTypeRegistryService;
+
+            this._docCommentText = this._classificationTypeRegistryService.GetClassificationType(JavaClassificationTypeNames.DocCommentText);
+            this._docCommentTag = this._classificationTypeRegistryService.GetClassificationType(JavaClassificationTypeNames.DocCommentTag);
+            this._docCommentInvalidTag = this._classificationTypeRegistryService.GetClassificationType(JavaClassificationTypeNames.DocCommentInvalidTag);
         }
 
         protected override JavaClassifierLexerState GetStartState()
@@ -177,6 +185,15 @@
             case JavaColorizerLexer.COMMENT:
             case JavaColorizerLexer.ML_COMMENT:
                 return _standardClassificationService.Comment;
+
+            case JavaDocCommentClassifierLexer.DOC_COMMENT_TEXT:
+                return _docCommentText;
+
+            case JavaDocCommentClassifierLexer.DOC_COMMENT_TAG:
+                return _docCommentTag;
+
+            case JavaDocCommentClassifierLexer.DOC_COMMENT_INVALID_TAG:
+                return _docCommentInvalidTag;
 
             default:
                 return null;

@@ -175,6 +175,7 @@
     </Compile>
     <Compile Include="JavaBackgroundParser.cs" />
     <Compile Include="JavaBackgroundParserProvider.cs" />
+    <Compile Include="JavaClassificationTypeNames.cs" />
     <Compile Include="JavaClassifierLexer.cs" />
     <Compile Include="JavaClassifierLexerMode.cs" />
     <Compile Include="JavaClassifierLexerState.cs" />
@@ -188,6 +189,10 @@
     <Compile Include="JavaUnicodeStream.cs" />
     <Compile Include="JavaEditorNavigationSourceProvider.cs" />
     <Compile Include="JavaEditorNavigationSource.cs" />
+    <Compile Include="JavaDocCommentClassifierLexer.g3.cs">
+      <DependentUpon>JavaDocCommentClassifierLexer.g3</DependentUpon>
+    </Compile>
+    <Compile Include="JavaClassificationTypes.cs" />
     <Compile Include="Text\CancellationPolicy.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="JavaClassifier.cs" />
@@ -228,6 +233,9 @@
     <AntlrTokens Include="Java2.tokens">
       <DependentUpon>Java2.g3</DependentUpon>
     </AntlrTokens>
+    <Antlr3 Include="JavaDocCommentClassifierLexer.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
     <None Include="Text\Tagger`1.cs" />
   </ItemGroup>
   <ItemGroup>
