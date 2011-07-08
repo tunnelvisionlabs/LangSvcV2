@@ -3,7 +3,7 @@
 options
 {
 	language=CSharp3;
-	tokenVocab=Java;
+	tokenVocab=Java2;
 }
 
 @namespace{Tvl.VisualStudio.Language.Java}
