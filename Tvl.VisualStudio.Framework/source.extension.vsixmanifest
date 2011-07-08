@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
   <Identifier Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6">
-    <Name>Visual Studio Extensibility Framework</Name>
+    <Name>Tunnel Vision Labs Extensibility Framework</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0.2</Version>
-    <Description xml:space="preserve">Supporting framework for managed extensions.</Description>
+    <Version>1.0.3.301</Version>
+    <Description xml:space="preserve">Supporting framework for Tunnel Vision Labs' extensions for Visual Studio.</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
     <Icon>VSIXProject_small.png</Icon>

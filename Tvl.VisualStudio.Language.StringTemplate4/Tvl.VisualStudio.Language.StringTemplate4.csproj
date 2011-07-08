@@ -226,6 +226,13 @@
       <Project>{3852C7D0-60EA-45CC-A84C-BF66B350CF3B}</Project>
       <Name>Tvl.VisualStudio.Language.Antlr</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.Framework\Tvl.VisualStudio.Framework.csproj">
+      <Project>{E5568831-E802-481F-A34F-D7DC69DD9C4F}</Project>
+      <Name>Tvl.VisualStudio.Framework</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <IncludeOutputGroupsInVSIX>CreateVsixContainer</IncludeOutputGroupsInVSIX>
+      <Private>False</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Language\Tvl.VisualStudio.Language.csproj">
       <Project>{90E28BCA-BD13-475B-B051-7A7D852A6206}</Project>
       <Name>Tvl.VisualStudio.Language</Name>
