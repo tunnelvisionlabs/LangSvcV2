@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
-  <Identifier Id="Tvl.VisualStudio.Language.StringTemplate4.1852bf6a-fde2-4268-9e3e-dce34312bfe3">
+  <Identifier Id="Tvl.VisualStudio.Language.Java.1852bf6a-fde2-4268-9e3e-dce34312bfe3">
     <Name>Java Language Support</Name>
     <Author>Sam Harwell</Author>
     <Version>1.0.0.301</Version>

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Vsix Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
-  <Identifier Id="Tvl.VisualStudio.Language.Markdown.Microsoft.2146f8ee-eec1-4aa9-a43a-5f8e1c8354a2">
+  <Identifier Id="Tvl.VisualStudio.Language.Markdown.2146f8ee-eec1-4aa9-a43a-5f8e1c8354a2">
     <Name>Markdown Language Support</Name>
     <Author>Sam Harwell</Author>
     <Version>1.0.0.301</Version>
