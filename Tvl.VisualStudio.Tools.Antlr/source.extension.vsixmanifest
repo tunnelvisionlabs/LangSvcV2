@@ -3,7 +3,7 @@
   <Identifier Id="Tvl.VisualStudio.Tools.Antlr.ce1a846f-ab0b-429c-b80c-52a732b03fdb">
     <Name>ANTLR Tools</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0.2.301</Version>
+    <Version>1.0.3.310</Version>
     <Description xml:space="preserve">Currently provides the AST Explorer.</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
