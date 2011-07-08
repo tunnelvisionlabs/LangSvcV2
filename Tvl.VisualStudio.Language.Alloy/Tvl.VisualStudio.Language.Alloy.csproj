@@ -203,6 +203,14 @@
       <Link>Eula.rtf</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Content Include="VSIXProject_large.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="VSIXProject_small.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
     </None>

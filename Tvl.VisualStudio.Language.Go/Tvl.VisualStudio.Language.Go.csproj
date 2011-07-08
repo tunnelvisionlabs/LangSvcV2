@@ -217,8 +217,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="VSIXProject_large.png" />
-    <Content Include="VSIXProject_small.png" />
+    <Content Include="VSIXProject_large.png">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="VSIXProject_small.png">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">

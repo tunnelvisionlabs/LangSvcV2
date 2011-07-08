@@ -8,8 +8,8 @@
     <ProjectGuid>{D4AC4DE7-7865-450B-AF14-955B0E3DFD3F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>JavaLanguageService</RootNamespace>
-    <AssemblyName>JavaLanguageService</AssemblyName>
+    <RootNamespace>Tvl.VisualStudio.Language.Java</RootNamespace>
+    <AssemblyName>Tvl.VisualStudio.Language.Java</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
@@ -211,6 +211,14 @@
     <Compile Include="Text.Language\LanguageElementManager.cs" />
     <Compile Include="Text.Language\LanguageElementManagerService.cs" />
     <Compile Include="Text.Language\LanguageElementsChangedEventArgs.cs" />
+    <Content Include="VSIXProject_large.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="VSIXProject_small.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
     </None>
@@ -229,10 +237,6 @@
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="VSIXProject_large.png" />
-    <Content Include="VSIXProject_small.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">

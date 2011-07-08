@@ -263,8 +263,6 @@
   <ItemGroup>
     <Resource Include="Resources\lexericon.png" />
     <Resource Include="Resources\parsericon.png" />
-    <Content Include="VSIXProject_large.png" />
-    <Content Include="VSIXProject_small.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Templates\Antlr\ItemTemplates\CombinedGrammarItemTemplate\CombinedGrammarItemTemplate.csproj">

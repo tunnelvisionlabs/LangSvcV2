@@ -7,6 +7,8 @@
     <Description xml:space="preserve">Basic support for the Java programming language.</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
+    <Icon>VSIXProject_small.jpg</Icon>
+    <PreviewImage>VSIXProject_large.jpg</PreviewImage>
     <SupportedProducts>
       <VisualStudio Version="10.0">
         <Edition>Ultimate</Edition>

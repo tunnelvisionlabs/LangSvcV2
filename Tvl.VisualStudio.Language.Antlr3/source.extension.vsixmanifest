@@ -7,8 +7,6 @@
     <Description xml:space="preserve">Basic support for the ANTLR grammar description language.</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
-    <Icon>VSIXProject_small.png</Icon>
-    <PreviewImage>VSIXProject_large.png</PreviewImage>
     <SupportedProducts>
       <VisualStudio Version="10.0">
         <Edition>Ultimate</Edition>

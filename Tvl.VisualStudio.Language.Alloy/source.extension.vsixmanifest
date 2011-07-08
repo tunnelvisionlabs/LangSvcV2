@@ -1,30 +1,32 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
-	<Identifier Id="Tvl.VisualStudio.Language.Alloy.b3393cfb-8f68-44c2-b4d7-c3210467bb9d">
-		<Name>Alloy Language Support</Name>
-		<Author>Sam Harwell</Author>
-		<Version>1.0.0.301</Version>
-		<Description xml:space="preserve">Basic support for the Alloy modeling language.</Description>
-		<Locale>1033</Locale>
-		<License>Eula.rtf</License>
-		<SupportedProducts>
-			<VisualStudio Version="10.0">
-				<Edition>Ultimate</Edition>
-				<Edition>Premium</Edition>
-				<Edition>Pro</Edition>
-				<Edition>IntegratedShell</Edition>
-			</VisualStudio>
-		</SupportedProducts>
-		<SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
-	</Identifier>
-	<References>
-		<Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.0.3">
-			<Name>Visual Studio Extensibility Framework</Name>
-			<VsixPath>Tvl.VisualStudio.Framework.vsix</VsixPath>
-		</Reference>
-	</References>
-	<Content>
-		<MefComponent>|%CurrentProject%|</MefComponent>
-		<VsPackage>|%CurrentProject%|</VsPackage>
-	</Content>
+  <Identifier Id="Tvl.VisualStudio.Language.Alloy.b3393cfb-8f68-44c2-b4d7-c3210467bb9d">
+    <Name>Alloy Language Support</Name>
+    <Author>Sam Harwell</Author>
+    <Version>1.0.0.301</Version>
+    <Description xml:space="preserve">Basic support for the Alloy modeling language.</Description>
+    <Locale>1033</Locale>
+    <License>Eula.rtf</License>
+    <Icon>VSIXProject_small.png</Icon>
+    <PreviewImage>VSIXProject_large.png</PreviewImage>
+    <SupportedProducts>
+      <VisualStudio Version="10.0">
+        <Edition>Ultimate</Edition>
+        <Edition>Premium</Edition>
+        <Edition>Pro</Edition>
+        <Edition>IntegratedShell</Edition>
+      </VisualStudio>
+    </SupportedProducts>
+    <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
+  </Identifier>
+  <References>
+    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.0.3">
+      <Name>Visual Studio Extensibility Framework</Name>
+      <VsixPath>Tvl.VisualStudio.Framework.vsix</VsixPath>
+    </Reference>
+  </References>
+  <Content>
+    <MefComponent>|%CurrentProject%|</MefComponent>
+    <VsPackage>|%CurrentProject%|</VsPackage>
+  </Content>
 </Vsix>

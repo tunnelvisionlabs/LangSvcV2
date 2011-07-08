@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Vsix Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
+<Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
   <Identifier Id="Tvl.VisualStudio.Language.Php.ece72f50-0b6f-4363-9986-e38af13f6aa5">
     <Name>PHP Language Support</Name>
     <Author>Sam Harwell</Author>
@@ -7,6 +7,8 @@
     <Description xml:space="preserve">Basic support for the PHP programming language.</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
+    <Icon>VSIXProject_small.png</Icon>
+    <PreviewImage>VSIXProject_large.png</PreviewImage>
     <SupportedProducts>
       <VisualStudio Version="10.0">
         <Edition>Ultimate</Edition>
@@ -23,10 +25,8 @@
       <VsixPath>Tvl.VisualStudio.Framework.vsix</VsixPath>
     </Reference>
   </References>
-
   <Content>
     <MefComponent>|%CurrentProject%|</MefComponent>
     <VsPackage>|%CurrentProject%|</VsPackage>
   </Content>
-
 </Vsix>
