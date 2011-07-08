@@ -1,0 +1,755 @@
+﻿grammar Java;
+
+options
+{
+	language=CSharp3;
+	output=AST;
+	ASTLabelType=CommonTree;
+}
+
+tokens
+{
+	ABSTRACT='abstract';
+	ASSERT='assert';
+	BOOLEAN='boolean';
+	BREAK='break';
+	BYTE='byte';
+	CASE='case';
+	CATCH='catch';
+	CHAR='char';
+	CLASS='class';
+	CONST='const';
+	CONTINUE='continue';
+	DEFAULT='default';
+	DO='do';
+	DOUBLE='double';
+	ELSE='else';
+	ENUM='enum';
+	EXTENDS='extends';
+	FINAL='final';
+	FINALLY='finally';
+	FLOAT='float';
+	FOR='for';
+	IF='if';
+	GOTO='goto';
+	IMPLEMENTS='implements';
+	IMPORT='import';
+	INSTANCEOF='instanceof';
+	INT='int';
+	INTERFACE='interface';
+	LONG='long';
+	NATIVE='native';
+	NEW='new';
+	PACKAGE='package';
+	PRIVATE='private';
+	PROTECTED='protected';
+	PUBLIC='public';
+	RETURN='return';
+	SHORT='short';
+	STATIC='static';
+	STRICTFP='strictfp';
+	SUPER='super';
+	SWITCH='switch';
+	SYNCHRONIZED='synchronized';
+	THIS='this';
+	THROW='throw';
+	THROWS='throws';
+	TRANSIENT='transient';
+	TRY='try';
+	VOID='void';
+	VOLATILE='volatile';
+	WHILE='while';
+
+	// separators
+	LPAREN='(';
+	RPAREN=')';
+	LBRACK='[';
+	RBRACK=']';
+	LBRACE='{';
+	RBRACE='}';
+	SEMI=';';
+	COMMA=',';
+	DOT='.';
+	AT='@';
+
+	// operators
+	EQ='=';
+	NEQ='!=';
+	EQEQ='==';
+	PLUS='+';
+	PLUSEQ='+=';
+	MINUS='-';
+	MINUSEQ='-=';
+	TIMES='*';
+	TIMESEQ='*=';
+	DIV='/';
+	DIVEQ='/=';
+	LT='<';
+	GT='>';
+	LE='<=';
+	GE='>=';
+	NOT='!';
+	BITNOT='~';
+	AND='&&';
+	BITAND='&';
+	ANDEQ='&=';
+	QUES='?';
+	OR='||';
+	BITOR='|';
+	OREQ='|=';
+	COLON=':';
+	INC='++';
+	DEC='--';
+	XOR='^';
+	XOREQ='^=';
+	MOD='%';
+	MODEQ='%=';
+	LSHIFT='<<';
+	RSHIFT='>>';
+	LSHIFTEQ='<<=';
+	RSHIFTEQ='>>=';
+	ROR='>>>';
+	ROREQ='>>>=';
+
+
+	// AST
+	AST_SINGLE_TYPE_IMPORT;
+	AST_IMPORT_ON_DEMAND;
+	AST_STATIC_IMPORT;
+	AST_STATIC_IMPORT_ON_DEMAND;
+
+	AST_TYPEREF;
+	AST_FIELDDECL;
+}
+
+@lexer::namespace{JavaLanguageService}
+@parser::namespace{JavaLanguageService}
+
+//
+//  P A R S E R   M E M B E R S
+//
+
+public
+compilationUnit
+	:	packageDeclaration?
+		importDeclarations?
+		typeDeclarations?
+		EOF
+	;
+
+packageDeclaration
+	:	annotations?
+		'package'^
+		packageName
+		';'
+	;
+
+annotations
+	:	annotation+
+	;
+
+annotation
+	:	'@' typeName ('(' ')')?
+	;
+
+typeName
+	:	qualifiedIdentifier
+	;
+
+packageName
+	:	qualifiedIdentifier
+	;
+
+qualifiedIdentifier
+	:	IDENTIFIER ('.'^ IDENTIFIER ('.'! IDENTIFIER)*)?
+	;
+
+importDeclarations
+	:	importDeclaration+
+	;
+
+importDeclaration
+	:	typeImportDeclaration	// handles singleTypeImportDeclaration and typeImportOnDemandDeclaration
+	|	staticImportDeclaration	// handles singleStaticImportDeclaration and staticImportOnDemandDeclaration
+	;
+
+typeImportDeclaration
+	:	i='import' typeName
+		(	'.' '*' semi=';'
+			-> ^(AST_IMPORT_ON_DEMAND[$i] typeName '*' $semi)
+		|	semi=';'
+			-> ^(AST_SINGLE_TYPE_IMPORT[$i] typeName $semi)
+		)
+	;
+
+staticImportDeclaration
+	:	i='import' 'static' typeName
+		(	'.' '*' semi=';'
+			-> ^(AST_STATIC_IMPORT_ON_DEMAND[$i] typeName '*' $semi)
+		|	semi=';'
+			-> ^(AST_STATIC_IMPORT[$i] typeName $semi)
+		)
+	;
+
+typeDeclarations
+	:	typeDeclaration+
+	;
+
+typeDeclaration
+	:	classOrInterfaceModifiers?
+		(	classDeclaration
+		|	interfaceDeclaration
+		)
+	;
+
+classOrInterfaceModifiers
+	:	generalModifier+
+	;
+
+classDeclaration
+	:	normalClassDeclaration
+	|	enumDeclaration
+	;
+
+normalClassDeclaration
+	:	'class' IDENTIFIER typeParameters? super? interfaces? classBody
+	;
+
+typeParameters
+	:	'<' typeParameterList '>'
+	;
+
+typeParameterList
+	:	typeParameter (',' typeParameter)*
+	;
+
+typeParameter
+	:	IDENTIFIER ('extends' bound)?
+	;
+
+bound
+	:	type ('&' type)*
+	;
+
+type
+	:	basicType
+	|	IDENTIFIER typeArguments? ('.' IDENTIFIER typeArguments?)* ('[' ']')?
+	;
+
+basicType
+	:	'byte'
+	|	'short'
+	|	'char'
+	|	'int'
+	|	'long'
+	|	'float'
+	|	'double'
+	|	'boolean'
+	;
+
+typeArguments
+	:	'<'^ typeArgument (','! typeArgument)* '>'
+	;
+
+typeArgument
+	:	type
+	|	'?' (('extends' | 'super') type)?
+	;
+
+super
+	:	'extends' classType
+	;
+
+classType
+	:	typeDeclSpecifier typeArguments?
+		-> ^(AST_TYPEREF typeDeclSpecifier typeArguments?)
+	;
+
+typeDeclSpecifier
+	:	typeName
+	//|	classOrInterfaceType '.' IDENTIFIER
+	;
+
+interfaces
+	:	'implements' interfaceTypeList
+	;
+
+interfaceTypeList
+	:	interfaceType (',' interfaceType)*
+	;
+
+interfaceType
+	:	typeDeclSpecifier typeArguments?
+	;
+
+classBody
+	:	'{' classBodyDeclarations? '}'
+	;
+
+classBodyDeclarations
+	:	classBodyDeclaration+
+	;
+
+// not finished
+classBodyDeclaration
+	:	classMemberDeclaration
+	//|	instanceInitializer
+	//|	staticInitializer
+	//|	constructorDeclaration
+	;
+
+// not finished
+classMemberDeclaration
+	:	generalModifier*
+		(	fieldDeclaration
+		//|	methodDeclaration
+		|	classDeclaration
+		|	interfaceDeclaration
+		)
+	;
+
+/* The following is a partial list of items that can be modified, so make sure to include a left-factored generalModifiers
+ *  - classDeclaration
+ *  - interfaceDeclaration
+ *  - fieldDeclaration
+ *  - methodDeclaration
+ *  - formalParameter
+ *  - localVariableDeclaration
+ */
+generalModifier
+	:	annotation		// class, interface, field, method, variable
+	|	'public'		// class, interface, field, method
+	|	'protected'		// class, interface, field, method
+	|	'private'		// class, interface, field, method
+	|	'abstract'		// class, interface, method
+	|	'static'		// class, interface, field, method
+	|	'final'			// class, field, method, variable
+	|	'strictfp'		// class, interface, method
+	|	'transient'		// field
+	|	'volatile'		// field
+	|	'synchronized'	// method
+	|	'native'		// method
+	;
+
+fieldDeclaration
+	:	type variableDeclarators ';'
+		-> ^(AST_FIELDDECL type variableDeclarators ';')
+	;
+
+variableDeclarators
+	:	variableDeclarator (','! variableDeclarator)*
+	;
+
+variableDeclarator
+	:	variableDeclaratorId ('='^ variableInitializer)?
+	;
+
+variableDeclaratorId
+	:	IDENTIFIER^ ('[' ']')?
+	;
+
+variableInitializer
+	:	expression
+	|	arrayInitializer
+	;
+
+methodDeclaration
+	:	methodHeader methodBody
+	;
+
+methodHeader
+	:	// methodModifiers? // this is handled at higher level/left-factored
+		typeParameters?
+		resultType
+		methodDeclarator
+		throwsSpec?
+	;
+
+resultType
+	:	type
+	|	'void'
+	;
+
+methodDeclarator
+	:	IDENTIFIER^ '(' formalParameterList? ')'
+	;
+
+formalParameterList
+	:	formalParameter (',' formalParameter)*
+	;
+
+formalParameter
+	:	variableModifiers? type '...'? variableDeclaratorId
+	;
+
+variableModifiers
+	:	generalModifier+
+	;
+
+throwsSpec
+	:	'throws'^ exceptionTypeList
+	;
+
+exceptionTypeList
+	:	exceptionType (','! exceptionType)*
+	;
+
+// not finished
+exceptionType
+	:	classType
+	//|	typeVariable
+	;
+
+enumDeclaration
+	:	'enum' IDENTIFIER interfaces? enumBody
+	;
+
+enumBody
+	:	'{' enumConstants? ','? enumBodyDeclarations? '}'
+	;
+
+enumConstants
+	:	enumConstant (',' enumConstant)*
+	;
+
+enumConstant
+	:	annotations
+		IDENTIFIER
+		arguments?
+		classBody?
+	;
+
+enumBodyDeclarations
+	:	';' classBodyDeclarations?
+	;
+
+arguments
+	:	'(' argumentList? ')'
+	;
+
+argumentList
+	:	expression (','	expression)*
+	;
+
+interfaceDeclaration
+	:	normalInterfaceDeclaration
+	|	annotationTypeDeclaration
+	;
+
+normalInterfaceDeclaration
+	:	// interfaceModifiers?	// left-factored
+		'interface' IDENTIFIER typeParameters? extendsInterfaces? interfaceBody
+	;
+
+extendsInterfaces
+	:	'extends'^ interfaceType (','! interfaceType)*
+	;
+
+interfaceBody
+	:	'{' interfaceMemberDeclarations? '}'
+	;
+
+interfaceMemberDeclarations
+	:	interfaceMemberDeclaration+
+	;
+
+// not finished
+interfaceMemberDeclaration
+	:	';'
+	//|	constantDeclaration
+	//|	abstractMethodDeclaration
+	//|	classDeclaration
+	//|	interfaceDeclaration
+	;
+
+annotationTypeDeclaration
+	:	// interfaceModifiers?	// left-factored
+		'@' 'interface'
+		IDENTIFIER
+		annotationTypeBody
+	;
+
+annotationTypeBody
+	:	'{' annotationTypeElementDeclarations? '}'
+	;
+
+annotationTypeElementDeclarations
+	:	annotationTypeElementDeclaration+
+	;
+
+// not finished
+annotationTypeElementDeclaration
+	:	';'
+	//|	abstractMethodModifiers? type IDENTIFIER '(' ')' defaultValue? ';'
+	//|	constantDeclaration
+	//|	classDeclaration
+	//|	interfaceDeclaration
+	//|	enumDeclaration
+	//|	annotationTypeDeclaration
+	;
+
+// not finished
+expression
+	:	primary
+	;
+
+primary
+	:	literal
+	|	'this'
+	|	'(' expression ')'
+	|	classInstanceCreationExpression
+	;
+
+literal
+	:	numberLiteral
+	|	booleanLiteral
+	|	characterLiteral
+	|	stringLiteral
+	|	nullLiteral
+	;
+
+numberLiteral
+	:	NUMBER
+	;
+
+booleanLiteral
+	:	'true'
+	|	'false'
+	;
+
+characterLiteral
+	:	CHAR_LITERAL
+	;
+
+stringLiteral
+	:	STRING_LITERAL
+	;
+
+nullLiteral
+	:	'null'
+	;
+
+classInstanceCreationExpression
+	:	'new' typeArguments? classType '(' argumentList? ')'
+	;
+
+arrayInitializer
+	:	'{' variableInitializers? ','? '}'
+	;
+
+variableInitializers
+	:	variableInitializer (',' variableInitializer)*
+	;
+
+methodBody
+	:	block
+	|	';'
+	;
+
+block
+	:	'{' blockStatements? '}'
+	;
+
+blockStatements
+	:	blockStatement+
+	;
+
+// not finished
+blockStatement
+	:	statement
+	//|	localVariableDeclarationStatement
+	//|	classDeclaration
+	;
+
+// not finished
+statement
+	:	statementWithoutTrailingSubstatement
+	|	labeledStatement
+	//|	ifThenStatement
+	|	whileStatement
+	|	forStatement
+	;
+
+// not finished
+statementWithoutTrailingSubstatement
+	:	block
+	|	emptyStatement
+	//|	expressionStatement
+	|	assertStatement
+	|	switchStatement
+	|	doStatement
+	|	breakStatement
+	|	continueStatement
+	|	returnStatement
+	|	synchronizedStatement
+	|	throwStatement
+	|	tryStatement
+	;
+
+emptyStatement
+	:	';'
+	;
+
+expressionStatement
+	:	statementExpression ';'
+	;
+
+statementExpression
+	:	expression
+	;
+
+assertStatement
+	:	'assert' expression (':' expression)? ';'
+	;
+
+switchStatement
+	:	'switch' '(' expression ')' switchBlock
+	;
+
+switchBlock
+	:	'{' switchBlockStatementGroups? '}'
+	;
+
+switchBlockStatementGroups
+	:	switchBlockStatementGroup+
+	;
+
+switchBlockStatementGroup
+	:	switchLabels blockStatements?
+	;
+
+switchLabels
+	:	(('default' | 'case') => switchLabel)+
+	;
+
+switchLabel
+	:	'default' ':'
+	//|	'case' constantExpression
+	//|	'case' enumConstantName
+	;
+
+whileStatement
+	:	'while' '(' expression ')' statement
+	;
+
+doStatement
+	:	'do' statement 'while' '(' expression ')' ';'
+	;
+
+forStatement
+	:	basicForStatement
+	|	enhancedForStatement
+	;
+
+basicForStatement
+	:	'for' '(' forInit? ';' expression? ';' forUpdate? ')' statement
+	;
+
+// not finished
+forInit
+	:	statementExpressionList
+	//|	localVariableDeclaration
+	;
+
+forUpdate
+	:	statementExpressionList
+	;
+
+statementExpressionList
+	:	statementExpression+
+	;
+
+enhancedForStatement
+	:	'for' variableModifiers? type IDENTIFIER ':' expression ')' statement
+	;
+
+breakStatement
+	:	'break' IDENTIFIER? ';'
+	;
+
+continueStatement
+	:	'continue' IDENTIFIER? ';'
+	;
+
+returnStatement
+	:	'return' expression? ';'
+	;
+
+synchronizedStatement
+	:	'synchronized' '(' expression ')' block
+	;
+
+throwStatement
+	:	'throw' expression ';'
+	;
+
+tryStatement
+	:	'try' block catches? finallyClause?
+	;
+
+catches
+	:	catchClause+
+	;
+
+catchClause
+	:	'catch' '(' formalParameter ')' block
+	;
+
+finallyClause
+	:	'finally' block
+	;
+
+labeledStatement
+	:	IDENTIFIER ':' statement
+	;
+
+//
+//  L E X E R   M E M B E R S
+//
+
+IDENTIFIER
+	:	('a'..'z' | 'A'..'Z' | '_' | '$')
+		('a'..'z' | 'A'..'Z' | '0'..'9' | '_' | '$')*
+	;
+
+NUMBER
+	:	(	'0'..'9'
+		| 	'.' '0'..'9'
+		)
+		(IDENTIFIER NUMBER?)?
+	;
+
+COMMENT
+	:	'//' (~('\r' | '\n'))*
+		{Skip();}
+	;
+
+ML_COMMENT
+	:	'/*' .* '*/'
+		{Skip();}
+	;
+
+CHAR_LITERAL
+	:	'\''
+		(	'\\' .
+		|	~('\r' | '\n' | '\'' | '\\')
+		)*
+		'\''
+	;
+
+STRING_LITERAL
+	:	'"'
+		(	'\\' .
+		|	~('\r' | '\n' | '"' | '\\')
+		)*
+		'"'
+	;
+
+WS
+	:	(' ' | '\t' | '\r' | '\n' | '\f')+
+		{Skip();}
+	;
+
+ANYCHAR
+	:	.
+	;
