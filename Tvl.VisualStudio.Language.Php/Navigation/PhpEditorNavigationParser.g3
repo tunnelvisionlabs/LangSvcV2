@@ -1,0 +1,103 @@
+﻿parser grammar PhpEditorNavigationParser;
+
+options {
+    language=CSharp3;
+    TokenLabelType=CommonToken;
+    output=AST;
+    ASTLabelType=CommonTree;
+	tokenVocab=PhpDocCommentClassifierLexer;
+}
+
+tokens {
+	CLASS_IDENTIFIER;
+	INTERFACE_IDENTIFIER;
+	FUNCTION_IDENTIFIER;
+
+	FORMAL_PARAMETERS;
+	PARAMETER_IDENTIFIER;
+}
+
+@parser::namespace{Tvl.VisualStudio.Language.Php.Navigation}
+
+public
+compileUnit
+	:	(htmlText | code)*
+		EOF // need at least 2 nodes or the outliner will not work (expects to process children of a nil node, not a single standalone node)
+	;
+
+htmlText
+	:	~HTML_START_CODE^ (options{greedy=true;} : ~HTML_START_CODE)*
+	;
+
+code
+	:	HTML_START_CODE^ codeElement* CLOSE_PHP_TAG
+	;
+
+codeElement
+	:	classOrInterfaceDefinition
+	|	functionDefinition
+	|	codeBlock
+	|	~(CLOSE_PHP_TAG|'function'|LBRACE|RBRACE|'class'|'interface')
+	;
+
+codeBlock
+	:	LBRACE^
+			(	codeElement
+			|	htmlLiteral
+			)*
+		RBRACE
+	;
+
+htmlLiteral
+	:	CLOSE_PHP_TAG^
+			.*
+		HTML_START_CODE
+	;
+
+classOrInterfaceDefinition
+@after{_navigationTrees.Add($tree);}
+	:	(	'class' PHP_IDENTIFIER<CLASS_IDENTIFIER>^
+		|	'interface' PHP_IDENTIFIER<INTERFACE_IDENTIFIER>^
+		)
+		extendsList? implementsList? codeBlock
+	;
+
+extendsList
+	:	'extends' PHP_IDENTIFIER (COMMA PHP_IDENTIFIER)*
+	;
+
+implementsList
+	:	'implements' PHP_IDENTIFIER (COMMA PHP_IDENTIFIER)*
+	;
+
+functionDefinition
+@after{_navigationTrees.Add($tree);}
+	:	'function' PHP_IDENTIFIER<FUNCTION_IDENTIFIER>^ functionParameterList codeBlock
+	;
+
+functionParameterList
+	:	LPAREN<FORMAL_PARAMETERS>^ functionParameters? RPAREN
+	;
+
+functionParameters
+	:	functionParameter (COMMA! functionParameter)*
+	;
+
+functionParameter
+	:	AND? PHP_IDENTIFIER<PARAMETER_IDENTIFIER>^ parameterDefaultValue?
+	;
+
+parameterDefaultValue
+	:	EQ^
+		(	~(COMMA|LPAREN|RPAREN)
+		|	nestedParens
+		)*
+	;
+
+nestedParens
+	:	LPAREN^
+			(	~(LPAREN|RPAREN)
+			|	nestedParens
+			)*
+		RPAREN
+	;

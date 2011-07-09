@@ -1,0 +1,99 @@
+﻿lexer grammar PhpHtmlTagClassifierLexer;
+
+options {
+	language=CSharp3;
+	TokenLabelType=CommonToken;
+	tokenVocab=PhpHtmlTextClassifierLexer;
+}
+
+@namespace{Tvl.VisualStudio.Language.Php.Classification}
+@modifier{internal}
+@ctorModifier{private}
+
+HTML_CLOSE_TAG
+	:	'/'? '>'
+	;
+
+HTML_OPERATOR
+	:	'='
+	;
+
+WS
+	:	(' ' | '\t')+
+	;
+
+NEWLINE
+	:	'\r'? '\n'
+	;
+
+fragment HTML_ELEMENT_NAME : ;
+fragment HTML_ATTRIBUTE_NAME : ;
+
+NAME
+	:	~(	C0_CONTROL_CHAR
+		|	C1_CONTROL_CHAR
+		|	' ' | '"' | '\'' | '>' | '/' | '='
+		)+
+	;
+
+fragment HTML_ATTRIBUTE_VALUE : ;
+
+BEGIN_SINGLE_QUOTE_STRING
+	:	'\''
+	;
+
+BEGIN_DOUBLE_QUOTE_STRING
+	:	'"'
+	;
+
+//fragment
+//SINGLE_QUOTE_STRING
+//	:	'\'' .* '\''
+//	;
+
+//fragment
+//DOUBLE_QUOTE_STRING
+//	:	'"' .* '"'
+//	;
+
+fragment
+CONTINUE_SINGLE_QUOTE_STRING
+options {k=1;}
+	:	{IsPhpTagStart(input)}? => '<?php'		{state.type = HTML_START_CODE;}
+	|	(	~('\r' | '\n' | '<' | '\'')
+		|	{!IsPhpTagStart(input)}? => '<'
+		)*
+		(	'\''						{state.type = END_STRING;}
+		|	/* still in the string */	{state.type = CONTINUE_STRING;}
+		)
+	;
+
+fragment
+CONTINUE_DOUBLE_QUOTE_STRING
+options {k=1;}
+	:	{IsPhpTagStart(input)}? => '<?php'		{state.type = HTML_START_CODE;}
+	|	(	~('\r' | '\n' | '<' | '"')
+		|	{!IsPhpTagStart(input)}? => '<'
+		)*
+		(	'"'							{state.type = END_STRING;}
+		|	/* still in the string */	{state.type = CONTINUE_STRING;}
+		)
+	;
+
+fragment CONTINUE_STRING : ;
+fragment END_STRING : ;
+
+fragment
+C0_CONTROL_CHAR
+	:	'\u0000'..'\u001F'
+	|	'\u007f'
+	;
+
+fragment
+C1_CONTROL_CHAR
+	:	'\u0080'..'\u009f'
+	;
+
+ANY_CHAR
+	:	.
+	;

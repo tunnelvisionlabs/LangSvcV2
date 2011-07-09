@@ -29,7 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Public Assemblies", "Public
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Private Assemblies", "Private Assemblies", "{27B8B675-BC57-4568-8BB7-EE0B1DA16E64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language.Php", "Tvl.VisualStudio.Php\Tvl.VisualStudio.Language.Php.csproj", "{278B5C1B-CF8B-4DD7-A514-EE27B268F11E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language.Php", "Tvl.VisualStudio.Language.Php\Tvl.VisualStudio.Language.Php.csproj", "{278B5C1B-CF8B-4DD7-A514-EE27B268F11E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language.Go", "Tvl.VisualStudio.Language.Go\Tvl.VisualStudio.Language.Go.csproj", "{202C26A6-5388-4D5D-BE36-7912A02939DD}"
 EndProject
