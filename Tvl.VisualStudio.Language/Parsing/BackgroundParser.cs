@@ -9,10 +9,13 @@
     using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
     using Timer = System.Timers.Timer;
     using System.Diagnostics;
+    using System.Threading.Tasks;
+    using Tvl.Extensions;
 
     public abstract class BackgroundParser : IBackgroundParser, IDisposable
     {
         private readonly ITextBuffer _textBuffer;
+        private readonly TaskScheduler _taskScheduler;
         private readonly ITextDocumentFactoryService _textDocumentFactoryService;
         private readonly IOutputWindowService _outputWindowService;
         private readonly string _outputWindowName;
@@ -24,18 +27,33 @@
 
         public event EventHandler<ParseResultEventArgs> ParseComplete;
 
+        [Obsolete]
         public BackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
-            : this(textBuffer, textDocumentFactoryService, outputWindowService, PredefinedOutputWindowPanes.TvlIntellisense)
+            : this(textBuffer, TaskScheduler.Default, textDocumentFactoryService, outputWindowService, PredefinedOutputWindowPanes.TvlIntellisense)
         {
+            Contract.Requires(textBuffer != null);
+            Contract.Requires(textDocumentFactoryService != null);
+            Contract.Requires(outputWindowService != null);
         }
 
-        public BackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService, string outputPaneName)
+        public BackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+            : this(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService, PredefinedOutputWindowPanes.TvlIntellisense)
+        {
+            Contract.Requires(textBuffer != null);
+            Contract.Requires(taskScheduler != null);
+            Contract.Requires(textDocumentFactoryService != null);
+            Contract.Requires(outputWindowService != null);
+        }
+
+        public BackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService, string outputPaneName)
         {
             Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Contract.Requires<ArgumentNullException>(taskScheduler != null, "taskScheduler");
             Contract.Requires<ArgumentNullException>(textDocumentFactoryService != null, "textDocumentFactoryService");
             Contract.Requires<ArgumentNullException>(outputWindowService != null, "outputWindowService");
 
             this._textBuffer = textBuffer;
+            this._taskScheduler = taskScheduler;
             this._textDocumentFactoryService = textDocumentFactoryService;
             this._outputWindowService = outputWindowService;
             this._outputWindowName = outputPaneName;
@@ -150,8 +168,8 @@
             {
                 try
                 {
-                    Action action = ReParse;
-                    action.BeginInvoke((asyncResult) => _parsing = 0, null);
+                    Task task = Task.Factory.StartNew(ReParse, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
+                    task.ContinueWith(_ => _parsing = 0);
                 }
                 catch
                 {

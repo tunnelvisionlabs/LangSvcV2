@@ -178,6 +178,7 @@
     <Compile Include="OutputWindow\OutputWindowService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OutputWindow\VsOutputWindowPaneAdapter.cs" />
+    <Compile Include="StandardTaskSchedulers.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj">
