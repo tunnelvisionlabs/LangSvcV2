@@ -28,7 +28,7 @@
             Contract.Requires<ArgumentNullException>(provider != null, "provider");
 
             this._textBuffer = textBuffer;
-            this._backgroundParser = PhpOutliningBackgroundParser.CreateParser(textBuffer, provider.OutputWindowService, provider.TextDocumentFactoryService);
+            this._backgroundParser = PhpOutliningBackgroundParser.CreateParser(textBuffer, provider.BackgroundIntelliSenseTaskScheduler, provider.OutputWindowService, provider.TextDocumentFactoryService);
             this._provider = provider;
 
             this.BackgroundParser.ParseComplete += HandleBackgroundParseComplete;

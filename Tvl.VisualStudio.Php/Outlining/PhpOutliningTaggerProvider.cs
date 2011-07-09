@@ -2,9 +2,11 @@
 {
     using System;
     using System.ComponentModel.Composition;
+    using System.Threading.Tasks;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Shell;
     using Tvl.VisualStudio.Shell.OutputWindow;
 
     [Export(typeof(ITaggerProvider))]
@@ -21,6 +23,13 @@
 
         [Import]
         public ITextDocumentFactoryService TextDocumentFactoryService
+        {
+            get;
+            private set;
+        }
+
+        [Import(PredefinedTaskSchedulers.BackgroundIntelliSense)]
+        public TaskScheduler BackgroundIntelliSenseTaskScheduler
         {
             get;
             private set;

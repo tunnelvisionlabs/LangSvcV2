@@ -1,7 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Language.Markdown
 {
     using System;
+    using System.Diagnostics.Contracts;
     using System.Text;
+    using System.Threading.Tasks;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
@@ -11,9 +13,13 @@
     {
         private MarkdownSharp.Markdown _markdownTransform = new MarkdownSharp.Markdown();
 
-        public MarkdownBackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
-            : base(textBuffer, textDocumentFactoryService, outputWindowService)
+        public MarkdownBackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+            : base(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService)
         {
+            Contract.Requires(textBuffer != null);
+            Contract.Requires(taskScheduler != null);
+            Contract.Requires(textDocumentFactoryService != null);
+            Contract.Requires(outputWindowService != null);
         }
 
         protected override void ReParseImpl()

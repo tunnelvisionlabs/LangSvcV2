@@ -4,6 +4,7 @@
     using System.ComponentModel.Composition;
 
     using Action = System.Action;
+    using PredefinedTaskSchedulers = Tvl.VisualStudio.Shell.PredefinedTaskSchedulers;
     using ContentTypeAttribute = Microsoft.VisualStudio.Utilities.ContentTypeAttribute;
     using Dispatcher = System.Windows.Threading.Dispatcher;
     using IEditorNavigationSource = Tvl.VisualStudio.Text.Navigation.IEditorNavigationSource;
@@ -17,6 +18,7 @@
     using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;
     using StandardGlyphGroup = Microsoft.VisualStudio.Language.Intellisense.StandardGlyphGroup;
     using StandardGlyphItem = Microsoft.VisualStudio.Language.Intellisense.StandardGlyphItem;
+    using TaskScheduler = System.Threading.Tasks.TaskScheduler;
 
     [Export(typeof(IEditorNavigationSourceProvider))]
     [ContentType(PhpConstants.PhpContentType)]
@@ -46,6 +48,13 @@
 
         [Import]
         public IEditorNavigationTypeRegistryService EditorNavigationTypeRegistryService
+        {
+            get;
+            private set;
+        }
+
+        [Import(PredefinedTaskSchedulers.BackgroundIntelliSense)]
+        public TaskScheduler BackgroundIntelliSenseTaskScheduler
         {
             get;
             private set;

@@ -2,6 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
+    using System.Threading.Tasks;
     using Antlr.Runtime;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Text;
@@ -11,9 +13,13 @@
 
     public class GoBackgroundParser : BackgroundParser
     {
-        public GoBackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
-            : base(textBuffer, textDocumentFactoryService, outputWindowService)
+        public GoBackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+            : base(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService)
         {
+            Contract.Requires(textBuffer != null);
+            Contract.Requires(taskScheduler != null);
+            Contract.Requires(textDocumentFactoryService != null);
+            Contract.Requires(outputWindowService != null);
         }
 
         protected override void ReParseImpl()

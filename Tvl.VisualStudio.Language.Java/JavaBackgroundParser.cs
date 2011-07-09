@@ -15,7 +15,7 @@
         private readonly JavaBackgroundParserProvider _provider;
 
         public JavaBackgroundParser(ITextBuffer textBuffer, JavaBackgroundParserProvider provider)
-            : base(textBuffer, provider.TextDocumentFactoryService, provider.OutputWindowService)
+            : base(textBuffer, provider.BackgroundIntelliSenseTaskScheduler, provider.TextDocumentFactoryService, provider.OutputWindowService)
         {
             Contract.Requires<ArgumentNullException>(provider != null, "provider");
 

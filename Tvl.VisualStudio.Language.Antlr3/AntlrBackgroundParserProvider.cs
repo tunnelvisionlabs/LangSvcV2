@@ -2,10 +2,12 @@
 {
     using System;
     using System.ComponentModel.Composition;
+    using System.Threading.Tasks;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Shell.OutputWindow;
-    using Tvl.VisualStudio.Language.Parsing;
     using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Shell;
+    using Tvl.VisualStudio.Shell.OutputWindow;
 
     [Export(typeof(IBackgroundParserProvider))]
     [ContentType(AntlrConstants.AntlrContentType)]
@@ -25,9 +27,16 @@
             set;
         }
 
+        [Import(PredefinedTaskSchedulers.BackgroundIntelliSense)]
+        public TaskScheduler BackgroundIntelliSenseTaskScheduler
+        {
+            get;
+            private set;
+        }
+
         public IBackgroundParser CreateParser(ITextBuffer textBuffer)
         {
-            Func<AntlrBackgroundParser> creator = () => new AntlrBackgroundParser(textBuffer, TextDocumentFactoryService, OutputWindowService);
+            Func<AntlrBackgroundParser> creator = () => new AntlrBackgroundParser(textBuffer, BackgroundIntelliSenseTaskScheduler, TextDocumentFactoryService, OutputWindowService);
             return textBuffer.Properties.GetOrCreateSingletonProperty<AntlrBackgroundParser>(creator);
         }
     }

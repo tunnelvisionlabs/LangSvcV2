@@ -2,45 +2,34 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
+    using System.Threading.Tasks;
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow;
     using PhpOutliningLexer = Tvl.VisualStudio.Language.Php.Outlining.PhpOutliningLexer;
-    using PhpOutliningParser = Tvl.VisualStudio.Language.Php.Outlining.PhpOutliningParser;
     using Stopwatch = System.Diagnostics.Stopwatch;
 
     internal class PhpEditorNavigationBackgroundParser : BackgroundParser
     {
-        private readonly ITextBuffer _textBuffer;
-        private readonly IOutputWindowService _outputWindowService;
-        private readonly ITextDocumentFactoryService _textDocumentFactoryService;
-
-        private PhpEditorNavigationBackgroundParser(ITextBuffer textBuffer, IOutputWindowService outputWindowService, ITextDocumentFactoryService textDocumentFactoryService)
-            : base(textBuffer, textDocumentFactoryService, outputWindowService)
+        private PhpEditorNavigationBackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, IOutputWindowService outputWindowService, ITextDocumentFactoryService textDocumentFactoryService)
+            : base(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService)
         {
-            if (textBuffer == null)
-                throw new ArgumentNullException("textBuffer");
-            if (outputWindowService == null)
-                throw new ArgumentNullException("outputWindowService");
-            if (textDocumentFactoryService == null)
-                throw new ArgumentNullException("textDocumentFactoryService");
-
-            _textBuffer = textBuffer;
-            _outputWindowService = outputWindowService;
-            _textDocumentFactoryService = textDocumentFactoryService;
+            Contract.Requires(textBuffer != null);
+            Contract.Requires(taskScheduler != null);
+            Contract.Requires(outputWindowService != null);
+            Contract.Requires(textDocumentFactoryService != null);
         }
 
-        internal static PhpEditorNavigationBackgroundParser CreateParser(ITextBuffer textBuffer, IOutputWindowService outputWindowService, ITextDocumentFactoryService textDocumentFactoryService)
+        internal static PhpEditorNavigationBackgroundParser CreateParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, IOutputWindowService outputWindowService, ITextDocumentFactoryService textDocumentFactoryService)
         {
-            if (textBuffer == null)
-                throw new ArgumentNullException("textBuffer");
-            if (outputWindowService == null)
-                throw new ArgumentNullException("outputWindowService");
-            if (textDocumentFactoryService == null)
-                throw new ArgumentNullException("textDocumentFactoryService");
+            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Contract.Requires<ArgumentNullException>(taskScheduler != null, "taskScheduler");
+            Contract.Requires<ArgumentNullException>(outputWindowService != null, "outputWindowService");
+            Contract.Requires<ArgumentNullException>(textDocumentFactoryService != null, "textDocumentFactoryService");
 
-            return new PhpEditorNavigationBackgroundParser(textBuffer, outputWindowService, textDocumentFactoryService);
+            return new PhpEditorNavigationBackgroundParser(textBuffer, taskScheduler, outputWindowService, textDocumentFactoryService);
         }
 
         protected override void ReParseImpl()

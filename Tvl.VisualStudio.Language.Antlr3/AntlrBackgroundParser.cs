@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow;
@@ -20,10 +21,13 @@
     {
         private static bool _initialized;
 
-        public AntlrBackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
-            : base(textBuffer, textDocumentFactoryService, outputWindowService)
+        public AntlrBackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+            : base(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService)
         {
-            Contract.Requires<ArgumentNullException>(outputWindowService != null, "outputWindowService");
+            Contract.Requires(textBuffer != null);
+            Contract.Requires(taskScheduler != null);
+            Contract.Requires(textDocumentFactoryService != null);
+            Contract.Requires(outputWindowService != null);
 
             if (!_initialized)
             {

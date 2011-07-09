@@ -11,12 +11,17 @@
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow;
     using Stopwatch = System.Diagnostics.Stopwatch;
+    using System.Threading.Tasks;
 
     public class StringTemplateBackgroundParser : BackgroundParser
     {
-        public StringTemplateBackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
-            : base(textBuffer, textDocumentFactoryService, outputWindowService)
+        public StringTemplateBackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+            : base(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService)
         {
+            Contract.Requires(textBuffer != null);
+            Contract.Requires(taskScheduler != null);
+            Contract.Requires(textDocumentFactoryService != null);
+            Contract.Requires(outputWindowService != null);
         }
 
         protected override void ReParseImpl()
