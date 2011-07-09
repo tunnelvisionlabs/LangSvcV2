@@ -1,6 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Go
 {
     using Antlr.Runtime.Tree;
+    using System;
+    using Microsoft.VisualStudio;
 
     partial class GoTypeFormatter
     {
@@ -9,9 +11,19 @@
             if (typeTree == null)
                 return "<null>";
 
-            CommonTreeNodeStream input = new CommonTreeNodeStream(typeTree);
-            GoTypeFormatter formatter = new GoTypeFormatter(input);
-            return formatter.type();
+            try
+            {
+                CommonTreeNodeStream input = new CommonTreeNodeStream(typeTree);
+                GoTypeFormatter formatter = new GoTypeFormatter(input);
+                return formatter.type();
+            }
+            catch (Exception e)
+            {
+                if (ErrorHandler.IsCriticalException(e))
+                    throw;
+
+                return "?";
+            }
         }
 
         private static string HandleExpectedType(string result)

@@ -49,6 +49,9 @@
 
                         if (outputWindow != null)
                             outputWindow.WriteLine(message);
+
+                        if (errors.Count > 100)
+                            throw new OperationCanceledException();
                     };
 
                 var result = parser.compilationUnit();

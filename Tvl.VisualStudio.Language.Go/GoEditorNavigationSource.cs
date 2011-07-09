@@ -159,7 +159,7 @@
                                 var glyph = GetGlyph(GetGlyphGroupForType(typeSpec), char.IsUpper(typeName[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate);
                                 navigationTargets.Add(new EditorNavigationTarget(typeName, navigationType, ruleSpan, ruleSeek, glyph));
 
-                                if (typeSpec.ChildCount > 0 && typeSpec.Children[0].Type == GoLexer.KW_STRUCT)
+                                if (typeSpec.ChildCount > 0 && typeSpec.Children[0].Type == GoLexer.KW_STRUCT && typeSpec.Children[0].ChildCount > 0)
                                 {
                                     foreach (CommonTree fieldSpec in ((CommonTree)typeSpec.Children[0]).Children)
                                     {

@@ -9,6 +9,7 @@ options {
 @namespace{Tvl.VisualStudio.Language.Go}
 @ctorModifier{private}
 @modifier{internal}
+@rulecatch{ }
 
 type returns [string result]
 	:	typeName			{$result = HandleExpectedType($typeName.result);}
@@ -114,8 +115,7 @@ parameterList
 	;
 
 parameterDecl
-	:	(IDENTIFIER ~('.'|','|')')) =>
-		// using IDENTIFIER instead of identifierList because parameterDecl is only used by the parameterList rule, which is itself comma separated
+	:	// using IDENTIFIER instead of identifierList because parameterDecl is only used by the parameterList rule, which is itself comma separated
 		^(IDENTIFIER parameterType)
 	|	parameterType
 	;
@@ -234,7 +234,7 @@ qualifiedIdent returns [string result]
 // Composite literals
 
 compositeLit returns [string result]
-	:	^(AST_COMPOSITE_LITERAL literalType (elementList ','?)? '}')
+	:	^(AST_COMPOSITE_LITERAL literalType literalValue)
 	;
 
 literalType returns [string result]
@@ -245,6 +245,10 @@ literalType returns [string result]
 	|	mapType							{$result = HandleExpectedType($mapType.result);}
 	|	typeName						{$result = HandleExpectedType($typeName.result);}
 	|	^('(' subType=literalType ')')	{$result = "(" + HandleExpectedType($subType.result) + ")";}
+	;
+
+literalValue
+	:	^(AST_LITERAL_VALUE (elementList ','?)? '}')
 	;
 
 elementList
@@ -270,6 +274,7 @@ elementIndex
 
 value
 	:	expression
+	|	literalValue
 	;
 
 // Function literals
@@ -283,7 +288,7 @@ functionLit returns [string result]
 
 primaryExpr returns [string result]
 	:	(	operand											{$result = HandleExpectedType($operand.result);}
-		//|	conversion
+		|	conversion
 		//|	builtinCall
 		)
 	|	^(AST_SELECTOR left=primaryExpr selector)			{$result = HandleExpectedType($left.result) + HandleExpectedType($selector.result);}
@@ -375,4 +380,8 @@ methodExpr returns [string result]
 receiverType returns [string result]
 	:	typeName
 	|	'(' '*' typeName ')'
+	;
+
+conversion returns [string result]
+	:	^(AST_CONVERSION type expression ')')	{$result = $type.result;}
 	;

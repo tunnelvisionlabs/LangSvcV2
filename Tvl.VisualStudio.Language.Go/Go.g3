@@ -103,6 +103,8 @@ tokens
 	AST_INDEX;
 	AST_METHOD_EXPRESSION;
 	AST_COMPOSITE_LITERAL;
+	AST_LITERAL_VALUE;
+	AST_CONVERSION;
 
 	AST_POSITIVE;
 	AST_NEGATE;
@@ -461,7 +463,8 @@ qualifiedIdent
 // Composite literals
 
 compositeLit
-	:	literalType '{'<AST_COMPOSITE_LITERAL>^ (elementList ','?)? '}'
+	:	literalType literalValue
+		-> ^(AST_COMPOSITE_LITERAL[$literalValue.start] literalType literalValue)
 	;
 
 literalType
@@ -472,6 +475,10 @@ literalType
 	|	mapType
 	|	typeName
 	|	'('^ literalType ')'
+	;
+
+literalValue
+	:	'{'<AST_LITERAL_VALUE>^ (elementList ','?)? '}'
 	;
 
 elementList
@@ -497,6 +504,7 @@ elementIndex
 
 value
 	:	expression
+	|	literalValue
 	;
 
 // Function literals
@@ -508,9 +516,11 @@ functionLit
 // Primary expressions
 
 primaryExpr
-	:	(	operand
+	:	(	options{backtrack=true;}
+		:	operand
 			-> operand
-		//|	conversion
+		|	conversion
+			-> conversion
 		//|	builtinCall
 		)
 		(	selector
@@ -646,7 +656,7 @@ receiverType
 // Conversions
 
 conversion
-	:	literalType '(' expression ')'
+	:	literalType '('<AST_CONVERSION>^ expression ')'
 	;
 
 // Constant expressions
