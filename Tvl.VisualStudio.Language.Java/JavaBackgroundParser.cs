@@ -53,6 +53,9 @@
 
                     if (outputWindow != null)
                         outputWindow.WriteLine(string.Format("{0}({1}:{2}): {3}", filename, line, column, message));
+
+                    if (errors.Count > 100)
+                        throw new OperationCanceledException();
                 };
 
             var result = parser.compilationUnit();

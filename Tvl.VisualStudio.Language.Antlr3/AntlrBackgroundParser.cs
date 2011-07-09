@@ -81,6 +81,9 @@
 
                 if (outputWindow != null)
                     outputWindow.WriteLine(message);
+
+                if (errors.Count > 100)
+                    throw new OperationCanceledException();
             };
 
             AntlrTool.ToolPathRoot = typeof(AntlrTool).Assembly.Location;
