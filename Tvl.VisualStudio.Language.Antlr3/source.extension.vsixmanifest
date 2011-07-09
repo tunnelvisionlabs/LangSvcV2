@@ -3,7 +3,7 @@
   <Identifier Id="Tvl.VisualStudio.Language.Antlr3.74dda0ee-262e-4c58-8255-d57136664d2b">
     <Name>ANTLR Language Support</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0.5.311</Version>
+    <Version>1.0.6.318</Version>
     <Description xml:space="preserve">Basic support for the ANTLR grammar description language.</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
@@ -19,7 +19,7 @@
     <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
   </Identifier>
   <References>
-    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.0.5">
+    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.0.7">
       <Name>Visual Studio Extensibility Framework</Name>
       <VsixPath>Tvl.VisualStudio.Framework.vsix</VsixPath>
     </Reference>
