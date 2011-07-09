@@ -27,7 +27,7 @@
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 var snapshot = TextBuffer.CurrentSnapshot;
-                SnapshotCharStream input = new SnapshotCharStream(snapshot);
+                SnapshotCharStream input = new SnapshotCharStream(snapshot, new Span(0, snapshot.Length));
                 GroupLexer lexer = new GroupLexer(input);
                 CommonTokenStream tokens = new CommonTokenStream(lexer);
                 GroupParserWrapper parser = new GroupParserWrapper(tokens);

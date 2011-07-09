@@ -24,7 +24,7 @@
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 var snapshot = TextBuffer.CurrentSnapshot;
-                SnapshotCharStream input = new SnapshotCharStream(snapshot);
+                SnapshotCharStream input = new SnapshotCharStream(snapshot, new Span(0, snapshot.Length));
                 GoLexer lexer = new GoLexer(input);
                 GoSemicolonInsertionTokenSource tokenSource = new GoSemicolonInsertionTokenSource(lexer);
                 CommonTokenStream tokens = new CommonTokenStream(tokenSource);

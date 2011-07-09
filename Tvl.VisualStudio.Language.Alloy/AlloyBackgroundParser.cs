@@ -30,7 +30,7 @@
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 var snapshot = TextBuffer.CurrentSnapshot;
-                SnapshotCharStream input = new SnapshotCharStream(snapshot);
+                SnapshotCharStream input = new SnapshotCharStream(snapshot, new Span(0, snapshot.Length));
                 AlloyLexer lexer = new AlloyLexer(input);
                 CommonTokenStream tokens = new CommonTokenStream(lexer);
                 AlloyParser parser = new AlloyParser(tokens);
