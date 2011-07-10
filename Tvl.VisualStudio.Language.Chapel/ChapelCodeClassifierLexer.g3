@@ -1,0 +1,138 @@
+﻿lexer grammar ChapelCodeClassifierLexer;
+
+options {
+    language=CSharp3;
+    TokenLabelType=CommonToken;
+}
+
+@namespace{Tvl.VisualStudio.Language.Chapel}
+@modifier{internal}
+@ctorModifier{private}
+
+EQ			: '=';
+ADDEQ		: '+=';
+SUBEQ		: '-=';
+MULEQ		: '*=';
+DIVEQ		: '/=';
+MULMULEQ	: '**=';
+MODEQ		: '%=';
+ANDEQ		: '&=';
+OREQ		: '|=';
+XOREQ		: '^=';
+ANDANDEQ	: '&&=';
+OROREQ		: '||=';
+LSHIFTEQ	: '<<=';
+RSHIFTEQ	: '>>=';
+SWAP		: '<=>';
+RANGE		: '..';
+POUND		: '#';
+ELLIP		: '...';
+ANDAND		: '&&';
+OROR		: '||';
+NOT			: '!';
+AND			: '&';
+OR			: '|';
+XOR			: '^';
+TILDE		: '~';
+LSHIFT		: '<<';
+RSHIFT		: '>>';
+EQEQ		: '==';
+NEQ			: '!=';
+LE			: '<=';
+GE			: '>=';
+LT			: '<';
+GT			: '>';
+ADD			: '+';
+SUB			: '-';
+MUL			: '*';
+DIV			: '/';
+MOD			: '%';
+MULMUL		: '**';
+COLON		: ':';
+SEMI		: ';';
+COMMA		: ',';
+DOT			: '.';
+QUESTION	: '?';
+
+LPAREN		: '(';
+RPAREN		: ')';
+LBRACK		: '[';
+RBRACK		: ']';
+LBRACE		: '{';
+RBRACE		: '}';
+
+
+IDENTIFIER
+	:	('a'..'z' | 'A'..'Z' | '_')
+		('a'..'z' | 'A'..'Z' | '0'..'9' | '_' | '$')*
+	;
+
+fragment INTEGER : ;
+fragment REAL : ;
+fragment IMAGINARY : ;
+NUMBER
+	:	(	'0' ('x'|'X') ('0'..'9' | 'a'..'f' | 'A'..'F')+			{$type = INTEGER;}
+		|	'0' ('b'|'B') ('0' | '1')+								{$type = INTEGER;}
+		|	'0'..'9'+
+			(	'.' '0'..'9'+ (('e'|'E') ('+'|'-')? '0'..'9'+)?		{$type = REAL;}
+			|	'.'? ('e'|'E') ('+'|'-')? '0'..'9'+					{$type = REAL;}
+			|														{$type = INTEGER;}
+			)
+		|	'.' '0'..'9'+ (('e'|'E') ('+'|'-')? '0'..'9'+)?			{$type = REAL;}
+		)
+		(	'i'														{$type = IMAGINARY;}
+		|	// nothing
+		)
+	;
+
+STRING
+	:	'"' DoubleQuoteChars? '"'
+	|	'\'' SingleQuoteChars? '\''
+	;
+
+fragment
+DoubleQuoteChars
+	:	(	~('"'|'\r'|'\n'|'\\')
+		|	'\\' (options{greedy=true;} : .)?
+		)+
+	;
+
+fragment
+SingleQuoteChars
+	:	(	~('\''|'\r'|'\n'|'\\')
+		|	'\\' (options{greedy=true;} : .)?
+		)+
+	;
+
+COMMENT
+	:	'//' (~('\r' | '\n'))*
+	;
+
+ML_COMMENT
+	:	'/*' CONTINUE_COMMENT {$type = state.type;}
+	;
+
+fragment END_COMMENT : ;
+
+fragment
+CONTINUE_COMMENT
+	:	(	~('\r'|'\n'|'*')
+		|	{input.LA(2) != '/'}? => '*'
+		)*
+		(	'*/' {state.type = END_COMMENT;}
+		|	{state.type = CONTINUE_COMMENT;}
+		)
+	;
+
+WS
+	:	(' ' | '\t')+
+	;
+
+NEWLINE
+	:	'\r' '\n'?
+	|	'\n'
+	;
+
+ANYCHAR
+	:	.
+	;

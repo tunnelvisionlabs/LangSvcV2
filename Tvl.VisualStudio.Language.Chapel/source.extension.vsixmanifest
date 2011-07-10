@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Vsix Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
+  <Identifier Id="Tvl.VisualStudio.Language.Chapel.68c0f3a0-30b1-4e27-a8b4-436e9a03eaee">
+    <Name>Chapel Language Support</Name>
+    <Author>Sam Harwell</Author>
+    <Version>1.0.0.0</Version>
+    <Description xml:space="preserve">Basic support for the Chapel high-performance programming language.</Description>
+    <Locale>1033</Locale>
+    <License>Eula.rtf</License>
+    <PreviewImage>VSIXProject_large.png</PreviewImage>
+    <SupportedProducts>
+      <VisualStudio Version="10.0">
+        <Edition>Ultimate</Edition>
+        <Edition>Premium</Edition>
+        <Edition>Pro</Edition>
+        <Edition>IntegratedShell</Edition>
+      </VisualStudio>
+    </SupportedProducts>
+    <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
+  </Identifier>
+  <References>
+    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.0.5">
+      <Name>Visual Studio Extensibility Framework</Name>
+      <VsixPath>Tvl.VisualStudio.Framework.vsix</VsixPath>
+    </Reference>
+  </References>
+  <Content>
+    <MefComponent>|%CurrentProject%|</MefComponent>
+    <VsPackage>|%CurrentProject%|</VsPackage>
+  </Content>
+</Vsix>
