@@ -219,6 +219,7 @@
     <Compile Include="AntlrOutliningTagger.cs" />
     <Compile Include="AntlrOutliningTaggerProvider.cs" />
     <Compile Include="AntlrClassifierLexerState.cs" />
+    <Compile Include="Experimental\AntlrAtnBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
