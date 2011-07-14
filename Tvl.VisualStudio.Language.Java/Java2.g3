@@ -1068,9 +1068,9 @@ unaryExpressionNotPlusMinus
 			-> ^(SELECTOR $unaryExpressionNotPlusMinus selector)
 		)*
         (   t='++'
-			-> ^(PREINC[$t] $unaryExpressionNotPlusMinus)
+			-> ^(POSTINC[$t] $unaryExpressionNotPlusMinus)
         |   t='--'
-			-> ^(PREDEC[$t] $unaryExpressionNotPlusMinus)
+			-> ^(POSTDEC[$t] $unaryExpressionNotPlusMinus)
         )?
     ;
 
