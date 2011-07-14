@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
@@ -10,8 +9,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Tunnel Vision Laboratories, LLC")]
-[assembly: AssemblyProduct("JavaLanguageService")]
-[assembly: AssemblyCopyright("Copyright © Sam Harwell 2010")]
+[assembly: AssemblyProduct("Tvl.VisualStudio.Language.Java")]
+[assembly: AssemblyCopyright("Copyright © Sam Harwell 2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
