@@ -29,11 +29,15 @@
         /** <summary>Track the last mark() call result value for use in rewind().</summary> */
         private int _lastMarker;
 
+        private int _count;
+
         public SnapshotCharStream(ITextSnapshot snapshot)
         {
             Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
 
             this.Snapshot = snapshot;
+            this._count = snapshot.Length;
+
             UpdateCachedLine();
         }
 
@@ -42,6 +46,7 @@
             Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
 
             this.Snapshot = snapshot;
+            _count = Snapshot.Length;
             _explicitCache = true;
             _currentSnapshotLineStartIndex = cachedSpan.Start;
             _currentSnapshotLine = snapshot.GetText(cachedSpan);
@@ -69,7 +74,7 @@
         {
             get
             {
-                return Snapshot.Length;
+                return _count;
             }
         }
 
@@ -94,6 +99,12 @@
 
         public string Substring(int startIndex, int length)
         {
+            if (_currentSnapshotLine != null)
+            {
+                if (startIndex >= _currentSnapshotLineStartIndex && (startIndex + length) <= _currentSnapshotLineStartIndex + _currentSnapshotLine.Length)
+                    return _currentSnapshotLine.Substring(startIndex - _currentSnapshotLineStartIndex, length);
+            }
+
             return Snapshot.GetText(startIndex, length);
         }
 
