@@ -18,7 +18,8 @@ specification
 	;
 
 module
-	:	^(KW_MODULE name (LBRACE KW_EXACTLY? name (COMMA KW_EXACTLY? number)* RBRACE)?)
+	:	^(KW_MODULE moduleName=name (LBRACE KW_EXACTLY? name (COMMA KW_EXACTLY? number)* RBRACE)?)
+		{HandleModule($moduleName.start);}
 	;
 
 open

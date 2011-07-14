@@ -33,7 +33,7 @@ tokens {
 	DOT			= '.';
 	LSHIFT		= '<<';
 	RSHIFT		= '>>';
-	RROTATE		= '>>>';
+	URSHIFT		= '>>>';
 	IFF			= '<=>';
 	DOMAIN_RES	= '<:';
 	RANGE_RES	= ':>';
@@ -293,7 +293,7 @@ binOpExpr3
 	;
 
 binOpExpr4
-	:	binOpExpr5 (options{k=1; greedy=true;} : ('=>'|'implies')^ binOpExpr4 (options{k=1; greedy=true;} : elseClause)?)*
+	:	binOpExpr5 (options{k=1; greedy=true;} : ('=>'|'implies')^ binOpExpr5 (options{k=1; greedy=true;} : elseClause)?)*
 	;
 
 elseClause
@@ -327,8 +327,8 @@ binOpExpr9
 	;
 
 unOpExpr10
-	:	('+'|'-')^ unOpExpr10
-	|	countOpExpr11
+	:	/*('+'|'-')^ unOpExpr10
+	|	*/countOpExpr11 (('+'|'-')^ countOpExpr11)*
 	;
 
 countOpExpr11
@@ -336,7 +336,7 @@ countOpExpr11
 	;
 
 binOpExpr12
-	:	binOpExpr13 ('++'^ binOpExpr14)*
+	:	binOpExpr13 ('++'^ binOpExpr13)*
 	;
 
 binOpExpr13
@@ -345,7 +345,7 @@ binOpExpr13
 
 // let unOpExpr8 handle the right hand side's multiplicity
 binOpExpr14
-	:	binOpExpr15 (arrowMultiplicity? '->'^ binOpExpr15)*
+	:	binOpExpr15 (arrowMultiplicity? '->'^ arrowMultiplicity? binOpExpr15)*
 	;
 
 binOpExpr15
@@ -357,11 +357,14 @@ binOpExpr16
 	;
 
 callExpr17
-	:	binOpExpr18 ('['^ (expr (','! expr)*)? ']')*
+	:	binOpExpr18
 	;
 
 binOpExpr18
-	:	unOpExpr19 ('.'^ unOpExpr19)*
+	:	unOpExpr19
+		(	'.'^ unOpExpr19
+		|	'['^ (expr (','! expr)*)? ']'
+		)*
 	;
 
 unOpExpr19

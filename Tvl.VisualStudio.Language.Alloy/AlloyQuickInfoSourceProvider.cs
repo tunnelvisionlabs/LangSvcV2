@@ -2,6 +2,7 @@
 {
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Utilities;
+    using IOutputWindowService = Tvl.VisualStudio.Shell.OutputWindow.IOutputWindowService;
     using IQuickInfoSource = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoSource;
     using IQuickInfoSourceProvider = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoSourceProvider;
     using ITextBuffer = Microsoft.VisualStudio.Text.ITextBuffer;
@@ -16,7 +17,14 @@
         public AlloyIntellisenseCache IntellisenseCache
         {
             get;
-            set;
+            private set;
+        }
+
+        [Import]
+        public IOutputWindowService OutputWindowService
+        {
+            get;
+            private set;
         }
 
         public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer)

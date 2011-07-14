@@ -18,6 +18,8 @@
         private readonly AlloyEditorNavigationSourceProvider _provider;
         private readonly ITextSnapshot _snapshot;
 
+        private string _moduleName = string.Empty;
+
         private AlloyEditorNavigationSourceWalker(ITreeNodeStream input, ReadOnlyCollection<IToken> tokens, AlloyEditorNavigationSourceProvider provider, ITextSnapshot snapshot)
             : base(input, snapshot, provider.OutputWindowService)
         {
@@ -41,6 +43,11 @@
             walker.compilationUnit();
 
             return walker._targets;
+        }
+
+        protected override void HandleModule(CommonTree moduleName)
+        {
+            _moduleName = moduleName.Text;
         }
 
         protected override void HandleSignature(CommonTree signature, IList<IToken> qualifiers, IList<CommonTree> names, CommonTree extendsSpec, CommonTree body, CommonTree block)
@@ -86,6 +93,10 @@
             if (tree == null || name == null)
                 return;
 
+            string fullName = name.Text;
+            if (!string.IsNullOrEmpty(_moduleName))
+                fullName = _moduleName + "." + name.Text;
+
             var navigationType = EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Types);
             var startToken = _tokens[tree.TokenStartIndex];
             var stopToken = _tokens[tree.TokenStopIndex];
@@ -95,7 +106,7 @@
             var group = tree.Type == KW_SIG ? StandardGlyphGroup.GlyphGroupStruct : StandardGlyphGroup.GlyphGroupEnum;
             var item = StandardGlyphItem.GlyphItemPublic;
             var glyph = _provider.GetGlyph(group, item);
-            _targets.Add(new EditorNavigationTarget(name.Text, navigationType, ruleSpan, ruleSeek, glyph));
+            _targets.Add(new EditorNavigationTarget(fullName, navigationType, ruleSpan, ruleSeek, glyph));
         }
 
         private void HandleFunctionOrPredicate(CommonTree tree, CommonTree name, IList<CommonTree> parameters, CommonTree returnSpec, ImageSource glyph)

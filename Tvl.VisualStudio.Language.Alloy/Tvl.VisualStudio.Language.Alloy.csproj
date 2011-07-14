@@ -146,10 +146,13 @@
     <Compile Include="AlloySignatureHelpSourceProvider.cs" />
     <Compile Include="AlloyTextStructureNavigator.cs" />
     <Compile Include="AlloyTextStructureNavigatorProvider.cs" />
+    <Compile Include="Experimental\AlloyAtnBuilder.cs" />
+    <Compile Include="Experimental\AlloySimplifiedAtnBuilder.cs" />
     <Compile Include="IntellisenseModel\AlloyFile.cs" />
     <Compile Include="IntellisenseModel\Assertion.cs" />
     <Compile Include="IntellisenseModel\BinaryExpression.cs" />
     <Compile Include="IntellisenseModel\BlockExpression.cs" />
+    <Compile Include="IntellisenseModel\CallExpression.cs" />
     <Compile Include="IntellisenseModel\Command.cs" />
     <Compile Include="IntellisenseModel\ConditionExpression.cs" />
     <Compile Include="IntellisenseModel\Declaration.cs" />

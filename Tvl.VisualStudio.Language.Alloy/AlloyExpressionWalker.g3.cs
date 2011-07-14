@@ -43,7 +43,10 @@
 
         private Expression MakeBoxJoinOrCall(Expression left, List<Expression> right, SnapshotSpan? openBracket, SnapshotSpan? closeBracket)
         {
-            throw new NotImplementedException();
+            if (right.Count == 1)
+                return Expression.BoxJoin(left, right[0], openBracket);
+
+            return Expression.Call(left, right, openBracket);
         }
     }
 }

@@ -36,6 +36,8 @@
         RangeRestriction,
         Override,
 
+        Call,
+
         // logical operators
         Not,
         AndAlso,

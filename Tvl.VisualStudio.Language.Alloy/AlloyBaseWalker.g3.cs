@@ -70,6 +70,10 @@
             base.DisplayRecognitionError(tokenNames, e);
         }
 
+        protected virtual void HandleModule(CommonTree moduleName)
+        {
+        }
+
         protected virtual void EnterSignature(CommonTree signature, IList<IToken> qualifiers, IList<CommonTree> names, CommonTree extendsSpec)
         {
         }

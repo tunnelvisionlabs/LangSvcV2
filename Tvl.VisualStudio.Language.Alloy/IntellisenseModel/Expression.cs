@@ -120,6 +120,11 @@
             throw new NotImplementedException();
         }
 
+        public static CallExpression Call(Expression left, IEnumerable<Expression> right, SnapshotSpan? operatorSpan)
+        {
+            return new CallExpression(left, right, operatorSpan);
+        }
+
         public static BinaryExpression DotJoin(Expression left, Expression right, SnapshotSpan? operatorSpan)
         {
             return MakeBinary(ExpressionType.DotJoin, left, right, operatorSpan);
