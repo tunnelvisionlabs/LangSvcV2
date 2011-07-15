@@ -1,8 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy.Experimental
 {
     using System.Collections.Generic;
-    using Tvl.VisualStudio.Language.Parsing.Experimental;
     using Tvl.VisualStudio.Language.Parsing.Collections;
+    using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
 
     internal class AlloySimplifiedAtnBuilder
     {
@@ -57,24 +57,7 @@
             Nfa.BindRule(rules.QuantDecls, builder.BuildQuantDeclsRule());
             Nfa.BindRule(rules.BinaryExpression, builder.BuildBinaryExpression());
             Nfa.BindRule(rules.UnaryExpression, builder.BuildUnaryExpression());
-            //Nfa.BindRule(rules.BinOpExpr2, builder.BuildBinOpExpr2Rule());
-            //Nfa.BindRule(rules.BinOpExpr3, builder.BuildBinOpExpr3Rule());
-            //Nfa.BindRule(rules.BinOpExpr4, builder.BuildBinOpExpr4Rule());
             Nfa.BindRule(rules.ElseClause, builder.BuildElseClauseRule());
-            //Nfa.BindRule(rules.BinOpExpr5, builder.BuildBinOpExpr5Rule());
-            //Nfa.BindRule(rules.UnOpExpr6, builder.BuildUnOpExpr6Rule());
-            //Nfa.BindRule(rules.BinOpExpr7, builder.BuildBinOpExpr7Rule());
-            //Nfa.BindRule(rules.CompareOp, builder.BuildCompareOpRule());
-            //Nfa.BindRule(rules.UnOpExpr8, builder.BuildUnOpExpr8Rule());
-            //Nfa.BindRule(rules.BinOpExpr9, builder.BuildBinOpExpr9Rule());
-            //Nfa.BindRule(rules.UnOpExpr10, builder.BuildUnOpExpr10Rule());
-            //Nfa.BindRule(rules.CountOpExpr11, builder.BuildCountOpExpr11Rule());
-            //Nfa.BindRule(rules.BinOpExpr12, builder.BuildBinOpExpr12Rule());
-            //Nfa.BindRule(rules.BinOpExpr13, builder.BuildBinOpExpr13Rule());
-            //Nfa.BindRule(rules.BinOpExpr14, builder.BuildBinOpExpr14Rule());
-            //Nfa.BindRule(rules.BinOpExpr15, builder.BuildBinOpExpr15Rule());
-            //Nfa.BindRule(rules.BinOpExpr16, builder.BuildBinOpExpr16Rule());
-            //Nfa.BindRule(rules.CallExpr17, builder.BuildCallExpr17Rule());
             Nfa.BindRule(rules.BinOpExpr18, builder.BuildBinOpExpr18Rule());
             Nfa.BindRule(rules.CallArguments, builder.BuildCallArguments());
             Nfa.BindRule(rules.UnOpExpr19, builder.BuildUnOpExpr19Rule());
@@ -123,24 +106,7 @@
                     rules.QuantDecls,
                     rules.BinaryExpression,
                     rules.UnaryExpression,
-                    //rules.BinOpExpr2,
-                    //rules.BinOpExpr3,
-                    //rules.BinOpExpr4,
                     rules.ElseClause,
-                    //rules.BinOpExpr5,
-                    //rules.UnOpExpr6,
-                    //rules.BinOpExpr7,
-                    //rules.CompareOp,
-                    //rules.UnOpExpr8,
-                    //rules.BinOpExpr9,
-                    //rules.UnOpExpr10,
-                    //rules.CountOpExpr11,
-                    //rules.BinOpExpr12,
-                    //rules.BinOpExpr13,
-                    //rules.BinOpExpr14,
-                    //rules.BinOpExpr15,
-                    //rules.BinOpExpr16,
-                    //rules.CallExpr17,
                     rules.BinOpExpr18,
                     rules.CallArguments,
                     rules.UnOpExpr19,
@@ -549,171 +515,12 @@
                 Nfa.Rule(Rules.BinOpExpr18));
         }
 
-        //private Nfa BuildBinOpExpr2Rule()
-        //{
-        //    return Nfa.Sequence(
-        //        Nfa.Rule(Rules.BinOpExpr3),
-        //        Nfa.Closure(
-        //            Nfa.Sequence(
-        //                Nfa.MatchAny(AlloyLexer.OR, AlloyLexer.KW_OR),
-        //                Nfa.Rule(Rules.BinOpExpr3))));
-        //}
-
-        //private Nfa BuildBinOpExpr3Rule()
-        //{
-        //    return Nfa.Sequence(
-        //        Nfa.Rule(Rules.BinOpExpr4),
-        //        Nfa.Closure(
-        //            Nfa.Sequence(
-        //                Nfa.MatchAny(AlloyLexer.IFF, AlloyLexer.KW_IFF),
-        //                Nfa.Rule(Rules.BinOpExpr4))));
-        //}
-
-        //private Nfa BuildBinOpExpr4Rule()
-        //{
-        //    return Nfa.Sequence(
-        //        Nfa.Rule(Rules.BinOpExpr5),
-        //        Nfa.Closure(
-        //            Nfa.Sequence(
-        //                Nfa.MatchAny(AlloyLexer.IMPLIES, AlloyLexer.KW_IMPLIES),
-        //                Nfa.Rule(Rules.BinOpExpr5),
-        //                Nfa.Optional(Nfa.Rule(Rules.ElseClause)))));
-        //}
-
         private Nfa BuildElseClauseRule()
         {
             return Nfa.Sequence(
                 Nfa.MatchAny(AlloyLexer.KW_ELSE, AlloyLexer.COMMA),
                 Nfa.Rule(Rules.UnaryExpression));
         }
-
-        //private Nfa BuildBinOpExpr5Rule()
-        //{
-        //    return Nfa.Sequence(
-        //        Nfa.Rule(Rules.UnOpExpr6),
-        //        Nfa.Closure(
-        //            Nfa.Sequence(
-        //                Nfa.MatchAny(AlloyLexer.AND, AlloyLexer.KW_AND),
-        //                Nfa.Rule(Rules.UnOpExpr6))));
-        //}
-
-        //private Nfa BuildUnOpExpr6Rule()
-        //{
-        //    return Nfa.Choice(
-        //        Nfa.Sequence(
-        //            Nfa.MatchAny(AlloyLexer.NOT, AlloyLexer.KW_NOT),
-        //            Nfa.Rule(Rules.UnOpExpr6)),
-        //        Nfa.Rule(Rules.BinOpExpr7));
-        //}
-
-        //private Nfa BuildBinOpExpr7Rule()
-        //{
-        //    return Nfa.Sequence(
-        //        Nfa.Rule(Rules.UnOpExpr8),
-        //        Nfa.Closure(
-        //            Nfa.Sequence(
-        //                Nfa.Optional(Nfa.MatchAny(AlloyLexer.NOT, AlloyLexer.KW_NOT)),
-        //                Nfa.Rule(Rules.CompareOp),
-        //                Nfa.Rule(Rules.UnOpExpr8))));
-        //}
-
-        //private Nfa BuildCompareOpRule()
-        //{
-        //    return Nfa.MatchAny(AlloyLexer.LT, AlloyLexer.GT, AlloyLexer.LE, AlloyLexer.GE, AlloyLexer.EQ, AlloyLexer.KW_IN);
-        //}
-
-        //private Nfa BuildUnOpExpr8Rule()
-        //{
-        //    return Nfa.Choice(
-        //        Nfa.Sequence(
-        //            Nfa.MatchAny(AlloyLexer.KW_NO, AlloyLexer.KW_SOME, AlloyLexer.KW_LONE, AlloyLexer.KW_ONE, AlloyLexer.KW_SET, AlloyLexer.KW_SEQ),
-        //            Nfa.Rule(Rules.UnOpExpr8)),
-        //        Nfa.Rule(Rules.BinOpExpr9));
-        //}
-
-        //private Nfa BuildBinOpExpr9Rule()
-        //{
-        //    return Nfa.Sequence(
-        //        Nfa.Rule(Rules.UnOpExpr10),
-        //        Nfa.Closure(
-        //            Nfa.Sequence(
-        //                Nfa.MatchAny(AlloyLexer.LSHIFT, AlloyLexer.RSHIFT, AlloyLexer.URSHIFT),
-        //                Nfa.Rule(Rules.UnOpExpr10))));
-        //}
-
-        //private Nfa BuildUnOpExpr10Rule()
-        //{
-        //    return Nfa.Sequence(
-        //        Nfa.Rule(Rules.CountOpExpr11),
-        //        Nfa.Closure(
-        //            Nfa.Sequence(
-        //                Nfa.MatchAny(AlloyLexer.PLUS, AlloyLexer.MINUS),
-        //                Nfa.Rule(Rules.CountOpExpr11))));
-        //}
-
-        //private Nfa BuildCountOpExpr11Rule()
-        //{
-        //    return Nfa.Sequence(
-        //        Nfa.Optional(Nfa.Match(AlloyLexer.COUNT)),
-        //        Nfa.Rule(Rules.BinOpExpr12));
-        //}
-
-        //private Nfa BuildBinOpExpr12Rule()
-        //{
-        //    return Nfa.Sequence(
-        //        Nfa.Rule(Rules.BinOpExpr13),
-        //        Nfa.Closure(
-        //            Nfa.Sequence(
-        //                Nfa.Match(AlloyLexer.OVERRIDE),
-        //                Nfa.Rule(Rules.BinOpExpr13))));
-        //}
-
-        //private Nfa BuildBinOpExpr13Rule()
-        //{
-        //    return Nfa.Sequence(
-        //        Nfa.Rule(Rules.BinOpExpr14),
-        //        Nfa.Closure(
-        //            Nfa.Sequence(
-        //                Nfa.Match(AlloyLexer.BITAND),
-        //                Nfa.Rule(Rules.BinOpExpr14))));
-        //}
-
-        //private Nfa BuildBinOpExpr14Rule()
-        //{
-        //    return Nfa.Sequence(
-        //        Nfa.Rule(Rules.BinOpExpr15),
-        //        Nfa.Closure(
-        //            Nfa.Sequence(
-        //                Nfa.Optional(Nfa.Rule(Rules.ArrowMultiplicity)),
-        //                Nfa.Match(AlloyLexer.ARROW),
-        //                Nfa.Optional(Nfa.Rule(Rules.ArrowMultiplicity)),
-        //                Nfa.Rule(Rules.BinOpExpr15))));
-        //}
-
-        //private Nfa BuildBinOpExpr15Rule()
-        //{
-        //    return Nfa.Sequence(
-        //        Nfa.Rule(Rules.BinOpExpr16),
-        //        Nfa.Closure(
-        //            Nfa.Sequence(
-        //                Nfa.Match(AlloyLexer.DOMAIN_RES),
-        //                Nfa.Rule(Rules.BinOpExpr16))));
-        //}
-
-        //private Nfa BuildBinOpExpr16Rule()
-        //{
-        //    return Nfa.Sequence(
-        //        Nfa.Rule(Rules.CallExpr17),
-        //        Nfa.Closure(
-        //            Nfa.Sequence(
-        //                Nfa.Match(AlloyLexer.RANGE_RES),
-        //                Nfa.Rule(Rules.CallExpr17))));
-        //}
-
-        //private Nfa BuildCallExpr17Rule()
-        //{
-        //    return Nfa.Rule(Rules.BinOpExpr18);
-        //}
 
         private Nfa BuildBinOpExpr18Rule()
         {
@@ -865,24 +672,7 @@
             public readonly RuleBinding QuantDecls = new RuleBinding("QuantDecls");
             public readonly RuleBinding BinaryExpression = new RuleBinding("BinaryExpression");
             public readonly RuleBinding UnaryExpression = new RuleBinding("UnaryExpression");
-            //public readonly RuleBinding BinOpExpr2 = new RuleBinding("BinOpExpr2");
-            //public readonly RuleBinding BinOpExpr3 = new RuleBinding("BinOpExpr3");
-            //public readonly RuleBinding BinOpExpr4 = new RuleBinding("BinOpExpr4");
             public readonly RuleBinding ElseClause = new RuleBinding("ElseClause");
-            //public readonly RuleBinding BinOpExpr5 = new RuleBinding("BinOpExpr5");
-            //public readonly RuleBinding UnOpExpr6 = new RuleBinding("UnOpExpr6");
-            //public readonly RuleBinding BinOpExpr7 = new RuleBinding("BinOpExpr7");
-            //public readonly RuleBinding CompareOp = new RuleBinding("CompareOp");
-            //public readonly RuleBinding UnOpExpr8 = new RuleBinding("UnOpExpr8");
-            //public readonly RuleBinding BinOpExpr9 = new RuleBinding("BinOpExpr9");
-            //public readonly RuleBinding UnOpExpr10 = new RuleBinding("UnOpExpr10");
-            //public readonly RuleBinding CountOpExpr11 = new RuleBinding("CountOpExpr11");
-            //public readonly RuleBinding BinOpExpr12 = new RuleBinding("BinOpExpr12");
-            //public readonly RuleBinding BinOpExpr13 = new RuleBinding("BinOpExpr13");
-            //public readonly RuleBinding BinOpExpr14 = new RuleBinding("BinOpExpr14");
-            //public readonly RuleBinding BinOpExpr15 = new RuleBinding("BinOpExpr15");
-            //public readonly RuleBinding BinOpExpr16 = new RuleBinding("BinOpExpr16");
-            //public readonly RuleBinding CallExpr17 = new RuleBinding("CallExpr17");
             public readonly RuleBinding BinOpExpr18 = new RuleBinding("BinOpExpr18");
             public readonly RuleBinding CallArguments = new RuleBinding("CallArguments");
             public readonly RuleBinding UnOpExpr19 = new RuleBinding("UnOpExpr19");

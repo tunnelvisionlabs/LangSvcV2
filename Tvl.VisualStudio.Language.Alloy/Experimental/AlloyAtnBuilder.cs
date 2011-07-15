@@ -1,7 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy.Experimental
 {
     using System.Collections.Generic;
-    using Tvl.VisualStudio.Language.Parsing.Experimental;
+    using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
 
     internal class AlloyAtnBuilder
     {

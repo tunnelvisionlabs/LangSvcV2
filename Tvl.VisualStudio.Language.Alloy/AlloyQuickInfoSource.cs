@@ -1,23 +1,24 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy
 {
+    using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Linq;
+    using Antlr.Runtime;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Text;
+    using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
+    using Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter;
+    using Tvl.VisualStudio.Shell.OutputWindow;
+    using AlloySimplifiedAtnBuilder = Tvl.VisualStudio.Language.Alloy.Experimental.AlloySimplifiedAtnBuilder;
+    using Expression = Tvl.VisualStudio.Language.Alloy.IntellisenseModel.Expression;
     using IQuickInfoSession = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoSession;
     using IQuickInfoSource = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoSource;
     using ITextBuffer = Microsoft.VisualStudio.Text.ITextBuffer;
     using ITextSnapshot = Microsoft.VisualStudio.Text.ITextSnapshot;
     using ITrackingSpan = Microsoft.VisualStudio.Text.ITrackingSpan;
     using SnapshotPoint = Microsoft.VisualStudio.Text.SnapshotPoint;
-    using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Language.Alloy.IntellisenseModel;
-    using System;
-    using Microsoft.VisualStudio;
-    using Tvl.VisualStudio.Language.Parsing;
-    using Antlr.Runtime;
-    using Tvl.VisualStudio.Language.Parsing.Experimental;
-    using Tvl.VisualStudio.Language.Alloy.Experimental;
-    using System.Linq;
-    using Tvl.VisualStudio.Shell.OutputWindow;
-    using System.Diagnostics;
 
     internal class AlloyQuickInfoSource : IQuickInfoSource
     {
@@ -227,7 +228,7 @@
             }
         }
 
-        private List<string> AnalyzeInterpreterTrace(NetworkInterpreter.InterpretTrace context, RuleBinding memberSelectRule, out Span span)
+        private List<string> AnalyzeInterpreterTrace(InterpretTrace context, RuleBinding memberSelectRule, out Span span)
         {
             var transitions = context.Transitions;
             int expressionLevel = 0;
@@ -307,7 +308,7 @@
             return results;
         }
 
-        private static bool IsBounded(NetworkInterpreter.InterpretTrace trace, NetworkInterpreter interpreter)
+        private static bool IsBounded(InterpretTrace trace, NetworkInterpreter interpreter)
         {
             return trace.Transitions.Count > 0 && trace.Interpreter.BoundaryStates.Contains(trace.Transitions.First.Value.Transition.SourceState);
         }

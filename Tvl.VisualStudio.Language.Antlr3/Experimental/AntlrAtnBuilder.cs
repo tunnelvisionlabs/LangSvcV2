@@ -1,12 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Antlr3.Experimental
 {
-    using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
-    using Tvl.VisualStudio.Language.Parsing.Experimental;
-
+    using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
     using ANTLRParser = global::Antlr3.Grammars.ANTLRParser;
-    using Interval = Tvl.VisualStudio.Language.Parsing.Collections.Interval;
 
     internal class AntlrAtnBuilder
     {

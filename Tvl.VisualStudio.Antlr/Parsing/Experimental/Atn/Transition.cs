@@ -1,4 +1,4 @@
-﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental
+﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental.Atn
 {
     using System;
     using System.Diagnostics.Contracts;
