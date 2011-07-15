@@ -13,11 +13,11 @@
     <AssemblyName>Tvl.VisualStudio.Language.Go</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <GeneratePkgDefFile>false</GeneratePkgDefFile>
+    <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
     <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
     <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
-    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
     <CodeContractsAssemblyMode>1</CodeContractsAssemblyMode>
   </PropertyGroup>
@@ -193,6 +193,8 @@
     <Compile Include="GoTypeFormatter.g3.cs">
       <DependentUpon>GoTypeFormatter.g3</DependentUpon>
     </Compile>
+    <Compile Include="GoLanguageInfo.cs" />
+    <Compile Include="GoLanguagePackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -256,6 +258,13 @@
       <Project>{2B913C3A-3FD8-4633-81C8-683AF66741A8}</Project>
       <Name>Tvl.VisualStudio.Text</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="VSPackage.resx">
+      <SubType>Designer</SubType>
+      <LogicalName>VSPackage.resources</LogicalName>
+      <MergeWithCTO>true</MergeWithCTO>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <!-- Folder containing AntlrBuildTask.dll -->
