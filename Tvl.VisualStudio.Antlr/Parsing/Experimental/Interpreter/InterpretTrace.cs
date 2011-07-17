@@ -55,22 +55,56 @@
         {
             Contract.Requires<ArgumentNullException>(transition != null, "transition");
 
+            Contract.Assert(Network.States.ContainsKey(transition.SourceState.Id));
+            Contract.Assert(Network.States.ContainsKey(transition.TargetState.Id));
+
             bool boundedStart = BoundedStart;
-            if (!boundedStart && Transitions.Count > 0 && Interpreter.BoundaryStates.Contains(Transitions.First.Value.Transition.SourceState))
+            if (!boundedStart && Transitions.Count > 0)
             {
-                bool nested = false;
-                for (ContextFrame parent = StartContext.Parent; parent != null; parent = parent.Parent)
+                bool stateBoundary = Interpreter.BoundaryStates.Contains(Transitions.First.Value.Transition.SourceState);
+                bool ruleBoundary = false;
+                PushContextTransition pushContextTransition = Transitions.First.Value.Transition as PushContextTransition;
+                if (pushContextTransition != null)
                 {
-                    if (parent.Context != null)
+                    /* the rule boundary transfers from outside the rule to inside the rule (or
+                     * inside a rule invoked by this rule)
+                     */
+
+                    // first, check if the transition goes to this rule
+                    ruleBoundary = Interpreter.BoundaryRules.Contains(Network.StateRules[pushContextTransition.TargetState.Id]);
+
+                    // next, check if the transition starts outside this rule and goes through this rule
+                    if (!ruleBoundary && !Interpreter.BoundaryRules.Contains(Network.ContextRules[pushContextTransition.ContextIdentifiers[0]]))
                     {
-                        string contextRule = Network.StateRules[parent.Context.Value];
-                        RuleBinding ruleBinding = Network.GetRule(contextRule);
-                        if (Interpreter.BoundaryStates.Contains(ruleBinding.StartState))
-                            nested = true;
+                        ruleBoundary =
+                            pushContextTransition.ContextIdentifiers
+                            .Skip(1)
+                            .Any(i => Interpreter.BoundaryRules.Contains(Network.ContextRules[i]));
                     }
                 }
 
-                boundedStart = !nested;
+                if (stateBoundary || ruleBoundary)
+                {
+                    bool nested = false;
+                    for (ContextFrame parent = StartContext.Parent; parent != null; parent = parent.Parent)
+                    {
+                        if (parent.Context != null)
+                        {
+                            RuleBinding contextRule = Network.ContextRules[parent.Context.Value];
+                            if (Interpreter.BoundaryRules.Contains(contextRule))
+                            {
+                                nested = true;
+                            }
+                            else
+                            {
+                                if (Interpreter.BoundaryStates.Contains(contextRule.StartState))
+                                    nested = true;
+                            }
+                        }
+                    }
+
+                    boundedStart = !nested;
+                }
             }
 
             result = null;
@@ -96,7 +130,10 @@
                 PopContextTransition popContextTransition = transition as PopContextTransition;
                 if (popContextTransition != null)
                 {
-                    ContextFrame subContext = new ContextFrame(popContextTransition.SourceState, popContextTransition.ContextIdentifier, this.StartContext, Interpreter);
+                    ContextFrame subContext = this.StartContext;
+                    foreach (var label in popContextTransition.ContextIdentifiers.Reverse())
+                        subContext = new ContextFrame(popContextTransition.SourceState, label, subContext, Interpreter);
+
                     result = new InterpretTrace(subContext, this.EndContext, this.Transitions, boundedStart, this.BoundedEnd, boundedStart);
                     if (!boundedStart)
                         result.Transitions.AddFirst(new InterpretTraceTransition(transition, Interpreter));
@@ -110,19 +147,22 @@
                     ContextFrame startContext = this.StartContext;
                     ContextFrame endContext = this.EndContext;
 
-                    if (startContext.Context != null)
+                    foreach (var label in pushContextTransition.ContextIdentifiers.Reverse())
                     {
-                        // if the start context has a state stack, pop an item off it
-                        if (!string.Equals(startContext.Context, pushContextTransition.ContextIdentifier))
-                            return false;
+                        if (startContext.Context != null)
+                        {
+                            // if the start context has a state stack, pop an item off it
+                            if (startContext.Context != label)
+                                return false;
 
-                        startContext = new ContextFrame(transition.SourceState, startContext.Parent.Context, startContext.Parent.Parent, Interpreter);
-                    }
-                    else
-                    {
-                        // else we add a "predicate" to the end context
-                        endContext = endContext.AddHeadContext(new ContextFrame(Network.States[pushContextTransition.ContextIdentifier], pushContextTransition.ContextIdentifier, null, Interpreter));
-                        startContext = new ContextFrame(transition.SourceState, startContext.Context, startContext.Parent, Interpreter);
+                            startContext = new ContextFrame(transition.SourceState, startContext.Parent.Context, startContext.Parent.Parent, Interpreter);
+                        }
+                        else
+                        {
+                            // else we add a "predicate" to the end context
+                            endContext = endContext.AddHeadContext(new ContextFrame(null, label, null, Interpreter));
+                            startContext = new ContextFrame(transition.SourceState, startContext.Context, startContext.Parent, Interpreter);
+                        }
                     }
 
                     result = new InterpretTrace(startContext, endContext, this.Transitions, boundedStart, this.BoundedEnd, boundedStart);
@@ -181,7 +221,10 @@
                 PushContextTransition pushContextTransition = transition as PushContextTransition;
                 if (pushContextTransition != null)
                 {
-                    ContextFrame subContext = new ContextFrame(pushContextTransition.TargetState, pushContextTransition.ContextIdentifier, this.EndContext, Interpreter);
+                    ContextFrame subContext = this.EndContext;
+                    foreach (var label in pushContextTransition.ContextIdentifiers)
+                        subContext = new ContextFrame(pushContextTransition.TargetState, label, subContext, Interpreter);
+
                     result = new InterpretTrace(this.StartContext, subContext, this.Transitions, this.BoundedStart, boundedEnd, boundedEnd);
                     if (!boundedEnd)
                         result.Transitions.AddLast(new InterpretTraceTransition(transition, Interpreter));
@@ -195,19 +238,22 @@
                     ContextFrame startContext = this.StartContext;
                     ContextFrame endContext = this.EndContext;
 
-                    if (endContext.Context != null)
+                    foreach (var label in popContextTransition.ContextIdentifiers)
                     {
-                        // if the end context has a state stack, pop an item off it
-                        if (!string.Equals(endContext.Context, popContextTransition.ContextIdentifier))
-                            return false;
+                        if (endContext.Context != null)
+                        {
+                            // if the end context has a state stack, pop an item off it
+                            if (endContext.Context != label)
+                                return false;
 
-                        endContext = new ContextFrame(transition.TargetState, endContext.Parent.Context, endContext.Parent.Parent, Interpreter);
-                    }
-                    else
-                    {
-                        // else we add a "predicate" to the start context
-                        startContext = startContext.AddHeadContext(new ContextFrame(Network.States[popContextTransition.ContextIdentifier], popContextTransition.ContextIdentifier, null, Interpreter));
-                        endContext = new ContextFrame(transition.TargetState, endContext.Context, endContext.Parent, Interpreter);
+                            endContext = new ContextFrame(transition.TargetState, endContext.Parent.Context, endContext.Parent.Parent, Interpreter);
+                        }
+                        else
+                        {
+                            // else we add a "predicate" to the start context
+                            startContext = startContext.AddHeadContext(new ContextFrame(Network.States[label], label, null, Interpreter));
+                            endContext = new ContextFrame(transition.TargetState, endContext.Context, endContext.Parent, Interpreter);
+                        }
                     }
 
                     result = new InterpretTrace(startContext, endContext, this.Transitions, this.BoundedStart, boundedEnd, boundedEnd);

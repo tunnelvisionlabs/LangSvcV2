@@ -41,7 +41,7 @@
     <CodeContractsPlatformPath />
     <CodeContractsExtraAnalysisOptions />
     <CodeContractsBaseLineFile />
-    <CodeContractsRuntimeCheckingLevel>ReleaseRequires</CodeContractsRuntimeCheckingLevel>
+    <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
     <CodeContractsContainerAnalysis>False</CodeContractsContainerAnalysis>
     <CodeContractsExtraRewriteOptions />
@@ -174,6 +174,10 @@
     <Compile Include="Parsing\Experimental\Atn\MatchRangeTransition.cs" />
     <Compile Include="Parsing\Experimental\Atn\Network.cs" />
     <Compile Include="Parsing\Experimental\Interpreter\ContextFrame.cs" />
+    <Compile Include="Parsing\Experimental\Interpreter\DeterministicState.cs" />
+    <Compile Include="Parsing\Experimental\Interpreter\DeterministicTrace.cs" />
+    <Compile Include="Parsing\Experimental\Interpreter\DeterministicTraceTransition.cs" />
+    <Compile Include="Parsing\Experimental\Interpreter\DeterministicTransition.cs" />
     <Compile Include="Parsing\Experimental\Interpreter\InterpretTrace.cs" />
     <Compile Include="Parsing\Experimental\Interpreter\NetworkInterpreter.cs" />
     <Compile Include="Parsing\Experimental\Interpreter\InterpretTraceTransition.cs" />
@@ -183,11 +187,16 @@
     <Compile Include="Parsing\Experimental\Atn\RuleBinding.cs" />
     <Compile Include="Parsing\Experimental\Atn\State.cs" />
     <Compile Include="Parsing\Experimental\Atn\Transition.cs" />
+    <Compile Include="Parsing\Experimental\Interpreter\PreventContextType.cs" />
     <Compile Include="Parsing\ITokenSourceWithState`1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Parsing\SnapshotCharStream.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
+      <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
+      <Name>Tvl.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Language\Tvl.VisualStudio.Language.csproj">
       <Project>{90E28BCA-BD13-475B-B051-7A7D852A6206}</Project>
       <Name>Tvl.VisualStudio.Language</Name>

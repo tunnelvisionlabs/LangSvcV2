@@ -1,16 +1,27 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental.Atn
 {
+    using System.Collections.Generic;
+
     public class PushContextTransition : ContextTransition
     {
-        public PushContextTransition(State targetState, int contextIdentifier)
-            : base(targetState, contextIdentifier)
+        private readonly HashSet<PopContextTransition> _popTransitions = new HashSet<PopContextTransition>();
+
+        public PushContextTransition(State targetState, IEnumerable<int> contextIdentifiers)
+            : base(targetState, contextIdentifiers)
         {
         }
 
-        public PopContextTransition PopTransition
+        public PushContextTransition(State targetState, params int[] contextIdentifiers)
+            : base(targetState, contextIdentifiers)
         {
-            get;
-            set;
+        }
+
+        public HashSet<PopContextTransition> PopTransitions
+        {
+            get
+            {
+                return _popTransitions;
+            }
         }
     }
 }

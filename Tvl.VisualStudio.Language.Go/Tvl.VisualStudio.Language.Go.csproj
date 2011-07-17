@@ -166,6 +166,7 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Experimental\GoSimplifiedAtnBuilder.cs" />
     <Compile Include="GoClassifierLexer.cs" />
     <Compile Include="GoClassifierLexerMode.cs" />
     <Compile Include="GoClassifierLexerState.cs" />

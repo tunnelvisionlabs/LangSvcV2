@@ -73,7 +73,9 @@
             }
             else if (Transition.IsContext)
             {
-                transition = string.Format("-> {0} {1} ->", (Transition is PushContextTransition) ? "push" : "pop", ((ContextTransition)Transition).ContextIdentifier);
+                string op = (Transition is PushContextTransition) ? "push" : "pop";
+                string labels = string.Join(" ", ((ContextTransition)Transition).ContextIdentifiers);
+                transition = string.Format("-> {0} {1} ->", op, labels);
             }
 
             return string.Format("{0} {1} {2}", sourceState, transition, targetState);

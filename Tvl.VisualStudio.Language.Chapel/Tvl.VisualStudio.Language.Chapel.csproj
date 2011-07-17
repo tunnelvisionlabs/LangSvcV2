@@ -166,8 +166,16 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Chapel.g3.lexer.cs">
+      <DependentUpon>Chapel.g3</DependentUpon>
+    </None>
+    <None Include="Chapel.g3.parser.cs">
+      <DependentUpon>Chapel.g3</DependentUpon>
+    </None>
     <Compile Include="ChapelBraceMatchingTaggerProvider.cs" />
-    <Compile Include="ChapelCodeClassifierLexer.g3.cs" />
+    <Compile Include="ChapelCodeClassifierLexer.g3.cs">
+      <DependentUpon>ChapelCodeClassifierLexer.g3</DependentUpon>
+    </Compile>
     <Compile Include="ChapelConstants.cs" />
     <Compile Include="ChapelClassificationTypeNames.cs" />
     <Compile Include="ChapelClassificationTypes.cs" />
@@ -188,6 +196,9 @@
     </Antlr3>
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
+    </None>
+    <None Include="Chapel.g3">
+      <Generator>MSBuild:Compile</Generator>
     </None>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
@@ -228,9 +239,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="VSIXProject_large.png">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="VSIXProject_small.jpg">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
   </ItemGroup>

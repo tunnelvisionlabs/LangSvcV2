@@ -66,9 +66,9 @@
             {
                 string contextName = frame.Context != null ? frame.Context.ToString() : "<null>";
 
-                string parentRule;
-                if (frame.Context != null && Network.StateRules.TryGetValue(frame.Context.Value, out parentRule))
-                    contextName = string.Format("{0}({1})", contextName, parentRule);
+                RuleBinding parentRule;
+                if (frame.Context != null && Network.ContextRules.TryGetValue(frame.Context.Value, out parentRule))
+                    contextName = string.Format("{0}({1})", contextName, parentRule.Name);
 
                 parentContexts.Add(contextName);
             }

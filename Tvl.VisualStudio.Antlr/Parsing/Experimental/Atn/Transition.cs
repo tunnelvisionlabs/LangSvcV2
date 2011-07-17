@@ -8,6 +8,7 @@
     {
         private State _sourceState;
         private State _targetState;
+        private bool _isRecursive;
 
         public Transition(State targetState)
         {
@@ -34,6 +35,19 @@
             get
             {
                 return _targetState;
+            }
+        }
+
+        public bool IsRecursive
+        {
+            get
+            {
+                return _isRecursive;
+            }
+
+            set
+            {
+                _isRecursive = value;
             }
         }
 

@@ -1,10 +1,12 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy.Experimental
 {
+    using System;
     using System.Collections.Generic;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
 
     internal class AlloyAtnBuilder
     {
+        private static Network _network;
         private readonly RuleBindings _ruleBindings = new RuleBindings();
 
         private RuleBindings Rules
@@ -17,6 +19,9 @@
 
         public static Network BuildNetwork()
         {
+            if (_network != null)
+                return _network;
+
             AlloyAtnBuilder builder = new AlloyAtnBuilder();
             var rules = builder.Rules;
 
@@ -144,7 +149,9 @@
                     rules.Ref,
                 };
 
-            return new Network(ruleBindings);
+            throw new NotImplementedException();
+            _network = new Network(ruleBindings, null);
+            return _network;
         }
 
         private Nfa BuildCompilationUnitRule()

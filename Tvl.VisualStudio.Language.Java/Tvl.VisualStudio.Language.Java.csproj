@@ -167,6 +167,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BraceMatchingTaggerProvider.cs" />
+    <Compile Include="Experimental\JavaSimplifiedAtnBuilder.cs" />
     <Compile Include="Java2.g3.lexer.cs">
       <DependentUpon>Java2.g3</DependentUpon>
     </Compile>

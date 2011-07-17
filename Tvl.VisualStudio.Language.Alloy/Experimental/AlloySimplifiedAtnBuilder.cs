@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using Tvl.VisualStudio.Language.Parsing.Collections;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
+    using System.Linq;
 
     internal class AlloySimplifiedAtnBuilder
     {
@@ -121,9 +122,232 @@
                     rules.Ref,
                 };
 
-            _network = new Network(ruleBindings);
+            Dictionary<int, RuleBinding> stateRules = new Dictionary<int, RuleBinding>();
+            foreach (var rule in ruleBindings)
+                GetRuleStates(rule, rule.StartState, stateRules);
+
+            HashSet<State> reachableStates = new HashSet<State>();
+            foreach (var rule in ruleBindings)
+                GetReachableStates(rule, reachableStates);
+
+            HashSet<State> ruleStartStates = new HashSet<State>(ruleBindings.Select(i => i.StartState));
+
+            int skippedCount = 0;
+            int optimizedCount = 0;
+            foreach (var state in reachableStates)
+            {
+                bool skip = false;
+
+                /* if there are no incoming transitions and it's not a rule start state,
+                 * then the state is unreachable and will be removed so there's no need to
+                 * optimize it.
+                 */
+                if (!ruleStartStates.Contains(state) && state.OutgoingTransitions.Count > 0)
+                {
+                    if (state.IncomingTransitions.Count == 0)
+                        skip = true;
+
+                    if (!skip && state.IncomingTransitions.All(i => i.IsEpsilon))
+                        skip = true;
+
+                    if (!skip && !state.IncomingTransitions.Any(i => i.IsMatch) && !state.OutgoingTransitions.Any(i => i.IsMatch))
+                    {
+                        bool incomingPush = state.IncomingTransitions.Any(i => i is PushContextTransition);
+                        bool incomingPop = state.IncomingTransitions.Any(i => i is PopContextTransition);
+                        bool outgoingPush = state.OutgoingTransitions.Any(i => i is PushContextTransition);
+                        bool outgoingPop = state.OutgoingTransitions.Any(i => i is PopContextTransition);
+                        if ((incomingPop && !outgoingPush) || (incomingPush && !outgoingPop))
+                            skip = true;
+                    }
+                }
+
+                if (skip)
+                {
+                    skippedCount++;
+                    continue;
+                }
+
+                state.Optimize();
+                optimizedCount++;
+            }
+
+            HashSet<State> reachableOptimizedStates = new HashSet<State>();
+            foreach (var rule in ruleBindings)
+                GetReachableStates(rule, reachableOptimizedStates);
+
+            foreach (var state in reachableOptimizedStates)
+            {
+                if (!state.IsOptimized && state.IncomingTransitions.Any(i => i.IsRecursive))
+                    state.Optimize();
+            }
+
+            RemoveUnreachableStates(reachableStates, ruleStartStates);
+
+#if false
+            foreach (var rule in ruleBindings)
+                OptimizeRule(rule, ruleStartStates);
+#endif
+
+            _network = new Network(ruleBindings, stateRules);
             return _network;
         }
+
+        private static void GetRuleStates(RuleBinding ruleName, State state, Dictionary<int, RuleBinding> stateRules)
+        {
+            if (stateRules.ContainsKey(state.Id))
+                return;
+
+            stateRules[state.Id] = ruleName;
+
+            foreach (var transition in state.OutgoingTransitions)
+            {
+                if (transition is PopContextTransition)
+                    continue;
+
+                PushContextTransition contextTransition = transition as PushContextTransition;
+                if (contextTransition != null)
+                {
+                    foreach (var popTransition in contextTransition.PopTransitions)
+                        GetRuleStates(ruleName, popTransition.TargetState, stateRules);
+                }
+                else
+                {
+                    GetRuleStates(ruleName, transition.TargetState, stateRules);
+                }
+            }
+        }
+
+        private static void GetReachableStates(RuleBinding rule, HashSet<State> states)
+        {
+            if (states.Add(rule.StartState))
+                GetReachableStates(rule.StartState, states);
+        }
+
+        private static void GetReachableStates(State state, HashSet<State> states)
+        {
+            foreach (var transition in state.OutgoingTransitions)
+            {
+                if (transition is PopContextTransition)
+                    continue;
+
+                if (states.Add(transition.TargetState))
+                    GetReachableStates(transition.TargetState, states);
+
+                PushContextTransition contextTransition = transition as PushContextTransition;
+                if (contextTransition != null)
+                {
+                    foreach (var popTransition in contextTransition.PopTransitions)
+                    {
+                        if (states.Add(popTransition.TargetState))
+                            GetReachableStates(popTransition.TargetState, states);
+                    }
+                }
+            }
+        }
+
+        private static void RemoveUnreachableStates(HashSet<State> reachableStates, HashSet<State> ruleStartStates)
+        {
+            while (true)
+            {
+                bool removed = false;
+
+                foreach (var state in reachableStates)
+                {
+                    // already removed (or a terminal state)
+                    if (state.OutgoingTransitions.Count == 0)
+                        continue;
+
+                    /* if there are no incoming transitions and it's not a rule start state,
+                     * then the state is unreachable so we remove it.
+                     */
+                    if (!state.IsOptimized || (state.IncomingTransitions.Count == 0 && !ruleStartStates.Contains(state)))
+                    {
+                        removed = true;
+                        foreach (var transition in state.OutgoingTransitions.ToArray())
+                            state.RemoveTransition(transition);
+                    }
+                }
+
+                if (!removed)
+                    return;
+            }
+        }
+
+#if false
+        private static void OptimizeRule(RuleBinding rule, HashSet<State> ruleStartStates)
+        {
+            HashSet<State> visited = new HashSet<State>();
+            Queue<State> queue = new Queue<State>();
+            queue.Enqueue(rule.StartState);
+
+            while (queue.Count > 0)
+            {
+                State state = queue.Dequeue();
+                if (!visited.Add(state))
+                    continue;
+
+                /* if there are no incoming transitions and it's not a rule start state,
+                 * then the state is unreachable so we remove it.
+                 */
+                if (state.IncomingTransitions.Count == 0 && !ruleStartStates.Contains(state))
+                {
+                    foreach (var transition in state.OutgoingTransitions)
+                    {
+                        transition.TargetState.IncomingTransitions.Remove(transition);
+
+                        if (transition.IsContext)
+                        {
+                            IEnumerable<IList> matchingTransitions = Enumerable.Empty<IList>();
+                            PopContextTransition popContextTransition = transition as PopContextTransition;
+                            if (popContextTransition != null)
+                                matchingTransitions = popContextTransition.PushTransitions.Select(i => (IList)i.PopTransitions);
+
+                            PushContextTransition pushContextTransition = transition as PushContextTransition;
+                            if (pushContextTransition != null)
+                                matchingTransitions = pushContextTransition.PopTransitions.Select(i => (IList)i.PushTransitions);
+
+                            foreach (IList list in matchingTransitions)
+                                list.Remove(transition);
+                        }
+                    }
+
+                    continue;
+                }
+
+                foreach (var transition in state.OutgoingTransitions)
+                {
+                    if (!transition.IsContext)
+                        queue.Enqueue(transition.TargetState);
+
+                    PushContextTransition pushContext = transition as PushContextTransition;
+                    if (pushContext != null)
+                    {
+                        foreach (var popTransition in pushContext.PopTransitions)
+                        {
+                            if (popTransition.ContextIdentifiers.Last() != pushContext.ContextIdentifiers.First())
+                                continue;
+
+                            queue.Enqueue(popTransition.TargetState);
+                        }
+                    }
+                }
+
+                state.Optimize();
+
+                /* No need to do the following because no new states are created during the optimize process. */
+
+                //foreach (var transition in state.OutgoingTransitions)
+                //{
+                //    if (!transition.IsContext)
+                //        queue.Enqueue(transition.TargetState);
+
+                //    PushContextTransition pushContext = transition as PushContextTransition;
+                //    if (pushContext != null)
+                //        queue.Enqueue(pushContext.PopTransition.TargetState);
+                //}
+            }
+        }
+#endif
 
         private Nfa BuildCompilationUnitRule()
         {
@@ -533,14 +757,17 @@
                             Nfa.Rule(Rules.UnOpExpr19)),
                         Nfa.Sequence(
                             Nfa.Match(AlloyLexer.LBRACK),
+#if false
                             Nfa.Rule(Rules.CallArguments),
-                            //Nfa.Optional(
-                            //    Nfa.Sequence(
-                            //        Nfa.Rule(Rules.Expr),
-                            //        Nfa.Closure(
-                            //            Nfa.Sequence(
-                            //                Nfa.Match(AlloyLexer.COMMA),
-                            //                Nfa.Rule(Rules.Expr))))),
+#else
+                            Nfa.Optional(
+                                Nfa.Sequence(
+                                    Nfa.Rule(Rules.Expr),
+                                    Nfa.Closure(
+                                        Nfa.Sequence(
+                                            Nfa.Match(AlloyLexer.COMMA),
+                                            Nfa.Rule(Rules.Expr))))),
+#endif
                             Nfa.Match(AlloyLexer.RBRACK)))));
         }
 
@@ -638,53 +865,102 @@
                 Nfa.MatchAny(AlloyLexer.KW_UNIV, AlloyLexer.KW_INT2, AlloyLexer.KW_SEQINT));
         }
 
+        public static class RuleNames
+        {
+            public static readonly string CompilationUnit = "CompilationUnit";
+            public static readonly string Specification = "Specification";
+            public static readonly string Module = "Module";
+            public static readonly string Open = "Open";
+            public static readonly string Paragraph = "Paragraph";
+            public static readonly string FactDecl = "FactDecl";
+            public static readonly string AssertDecl = "AssertDecl";
+            public static readonly string FunDecl = "FunDecl";
+            public static readonly string FunctionName = "FunctionName";
+            public static readonly string FunctionReturn = "FunctionReturn";
+            public static readonly string FunctionParameters = "FunctionParameters";
+            public static readonly string DeclList = "DeclList";
+            public static readonly string CmdDecl = "CmdDecl";
+            public static readonly string CmdScope = "CmdScope";
+            public static readonly string CmdScopeFor = "CmdScopeFor";
+            public static readonly string CmdScopeExpect = "CmdScopeExpect";
+            public static readonly string TypescopeDeclList = "TypescopeDeclList";
+            public static readonly string Typescope = "Typescope";
+            public static readonly string SigDecl = "SigDecl";
+            public static readonly string NameList = "NameList";
+            public static readonly string NameDeclList = "NameDeclList";
+            public static readonly string SigBody = "SigBody";
+            public static readonly string EnumDecl = "EnumDecl";
+            public static readonly string EnumBody = "EnumBody";
+            public static readonly string SigQual = "SigQual";
+            public static readonly string SigExt = "SigExt";
+            public static readonly string Expr = "Expr";
+            public static readonly string UnOpExpr1 = "UnOpExpr1";
+            public static readonly string LetDecls = "LetDecls";
+            public static readonly string QuantDecls = "QuantDecls";
+            public static readonly string BinaryExpression = "BinaryExpression";
+            public static readonly string UnaryExpression = "UnaryExpression";
+            public static readonly string ElseClause = "ElseClause";
+            public static readonly string BinOpExpr18 = "BinOpExpr18";
+            public static readonly string CallArguments = "CallArguments";
+            public static readonly string UnOpExpr19 = "UnOpExpr19";
+            public static readonly string PrimaryExpr = "PrimaryExpr";
+            public static readonly string Decl = "Decl";
+            public static readonly string LetDecl = "LetDecl";
+            public static readonly string Quant = "Quant";
+            public static readonly string ArrowMultiplicity = "ArrowMultiplicity";
+            public static readonly string Block = "Block";
+            public static readonly string Name = "Name";
+            public static readonly string Number = "Number";
+            public static readonly string Ref = "Ref";
+        }
+
         private class RuleBindings
         {
-            public readonly RuleBinding CompilationUnit = new RuleBinding("CompilationUnit");
-            public readonly RuleBinding Specification = new RuleBinding("Specification");
-            public readonly RuleBinding Module = new RuleBinding("Module");
-            public readonly RuleBinding Open = new RuleBinding("Open");
-            public readonly RuleBinding Paragraph = new RuleBinding("Paragraph");
-            public readonly RuleBinding FactDecl = new RuleBinding("FactDecl");
-            public readonly RuleBinding AssertDecl = new RuleBinding("AssertDecl");
-            public readonly RuleBinding FunDecl = new RuleBinding("FunDecl");
-            public readonly RuleBinding FunctionName = new RuleBinding("FunctionName");
-            public readonly RuleBinding FunctionReturn = new RuleBinding("FunctionReturn");
-            public readonly RuleBinding FunctionParameters = new RuleBinding("FunctionParameters");
-            public readonly RuleBinding DeclList = new RuleBinding("DeclList");
-            public readonly RuleBinding CmdDecl = new RuleBinding("CmdDecl");
-            public readonly RuleBinding CmdScope = new RuleBinding("CmdScope");
-            public readonly RuleBinding CmdScopeFor = new RuleBinding("CmdScopeFor");
-            public readonly RuleBinding CmdScopeExpect = new RuleBinding("CmdScopeExpect");
-            public readonly RuleBinding TypescopeDeclList = new RuleBinding("TypescopeDeclList");
-            public readonly RuleBinding Typescope = new RuleBinding("Typescope");
-            public readonly RuleBinding SigDecl = new RuleBinding("SigDecl");
-            public readonly RuleBinding NameList = new RuleBinding("NameList");
-            public readonly RuleBinding NameDeclList = new RuleBinding("NameDeclList");
-            public readonly RuleBinding SigBody = new RuleBinding("SigBody");
-            public readonly RuleBinding EnumDecl = new RuleBinding("EnumDecl");
-            public readonly RuleBinding EnumBody = new RuleBinding("EnumBody");
-            public readonly RuleBinding SigQual = new RuleBinding("SigQual");
-            public readonly RuleBinding SigExt = new RuleBinding("SigExt");
-            public readonly RuleBinding Expr = new RuleBinding("Expr");
-            public readonly RuleBinding UnOpExpr1 = new RuleBinding("UnOpExpr1");
-            public readonly RuleBinding LetDecls = new RuleBinding("LetDecls");
-            public readonly RuleBinding QuantDecls = new RuleBinding("QuantDecls");
-            public readonly RuleBinding BinaryExpression = new RuleBinding("BinaryExpression");
-            public readonly RuleBinding UnaryExpression = new RuleBinding("UnaryExpression");
-            public readonly RuleBinding ElseClause = new RuleBinding("ElseClause");
-            public readonly RuleBinding BinOpExpr18 = new RuleBinding("BinOpExpr18");
-            public readonly RuleBinding CallArguments = new RuleBinding("CallArguments");
-            public readonly RuleBinding UnOpExpr19 = new RuleBinding("UnOpExpr19");
-            public readonly RuleBinding PrimaryExpr = new RuleBinding("PrimaryExpr");
-            public readonly RuleBinding Decl = new RuleBinding("Decl");
-            public readonly RuleBinding LetDecl = new RuleBinding("LetDecl");
-            public readonly RuleBinding Quant = new RuleBinding("Quant");
-            public readonly RuleBinding ArrowMultiplicity = new RuleBinding("ArrowMultiplicity");
-            public readonly RuleBinding Block = new RuleBinding("Block");
-            public readonly RuleBinding Name = new RuleBinding("Name");
-            public readonly RuleBinding Number = new RuleBinding("Number");
-            public readonly RuleBinding Ref = new RuleBinding("Ref");
+            public readonly RuleBinding CompilationUnit = new RuleBinding(RuleNames.CompilationUnit);
+            public readonly RuleBinding Specification = new RuleBinding(RuleNames.Specification);
+            public readonly RuleBinding Module = new RuleBinding(RuleNames.Module);
+            public readonly RuleBinding Open = new RuleBinding(RuleNames.Open);
+            public readonly RuleBinding Paragraph = new RuleBinding(RuleNames.Paragraph);
+            public readonly RuleBinding FactDecl = new RuleBinding(RuleNames.FactDecl);
+            public readonly RuleBinding AssertDecl = new RuleBinding(RuleNames.AssertDecl);
+            public readonly RuleBinding FunDecl = new RuleBinding(RuleNames.FunDecl);
+            public readonly RuleBinding FunctionName = new RuleBinding(RuleNames.FunctionName);
+            public readonly RuleBinding FunctionReturn = new RuleBinding(RuleNames.FunctionReturn);
+            public readonly RuleBinding FunctionParameters = new RuleBinding(RuleNames.FunctionParameters);
+            public readonly RuleBinding DeclList = new RuleBinding(RuleNames.DeclList);
+            public readonly RuleBinding CmdDecl = new RuleBinding(RuleNames.CmdDecl);
+            public readonly RuleBinding CmdScope = new RuleBinding(RuleNames.CmdScope);
+            public readonly RuleBinding CmdScopeFor = new RuleBinding(RuleNames.CmdScopeFor);
+            public readonly RuleBinding CmdScopeExpect = new RuleBinding(RuleNames.CmdScopeExpect);
+            public readonly RuleBinding TypescopeDeclList = new RuleBinding(RuleNames.TypescopeDeclList);
+            public readonly RuleBinding Typescope = new RuleBinding(RuleNames.Typescope);
+            public readonly RuleBinding SigDecl = new RuleBinding(RuleNames.SigDecl);
+            public readonly RuleBinding NameList = new RuleBinding(RuleNames.NameList);
+            public readonly RuleBinding NameDeclList = new RuleBinding(RuleNames.NameDeclList);
+            public readonly RuleBinding SigBody = new RuleBinding(RuleNames.SigBody);
+            public readonly RuleBinding EnumDecl = new RuleBinding(RuleNames.EnumDecl);
+            public readonly RuleBinding EnumBody = new RuleBinding(RuleNames.EnumBody);
+            public readonly RuleBinding SigQual = new RuleBinding(RuleNames.SigQual);
+            public readonly RuleBinding SigExt = new RuleBinding(RuleNames.SigExt);
+            public readonly RuleBinding Expr = new RuleBinding(RuleNames.Expr);
+            public readonly RuleBinding UnOpExpr1 = new RuleBinding(RuleNames.UnOpExpr1);
+            public readonly RuleBinding LetDecls = new RuleBinding(RuleNames.LetDecls);
+            public readonly RuleBinding QuantDecls = new RuleBinding(RuleNames.QuantDecls);
+            public readonly RuleBinding BinaryExpression = new RuleBinding(RuleNames.BinaryExpression);
+            public readonly RuleBinding UnaryExpression = new RuleBinding(RuleNames.UnaryExpression);
+            public readonly RuleBinding ElseClause = new RuleBinding(RuleNames.ElseClause);
+            public readonly RuleBinding BinOpExpr18 = new RuleBinding(RuleNames.BinOpExpr18);
+            public readonly RuleBinding CallArguments = new RuleBinding(RuleNames.CallArguments);
+            public readonly RuleBinding UnOpExpr19 = new RuleBinding(RuleNames.UnOpExpr19);
+            public readonly RuleBinding PrimaryExpr = new RuleBinding(RuleNames.PrimaryExpr);
+            public readonly RuleBinding Decl = new RuleBinding(RuleNames.Decl);
+            public readonly RuleBinding LetDecl = new RuleBinding(RuleNames.LetDecl);
+            public readonly RuleBinding Quant = new RuleBinding(RuleNames.Quant);
+            public readonly RuleBinding ArrowMultiplicity = new RuleBinding(RuleNames.ArrowMultiplicity);
+            public readonly RuleBinding Block = new RuleBinding(RuleNames.Block);
+            public readonly RuleBinding Name = new RuleBinding(RuleNames.Name);
+            public readonly RuleBinding Number = new RuleBinding(RuleNames.Number);
+            public readonly RuleBinding Ref = new RuleBinding(RuleNames.Ref);
         }
     }
 }

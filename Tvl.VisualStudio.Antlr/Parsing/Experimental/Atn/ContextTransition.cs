@@ -1,22 +1,40 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental.Atn
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
+    using System.Linq;
+    using Tvl.Extensions;
     using IntervalSet = Tvl.VisualStudio.Language.Parsing.Collections.IntervalSet;
 
     public abstract class ContextTransition : Transition
     {
-        private readonly int _contextIdentifier;
+        private readonly ReadOnlyCollection<int> _contextIdentifiers;
 
-        public ContextTransition(State targetState, int contextIdentifier)
+        public ContextTransition(State targetState, IEnumerable<int> contextIdentifiers)
             : base(targetState)
         {
-            _contextIdentifier = contextIdentifier;
+            Contract.Requires<ArgumentNullException>(contextIdentifiers != null, "contextIdentifiers");
+            Contract.Requires<ArgumentException>(contextIdentifiers.Any());
+
+            _contextIdentifiers = new ReadOnlyCollection<int>(contextIdentifiers.ToArray());
         }
 
-        public int ContextIdentifier
+        public ContextTransition(State targetState, params int[] contextIdentifiers)
+            : base(targetState)
+        {
+            Contract.Requires<ArgumentNullException>(contextIdentifiers != null, "contextIdentifiers");
+            Contract.Requires<ArgumentException>(contextIdentifiers.Length > 0);
+
+            _contextIdentifiers = new ReadOnlyCollection<int>(contextIdentifiers.CloneArray());
+        }
+
+        public ReadOnlyCollection<int> ContextIdentifiers
         {
             get
             {
-                return _contextIdentifier;
+                return new ReadOnlyCollection<int>(_contextIdentifiers);
             }
         }
 

@@ -98,8 +98,8 @@
 
             PushContextTransition push = new PushContextTransition(ruleBinding.StartState, startState.Id);
             PopContextTransition pop = new PopContextTransition(endState, startState.Id);
-            push.PopTransition = pop;
-            pop.PushTransition = push;
+            push.PopTransitions.Add(pop);
+            pop.PushTransitions.Add(push);
 
             startState.AddTransition(push);
             ruleBinding.EndState.AddTransition(pop);

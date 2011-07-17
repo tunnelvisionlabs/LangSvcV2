@@ -1,11 +1,13 @@
 ﻿namespace Tvl.VisualStudio.Language.Antlr3.Experimental
 {
+    using System;
     using System.Collections.Generic;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
     using ANTLRParser = global::Antlr3.Grammars.ANTLRParser;
 
     internal class AntlrAtnBuilder
     {
+        private static Network _network;
         private readonly RuleBindings _ruleEndpoints = new RuleBindings();
 
         private AntlrAtnBuilder()
@@ -22,6 +24,9 @@
 
         public static Network BuildNetwork()
         {
+            if (_network != null)
+                return _network;
+
             AntlrAtnBuilder builder = new AntlrAtnBuilder();
             var rules = builder.Rules;
 
@@ -147,7 +152,9 @@
             ruleBindings.Add(rules.RewriteTemplateArgs);
             ruleBindings.Add(rules.RewriteTemplateArg);
 
-            return new Network(ruleBindings);
+            throw new NotImplementedException();
+            _network = new Network(ruleBindings, null);
+            return _network;
         }
 
         private Nfa BuildGrammarRule()
