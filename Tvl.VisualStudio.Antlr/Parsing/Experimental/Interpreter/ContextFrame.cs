@@ -11,12 +11,18 @@
         public readonly ContextFrame Parent;
         public readonly NetworkInterpreter Interpreter;
 
+        private readonly int _hashCode;
+
         public ContextFrame(State state, int? context, ContextFrame parent, NetworkInterpreter interpreter)
         {
             State = state;
             Context = context;
             Parent = parent;
             Interpreter = interpreter;
+
+            int stateCode = (State != null) ? EqualityComparer<State>.Default.GetHashCode(State) : 0;
+            long parentCode = (Parent != null) ? Parent.GetHashCode() * 104729 : 0;
+            _hashCode = stateCode ^ (Context ?? 0) ^ parentCode.GetHashCode();
         }
 
         public Network Network
@@ -50,9 +56,7 @@
 
         public override int GetHashCode()
         {
-            int state = (State != null) ? EqualityComparer<State>.Default.GetHashCode(State) : 0;
-            long parent = (Parent != null) ? Parent.GetHashCode() * 104729 : 0;
-            return state ^ (Context ?? 0) ^ parent.GetHashCode();
+            return _hashCode;
         }
 
         public override string ToString()
