@@ -271,7 +271,7 @@
                 }
 
                 InterpretTrace step;
-                if (context.TryStepBackward(transition, symbol, symbolPosition, out step))
+                if (context.TryStepBackward(transition, preventContextType, symbol, symbolPosition, out step))
                 {
                     if (transition.IsMatch)
                     {

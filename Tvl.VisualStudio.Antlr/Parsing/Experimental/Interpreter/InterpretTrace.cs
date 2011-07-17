@@ -51,7 +51,7 @@
             }
         }
 
-        public bool TryStepBackward(Transition transition, int symbol, int symbolPosition, out InterpretTrace result)
+        public bool TryStepBackward(Transition transition, PreventContextType preventContextType, int symbol, int symbolPosition, out InterpretTrace result)
         {
             Contract.Requires<ArgumentNullException>(transition != null, "transition");
 
@@ -122,7 +122,7 @@
                 return true;
             }
 
-            if (!transition.SourceState.GetSourceSet().Contains(symbol))
+            if (!transition.SourceState.GetSourceSet(preventContextType).Contains(symbol))
                 return false;
 
             if (transition.IsContext)

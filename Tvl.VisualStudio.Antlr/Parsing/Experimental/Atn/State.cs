@@ -6,6 +6,7 @@
     using System.Linq;
     using IntervalSet = Tvl.VisualStudio.Language.Parsing.Collections.IntervalSet;
     using IList = System.Collections.IList;
+    using PreventContextType = Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter.PreventContextType;
 
     public class State
     {
@@ -15,8 +16,8 @@
         private readonly List<Transition> _incomingTransitions = new List<Transition>();
         private readonly int _id = _nextState++;
 
-        private IntervalSet _sourceSet;
-        private IntervalSet _followSet;
+        private IntervalSet[] _sourceSet;
+        private IntervalSet[] _followSet;
         private bool? _isForwardRecursive;
         private bool? _isBackwardRecursive;
         private bool _isOptimized;
@@ -386,12 +387,19 @@
 
         public IntervalSet GetSourceSet()
         {
-            if (_sourceSet != null)
-                return _sourceSet;
+            return GetSourceSet(PreventContextType.None);
+        }
 
+        public IntervalSet GetSourceSet(PreventContextType preventContextType)
+        {
+            if (_sourceSet != null && _sourceSet[(int)preventContextType] != null)
+                return _sourceSet[(int)preventContextType];
+
+            IntervalSet[] sets = _sourceSet ?? new IntervalSet[Enum.GetValues(typeof(PreventContextType)).Cast<int>().Max() + 1];
             IntervalSet set = new IntervalSet();
             HashSet<Transition> visited = new HashSet<Transition>();
             Queue<Transition> queue = new Queue<Transition>(_incomingTransitions);
+            PreventContextType nextPreventContextType = preventContextType;
 
             while (queue.Count > 0)
             {
@@ -399,10 +407,62 @@
                 if (!visited.Add(transition))
                     continue;
 
+                switch (nextPreventContextType)
+                {
+                case PreventContextType.Pop:
+                    if (transition is PopContextTransition)
+                        continue;
+
+                    break;
+
+                case PreventContextType.PopNonRecursive:
+                    if ((!transition.IsRecursive) && (transition is PopContextTransition))
+                        continue;
+
+                    break;
+
+                case PreventContextType.Push:
+                    if (transition is PushContextTransition)
+                        continue;
+
+                    break;
+
+                case PreventContextType.PushNonRecursive:
+                    if ((!transition.IsRecursive) && (transition is PushContextTransition))
+                        continue;
+
+                    break;
+
+                default:
+                    break;
+                }
+
                 if (transition.IsEpsilon || transition.IsContext)
                 {
-                    foreach (var incoming in transition.SourceState.IncomingTransitions)
-                        queue.Enqueue(incoming);
+                    if (transition.IsContext)
+                    {
+                        nextPreventContextType = PreventContextType.None;
+                        if (transition.TargetState.IsOptimized)
+                        {
+                            if (transition is PushContextTransition)
+                                nextPreventContextType = PreventContextType.Push;
+                            else if (transition is PopContextTransition)
+                                nextPreventContextType = PreventContextType.Pop;
+
+                            if (transition.IsRecursive)
+                                nextPreventContextType++; // only block non-recursive transitions
+                        }
+                    }
+
+                    if (transition.SourceState._sourceSet != null && transition.SourceState._sourceSet[(int)nextPreventContextType] != null)
+                    {
+                        set.UnionWith(transition.SourceState._sourceSet[(int)nextPreventContextType]);
+                    }
+                    else
+                    {
+                        foreach (var incoming in transition.SourceState.IncomingTransitions)
+                            queue.Enqueue(incoming);
+                    }
                 }
                 else
                 {
@@ -410,19 +470,27 @@
                 }
             }
 
-            _sourceSet = set;
+            _sourceSet = sets;
+            _sourceSet[(int)preventContextType] = set;
 
             return set;
         }
 
         public IntervalSet GetFollowSet()
         {
-            if (_followSet != null)
-                return _followSet;
+            return GetFollowSet(PreventContextType.None);
+        }
 
+        public IntervalSet GetFollowSet(PreventContextType preventContextType)
+        {
+            if (_followSet != null && _followSet[(int)preventContextType] != null)
+                return _followSet[(int)preventContextType];
+
+            IntervalSet[] sets = _followSet ?? new IntervalSet[Enum.GetValues(typeof(PreventContextType)).Cast<int>().Max() + 1];
             IntervalSet set = new IntervalSet();
             HashSet<Transition> visited = new HashSet<Transition>();
             Queue<Transition> queue = new Queue<Transition>(_outgoingTransitions);
+            PreventContextType nextPreventContextType = preventContextType;
 
             while (queue.Count > 0)
             {
@@ -430,10 +498,62 @@
                 if (!visited.Add(transition))
                     continue;
 
+                switch (nextPreventContextType)
+                {
+                case PreventContextType.Pop:
+                    if (transition is PopContextTransition)
+                        continue;
+
+                    break;
+
+                case PreventContextType.PopNonRecursive:
+                    if ((!transition.IsRecursive) && (transition is PopContextTransition))
+                        continue;
+
+                    break;
+
+                case PreventContextType.Push:
+                    if (transition is PushContextTransition)
+                        continue;
+
+                    break;
+
+                case PreventContextType.PushNonRecursive:
+                    if ((!transition.IsRecursive) && (transition is PushContextTransition))
+                        continue;
+
+                    break;
+
+                default:
+                    break;
+                }
+
                 if (transition.IsEpsilon || transition.IsContext)
                 {
-                    foreach (var outgoing in transition.TargetState.OutgoingTransitions)
-                        queue.Enqueue(outgoing);
+                    if (transition.IsContext)
+                    {
+                        nextPreventContextType = PreventContextType.None;
+                        if (transition.SourceState.IsOptimized)
+                        {
+                            if (transition is PushContextTransition)
+                                nextPreventContextType = PreventContextType.Push;
+                            else if (transition is PopContextTransition)
+                                nextPreventContextType = PreventContextType.Pop;
+
+                            if (transition.IsRecursive)
+                                nextPreventContextType++; // only block non-recursive transitions
+                        }
+                    }
+
+                    if (transition.TargetState._followSet != null && transition.TargetState._followSet[(int)nextPreventContextType] != null)
+                    {
+                        set.UnionWith(transition.TargetState._followSet[(int)nextPreventContextType]);
+                    }
+                    else
+                    {
+                        foreach (var outgoing in transition.TargetState.OutgoingTransitions)
+                            queue.Enqueue(outgoing);
+                    }
                 }
                 else
                 {
@@ -441,7 +561,8 @@
                 }
             }
 
-            _followSet = set;
+            _followSet = sets;
+            _followSet[(int)preventContextType] = set;
 
             return set;
         }
