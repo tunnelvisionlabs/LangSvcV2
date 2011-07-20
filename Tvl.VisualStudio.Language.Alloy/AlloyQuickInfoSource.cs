@@ -106,7 +106,7 @@
 
                 RuleBinding memberSelectRule = network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.BinOpExpr18);
 #if DEBUG
-                HashSet<Transition> memberSelectTransitions = new HashSet<Transition>(ReferenceEqualityComparer<Transition>.Default);
+                HashSet<Transition> memberSelectTransitions = new HashSet<Transition>(ObjectReferenceEqualityComparer<Transition>.Default);
                 GetReachableTransitions(memberSelectRule, memberSelectTransitions);
 #endif
 
@@ -115,6 +115,7 @@
                 //interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.UnaryExpression).StartState);
                 interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.LetDecl).StartState);
                 interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.NameList).StartState);
+                interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.NameListName).StartState);
                 interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Ref).StartState);
                 interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Module).StartState);
                 interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Open).StartState);
@@ -130,6 +131,7 @@
                 //interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.UnaryExpression));
                 interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.LetDecl));
                 interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.NameList));
+                interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.NameListName));
                 interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Ref));
                 interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Module));
                 interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Open));
@@ -198,6 +200,8 @@
                 //List<Expression> expressions = new List<Expression>();
                 //HashSet<string> finalResult = new HashSet<string>();
                 //SnapshotSpan? contextSpan = null;
+
+                bool foundInfo = false;
                 foreach (var span in spans)
                 {
                     if (!span.IsEmpty)
@@ -205,22 +209,14 @@
                         VirtualSnapshotSpan selection = new VirtualSnapshotSpan(new SnapshotSpan(currentSnapshot, span));
                         if (!selection.IsEmpty && selection.Contains(new VirtualSnapshotPoint(triggerPoint.Value)))
                         {
-                            applicableToSpan = selection.Snapshot.CreateTrackingSpan(selection.SnapshotSpan, SpanTrackingMode.EdgeExclusive);
-
                             try
                             {
                                 Expression currentExpression = Provider.IntellisenseCache.ParseExpression(selection);
-                                if (currentExpression != null)
+                                if (currentExpression != null && currentExpression.Span.HasValue && currentExpression.Span.Value.Contains(triggerPoint.Value))
                                 {
-                                    SnapshotSpan? span2 = currentExpression.Span;
-                                    if (span2.HasValue)
-                                        applicableToSpan = span2.Value.Snapshot.CreateTrackingSpan(span2.Value, SpanTrackingMode.EdgeExclusive);
-
+                                    applicableToSpan = currentExpression.Span.Value.Snapshot.CreateTrackingSpan(currentExpression.Span.Value, SpanTrackingMode.EdgeExclusive);
                                     quickInfoContent.Add(currentExpression.ToString());
-                                }
-                                else
-                                {
-                                    quickInfoContent.Add("Could not parse expression.");
+                                    foundInfo = true;
                                 }
                             }
                             catch (Exception ex)
@@ -251,6 +247,24 @@
                     //    finalResult.UnionWith(results);
                     //    applicableToSpan = currentSnapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
                     //}
+                }
+
+                if (!foundInfo && spans.Count > 0)
+                {
+                    foreach (var span in spans)
+                    {
+                        if (!span.IsEmpty)
+                        {
+                            VirtualSnapshotSpan selection = new VirtualSnapshotSpan(new SnapshotSpan(currentSnapshot, span));
+                            if (!selection.IsEmpty && selection.Contains(new VirtualSnapshotPoint(triggerPoint.Value)))
+                            {
+                                applicableToSpan = selection.Snapshot.CreateTrackingSpan(selection.SnapshotSpan, SpanTrackingMode.EdgeExclusive);
+                                break;
+                            }
+                        }
+                    }
+
+                    quickInfoContent.Add("Could not parse expression.");
                 }
 
                 //foreach (var result in finalResult)
