@@ -88,18 +88,17 @@
                     bool nested = false;
                     for (ContextFrame parent = StartContext.Parent; parent != null; parent = parent.Parent)
                     {
-                        if (parent.Context != null)
+                        Contract.Assert(parent.Context != null);
+
+                        RuleBinding contextRule = Network.ContextRules[parent.Context.Value];
+                        if (Interpreter.BoundaryRules.Contains(contextRule))
                         {
-                            RuleBinding contextRule = Network.ContextRules[parent.Context.Value];
-                            if (Interpreter.BoundaryRules.Contains(contextRule))
-                            {
+                            nested = true;
+                        }
+                        else
+                        {
+                            if (Interpreter.BoundaryStates.Contains(contextRule.StartState))
                                 nested = true;
-                            }
-                            else
-                            {
-                                if (Interpreter.BoundaryStates.Contains(contextRule.StartState))
-                                    nested = true;
-                            }
                         }
                     }
 
@@ -144,7 +143,7 @@
                 {
                     ContextFrame subContext = this.StartContext;
                     foreach (var label in popContextTransition.ContextIdentifiers.Reverse())
-                        subContext = new ContextFrame(popContextTransition.SourceState, label, subContext, Interpreter);
+                        subContext = new ContextFrame(popContextTransition.SourceState, null, new ContextFrame(subContext.State, label, subContext.Parent, Interpreter), Interpreter);
 
                     result = new InterpretTrace(subContext, this.EndContext, this.Transitions, boundedStart, this.BoundedEnd, boundedStart);
                     if (!boundedStart)
@@ -161,13 +160,15 @@
 
                     foreach (var label in pushContextTransition.ContextIdentifiers.Reverse())
                     {
-                        if (startContext.Context != null)
+                        if (startContext.Parent != null)
                         {
+                            Contract.Assert(startContext.Parent.Context.HasValue);
+
                             // if the start context has a state stack, pop an item off it
-                            if (startContext.Context != label)
+                            if (startContext.Parent.Context != label)
                                 return false;
 
-                            startContext = new ContextFrame(transition.SourceState, startContext.Parent.Context, startContext.Parent.Parent, Interpreter);
+                            startContext = new ContextFrame(transition.SourceState, null, startContext.Parent.Parent, Interpreter);
                         }
                         else
                         {
@@ -235,7 +236,7 @@
                 {
                     ContextFrame subContext = this.EndContext;
                     foreach (var label in pushContextTransition.ContextIdentifiers)
-                        subContext = new ContextFrame(pushContextTransition.TargetState, label, subContext, Interpreter);
+                        subContext = new ContextFrame(pushContextTransition.TargetState, null, new ContextFrame(subContext.State, label, subContext, Interpreter), Interpreter);
 
                     result = new InterpretTrace(this.StartContext, subContext, this.Transitions, this.BoundedStart, boundedEnd, boundedEnd);
                     if (!boundedEnd)
@@ -252,18 +253,20 @@
 
                     foreach (var label in popContextTransition.ContextIdentifiers)
                     {
-                        if (endContext.Context != null)
+                        if (endContext.Parent != null)
                         {
+                            Contract.Assert(endContext.Parent.Context.HasValue);
+
                             // if the end context has a state stack, pop an item off it
-                            if (endContext.Context != label)
+                            if (endContext.Parent.Context != label)
                                 return false;
 
-                            endContext = new ContextFrame(transition.TargetState, endContext.Parent.Context, endContext.Parent.Parent, Interpreter);
+                            endContext = new ContextFrame(transition.TargetState, null, endContext.Parent.Parent, Interpreter);
                         }
                         else
                         {
                             // else we add a "predicate" to the start context
-                            startContext = startContext.AddHeadContext(new ContextFrame(Network.States[label], label, null, Interpreter));
+                            startContext = startContext.AddHeadContext(new ContextFrame(null, label, null, Interpreter));
                             endContext = new ContextFrame(transition.TargetState, endContext.Context, endContext.Parent, Interpreter);
                         }
                     }

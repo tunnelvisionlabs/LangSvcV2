@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
+    using Contract = System.Diagnostics.Contracts.Contract;
 
     public class ContextFrame : IEquatable<ContextFrame>
     {
@@ -15,6 +16,8 @@
 
         public ContextFrame(State state, int? context, ContextFrame parent, NetworkInterpreter interpreter)
         {
+            Contract.Requires(parent == null || parent.Context.HasValue);
+
             State = state;
             Context = context;
             Parent = parent;
