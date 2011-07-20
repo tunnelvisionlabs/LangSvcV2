@@ -148,6 +148,9 @@
     <Compile Include="AlloyTextStructureNavigatorProvider.cs" />
     <Compile Include="Experimental\AlloyAtnBuilder.cs" />
     <Compile Include="Experimental\AlloySimplifiedAtnBuilder.cs" />
+    <Compile Include="Experimental\AlloySymbolTagger.cs" />
+    <Compile Include="Experimental\AlloySymbolTaggerClassificationTypeNames.cs" />
+    <Compile Include="Experimental\AlloySymbolTaggerProvider.cs" />
     <Compile Include="IntellisenseModel\AlloyFile.cs" />
     <Compile Include="IntellisenseModel\Assertion.cs" />
     <Compile Include="IntellisenseModel\BinaryExpression.cs" />
