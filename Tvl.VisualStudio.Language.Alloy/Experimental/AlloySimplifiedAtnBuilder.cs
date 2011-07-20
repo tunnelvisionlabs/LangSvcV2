@@ -49,6 +49,7 @@
             Nfa.BindRule(rules.Typescope, builder.BuildTypescopeRule());
             Nfa.BindRule(rules.SigDecl, builder.BuildSigDeclRule());
             Nfa.BindRule(rules.NameList, builder.BuildNameListRule());
+            Nfa.BindRule(rules.NameListName, builder.BuildNameListNameRule());
             Nfa.BindRule(rules.NameDeclList, builder.BuildNameDeclListRule());
             Nfa.BindRule(rules.SigBody, builder.BuildSigBodyRule());
             Nfa.BindRule(rules.EnumDecl, builder.BuildEnumDeclRule());
@@ -98,6 +99,7 @@
                     rules.Typescope,
                     rules.SigDecl,
                     rules.NameList,
+                    rules.NameListName,
                     rules.NameDeclList,
                     rules.SigBody,
                     rules.EnumDecl,
@@ -1081,15 +1083,20 @@
         private Nfa BuildNameListRule()
         {
             return Nfa.Sequence(
-                Nfa.Rule(Rules.Name),
+                Nfa.Rule(Rules.NameListName),
                 Nfa.Optional(
                     Nfa.Sequence(
                         Nfa.Match(AlloyLexer.COMMA),
-                        Nfa.Rule(Rules.Name),
+                        Nfa.Rule(Rules.NameListName),
                         Nfa.Closure(
                             Nfa.Sequence(
                                 Nfa.Match(AlloyLexer.COMMA),
-                                Nfa.Rule(Rules.Name))))));
+                                Nfa.Rule(Rules.NameListName))))));
+        }
+
+        private Nfa BuildNameListNameRule()
+        {
+            return Nfa.Rule(Rules.Name);
         }
 
         private Nfa BuildNameDeclListRule()
@@ -1271,22 +1278,13 @@
                             Nfa.Rule(Rules.UnOpExpr19)),
                         Nfa.Sequence(
                             Nfa.Match(AlloyLexer.LBRACK),
-#if true
                             Nfa.Rule(Rules.CallArguments),
-#else
-                            Nfa.Optional(
-                                Nfa.Sequence(
-                                    Nfa.Rule(Rules.Expr),
-                                    Nfa.Closure(
-                                        Nfa.Sequence(
-                                            Nfa.Match(AlloyLexer.COMMA),
-                                            Nfa.Rule(Rules.Expr))))),
-#endif
                             Nfa.Match(AlloyLexer.RBRACK)))));
         }
 
         private Nfa BuildCallArguments()
         {
+#if false
             return Nfa.Closure(
                 Nfa.Choice(
                     Nfa.Sequence(
@@ -1294,6 +1292,15 @@
                         Nfa.Rule(Rules.CallArguments),
                         Nfa.Match(AlloyLexer.RBRACK)),
                     Nfa.MatchComplement(Interval.FromBounds(AlloyLexer.LBRACK, AlloyLexer.LBRACK), Interval.FromBounds(AlloyLexer.RBRACK, AlloyLexer.RBRACK))));
+#else
+            return Nfa.Optional(
+                Nfa.Sequence(
+                    Nfa.Rule(Rules.Expr),
+                    Nfa.Closure(
+                        Nfa.Sequence(
+                            Nfa.Match(AlloyLexer.COMMA),
+                            Nfa.Rule(Rules.Expr)))));
+#endif
         }
 
         private Nfa BuildUnOpExpr19Rule()
@@ -1401,6 +1408,7 @@
             public static readonly string Typescope = "Typescope";
             public static readonly string SigDecl = "SigDecl";
             public static readonly string NameList = "NameList";
+            public static readonly string NameListName = "NameListName";
             public static readonly string NameDeclList = "NameDeclList";
             public static readonly string SigBody = "SigBody";
             public static readonly string EnumDecl = "EnumDecl";
@@ -1450,6 +1458,7 @@
             public readonly RuleBinding Typescope = new RuleBinding(RuleNames.Typescope);
             public readonly RuleBinding SigDecl = new RuleBinding(RuleNames.SigDecl);
             public readonly RuleBinding NameList = new RuleBinding(RuleNames.NameList);
+            public readonly RuleBinding NameListName = new RuleBinding(RuleNames.NameListName);
             public readonly RuleBinding NameDeclList = new RuleBinding(RuleNames.NameDeclList);
             public readonly RuleBinding SigBody = new RuleBinding(RuleNames.SigBody);
             public readonly RuleBinding EnumDecl = new RuleBinding(RuleNames.EnumDecl);
