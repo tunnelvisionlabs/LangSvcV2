@@ -27,8 +27,8 @@
             //    stateRules[rule.EndState.Id] = rule.Name;
             //}
 
-            HashSet<State> states = new HashSet<State>();
-            HashSet<Transition> transitions = new HashSet<Transition>();
+            HashSet<State> states = new HashSet<State>(ObjectReferenceEqualityComparer<State>.Default);
+            HashSet<Transition> transitions = new HashSet<Transition>(ObjectReferenceEqualityComparer<Transition>.Default);
             Dictionary<int, RuleBinding> contextRules = new Dictionary<int, RuleBinding>();
 
             foreach (var rule in _rules)
@@ -63,9 +63,12 @@
 
                             foreach (var popTransition in pushContext.PopTransitions)
                             {
-                                // make sure this pop transition ends in this rule
-                                if (popTransition.ContextIdentifiers.Last() != pushContext.ContextIdentifiers.First())
-                                    throw new InvalidOperationException();
+                                // the matching pop transitions should always end in this rule
+                                Contract.Assert(popTransition.ContextIdentifiers.Last() == pushContext.ContextIdentifiers.First());
+                                // matching is symmetric
+                                Contract.Assert(popTransition.PushTransitions.Contains(pushContext));
+                                // make sure there are no "matching" transitions which were removed by a call to State.RemoveTransition
+                                Contract.Assert(popTransition.SourceState != null);
 
                                 ExtractStatesAndTransitions(currentRule, popTransition.TargetState, states, transitions, stateRules, contextRules);
                             }

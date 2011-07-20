@@ -173,6 +173,7 @@
     <Compile Include="Parsing\Experimental\Atn\EpsilonTransition.cs" />
     <Compile Include="Parsing\Experimental\Atn\MatchRangeTransition.cs" />
     <Compile Include="Parsing\Experimental\Atn\Network.cs" />
+    <Compile Include="Parsing\Experimental\Interpreter\BoundedStartInterpretTraceEqualityComparer.cs" />
     <Compile Include="Parsing\Experimental\Interpreter\ContextFrame.cs" />
     <Compile Include="Parsing\Experimental\Interpreter\DeterministicState.cs" />
     <Compile Include="Parsing\Experimental\Interpreter\DeterministicTrace.cs" />

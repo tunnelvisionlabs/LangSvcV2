@@ -5,7 +5,6 @@
     using System.Diagnostics.Contracts;
     using System.Linq;
     using IntervalSet = Tvl.VisualStudio.Language.Parsing.Collections.IntervalSet;
-    using IList = System.Collections.IList;
     using PreventContextType = Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter.PreventContextType;
 
     public class State
@@ -14,7 +13,7 @@
 
         private readonly List<Transition> _outgoingTransitions = new List<Transition>();
         private readonly List<Transition> _incomingTransitions = new List<Transition>();
-        private readonly int _id = _nextState++;
+        private int _id = _nextState++;
 
         private IntervalSet[] _sourceSet;
         private IntervalSet[] _followSet;
@@ -27,6 +26,11 @@
             get
             {
                 return _id;
+            }
+
+            set
+            {
+                _id = value;
             }
         }
 
@@ -97,7 +101,7 @@
                 {
                     _isForwardRecursive = false;
 
-                    HashSet<Transition> visited = new HashSet<Transition>();
+                    HashSet<Transition> visited = new HashSet<Transition>(ObjectReferenceEqualityComparer<Transition>.Default);
                     Queue<Transition> queue = new Queue<Transition>(_outgoingTransitions);
 
                     while (queue.Count > 0)
@@ -126,13 +130,11 @@
 
         public void Optimize()
         {
-            OptimizeIncomingTransitions();
+            if (IsOptimized)
+                return;
+
             OptimizeOutgoingTransitions();
             _isOptimized = true;
-        }
-
-        private void OptimizeIncomingTransitions()
-        {
         }
 
         private void OptimizeOutgoingTransitions()
@@ -146,20 +148,26 @@
 
             foreach (var transition in oldTransitions)
             {
-                HashSet<State> visited = new HashSet<State>();
+                HashSet<State> visited = new HashSet<State>(ObjectReferenceEqualityComparer<State>.Default);
                 visited.Add(this);
 
-                AddOptimizedTransitions(visited, transition);
+                AddOptimizedTransitions(visited, transition, PreventContextType.None);
             }
+
+            Contract.Assert(oldTransitions.Count == 0 || OutgoingTransitions.Count > 0);
         }
 
-        private void AddOptimizedTransitions(HashSet<State> visited, Transition transition)
+        private void AddOptimizedTransitions(HashSet<State> visited, Transition transition, PreventContextType preventContextType)
         {
+            Contract.Requires(visited != null);
+            Contract.Requires(transition != null);
+            Contract.Requires(transition.SourceState == null);
+
             try
             {
-                if (transition.IsMatch || !visited.Add(transition.TargetState))
+                if (transition.IsMatch || transition.TargetState.OutgoingTransitions.Count == 0 || !visited.Add(transition.TargetState))
                 {
-                    if (!transition.IsMatch)
+                    if (!transition.IsMatch && transition.TargetState.OutgoingTransitions.Count > 0)
                     {
                         // must be here because it's a recursive state
                         transition.IsRecursive = true;
@@ -169,32 +177,71 @@
                     return;
                 }
 
-                if (transition.IsEpsilon)
+                bool added = false;
+
+                foreach (var nextTransition in transition.TargetState.OutgoingTransitions.ToArray())
                 {
-                    foreach (var nextTransition in transition.TargetState.OutgoingTransitions)
+                    bool preventMerge = false;
+
+                    switch (preventContextType)
                     {
-                        AddOptimizedTransitions(visited, MergeTransitions(transition, nextTransition));
+                    case PreventContextType.Pop:
+                        if (transition is PopContextTransition)
+                            preventMerge = true;
+
+                        break;
+
+                    case PreventContextType.PopNonRecursive:
+                        if ((!transition.IsRecursive) && (transition is PopContextTransition))
+                            preventMerge = true;
+
+                        break;
+
+                    case PreventContextType.Push:
+                        if (transition is PushContextTransition)
+                            preventMerge = true;
+
+                        break;
+
+                    case PreventContextType.PushNonRecursive:
+                        if ((!transition.IsRecursive) && (transition is PushContextTransition))
+                            preventMerge = true;
+
+                        break;
+
+                    default:
+                        break;
                     }
 
-                    return;
-                }
-
-                if (transition.IsContext)
-                {
-                    bool added = false;
-
-                    foreach (var nextTransition in transition.TargetState.OutgoingTransitions)
+                    if (transition.IsEpsilon)
                     {
-                        bool canMerge = !nextTransition.IsMatch;
+                        Contract.Assert(!preventMerge);
+                        AddOptimizedTransitions(visited, MergeTransitions(transition, nextTransition), preventContextType);
+                    }
+                    else if (transition.IsContext)
+                    {
+                        PreventContextType nextPreventContextType = PreventContextType.None;
+                        if (!preventMerge && transition.TargetState.IsOptimized)
+                        {
+                            if (nextTransition is PushContextTransition)
+                                nextPreventContextType = PreventContextType.Push;
+                            else if (nextTransition is PopContextTransition)
+                                nextPreventContextType = PreventContextType.Pop;
 
-                        if (nextTransition.IsContext)
+                            if (nextTransition.IsRecursive)
+                                nextPreventContextType++; // only block non-recursive transitions
+                        }
+
+                        bool canMerge = !preventMerge && !nextTransition.IsMatch;
+
+                        if (canMerge && nextTransition.IsContext)
                         {
                             canMerge = nextTransition.GetType() == transition.GetType();
                         }
 
                         if (canMerge)
                         {
-                            AddOptimizedTransitions(visited, MergeTransitions(transition, nextTransition));
+                            AddOptimizedTransitions(visited, MergeTransitions(transition, nextTransition), nextPreventContextType);
                         }
                         else if (!added)
                         {
@@ -202,22 +249,20 @@
                             added = true;
                         }
                     }
-
-                    return;
                 }
             }
             finally
             {
                 visited.Remove(transition.TargetState);
             }
-
-            throw new NotImplementedException();
         }
 
         private Transition MergeTransitions(Transition first, Transition second)
         {
-            Contract.Requires<ArgumentNullException>(first != null, "first");
-            Contract.Requires<ArgumentNullException>(second != null, "second");
+            Contract.Requires(first != null);
+            Contract.Requires(second != null);
+
+            Contract.Ensures(Contract.Result<Transition>().SourceState == null);
 
             if (first.IsMatch)
                 throw new InvalidOperationException();
@@ -236,6 +281,7 @@
                 {
                     var transition = new PopContextTransition(second.TargetState, popContextTransition.ContextIdentifiers);
                     transition.PushTransitions.UnionWith(popContextTransition.PushTransitions);
+                    Contract.Assert(Contract.ForAll(transition.PushTransitions, i => i.SourceState != null));
                     return transition;
                 }
 
@@ -244,6 +290,7 @@
                 {
                     var transition = new PushContextTransition(second.TargetState, pushContextTransition.ContextIdentifiers);
                     transition.PopTransitions.UnionWith(pushContextTransition.PopTransitions);
+                    Contract.Assert(Contract.ForAll(transition.PopTransitions, i => i.SourceState != null));
                     return transition;
                 }
 
@@ -257,6 +304,7 @@
                 {
                     var transition = new PopContextTransition(second.TargetState, popFirst.ContextIdentifiers);
                     transition.PushTransitions.UnionWith(popFirst.PushTransitions);
+                    Contract.Assert(Contract.ForAll(transition.PushTransitions, i => i.SourceState != null));
                     return transition;
                 }
 
@@ -266,6 +314,7 @@
                     var transition = new PopContextTransition(popSecond.TargetState, popFirst.ContextIdentifiers.Concat(popSecond.ContextIdentifiers));
                     //transition.PushTransitions.UnionWith(popFirst.PushTransitions);
                     transition.PushTransitions.UnionWith(popSecond.PushTransitions);
+                    Contract.Assert(Contract.ForAll(transition.PushTransitions, i => i.SourceState != null));
                     return transition;
                 }
 
@@ -285,6 +334,7 @@
                 {
                     var transition = new PushContextTransition(second.TargetState, pushFirst.ContextIdentifiers);
                     transition.PopTransitions.UnionWith(pushFirst.PopTransitions);
+                    Contract.Assert(Contract.ForAll(transition.PopTransitions, i => i.SourceState != null));
                     return transition;
                 }
 
@@ -294,6 +344,7 @@
                     var transition = new PushContextTransition(pushSecond.TargetState, pushFirst.ContextIdentifiers.Concat(pushSecond.ContextIdentifiers));
                     transition.PopTransitions.UnionWith(pushFirst.PopTransitions);
                     //transition.PopTransitions.UnionWith(pushSecond.PopTransitions);
+                    Contract.Assert(Contract.ForAll(transition.PopTransitions, i => i.SourceState != null));
                     return transition;
                 }
 
@@ -326,21 +377,23 @@
             {
                 foreach (var pushTransition in popContextTransition.PushTransitions)
                 {
-                    if (pushTransition.ContextIdentifiers.First() != popContextTransition.ContextIdentifiers.Last())
-                        throw new InvalidOperationException();
-
+                    Contract.Assert(pushTransition.ContextIdentifiers.First() == popContextTransition.ContextIdentifiers.Last());
+                    Contract.Assert(pushTransition.SourceState != null);
                     pushTransition.PopTransitions.Add(popContextTransition);
                 }
+
+                Contract.Assert(Contract.ForAll(OutgoingTransitions.OfType<PushContextTransition>(), i => i.ContextIdentifiers.Last() != popContextTransition.ContextIdentifiers.First() || popContextTransition.PushTransitions.Contains(i)));
             }
             else if (pushContextTransition != null)
             {
                 foreach (var popTransition in pushContextTransition.PopTransitions)
                 {
-                    if (popTransition.ContextIdentifiers.Last() != pushContextTransition.ContextIdentifiers.First())
-                        throw new InvalidOperationException();
-
+                    Contract.Assert(popTransition.ContextIdentifiers.Last() == pushContextTransition.ContextIdentifiers.First());
+                    Contract.Assert(popTransition.SourceState != null);
                     popTransition.PushTransitions.Add(pushContextTransition);
                 }
+
+                Contract.Assert(Contract.ForAll(OutgoingTransitions.OfType<PopContextTransition>(), i => i.ContextIdentifiers.Last() != pushContextTransition.ContextIdentifiers.First() || pushContextTransition.PopTransitions.Contains(i)));
             }
 
             _followSet = null;
@@ -365,14 +418,20 @@
             if (popContextTransition != null)
             {
                 foreach (var pushTransition in popContextTransition.PushTransitions)
+                {
+                    Contract.Assert(pushTransition.PopTransitions.Contains(transition));
                     pushTransition.PopTransitions.Remove(popContextTransition);
+                }
             }
 
             PushContextTransition pushContextTransition = transition as PushContextTransition;
             if (pushContextTransition != null)
             {
                 foreach (var popTransition in pushContextTransition.PopTransitions)
+                {
+                    Contract.Assert(popTransition.PushTransitions.Contains(transition));
                     popTransition.PushTransitions.Remove(pushContextTransition);
+                }
             }
 
             OutgoingTransitions.Remove(transition);
@@ -397,44 +456,48 @@
 
             IntervalSet[] sets = _sourceSet ?? new IntervalSet[Enum.GetValues(typeof(PreventContextType)).Cast<int>().Max() + 1];
             IntervalSet set = new IntervalSet();
-            HashSet<Transition> visited = new HashSet<Transition>();
-            Queue<Transition> queue = new Queue<Transition>(_incomingTransitions);
-            PreventContextType nextPreventContextType = preventContextType;
+            HashSet<Transition> visited = new HashSet<Transition>(ObjectReferenceEqualityComparer<Transition>.Default);
+            var queue = new Queue<Tuple<Transition, PreventContextType>>(_incomingTransitions.Select(i => Tuple.Create(i, preventContextType)));
 
             while (queue.Count > 0)
             {
-                Transition transition = queue.Dequeue();
+                var pair = queue.Dequeue();
+                Transition transition = pair.Item1;
+                PreventContextType nextPreventContextType = pair.Item2;
                 if (!visited.Add(transition))
                     continue;
 
-                switch (nextPreventContextType)
+                if (transition.SourceState.IsOptimized)
                 {
-                case PreventContextType.Pop:
-                    if (transition is PopContextTransition)
-                        continue;
+                    switch (nextPreventContextType)
+                    {
+                    case PreventContextType.Pop:
+                        if (transition is PopContextTransition)
+                            continue;
 
-                    break;
+                        break;
 
-                case PreventContextType.PopNonRecursive:
-                    if ((!transition.IsRecursive) && (transition is PopContextTransition))
-                        continue;
+                    case PreventContextType.PopNonRecursive:
+                        if ((!transition.IsRecursive) && (transition is PopContextTransition))
+                            continue;
 
-                    break;
+                        break;
 
-                case PreventContextType.Push:
-                    if (transition is PushContextTransition)
-                        continue;
+                    case PreventContextType.Push:
+                        if (transition is PushContextTransition)
+                            continue;
 
-                    break;
+                        break;
 
-                case PreventContextType.PushNonRecursive:
-                    if ((!transition.IsRecursive) && (transition is PushContextTransition))
-                        continue;
+                    case PreventContextType.PushNonRecursive:
+                        if ((!transition.IsRecursive) && (transition is PushContextTransition))
+                            continue;
 
-                    break;
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
+                    }
                 }
 
                 if (transition.IsEpsilon || transition.IsContext)
@@ -442,16 +505,13 @@
                     if (transition.IsContext)
                     {
                         nextPreventContextType = PreventContextType.None;
-                        if (transition.TargetState.IsOptimized)
-                        {
-                            if (transition is PushContextTransition)
-                                nextPreventContextType = PreventContextType.Push;
-                            else if (transition is PopContextTransition)
-                                nextPreventContextType = PreventContextType.Pop;
+                        if (transition is PushContextTransition)
+                            nextPreventContextType = PreventContextType.Push;
+                        else if (transition is PopContextTransition)
+                            nextPreventContextType = PreventContextType.Pop;
 
-                            if (transition.IsRecursive)
-                                nextPreventContextType++; // only block non-recursive transitions
-                        }
+                        if (transition.IsRecursive)
+                            nextPreventContextType++; // only block non-recursive transitions
                     }
 
                     if (transition.SourceState._sourceSet != null && transition.SourceState._sourceSet[(int)nextPreventContextType] != null)
@@ -461,7 +521,7 @@
                     else
                     {
                         foreach (var incoming in transition.SourceState.IncomingTransitions)
-                            queue.Enqueue(incoming);
+                            queue.Enqueue(Tuple.Create(incoming, nextPreventContextType));
                     }
                 }
                 else
@@ -488,7 +548,7 @@
 
             IntervalSet[] sets = _followSet ?? new IntervalSet[Enum.GetValues(typeof(PreventContextType)).Cast<int>().Max() + 1];
             IntervalSet set = new IntervalSet();
-            HashSet<Transition> visited = new HashSet<Transition>();
+            HashSet<Transition> visited = new HashSet<Transition>(ObjectReferenceEqualityComparer<Transition>.Default);
             Queue<Transition> queue = new Queue<Transition>(_outgoingTransitions);
             PreventContextType nextPreventContextType = preventContextType;
 
@@ -565,6 +625,11 @@
             _followSet[(int)preventContextType] = set;
 
             return set;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("State {0}{1} {2}/{3}", Id, IsOptimized ? "!" : string.Empty, IncomingTransitions.Count, OutgoingTransitions.Count);
         }
     }
 }

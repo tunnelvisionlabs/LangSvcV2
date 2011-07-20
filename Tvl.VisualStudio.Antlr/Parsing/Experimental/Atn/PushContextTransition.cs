@@ -23,5 +23,24 @@
                 return _popTransitions;
             }
         }
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj as PushContextTransition);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            string source = SourceState != null ? SourceState.Id.ToString() + (SourceState.IsOptimized ? "!" : string.Empty) : "?";
+            string target = TargetState != null ? TargetState.Id.ToString() + (TargetState.IsOptimized ? "!" : string.Empty) : "?";
+            string context = string.Join(" ", ContextIdentifiers);
+
+            return string.Format("{0} -> push {1} -> {2}", source, context, target);
+        }
     }
 }

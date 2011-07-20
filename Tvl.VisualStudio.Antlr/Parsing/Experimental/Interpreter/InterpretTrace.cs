@@ -51,12 +51,12 @@
             }
         }
 
-        public bool TryStepBackward(Transition transition, PreventContextType preventContextType, int symbol, int symbolPosition, out InterpretTrace result)
+        public bool TryStepBackward(Transition transition, int symbol, int symbolPosition, out InterpretTrace result)
         {
             Contract.Requires<ArgumentNullException>(transition != null, "transition");
 
-            Contract.Assert(Network.States.ContainsKey(transition.SourceState.Id));
-            Contract.Assert(Network.States.ContainsKey(transition.TargetState.Id));
+            Contract.Assert(Network.States.ContainsKey(transition.SourceState.Id), "Attempted to step outside the network.");
+            //Contract.Assert(Network.States.ContainsKey(transition.TargetState.Id));
 
             bool boundedStart = BoundedStart;
             if (!boundedStart && Transitions.Count > 0)
@@ -120,6 +120,18 @@
                     result.Transitions.AddFirst(new InterpretTraceTransition(transition, symbol, symbolPosition, Interpreter));
 
                 return true;
+            }
+
+            PreventContextType preventContextType = PreventContextType.None;
+            if (transition.IsContext)
+            {
+                if (transition is PushContextTransition)
+                    preventContextType = PreventContextType.Push;
+                else if (transition is PopContextTransition)
+                    preventContextType = PreventContextType.Pop;
+
+                if (transition.IsRecursive)
+                    preventContextType++; // only block non-recursive transitions
             }
 
             if (!transition.SourceState.GetSourceSet(preventContextType).Contains(symbol))

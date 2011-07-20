@@ -1,6 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental.Atn
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using IntervalSet = Tvl.VisualStudio.Language.Parsing.Collections.IntervalSet;
 
@@ -69,6 +70,24 @@
         public abstract IntervalSet MatchSet
         {
             get;
+        }
+
+        public override bool Equals(object obj)
+        {
+            Transition other = obj as Transition;
+            if (other == null)
+                return false;
+
+            return EqualityComparer<State>.Default.Equals(SourceState, other.SourceState)
+                && EqualityComparer<State>.Default.Equals(TargetState, other.TargetState)
+                && IsRecursive == other.IsRecursive;
+        }
+
+        public override int GetHashCode()
+        {
+            int source = _sourceState != null ? _sourceState.GetHashCode() : 0;
+            int target = _targetState != null ? _targetState.GetHashCode() : 0;
+            return source ^ target ^ (_isRecursive ? 1 : 0);
         }
     }
 }

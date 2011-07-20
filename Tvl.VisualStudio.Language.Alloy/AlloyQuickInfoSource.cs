@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr.Runtime;
     using Microsoft.VisualStudio;
@@ -27,10 +28,8 @@
 
         public AlloyQuickInfoSource(ITextBuffer textBuffer, AlloyQuickInfoSourceProvider provider)
         {
-            if (textBuffer == null)
-                throw new ArgumentNullException("textBuffer");
-            if (provider == null)
-                throw new ArgumentNullException("provider");
+            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Contract.Requires<ArgumentNullException>(provider != null, "provider");
 
             _textBuffer = textBuffer;
             _provider = provider;
@@ -96,6 +95,7 @@
                 case AlloyLexer.KW_IDEN:
                 case AlloyLexer.KW_INT2:
                 case AlloyLexer.KW_SEQINT:
+                case AlloyLexer.INTEGER:
                     break;
 
                 default:
@@ -105,8 +105,10 @@
                 Network network = AlloySimplifiedAtnBuilder.BuildNetwork();
 
                 RuleBinding memberSelectRule = network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.BinOpExpr18);
-                HashSet<Transition> memberSelectTransitions = new HashSet<Transition>();
+#if DEBUG
+                HashSet<Transition> memberSelectTransitions = new HashSet<Transition>(ReferenceEqualityComparer<Transition>.Default);
                 GetReachableTransitions(memberSelectRule, memberSelectTransitions);
+#endif
 
                 NetworkInterpreter interpreter = new NetworkInterpreter(network, tokens);
                 interpreter.BoundaryStates.Add(memberSelectRule.StartState);
@@ -156,19 +158,26 @@
                     }
                 }
 
+                HashSet<InterpretTrace> contexts = new HashSet<InterpretTrace>(BoundedStartInterpretTraceEqualityComparer.Default);
+                if (interpreter.Contexts.Count > 0)
+                {
+                    contexts.UnionWith(interpreter.Contexts);
+                }
+                else
+                {
+                    contexts.UnionWith(interpreter.BoundedStartContexts);
+                }
+
                 IOutputWindowPane pane = Provider.OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
                 if (pane != null)
                 {
-                    pane.WriteLine(string.Format("Located {0} QuickInfo expression(s) in {1}ms.", interpreter.Contexts.Count, stopwatch.ElapsedMilliseconds));
+                    pane.WriteLine(string.Format("Located {0} QuickInfo expression(s) in {1}ms.", contexts.Count, stopwatch.ElapsedMilliseconds));
                 }
 
-                HashSet<string> finalResult = new HashSet<string>();
-                SnapshotSpan? contextSpan = null;
-                foreach (var context in interpreter.Contexts)
+                HashSet<Span> spans = new HashSet<Span>();
+                foreach (var context in contexts)
                 {
                     Span? span = null;
-                    //List<string> results = AnalyzeInterpreterTrace(context, memberSelectRule, out span);
-
                     foreach (var transition in context.Transitions)
                     {
                         if (!transition.Transition.IsMatch)
@@ -182,8 +191,60 @@
                             span = Span.FromBounds(Math.Min(span.Value.Start, tokenSpan.Start), Math.Max(span.Value.End, tokenSpan.End));
                     }
 
-                    if (span.HasValue && !span.Value.IsEmpty)
-                        contextSpan = new SnapshotSpan(currentSnapshot, span.Value);
+                    if (span.HasValue)
+                        spans.Add(span.Value);
+                }
+
+                //List<Expression> expressions = new List<Expression>();
+                //HashSet<string> finalResult = new HashSet<string>();
+                //SnapshotSpan? contextSpan = null;
+                foreach (var span in spans)
+                {
+                    if (!span.IsEmpty)
+                    {
+                        VirtualSnapshotSpan selection = new VirtualSnapshotSpan(new SnapshotSpan(currentSnapshot, span));
+                        if (!selection.IsEmpty && selection.Contains(new VirtualSnapshotPoint(triggerPoint.Value)))
+                        {
+                            applicableToSpan = selection.Snapshot.CreateTrackingSpan(selection.SnapshotSpan, SpanTrackingMode.EdgeExclusive);
+
+                            try
+                            {
+                                Expression currentExpression = Provider.IntellisenseCache.ParseExpression(selection);
+                                if (currentExpression != null)
+                                {
+                                    SnapshotSpan? span2 = currentExpression.Span;
+                                    if (span2.HasValue)
+                                        applicableToSpan = span2.Value.Snapshot.CreateTrackingSpan(span2.Value, SpanTrackingMode.EdgeExclusive);
+
+                                    quickInfoContent.Add(currentExpression.ToString());
+                                }
+                                else
+                                {
+                                    quickInfoContent.Add("Could not parse expression.");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                if (ErrorHandler.IsCriticalException(ex))
+                                    throw;
+
+                                quickInfoContent.Add(ex.Message);
+                            }
+                        }
+
+                        //try
+                        //{
+                        //    SnapshotSpan contextSpan = new SnapshotSpan(currentSnapshot, span.Value);
+                        //    Expression expression = Provider.IntellisenseCache.ParseExpression(contextSpan);
+                        //    if (expression != null)
+                        //        expressions.Add(expression);
+                        //}
+                        //catch (Exception e)
+                        //{
+                        //    if (ErrorHandler.IsCriticalException(e))
+                        //        throw;
+                        //}
+                    }
 
                     //if (results.Count > 0)
                     //{
@@ -192,10 +253,10 @@
                     //}
                 }
 
-                foreach (var result in finalResult)
-                {
-                    quickInfoContent.Add(result);
-                }
+                //foreach (var result in finalResult)
+                //{
+                //    quickInfoContent.Add(result);
+                //}
 
                 #endregion
 
@@ -208,41 +269,42 @@
                         selection = new VirtualSnapshotSpan(expressionSpan.Value);
                 }
 #endif
-                VirtualSnapshotSpan selection = new VirtualSnapshotSpan();
-                if (contextSpan.HasValue)
-                    selection = new VirtualSnapshotSpan(contextSpan.Value);
+                //VirtualSnapshotSpan selection = new VirtualSnapshotSpan();
+                //if (contextSpan.HasValue)
+                //    selection = new VirtualSnapshotSpan(contextSpan.Value);
 
-                if (!selection.IsEmpty && selection.Contains(new VirtualSnapshotPoint(triggerPoint.Value)))
-                {
-                    applicableToSpan = selection.Snapshot.CreateTrackingSpan(selection.SnapshotSpan, SpanTrackingMode.EdgeExclusive);
+                //if (!selection.IsEmpty && selection.Contains(new VirtualSnapshotPoint(triggerPoint.Value)))
+                //{
+                //    applicableToSpan = selection.Snapshot.CreateTrackingSpan(selection.SnapshotSpan, SpanTrackingMode.EdgeExclusive);
 
-                    try
-                    {
-                        Expression currentExpression = Provider.IntellisenseCache.ParseExpression(selection);
-                        if (currentExpression != null)
-                        {
-                            SnapshotSpan? span = currentExpression.Span;
-                            if (span.HasValue)
-                                applicableToSpan = span.Value.Snapshot.CreateTrackingSpan(span.Value, SpanTrackingMode.EdgeExclusive);
+                //    try
+                //    {
+                //        Expression currentExpression = Provider.IntellisenseCache.ParseExpression(selection);
+                //        if (currentExpression != null)
+                //        {
+                //            SnapshotSpan? span = currentExpression.Span;
+                //            if (span.HasValue)
+                //                applicableToSpan = span.Value.Snapshot.CreateTrackingSpan(span.Value, SpanTrackingMode.EdgeExclusive);
 
-                            quickInfoContent.Add(currentExpression.ToString());
-                        }
-                        else
-                        {
-                            quickInfoContent.Add("Could not parse expression.");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        if (ErrorHandler.IsCriticalException(ex))
-                            throw;
+                //            quickInfoContent.Add(currentExpression.ToString());
+                //        }
+                //        else
+                //        {
+                //            quickInfoContent.Add("Could not parse expression.");
+                //        }
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        if (ErrorHandler.IsCriticalException(ex))
+                //            throw;
 
-                        quickInfoContent.Add(ex.Message);
-                    }
-                }
+                //        quickInfoContent.Add(ex.Message);
+                //    }
+                //}
             }
         }
 
+#if false
         private List<string> AnalyzeInterpreterTrace(InterpretTrace context, RuleBinding memberSelectRule, out Span span)
         {
             var transitions = context.Transitions;
@@ -264,6 +326,7 @@
                     case AlloyLexer.KW_IDEN:
                     case AlloyLexer.KW_INT2:
                     case AlloyLexer.KW_SEQINT:
+                    case AlloyLexer.INTEGER:
                         if (expressionLevel == 0)
                         {
                             IToken token = transition.Token;
@@ -322,50 +385,53 @@
 
             return results;
         }
+#endif
 
         private static bool IsBounded(InterpretTrace trace, NetworkInterpreter interpreter)
         {
             return trace.BoundedStart;
-            //if (trace.Transitions.Count == 0)
-            //    return false;
+#if false
+            if (trace.Transitions.Count == 0)
+                return false;
 
-            //bool boundedStart = false;
-            //if (trace.Transitions.Count > 0)
-            //{
-            //    bool stateBoundary = trace.Interpreter.BoundaryStates.Contains(trace.Transitions.First.Value.Transition.SourceState);
-            //    bool ruleBoundary = false;
-            //    PushContextTransition pushContextTransition = trace.Transitions.First.Value.Transition as PushContextTransition;
-            //    if (pushContextTransition != null)
-            //    {
-            //        ruleBoundary = pushContextTransition.ContextIdentifiers.Any(i => trace.Interpreter.BoundaryRules.Contains(trace.Network.ContextRules[i]));
-            //    }
+            bool boundedStart = false;
+            if (trace.Transitions.Count > 0)
+            {
+                bool stateBoundary = trace.Interpreter.BoundaryStates.Contains(trace.Transitions.First.Value.Transition.SourceState);
+                bool ruleBoundary = false;
+                PushContextTransition pushContextTransition = trace.Transitions.First.Value.Transition as PushContextTransition;
+                if (pushContextTransition != null)
+                {
+                    ruleBoundary = pushContextTransition.ContextIdentifiers.Any(i => trace.Interpreter.BoundaryRules.Contains(trace.Network.ContextRules[i]));
+                }
 
-            //    if (stateBoundary || ruleBoundary)
-            //    {
-            //        bool nested = false;
-            //        for (ContextFrame parent = trace.StartContext.Parent; parent != null; parent = parent.Parent)
-            //        {
-            //            if (parent.Context != null)
-            //            {
-            //                string contextRule = trace.Network.ContextRules[parent.Context.Value];
-            //                if (trace.Interpreter.BoundaryRules.Contains(contextRule))
-            //                {
-            //                    nested = true;
-            //                }
-            //                else
-            //                {
-            //                    RuleBinding ruleBinding = trace.Network.GetRule(contextRule);
-            //                    if (trace.Interpreter.BoundaryStates.Contains(ruleBinding.StartState))
-            //                        nested = true;
-            //                }
-            //            }
-            //        }
+                if (stateBoundary || ruleBoundary)
+                {
+                    bool nested = false;
+                    for (ContextFrame parent = trace.StartContext.Parent; parent != null; parent = parent.Parent)
+                    {
+                        if (parent.Context != null)
+                        {
+                            string contextRule = trace.Network.ContextRules[parent.Context.Value];
+                            if (trace.Interpreter.BoundaryRules.Contains(contextRule))
+                            {
+                                nested = true;
+                            }
+                            else
+                            {
+                                RuleBinding ruleBinding = trace.Network.GetRule(contextRule);
+                                if (trace.Interpreter.BoundaryStates.Contains(ruleBinding.StartState))
+                                    nested = true;
+                            }
+                        }
+                    }
 
-            //        boundedStart = !nested;
-            //    }
-            //}
+                    boundedStart = !nested;
+                }
+            }
 
-            //return boundedStart;
+            return boundedStart;
+#endif
         }
 
         private static void GetReachableTransitions(RuleBinding memberSelectRule, HashSet<Transition> memberSelectTransitions)

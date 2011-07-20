@@ -5,7 +5,7 @@
 
     public class MatchRangeTransition : Transition
     {
-        private Interval _range;
+        private readonly Interval _range;
 
         public MatchRangeTransition(State targetState, Interval range)
             : base(targetState)
@@ -51,6 +51,29 @@
             {
                 return IntervalSet.Of(_range);
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            MatchRangeTransition other = obj as MatchRangeTransition;
+            if (other == null)
+                return false;
+
+            return Range == other.Range
+                && base.Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode() ^ Range.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            string source = SourceState != null ? SourceState.Id.ToString() + (SourceState.IsOptimized ? "!" : string.Empty) : "?";
+            string target = TargetState != null ? TargetState.Id.ToString() + (TargetState.IsOptimized ? "!" : string.Empty) : "?";
+
+            return string.Format("{0} -> match {1} -> {2}", source, _range, target);
         }
     }
 }

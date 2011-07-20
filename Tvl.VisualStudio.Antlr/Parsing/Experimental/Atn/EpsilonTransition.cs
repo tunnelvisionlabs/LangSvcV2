@@ -40,5 +40,23 @@
                 return new IntervalSet();
             }
         }
+
+        public override string ToString()
+        {
+            string source = SourceState != null ? SourceState.Id.ToString() + (SourceState.IsOptimized ? "!" : string.Empty) : "?";
+            string target = TargetState != null ? TargetState.Id.ToString() + (TargetState.IsOptimized ? "!" : string.Empty) : "?";
+
+            return string.Format("{0} -> {1}", source, target);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj as EpsilonTransition);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

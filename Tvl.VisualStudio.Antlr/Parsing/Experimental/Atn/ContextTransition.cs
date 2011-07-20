@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Linq;
     using Tvl.Extensions;
@@ -10,7 +9,7 @@
 
     public abstract class ContextTransition : Transition
     {
-        private readonly ReadOnlyCollection<int> _contextIdentifiers;
+        private readonly IList<int> _contextIdentifiers;
 
         public ContextTransition(State targetState, IEnumerable<int> contextIdentifiers)
             : base(targetState)
@@ -18,7 +17,7 @@
             Contract.Requires<ArgumentNullException>(contextIdentifiers != null, "contextIdentifiers");
             Contract.Requires<ArgumentException>(contextIdentifiers.Any());
 
-            _contextIdentifiers = new ReadOnlyCollection<int>(contextIdentifiers.ToArray());
+            _contextIdentifiers = contextIdentifiers.ToArray();
         }
 
         public ContextTransition(State targetState, params int[] contextIdentifiers)
@@ -27,14 +26,14 @@
             Contract.Requires<ArgumentNullException>(contextIdentifiers != null, "contextIdentifiers");
             Contract.Requires<ArgumentException>(contextIdentifiers.Length > 0);
 
-            _contextIdentifiers = new ReadOnlyCollection<int>(contextIdentifiers.CloneArray());
+            _contextIdentifiers = contextIdentifiers.CloneArray();
         }
 
-        public ReadOnlyCollection<int> ContextIdentifiers
+        public IList<int> ContextIdentifiers
         {
             get
             {
-                return new ReadOnlyCollection<int>(_contextIdentifiers);
+                return _contextIdentifiers;
             }
         }
 
@@ -68,6 +67,21 @@
             {
                 return new IntervalSet();
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            ContextTransition other = obj as ContextTransition;
+            if (other == null)
+                return false;
+
+            return ContextIdentifiers.SequenceEqual(other.ContextIdentifiers)
+                && base.Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode() ^ ContextIdentifiers.Count.GetHashCode();
         }
     }
 }

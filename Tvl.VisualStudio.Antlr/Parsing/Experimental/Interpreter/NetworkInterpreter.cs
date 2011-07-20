@@ -15,14 +15,15 @@
         private readonly ITokenStream _input;
 
         private readonly List<InterpretTrace> _contexts = new List<InterpretTrace>();
+        private readonly HashSet<InterpretTrace> _boundedStartContexts = new HashSet<InterpretTrace>(BoundedStartInterpretTraceEqualityComparer.Default);
 #if DFA
         private DeterministicTrace _deterministicTrace;
 #endif
 
-        private readonly HashSet<RuleBinding> _boundaryRules = new HashSet<RuleBinding>();
-        private readonly HashSet<State> _boundaryStates = new HashSet<State>();
-        private readonly HashSet<State> _forwardBoundaryStates = new HashSet<State>();
-        private readonly HashSet<RuleBinding> _excludedStartRules = new HashSet<RuleBinding>();
+        private readonly HashSet<RuleBinding> _boundaryRules = new HashSet<RuleBinding>(ObjectReferenceEqualityComparer<RuleBinding>.Default);
+        private readonly HashSet<State> _boundaryStates = new HashSet<State>(ObjectReferenceEqualityComparer<State>.Default);
+        private readonly HashSet<State> _forwardBoundaryStates = new HashSet<State>(ObjectReferenceEqualityComparer<State>.Default);
+        private readonly HashSet<RuleBinding> _excludedStartRules = new HashSet<RuleBinding>(ObjectReferenceEqualityComparer<RuleBinding>.Default);
 
         private int _lookBehindPosition = 0;
         private int _lookAheadPosition = 0;
@@ -57,6 +58,14 @@
             get
             {
                 return _contexts.AsReadOnly();
+            }
+        }
+
+        public ICollection<InterpretTrace> BoundedStartContexts
+        {
+            get
+            {
+                return _boundedStartContexts;
             }
         }
 
@@ -105,8 +114,11 @@
              */
 
             Stopwatch updateTimer = Stopwatch.StartNew();
+
             if (_lookAheadPosition == 0 && _lookBehindPosition == 0 && _contexts.Count == 0)
             {
+                HashSet<InterpretTrace> initialContexts = new HashSet<InterpretTrace>(EqualityComparer<InterpretTrace>.Default);
+
                 /* create our initial set of states as the ones at the target end of a match transition
                  * that contains 'symbol' in the match set.
                  */
@@ -121,8 +133,10 @@
 
                     ContextFrame startContext = new ContextFrame(transition.TargetState, null, null, this);
                     ContextFrame endContext = new ContextFrame(transition.TargetState, null, null, this);
-                    _contexts.Add(new InterpretTrace(startContext, endContext));
+                    initialContexts.Add(new InterpretTrace(startContext, endContext));
                 }
+
+                _contexts.AddRange(initialContexts);
 
 #if DFA
                 DeterministicState deterministicState = new DeterministicState(_contexts.Select(i => i.StartContext));
@@ -133,8 +147,11 @@
             List<InterpretTrace> existing = new List<InterpretTrace>(_contexts);
             _contexts.Clear();
             SortedSet<int> states = new SortedSet<int>();
-            HashSet<InterpretTrace> contexts = new HashSet<InterpretTrace>();
-            HashSet<ContextFrame> existingUnique = new HashSet<ContextFrame>(existing.Select(i => i.StartContext));
+            HashSet<InterpretTrace> contexts = new HashSet<InterpretTrace>(EqualityComparer<InterpretTrace>.Default);
+#if DEBUG
+            HashSet<ContextFrame> existingUnique = new HashSet<ContextFrame>(existing.Select(i => i.StartContext), EqualityComparer<ContextFrame>.Default);
+            Contract.Assert(existingUnique.Count == existing.Count);
+#endif
 
             foreach (var context in existing)
             {
@@ -144,6 +161,7 @@
             }
 
             _contexts.AddRange(contexts);
+            _boundedStartContexts.UnionWith(_contexts.Where(i => i.BoundedStart));
             long nfaUpdateTime = updateTimer.ElapsedMilliseconds;
 
 #if DFA
@@ -210,7 +228,7 @@
             List<InterpretTrace> existing = new List<InterpretTrace>(_contexts);
             _contexts.Clear();
             SortedSet<int> states = new SortedSet<int>();
-            HashSet<InterpretTrace> contexts = new HashSet<InterpretTrace>();
+            HashSet<InterpretTrace> contexts = new HashSet<InterpretTrace>(EqualityComparer<InterpretTrace>.Default);
 
             foreach (var context in existing)
             {
@@ -271,7 +289,7 @@
                 }
 
                 InterpretTrace step;
-                if (context.TryStepBackward(transition, preventContextType, symbol, symbolPosition, out step))
+                if (context.TryStepBackward(transition, symbol, symbolPosition, out step))
                 {
                     if (transition.IsMatch)
                     {

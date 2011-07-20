@@ -28,6 +28,12 @@
             body.EndState.AddTransition(new EpsilonTransition(ruleBinding.EndState));
         }
 
+        public static Nfa Epsilon()
+        {
+            State state = new State();
+            return new Nfa(state, state);
+        }
+
         public static Nfa Closure(Nfa nfa)
         {
             State startState = new State();
@@ -98,11 +104,13 @@
 
             PushContextTransition push = new PushContextTransition(ruleBinding.StartState, startState.Id);
             PopContextTransition pop = new PopContextTransition(endState, startState.Id);
-            push.PopTransitions.Add(pop);
-            pop.PushTransitions.Add(push);
 
             startState.AddTransition(push);
             ruleBinding.EndState.AddTransition(pop);
+
+            push.PopTransitions.Add(pop);
+            pop.PushTransitions.Add(push);
+
             return new Nfa(startState, endState);
         }
 
