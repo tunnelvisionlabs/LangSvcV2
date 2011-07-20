@@ -7,6 +7,7 @@
     using Math = System.Math;
     using NotImplementedException = System.NotImplementedException;
     using TokenTypes = Antlr.Runtime.TokenTypes;
+    using StringBuilder = System.Text.StringBuilder;
 
     /** A set of integers that relies on ranges being common to do
      *  "run-length-encoded" like compression (if you view an IntSet like
@@ -302,7 +303,7 @@
             // add a range from 0 to first.Start constrained to vocab
             if (first.Start > vocabulary.Start)
             {
-                compl.Intervals.Add(new Interval(vocabulary.Start, first.Start - 1));
+                compl.Intervals.Add(Interval.FromBounds(vocabulary.Start, first.Start - 1));
             }
 
             for (int i = 1; i < n; i++)
@@ -316,7 +317,7 @@
                 if (intervals[i - 1].EndInclusive == intervals[i].Start - 1)
                     continue;
 
-                compl.Intervals.Add(new Interval(Math.Max(vocabulary.Start, intervals[i - 1].EndInclusive + 1), Math.Min(vocabulary.EndInclusive, intervals[i].Start - 1)));
+                compl.Intervals.Add(Interval.FromBounds(Math.Max(vocabulary.Start, intervals[i - 1].EndInclusive + 1), Math.Min(vocabulary.EndInclusive, intervals[i].Start - 1)));
 
                 //// from 2nd interval .. nth
                 //Interval previous = intervals[i - 1];
@@ -330,7 +331,7 @@
             // add a range from last.EndInclusive to maxElement constrained to vocab
             if (last.EndInclusive < vocabulary.EndInclusive)
             {
-                compl.Intervals.Add(new Interval(last.EndInclusive + 1, vocabulary.EndInclusive));
+                compl.Intervals.Add(Interval.FromBounds(last.EndInclusive + 1, vocabulary.EndInclusive));
                 //IntervalSet s = IntervalSet.Of( last.EndInclusive + 1, maxElement );
                 //IntervalSet a = (IntervalSet)s.And( vocabularyIS );
                 //compl.AddAll( a );
@@ -648,13 +649,12 @@
             return intervals.GetHashCode();
         }
 
-#if false
         public override string ToString()
         {
             return ToString(null);
         }
 
-        public virtual string ToString(Grammar g)
+        public virtual string ToString(IList<string> tokenNames)
         {
             if (this.intervals == null || this.intervals.Count == 0)
             {
@@ -666,8 +666,12 @@
             {
                 buf.Append("{");
             }
+
             foreach (Interval I in intervals)
             {
+                if (I.Length == 0)
+                    continue;
+
                 // element separation
                 if (buf.Length > 1)
                     buf.Append(", ");
@@ -676,34 +680,29 @@
                 int b = I.EndInclusive;
                 if (a == b)
                 {
-                    if (g != null)
-                    {
-                        buf.Append(g.GetTokenDisplayName(a));
-                    }
-                    else
-                    {
-                        buf.Append(a);
-                    }
+                    buf.Append(GetTokenDisplayName(tokenNames, a));
                 }
                 else
                 {
-                    if (g != null)
-                    {
-                        buf.Append(g.GetTokenDisplayName(a) + ".." + g.GetTokenDisplayName(b));
-                    }
-                    else
-                    {
-                        buf.Append(a + ".." + b);
-                    }
+                    buf.Append(GetTokenDisplayName(tokenNames, a) + ".." + GetTokenDisplayName(tokenNames, b));
                 }
             }
+
             if (this.intervals.Count > 1)
             {
                 buf.Append("}");
             }
+
             return buf.ToString();
         }
-#endif
+
+        private static string GetTokenDisplayName(IList<string> tokenNames, int symbol)
+        {
+            if (tokenNames == null || symbol < 0 || symbol >= tokenNames.Count)
+                return symbol.ToString();
+
+            return tokenNames[symbol];
+        }
 
         public List<int> ToList()
         {
