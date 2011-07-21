@@ -7,17 +7,25 @@
     using System.Linq;
     using Tvl.VisualStudio.Shell.Extensions;
 
+    using Dispatcher = System.Windows.Threading.Dispatcher;
+    using DispatcherPriority = System.Windows.Threading.DispatcherPriority;
     using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
     using IVsOutputWindow = Microsoft.VisualStudio.Shell.Interop.IVsOutputWindow;
     using IVsOutputWindowPane = Microsoft.VisualStudio.Shell.Interop.IVsOutputWindowPane;
     using SVsOutputWindow = Microsoft.VisualStudio.Shell.Interop.SVsOutputWindow;
     using SVsServiceProvider = Microsoft.VisualStudio.Shell.SVsServiceProvider;
+    using Thread = System.Threading.Thread;
     using VSConstants = Microsoft.VisualStudio.VSConstants;
 
     [Export(typeof(IOutputWindowService))]
     internal sealed class OutputWindowService : IOutputWindowService
     {
+        public OutputWindowService()
+        {
+            Dispatcher = Dispatcher.CurrentDispatcher;
+        }
+
         [Import]
         private SVsServiceProvider GlobalServiceProvider
         {
@@ -27,6 +35,12 @@
 
         [ImportMany]
         private List<Lazy<OutputWindowDefinition, IOutputWindowDefinitionMetadata>> OutputWindowDefinitions
+        {
+            get;
+            set;
+        }
+
+        private Dispatcher Dispatcher
         {
             get;
             set;
@@ -45,7 +59,15 @@
 
         public IOutputWindowPane TryGetPane(string name)
         {
-            return _panes.GetOrAdd(name, CreateWindowPane);
+            return _panes.GetOrAdd(name, CreateWindowPaneOnMainThread);
+        }
+
+        private IOutputWindowPane CreateWindowPaneOnMainThread(string name)
+        {
+            if (Dispatcher.Thread == Thread.CurrentThread)
+                return CreateWindowPane(name);
+
+            return (IOutputWindowPane)Dispatcher.Invoke(DispatcherPriority.Normal, (Func<string, IOutputWindowPane>)CreateWindowPane, name);
         }
 
         private IOutputWindowPane CreateWindowPane(string name)
