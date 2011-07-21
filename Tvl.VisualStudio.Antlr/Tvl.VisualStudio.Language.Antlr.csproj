@@ -170,6 +170,7 @@
     <Compile Include="Parsing\Collections\Interval.cs" />
     <Compile Include="Parsing\Collections\IntervalSet.cs" />
     <Compile Include="Parsing\Experimental\Atn\ContextTransition.cs" />
+    <Compile Include="Parsing\Experimental\Atn\NetworkBuilder.cs" />
     <Compile Include="Parsing\Experimental\Atn\EpsilonTransition.cs" />
     <Compile Include="Parsing\Experimental\Atn\MatchRangeTransition.cs" />
     <Compile Include="Parsing\Experimental\Atn\Network.cs" />

@@ -4,14 +4,13 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
-    using Tvl.VisualStudio.Shell.OutputWindow;
-    using IAstRuleReturnScope = Antlr.Runtime.IAstRuleReturnScope;
-    using Antlr.Runtime;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter;
+    using Tvl.VisualStudio.Shell.OutputWindow;
 
     internal sealed class AlloyAtnOutliningTagger : BackgroundParser, ITagger<IOutliningRegionTag>
     {
@@ -144,7 +143,7 @@
 
         private NetworkInterpreter CreateNetworkInterpreter(ITokenStream tokens)
         {
-            Network network = AlloyOutliningAtnBuilder.BuildNetwork();
+            Network network = NetworkBuilder<AlloyOutliningAtnBuilder>.GetOrBuildNetwork();
 
             NetworkInterpreter interpreter = new NetworkInterpreter(network, tokens);
 

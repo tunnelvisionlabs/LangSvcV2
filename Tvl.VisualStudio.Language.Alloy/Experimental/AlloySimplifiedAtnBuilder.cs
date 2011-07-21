@@ -1,18 +1,15 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy.Experimental
 {
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
-    using System.Linq;
-    using System.Xml.Linq;
-    using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
-    using StringBuilder = System.Text.StringBuilder;
+    using Contract = System.Diagnostics.Contracts.Contract;
+    using NetworkBuilder = Tvl.VisualStudio.Language.Parsing.Experimental.Atn.NetworkBuilder;
+    using Nfa = Tvl.VisualStudio.Language.Parsing.Experimental.Atn.Nfa;
+    using RuleBinding = Tvl.VisualStudio.Language.Parsing.Experimental.Atn.RuleBinding;
 
-    internal class AlloySimplifiedAtnBuilder : NetworkBuilder<AlloySimplifiedAtnBuilder>
+    internal class AlloySimplifiedAtnBuilder : NetworkBuilder
     {
-        private static Network _network;
-
         private readonly RuleBindings _ruleBindings;
-        private readonly IList<RuleBinding> _rules;
+        private readonly List<RuleBinding> _rules;
 
         public AlloySimplifiedAtnBuilder()
         {
@@ -77,7 +74,7 @@
                 };
         }
 
-        protected override IList<RuleBinding> Rules
+        protected sealed override IList<RuleBinding> Rules
         {
             get
             {
@@ -85,7 +82,7 @@
             }
         }
 
-        private RuleBindings Bindings
+        protected RuleBindings Bindings
         {
             get
             {
@@ -93,71 +90,78 @@
             }
         }
 
-        protected override void BindRules()
+        protected sealed override void BindRules()
         {
-            Nfa.BindRule(Bindings.CompilationUnit, BuildCompilationUnitRule());
-            Nfa.BindRule(Bindings.Specification, BuildSpecificationRule());
-            Nfa.BindRule(Bindings.Module, BuildModuleRule());
-            Nfa.BindRule(Bindings.Open, BuildOpenRule());
-            Nfa.BindRule(Bindings.Paragraph, BuildParagraphRule());
-            Nfa.BindRule(Bindings.FactDecl, BuildFactDeclRule());
-            Nfa.BindRule(Bindings.FactDeclHeader, BuildFactDeclHeaderRule());
-            Nfa.BindRule(Bindings.AssertDecl, BuildAssertDeclRule());
-            Nfa.BindRule(Bindings.AssertDeclHeader, BuildAssertDeclHeaderRule());
-            Nfa.BindRule(Bindings.FunDecl, BuildFunDeclRule());
-            Nfa.BindRule(Bindings.FunctionName, BuildFunctionNameRule());
-            Nfa.BindRule(Bindings.FunFunctionName, BuildFunFunctionNameRule());
-            Nfa.BindRule(Bindings.PredFunctionName, BuildPredFunctionNameRule());
-            Nfa.BindRule(Bindings.FunctionReturn, BuildFunctionReturnRule());
-            Nfa.BindRule(Bindings.FunctionParameters, BuildFunctionParametersRule());
-            Nfa.BindRule(Bindings.DeclList, BuildDeclListRule());
-            Nfa.BindRule(Bindings.CmdDecl, BuildCmdDeclRule());
-            Nfa.BindRule(Bindings.CmdScope, BuildCmdScopeRule());
-            Nfa.BindRule(Bindings.CmdScopeFor, BuildCmdScopeForRule());
-            Nfa.BindRule(Bindings.CmdScopeExpect, BuildCmdScopeExpectRule());
-            Nfa.BindRule(Bindings.TypescopeDeclList, BuildTypescopeDeclListRule());
-            Nfa.BindRule(Bindings.Typescope, BuildTypescopeRule());
-            Nfa.BindRule(Bindings.SigDecl, BuildSigDeclRule());
-            Nfa.BindRule(Bindings.SigDeclHeader, BuildSigDeclHeaderRule());
-            Nfa.BindRule(Bindings.NameList, BuildNameListRule());
-            Nfa.BindRule(Bindings.NameListName, BuildNameListNameRule());
-            Nfa.BindRule(Bindings.NameDeclList, BuildNameDeclListRule());
-            Nfa.BindRule(Bindings.SigBody, BuildSigBodyRule());
-            Nfa.BindRule(Bindings.EnumDecl, BuildEnumDeclRule());
-            Nfa.BindRule(Bindings.EnumBody, BuildEnumBodyRule());
-            Nfa.BindRule(Bindings.SigQual, BuildSigQualRule());
-            Nfa.BindRule(Bindings.SigExt, BuildSigExtRule());
-            Nfa.BindRule(Bindings.Expr, BuildExprRule());
-            Nfa.BindRule(Bindings.UnOpExpr1, BuildUnOpExpr1Rule());
-            Nfa.BindRule(Bindings.LetDecls, BuildLetDeclsRule());
-            Nfa.BindRule(Bindings.QuantDecls, BuildQuantDeclsRule());
-            Nfa.BindRule(Bindings.BinaryExpression, BuildBinaryExpression());
-            Nfa.BindRule(Bindings.UnaryExpression, BuildUnaryExpression());
-            Nfa.BindRule(Bindings.ElseClause, BuildElseClauseRule());
-            Nfa.BindRule(Bindings.BinOpExpr18, BuildBinOpExpr18Rule());
-            Nfa.BindRule(Bindings.CallArguments, BuildCallArguments());
-            Nfa.BindRule(Bindings.UnOpExpr19, BuildUnOpExpr19Rule());
-            Nfa.BindRule(Bindings.PrimaryExpr, BuildPrimaryExprRule());
-            Nfa.BindRule(Bindings.Decl, BuildDeclRule());
-            Nfa.BindRule(Bindings.LetDecl, BuildLetDeclRule());
-            Nfa.BindRule(Bindings.Quant, BuildQuantRule());
-            Nfa.BindRule(Bindings.ArrowMultiplicity, BuildArrowMultiplicityRule());
-            Nfa.BindRule(Bindings.Block, BuildBlockRule());
-            Nfa.BindRule(Bindings.Name, BuildNameRule());
-            Nfa.BindRule(Bindings.NameDefinition, BuildNameDefinitionRule());
-            Nfa.BindRule(Bindings.NameReference, BuildNameReferenceRule());
-            Nfa.BindRule(Bindings.Number, BuildNumberRule());
-            Nfa.BindRule(Bindings.Ref, BuildRefRule());
+            BindRulesImpl();
+            // derived classes might remove some rules originally declared in this class
+            _rules.RemoveAll(i => i.StartState.OutgoingTransitions.Count == 0);
         }
 
-        private Nfa BuildCompilationUnitRule()
+        protected virtual void BindRulesImpl()
+        {
+            TryBindRule(Bindings.CompilationUnit, BuildCompilationUnitRule());
+            TryBindRule(Bindings.Specification, BuildSpecificationRule());
+            TryBindRule(Bindings.Module, BuildModuleRule());
+            TryBindRule(Bindings.Open, BuildOpenRule());
+            TryBindRule(Bindings.Paragraph, BuildParagraphRule());
+            TryBindRule(Bindings.FactDecl, BuildFactDeclRule());
+            TryBindRule(Bindings.FactDeclHeader, BuildFactDeclHeaderRule());
+            TryBindRule(Bindings.AssertDecl, BuildAssertDeclRule());
+            TryBindRule(Bindings.AssertDeclHeader, BuildAssertDeclHeaderRule());
+            TryBindRule(Bindings.FunDecl, BuildFunDeclRule());
+            TryBindRule(Bindings.FunctionName, BuildFunctionNameRule());
+            TryBindRule(Bindings.FunFunctionName, BuildFunFunctionNameRule());
+            TryBindRule(Bindings.PredFunctionName, BuildPredFunctionNameRule());
+            TryBindRule(Bindings.FunctionReturn, BuildFunctionReturnRule());
+            TryBindRule(Bindings.FunctionParameters, BuildFunctionParametersRule());
+            TryBindRule(Bindings.DeclList, BuildDeclListRule());
+            TryBindRule(Bindings.CmdDecl, BuildCmdDeclRule());
+            TryBindRule(Bindings.CmdScope, BuildCmdScopeRule());
+            TryBindRule(Bindings.CmdScopeFor, BuildCmdScopeForRule());
+            TryBindRule(Bindings.CmdScopeExpect, BuildCmdScopeExpectRule());
+            TryBindRule(Bindings.TypescopeDeclList, BuildTypescopeDeclListRule());
+            TryBindRule(Bindings.Typescope, BuildTypescopeRule());
+            TryBindRule(Bindings.SigDecl, BuildSigDeclRule());
+            TryBindRule(Bindings.SigDeclHeader, BuildSigDeclHeaderRule());
+            TryBindRule(Bindings.NameList, BuildNameListRule());
+            TryBindRule(Bindings.NameListName, BuildNameListNameRule());
+            TryBindRule(Bindings.NameDeclList, BuildNameDeclListRule());
+            TryBindRule(Bindings.SigBody, BuildSigBodyRule());
+            TryBindRule(Bindings.EnumDecl, BuildEnumDeclRule());
+            TryBindRule(Bindings.EnumBody, BuildEnumBodyRule());
+            TryBindRule(Bindings.SigQual, BuildSigQualRule());
+            TryBindRule(Bindings.SigExt, BuildSigExtRule());
+            TryBindRule(Bindings.Expr, BuildExprRule());
+            TryBindRule(Bindings.UnOpExpr1, BuildUnOpExpr1Rule());
+            TryBindRule(Bindings.LetDecls, BuildLetDeclsRule());
+            TryBindRule(Bindings.QuantDecls, BuildQuantDeclsRule());
+            TryBindRule(Bindings.BinaryExpression, BuildBinaryExpression());
+            TryBindRule(Bindings.UnaryExpression, BuildUnaryExpression());
+            TryBindRule(Bindings.ElseClause, BuildElseClauseRule());
+            TryBindRule(Bindings.BinOpExpr18, BuildBinOpExpr18Rule());
+            TryBindRule(Bindings.CallArguments, BuildCallArguments());
+            TryBindRule(Bindings.UnOpExpr19, BuildUnOpExpr19Rule());
+            TryBindRule(Bindings.PrimaryExpr, BuildPrimaryExprRule());
+            TryBindRule(Bindings.Decl, BuildDeclRule());
+            TryBindRule(Bindings.LetDecl, BuildLetDeclRule());
+            TryBindRule(Bindings.Quant, BuildQuantRule());
+            TryBindRule(Bindings.ArrowMultiplicity, BuildArrowMultiplicityRule());
+            TryBindRule(Bindings.Block, BuildBlockRule());
+            TryBindRule(Bindings.Name, BuildNameRule());
+            TryBindRule(Bindings.NameDefinition, BuildNameDefinitionRule());
+            TryBindRule(Bindings.NameReference, BuildNameReferenceRule());
+            TryBindRule(Bindings.Number, BuildNumberRule());
+            TryBindRule(Bindings.Ref, BuildRefRule());
+        }
+
+        protected virtual Nfa BuildCompilationUnitRule()
         {
             return Nfa.Sequence(
                 Nfa.Rule(Bindings.Specification),
                 Nfa.Match(AlloyLexer.EOF));
         }
 
-        private Nfa BuildSpecificationRule()
+        protected virtual Nfa BuildSpecificationRule()
         {
             return Nfa.Sequence(
                 Nfa.Optional(Nfa.Rule(Bindings.Module)),
@@ -165,7 +169,7 @@
                 Nfa.Closure(Nfa.Rule(Bindings.Paragraph)));
         }
 
-        private Nfa BuildModuleRule()
+        protected virtual Nfa BuildModuleRule()
         {
             return Nfa.Sequence(
                 Nfa.Match(AlloyLexer.KW_MODULE),
@@ -183,7 +187,7 @@
                         Nfa.Match(AlloyLexer.RBRACK))));
         }
 
-        private Nfa BuildOpenRule()
+        protected virtual Nfa BuildOpenRule()
         {
             return Nfa.Sequence(
                 Nfa.Optional(Nfa.Match(AlloyLexer.KW_PRIVATE)),
@@ -205,7 +209,7 @@
                         Nfa.Rule(Bindings.NameDefinition))));
         }
 
-        private Nfa BuildParagraphRule()
+        protected virtual Nfa BuildParagraphRule()
         {
             return Nfa.Choice(
                 Nfa.Rule(Bindings.FactDecl),
@@ -216,35 +220,35 @@
                 Nfa.Rule(Bindings.SigDecl));
         }
 
-        private Nfa BuildFactDeclRule()
+        protected virtual Nfa BuildFactDeclRule()
         {
             return Nfa.Sequence(
                 Nfa.Rule(Bindings.FactDeclHeader),
                 Nfa.Rule(Bindings.Block));
         }
 
-        private Nfa BuildFactDeclHeaderRule()
+        protected virtual Nfa BuildFactDeclHeaderRule()
         {
             return Nfa.Sequence(
                 Nfa.Match(AlloyLexer.KW_FACT),
                 Nfa.Optional(Nfa.Rule(Bindings.NameDefinition)));
         }
 
-        private Nfa BuildAssertDeclRule()
+        protected virtual Nfa BuildAssertDeclRule()
         {
             return Nfa.Sequence(
                 Nfa.Rule(Bindings.AssertDeclHeader),
                 Nfa.Rule(Bindings.Block));
         }
 
-        private Nfa BuildAssertDeclHeaderRule()
+        protected virtual Nfa BuildAssertDeclHeaderRule()
         {
             return Nfa.Sequence(
                 Nfa.Match(AlloyLexer.KW_ASSERT),
                 Nfa.Optional(Nfa.Rule(Bindings.NameDefinition)));
         }
 
-        private Nfa BuildFunDeclRule()
+        protected virtual Nfa BuildFunDeclRule()
         {
             return Nfa.Sequence(
                 Nfa.Optional(Nfa.Match(AlloyLexer.KW_PRIVATE)),
@@ -260,21 +264,21 @@
                         Nfa.Rule(Bindings.Block))));
         }
 
-        private Nfa BuildFunFunctionNameRule()
+        protected virtual Nfa BuildFunFunctionNameRule()
         {
             return Nfa.Sequence(
                 Nfa.Match(AlloyLexer.KW_FUN),
                 Nfa.Rule(Bindings.FunctionName));
         }
 
-        private Nfa BuildPredFunctionNameRule()
+        protected virtual Nfa BuildPredFunctionNameRule()
         {
             return Nfa.Sequence(
                 Nfa.Match(AlloyLexer.KW_PRED),
                 Nfa.Rule(Bindings.FunctionName));
         }
 
-        private Nfa BuildFunctionNameRule()
+        protected virtual Nfa BuildFunctionNameRule()
         {
             return Nfa.Sequence(
                 Nfa.Optional(
@@ -284,14 +288,14 @@
                 Nfa.Rule(Bindings.NameDefinition));
         }
 
-        private Nfa BuildFunctionReturnRule()
+        protected virtual Nfa BuildFunctionReturnRule()
         {
             return Nfa.Sequence(
                 Nfa.Match(AlloyLexer.COLON),
                 Nfa.Rule(Bindings.Expr));
         }
 
-        private Nfa BuildFunctionParametersRule()
+        protected virtual Nfa BuildFunctionParametersRule()
         {
             return Nfa.Choice(
                 Nfa.Sequence(
@@ -304,7 +308,7 @@
                     Nfa.Match(AlloyLexer.RBRACK)));
         }
 
-        private Nfa BuildDeclListRule()
+        protected virtual Nfa BuildDeclListRule()
         {
             return Nfa.Sequence(
                 Nfa.Rule(Bindings.Decl),
@@ -315,7 +319,7 @@
                 Nfa.Optional(Nfa.Match(AlloyLexer.COMMA)));
         }
 
-        private Nfa BuildCmdDeclRule()
+        protected virtual Nfa BuildCmdDeclRule()
         {
             return Nfa.Sequence(
                 Nfa.Optional(
@@ -330,14 +334,14 @@
                 Nfa.Rule(Bindings.CmdScope));
         }
 
-        private Nfa BuildCmdScopeRule()
+        protected virtual Nfa BuildCmdScopeRule()
         {
             return Nfa.Sequence(
                 Nfa.Optional(Nfa.Rule(Bindings.CmdScopeFor)),
                 Nfa.Optional(Nfa.Rule(Bindings.CmdScopeExpect)));
         }
 
-        private Nfa BuildCmdScopeForRule()
+        protected virtual Nfa BuildCmdScopeForRule()
         {
             return Nfa.Sequence(
                 Nfa.Match(AlloyLexer.KW_FOR),
@@ -349,14 +353,14 @@
                     Nfa.Rule(Bindings.TypescopeDeclList)));
         }
 
-        private Nfa BuildCmdScopeExpectRule()
+        protected virtual Nfa BuildCmdScopeExpectRule()
         {
             return Nfa.Sequence(
                 Nfa.Match(AlloyLexer.KW_EXPECT),
                 Nfa.Optional(Nfa.Rule(Bindings.Number)));
         }
 
-        private Nfa BuildTypescopeDeclListRule()
+        protected virtual Nfa BuildTypescopeDeclListRule()
         {
             return Nfa.Sequence(
                 Nfa.Rule(Bindings.Typescope),
@@ -367,7 +371,7 @@
                 Nfa.Optional(Nfa.Match(AlloyLexer.COMMA)));
         }
 
-        private Nfa BuildTypescopeRule()
+        protected virtual Nfa BuildTypescopeRule()
         {
             return Nfa.Sequence(
                 Nfa.Optional(Nfa.Match(AlloyLexer.KW_EXACTLY)),
@@ -378,7 +382,7 @@
                         Nfa.MatchAny(AlloyLexer.KW_INT, AlloyLexer.KW_SEQ))));
         }
 
-        private Nfa BuildSigDeclRule()
+        protected virtual Nfa BuildSigDeclRule()
         {
             return Nfa.Sequence(
                 Nfa.Closure(Nfa.Rule(Bindings.SigQual)),
@@ -387,7 +391,7 @@
                 Nfa.Optional(Nfa.Rule(Bindings.Block)));
         }
 
-        private Nfa BuildSigDeclHeaderRule()
+        protected virtual Nfa BuildSigDeclHeaderRule()
         {
             return Nfa.Sequence(
                 Nfa.Match(AlloyLexer.KW_SIG),
@@ -395,7 +399,7 @@
                 Nfa.Optional(Nfa.Rule(Bindings.SigExt)));
         }
 
-        private Nfa BuildNameListRule()
+        protected virtual Nfa BuildNameListRule()
         {
             return Nfa.Sequence(
                 Nfa.Rule(Bindings.NameListName),
@@ -409,19 +413,19 @@
                                 Nfa.Rule(Bindings.NameListName))))));
         }
 
-        private Nfa BuildNameListNameRule()
+        protected virtual Nfa BuildNameListNameRule()
         {
             return Nfa.Rule(Bindings.NameDefinition);
         }
 
-        private Nfa BuildNameDeclListRule()
+        protected virtual Nfa BuildNameDeclListRule()
         {
             return Nfa.Sequence(
                 Nfa.Rule(Bindings.NameList),
                 Nfa.Optional(Nfa.Match(AlloyLexer.COMMA)));
         }
 
-        private Nfa BuildSigBodyRule()
+        protected virtual Nfa BuildSigBodyRule()
         {
             return Nfa.Sequence(
                 Nfa.Match(AlloyLexer.LBRACE),
@@ -436,7 +440,7 @@
                 Nfa.Match(AlloyLexer.RBRACE));
         }
 
-        private Nfa BuildEnumDeclRule()
+        protected virtual Nfa BuildEnumDeclRule()
         {
             return Nfa.Sequence(
                 Nfa.Match(AlloyLexer.KW_ENUM),
@@ -444,7 +448,7 @@
                 Nfa.Rule(Bindings.EnumBody));
         }
 
-        private Nfa BuildEnumBodyRule()
+        protected virtual Nfa BuildEnumBodyRule()
         {
             return Nfa.Sequence(
                 Nfa.Match(AlloyLexer.LBRACE),
@@ -452,12 +456,12 @@
                 Nfa.Match(AlloyLexer.RBRACE));
         }
 
-        private Nfa BuildSigQualRule()
+        protected virtual Nfa BuildSigQualRule()
         {
             return Nfa.MatchAny(AlloyLexer.KW_ABSTRACT, AlloyLexer.KW_LONE, AlloyLexer.KW_ONE, AlloyLexer.KW_SOME, AlloyLexer.KW_PRIVATE);
         }
 
-        private Nfa BuildSigExtRule()
+        protected virtual Nfa BuildSigExtRule()
         {
             return Nfa.Choice(
                 Nfa.Sequence(
@@ -472,12 +476,12 @@
                             Nfa.Rule(Bindings.Ref)))));
         }
 
-        private Nfa BuildExprRule()
+        protected virtual Nfa BuildExprRule()
         {
             return Nfa.Rule(Bindings.UnOpExpr1);
         }
 
-        private Nfa BuildUnOpExpr1Rule()
+        protected virtual Nfa BuildUnOpExpr1Rule()
         {
             return Nfa.Choice(
                 Nfa.Sequence(
@@ -492,7 +496,7 @@
                 Nfa.Rule(Bindings.BinaryExpression));
         }
 
-        private Nfa BuildLetDeclsRule()
+        protected virtual Nfa BuildLetDeclsRule()
         {
             return Nfa.Sequence(
                 Nfa.Match(AlloyLexer.KW_LET),
@@ -504,7 +508,7 @@
                 Nfa.Optional(Nfa.Match(AlloyLexer.COMMA)));
         }
 
-        private Nfa BuildQuantDeclsRule()
+        protected virtual Nfa BuildQuantDeclsRule()
         {
             return Nfa.Sequence(
                 Nfa.Rule(Bindings.Quant),
@@ -516,7 +520,7 @@
                 Nfa.Optional(Nfa.Match(AlloyLexer.COMMA)));
         }
 
-        private Nfa BuildBinaryExpression()
+        protected virtual Nfa BuildBinaryExpression()
         {
             int[] binaryOperators =
                 {
@@ -560,7 +564,7 @@
                             Nfa.Optional(Nfa.Rule(Bindings.ElseClause))))));
         }
 
-        private Nfa BuildUnaryExpression()
+        protected virtual Nfa BuildUnaryExpression()
         {
             int[] unaryPrefixOperators =
                 {
@@ -575,14 +579,14 @@
                 Nfa.Rule(Bindings.BinOpExpr18));
         }
 
-        private Nfa BuildElseClauseRule()
+        protected virtual Nfa BuildElseClauseRule()
         {
             return Nfa.Sequence(
                 Nfa.MatchAny(AlloyLexer.KW_ELSE/*, AlloyLexer.COMMA*/),
                 Nfa.Rule(Bindings.UnaryExpression));
         }
 
-        private Nfa BuildBinOpExpr18Rule()
+        protected virtual Nfa BuildBinOpExpr18Rule()
         {
             return Nfa.Sequence(
                 Nfa.Rule(Bindings.UnOpExpr19),
@@ -597,7 +601,7 @@
                             Nfa.Match(AlloyLexer.RBRACK)))));
         }
 
-        private Nfa BuildCallArguments()
+        protected virtual Nfa BuildCallArguments()
         {
 #if false
             return Nfa.Closure(
@@ -618,7 +622,7 @@
 #endif
         }
 
-        private Nfa BuildUnOpExpr19Rule()
+        protected virtual Nfa BuildUnOpExpr19Rule()
         {
             return Nfa.Choice(
                 Nfa.Sequence(
@@ -627,7 +631,7 @@
                 Nfa.Rule(Bindings.PrimaryExpr));
         }
 
-        private Nfa BuildPrimaryExprRule()
+        protected virtual Nfa BuildPrimaryExprRule()
         {
             return Nfa.Choice(
                 Nfa.MatchAny(AlloyLexer.KW_NONE, AlloyLexer.KW_IDEN, AlloyLexer.KW_UNIV, AlloyLexer.KW_INT2, AlloyLexer.KW_SEQINT),
@@ -642,7 +646,7 @@
                 Nfa.Rule(Bindings.Block));
         }
 
-        private Nfa BuildDeclRule()
+        protected virtual Nfa BuildDeclRule()
         {
             return Nfa.Sequence(
                 Nfa.Optional(Nfa.Match(AlloyLexer.KW_PRIVATE)),
@@ -654,7 +658,7 @@
                 Nfa.Rule(Bindings.BinaryExpression));
         }
 
-        private Nfa BuildLetDeclRule()
+        protected virtual Nfa BuildLetDeclRule()
         {
             return Nfa.Sequence(
                 Nfa.Rule(Bindings.NameDefinition),
@@ -662,17 +666,17 @@
                 Nfa.Rule(Bindings.Expr));
         }
 
-        private Nfa BuildQuantRule()
+        protected virtual Nfa BuildQuantRule()
         {
             return Nfa.MatchAny(AlloyLexer.KW_ALL, AlloyLexer.KW_NO, AlloyLexer.KW_SOME, AlloyLexer.KW_LONE, AlloyLexer.KW_ONE, AlloyLexer.KW_SUM);
         }
 
-        private Nfa BuildArrowMultiplicityRule()
+        protected virtual Nfa BuildArrowMultiplicityRule()
         {
             return Nfa.MatchAny(AlloyLexer.KW_SOME, AlloyLexer.KW_ONE, AlloyLexer.KW_LONE, AlloyLexer.KW_SET);
         }
 
-        private Nfa BuildBlockRule()
+        protected virtual Nfa BuildBlockRule()
         {
             return Nfa.Sequence(
                 Nfa.Match(AlloyLexer.LBRACE),
@@ -680,7 +684,7 @@
                 Nfa.Match(AlloyLexer.RBRACE));
         }
 
-        private Nfa BuildNameRule()
+        protected virtual Nfa BuildNameRule()
         {
             return Nfa.Sequence(
                 Nfa.MatchAny(AlloyLexer.KW_THIS, AlloyLexer.IDENTIFIER),
@@ -690,7 +694,7 @@
                         Nfa.Match(AlloyLexer.IDENTIFIER))));
         }
 
-        private Nfa BuildNameDefinitionRule()
+        protected virtual Nfa BuildNameDefinitionRule()
         {
             return Nfa.Sequence(
                 Nfa.MatchAny(AlloyLexer.KW_THIS, AlloyLexer.IDENTIFIER),
@@ -700,7 +704,7 @@
                         Nfa.Match(AlloyLexer.IDENTIFIER))));
         }
 
-        private Nfa BuildNameReferenceRule()
+        protected virtual Nfa BuildNameReferenceRule()
         {
             return Nfa.Sequence(
                 Nfa.MatchAny(AlloyLexer.KW_THIS, AlloyLexer.IDENTIFIER),
@@ -710,16 +714,25 @@
                         Nfa.Match(AlloyLexer.IDENTIFIER))));
         }
 
-        private Nfa BuildNumberRule()
+        protected virtual Nfa BuildNumberRule()
         {
             return Nfa.Match(AlloyLexer.INTEGER);
         }
 
-        private Nfa BuildRefRule()
+        protected virtual Nfa BuildRefRule()
         {
             return Nfa.Choice(
                 Nfa.Rule(Bindings.NameReference),
                 Nfa.MatchAny(AlloyLexer.KW_UNIV, AlloyLexer.KW_INT2, AlloyLexer.KW_SEQINT));
+        }
+
+        private void TryBindRule(RuleBinding ruleBinding, Nfa nfa)
+        {
+            Contract.Requires(ruleBinding != null);
+            if (nfa == null)
+                return;
+
+            Nfa.BindRule(ruleBinding, nfa);
         }
 
         public static class RuleNames
@@ -779,7 +792,7 @@
             public static readonly string Ref = "Ref";
         }
 
-        private class RuleBindings
+        protected class RuleBindings
         {
             public readonly RuleBinding CompilationUnit = new RuleBinding(RuleNames.CompilationUnit);
             public readonly RuleBinding Specification = new RuleBinding(RuleNames.Specification);

@@ -291,7 +291,7 @@
 
         private NetworkInterpreter CreateNetworkInterpreter(ITokenStream tokens)
         {
-            Network network = AlloySimplifiedAtnBuilder.BuildNetwork();
+            Network network = NetworkBuilder<AlloySimplifiedAtnBuilder>.GetOrBuildNetwork();
 
             NetworkInterpreter interpreter = new NetworkInterpreter(network, tokens);
 

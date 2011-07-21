@@ -102,7 +102,7 @@
                     return;
                 }
 
-                Network network = AlloySimplifiedAtnBuilder.BuildNetwork();
+                Network network = NetworkBuilder<AlloySimplifiedAtnBuilder>.GetOrBuildNetwork();
 
                 RuleBinding memberSelectRule = network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.BinOpExpr18);
 #if DEBUG
