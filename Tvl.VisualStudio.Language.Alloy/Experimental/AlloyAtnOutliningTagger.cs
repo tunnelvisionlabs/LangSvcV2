@@ -122,7 +122,10 @@
 
                     var blockSpan = OutlineBlock(firstBraceTransition.Token, lastBraceTransition.Token, snapshot);
                     if (blockSpan != null)
+                    {
                         outliningRegions.Add(blockSpan);
+                        break;
+                    }
                 }
             }
 
@@ -148,74 +151,17 @@
 
             NetworkInterpreter interpreter = new NetworkInterpreter(network, tokens);
 
-            //RuleBinding memberSelectRule = network.GetRule(AlloyOutliningAtnBuilder.RuleNames.BinOpExpr18);
-            //interpreter.BoundaryRules.Add(memberSelectRule);
-
-            ////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.LetDecl));
-            ////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.QuantDecls));
-            ////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.Decl));
-            //////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.NameList));
-            //////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.NameListName));
-            ////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.Ref));
-            ////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.Open));
-            ////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.FactDecl));
-            ////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.AssertDecl));
-            //////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.FunDecl));
-            //////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.FunctionName));
-            ////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.CmdDecl));
-            ////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.Typescope));
-            ////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.EnumDecl));
-            ////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.ElseClause));
-            ////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.Module));
-
-            //interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.LetDecl));
-            //interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.QuantDecls));
-            //interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.Decl));
-
-            // /* adding this rule definitely didn't help! */
-            ////interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.Expr));
-
-            //interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.Module));
-            //interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.FactDeclHeader));
-            //interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.AssertDeclHeader));
-            //interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.FunFunctionName));
-            //interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.PredFunctionName));
-            //interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.FunctionReturn));
-            //interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.SigDeclHeader));
-            //interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.SigExt));
-
             interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.AssertDecl));
             interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.EnumDecl));
             interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.FactDecl));
             interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.FunDecl));
             interpreter.BoundaryRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.SigDecl));
 
-            ////interpreter.ExcludedStartRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.CallArguments));
             interpreter.ExcludedStartRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.SigBody));
             interpreter.ExcludedStartRules.Add(network.GetRule(AlloyOutliningAtnBuilder.RuleNames.Block));
 
             return interpreter;
         }
-
-        //private void HandleBackgroundParseComplete(object sender, ParseResultEventArgs e)
-        //{
-        //    AntlrParseResultEventArgs antlrParseResultArgs = e as AntlrParseResultEventArgs;
-        //    if (antlrParseResultArgs == null)
-        //        return;
-
-        //    UpdateTags(antlrParseResultArgs);
-        //}
-
-        //private void UpdateTags(AntlrParseResultEventArgs antlrParseResultArgs)
-        //{
-        //    List<ITagSpan<IOutliningRegionTag>> outliningRegions = null;
-        //    IAstRuleReturnScope parseResult = antlrParseResultArgs.Result as IAstRuleReturnScope;
-        //    if (parseResult != null)
-        //        outliningRegions = AlloyOutliningTaggerWalker.ExtractOutliningRegions(parseResult, antlrParseResultArgs.Tokens, _provider, antlrParseResultArgs.Snapshot);
-
-        //    this._outliningRegions = outliningRegions ?? new List<ITagSpan<IOutliningRegionTag>>();
-        //    OnTagsChanged(new SnapshotSpanEventArgs(new SnapshotSpan(antlrParseResultArgs.Snapshot, new Span(0, antlrParseResultArgs.Snapshot.Length))));
-        //}
 
         private void OnTagsChanged(SnapshotSpanEventArgs e)
         {
