@@ -76,13 +76,20 @@
 
             HashSet<State> reachableOptimizedStates = GetReachableStates(Rules);
 
+            int removed = RemoveUnreachableStates(Rules, reachableStates, ruleStartStates);
+
             foreach (var state in reachableOptimizedStates)
             {
                 if (!state.IsOptimized && (state.OutgoingTransitions.Count == 0 || state.IncomingTransitions.Any(i => i.IsRecursive)))
+                {
+                    bool hadTransitions = state.OutgoingTransitions.Count > 0;
                     state.Optimize();
+                    if (hadTransitions)
+                        removed = RemoveUnreachableStates(Rules, reachableStates, ruleStartStates);
+                }
             }
 
-            RemoveUnreachableStates(Rules, reachableStates, ruleStartStates);
+            //RemoveUnreachableStates(Rules, reachableStates, ruleStartStates);
 
             //ExportDot(AlloyParser.tokenNames, ruleBindings, reachableOptimizedStates, stateRules, @"C:\dev\SimpleC\TestGenerated\AlloySimplifiedOptimized.dot");
             //ExportDgml(AlloyParser.tokenNames, ruleBindings, reachableOptimizedStates, stateRules, @"C:\dev\SimpleC\TestGenerated\AlloySimplifiedOptimized.dgml");
@@ -166,8 +173,10 @@
             }
         }
 
-        protected virtual void RemoveUnreachableStates(IEnumerable<RuleBinding> rules, HashSet<State> states, HashSet<State> ruleStartStates)
+        protected virtual int RemoveUnreachableStates(IEnumerable<RuleBinding> rules, HashSet<State> states, HashSet<State> ruleStartStates)
         {
+            int removedCount = 0;
+
             while (true)
             {
                 HashSet<State> reachableStates = GetReachableStates(rules);
@@ -185,6 +194,7 @@
                      */
                     if (!reachableStates.Contains(state))
                     {
+                        removedCount++;
                         removed = true;
                         foreach (var transition in state.OutgoingTransitions.ToArray())
                             state.RemoveTransition(transition);
@@ -192,8 +202,10 @@
                 }
 
                 if (!removed)
-                    return;
+                    break;
             }
+
+            return removedCount;
         }
 
         protected virtual Dictionary<int, RuleBinding> RenumberStates(HashSet<State> reachableStates, HashSet<State> allStates, Dictionary<int, RuleBinding> stateRules)
