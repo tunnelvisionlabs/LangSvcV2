@@ -111,21 +111,6 @@
 #endif
 
                 NetworkInterpreter interpreter = new NetworkInterpreter(network, tokens);
-                interpreter.BoundaryStates.Add(memberSelectRule.StartState);
-                //interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.UnaryExpression).StartState);
-                interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.LetDecl).StartState);
-                interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.NameList).StartState);
-                interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.NameListName).StartState);
-                interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Ref).StartState);
-                interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Module).StartState);
-                interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Open).StartState);
-                interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.FactDecl).StartState);
-                interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.AssertDecl).StartState);
-                interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.FunctionName).StartState);
-                interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.CmdDecl).StartState);
-                interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Typescope).StartState);
-                interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.EnumDecl).StartState);
-                interpreter.BoundaryStates.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.ElseClause).StartState);
 
                 interpreter.BoundaryRules.Add(memberSelectRule);
                 //interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.UnaryExpression));
@@ -154,7 +139,7 @@
                      * traces with a transition reachable from binOpExpr18 should contain a push
                      * transition with binOpExpr18's start state as its target.
                      */
-                    if (interpreter.Contexts.All(context => IsBounded(context, interpreter)))
+                    if (interpreter.Contexts.All(context => context.BoundedStart))
                     {
                         break;
                     }
@@ -401,53 +386,7 @@
         }
 #endif
 
-        private static bool IsBounded(InterpretTrace trace, NetworkInterpreter interpreter)
-        {
-            return trace.BoundedStart;
-#if false
-            if (trace.Transitions.Count == 0)
-                return false;
-
-            bool boundedStart = false;
-            if (trace.Transitions.Count > 0)
-            {
-                bool stateBoundary = trace.Interpreter.BoundaryStates.Contains(trace.Transitions.First.Value.Transition.SourceState);
-                bool ruleBoundary = false;
-                PushContextTransition pushContextTransition = trace.Transitions.First.Value.Transition as PushContextTransition;
-                if (pushContextTransition != null)
-                {
-                    ruleBoundary = pushContextTransition.ContextIdentifiers.Any(i => trace.Interpreter.BoundaryRules.Contains(trace.Network.ContextRules[i]));
-                }
-
-                if (stateBoundary || ruleBoundary)
-                {
-                    bool nested = false;
-                    for (ContextFrame parent = trace.StartContext.Parent; parent != null; parent = parent.Parent)
-                    {
-                        if (parent.Context != null)
-                        {
-                            string contextRule = trace.Network.ContextRules[parent.Context.Value];
-                            if (trace.Interpreter.BoundaryRules.Contains(contextRule))
-                            {
-                                nested = true;
-                            }
-                            else
-                            {
-                                RuleBinding ruleBinding = trace.Network.GetRule(contextRule);
-                                if (trace.Interpreter.BoundaryStates.Contains(ruleBinding.StartState))
-                                    nested = true;
-                            }
-                        }
-                    }
-
-                    boundedStart = !nested;
-                }
-            }
-
-            return boundedStart;
-#endif
-        }
-
+#if DEBUG
         private static void GetReachableTransitions(RuleBinding memberSelectRule, HashSet<Transition> memberSelectTransitions)
         {
             GetReachableTransitions(memberSelectRule.StartState, memberSelectTransitions);
@@ -474,6 +413,7 @@
                 }
             }
         }
+#endif
 
         public void Dispose()
         {

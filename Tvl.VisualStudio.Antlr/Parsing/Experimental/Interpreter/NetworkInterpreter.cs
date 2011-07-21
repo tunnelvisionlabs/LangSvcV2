@@ -22,8 +22,6 @@
 #endif
 
         private readonly HashSet<RuleBinding> _boundaryRules = new HashSet<RuleBinding>(ObjectReferenceEqualityComparer<RuleBinding>.Default);
-        private readonly HashSet<State> _boundaryStates = new HashSet<State>(ObjectReferenceEqualityComparer<State>.Default);
-        private readonly HashSet<State> _forwardBoundaryStates = new HashSet<State>(ObjectReferenceEqualityComparer<State>.Default);
         private readonly HashSet<RuleBinding> _excludedStartRules = new HashSet<RuleBinding>(ObjectReferenceEqualityComparer<RuleBinding>.Default);
 
         private int _lookBehindPosition = 0;
@@ -75,22 +73,6 @@
             get
             {
                 return _boundaryRules;
-            }
-        }
-
-        public ICollection<State> BoundaryStates
-        {
-            get
-            {
-                return _boundaryStates;
-            }
-        }
-
-        public ICollection<State> ForwardBoundaryStates
-        {
-            get
-            {
-                return _forwardBoundaryStates;
             }
         }
 

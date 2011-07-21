@@ -61,7 +61,6 @@
             bool boundedStart = BoundedStart;
             if (!boundedStart && Transitions.Count > 0)
             {
-                bool stateBoundary = Interpreter.BoundaryStates.Contains(Transitions.First.Value.Transition.SourceState);
                 bool ruleBoundary = false;
                 PushContextTransition pushContextTransition = Transitions.First.Value.Transition as PushContextTransition;
                 if (pushContextTransition != null)
@@ -83,7 +82,7 @@
                     }
                 }
 
-                if (stateBoundary || ruleBoundary)
+                if (ruleBoundary)
                 {
                     bool nested = false;
                     for (ContextFrame parent = StartContext.Parent; parent != null; parent = parent.Parent)
@@ -92,14 +91,7 @@
 
                         RuleBinding contextRule = Network.ContextRules[parent.Context.Value];
                         if (Interpreter.BoundaryRules.Contains(contextRule))
-                        {
                             nested = true;
-                        }
-                        else
-                        {
-                            if (Interpreter.BoundaryStates.Contains(contextRule.StartState))
-                                nested = true;
-                        }
                     }
 
                     boundedStart = !nested;
@@ -190,13 +182,7 @@
             else if (transition.IsEpsilon)
             {
                 ContextFrame startContext = new ContextFrame(transition.SourceState, this.StartContext.Context, this.StartContext.Parent, Interpreter);
-
-                bool addTransition = !boundedStart && Interpreter.BoundaryStates.Contains(transition.SourceState);
-                result = new InterpretTrace(startContext, this.EndContext, this.Transitions, boundedStart, this.BoundedEnd, !addTransition);
-
-                if (addTransition)
-                    result.Transitions.AddFirst(new InterpretTraceTransition(transition, Interpreter));
-
+                result = new InterpretTrace(startContext, this.EndContext, this.Transitions, boundedStart, this.BoundedEnd, true);
                 return true;
             }
 
@@ -213,7 +199,6 @@
             bool boundedEnd = BoundedEnd;
             if (!boundedEnd && Transitions.Count > 0)
             {
-                bool stateBoundary = Interpreter.BoundaryStates.Contains(Transitions.Last.Value.Transition.TargetState);
                 bool ruleBoundary = false;
                 PopContextTransition popContextTransition = Transitions.Last.Value.Transition as PopContextTransition;
                 if (popContextTransition != null)
@@ -235,7 +220,7 @@
                     }
                 }
 
-                if (stateBoundary || ruleBoundary)
+                if (ruleBoundary)
                 {
                     bool nested = false;
                     for (ContextFrame parent = EndContext.Parent; parent != null; parent = parent.Parent)
@@ -244,14 +229,7 @@
 
                         RuleBinding contextRule = Network.ContextRules[parent.Context.Value];
                         if (Interpreter.BoundaryRules.Contains(contextRule))
-                        {
                             nested = true;
-                        }
-                        else
-                        {
-                            if (Interpreter.BoundaryStates.Contains(contextRule.StartState))
-                                nested = true;
-                        }
                     }
 
                     boundedEnd = !nested;
@@ -342,13 +320,7 @@
             else if (transition.IsEpsilon)
             {
                 ContextFrame endContext = new ContextFrame(transition.TargetState, this.EndContext.Context, this.EndContext.Parent, Interpreter);
-
-                bool addTransition = !boundedEnd && Interpreter.BoundaryStates.Contains(transition.TargetState);
-                result = new InterpretTrace(this.StartContext, endContext, this.Transitions, this.BoundedStart, boundedEnd, !addTransition);
-
-                if (addTransition)
-                    result.Transitions.AddLast(new InterpretTraceTransition(transition, Interpreter));
-
+                result = new InterpretTrace(this.StartContext, endContext, this.Transitions, this.BoundedStart, boundedEnd, true);
                 return true;
             }
 
