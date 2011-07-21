@@ -2,12 +2,15 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
+    using Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter;
     using Tvl.VisualStudio.Shell.OutputWindow;
 
     internal sealed class AlloySymbolTagger : BackgroundParser, ITagger<IClassificationTag>
@@ -68,8 +71,7 @@
              *  - KW_FACT (name is optional)
              *  - KW_ASSERT (name is optional)
              */
-            List<IToken> singleNameKeywords = new List<IToken>();
-            List<IToken> qualifiedNameKeywords = new List<IToken>();
+            List<IToken> nameKeywords = new List<IToken>();
             List<IToken> declColons = new List<IToken>();
 
             List<IToken> identifiers = new List<IToken>();
@@ -89,12 +91,13 @@
                 case AlloyLexer.KW_ASSERT:
                 case AlloyLexer.KW_RUN:
                 case AlloyLexer.KW_CHECK:
-                    singleNameKeywords.Add(tokens.LT(1));
-                    break;
+                case AlloyLexer.KW_EXTENDS:
 
                 case AlloyLexer.KW_FUN:
                 case AlloyLexer.KW_PRED:
-                    qualifiedNameKeywords.Add(tokens.LT(1));
+
+                case AlloyLexer.KW_SIG:
+                    nameKeywords.Add(tokens.LT(1));
                     break;
 
                 case AlloyLexer.COLON:
@@ -116,72 +119,153 @@
             HashSet<IToken> definitions = new HashSet<IToken>(TokenIndexEqualityComparer.Default);
             HashSet<IToken> references = new HashSet<IToken>(TokenIndexEqualityComparer.Default);
 
-            foreach (var token in singleNameKeywords)
+            foreach (var token in nameKeywords)
             {
                 tokens.Seek(token.TokenIndex);
-                tokens.Consume();
-                List<IToken> nameTokens = ReadName(tokens);
-
-                switch (token.Type)
+                NetworkInterpreter interpreter = CreateNetworkInterpreter(tokens);
+                while (interpreter.TryStepForward())
                 {
-                case AlloyLexer.KW_RUN:
-                case AlloyLexer.KW_CHECK:
-                    references.UnionWith(nameTokens);
-                    break;
+                    if (interpreter.Contexts.Count == 0)
+                        break;
 
-                default:
-                    definitions.UnionWith(nameTokens);
-                    break;
-                }
-            }
-
-            foreach (var token in qualifiedNameKeywords)
-            {
-                tokens.Seek(token.TokenIndex);
-                tokens.Consume();
-                List<IToken> refTokens = null;
-                List<IToken> nameTokens = ReadName(tokens);
-
-                if (tokens.LA(1) == AlloyLexer.DOT)
-                {
-                    refTokens = nameTokens;
-                    tokens.Consume();
-                    nameTokens = ReadName(tokens);
+                    if (interpreter.Contexts.All(context => context.BoundedEnd))
+                        break;
                 }
 
-                if (refTokens != null)
-                    references.UnionWith(refTokens);
+                foreach (var context in interpreter.Contexts)
+                {
+                    foreach (var transition in context.Transitions)
+                    {
+                        if (!transition.Symbol.HasValue)
+                            continue;
 
-                definitions.UnionWith(nameTokens);
+                        switch (transition.Symbol)
+                        {
+                        case AlloyLexer.IDENTIFIER:
+                        case AlloyLexer.KW_THIS:
+                            RuleBinding rule = interpreter.Network.StateRules[transition.Transition.TargetState.Id];
+                            if (rule.Name != AlloySimplifiedAtnBuilder.RuleNames.NameDefinition)
+                                references.Add(tokens.Get(transition.TokenIndex.Value));
+                            if (rule.Name != AlloySimplifiedAtnBuilder.RuleNames.NameReference)
+                                definitions.Add(tokens.Get(transition.TokenIndex.Value));
+                            break;
+
+                        default:
+                            continue;
+                        }
+                    }
+                }
             }
 
             foreach (var token in declColons)
             {
-                // have to read names in reverse
                 tokens.Seek(token.TokenIndex);
+                tokens.Consume();
 
-                while (true)
+                NetworkInterpreter interpreter = CreateNetworkInterpreter(tokens);
+                while (interpreter.TryStepBackward())
                 {
-                    tokens.Seek(tokens.LT(1).TokenIndex);
-                    List<IToken> nameTokens = ReadNameReverse(tokens);
-                    definitions.UnionWith(nameTokens);
-                    switch (tokens.LA(-1))
-                    {
-                    case AlloyLexer.COMMA:
-                    //case AlloyLexer.IDENTIFIER:
-                    //case AlloyLexer.KW_THIS:
-                        tokens.Seek(tokens.LT(-1).TokenIndex);
-                        continue;
-
-                    default:
+                    if (interpreter.Contexts.Count == 0)
                         break;
-                    }
 
-                    break;
+                    if (interpreter.Contexts.All(context => context.BoundedStart))
+                        break;
+                }
+
+                while (interpreter.TryStepForward())
+                {
+                    if (interpreter.Contexts.Count == 0)
+                        break;
+
+                    if (interpreter.Contexts.All(context => context.BoundedEnd))
+                        break;
+                }
+
+                foreach (var context in interpreter.Contexts)
+                {
+                    foreach (var transition in context.Transitions)
+                    {
+                        if (!transition.Symbol.HasValue)
+                            continue;
+
+                        switch (transition.Symbol)
+                        {
+                        case AlloyLexer.IDENTIFIER:
+                        case AlloyLexer.KW_THIS:
+                            RuleBinding rule = interpreter.Network.StateRules[transition.Transition.TargetState.Id];
+                            if (rule.Name != AlloySimplifiedAtnBuilder.RuleNames.NameDefinition)
+                                references.Add(tokens.Get(transition.TokenIndex.Value));
+                            if (rule.Name != AlloySimplifiedAtnBuilder.RuleNames.NameReference)
+                                definitions.Add(tokens.Get(transition.TokenIndex.Value));
+                            break;
+
+                        default:
+                            continue;
+                        }
+                    }
                 }
             }
 
-            HashSet<IToken> unknownIdentifiers = new HashSet<IToken>(identifiers, TokenIndexEqualityComparer.Default);
+            foreach (var token in identifiers)
+            {
+                if (definitions.Contains(token) || references.Contains(token))
+                    continue;
+
+                tokens.Seek(token.TokenIndex);
+                tokens.Consume();
+
+                NetworkInterpreter interpreter = CreateNetworkInterpreter(tokens);
+                while (interpreter.TryStepBackward())
+                {
+                    if (interpreter.Contexts.Count == 0)
+                        break;
+
+                    if (interpreter.Contexts.All(context => context.BoundedStart))
+                        break;
+                }
+
+                while (interpreter.TryStepForward())
+                {
+                    if (interpreter.Contexts.Count == 0)
+                        break;
+
+                    if (interpreter.Contexts.All(context => context.BoundedEnd))
+                        break;
+                }
+
+                foreach (var context in interpreter.Contexts)
+                {
+                    foreach (var transition in context.Transitions)
+                    {
+                        if (!transition.Symbol.HasValue)
+                            continue;
+
+                        switch (transition.Symbol)
+                        {
+                        case AlloyLexer.IDENTIFIER:
+                        case AlloyLexer.KW_THIS:
+                            RuleBinding rule = interpreter.Network.StateRules[transition.Transition.TargetState.Id];
+                            if (rule.Name != AlloySimplifiedAtnBuilder.RuleNames.NameDefinition)
+                                references.Add(tokens.Get(transition.TokenIndex.Value));
+                            if (rule.Name != AlloySimplifiedAtnBuilder.RuleNames.NameReference)
+                                definitions.Add(tokens.Get(transition.TokenIndex.Value));
+                            break;
+
+                        default:
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            // tokens which are in both the 'definitions' and 'references' sets are actually unknown.
+            HashSet<IToken> unknownIdentifiers = new HashSet<IToken>(definitions, TokenIndexEqualityComparer.Default);
+            unknownIdentifiers.IntersectWith(references);
+            definitions.ExceptWith(unknownIdentifiers);
+            references.ExceptWith(unknownIdentifiers);
+
+            // the full set of unknown identifiers are any that aren't explicitly classified as a definition or a reference
+            unknownIdentifiers = new HashSet<IToken>(identifiers, TokenIndexEqualityComparer.Default);
             unknownIdentifiers.ExceptWith(definitions);
             unknownIdentifiers.ExceptWith(references);
 
@@ -201,6 +285,53 @@
             OnTagsChanged(new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, new Span(0, snapshot.Length))));
         }
 
+        private NetworkInterpreter CreateNetworkInterpreter(CommonTokenStream tokens)
+        {
+            Network network = AlloySimplifiedAtnBuilder.BuildNetwork();
+
+            NetworkInterpreter interpreter = new NetworkInterpreter(network, tokens);
+
+            RuleBinding memberSelectRule = network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.BinOpExpr18);
+            interpreter.BoundaryRules.Add(memberSelectRule);
+
+            //interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.LetDecl));
+            //interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.QuantDecls));
+            //interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Decl));
+            ////interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.NameList));
+            ////interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.NameListName));
+            //interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Ref));
+            //interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Open));
+            //interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.FactDecl));
+            //interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.AssertDecl));
+            ////interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.FunDecl));
+            ////interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.FunctionName));
+            //interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.CmdDecl));
+            //interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Typescope));
+            //interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.EnumDecl));
+            //interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.ElseClause));
+            //interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Module));
+
+            interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.LetDecl));
+            interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.QuantDecls));
+            interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Decl));
+
+            /* adding this rule definitely didn't help! */
+            //interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Expr));
+
+            interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.Module));
+            interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.FactDeclHeader));
+            interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.AssertDeclHeader));
+            interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.FunFunctionName));
+            interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.PredFunctionName));
+            interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.FunctionReturn));
+            interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.SigDeclHeader));
+            interpreter.BoundaryRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.SigExt));
+
+            //interpreter.ExcludedStartRules.Add(network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.CallArguments));
+
+            return interpreter;
+        }
+
         private static IEnumerable<ITagSpan<IClassificationTag>> ClassifyTokens(ITextSnapshot snapshot, IEnumerable<IToken> tokens, IClassificationTag classificationTag)
         {
             foreach (var token in tokens)
@@ -208,73 +339,6 @@
                 SnapshotSpan span = new SnapshotSpan(snapshot, Span.FromBounds(token.StartIndex, token.StopIndex + 1));
                 yield return new TagSpan<IClassificationTag>(span, classificationTag);
             }
-        }
-
-        private List<IToken> ReadName(ITokenStream tokenStream)
-        {
-            List<IToken> tokens = new List<IToken>();
-
-            // 'this' | IDENTIFIER
-            switch (tokenStream.LA(1))
-            {
-            case AlloyLexer.IDENTIFIER:
-            case AlloyLexer.KW_THIS:
-                tokens.Add(tokenStream.LT(1));
-                tokenStream.Consume();
-                break;
-
-            default:
-                return tokens;
-            }
-
-            while (true)
-            {
-                if (tokenStream.LA(1) != AlloyLexer.SLASH || tokenStream.LA(2) != AlloyLexer.IDENTIFIER)
-                    return tokens;
-
-                tokens.Add(tokenStream.LT(1));
-                tokenStream.Consume();
-                tokens.Add(tokenStream.LT(1));
-                tokenStream.Consume();
-            }
-        }
-
-        private List<IToken> ReadNameReverse(ITokenStream tokenStream)
-        {
-            List<IToken> tokens = new List<IToken>();
-            int offset = -1;
-
-            // ('this' | IDENTIFIER) ('/' IDENTIFIER)*
-            while (true)
-            {
-                switch (tokenStream.LA(offset))
-                {
-                case AlloyLexer.IDENTIFIER:
-                    tokens.Add(tokenStream.LT(offset));
-                    if (tokenStream.LA(offset - 1) == AlloyLexer.SLASH)
-                    {
-                        tokens.Add(tokenStream.LT(offset - 1));
-                        offset -= 2;
-                        continue;
-                    }
-
-                    break;
-
-                case AlloyLexer.KW_THIS:
-                    tokens.Add(tokenStream.LT(offset));
-                    break;
-
-                default:
-                    break;
-                }
-
-                break;
-            }
-
-            if (tokens.Count > 0)
-                tokenStream.Seek(tokens[tokens.Count - 1].TokenIndex);
-
-            return tokens;
         }
 
         private class TokenIndexEqualityComparer : IEqualityComparer<IToken>
