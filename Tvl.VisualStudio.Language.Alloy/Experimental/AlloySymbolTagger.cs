@@ -28,6 +28,14 @@
             RequestParse(false);
         }
 
+        public override string Name
+        {
+            get
+            {
+                return "Symbol Tagger";
+            }
+        }
+
         public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
             return _tags;

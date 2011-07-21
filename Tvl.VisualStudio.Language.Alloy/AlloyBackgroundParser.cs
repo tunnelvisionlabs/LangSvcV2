@@ -21,6 +21,14 @@
             Contract.Requires(outputWindowService != null);
         }
 
+        public override string Name
+        {
+            get
+            {
+                return "Default";
+            }
+        }
+
         public AntlrParseResultEventArgs PreviousParseResult
         {
             get;

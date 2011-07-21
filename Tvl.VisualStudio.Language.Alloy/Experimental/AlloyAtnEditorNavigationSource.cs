@@ -25,6 +25,14 @@
 
         public event EventHandler NavigationTargetsChanged;
 
+        public override string Name
+        {
+            get
+            {
+                return "Editor Navigation Source";
+            }
+        }
+
         public IEnumerable<IEditorNavigationType> GetNavigationTypes()
         {
             yield return _provider.EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Types);

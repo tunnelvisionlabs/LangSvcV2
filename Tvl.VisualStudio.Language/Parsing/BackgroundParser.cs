@@ -104,6 +104,14 @@
             }
         }
 
+        public virtual string Name
+        {
+            get
+            {
+                return string.Empty;
+            }
+        }
+
         protected ITextDocumentFactoryService TextDocumentFactoryService
         {
             get
@@ -191,7 +199,10 @@
 
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
-                string message = "{0}: Background parse {1} in {2}ms. {3}";
+                string message = "{0}: Background parse {1}{2} in {3}ms. {4}";
+                string name = Name;
+                if (!string.IsNullOrEmpty(name))
+                    name = "(" + name + ") ";
 
                 string filename = "<Unknown File>";
                 ITextDocument textDocument;
@@ -211,7 +222,7 @@
                         if (outputWindow != null)
                         {
                             long time = stopwatch.ElapsedMilliseconds;
-                            outputWindow.WriteLine(string.Format(message, filename, "succeeded", time, string.Empty));
+                            outputWindow.WriteLine(string.Format(message, filename, name, "succeeded", time, string.Empty));
                         }
                     }
                     catch (Exception e3)
@@ -230,7 +241,7 @@
                         if (outputWindow != null)
                         {
                             long time = stopwatch.ElapsedMilliseconds;
-                            outputWindow.WriteLine(string.Format(message, filename, "failed", time, e2.Message + e2.StackTrace));
+                            outputWindow.WriteLine(string.Format(message, filename, name, "failed", time, e2.Message + e2.StackTrace));
                         }
                     }
                     catch (Exception e3)

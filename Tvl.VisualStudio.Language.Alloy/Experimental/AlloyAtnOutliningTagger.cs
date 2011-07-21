@@ -24,6 +24,14 @@
             RequestParse(false);
         }
 
+        public override string Name
+        {
+            get
+            {
+                return "Outlining Tagger";
+            }
+        }
+
         public IEnumerable<ITagSpan<IOutliningRegionTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
             return _outliningRegions ?? Enumerable.Empty<ITagSpan<IOutliningRegionTag>>();
