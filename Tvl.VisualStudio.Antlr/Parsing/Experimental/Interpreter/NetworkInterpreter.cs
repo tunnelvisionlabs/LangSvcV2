@@ -102,6 +102,26 @@
             }
         }
 
+        public void CombineBoundedStartContexts()
+        {
+            IList<InterpretTrace> contexts = _contexts.Distinct(BoundedStartInterpretTraceEqualityComparer.Default).ToList();
+            if (contexts.Count != _contexts.Count)
+            {
+                _contexts.Clear();
+                _contexts.AddRange(contexts);
+            }
+        }
+
+        public void CombineBoundedEndContexts()
+        {
+            IList<InterpretTrace> contexts = _contexts.Distinct(BoundedEndInterpretTraceEqualityComparer.Default).ToList();
+            if (contexts.Count != _contexts.Count)
+            {
+                _contexts.Clear();
+                _contexts.AddRange(contexts);
+            }
+        }
+
         public bool TryStepBackward()
         {
             if (_input.Index - _lookBehindPosition <= 0)
@@ -161,8 +181,18 @@
                 states.Clear();
             }
 
-            _contexts.AddRange(contexts);
-            _boundedStartContexts.UnionWith(_contexts.Where(i => i.BoundedStart));
+            bool success = false;
+            if (contexts.Count > 0)
+            {
+                _contexts.AddRange(contexts);
+                _boundedStartContexts.UnionWith(_contexts.Where(i => i.BoundedStart));
+                success = true;
+            }
+            else
+            {
+                _contexts.AddRange(existing);
+            }
+
             long nfaUpdateTime = updateTimer.ElapsedMilliseconds;
 
 #if DFA
@@ -194,8 +224,10 @@
             long dfaUpdateTime = updateTimer.ElapsedMilliseconds;
 #endif
 
-            _lookBehindPosition++;
-            return true;
+            if (success)
+                _lookBehindPosition++;
+
+            return success;
         }
 
         public bool TryStepForward()
@@ -248,12 +280,24 @@
                 states.Clear();
             }
 
-            _contexts.AddRange(contexts);
-            _boundedEndContexts.UnionWith(_contexts.Where(i => i.BoundedEnd));
+            bool success = false;
+            if (contexts.Count > 0)
+            {
+                _contexts.AddRange(contexts);
+                _boundedEndContexts.UnionWith(_contexts.Where(i => i.BoundedEnd));
+                success = true;
+            }
+            else
+            {
+                _contexts.AddRange(existing);
+            }
+
             long nfaUpdateTime = updateTimer.ElapsedMilliseconds;
 
-            _lookAheadPosition++;
-            return true;
+            if (success)
+                _lookAheadPosition++;
+
+            return success;
         }
 
         private void StepBackward(ICollection<InterpretTrace> result, ICollection<int> states, InterpretTrace context, int symbol, int symbolPosition, PreventContextType preventContextType)
