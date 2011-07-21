@@ -285,7 +285,7 @@
             OnTagsChanged(new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, new Span(0, snapshot.Length))));
         }
 
-        private NetworkInterpreter CreateNetworkInterpreter(CommonTokenStream tokens)
+        private NetworkInterpreter CreateNetworkInterpreter(ITokenStream tokens)
         {
             Network network = AlloySimplifiedAtnBuilder.BuildNetwork();
 
