@@ -1,9 +1,5 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy.IntellisenseModel
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using Microsoft.VisualStudio.Text;
 
     public class ConstantExpression : Expression
@@ -32,6 +28,14 @@
             {
                 return _span;
             }
+        }
+
+        public override string ToString()
+        {
+            if (Value == null)
+                return "<null>";
+
+            return _value.ToString();
         }
     }
 }
