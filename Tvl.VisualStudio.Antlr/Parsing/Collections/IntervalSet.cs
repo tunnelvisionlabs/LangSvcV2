@@ -39,7 +39,19 @@
 
         public IntervalSet(IList<Interval> intervals)
         {
-            this.intervals = intervals;
+            List<Interval> orderedIntervals = intervals.OrderBy(i => i.Start).ToList();
+            for (int i = 0; i < orderedIntervals.Count - 1; i++)
+            {
+                Interval? union = orderedIntervals[i].Union(orderedIntervals[i + 1]);
+                if (union != null)
+                {
+                    orderedIntervals[i] = union.Value;
+                    orderedIntervals.RemoveAt(i + 1);
+                    i--; // repeat this index
+                }
+            }
+
+            this.intervals = orderedIntervals;
         }
 
         public int Count
