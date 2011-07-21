@@ -173,7 +173,7 @@
                         transition.IsRecursive = true;
                     }
 
-                    AddTransition(transition);
+                    AddTransitionInternal(transition);
                     return;
                 }
 
@@ -245,7 +245,7 @@
                         }
                         else if (!added)
                         {
-                            AddTransition(transition);
+                            AddTransitionInternal(transition);
                             added = true;
                         }
                     }
@@ -367,39 +367,7 @@
             Contract.Requires<InvalidOperationException>(!OutgoingTransitions.Contains(transition));
             Contract.Requires<InvalidOperationException>(!transition.TargetState.IncomingTransitions.Contains(transition));
 
-            _outgoingTransitions.Add(transition);
-            transition.TargetState.IncomingTransitions.Add(transition);
-            transition.SourceState = this;
-
-            PopContextTransition popContextTransition = transition as PopContextTransition;
-            PushContextTransition pushContextTransition = transition as PushContextTransition;
-            if (popContextTransition != null)
-            {
-                foreach (var pushTransition in popContextTransition.PushTransitions)
-                {
-                    Contract.Assert(pushTransition.ContextIdentifiers.First() == popContextTransition.ContextIdentifiers.Last());
-                    Contract.Assert(pushTransition.SourceState != null);
-                    pushTransition.PopTransitions.Add(popContextTransition);
-                }
-
-                Contract.Assert(Contract.ForAll(OutgoingTransitions.OfType<PushContextTransition>(), i => i.ContextIdentifiers.Last() != popContextTransition.ContextIdentifiers.First() || popContextTransition.PushTransitions.Contains(i)));
-            }
-            else if (pushContextTransition != null)
-            {
-                foreach (var popTransition in pushContextTransition.PopTransitions)
-                {
-                    Contract.Assert(popTransition.ContextIdentifiers.Last() == pushContextTransition.ContextIdentifiers.First());
-                    Contract.Assert(popTransition.SourceState != null);
-                    popTransition.PushTransitions.Add(pushContextTransition);
-                }
-
-                Contract.Assert(Contract.ForAll(OutgoingTransitions.OfType<PopContextTransition>(), i => i.ContextIdentifiers.Last() != pushContextTransition.ContextIdentifiers.First() || pushContextTransition.PopTransitions.Contains(i)));
-            }
-
-            _followSet = null;
-            _isForwardRecursive = null;
-            transition.TargetState._sourceSet = null;
-            transition.TargetState._isBackwardRecursive = null;
+            AddTransitionInternal(transition);
         }
 
         public void RemoveTransition(Transition transition)
@@ -412,36 +380,7 @@
             Contract.Ensures(!Contract.OldValue(transition.SourceState).OutgoingTransitions.Contains(transition));
             Contract.Ensures(!transition.TargetState.IncomingTransitions.Contains(transition));
 
-            Contract.Assert(transition.TargetState.IncomingTransitions.Contains(transition));
-
-            PopContextTransition popContextTransition = transition as PopContextTransition;
-            if (popContextTransition != null)
-            {
-                foreach (var pushTransition in popContextTransition.PushTransitions)
-                {
-                    Contract.Assert(pushTransition.PopTransitions.Contains(transition));
-                    pushTransition.PopTransitions.Remove(popContextTransition);
-                }
-            }
-
-            PushContextTransition pushContextTransition = transition as PushContextTransition;
-            if (pushContextTransition != null)
-            {
-                foreach (var popTransition in pushContextTransition.PopTransitions)
-                {
-                    Contract.Assert(popTransition.PushTransitions.Contains(transition));
-                    popTransition.PushTransitions.Remove(pushContextTransition);
-                }
-            }
-
-            OutgoingTransitions.Remove(transition);
-            transition.TargetState.IncomingTransitions.Remove(transition);
-
-            _followSet = null;
-            _isForwardRecursive = null;
-            transition.TargetState._sourceSet = null;
-            transition.TargetState._isBackwardRecursive = null;
-            transition.SourceState = null;
+            RemoveTransitionInternal(transition);
         }
 
         public IntervalSet GetSourceSet()
@@ -634,6 +573,90 @@
         public override string ToString()
         {
             return string.Format("State {0}{1} {2}/{3}", Id, IsOptimized ? "!" : string.Empty, IncomingTransitions.Count, OutgoingTransitions.Count);
+        }
+
+        private void AddTransitionInternal(Transition transition)
+        {
+            Contract.Requires(transition != null);
+            Contract.Requires(transition.SourceState == null);
+            Contract.Requires(!OutgoingTransitions.Contains(transition));
+            Contract.Requires(!transition.TargetState.IncomingTransitions.Contains(transition));
+
+            _outgoingTransitions.Add(transition);
+            transition.TargetState.IncomingTransitions.Add(transition);
+            transition.SourceState = this;
+
+            PopContextTransition popContextTransition = transition as PopContextTransition;
+            PushContextTransition pushContextTransition = transition as PushContextTransition;
+            if (popContextTransition != null)
+            {
+                foreach (var pushTransition in popContextTransition.PushTransitions)
+                {
+                    Contract.Assert(pushTransition.ContextIdentifiers.First() == popContextTransition.ContextIdentifiers.Last());
+                    Contract.Assert(pushTransition.SourceState != null);
+                    pushTransition.PopTransitions.Add(popContextTransition);
+                }
+
+                Contract.Assert(Contract.ForAll(OutgoingTransitions.OfType<PushContextTransition>(), i => i.ContextIdentifiers.Last() != popContextTransition.ContextIdentifiers.First() || popContextTransition.PushTransitions.Contains(i)));
+            }
+            else if (pushContextTransition != null)
+            {
+                foreach (var popTransition in pushContextTransition.PopTransitions)
+                {
+                    Contract.Assert(popTransition.ContextIdentifiers.Last() == pushContextTransition.ContextIdentifiers.First());
+                    Contract.Assert(popTransition.SourceState != null);
+                    popTransition.PushTransitions.Add(pushContextTransition);
+                }
+
+                Contract.Assert(Contract.ForAll(OutgoingTransitions.OfType<PopContextTransition>(), i => i.ContextIdentifiers.Last() != pushContextTransition.ContextIdentifiers.First() || pushContextTransition.PopTransitions.Contains(i)));
+            }
+
+            _followSet = null;
+            _isForwardRecursive = null;
+            transition.TargetState._sourceSet = null;
+            transition.TargetState._isBackwardRecursive = null;
+        }
+
+        private void RemoveTransitionInternal(Transition transition)
+        {
+            Contract.Requires(transition != null, "transition");
+            Contract.Requires(transition.SourceState == this);
+            Contract.Requires(OutgoingTransitions.Contains(transition));
+
+            Contract.Ensures(transition.SourceState == null);
+            Contract.Ensures(!Contract.OldValue(transition.SourceState).OutgoingTransitions.Contains(transition));
+            Contract.Ensures(!transition.TargetState.IncomingTransitions.Contains(transition));
+
+            Contract.Assert(transition.TargetState.IncomingTransitions.Contains(transition));
+
+            PopContextTransition popContextTransition = transition as PopContextTransition;
+            if (popContextTransition != null)
+            {
+                foreach (var pushTransition in popContextTransition.PushTransitions)
+                {
+                    Contract.Assert(pushTransition.PopTransitions.Contains(transition));
+                    pushTransition.PopTransitions.Remove(popContextTransition);
+                }
+            }
+
+            PushContextTransition pushContextTransition = transition as PushContextTransition;
+            if (pushContextTransition != null)
+            {
+                foreach (var popTransition in pushContextTransition.PopTransitions)
+                {
+                    Contract.Assert(popTransition.PushTransitions.Contains(transition));
+                    popTransition.PushTransitions.Remove(pushContextTransition);
+                }
+            }
+
+            OutgoingTransitions.Remove(transition);
+            transition.TargetState.IncomingTransitions.Remove(transition);
+
+            _followSet = null;
+            _isForwardRecursive = null;
+            transition.TargetState._sourceSet = null;
+            transition.TargetState._isBackwardRecursive = null;
+            transition.SourceState = null;
         }
     }
 }
