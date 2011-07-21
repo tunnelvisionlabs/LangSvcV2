@@ -65,8 +65,10 @@
                             {
                                 // the matching pop transitions should always end in this rule
                                 Contract.Assert(popTransition.ContextIdentifiers.Last() == pushContext.ContextIdentifiers.First());
+#if ALL_CHECKS
                                 // matching is symmetric
                                 Contract.Assert(popTransition.PushTransitions.Contains(pushContext));
+#endif
                                 // make sure there are no "matching" transitions which were removed by a call to State.RemoveTransition
                                 Contract.Assert(popTransition.SourceState != null);
 
@@ -80,6 +82,19 @@
                         PopContextTransition popContext = transition as PopContextTransition;
                         if (popContext != null)
                         {
+                            foreach (var pushTransition in popContext.PushTransitions)
+                            {
+                                // the matching push transitions should always start in this rule
+                                Contract.Assert(pushTransition.ContextIdentifiers.First() == popContext.ContextIdentifiers.Last());
+#if ALL_CHECKS
+                                // matching is symmetric
+                                Contract.Assert(pushTransition.PopTransitions.Contains(popContext));
+#endif
+                                // make sure there are no "matching" transitions which were removed by a call to State.RemoveTransition
+                                Contract.Assert(pushTransition.SourceState != null);
+                            }
+
+                            ExtractStatesAndTransitions(null, transition.TargetState, states, transitions, stateRules, contextRules);
                             continue;
                         }
 

@@ -122,15 +122,15 @@
             }
 
             PreventContextType preventContextType = PreventContextType.None;
-            if (transition.IsContext)
+            if (transition.IsContext && !transition.IsRecursive)
             {
                 if (transition is PushContextTransition)
                     preventContextType = PreventContextType.Push;
                 else if (transition is PopContextTransition)
                     preventContextType = PreventContextType.Pop;
 
-                if (transition.IsRecursive)
-                    preventContextType++; // only block non-recursive transitions
+                //if (transition.IsRecursive)
+                //    preventContextType++; // only block non-recursive transitions
             }
 
             if (!transition.SourceState.GetSourceSet(preventContextType).Contains(symbol))
@@ -274,15 +274,15 @@
             }
 
             PreventContextType preventContextType = PreventContextType.None;
-            if (transition.IsContext)
+            if (transition.IsContext && !transition.IsRecursive)
             {
                 if (transition is PushContextTransition)
                     preventContextType = PreventContextType.Push;
                 else if (transition is PopContextTransition)
                     preventContextType = PreventContextType.Pop;
 
-                if (transition.IsRecursive)
-                    preventContextType++; // only block non-recursive transitions
+                //if (transition.IsRecursive)
+                //    preventContextType++; // only block non-recursive transitions
             }
 
             if (!transition.TargetState.GetFollowSet(preventContextType).Contains(symbol))

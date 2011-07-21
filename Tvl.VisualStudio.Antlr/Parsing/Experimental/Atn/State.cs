@@ -163,18 +163,34 @@
             Contract.Requires(transition != null);
             Contract.Requires(transition.SourceState == null);
 
+            List<State> addedStates = null;
+
             try
             {
-                if (transition.IsMatch || transition.TargetState.OutgoingTransitions.Count == 0 || !visited.Add(transition.TargetState))
+                while (true)
                 {
-                    if (!transition.IsMatch && transition.TargetState.OutgoingTransitions.Count > 0)
+                    if (transition.IsMatch || transition.TargetState.OutgoingTransitions.Count == 0 || !visited.Add(transition.TargetState))
                     {
-                        // must be here because it's a recursive state
-                        transition.IsRecursive = true;
+                        if (!transition.IsMatch && transition.TargetState.OutgoingTransitions.Count > 0)
+                        {
+                            // must be here because it's a recursive state
+                            transition.IsRecursive = true;
+                        }
+
+                        AddTransitionInternal(transition);
+                        return;
                     }
 
-                    AddTransitionInternal(transition);
-                    return;
+                    // inline merge of single epsilon transitions
+                    if (transition.TargetState.OutgoingTransitions.Count == 1 && transition.TargetState.OutgoingTransitions[0].IsEpsilon)
+                    {
+                        transition = MergeTransitions(transition, transition.TargetState.OutgoingTransitions[0]);
+                        addedStates = addedStates ?? new List<State>();
+                        addedStates.Add(transition.TargetState);
+                        continue;
+                    }
+
+                    break;
                 }
 
                 bool added = false;
@@ -191,11 +207,11 @@
 
                         break;
 
-                    case PreventContextType.PopNonRecursive:
-                        if ((!transition.IsRecursive) && (transition is PopContextTransition))
-                            preventMerge = true;
+                    //case PreventContextType.PopNonRecursive:
+                    //    if ((!transition.IsRecursive) && (transition is PopContextTransition))
+                    //        preventMerge = true;
 
-                        break;
+                    //    break;
 
                     case PreventContextType.Push:
                         if (transition is PushContextTransition)
@@ -203,11 +219,11 @@
 
                         break;
 
-                    case PreventContextType.PushNonRecursive:
-                        if ((!transition.IsRecursive) && (transition is PushContextTransition))
-                            preventMerge = true;
+                    //case PreventContextType.PushNonRecursive:
+                    //    if ((!transition.IsRecursive) && (transition is PushContextTransition))
+                    //        preventMerge = true;
 
-                        break;
+                    //    break;
 
                     default:
                         break;
@@ -221,15 +237,15 @@
                     else if (transition.IsContext)
                     {
                         PreventContextType nextPreventContextType = PreventContextType.None;
-                        if (!preventMerge && transition.TargetState.IsOptimized)
+                        if (!preventMerge && transition.TargetState.IsOptimized && !nextTransition.IsRecursive)
                         {
                             if (nextTransition is PushContextTransition)
                                 nextPreventContextType = PreventContextType.Push;
                             else if (nextTransition is PopContextTransition)
                                 nextPreventContextType = PreventContextType.Pop;
 
-                            if (nextTransition.IsRecursive)
-                                nextPreventContextType++; // only block non-recursive transitions
+                            //if (nextTransition.IsRecursive)
+                            //    nextPreventContextType = PreventContextType.None; // only block non-recursive transitions
                         }
 
                         bool canMerge = !preventMerge && !nextTransition.IsMatch;
@@ -237,6 +253,16 @@
                         if (canMerge && nextTransition.IsContext)
                         {
                             canMerge = nextTransition.GetType() == transition.GetType();
+
+                            if (canMerge)
+                            {
+                                bool recursive = ((ContextTransition)transition).ContextIdentifiers.Any(((ContextTransition)nextTransition).ContextIdentifiers.Contains);
+                                if (recursive)
+                                {
+                                    transition.IsRecursive = true;
+                                    canMerge = false;
+                                }
+                            }
                         }
 
                         if (canMerge)
@@ -254,6 +280,8 @@
             finally
             {
                 visited.Remove(transition.TargetState);
+                if (addedStates != null)
+                    visited.ExceptWith(addedStates);
             }
         }
 
@@ -416,11 +444,11 @@
 
                         break;
 
-                    case PreventContextType.PopNonRecursive:
-                        if ((!transition.IsRecursive) && (transition is PopContextTransition))
-                            continue;
+                    //case PreventContextType.PopNonRecursive:
+                    //    if ((!transition.IsRecursive) && (transition is PopContextTransition))
+                    //        continue;
 
-                        break;
+                    //    break;
 
                     case PreventContextType.Push:
                         if (transition is PushContextTransition)
@@ -428,11 +456,11 @@
 
                         break;
 
-                    case PreventContextType.PushNonRecursive:
-                        if ((!transition.IsRecursive) && (transition is PushContextTransition))
-                            continue;
+                    //case PreventContextType.PushNonRecursive:
+                    //    if ((!transition.IsRecursive) && (transition is PushContextTransition))
+                    //        continue;
 
-                        break;
+                    //    break;
 
                     default:
                         break;
@@ -444,13 +472,15 @@
                     if (transition.IsContext)
                     {
                         nextPreventContextType = PreventContextType.None;
-                        if (transition is PushContextTransition)
+                        if (transition.IsRecursive)
+                            nextPreventContextType = PreventContextType.None;
+                        else if (transition is PushContextTransition)
                             nextPreventContextType = PreventContextType.Push;
                         else if (transition is PopContextTransition)
                             nextPreventContextType = PreventContextType.Pop;
 
-                        if (transition.IsRecursive)
-                            nextPreventContextType++; // only block non-recursive transitions
+                        //if (transition.IsRecursive)
+                        //    nextPreventContextType++; // only block non-recursive transitions
                     }
 
                     if (transition.SourceState._sourceSet != null && transition.SourceState._sourceSet[(int)nextPreventContextType] != null)
@@ -508,11 +538,11 @@
 
                         break;
 
-                    case PreventContextType.PopNonRecursive:
-                        if ((!transition.IsRecursive) && (transition is PopContextTransition))
-                            continue;
+                    //case PreventContextType.PopNonRecursive:
+                    //    if ((!transition.IsRecursive) && (transition is PopContextTransition))
+                    //        continue;
 
-                        break;
+                    //    break;
 
                     case PreventContextType.Push:
                         if (transition is PushContextTransition)
@@ -520,11 +550,11 @@
 
                         break;
 
-                    case PreventContextType.PushNonRecursive:
-                        if ((!transition.IsRecursive) && (transition is PushContextTransition))
-                            continue;
+                    //case PreventContextType.PushNonRecursive:
+                    //    if ((!transition.IsRecursive) && (transition is PushContextTransition))
+                    //        continue;
 
-                        break;
+                    //    break;
 
                     default:
                         break;
@@ -536,15 +566,15 @@
                     if (transition.IsContext)
                     {
                         nextPreventContextType = PreventContextType.None;
-                        if (transition.SourceState.IsOptimized)
+                        if (transition.SourceState.IsOptimized && !transition.IsRecursive)
                         {
                             if (transition is PushContextTransition)
                                 nextPreventContextType = PreventContextType.Push;
                             else if (transition is PopContextTransition)
                                 nextPreventContextType = PreventContextType.Pop;
 
-                            if (transition.IsRecursive)
-                                nextPreventContextType++; // only block non-recursive transitions
+                            //if (transition.IsRecursive)
+                            //    nextPreventContextType++; // only block non-recursive transitions
                         }
                     }
 
@@ -579,8 +609,39 @@
         {
             Contract.Requires(transition != null);
             Contract.Requires(transition.SourceState == null);
+#if ALL_CHECKS
             Contract.Requires(!OutgoingTransitions.Contains(transition));
             Contract.Requires(!transition.TargetState.IncomingTransitions.Contains(transition));
+#endif
+
+            if (transition.IsContext && transition.IsRecursive)
+            {
+                PopContextTransition first = transition as PopContextTransition;
+                if (first != null)
+                {
+                    foreach (var existing in OutgoingTransitions.OfType<PopContextTransition>().ToArray())
+                    {
+                        if (existing.TargetState != transition.TargetState)
+                            continue;
+
+                        if (first.ContextIdentifiers.Take(existing.ContextIdentifiers.Count).SequenceEqual(existing.ContextIdentifiers))
+                            RemoveTransitionInternal(existing);
+                    }
+                }
+
+                PushContextTransition second = transition as PushContextTransition;
+                if (second != null)
+                {
+                    foreach (var existing in OutgoingTransitions.OfType<PushContextTransition>().ToArray())
+                    {
+                        if (existing.TargetState != transition.TargetState)
+                            continue;
+
+                        if (second.ContextIdentifiers.Take(existing.ContextIdentifiers.Count).SequenceEqual(existing.ContextIdentifiers))
+                            RemoveTransitionInternal(existing);
+                    }
+                }
+            }
 
             _outgoingTransitions.Add(transition);
             transition.TargetState.IncomingTransitions.Add(transition);
@@ -597,7 +658,9 @@
                     pushTransition.PopTransitions.Add(popContextTransition);
                 }
 
+#if ALL_CHECKS
                 Contract.Assert(Contract.ForAll(OutgoingTransitions.OfType<PushContextTransition>(), i => i.ContextIdentifiers.Last() != popContextTransition.ContextIdentifiers.First() || popContextTransition.PushTransitions.Contains(i)));
+#endif
             }
             else if (pushContextTransition != null)
             {
@@ -608,7 +671,9 @@
                     popTransition.PushTransitions.Add(pushContextTransition);
                 }
 
+#if ALL_CHECKS
                 Contract.Assert(Contract.ForAll(OutgoingTransitions.OfType<PopContextTransition>(), i => i.ContextIdentifiers.Last() != pushContextTransition.ContextIdentifiers.First() || pushContextTransition.PopTransitions.Contains(i)));
+#endif
             }
 
             _followSet = null;

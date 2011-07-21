@@ -16,6 +16,7 @@
         {
             Contract.Requires<ArgumentNullException>(contextIdentifiers != null, "contextIdentifiers");
             Contract.Requires<ArgumentException>(contextIdentifiers.Any());
+            Contract.Requires(contextIdentifiers.Distinct().Count() == contextIdentifiers.Count());
 
             _contextIdentifiers = contextIdentifiers.ToArray();
         }
@@ -25,6 +26,7 @@
         {
             Contract.Requires<ArgumentNullException>(contextIdentifiers != null, "contextIdentifiers");
             Contract.Requires<ArgumentException>(contextIdentifiers.Length > 0);
+            Contract.Requires(contextIdentifiers.Distinct().Count() == contextIdentifiers.Count());
 
             _contextIdentifiers = contextIdentifiers.CloneArray();
         }
