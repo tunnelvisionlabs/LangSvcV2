@@ -105,6 +105,7 @@ specification
 	:	module? open* paragraph*
 	;
 
+public
 module
 	:	'module'^ name ('[' 'exactly'? name (',' 'exactly'? number)* ']')?
 	;
@@ -129,6 +130,14 @@ funDecl
 	:	'private'?
 		(	'fun'^ functionName functionParameters? functionReturn block
 		|	'pred'^ functionName functionParameters? block
+		)
+	;
+
+public
+funDeclGenericBody
+	:	'private'?
+		(	'fun'^ functionName functionParameters? functionReturn genericBlock
+		|	'pred'^ functionName functionParameters? genericBlock
 		)
 	;
 
@@ -180,6 +189,11 @@ sigDecl
 	:	sigQual* 'sig'^ nameDeclList sigExt? sigBody block?
 	;
 
+public
+sigDeclNoBlock
+	:	sigQual* 'sig'^ nameDeclList sigExt? sigBody
+	;
+
 nameList
 	:	name (','^ name (','! name)*)?
 	;
@@ -192,6 +206,7 @@ sigBody
 	:	'{'^ (decl (','! decl)* ','!?)? '}'
 	;
 
+public
 enumDecl
 	:	'enum'^ name enumBody
 	;
@@ -403,6 +418,14 @@ arrowMultiplicity
 
 block
 	:	'{'^ expr* '}'
+	;
+
+genericBlock
+	:	'{'^
+			(	~('{'|'}'|'enum'|'fact'|'assert'|'fun'|'pred'|'abstract'|'sig'|'run'|'check'|'expect'|'for'|'but'|'exactly')!
+			|	genericBlock!
+			)*
+		'}'
 	;
 
 //blockOrBar

@@ -147,6 +147,8 @@
     <Compile Include="AlloyTextStructureNavigator.cs" />
     <Compile Include="AlloyTextStructureNavigatorProvider.cs" />
     <None Include="Experimental\AlloyAtnBuilder.cs" />
+    <Compile Include="Experimental\AlloyAtnEditorNavigationSource.cs" />
+    <Compile Include="Experimental\AlloyAtnEditorNavigationSourceProvider.cs" />
     <Compile Include="Experimental\AlloyAtnOutliningTagger.cs" />
     <Compile Include="Experimental\AlloyAtnOutliningTaggerProvider.cs" />
     <Compile Include="Experimental\AlloyOutliningAtnBuilder.cs" />

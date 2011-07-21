@@ -3,11 +3,14 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr.Runtime;
     using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
+    using Tvl.VisualStudio.Language.Alloy.Experimental;
+    using Tvl.VisualStudio.Shell.OutputWindow;
     using Tvl.VisualStudio.Text.Navigation;
     using ImageSource = System.Windows.Media.ImageSource;
 
@@ -15,31 +18,43 @@
     {
         private readonly List<IEditorNavigationTarget> _targets = new List<IEditorNavigationTarget>();
         private readonly ReadOnlyCollection<IToken> _tokens;
-        private readonly AlloyEditorNavigationSourceProvider _provider;
-        private readonly ITextSnapshot _snapshot;
+        private readonly IEditorNavigationTypeRegistryService _editorNavigationTypeRegistryService;
+        private readonly IGlyphService _glyphService;
 
         private string _moduleName = string.Empty;
 
-        private AlloyEditorNavigationSourceWalker(ITreeNodeStream input, ReadOnlyCollection<IToken> tokens, AlloyEditorNavigationSourceProvider provider, ITextSnapshot snapshot)
-            : base(input, snapshot, provider.OutputWindowService)
+        private AlloyEditorNavigationSourceWalker(ITreeNodeStream input, ITextSnapshot snapshot, ReadOnlyCollection<IToken> tokens, IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService, IGlyphService glyphService, IOutputWindowService outputWindowService)
+            : base(input, snapshot, outputWindowService)
         {
+            Contract.Requires<ArgumentNullException>(editorNavigationTypeRegistryService != null, "editorNavigationTypeRegistryService");
+            Contract.Requires<ArgumentNullException>(glyphService != null, "glyphService");
+
             _tokens = tokens;
-            _provider = provider;
-            _snapshot = snapshot;
+            _editorNavigationTypeRegistryService = editorNavigationTypeRegistryService;
+            _glyphService = glyphService;
         }
 
         private IEditorNavigationTypeRegistryService EditorNavigationTypeRegistryService
         {
             get
             {
-                return _provider.EditorNavigationTypeRegistryService;
+                return _editorNavigationTypeRegistryService;
             }
         }
 
         public static List<IEditorNavigationTarget> ExtractNavigationTargets(IAstRuleReturnScope parseResult, ReadOnlyCollection<IToken> tokens, AlloyEditorNavigationSourceProvider provider, ITextSnapshot snapshot)
         {
             BufferedTreeNodeStream input = new BufferedTreeNodeStream(parseResult.Tree);
-            AlloyEditorNavigationSourceWalker walker = new AlloyEditorNavigationSourceWalker(input, tokens, provider, snapshot);
+            AlloyEditorNavigationSourceWalker walker = new AlloyEditorNavigationSourceWalker(input, snapshot, tokens, provider.EditorNavigationTypeRegistryService, provider, provider.OutputWindowService);
+            walker.compilationUnit();
+
+            return walker._targets;
+        }
+
+        public static List<IEditorNavigationTarget> ExtractNavigationTargets(IAstRuleReturnScope parseResult, ReadOnlyCollection<IToken> tokens, AlloyAtnEditorNavigationSourceProvider provider, ITextSnapshot snapshot)
+        {
+            BufferedTreeNodeStream input = new BufferedTreeNodeStream(parseResult.Tree);
+            AlloyEditorNavigationSourceWalker walker = new AlloyEditorNavigationSourceWalker(input, snapshot, tokens, provider.EditorNavigationTypeRegistryService, provider, provider.OutputWindowService);
             walker.compilationUnit();
 
             return walker._targets;
@@ -76,7 +91,7 @@
         {
             var group = StandardGlyphGroup.GlyphGroupMethod;
             var item = isPrivate ? StandardGlyphItem.GlyphItemPrivate : StandardGlyphItem.GlyphItemPublic;
-            var glyph = _provider.GetGlyph(group, item);
+            var glyph = _glyphService.GetGlyph(group, item);
             HandleFunctionOrPredicate(function, name, parameters, returnSpec, glyph);
         }
 
@@ -84,7 +99,7 @@
         {
             var group = StandardGlyphGroup.GlyphGroupIntrinsic;
             var item = isPrivate ? StandardGlyphItem.GlyphItemPrivate : StandardGlyphItem.GlyphItemPublic;
-            var glyph = _provider.GetGlyph(group, item);
+            var glyph = _glyphService.GetGlyph(group, item);
             HandleFunctionOrPredicate(function, name, parameters, null, glyph);
         }
 
@@ -101,11 +116,11 @@
             var startToken = _tokens[tree.TokenStartIndex];
             var stopToken = _tokens[tree.TokenStopIndex];
             Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
-            SnapshotSpan ruleSpan = new SnapshotSpan(_snapshot, span);
-            SnapshotSpan ruleSeek = new SnapshotSpan(_snapshot, new Span(name.Token.StartIndex, 0));
+            SnapshotSpan ruleSpan = new SnapshotSpan(Snapshot, span);
+            SnapshotSpan ruleSeek = new SnapshotSpan(Snapshot, new Span(name.Token.StartIndex, 0));
             var group = tree.Type == KW_SIG ? StandardGlyphGroup.GlyphGroupStruct : StandardGlyphGroup.GlyphGroupEnum;
             var item = StandardGlyphItem.GlyphItemPublic;
-            var glyph = _provider.GetGlyph(group, item);
+            var glyph = _glyphService.GetGlyph(group, item);
             _targets.Add(new EditorNavigationTarget(fullName, navigationType, ruleSpan, ruleSeek, glyph));
         }
 
@@ -118,8 +133,8 @@
             var startToken = _tokens[tree.TokenStartIndex];
             var stopToken = _tokens[tree.TokenStopIndex];
             Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
-            SnapshotSpan ruleSpan = new SnapshotSpan(_snapshot, span);
-            SnapshotSpan ruleSeek = new SnapshotSpan(_snapshot, new Span(name.Token.StartIndex, 0));
+            SnapshotSpan ruleSpan = new SnapshotSpan(Snapshot, span);
+            SnapshotSpan ruleSeek = new SnapshotSpan(Snapshot, new Span(name.Token.StartIndex, 0));
 
             string functionDisplayName = (name.Type == DOT) ? GetNameText((CommonTree)name.Children[1]) : GetNameText(name);
             string thisType = (name.Type == DOT) ? GetNameText((CommonTree)name.Children[0]) : null;
