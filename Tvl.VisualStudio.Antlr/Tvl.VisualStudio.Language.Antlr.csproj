@@ -176,6 +176,7 @@
     <Compile Include="Parsing\Experimental\Atn\NetworkBuilder`1.cs" />
     <Compile Include="Parsing\Experimental\Interpreter\BoundedStartInterpretTraceEqualityComparer.cs" />
     <Compile Include="Parsing\Experimental\Interpreter\ContextFrame.cs" />
+    <Compile Include="Parsing\Experimental\Interpreter\BoundedEndInterpretTraceEqualityComparer.cs" />
     <Compile Include="Parsing\Experimental\Interpreter\DeterministicState.cs" />
     <Compile Include="Parsing\Experimental\Interpreter\DeterministicTrace.cs" />
     <Compile Include="Parsing\Experimental\Interpreter\DeterministicTraceTransition.cs" />

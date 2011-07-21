@@ -207,9 +207,56 @@
         {
             Contract.Requires<ArgumentNullException>(transition != null, "transition");
 
+            Contract.Assert(Network.States.ContainsKey(transition.TargetState.Id), "Attempted to step outside the network.");
+            //Contract.Assert(Network.States.ContainsKey(transition.TargetState.Id));
+
             bool boundedEnd = BoundedEnd;
-            if (!boundedEnd && Transitions.Count > 0 && Interpreter.ForwardBoundaryStates.Contains(Transitions.Last.Value.Transition.TargetState))
-                boundedEnd = true;
+            if (!boundedEnd && Transitions.Count > 0)
+            {
+                bool stateBoundary = Interpreter.BoundaryStates.Contains(Transitions.Last.Value.Transition.TargetState);
+                bool ruleBoundary = false;
+                PopContextTransition popContextTransition = Transitions.Last.Value.Transition as PopContextTransition;
+                if (popContextTransition != null)
+                {
+                    /* the rule boundary transfers from outside the rule to inside the rule (or
+                     * inside a rule invoked by this rule)
+                     */
+
+                    // first, check if the transition goes to this rule
+                    ruleBoundary = Interpreter.BoundaryRules.Contains(Network.StateRules[popContextTransition.TargetState.Id]);
+
+                    // next, check if the transition starts outside this rule and goes through this rule
+                    if (!ruleBoundary && !Interpreter.BoundaryRules.Contains(Network.ContextRules[popContextTransition.ContextIdentifiers.Last()]))
+                    {
+                        ruleBoundary =
+                            popContextTransition.ContextIdentifiers
+                            .Take(popContextTransition.ContextIdentifiers.Count - 1)
+                            .Any(i => Interpreter.BoundaryRules.Contains(Network.ContextRules[i]));
+                    }
+                }
+
+                if (stateBoundary || ruleBoundary)
+                {
+                    bool nested = false;
+                    for (ContextFrame parent = EndContext.Parent; parent != null; parent = parent.Parent)
+                    {
+                        Contract.Assert(parent.Context != null);
+
+                        RuleBinding contextRule = Network.ContextRules[parent.Context.Value];
+                        if (Interpreter.BoundaryRules.Contains(contextRule))
+                        {
+                            nested = true;
+                        }
+                        else
+                        {
+                            if (Interpreter.BoundaryStates.Contains(contextRule.StartState))
+                                nested = true;
+                        }
+                    }
+
+                    boundedEnd = !nested;
+                }
+            }
 
             result = null;
 
@@ -226,7 +273,19 @@
                 return true;
             }
 
-            if (!transition.TargetState.GetFollowSet().Contains(symbol))
+            PreventContextType preventContextType = PreventContextType.None;
+            if (transition.IsContext)
+            {
+                if (transition is PushContextTransition)
+                    preventContextType = PreventContextType.Push;
+                else if (transition is PopContextTransition)
+                    preventContextType = PreventContextType.Pop;
+
+                if (transition.IsRecursive)
+                    preventContextType++; // only block non-recursive transitions
+            }
+
+            if (!transition.TargetState.GetFollowSet(preventContextType).Contains(symbol))
                 return false;
 
             if (transition.IsContext)
@@ -236,7 +295,7 @@
                 {
                     ContextFrame subContext = this.EndContext;
                     foreach (var label in pushContextTransition.ContextIdentifiers)
-                        subContext = new ContextFrame(pushContextTransition.TargetState, null, new ContextFrame(subContext.State, label, subContext, Interpreter), Interpreter);
+                        subContext = new ContextFrame(pushContextTransition.TargetState, null, new ContextFrame(subContext.State, label, subContext.Parent, Interpreter), Interpreter);
 
                     result = new InterpretTrace(this.StartContext, subContext, this.Transitions, this.BoundedStart, boundedEnd, boundedEnd);
                     if (!boundedEnd)
@@ -283,8 +342,11 @@
             else if (transition.IsEpsilon)
             {
                 ContextFrame endContext = new ContextFrame(transition.TargetState, this.EndContext.Context, this.EndContext.Parent, Interpreter);
-                result = new InterpretTrace(this.StartContext, endContext, this.Transitions, this.BoundedStart, boundedEnd, boundedEnd);
-                if (!boundedEnd && Interpreter.ForwardBoundaryStates.Contains(transition.TargetState))
+
+                bool addTransition = !boundedEnd && Interpreter.BoundaryStates.Contains(transition.TargetState);
+                result = new InterpretTrace(this.StartContext, endContext, this.Transitions, this.BoundedStart, boundedEnd, !addTransition);
+
+                if (addTransition)
                     result.Transitions.AddLast(new InterpretTraceTransition(transition, Interpreter));
 
                 return true;

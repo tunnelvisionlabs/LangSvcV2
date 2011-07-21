@@ -16,6 +16,7 @@
 
         private readonly List<InterpretTrace> _contexts = new List<InterpretTrace>();
         private readonly HashSet<InterpretTrace> _boundedStartContexts = new HashSet<InterpretTrace>(BoundedStartInterpretTraceEqualityComparer.Default);
+        private readonly HashSet<InterpretTrace> _boundedEndContexts = new HashSet<InterpretTrace>(BoundedStartInterpretTraceEqualityComparer.Default);
 #if DFA
         private DeterministicTrace _deterministicTrace;
 #endif
@@ -148,7 +149,7 @@
             _contexts.Clear();
             SortedSet<int> states = new SortedSet<int>();
             HashSet<InterpretTrace> contexts = new HashSet<InterpretTrace>(EqualityComparer<InterpretTrace>.Default);
-#if DEBUG
+#if false
             HashSet<ContextFrame> existingUnique = new HashSet<ContextFrame>(existing.Select(i => i.StartContext), EqualityComparer<ContextFrame>.Default);
             Contract.Assert(existingUnique.Count == existing.Count);
 #endif
@@ -205,45 +206,52 @@
             int symbol = _input.LA(1 + _lookAheadPosition);
             int symbolPosition = _input.Index + _lookAheadPosition;
 
+            Stopwatch updateTimer = Stopwatch.StartNew();
+
             if (_lookAheadPosition == 0 && _lookBehindPosition == 0 && _contexts.Count == 0)
             {
-                /* create our initial set of states as the ones at the source end of a match transition
+                HashSet<InterpretTrace> initialContexts = new HashSet<InterpretTrace>(EqualityComparer<InterpretTrace>.Default);
+
+                /* create our initial set of states as the ones at the target end of a match transition
                  * that contains 'symbol' in the match set.
                  */
                 List<Transition> transitions = new List<Transition>(_network.Transitions.Where(i => i.IsMatch && i.MatchSet.Contains(symbol)));
                 foreach (var transition in transitions)
                 {
-                    if (_excludedStartRules.Contains(Network.StateRules[transition.SourceState.Id]))
+                    if (ExcludedStartRules.Contains(Network.StateRules[transition.SourceState.Id]))
                         continue;
 
-                    if (_excludedStartRules.Contains(Network.StateRules[transition.TargetState.Id]))
+                    if (ExcludedStartRules.Contains(Network.StateRules[transition.TargetState.Id]))
                         continue;
 
                     ContextFrame startContext = new ContextFrame(transition.SourceState, null, null, this);
                     ContextFrame endContext = new ContextFrame(transition.SourceState, null, null, this);
-                    _contexts.Add(new InterpretTrace(startContext, endContext));
+                    initialContexts.Add(new InterpretTrace(startContext, endContext));
                 }
+
+                _contexts.AddRange(initialContexts);
             }
 
             List<InterpretTrace> existing = new List<InterpretTrace>(_contexts);
             _contexts.Clear();
             SortedSet<int> states = new SortedSet<int>();
             HashSet<InterpretTrace> contexts = new HashSet<InterpretTrace>(EqualityComparer<InterpretTrace>.Default);
+#if false
+            HashSet<ContextFrame> existingUnique = new HashSet<ContextFrame>(existing.Select(i => i.StartContext), EqualityComparer<ContextFrame>.Default);
+            Contract.Assert(existingUnique.Count == existing.Count);
+#endif
 
             foreach (var context in existing)
             {
-                if (context.Transitions.Count > 0 && _forwardBoundaryStates.Contains(context.Transitions.Last.Value.Transition.TargetState))
-                {
-                    contexts.Add(context);
-                    continue;
-                }
-
                 states.Add(context.EndContext.State.Id);
-                StepForward(contexts, states, context, symbol, symbolPosition);
+                StepForward(contexts, states, context, symbol, symbolPosition, PreventContextType.None);
                 states.Clear();
             }
 
             _contexts.AddRange(contexts);
+            _boundedEndContexts.UnionWith(_contexts.Where(i => i.BoundedEnd));
+            long nfaUpdateTime = updateTimer.ElapsedMilliseconds;
+
             _lookAheadPosition++;
             return true;
         }
@@ -327,9 +335,9 @@
             }
         }
 
-        private void StepForward(ICollection<InterpretTrace> result, ICollection<int> states, InterpretTrace context, int symbol, int symbolPosition)
+        private void StepForward(ICollection<InterpretTrace> result, ICollection<int> states, InterpretTrace context, int symbol, int symbolPosition, PreventContextType preventContextType)
         {
-            //if (context.EndContext.State != null && _forwardBoundaryStates.Contains(context.EndContext.State))
+            //if (context.StartContext.State != null && _boundaryStates.Contains(context.StartContext.State))
             //{
             //    result.Add(context);
             //    return;
@@ -337,6 +345,36 @@
 
             foreach (var transition in context.EndContext.State.OutgoingTransitions)
             {
+                switch (preventContextType)
+                {
+                case PreventContextType.Pop:
+                    if (transition is PopContextTransition)
+                        continue;
+
+                    break;
+
+                case PreventContextType.PopNonRecursive:
+                    if ((!transition.IsRecursive) && (transition is PopContextTransition))
+                        continue;
+
+                    break;
+
+                case PreventContextType.Push:
+                    if (transition is PushContextTransition)
+                        continue;
+
+                    break;
+
+                case PreventContextType.PushNonRecursive:
+                    if ((!transition.IsRecursive) && (transition is PushContextTransition))
+                        continue;
+
+                    break;
+
+                default:
+                    break;
+                }
+
                 InterpretTrace step;
                 if (context.TryStepForward(transition, symbol, symbolPosition, out step))
                 {
@@ -347,7 +385,6 @@
                     }
 
                     bool recursive = transition.TargetState.IsForwardRecursive;
-
                     if (recursive && states.Contains(transition.TargetState.Id))
                     {
                         // TODO: check postfix rule
@@ -357,7 +394,19 @@
                     if (recursive)
                         states.Add(transition.TargetState.Id);
 
-                    StepForward(result, states, step, symbol, symbolPosition);
+                    PreventContextType nextPreventContextType = PreventContextType.None;
+                    if (context.EndContext.State.IsOptimized)
+                    {
+                        if (transition is PushContextTransition)
+                            nextPreventContextType = PreventContextType.Push;
+                        else if (transition is PopContextTransition)
+                            nextPreventContextType = PreventContextType.Pop;
+
+                        if (transition.IsRecursive)
+                            nextPreventContextType++; // only block non-recursive transitions
+                    }
+
+                    StepForward(result, states, step, symbol, symbolPosition, nextPreventContextType);
 
                     if (recursive)
                         states.Remove(transition.TargetState.Id);

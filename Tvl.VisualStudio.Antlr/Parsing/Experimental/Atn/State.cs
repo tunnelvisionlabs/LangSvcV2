@@ -549,43 +549,47 @@
             IntervalSet[] sets = _followSet ?? new IntervalSet[Enum.GetValues(typeof(PreventContextType)).Cast<int>().Max() + 1];
             IntervalSet set = new IntervalSet();
             HashSet<Transition> visited = new HashSet<Transition>(ObjectReferenceEqualityComparer<Transition>.Default);
-            Queue<Transition> queue = new Queue<Transition>(_outgoingTransitions);
-            PreventContextType nextPreventContextType = preventContextType;
+            var queue = new Queue<Tuple<Transition, PreventContextType>>(_outgoingTransitions.Select(i => Tuple.Create(i, preventContextType)));
 
             while (queue.Count > 0)
             {
-                Transition transition = queue.Dequeue();
+                var pair = queue.Dequeue();
+                Transition transition = pair.Item1;
+                PreventContextType nextPreventContextType = pair.Item2;
                 if (!visited.Add(transition))
                     continue;
 
-                switch (nextPreventContextType)
+                if (transition.IsContext)
                 {
-                case PreventContextType.Pop:
-                    if (transition is PopContextTransition)
-                        continue;
+                    switch (nextPreventContextType)
+                    {
+                    case PreventContextType.Pop:
+                        if (transition is PopContextTransition)
+                            continue;
 
-                    break;
+                        break;
 
-                case PreventContextType.PopNonRecursive:
-                    if ((!transition.IsRecursive) && (transition is PopContextTransition))
-                        continue;
+                    case PreventContextType.PopNonRecursive:
+                        if ((!transition.IsRecursive) && (transition is PopContextTransition))
+                            continue;
 
-                    break;
+                        break;
 
-                case PreventContextType.Push:
-                    if (transition is PushContextTransition)
-                        continue;
+                    case PreventContextType.Push:
+                        if (transition is PushContextTransition)
+                            continue;
 
-                    break;
+                        break;
 
-                case PreventContextType.PushNonRecursive:
-                    if ((!transition.IsRecursive) && (transition is PushContextTransition))
-                        continue;
+                    case PreventContextType.PushNonRecursive:
+                        if ((!transition.IsRecursive) && (transition is PushContextTransition))
+                            continue;
 
-                    break;
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
+                    }
                 }
 
                 if (transition.IsEpsilon || transition.IsContext)
@@ -612,7 +616,7 @@
                     else
                     {
                         foreach (var outgoing in transition.TargetState.OutgoingTransitions)
-                            queue.Enqueue(outgoing);
+                            queue.Enqueue(Tuple.Create(outgoing, nextPreventContextType));
                     }
                 }
                 else
