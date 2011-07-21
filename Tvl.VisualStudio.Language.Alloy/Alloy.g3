@@ -436,7 +436,7 @@ INTEGER
 	;
 
 WS
-	:	(' ' | '\t')*
+	:	(' ' | '\t')+
 		{Skip();}
 	;
 
@@ -453,4 +453,8 @@ COMMENT
 ML_COMMENT
 	:	'/*' .* '*/'
 		{Skip();}
+	;
+
+ANY_CHAR
+	:	.
 	;
