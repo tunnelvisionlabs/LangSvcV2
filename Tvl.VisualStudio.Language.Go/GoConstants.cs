@@ -9,7 +9,7 @@
          */
         public const string GoLanguageName = "Go";
         public const string GoContentType = GoLanguageName;
-        public const string GoFileExtension = ".java";
+        public const string GoFileExtension = ".go";
 
         // product registration
         public const int GoLanguageResourceId = 100;
