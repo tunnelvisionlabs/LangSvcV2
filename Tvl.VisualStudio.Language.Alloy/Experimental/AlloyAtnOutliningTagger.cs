@@ -21,6 +21,7 @@
         public AlloyAtnOutliningTagger(ITextBuffer textBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
             : base(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService)
         {
+            RequestParse(false);
         }
 
         public IEnumerable<ITagSpan<IOutliningRegionTag>> GetTags(NormalizedSnapshotSpanCollection spans)

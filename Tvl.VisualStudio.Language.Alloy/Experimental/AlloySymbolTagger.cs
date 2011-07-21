@@ -25,6 +25,7 @@
             : base(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService)
         {
             _classificationTypeRegistryService = classificationTypeRegistryService;
+            RequestParse(false);
         }
 
         public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans)
