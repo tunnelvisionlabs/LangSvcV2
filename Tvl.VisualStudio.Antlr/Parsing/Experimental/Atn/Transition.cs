@@ -7,8 +7,8 @@
 
     public abstract class Transition
     {
+        private readonly State _targetState;
         private State _sourceState;
-        private State _targetState;
         private bool _isRecursive;
 
         public Transition(State targetState)
@@ -85,9 +85,11 @@
 
         public override int GetHashCode()
         {
-            int source = _sourceState != null ? _sourceState.GetHashCode() : 0;
-            int target = _targetState != null ? _targetState.GetHashCode() : 0;
-            return source ^ target ^ (_isRecursive ? 1 : 0);
+            // this is the only value ensured to not change
+            return _targetState.GetHashCode();
+            //int source = _sourceState != null ? _sourceState.GetHashCode() : 0;
+            //int target = _targetState != null ? _targetState.GetHashCode() : 0;
+            //return source ^ target ^ (_isRecursive ? 1 : 0);
         }
     }
 }
