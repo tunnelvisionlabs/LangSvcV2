@@ -222,8 +222,8 @@
                      * inside a rule invoked by this rule)
                      */
 
-                    // first, check if the transition goes to this rule
-                    ruleBoundary = Interpreter.BoundaryRules.Contains(Network.StateRules[popContextTransition.TargetState.Id]);
+                    // first, check if the transition goes from this rule
+                    ruleBoundary = Interpreter.BoundaryRules.Contains(Network.StateRules[popContextTransition.SourceState.Id]);
 
                     // next, check if the transition starts outside this rule and goes through this rule
                     if (!ruleBoundary && !Interpreter.BoundaryRules.Contains(Network.ContextRules[popContextTransition.ContextIdentifiers.Last()]))
