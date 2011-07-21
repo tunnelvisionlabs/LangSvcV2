@@ -8,7 +8,9 @@
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow;
 
+#if false
     [Export(typeof(ITaggerProvider))]
+#endif
     [ContentType(AlloyConstants.AlloyContentType)]
     [TagType(typeof(IOutliningRegionTag))]
     public sealed class AlloyOutliningTaggerProvider : ITaggerProvider
