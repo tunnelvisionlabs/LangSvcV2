@@ -172,6 +172,8 @@
                         break;
                 }
 
+                interpreter.CombineBoundedStartContexts();
+
                 while (interpreter.TryStepForward())
                 {
                     if (interpreter.Contexts.Count == 0)
@@ -223,6 +225,8 @@
                     if (interpreter.Contexts.All(context => context.BoundedStart))
                         break;
                 }
+
+                interpreter.CombineBoundedStartContexts();
 
                 while (interpreter.TryStepForward())
                 {

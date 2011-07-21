@@ -89,6 +89,8 @@
                         break;
                 }
 
+                interpreter.CombineBoundedStartContexts();
+
                 while (interpreter.TryStepForward())
                 {
                     if (interpreter.Contexts.Count == 0)
