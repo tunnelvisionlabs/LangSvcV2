@@ -90,6 +90,15 @@
             }
         }
 
+        protected static void TryBindRule(RuleBinding ruleBinding, Nfa nfa)
+        {
+            Contract.Requires(ruleBinding != null);
+            if (nfa == null)
+                return;
+
+            Nfa.BindRule(ruleBinding, nfa);
+        }
+
         protected sealed override void BindRules()
         {
             BindRulesImpl();
@@ -724,15 +733,6 @@
             return Nfa.Choice(
                 Nfa.Rule(Bindings.NameReference),
                 Nfa.MatchAny(AlloyLexer.KW_UNIV, AlloyLexer.KW_INT2, AlloyLexer.KW_SEQINT));
-        }
-
-        private void TryBindRule(RuleBinding ruleBinding, Nfa nfa)
-        {
-            Contract.Requires(ruleBinding != null);
-            if (nfa == null)
-                return;
-
-            Nfa.BindRule(ruleBinding, nfa);
         }
 
         public static class RuleNames
