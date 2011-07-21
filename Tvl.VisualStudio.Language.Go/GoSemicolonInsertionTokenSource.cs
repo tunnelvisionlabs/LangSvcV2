@@ -15,10 +15,39 @@
 
         public IToken NextToken()
         {
+            IToken token = NextTokenImpl();
+            while (token != null && token.Channel == TokenChannels.Hidden)
+                token = NextTokenImpl();
+
+            return token;
+        }
+
+        public string SourceName
+        {
+            get
+            {
+                return _lexer.SourceName;
+            }
+        }
+
+        public string[] TokenNames
+        {
+            get
+            {
+                return _lexer.TokenNames;
+            }
+        }
+
+        private IToken NextTokenImpl()
+        {
             if (_nextTokenIsSemicolon)
             {
                 _nextTokenIsSemicolon = false;
-                return new CommonToken(_nextRealToken.InputStream, GoLexer.SEMI, TokenChannels.Default, _nextRealToken.StartIndex, _nextRealToken.StopIndex);
+                return
+                    new CommonToken(_nextRealToken.InputStream, GoLexer.SEMI, TokenChannels.Default, _nextRealToken.StartIndex, _nextRealToken.StopIndex)
+                    {
+                        Text = ";*"
+                    };
             }
 
             // handle the first token in the stream
@@ -54,22 +83,6 @@
             }
 
             return token;
-        }
-
-        public string SourceName
-        {
-            get
-            {
-                return _lexer.SourceName;
-            }
-        }
-
-        public string[] TokenNames
-        {
-            get
-            {
-                return _lexer.TokenNames;
-            }
         }
     }
 }
