@@ -118,7 +118,7 @@
                     if (token.Type == AlloyLexer.KW_SIG)
                     {
                         InterpretTraceTransition lastBodyBraceTransition = context.Transitions.LastOrDefault(i => i.Symbol == AlloyLexer.RBRACE && interpreter.Network.StateRules[i.Transition.SourceState.Id].Name == AlloyOutliningAtnBuilder.RuleNames.SigBody);
-                        if (lastBodyBraceTransition != lastBraceTransition)
+                        if (lastBodyBraceTransition != lastBraceTransition && lastBodyBraceTransition != null)
                         {
                             var bodySpan = OutlineBlock(firstBraceTransition.Token, lastBodyBraceTransition.Token, snapshot);
                             if (bodySpan != null)
