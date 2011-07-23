@@ -12,19 +12,19 @@
         /// </summary>
         Push,
 
-        ///// <summary>
-        ///// Block all non-recursive push transitions.
-        ///// </summary>
-        //PushNonRecursive,
+        /// <summary>
+        /// Block all recursive push transitions.
+        /// </summary>
+        PushRecursive,
 
         /// <summary>
         /// Block all pop transitions.
         /// </summary>
         Pop,
 
-        ///// <summary>
-        ///// Block all non-recursive pop transitions.
-        ///// </summary>
-        //PopNonRecursive,
+        /// <summary>
+        /// Block all recursive pop transitions.
+        /// </summary>
+        PopRecursive,
     }
 }

@@ -108,9 +108,6 @@
             startState.AddTransition(push);
             ruleBinding.EndState.AddTransition(pop);
 
-            push.PopTransitions.Add(pop);
-            pop.PushTransitions.Add(push);
-
             return new Nfa(startState, endState);
         }
 

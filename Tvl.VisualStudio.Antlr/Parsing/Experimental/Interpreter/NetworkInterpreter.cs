@@ -288,42 +288,39 @@
 
         private void StepBackward(ICollection<InterpretTrace> result, ICollection<int> states, InterpretTrace context, int symbol, int symbolPosition, PreventContextType preventContextType)
         {
-            //if (context.StartContext.State != null && _boundaryStates.Contains(context.StartContext.State))
-            //{
-            //    result.Add(context);
-            //    return;
-            //}
-
             foreach (var transition in context.StartContext.State.IncomingTransitions)
             {
-                switch (preventContextType)
+                if (transition.SourceState.IsOptimized)
                 {
-                case PreventContextType.Pop:
-                    if (transition is PopContextTransition)
-                        continue;
+                    switch (preventContextType)
+                    {
+                    case PreventContextType.Pop:
+                        if (!transition.IsRecursive && (transition is PopContextTransition))
+                            continue;
 
-                    break;
+                        break;
 
-                //case PreventContextType.PopNonRecursive:
-                //    if ((!transition.IsRecursive) && (transition is PopContextTransition))
-                //        continue;
+                    case PreventContextType.PopRecursive:
+                        if (transition.IsRecursive && (transition is PopContextTransition))
+                            continue;
 
-                //    break;
+                        break;
 
-                case PreventContextType.Push:
-                    if (transition is PushContextTransition)
-                        continue;
+                    case PreventContextType.Push:
+                        if (!transition.IsRecursive && (transition is PushContextTransition))
+                            continue;
 
-                    break;
+                        break;
 
-                //case PreventContextType.PushNonRecursive:
-                //    if ((!transition.IsRecursive) && (transition is PushContextTransition))
-                //        continue;
+                    case PreventContextType.PushRecursive:
+                        if (transition.IsRecursive && (transition is PushContextTransition))
+                            continue;
 
-                //    break;
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
+                    }
                 }
 
                 InterpretTrace step;
@@ -346,15 +343,12 @@
                         states.Add(transition.SourceState.Id);
 
                     PreventContextType nextPreventContextType = PreventContextType.None;
-                    if (context.StartContext.State.IsOptimized && !transition.IsRecursive)
+                    if (context.StartContext.State.IsOptimized)
                     {
                         if (transition is PushContextTransition)
-                            nextPreventContextType = PreventContextType.Push;
+                            nextPreventContextType = transition.IsRecursive ? PreventContextType.PushRecursive : PreventContextType.Push;
                         else if (transition is PopContextTransition)
-                            nextPreventContextType = PreventContextType.Pop;
-
-                        //if (transition.IsRecursive)
-                        //    nextPreventContextType++; // only block non-recursive transitions
+                            nextPreventContextType = transition.IsRecursive ? PreventContextType.PopRecursive : PreventContextType.Pop;
                     }
 
                     StepBackward(result, states, step, symbol, symbolPosition, nextPreventContextType);
@@ -367,39 +361,33 @@
 
         private void StepForward(ICollection<InterpretTrace> result, ICollection<int> states, InterpretTrace context, int symbol, int symbolPosition, PreventContextType preventContextType)
         {
-            //if (context.StartContext.State != null && _boundaryStates.Contains(context.StartContext.State))
-            //{
-            //    result.Add(context);
-            //    return;
-            //}
-
             foreach (var transition in context.EndContext.State.OutgoingTransitions)
             {
                 switch (preventContextType)
                 {
                 case PreventContextType.Pop:
-                    if (transition is PopContextTransition)
+                    if (!transition.IsRecursive && (transition is PopContextTransition))
                         continue;
 
                     break;
 
-                //case PreventContextType.PopNonRecursive:
-                //    if ((!transition.IsRecursive) && (transition is PopContextTransition))
-                //        continue;
+                case PreventContextType.PopRecursive:
+                    if (transition.IsRecursive && (transition is PopContextTransition))
+                        continue;
 
-                //    break;
+                    break;
 
                 case PreventContextType.Push:
-                    if (transition is PushContextTransition)
+                    if (!transition.IsRecursive && (transition is PushContextTransition))
                         continue;
 
                     break;
 
-                //case PreventContextType.PushNonRecursive:
-                //    if ((!transition.IsRecursive) && (transition is PushContextTransition))
-                //        continue;
+                case PreventContextType.PushRecursive:
+                    if (transition.IsRecursive && (transition is PushContextTransition))
+                        continue;
 
-                //    break;
+                    break;
 
                 default:
                     break;
@@ -425,15 +413,12 @@
                         states.Add(transition.TargetState.Id);
 
                     PreventContextType nextPreventContextType = PreventContextType.None;
-                    if (context.EndContext.State.IsOptimized && !transition.IsRecursive)
+                    if (context.EndContext.State.IsOptimized)
                     {
                         if (transition is PushContextTransition)
-                            nextPreventContextType = PreventContextType.Push;
+                            nextPreventContextType = transition.IsRecursive ? PreventContextType.PushRecursive : PreventContextType.Push;
                         else if (transition is PopContextTransition)
-                            nextPreventContextType = PreventContextType.Pop;
-
-                        //if (transition.IsRecursive)
-                        //    nextPreventContextType++; // only block non-recursive transitions
+                            nextPreventContextType = transition.IsRecursive ? PreventContextType.PopRecursive : PreventContextType.Pop;
                     }
 
                     StepForward(result, states, step, symbol, symbolPosition, nextPreventContextType);

@@ -24,16 +24,35 @@
         {
             BindRules();
 
+            HashSet<State> states = GetAllStates(Rules);
+            HashSet<State> reachableStates = GetReachableStates(Rules);
+            HashSet<State> ruleStartStates = new HashSet<State>(Rules.Where(i => i.IsStartRule).Select(i => i.StartState), ObjectReferenceEqualityComparer<State>.Default);
+
+            StateOptimizer optimizer = new StateOptimizer(states);
+
             Dictionary<int, RuleBinding> stateRules = new Dictionary<int, RuleBinding>();
             foreach (var rule in Rules)
-                GetRuleStates(rule, rule.StartState, stateRules);
+                GetRuleStates(optimizer, rule, rule.StartState, stateRules);
 
-            HashSet<State> reachableStates = GetReachableStates(Rules);
+            Dictionary<int, RuleBinding> contextRules = new Dictionary<int, RuleBinding>();
+            foreach (var state in reachableStates)
+                GetContextRules(state, stateRules, contextRules);
+
+#if !OLD_OPTIMIZER
+            optimizer.Optimize(ruleStartStates);
+            RemoveUnreachableStates(optimizer, Rules, states, ruleStartStates);
+#else
+            foreach (var state in states)
+                state.RemoveExtraEpsilonTransitions(optimizer, ruleStartStates.Contains(state));
+
+            foreach (var state in states)
+                state.AddRecursiveTransitions(optimizer);
+
+            RemoveUnreachableStates(optimizer, Rules, states, ruleStartStates);
 
             //ExportDot(AlloyParser.tokenNames, ruleBindings, reachableStates, stateRules, @"C:\dev\SimpleC\TestGenerated\AlloySimplified.dot");
             //ExportDgml(AlloyParser.tokenNames, ruleBindings, reachableStates, stateRules, @"C:\dev\SimpleC\TestGenerated\AlloySimplified.dgml");
 
-            HashSet<State> ruleStartStates = new HashSet<State>(Rules.Select(i => i.StartState));
 
             int skippedCount = 0;
             int optimizedCount = 0;
@@ -70,22 +89,22 @@
                     continue;
                 }
 
-                state.Optimize();
+                state.Optimize(optimizer);
                 optimizedCount++;
             }
 
             HashSet<State> reachableOptimizedStates = GetReachableStates(Rules);
 
-            int removed = RemoveUnreachableStates(Rules, reachableStates, ruleStartStates);
+            int removed = RemoveUnreachableStates(optimizer, Rules, reachableStates, ruleStartStates);
 
             foreach (var state in reachableOptimizedStates)
             {
                 if (!state.IsOptimized && (state.OutgoingTransitions.Count == 0 || state.IncomingTransitions.Any(i => i.IsRecursive)))
                 {
                     bool hadTransitions = state.OutgoingTransitions.Count > 0;
-                    state.Optimize();
+                    state.Optimize(optimizer);
                     if (hadTransitions)
-                        removed = RemoveUnreachableStates(Rules, reachableStates, ruleStartStates);
+                        removed = RemoveUnreachableStates(optimizer, Rules, reachableStates, ruleStartStates);
                 }
             }
 
@@ -101,17 +120,27 @@
 
             reachableOptimizedStates = GetReachableStates(Rules);
             foreach (var state in reachableOptimizedStates)
-                state.Optimize();
+                state.Optimize(optimizer);
 
-            RemoveUnreachableStates(Rules, reachableStates, ruleStartStates);
+            RemoveUnreachableStates(optimizer, Rules, reachableStates, ruleStartStates);
             reachableOptimizedStates = GetReachableStates(Rules);
 
             //stateRules = RenumberStates(reachableOptimizedStates, reachableStates, stateRules);
+#endif
 
-            return new Network(Rules, stateRules);
+            return new Network(optimizer, Rules, stateRules, contextRules);
         }
 
-        protected virtual void GetRuleStates(RuleBinding ruleName, State state, Dictionary<int, RuleBinding> stateRules)
+        protected virtual void GetContextRules(State state, Dictionary<int, RuleBinding> stateRules, Dictionary<int, RuleBinding> contextRules)
+        {
+            foreach (var transition in state.OutgoingTransitions.OfType<PushContextTransition>())
+                contextRules[transition.ContextIdentifiers[0]] = stateRules[state.Id];
+
+            foreach (var transition in state.IncomingTransitions.OfType<PopContextTransition>())
+                contextRules[transition.ContextIdentifiers.Last()] = stateRules[state.Id];
+        }
+
+        protected virtual void GetRuleStates(StateOptimizer optimizer, RuleBinding ruleName, State state, Dictionary<int, RuleBinding> stateRules)
         {
             if (stateRules.ContainsKey(state.Id))
                 return;
@@ -126,54 +155,59 @@
                 PushContextTransition contextTransition = transition as PushContextTransition;
                 if (contextTransition != null)
                 {
-                    foreach (var popTransition in contextTransition.PopTransitions)
-                        GetRuleStates(ruleName, popTransition.TargetState, stateRules);
+                    foreach (var popTransition in optimizer.GetPopContextTransitions(contextTransition))
+                        GetRuleStates(optimizer, ruleName, popTransition.TargetState, stateRules);
                 }
                 else
                 {
-                    GetRuleStates(ruleName, transition.TargetState, stateRules);
+                    GetRuleStates(optimizer, ruleName, transition.TargetState, stateRules);
                 }
             }
+        }
+
+        protected virtual HashSet<State> GetAllStates(IEnumerable<RuleBinding> rules)
+        {
+            HashSet<State> states = new HashSet<State>(ObjectReferenceEqualityComparer<State>.Default);
+            foreach (var rule in rules)
+                GetReachableStates(rule, states, true);
+
+            return states;
         }
 
         protected virtual HashSet<State> GetReachableStates(IEnumerable<RuleBinding> rules)
         {
             HashSet<State> reachableStates = new HashSet<State>(ObjectReferenceEqualityComparer<State>.Default);
-            foreach (var rule in rules)
-                GetReachableStates(rule, reachableStates);
+            foreach (var rule in rules.Where(i => i.IsStartRule))
+                GetReachableStates(rule, reachableStates, false);
 
             return reachableStates;
         }
 
-        protected virtual void GetReachableStates(RuleBinding rule, HashSet<State> states)
+        protected virtual void GetReachableStates(RuleBinding rule, HashSet<State> states, bool trackIncoming)
         {
             if (states.Add(rule.StartState))
-                GetReachableStates(rule.StartState, states);
+                GetReachableStates(rule.StartState, states, trackIncoming);
         }
 
-        protected virtual void GetReachableStates(State state, HashSet<State> states)
+        protected virtual void GetReachableStates(State state, HashSet<State> states, bool trackIncoming)
         {
             foreach (var transition in state.OutgoingTransitions)
             {
-                if (transition is PopContextTransition)
-                    continue;
-
                 if (states.Add(transition.TargetState))
-                    GetReachableStates(transition.TargetState, states);
+                    GetReachableStates(transition.TargetState, states, trackIncoming);
+            }
 
-                PushContextTransition contextTransition = transition as PushContextTransition;
-                if (contextTransition != null)
+            if (trackIncoming)
+            {
+                foreach (var transition in state.IncomingTransitions)
                 {
-                    foreach (var popTransition in contextTransition.PopTransitions)
-                    {
-                        if (states.Add(popTransition.TargetState))
-                            GetReachableStates(popTransition.TargetState, states);
-                    }
+                    if (states.Add(transition.SourceState))
+                        GetReachableStates(transition.SourceState, states, trackIncoming);
                 }
             }
         }
 
-        protected virtual int RemoveUnreachableStates(IEnumerable<RuleBinding> rules, HashSet<State> states, HashSet<State> ruleStartStates)
+        protected virtual int RemoveUnreachableStates(StateOptimizer optimizer, IEnumerable<RuleBinding> rules, HashSet<State> states, HashSet<State> ruleStartStates)
         {
             int removedCount = 0;
 
@@ -197,13 +231,17 @@
                         removedCount++;
                         removed = true;
                         foreach (var transition in state.OutgoingTransitions.ToArray())
-                            state.RemoveTransition(transition);
+                            state.RemoveTransition(transition, optimizer);
                     }
                 }
 
                 if (!removed)
                     break;
             }
+
+#if DEBUG
+            int recursiveStates = GetReachableStates(rules).Count(i => i.HasRecursiveTransitions ?? true);
+#endif
 
             return removedCount;
         }
@@ -215,6 +253,7 @@
 
             Dictionary<int, int> remapping = new Dictionary<int, int>();
             int currentState = 0;
+            // favor the reachable states for low numbers since we may use a bitarray to track visited states
             foreach (var state in reachableStates)
             {
                 remapping[state.Id] = currentState;
@@ -229,14 +268,15 @@
                 currentState++;
             }
 
-            foreach (var state in allStates)
-            {
-                foreach (var transition in state.OutgoingTransitions.OfType<ContextTransition>())
-                {
-                    for (int i = 0; i < transition.ContextIdentifiers.Count; i++)
-                        transition.ContextIdentifiers[i] = remapping[transition.ContextIdentifiers[i]];
-                }
-            }
+            /* no more need to renumber contexts because the contextRules mapping is independent of the stateRules mapping */
+            //foreach (var state in allStates)
+            //{
+            //    foreach (var transition in state.OutgoingTransitions.OfType<ContextTransition>())
+            //    {
+            //        for (int i = 0; i < transition.ContextIdentifiers.Count; i++)
+            //            transition.ContextIdentifiers[i] = remapping[transition.ContextIdentifiers[i]];
+            //    }
+            //}
 
             Dictionary<int, RuleBinding> updatedStateRules = new Dictionary<int, RuleBinding>(stateRules.Comparer);
             foreach (var pair in stateRules)

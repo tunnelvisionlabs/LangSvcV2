@@ -161,6 +161,8 @@
             TryBindRule(Bindings.NameReference, BuildNameReferenceRule());
             TryBindRule(Bindings.Number, BuildNumberRule());
             TryBindRule(Bindings.Ref, BuildRefRule());
+
+            Bindings.CompilationUnit.IsStartRule = true;
         }
 
         protected virtual Nfa BuildCompilationUnitRule()

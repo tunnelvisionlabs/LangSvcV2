@@ -12,6 +12,7 @@
         public readonly ContextFrame Parent;
         public readonly NetworkInterpreter Interpreter;
 
+        private readonly int? _headContext;
         private readonly int _hashCode;
 
         public ContextFrame(State state, int? context, ContextFrame parent, NetworkInterpreter interpreter)
@@ -22,6 +23,7 @@
             Context = context;
             Parent = parent;
             Interpreter = interpreter;
+            _headContext = parent != null ? parent.HeadContext : context;
 
             int stateCode = (State != null) ? EqualityComparer<State>.Default.GetHashCode(State) : 0;
             long parentCode = (Parent != null) ? Parent.GetHashCode() * 104729 : 0;
@@ -33,6 +35,14 @@
             get
             {
                 return Interpreter.Network;
+            }
+        }
+
+        public int? HeadContext
+        {
+            get
+            {
+                return _headContext;
             }
         }
 

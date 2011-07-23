@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Linq;
     using Tvl.Extensions;
@@ -9,16 +10,15 @@
 
     public abstract class ContextTransition : Transition
     {
-        private readonly IList<int> _contextIdentifiers;
+        private readonly ReadOnlyCollection<int> _contextIdentifiers;
 
         public ContextTransition(State targetState, IEnumerable<int> contextIdentifiers)
             : base(targetState)
         {
             Contract.Requires<ArgumentNullException>(contextIdentifiers != null, "contextIdentifiers");
             Contract.Requires<ArgumentException>(contextIdentifiers.Any());
-            Contract.Requires(contextIdentifiers.Distinct().Count() == contextIdentifiers.Count());
 
-            _contextIdentifiers = contextIdentifiers.ToArray();
+            _contextIdentifiers = new ReadOnlyCollection<int>(contextIdentifiers.ToArray());
         }
 
         public ContextTransition(State targetState, params int[] contextIdentifiers)
@@ -26,12 +26,11 @@
         {
             Contract.Requires<ArgumentNullException>(contextIdentifiers != null, "contextIdentifiers");
             Contract.Requires<ArgumentException>(contextIdentifiers.Length > 0);
-            Contract.Requires(contextIdentifiers.Distinct().Count() == contextIdentifiers.Count());
 
-            _contextIdentifiers = contextIdentifiers.CloneArray();
+            _contextIdentifiers = new ReadOnlyCollection<int>(contextIdentifiers.CloneArray());
         }
 
-        public IList<int> ContextIdentifiers
+        public ReadOnlyCollection<int> ContextIdentifiers
         {
             get
             {

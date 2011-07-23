@@ -9,6 +9,7 @@
         public readonly string Name;
         public readonly State StartState;
         public readonly State EndState;
+        public bool _isStartRule;
 
         public RuleBinding(string name)
             : this(name, new State(), new State())
@@ -36,6 +37,19 @@
             EndState = endState;
         }
 
+        public bool IsStartRule
+        {
+            get
+            {
+                return _isStartRule;
+            }
+
+            set
+            {
+                _isStartRule = value;
+            }
+        }
+
         public bool Equals(RuleBinding other)
         {
             return object.ReferenceEquals(this, other);
@@ -53,7 +67,7 @@
 
         public override string ToString()
         {
-            return string.Format("Rule {0}: {1}", Name, StartState);
+            return string.Format("Rule '{0}': {1}", Name, StartState);
         }
     }
 }

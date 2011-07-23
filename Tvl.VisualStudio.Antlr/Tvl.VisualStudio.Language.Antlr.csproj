@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
@@ -175,6 +175,7 @@
     <Compile Include="Parsing\Experimental\Atn\MatchRangeTransition.cs" />
     <Compile Include="Parsing\Experimental\Atn\Network.cs" />
     <Compile Include="Parsing\Experimental\Atn\NetworkBuilder`1.cs" />
+    <Compile Include="Parsing\Experimental\Atn\StateOptimizer.cs" />
     <Compile Include="Parsing\Experimental\Interpreter\BoundedStartInterpretTraceEqualityComparer.cs" />
     <Compile Include="Parsing\Experimental\Interpreter\ContextFrame.cs" />
     <Compile Include="Parsing\Experimental\Interpreter\BoundedEndInterpretTraceEqualityComparer.cs" />

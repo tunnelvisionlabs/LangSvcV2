@@ -2,12 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Diagnostics.Contracts;
     using System.Linq;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
 
-    [DebuggerDisplay("Transition Count: {Transitions.Count}")]
     public class InterpretTrace : IEquatable<InterpretTrace>
     {
         private static readonly LinkedList<InterpretTraceTransition> EmptyTransitions = new LinkedList<InterpretTraceTransition>();
@@ -56,7 +54,7 @@
             Contract.Requires<ArgumentNullException>(transition != null, "transition");
 
             Contract.Assert(Network.States.ContainsKey(transition.SourceState.Id), "Attempted to step outside the network.");
-            //Contract.Assert(Network.States.ContainsKey(transition.TargetState.Id));
+            Contract.Assert(Network.States.ContainsKey(transition.TargetState.Id), "Attempted to step into the network.");
 
             bool boundedStart = BoundedStart;
             if (!boundedStart && Transitions.Count > 0)
@@ -114,15 +112,12 @@
             }
 
             PreventContextType preventContextType = PreventContextType.None;
-            if (transition.IsContext && !transition.IsRecursive)
+            if (transition.SourceState.IsOptimized && transition.IsContext)
             {
                 if (transition is PushContextTransition)
-                    preventContextType = PreventContextType.Push;
+                    preventContextType = transition.IsRecursive ? PreventContextType.PushRecursive : PreventContextType.Push;
                 else if (transition is PopContextTransition)
-                    preventContextType = PreventContextType.Pop;
-
-                //if (transition.IsRecursive)
-                //    preventContextType++; // only block non-recursive transitions
+                    preventContextType = transition.IsRecursive ? PreventContextType.PopRecursive : PreventContextType.Pop;
             }
 
             if (!transition.SourceState.GetSourceSet(preventContextType).Contains(symbol))
@@ -150,8 +145,9 @@
                     ContextFrame startContext = this.StartContext;
                     ContextFrame endContext = this.EndContext;
 
-                    foreach (var label in pushContextTransition.ContextIdentifiers.Reverse())
+                    for (int i = pushContextTransition.ContextIdentifiers.Count - 1; i >= 0; i--)
                     {
+                        int label = pushContextTransition.ContextIdentifiers[i];
                         if (startContext.Parent != null)
                         {
                             Contract.Assert(startContext.Parent.Context.HasValue);
@@ -164,9 +160,28 @@
                         }
                         else
                         {
+                            int? headContext = endContext.HeadContext;
+                            if (headContext != null)
+                            {
+                                if (!Network.Optimizer.CanNestContexts(label, headContext.Value))
+                                    return false;
+                            }
+                            else
+                            {
+                                if (!Network.Optimizer.IsStateInContext(label, endContext.State.Id))
+                                    return false;
+                            }
+
+                            ContextFrame headContextFrame = null;
+                            for (int j = 0; j <= i; j++)
+                                headContextFrame = new ContextFrame(null, pushContextTransition.ContextIdentifiers[j], headContextFrame, Interpreter);
+
                             // else we add a "predicate" to the end context
-                            endContext = endContext.AddHeadContext(new ContextFrame(null, label, null, Interpreter));
-                            startContext = new ContextFrame(transition.SourceState, startContext.Context, startContext.Parent, Interpreter);
+                            endContext = endContext.AddHeadContext(headContextFrame);
+                            if (!object.ReferenceEquals(startContext.State, transition.SourceState))
+                                startContext = new ContextFrame(transition.SourceState, startContext.Context, startContext.Parent, Interpreter);
+
+                            break;
                         }
                     }
 
@@ -192,9 +207,10 @@
         public bool TryStepForward(Transition transition, int symbol, int symbolPosition, out InterpretTrace result)
         {
             Contract.Requires<ArgumentNullException>(transition != null, "transition");
+            Contract.Ensures(!Contract.Result<bool>() || Contract.ValueAtReturn(out result) != null);
 
+            Contract.Assert(Network.States.ContainsKey(transition.SourceState.Id), "Attempted to step into the network.");
             Contract.Assert(Network.States.ContainsKey(transition.TargetState.Id), "Attempted to step outside the network.");
-            //Contract.Assert(Network.States.ContainsKey(transition.TargetState.Id));
 
             bool boundedEnd = BoundedEnd;
             if (!boundedEnd && Transitions.Count > 0)
@@ -252,15 +268,12 @@
             }
 
             PreventContextType preventContextType = PreventContextType.None;
-            if (transition.IsContext && !transition.IsRecursive)
+            if (transition.SourceState.IsOptimized && transition.IsContext)
             {
                 if (transition is PushContextTransition)
-                    preventContextType = PreventContextType.Push;
+                    preventContextType = transition.IsRecursive ? PreventContextType.PushRecursive : PreventContextType.Push;
                 else if (transition is PopContextTransition)
-                    preventContextType = PreventContextType.Pop;
-
-                //if (transition.IsRecursive)
-                //    preventContextType++; // only block non-recursive transitions
+                    preventContextType = transition.IsRecursive ? PreventContextType.PopRecursive : PreventContextType.Pop;
             }
 
             if (!transition.TargetState.GetFollowSet(preventContextType).Contains(symbol))
@@ -288,8 +301,9 @@
                     ContextFrame startContext = this.StartContext;
                     ContextFrame endContext = this.EndContext;
 
-                    foreach (var label in popContextTransition.ContextIdentifiers)
+                    for (int i = 0; i < popContextTransition.ContextIdentifiers.Count; i++)
                     {
+                        int label = popContextTransition.ContextIdentifiers[i];
                         if (endContext.Parent != null)
                         {
                             Contract.Assert(endContext.Parent.Context.HasValue);
@@ -302,9 +316,27 @@
                         }
                         else
                         {
-                            // else we add a "predicate" to the start context
-                            startContext = startContext.AddHeadContext(new ContextFrame(null, label, null, Interpreter));
-                            endContext = new ContextFrame(transition.TargetState, endContext.Context, endContext.Parent, Interpreter);
+                            int? headContext = startContext.HeadContext;
+                            if (headContext != null)
+                            {
+                                if (!Network.Optimizer.CanNestContexts(label, headContext.Value))
+                                    return false;
+                            }
+                            else
+                            {
+                                if (!Network.Optimizer.IsStateInContext(label, startContext.State.Id))
+                                    return false;
+                            }
+
+                            ContextFrame headContextFrame = null;
+                            for (int j = popContextTransition.ContextIdentifiers.Count - 1; j >= i; j--)
+                                headContextFrame = new ContextFrame(null, popContextTransition.ContextIdentifiers[j], headContextFrame, Interpreter);
+
+                            startContext = startContext.AddHeadContext(headContextFrame);
+                            if (!object.ReferenceEquals(endContext.State, transition.TargetState))
+                                endContext = new ContextFrame(transition.TargetState, endContext.Context, endContext.Parent, Interpreter);
+
+                            break;
                         }
                     }
 
@@ -344,7 +376,16 @@
 
         public override int GetHashCode()
         {
-            return StartContext.GetHashCode() ^ EndContext.GetHashCode() /*^ Transitions.Aggregate(0, (i, j) => i ^ j.GetHashCode())*/;
+            return StartContext.GetHashCode() ^ EndContext.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return string.Format(
+                "Transition Count: {0}{1}{2}",
+                Transitions.Count,
+                BoundedStart ? " (Bounded Start)" : string.Empty,
+                BoundedEnd ? " (Bounded End)" : string.Empty);
         }
     }
 }
