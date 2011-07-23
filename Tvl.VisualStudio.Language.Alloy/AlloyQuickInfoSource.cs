@@ -105,7 +105,7 @@
                 Network network = NetworkBuilder<AlloySimplifiedAtnBuilder>.GetOrBuildNetwork();
 
                 RuleBinding memberSelectRule = network.GetRule(AlloySimplifiedAtnBuilder.RuleNames.BinOpExpr18);
-#if DEBUG
+#if DEBUG && false
                 HashSet<Transition> memberSelectTransitions = new HashSet<Transition>(ObjectReferenceEqualityComparer<Transition>.Default);
                 GetReachableTransitions(memberSelectRule, memberSelectTransitions);
 #endif
@@ -386,7 +386,7 @@
         }
 #endif
 
-#if DEBUG
+#if DEBUG && false
         private static void GetReachableTransitions(RuleBinding memberSelectRule, HashSet<Transition> memberSelectTransitions)
         {
             GetReachableTransitions(memberSelectRule.StartState, memberSelectTransitions);
