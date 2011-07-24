@@ -105,8 +105,10 @@
                 Network network = NetworkBuilder<GoSimplifiedAtnBuilder>.GetOrBuildNetwork();
 
                 RuleBinding memberSelectRule = network.GetRule(GoSimplifiedAtnBuilder.RuleNames.PrimaryExpr);
+#if false
                 HashSet<Transition> memberSelectTransitions = new HashSet<Transition>();
                 GetReachableTransitions(memberSelectRule, memberSelectTransitions);
+#endif
 
                 NetworkInterpreter interpreter = new NetworkInterpreter(network, tokens);
 
@@ -310,6 +312,7 @@
             return results;
         }
 
+#if false
         private static void GetReachableTransitions(RuleBinding memberSelectRule, HashSet<Transition> memberSelectTransitions)
         {
             GetReachableTransitions(memberSelectRule.StartState, memberSelectTransitions);
@@ -336,6 +339,7 @@
                 }
             }
         }
+#endif
 
         public void Dispose()
         {
