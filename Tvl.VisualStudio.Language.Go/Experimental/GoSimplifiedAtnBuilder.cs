@@ -48,7 +48,6 @@
                     Bindings.SendChannel,
                     Bindings.RecvChannel,
                     Bindings.Block,
-                    Bindings.StatementBlock,
                     Bindings.Declaration,
                     Bindings.TopLevelDecl,
                     Bindings.ConstDecl,
@@ -61,8 +60,10 @@
                     Bindings.VarSpec,
                     Bindings.ShortVarDecl,
                     Bindings.FunctionDecl,
+                    Bindings.FunctionDeclHeader,
                     Bindings.Body,
                     Bindings.MethodDecl,
+                    Bindings.MethodDeclHeader,
                     Bindings.Receiver,
                     Bindings.BaseTypeName,
                     Bindings.Operand,
@@ -136,6 +137,8 @@
                     Bindings.PackageName,
                     Bindings.ImportDecl,
                     Bindings.ImportSpec,
+                    Bindings.SymbolDefinitionIdentifier,
+                    Bindings.SymbolReferenceIdentifier,
                 };
         }
 
@@ -204,7 +207,6 @@
             TryBindRule(Bindings.SendChannel, this.BuildSendChannelRule());
             TryBindRule(Bindings.RecvChannel, this.BuildRecvChannelRule());
             TryBindRule(Bindings.Block, this.BuildBlockRule());
-            TryBindRule(Bindings.StatementBlock, this.BuildStatementBlockRule());
             TryBindRule(Bindings.Declaration, this.BuildDeclarationRule());
             TryBindRule(Bindings.TopLevelDecl, this.BuildTopLevelDeclRule());
             TryBindRule(Bindings.ConstDecl, this.BuildConstDeclRule());
@@ -217,8 +219,10 @@
             TryBindRule(Bindings.VarSpec, this.BuildVarSpecRule());
             TryBindRule(Bindings.ShortVarDecl, this.BuildShortVarDeclRule());
             TryBindRule(Bindings.FunctionDecl, this.BuildFunctionDeclRule());
+            TryBindRule(Bindings.FunctionDeclHeader, this.BuildFunctionDeclHeaderRule());
             TryBindRule(Bindings.Body, this.BuildBodyRule());
             TryBindRule(Bindings.MethodDecl, this.BuildMethodDeclRule());
+            TryBindRule(Bindings.MethodDeclHeader, this.BuildMethodDeclHeaderRule());
             TryBindRule(Bindings.Receiver, this.BuildReceiverRule());
             TryBindRule(Bindings.BaseTypeName, this.BuildBaseTypeNameRule());
             TryBindRule(Bindings.Operand, this.BuildOperandRule());
@@ -292,6 +296,10 @@
             TryBindRule(Bindings.PackageName, this.BuildPackageNameRule());
             TryBindRule(Bindings.ImportDecl, this.BuildImportDeclRule());
             TryBindRule(Bindings.ImportSpec, this.BuildImportSpecRule());
+            TryBindRule(Bindings.SymbolDefinitionIdentifier, this.BuildSymbolDefinitionIdentifierRule());
+            TryBindRule(Bindings.SymbolReferenceIdentifier, this.BuildSymbolReferenceIdentifierRule());
+
+            Bindings.CompilationUnit.IsStartRule = true;
         }
 
         protected virtual Nfa BuildTypeRule()
@@ -388,12 +396,13 @@
 
         protected virtual Nfa BuildFieldIdentifierListRule()
         {
-            return Nfa.Sequence(
-                Nfa.Match(GoLexer.IDENTIFIER),
-                Nfa.Closure(
-                    Nfa.Sequence(
-                        Nfa.Match(GoLexer.COMMA),
-                        Nfa.Match(GoLexer.IDENTIFIER))));
+            return Nfa.Rule(Bindings.IdentifierList);
+            //return Nfa.Sequence(
+            //    Nfa.Match(GoLexer.IDENTIFIER),
+            //    Nfa.Closure(
+            //        Nfa.Sequence(
+            //            Nfa.Match(GoLexer.COMMA),
+            //            Nfa.Match(GoLexer.IDENTIFIER))));
         }
 
         protected virtual Nfa BuildAnonymousFieldRule()
@@ -461,7 +470,7 @@
         {
             return Nfa.Choice(
                 Nfa.Sequence(
-                    Nfa.Match(GoLexer.IDENTIFIER),
+                    Nfa.Rule(Bindings.SymbolDefinitionIdentifier),
                     Nfa.Rule(Bindings.ParameterType)),
                 Nfa.Rule(Bindings.ParameterType));
         }
@@ -501,7 +510,7 @@
 
         protected virtual Nfa BuildMethodNameRule()
         {
-            return Nfa.Match(GoLexer.IDENTIFIER);
+            return Nfa.Rule(Bindings.SymbolDefinitionIdentifier);
         }
 
         protected virtual Nfa BuildInterfaceTypeNameRule()
@@ -559,17 +568,6 @@
         {
             return Nfa.Sequence(
                 Nfa.Match(GoLexer.LBRACE),
-                Nfa.Closure(
-                    Nfa.Choice(
-                        Nfa.MatchComplement(Interval.FromBounds(GoLexer.LBRACE, GoLexer.LBRACE), Interval.FromBounds(GoLexer.RBRACE, GoLexer.RBRACE)),
-                        Nfa.Rule(Bindings.Block))),
-                Nfa.Match(GoLexer.RBRACE));
-        }
-
-        protected virtual Nfa BuildStatementBlockRule()
-        {
-            return Nfa.Sequence(
-                Nfa.Match(GoLexer.LBRACE),
                 Nfa.Rule(Bindings.Statement),
                 Nfa.Closure(
                     Nfa.Sequence(
@@ -623,11 +621,11 @@
         protected virtual Nfa BuildIdentifierListRule()
         {
             return Nfa.Sequence(
-                Nfa.Match(GoLexer.IDENTIFIER),
+                Nfa.Rule(Bindings.SymbolDefinitionIdentifier),
                 Nfa.Closure(
                     Nfa.Sequence(
                         Nfa.Match(GoLexer.COMMA),
-                        Nfa.Match(GoLexer.IDENTIFIER))));
+                        Nfa.Rule(Bindings.SymbolDefinitionIdentifier))));
         }
 
         protected virtual Nfa BuildExpressionListRule()
@@ -658,7 +656,7 @@
         protected virtual Nfa BuildTypeSpecRule()
         {
             return Nfa.Sequence(
-                Nfa.Match(GoLexer.IDENTIFIER),
+                Nfa.Rule(Bindings.SymbolDefinitionIdentifier),
                 Nfa.Rule(Bindings.Type));
         }
 
@@ -704,10 +702,16 @@
         protected virtual Nfa BuildFunctionDeclRule()
         {
             return Nfa.Sequence(
-                Nfa.Match(GoLexer.KW_FUNC),
-                Nfa.Match(GoLexer.IDENTIFIER),
-                Nfa.Rule(Bindings.Signature),
+                Nfa.Rule(Bindings.FunctionDeclHeader),
                 Nfa.Optional(Nfa.Rule(Bindings.Body)));
+        }
+
+        protected virtual Nfa BuildFunctionDeclHeaderRule()
+        {
+            return Nfa.Sequence(
+                Nfa.Match(GoLexer.KW_FUNC),
+                Nfa.Rule(Bindings.SymbolDefinitionIdentifier),
+                Nfa.Rule(Bindings.Signature));
         }
 
         protected virtual Nfa BuildBodyRule()
@@ -718,18 +722,24 @@
         protected virtual Nfa BuildMethodDeclRule()
         {
             return Nfa.Sequence(
+                Nfa.Rule(Bindings.MethodDeclHeader),
+                Nfa.Optional(Nfa.Rule(Bindings.Body)));
+        }
+
+        protected virtual Nfa BuildMethodDeclHeaderRule()
+        {
+            return Nfa.Sequence(
                 Nfa.Match(GoLexer.KW_FUNC),
                 Nfa.Rule(Bindings.Receiver),
                 Nfa.Rule(Bindings.MethodName),
-                Nfa.Rule(Bindings.Signature),
-                Nfa.Optional(Nfa.Rule(Bindings.Body)));
+                Nfa.Rule(Bindings.Signature));
         }
 
         protected virtual Nfa BuildReceiverRule()
         {
             return Nfa.Sequence(
                 Nfa.Match(GoLexer.LPAREN),
-                Nfa.Optional(Nfa.Match(GoLexer.IDENTIFIER)),
+                Nfa.Optional(Nfa.Rule(Bindings.SymbolDefinitionIdentifier)),
                 Nfa.Optional(Nfa.Match(GoLexer.TIMES)),
                 Nfa.Rule(Bindings.BaseTypeName),
                 Nfa.Match(GoLexer.RPAREN));
@@ -737,7 +747,7 @@
 
         protected virtual Nfa BuildBaseTypeNameRule()
         {
-            return Nfa.Match(GoLexer.IDENTIFIER);
+            return Nfa.Rule(Bindings.SymbolReferenceIdentifier);
         }
 
         protected virtual Nfa BuildOperandRule()
@@ -768,11 +778,11 @@
         protected virtual Nfa BuildQualifiedIdentRule()
         {
             return Nfa.Sequence(
-                Nfa.Match(GoLexer.IDENTIFIER),
+                Nfa.Rule(Bindings.SymbolReferenceIdentifier),
                 Nfa.Optional(
                     Nfa.Sequence(
                         Nfa.Match(GoLexer.DOT),
-                        Nfa.Match(GoLexer.IDENTIFIER))));
+                        Nfa.Rule(Bindings.SymbolReferenceIdentifier))));
         }
 
         protected virtual Nfa BuildCompositeLitRule()
@@ -839,7 +849,7 @@
 
         protected virtual Nfa BuildFieldNameRule()
         {
-            return Nfa.Match(GoLexer.IDENTIFIER);
+            return Nfa.Rule(Bindings.SymbolReferenceIdentifier);
         }
 
         protected virtual Nfa BuildElementIndexRule()
@@ -879,7 +889,7 @@
         {
             return Nfa.Sequence(
                 Nfa.Match(GoLexer.DOT),
-                Nfa.Match(GoLexer.IDENTIFIER));
+                Nfa.Rule(Bindings.SymbolReferenceIdentifier));
         }
 
         protected virtual Nfa BuildIndexOrSliceRule()
@@ -987,7 +997,8 @@
             return Nfa.Sequence(
                 Nfa.Rule(Bindings.ReceiverType),
                 Nfa.Match(GoLexer.DOT),
-                Nfa.Rule(Bindings.MethodName));
+                Nfa.Rule(Bindings.SymbolReferenceIdentifier));
+                //Nfa.Rule(Bindings.MethodName));
         }
 
         protected virtual Nfa BuildReceiverTypeRule()
@@ -1032,24 +1043,30 @@
 
         protected virtual Nfa BuildSimpleStmtRule()
         {
+            //return Nfa.Choice(
+            //    Nfa.Sequence(
+            //        Nfa.Rule(Bindings.Expression),
+            //        Nfa.Optional(
+            //            Nfa.Choice(
+            //                Nfa.Sequence(
+            //                    Nfa.Optional(
+            //                        Nfa.Sequence(
+            //                            Nfa.Match(GoLexer.COMMA),
+            //                            Nfa.Rule(Bindings.ExpressionList))),
+            //                    Nfa.Choice(
+            //                        Nfa.Sequence(
+            //                            Nfa.Match(GoLexer.DEFEQ),
+            //                            Nfa.Rule(Bindings.ExpressionList)),
+            //                        Nfa.Sequence(
+            //                            Nfa.Rule(Bindings.AssignOp),
+            //                            Nfa.Rule(Bindings.ExpressionList)))),
+            //                Nfa.MatchAny(GoLexer.INC, GoLexer.DEC)))),
+            //    Nfa.Rule(Bindings.EmptyStmt));
             return Nfa.Choice(
-                Nfa.Sequence(
-                    Nfa.Rule(Bindings.Expression),
-                    Nfa.Optional(
-                        Nfa.Choice(
-                            Nfa.Sequence(
-                                Nfa.Optional(
-                                    Nfa.Sequence(
-                                        Nfa.Match(GoLexer.COMMA),
-                                        Nfa.Rule(Bindings.ExpressionList))),
-                                Nfa.Choice(
-                                    Nfa.Sequence(
-                                        Nfa.Match(GoLexer.DEFEQ),
-                                        Nfa.Rule(Bindings.ExpressionList)),
-                                    Nfa.Sequence(
-                                        Nfa.Rule(Bindings.AssignOp),
-                                        Nfa.Rule(Bindings.ExpressionList)))),
-                            Nfa.MatchAny(GoLexer.INC, GoLexer.DEC)))),
+                Nfa.Rule(Bindings.ShortVarDecl),
+                Nfa.Rule(Bindings.Assignment),
+                Nfa.Rule(Bindings.IncDecStmt),
+                Nfa.Rule(Bindings.ExpressionStmt),
                 Nfa.Rule(Bindings.EmptyStmt));
         }
 
@@ -1068,7 +1085,7 @@
 
         protected virtual Nfa BuildLabelRule()
         {
-            return Nfa.Match(GoLexer.IDENTIFIER);
+            return Nfa.Rule(Bindings.SymbolDefinitionIdentifier);
         }
 
         protected virtual Nfa BuildExpressionStmtRule()
@@ -1175,7 +1192,7 @@
             return Nfa.Sequence(
                 Nfa.Optional(
                     Nfa.Sequence(
-                        Nfa.Match(GoLexer.IDENTIFIER),
+                        Nfa.Rule(Bindings.SymbolDefinitionIdentifier),
                         Nfa.Match(GoLexer.DEFEQ))),
                 Nfa.Rule(Bindings.PrimaryExpr),
                 Nfa.Match(GoLexer.DOT),
@@ -1373,7 +1390,7 @@
 
         protected virtual Nfa BuildPackageNameRule()
         {
-            return Nfa.Match(GoLexer.IDENTIFIER);
+            return Nfa.Rule(Bindings.SymbolDefinitionIdentifier);
         }
 
         protected virtual Nfa BuildImportDeclRule()
@@ -1397,8 +1414,18 @@
                 Nfa.Optional(
                     Nfa.Choice(
                         Nfa.Match(GoLexer.DOT),
-                        Nfa.Rule(Bindings.PackageName))),
+                        Nfa.Rule(Bindings.SymbolReferenceIdentifier))),
                 Nfa.Match(GoLexer.STRING_LITERAL));
+        }
+
+        protected virtual Nfa BuildSymbolDefinitionIdentifierRule()
+        {
+            return Nfa.Match(GoLexer.IDENTIFIER);
+        }
+
+        protected virtual Nfa BuildSymbolReferenceIdentifierRule()
+        {
+            return Nfa.Match(GoLexer.IDENTIFIER);
         }
 
         public static class RuleNames
@@ -1435,7 +1462,6 @@
             public const string SendChannel = "SendChannel";
             public const string RecvChannel = "RecvChannel";
             public const string Block = "Block";
-            public const string StatementBlock = "StatementBlock";
             public const string Declaration = "Declaration";
             public const string TopLevelDecl = "TopLevelDecl";
             public const string ConstDecl = "ConstDecl";
@@ -1448,8 +1474,10 @@
             public const string VarSpec = "VarSpec";
             public const string ShortVarDecl = "ShortVarDecl";
             public const string FunctionDecl = "FunctionDecl";
+            public const string FunctionDeclHeader = "FunctionDeclHeader";
             public const string Body = "Body";
             public const string MethodDecl = "MethodDecl";
+            public const string MethodDeclHeader = "MethodDeclHeader";
             public const string Receiver = "Receiver";
             public const string BaseTypeName = "BaseTypeName";
             public const string Operand = "Operand";
@@ -1523,6 +1551,8 @@
             public const string PackageName = "PackageName";
             public const string ImportDecl = "ImportDecl";
             public const string ImportSpec = "ImportSpec";
+            public const string SymbolDefinitionIdentifier = "SymbolDefinitionIdentifier";
+            public const string SymbolReferenceIdentifier = "SymbolReferenceIdentifier";
         }
 
         protected class RuleBindings
@@ -1559,7 +1589,6 @@
             public readonly RuleBinding SendChannel = new RuleBinding(RuleNames.SendChannel);
             public readonly RuleBinding RecvChannel = new RuleBinding(RuleNames.RecvChannel);
             public readonly RuleBinding Block = new RuleBinding(RuleNames.Block);
-            public readonly RuleBinding StatementBlock = new RuleBinding(RuleNames.StatementBlock);
             public readonly RuleBinding Declaration = new RuleBinding(RuleNames.Declaration);
             public readonly RuleBinding TopLevelDecl = new RuleBinding(RuleNames.TopLevelDecl);
             public readonly RuleBinding ConstDecl = new RuleBinding(RuleNames.ConstDecl);
@@ -1572,8 +1601,10 @@
             public readonly RuleBinding VarSpec = new RuleBinding(RuleNames.VarSpec);
             public readonly RuleBinding ShortVarDecl = new RuleBinding(RuleNames.ShortVarDecl);
             public readonly RuleBinding FunctionDecl = new RuleBinding(RuleNames.FunctionDecl);
+            public readonly RuleBinding FunctionDeclHeader = new RuleBinding(RuleNames.FunctionDeclHeader);
             public readonly RuleBinding Body = new RuleBinding(RuleNames.Body);
             public readonly RuleBinding MethodDecl = new RuleBinding(RuleNames.MethodDecl);
+            public readonly RuleBinding MethodDeclHeader = new RuleBinding(RuleNames.MethodDeclHeader);
             public readonly RuleBinding Receiver = new RuleBinding(RuleNames.Receiver);
             public readonly RuleBinding BaseTypeName = new RuleBinding(RuleNames.BaseTypeName);
             public readonly RuleBinding Operand = new RuleBinding(RuleNames.Operand);
@@ -1647,6 +1678,8 @@
             public readonly RuleBinding PackageName = new RuleBinding(RuleNames.PackageName);
             public readonly RuleBinding ImportDecl = new RuleBinding(RuleNames.ImportDecl);
             public readonly RuleBinding ImportSpec = new RuleBinding(RuleNames.ImportSpec);
+            public readonly RuleBinding SymbolDefinitionIdentifier = new RuleBinding(RuleNames.SymbolDefinitionIdentifier);
+            public readonly RuleBinding SymbolReferenceIdentifier = new RuleBinding(RuleNames.SymbolReferenceIdentifier);
         }
     }
 }

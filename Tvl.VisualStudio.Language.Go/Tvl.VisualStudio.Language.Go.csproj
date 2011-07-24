@@ -166,6 +166,11 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Experimental\GoReducedAtnBuilder.cs" />
+    <Compile Include="Experimental\GoSymbolTagger.cs" />
+    <Compile Include="Experimental\GoSymbolTaggerClassificationTypeNames.cs" />
+    <Compile Include="Experimental\GoSymbolTaggerProvider.cs" />
+    <Compile Include="Experimental\GoTopLevelSymbolTaggerAtnBuilder.cs" />
     <Compile Include="GoQuickInfoSource.cs" />
     <Compile Include="GoQuickInfoSourceProvider.cs" />
     <Compile Include="Experimental\GoSimplifiedAtnBuilder.cs" />
