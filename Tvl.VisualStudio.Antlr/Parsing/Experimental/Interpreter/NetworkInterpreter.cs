@@ -129,7 +129,7 @@
                 /* create our initial set of states as the ones at the target end of a match transition
                  * that contains 'symbol' in the match set.
                  */
-                List<Transition> transitions = new List<Transition>(_network.Transitions.Where(i => i.IsMatch && i.MatchSet.Contains(symbol)));
+                List<Transition> transitions = new List<Transition>(_network.Transitions.Where(i => i.MatchesSymbol(symbol)));
                 foreach (var transition in transitions)
                 {
                     if (ExcludedStartRules.Contains(Network.StateRules[transition.SourceState.Id]))
@@ -233,7 +233,7 @@
                 /* create our initial set of states as the ones at the target end of a match transition
                  * that contains 'symbol' in the match set.
                  */
-                List<Transition> transitions = new List<Transition>(_network.Transitions.Where(i => i.IsMatch && i.MatchSet.Contains(symbol)));
+                List<Transition> transitions = new List<Transition>(_network.Transitions.Where(i => i.MatchesSymbol(symbol)));
                 foreach (var transition in transitions)
                 {
                     if (ExcludedStartRules.Contains(Network.StateRules[transition.SourceState.Id]))

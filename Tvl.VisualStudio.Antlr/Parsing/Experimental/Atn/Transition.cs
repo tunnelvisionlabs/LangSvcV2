@@ -72,6 +72,11 @@
             get;
         }
 
+        public virtual bool MatchesSymbol(int symbol)
+        {
+            return IsMatch && MatchSet.Contains(symbol);
+        }
+
         public override bool Equals(object obj)
         {
             Transition other = obj as Transition;

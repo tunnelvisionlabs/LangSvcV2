@@ -100,7 +100,7 @@
 
             if (transition.IsMatch)
             {
-                if (!transition.MatchSet.Contains(symbol))
+                if (!transition.MatchesSymbol(symbol))
                     return false;
 
                 ContextFrame startContext = new ContextFrame(transition.SourceState, this.StartContext.Context, this.StartContext.Parent, Interpreter);
@@ -256,7 +256,7 @@
 
             if (transition.IsMatch)
             {
-                if (!transition.MatchSet.Contains(symbol))
+                if (!transition.MatchesSymbol(symbol))
                     return false;
 
                 ContextFrame endContext = new ContextFrame(transition.TargetState, this.EndContext.Context, this.EndContext.Parent, Interpreter);

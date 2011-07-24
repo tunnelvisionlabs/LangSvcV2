@@ -53,6 +53,11 @@
             }
         }
 
+        public override bool MatchesSymbol(int symbol)
+        {
+            return _range.Contains(symbol);
+        }
+
         public override bool Equals(object obj)
         {
             MatchRangeTransition other = obj as MatchRangeTransition;
