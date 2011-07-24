@@ -141,6 +141,8 @@
                         break;
                 }
 
+                interpreter.CombineBoundedEndContexts();
+
                 foreach (var context in interpreter.Contexts)
                 {
                     foreach (var transition in context.Transitions)
@@ -191,6 +193,8 @@
                     if (interpreter.Contexts.All(context => context.BoundedEnd))
                         break;
                 }
+
+                interpreter.CombineBoundedEndContexts();
 
                 foreach (var context in interpreter.Contexts)
                 {
@@ -245,6 +249,8 @@
                     if (interpreter.Contexts.All(context => context.BoundedEnd))
                         break;
                 }
+
+                interpreter.CombineBoundedEndContexts();
 
                 foreach (var context in interpreter.Contexts)
                 {
