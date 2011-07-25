@@ -26,5 +26,17 @@
                         Nfa.Rule(Bindings.Block))),
                 Nfa.Match(GoLexer.RBRACE));
         }
+
+        protected override Nfa BuildLiteralValueRule()
+        {
+            // brace matching only
+            return Nfa.Sequence(
+                Nfa.Match(GoLexer.LBRACE),
+                Nfa.Closure(
+                    Nfa.Choice(
+                        Nfa.MatchComplement(new Interval(GoLexer.LBRACE, 1), new Interval(GoLexer.RBRACE, 1)),
+                        Nfa.Rule(Bindings.LiteralValue))),
+                Nfa.Match(GoLexer.RBRACE));
+        }
     }
 }
