@@ -144,6 +144,8 @@
                     }
                 }
 
+                interpreter.CombineBoundedStartContexts();
+
                 IOutputWindowPane pane = Provider.OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
                 if (pane != null)
                 {
