@@ -350,6 +350,19 @@
             bool emitCurrent = false;
             foreach (var transition in currentTransition.TargetState.OutgoingTransitions)
             {
+                if (transition.IsMatch && !currentTransition.IsEpsilon)
+                {
+                    emitCurrent = true;
+                    continue;
+                }
+
+                if (transition.IsRecursive)
+                {
+                    // should probably try to detect overlapping paths
+                    emitCurrent = true;
+                    continue;
+                }
+
                 if (transition.TargetState.HasRecursiveTransitions ?? true)
                 {
                     if (!visited.Add(transition.TargetState))
@@ -358,14 +371,6 @@
 
                 try
                 {
-                    if (transition.IsRecursive)
-                    {
-                        // should probably try to detect overlapping paths
-                        emitCurrent = true;
-                        continue;
-                        //throw new NotImplementedException();
-                    }
-
                     bool canMerge = false;
                     if (currentTransition.IsEpsilon || transition.IsEpsilon)
                     {
