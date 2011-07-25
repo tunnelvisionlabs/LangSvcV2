@@ -76,7 +76,7 @@
         {
             string current = "?";
             if (State != null)
-                current = string.Format("{0}({1})", State.Id, Network.StateRules[State.Id]);
+                current = string.Format("{0}({1})", State.Id, Network.StateRules[State.Id].Name);
 
             List<string> parentContexts = new List<string>();
             for (ContextFrame frame = Parent; frame != null; frame = frame.Parent)

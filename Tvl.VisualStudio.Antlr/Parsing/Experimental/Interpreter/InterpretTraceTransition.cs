@@ -63,8 +63,8 @@
 
         public override string ToString()
         {
-            string sourceState = string.Format("{0}({1})", Transition.SourceState.Id, Interpreter.Network.StateRules[Transition.SourceState.Id]);
-            string targetState = string.Format("{0}({1})", Transition.TargetState.Id, Interpreter.Network.StateRules[Transition.TargetState.Id]);
+            string sourceState = string.Format("{0}({1})", Transition.SourceState.Id, Interpreter.Network.StateRules[Transition.SourceState.Id].Name);
+            string targetState = string.Format("{0}({1})", Transition.TargetState.Id, Interpreter.Network.StateRules[Transition.TargetState.Id].Name);
 
             string transition = "->";
             if (Transition.IsMatch)
