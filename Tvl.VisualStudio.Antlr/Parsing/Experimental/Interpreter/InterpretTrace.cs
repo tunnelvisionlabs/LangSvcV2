@@ -21,11 +21,11 @@
         {
         }
 
-        private InterpretTrace(ContextFrame startContext, ContextFrame endContext, LinkedList<InterpretTraceTransition> transitions, bool boundedStart, bool boundedEnd, bool currentBounded)
+        private InterpretTrace(ContextFrame startContext, ContextFrame endContext, LinkedList<InterpretTraceTransition> transitions, bool boundedStart, bool boundedEnd, bool copyTransitionsByReference)
         {
             StartContext = startContext;
             EndContext = endContext;
-            if (currentBounded)
+            if (copyTransitionsByReference)
                 Transitions = transitions;
             else
                 Transitions = new LinkedList<InterpretTraceTransition>(transitions);
@@ -106,7 +106,12 @@
                 ContextFrame startContext = new ContextFrame(transition.SourceState, this.StartContext.Context, this.StartContext.Parent, Interpreter);
                 result = new InterpretTrace(startContext, this.EndContext, this.Transitions, boundedStart, this.BoundedEnd, boundedStart);
                 if (!boundedStart)
+                {
+                    if (!Interpreter.TrackContextTransitions && result.Transitions.Count > 0 && result.Transitions.First.Value.Symbol == null)
+                        result.Transitions.RemoveFirst();
+
                     result.Transitions.AddFirst(new InterpretTraceTransition(transition, symbol, symbolPosition, Interpreter));
+                }
 
                 return true;
             }
@@ -134,7 +139,12 @@
 
                     result = new InterpretTrace(subContext, this.EndContext, this.Transitions, boundedStart, this.BoundedEnd, boundedStart);
                     if (!boundedStart)
+                    {
+                        if (!Interpreter.TrackContextTransitions && result.Transitions.Count > 0 && result.Transitions.First.Value.Symbol == null)
+                            result.Transitions.RemoveFirst();
+
                         result.Transitions.AddFirst(new InterpretTraceTransition(transition, Interpreter));
+                    }
 
                     return true;
                 }
@@ -187,7 +197,12 @@
 
                     result = new InterpretTrace(startContext, endContext, this.Transitions, boundedStart, this.BoundedEnd, boundedStart);
                     if (!boundedStart)
+                    {
+                        if (!Interpreter.TrackContextTransitions && result.Transitions.Count > 0 && result.Transitions.First.Value.Symbol == null)
+                            result.Transitions.RemoveFirst();
+
                         result.Transitions.AddFirst(new InterpretTraceTransition(transition, Interpreter));
+                    }
 
                     return true;
                 }
@@ -262,7 +277,12 @@
                 ContextFrame endContext = new ContextFrame(transition.TargetState, this.EndContext.Context, this.EndContext.Parent, Interpreter);
                 result = new InterpretTrace(this.StartContext, endContext, this.Transitions, this.BoundedStart, boundedEnd, boundedEnd);
                 if (!boundedEnd)
+                {
+                    if (!Interpreter.TrackContextTransitions && result.Transitions.Count > 0 && result.Transitions.Last.Value.Symbol == null)
+                        result.Transitions.RemoveLast();
+
                     result.Transitions.AddLast(new InterpretTraceTransition(transition, symbol, symbolPosition, Interpreter));
+                }
 
                 return true;
             }
@@ -342,7 +362,12 @@
 
                     result = new InterpretTrace(startContext, endContext, this.Transitions, this.BoundedStart, boundedEnd, boundedEnd);
                     if (!boundedEnd)
+                    {
+                        if (!Interpreter.TrackContextTransitions && result.Transitions.Count > 0 && result.Transitions.Last.Value.Symbol == null)
+                            result.Transitions.RemoveLast();
+
                         result.Transitions.AddLast(new InterpretTraceTransition(transition, Interpreter));
+                    }
 
                     return true;
                 }

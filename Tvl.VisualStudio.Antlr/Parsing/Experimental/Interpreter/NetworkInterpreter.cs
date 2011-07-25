@@ -16,6 +16,7 @@
 
         private readonly List<InterpretTrace> _contexts = new List<InterpretTrace>();
 
+        private bool _trackContextTransitions = false;
         private bool _trackBoundedContexts = false;
         private readonly HashSet<InterpretTrace> _boundedStartContexts = new HashSet<InterpretTrace>(BoundedStartInterpretTraceEqualityComparer.Default);
         private readonly HashSet<InterpretTrace> _boundedEndContexts = new HashSet<InterpretTrace>(BoundedEndInterpretTraceEqualityComparer.Default);
@@ -54,11 +55,24 @@
             }
         }
 
-        public ReadOnlyCollection<InterpretTrace> Contexts
+        public List<InterpretTrace> Contexts
         {
             get
             {
-                return _contexts.AsReadOnly();
+                return _contexts;
+            }
+        }
+
+        public bool TrackContextTransitions
+        {
+            get
+            {
+                return _trackContextTransitions;
+            }
+
+            set
+            {
+                _trackContextTransitions = value;
             }
         }
 
