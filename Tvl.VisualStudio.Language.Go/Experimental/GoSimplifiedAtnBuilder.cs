@@ -974,7 +974,7 @@
 
         protected virtual Nfa BuildRelOpRule()
         {
-            return Nfa.MatchAny(GoLexer.EQ, GoLexer.NEQ, GoLexer.LT, GoLexer.LE, GoLexer.GT, GoLexer.GE);
+            return Nfa.MatchAny(GoLexer.EQEQ, GoLexer.NEQ, GoLexer.LT, GoLexer.LE, GoLexer.GT, GoLexer.GE);
         }
 
         protected virtual Nfa BuildAddOpRule()
