@@ -9,7 +9,7 @@
     {
         private static readonly BoundedEndInterpretTraceEqualityComparer _default = new BoundedEndInterpretTraceEqualityComparer();
 
-        private BoundedEndInterpretTraceEqualityComparer()
+        protected BoundedEndInterpretTraceEqualityComparer()
         {
         }
 
@@ -38,10 +38,24 @@
             if (y.Transitions.Count == 0)
                 return false;
 
-            // unique on the last transition and end position
+            // unique on the end context, the last transition's source state, and the end position
+            for (ContextFrame xframe = x.EndContext, yframe = y.EndContext; true; xframe = xframe.Parent, yframe = yframe.Parent)
+            {
+                if (xframe == null || yframe == null)
+                {
+                    if (xframe != null || yframe != null)
+                        return false;
+
+                    break;
+                }
+
+                if (xframe.Context != yframe.Context)
+                    return false;
+            }
+
             InterpretTraceTransition lastx = x.Transitions.Last.Value;
             InterpretTraceTransition lasty = y.Transitions.Last.Value;
-            if (!EqualityComparer<Transition>.Default.Equals(lastx.Transition, lasty.Transition))
+            if (!EqualityComparer<State>.Default.Equals(lastx.Transition.SourceState, lasty.Transition.SourceState))
                 return false;
 
             InterpretTraceTransition lastxmatch = x.Transitions.LastOrDefault(i => i.Transition.IsMatch);

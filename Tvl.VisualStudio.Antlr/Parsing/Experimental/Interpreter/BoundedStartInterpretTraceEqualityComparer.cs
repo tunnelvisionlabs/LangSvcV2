@@ -9,7 +9,7 @@
     {
         private static readonly BoundedStartInterpretTraceEqualityComparer _default = new BoundedStartInterpretTraceEqualityComparer();
 
-        private BoundedStartInterpretTraceEqualityComparer()
+        protected BoundedStartInterpretTraceEqualityComparer()
         {
         }
 
@@ -38,10 +38,24 @@
             if (y.Transitions.Count == 0)
                 return false;
 
-            // unique on the first transition and start position
+            // unique on the start context, the first transition's target state, and the start position
+            for (ContextFrame xframe = x.StartContext, yframe = y.StartContext; true; xframe = xframe.Parent, yframe = yframe.Parent)
+            {
+                if (xframe == null || yframe == null)
+                {
+                    if (xframe != null || yframe != null)
+                        return false;
+
+                    break;
+                }
+
+                if (xframe.Context != yframe.Context)
+                    return false;
+            }
+
             InterpretTraceTransition firstx = x.Transitions.First.Value;
             InterpretTraceTransition firsty = y.Transitions.First.Value;
-            if (!EqualityComparer<Transition>.Default.Equals(firstx.Transition, firsty.Transition))
+            if (!EqualityComparer<State>.Default.Equals(firstx.Transition.TargetState, firsty.Transition.TargetState))
                 return false;
 
             InterpretTraceTransition firstxmatch = x.Transitions.FirstOrDefault(i => i.Transition.IsMatch);
