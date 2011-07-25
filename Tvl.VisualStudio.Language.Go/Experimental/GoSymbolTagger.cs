@@ -12,6 +12,8 @@
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter;
     using Tvl.VisualStudio.Shell.OutputWindow;
+    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
 
     internal sealed class GoSymbolTagger : BackgroundParser, ITagger<IClassificationTag>
     {
@@ -50,6 +52,8 @@
 
         protected override void ReParseImpl()
         {
+            Stopwatch timer = Stopwatch.StartNew();
+
             // lex the entire document to get the set of identifiers we'll need to classify
             ITextSnapshot snapshot = TextBuffer.CurrentSnapshot;
             var input = new SnapshotCharStream(snapshot, new Span(0, snapshot.Length));
@@ -187,6 +191,8 @@
 
                     if (interpreter.Contexts.All(context => context.BoundedStart))
                         break;
+
+                    interpreter.Contexts.RemoveAll(i => !IsConsistentWithPreviousResult(i, true, definitions, references));
                 }
 
                 interpreter.CombineBoundedStartContexts();
@@ -198,6 +204,8 @@
 
                     if (interpreter.Contexts.All(context => context.BoundedEnd))
                         break;
+
+                    interpreter.Contexts.RemoveAll(i => !IsConsistentWithPreviousResult(i, false, definitions, references));
                 }
 
                 interpreter.CombineBoundedEndContexts();
@@ -242,10 +250,12 @@
                     if (interpreter.Contexts.Count == 0 || interpreter.Contexts.Count > 400)
                         break;
 
-                    if (AllAgree(interpreter.Contexts))
+                    if (interpreter.Contexts.All(context => context.BoundedStart))
                         break;
 
-                    if (interpreter.Contexts.All(context => context.BoundedStart))
+                    interpreter.Contexts.RemoveAll(i => !IsConsistentWithPreviousResult(i, true, definitions, references));
+
+                    if (AllAgree(interpreter.Contexts))
                         break;
                 }
 
@@ -256,10 +266,12 @@
                     if (interpreter.Contexts.Count == 0 || interpreter.Contexts.Count > 400)
                         break;
 
-                    if (AllAgree(interpreter.Contexts))
+                    if (interpreter.Contexts.All(context => context.BoundedEnd))
                         break;
 
-                    if (interpreter.Contexts.All(context => context.BoundedEnd))
+                    interpreter.Contexts.RemoveAll(i => !IsConsistentWithPreviousResult(i, false, definitions, references));
+
+                    if (AllAgree(interpreter.Contexts))
                         break;
                 }
 
@@ -314,7 +326,35 @@
 
             _tags = tags;
 
+            timer.Stop();
+
+            IOutputWindowPane pane = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
+            if (pane != null)
+                pane.WriteLine(string.Format("Finished classifying {0} identifiers in {1}ms: {2} definitions, {3} references, {4} unknown", identifiers.Count, timer.ElapsedMilliseconds, definitions.Count, references.Count, unknownIdentifiers.Count));
+
             OnTagsChanged(new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, new Span(0, snapshot.Length))));
+        }
+
+        private bool IsConsistentWithPreviousResult(InterpretTrace trace, bool checkStart, HashSet<IToken> definitions, HashSet<IToken> references)
+        {
+            Contract.Requires(trace != null);
+            Contract.Requires(definitions != null);
+            Contract.Requires(references != null);
+
+            InterpretTraceTransition transition = checkStart ? trace.Transitions.First.Value : trace.Transitions.Last.Value;
+            IToken token = transition.Token;
+            if (definitions.Contains(token) && !references.Contains(token))
+            {
+                if (transition.Interpreter.Network.StateRules[transition.Transition.SourceState.Id].Name != GoSimplifiedAtnBuilder.RuleNames.SymbolDefinitionIdentifier)
+                    return false;
+            }
+            else if (references.Contains(token) && !definitions.Contains(token))
+            {
+                if (transition.Interpreter.Network.StateRules[transition.Transition.SourceState.Id].Name != GoSimplifiedAtnBuilder.RuleNames.SymbolReferenceIdentifier)
+                    return false;
+            }
+
+            return true;
         }
 
         private static bool AllAgree(IEnumerable<InterpretTrace> contexts)
