@@ -76,8 +76,11 @@
             if (other == null)
                 return false;
 
-            return ContextIdentifiers.SequenceEqual(other.ContextIdentifiers)
-                && base.Equals(other);
+            if (object.ReferenceEquals(other, this))
+                return true;
+
+            return base.Equals(other)
+                && ContextIdentifiers.SequenceEqual(other.ContextIdentifiers);
         }
 
         public override int GetHashCode()
