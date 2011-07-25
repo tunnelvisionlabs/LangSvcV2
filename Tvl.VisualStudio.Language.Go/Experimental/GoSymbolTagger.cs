@@ -102,6 +102,7 @@
                 case GoLexer.KW_TYPE:
                 case GoLexer.KW_VAR:
                 case GoLexer.KW_FUNC:
+                case GoLexer.KW_CONST:
                 //case GoLexer.KW_MODULE:
                 //case GoLexer.KW_OPEN:
                 //case GoLexer.KW_AS:
@@ -120,6 +121,7 @@
                     break;
 
                 case GoLexer.DEFEQ:
+                case GoLexer.COLON:
                     declColons.Add(tokens.LT(1));
                     break;
 
@@ -165,9 +167,9 @@
                         case GoLexer.IDENTIFIER:
                         //case GoLexer.KW_THIS:
                             RuleBinding rule = interpreter.Network.StateRules[transition.Transition.TargetState.Id];
-                            if (rule.Name != GoSimplifiedAtnBuilder.RuleNames.SymbolDefinitionIdentifier)
+                            if (rule.Name == GoSimplifiedAtnBuilder.RuleNames.SymbolReferenceIdentifier)
                                 references.Add(tokens.Get(transition.TokenIndex.Value));
-                            if (rule.Name != GoSimplifiedAtnBuilder.RuleNames.SymbolReferenceIdentifier)
+                            else if (rule.Name == GoSimplifiedAtnBuilder.RuleNames.SymbolDefinitionIdentifier)
                                 definitions.Add(tokens.Get(transition.TokenIndex.Value));
                             break;
 
@@ -183,7 +185,14 @@
                 tokens.Seek(token.TokenIndex);
                 tokens.Consume();
 
-                NetworkInterpreter interpreter = CreateFullNetworkInterpreter(tokens);
+                if (token.Type == GoLexer.COLON)
+                {
+                    IToken potentialLabel = tokens.LT(-2);
+                    if (potentialLabel.Type != GoLexer.IDENTIFIER)
+                        continue;
+                }
+
+                NetworkInterpreter interpreter = CreateVarDeclarationNetworkInterpreter(tokens);
                 while (interpreter.TryStepBackward())
                 {
                     if (interpreter.Contexts.Count == 0 || interpreter.Contexts.Count > 400)
@@ -197,18 +206,21 @@
 
                 interpreter.CombineBoundedStartContexts();
 
-                while (interpreter.TryStepForward())
+                if (!AllAgree(interpreter.Contexts))
                 {
-                    if (interpreter.Contexts.Count == 0 || interpreter.Contexts.Count > 400)
-                        break;
+                    while (interpreter.TryStepForward())
+                    {
+                        if (interpreter.Contexts.Count == 0 || interpreter.Contexts.Count > 400)
+                            break;
 
-                    if (interpreter.Contexts.All(context => context.BoundedEnd))
-                        break;
+                        if (interpreter.Contexts.All(context => context.BoundedEnd))
+                            break;
 
-                    interpreter.Contexts.RemoveAll(i => !IsConsistentWithPreviousResult(i, false, definitions, references));
+                        interpreter.Contexts.RemoveAll(i => !IsConsistentWithPreviousResult(i, false, definitions, references));
+                    }
+
+                    interpreter.CombineBoundedEndContexts();
                 }
-
-                interpreter.CombineBoundedEndContexts();
 
                 foreach (var context in interpreter.Contexts)
                 {
@@ -222,9 +234,9 @@
                         case GoLexer.IDENTIFIER:
                         //case GoLexer.KW_THIS:
                             RuleBinding rule = interpreter.Network.StateRules[transition.Transition.TargetState.Id];
-                            if (rule.Name != GoSimplifiedAtnBuilder.RuleNames.SymbolDefinitionIdentifier)
+                            if (rule.Name == GoSimplifiedAtnBuilder.RuleNames.SymbolReferenceIdentifier)
                                 references.Add(tokens.Get(transition.TokenIndex.Value));
-                            if (rule.Name != GoSimplifiedAtnBuilder.RuleNames.SymbolReferenceIdentifier)
+                            else if (rule.Name == GoSimplifiedAtnBuilder.RuleNames.SymbolDefinitionIdentifier)
                                 definitions.Add(tokens.Get(transition.TokenIndex.Value));
                             break;
 
@@ -235,6 +247,7 @@
                 }
             }
 
+#if false
             foreach (var token in identifiers)
             {
                 if (definitions.Contains(token) || references.Contains(token))
@@ -289,9 +302,9 @@
                         case GoLexer.IDENTIFIER:
                         //case GoLexer.KW_THIS:
                             RuleBinding rule = interpreter.Network.StateRules[transition.Transition.TargetState.Id];
-                            if (rule.Name != GoSimplifiedAtnBuilder.RuleNames.SymbolDefinitionIdentifier)
+                            if (rule.Name == GoSimplifiedAtnBuilder.RuleNames.SymbolReferenceIdentifier)
                                 references.Add(tokens.Get(transition.TokenIndex.Value));
-                            if (rule.Name != GoSimplifiedAtnBuilder.RuleNames.SymbolReferenceIdentifier)
+                            else if (rule.Name == GoSimplifiedAtnBuilder.RuleNames.SymbolDefinitionIdentifier)
                                 definitions.Add(tokens.Get(transition.TokenIndex.Value));
                             break;
 
@@ -301,17 +314,25 @@
                     }
                 }
             }
+#endif
 
             // tokens which are in both the 'definitions' and 'references' sets are actually unknown.
             HashSet<IToken> unknownIdentifiers = new HashSet<IToken>(definitions, TokenIndexEqualityComparer.Default);
             unknownIdentifiers.IntersectWith(references);
             definitions.ExceptWith(unknownIdentifiers);
+
+#if true
+            references = new HashSet<IToken>(identifiers, TokenIndexEqualityComparer.Default);
+            references.ExceptWith(definitions);
+            references.ExceptWith(unknownIdentifiers);
+#else
             references.ExceptWith(unknownIdentifiers);
 
             // the full set of unknown identifiers are any that aren't explicitly classified as a definition or a reference
             unknownIdentifiers = new HashSet<IToken>(identifiers, TokenIndexEqualityComparer.Default);
             unknownIdentifiers.ExceptWith(definitions);
             unknownIdentifiers.ExceptWith(references);
+#endif
 
             List<ITagSpan<IClassificationTag>> tags = new List<ITagSpan<IClassificationTag>>();
 
@@ -435,6 +456,8 @@
             // make sure we can handle forward walking from 'type'
             interpreter.BoundaryRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.TypeDecl));
             interpreter.BoundaryRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.TypeSwitchGuard));
+            // make sure we can handle forward walking from 'const'
+            interpreter.BoundaryRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.ConstDecl));
             // make sure we can handle forward walking from 'var'
             interpreter.BoundaryRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.VarDecl));
             // make sure we can handle forward walking from 'func'
@@ -449,6 +472,21 @@
             interpreter.BoundaryRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.CommCase));
 
             interpreter.ExcludedStartRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.Block));
+            interpreter.ExcludedStartRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.LiteralValue));
+
+            return interpreter;
+        }
+
+        private NetworkInterpreter CreateVarDeclarationNetworkInterpreter(ITokenStream tokens)
+        {
+            NetworkInterpreter interpreter = CreateFullNetworkInterpreter(tokens);
+
+            //// make sure we can handle forward and backward walking from ':'
+            //interpreter.BoundaryRules.Add(interpreter.Network.GetRule(GoSimplifiedAtnBuilder.RuleNames.ExprCaseClause));
+            //interpreter.BoundaryRules.Add(interpreter.Network.GetRule(GoSimplifiedAtnBuilder.RuleNames.TypeCaseClause));
+
+            //interpreter.ExcludedStartRules.Add(interpreter.Network.GetRule(GoSimplifiedAtnBuilder.RuleNames.ExprCaseClause));
+            //interpreter.ExcludedStartRules.Add(interpreter.Network.GetRule(GoSimplifiedAtnBuilder.RuleNames.TypeCaseClause));
 
             return interpreter;
         }
@@ -466,6 +504,8 @@
             // make sure we can handle forward walking from 'type'
             interpreter.BoundaryRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.TypeDecl));
             interpreter.BoundaryRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.TypeSwitchGuard));
+            // make sure we can handle forward walking from 'const'
+            interpreter.BoundaryRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.ConstDecl));
             // make sure we can handle forward walking from 'var'
             interpreter.BoundaryRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.VarDecl));
             // make sure we can handle forward walking from 'func'
@@ -481,6 +521,10 @@
 
             interpreter.BoundaryRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.Expression));
             interpreter.BoundaryRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.PrimaryExpr));
+
+            //// make sure we can handle forward and backward walking from ':'
+            //interpreter.BoundaryRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.ExprCaseClause));
+            //interpreter.BoundaryRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.TypeCaseClause));
 
             interpreter.ExcludedStartRules.Add(network.GetRule(GoSimplifiedAtnBuilder.RuleNames.Block));
 
