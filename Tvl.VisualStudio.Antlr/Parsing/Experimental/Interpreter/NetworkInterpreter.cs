@@ -363,34 +363,44 @@
         {
             foreach (var transition in context.EndContext.State.OutgoingTransitions)
             {
-                switch (preventContextType)
+                if (transition.IsContext)
                 {
-                case PreventContextType.Pop:
-                    if (!transition.IsRecursive && (transition is PopContextTransition))
-                        continue;
+                    PopContextTransition popContextTransition = transition as PopContextTransition;
+                    if (popContextTransition != null && context.EndContext.Parent != null)
+                    {
+                        if (popContextTransition.ContextIdentifiers[0] != context.EndContext.Parent.Context)
+                            continue;
+                    }
 
-                    break;
+                    switch (preventContextType)
+                    {
+                    case PreventContextType.Pop:
+                        if (!transition.IsRecursive && (transition is PopContextTransition))
+                            continue;
 
-                case PreventContextType.PopRecursive:
-                    if (transition.IsRecursive && (transition is PopContextTransition))
-                        continue;
+                        break;
 
-                    break;
+                    case PreventContextType.PopRecursive:
+                        if (transition.IsRecursive && (transition is PopContextTransition))
+                            continue;
 
-                case PreventContextType.Push:
-                    if (!transition.IsRecursive && (transition is PushContextTransition))
-                        continue;
+                        break;
 
-                    break;
+                    case PreventContextType.Push:
+                        if (!transition.IsRecursive && (transition is PushContextTransition))
+                            continue;
 
-                case PreventContextType.PushRecursive:
-                    if (transition.IsRecursive && (transition is PushContextTransition))
-                        continue;
+                        break;
 
-                    break;
+                    case PreventContextType.PushRecursive:
+                        if (transition.IsRecursive && (transition is PushContextTransition))
+                            continue;
 
-                default:
-                    break;
+                        break;
+
+                    default:
+                        break;
+                    }
                 }
 
                 InterpretTrace step;
@@ -403,13 +413,15 @@
                     }
 
                     bool recursive = transition.TargetState.IsForwardRecursive;
-                    if (recursive && states.Contains(transition.TargetState.Id))
+                    bool addRecursive = false;
+                    if (recursive)
                     {
-                        // TODO: check postfix rule
-                        continue;
+                        addRecursive = !states.Contains(transition.TargetState.Id);
+                        if (!addRecursive && (!(transition is PopContextTransition) || context.EndContext.Parent == null))
+                            continue;
                     }
 
-                    if (recursive)
+                    if (addRecursive)
                         states.Add(transition.TargetState.Id);
 
                     PreventContextType nextPreventContextType = PreventContextType.None;
@@ -423,7 +435,7 @@
 
                     StepForward(result, states, step, symbol, symbolPosition, nextPreventContextType);
 
-                    if (recursive)
+                    if (addRecursive)
                         states.Remove(transition.TargetState.Id);
                 }
             }
