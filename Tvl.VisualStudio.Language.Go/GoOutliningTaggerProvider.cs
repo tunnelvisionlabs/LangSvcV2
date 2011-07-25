@@ -7,7 +7,9 @@
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Language.Parsing;
 
+#if false
     [Export(typeof(ITaggerProvider))]
+#endif
     [ContentType(GoConstants.GoContentType)]
     [TagType(typeof(IOutliningRegionTag))]
     public sealed class GoOutliningTaggerProvider : ITaggerProvider
