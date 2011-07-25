@@ -15,8 +15,10 @@
         private readonly ITokenStream _input;
 
         private readonly List<InterpretTrace> _contexts = new List<InterpretTrace>();
+
+        private bool _trackBoundedContexts = false;
         private readonly HashSet<InterpretTrace> _boundedStartContexts = new HashSet<InterpretTrace>(BoundedStartInterpretTraceEqualityComparer.Default);
-        private readonly HashSet<InterpretTrace> _boundedEndContexts = new HashSet<InterpretTrace>(BoundedStartInterpretTraceEqualityComparer.Default);
+        private readonly HashSet<InterpretTrace> _boundedEndContexts = new HashSet<InterpretTrace>(BoundedEndInterpretTraceEqualityComparer.Default);
 #if DFA
         private DeterministicTrace _deterministicTrace;
 #endif
@@ -60,11 +62,32 @@
             }
         }
 
+        public bool TrackBoundedContexts
+        {
+            get
+            {
+                return _trackBoundedContexts;
+            }
+
+            set
+            {
+                _trackBoundedContexts = value;
+            }
+        }
+
         public ICollection<InterpretTrace> BoundedStartContexts
         {
             get
             {
                 return _boundedStartContexts;
+            }
+        }
+
+        public ICollection<InterpretTrace> BoundedEndContexts
+        {
+            get
+            {
+                return _boundedEndContexts;
             }
         }
 
@@ -171,7 +194,8 @@
             if (contexts.Count > 0)
             {
                 _contexts.AddRange(contexts);
-                _boundedStartContexts.UnionWith(_contexts.Where(i => i.BoundedStart));
+                if (TrackBoundedContexts)
+                    _boundedStartContexts.UnionWith(_contexts.Where(i => i.BoundedStart));
                 success = true;
             }
             else
@@ -270,7 +294,8 @@
             if (contexts.Count > 0)
             {
                 _contexts.AddRange(contexts);
-                _boundedEndContexts.UnionWith(_contexts.Where(i => i.BoundedEnd));
+                if (TrackBoundedContexts)
+                    _boundedEndContexts.UnionWith(_contexts.Where(i => i.BoundedEnd));
                 success = true;
             }
             else
