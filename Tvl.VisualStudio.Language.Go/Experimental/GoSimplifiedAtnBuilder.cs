@@ -470,7 +470,7 @@
         {
             return Nfa.Choice(
                 Nfa.Sequence(
-                    Nfa.Rule(Bindings.SymbolDefinitionIdentifier),
+                    Nfa.Rule(Bindings.IdentifierList),
                     Nfa.Rule(Bindings.ParameterType)),
                 Nfa.Rule(Bindings.ParameterType));
         }
@@ -1271,8 +1271,13 @@
         protected virtual Nfa BuildRangeClauseRule()
         {
             return Nfa.Sequence(
-                Nfa.Rule(Bindings.ExpressionList),
-                Nfa.MatchAny(GoLexer.EQ, GoLexer.DEFEQ),
+                Nfa.Choice(
+                    Nfa.Sequence(
+                        Nfa.Rule(Bindings.ExpressionList),
+                        Nfa.Match(GoLexer.EQ)),
+                    Nfa.Sequence(
+                        Nfa.Rule(Bindings.IdentifierList),
+                        Nfa.Match(GoLexer.DEFEQ))),
                 Nfa.Match(GoLexer.KW_RANGE),
                 Nfa.Rule(Bindings.Expression));
         }
