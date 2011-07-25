@@ -242,6 +242,9 @@
                     if (interpreter.Contexts.Count == 0 || interpreter.Contexts.Count > 400)
                         break;
 
+                    if (AllAgree(interpreter.Contexts))
+                        break;
+
                     if (interpreter.Contexts.All(context => context.BoundedStart))
                         break;
                 }
@@ -251,6 +254,9 @@
                 while (interpreter.TryStepForward())
                 {
                     if (interpreter.Contexts.Count == 0 || interpreter.Contexts.Count > 400)
+                        break;
+
+                    if (AllAgree(interpreter.Contexts))
                         break;
 
                     if (interpreter.Contexts.All(context => context.BoundedEnd))
@@ -309,6 +315,35 @@
             _tags = tags;
 
             OnTagsChanged(new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, new Span(0, snapshot.Length))));
+        }
+
+        private static bool AllAgree(IEnumerable<InterpretTrace> contexts)
+        {
+            var symbolTransitions = contexts.SelectMany(i => i.Transitions).Where(i => i.Symbol != null);
+            var grouped = symbolTransitions.GroupBy(i => i.TokenIndex);
+            foreach (var group in grouped)
+            {
+                if (group.First().Token.Type != GoLexer.IDENTIFIER)
+                    continue;
+
+                bool hasDefinition = false;
+                bool hasReference = false;
+                foreach (var item in group)
+                {
+                    string ruleName = item.Interpreter.Network.StateRules[item.Transition.SourceState.Id].Name;
+                    if (ruleName == GoSimplifiedAtnBuilder.RuleNames.SymbolDefinitionIdentifier)
+                        hasDefinition = true;
+                    else if (ruleName == GoSimplifiedAtnBuilder.RuleNames.SymbolReferenceIdentifier)
+                        hasReference = true;
+                    else
+                        return false;
+
+                    if (hasDefinition && hasReference)
+                        return false;
+                }
+            }
+
+            return true;
         }
 
         private NetworkInterpreter CreateTopLevelNetworkInterpreter(ITokenStream tokens)
