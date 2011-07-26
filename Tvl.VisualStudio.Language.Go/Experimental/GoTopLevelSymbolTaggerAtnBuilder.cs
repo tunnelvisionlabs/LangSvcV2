@@ -1,7 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Go.Experimental
 {
-    using Tvl.VisualStudio.Language.Parsing.Collections;
-    using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
+    using Interval = Tvl.VisualStudio.Language.Parsing.Collections.Interval;
+    using Nfa = Tvl.VisualStudio.Language.Parsing.Experimental.Atn.Nfa;
 
     /* Stats with only the block rule modified:
      * 

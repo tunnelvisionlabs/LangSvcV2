@@ -1,7 +1,6 @@
 ﻿namespace Tvl.VisualStudio.Language.Go.Experimental
 {
-    using Tvl.VisualStudio.Language.Parsing.Collections;
-    using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
+    using Nfa = Tvl.VisualStudio.Language.Parsing.Experimental.Atn.Nfa;
 
     internal class GoReducedAtnBuilder : GoSimplifiedAtnBuilder
     {
