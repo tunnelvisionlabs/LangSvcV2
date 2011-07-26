@@ -100,7 +100,7 @@
 
             if (transition.IsMatch)
             {
-                if (!transition.MatchesSymbol(symbol))
+                if (symbol != NetworkInterpreter.UnknownSymbol && !transition.MatchesSymbol(symbol))
                     return false;
 
                 ContextFrame startContext = new ContextFrame(transition.SourceState, this.StartContext.Context, this.StartContext.Parent, Interpreter);
@@ -125,7 +125,7 @@
                     preventContextType = transition.IsRecursive ? PreventContextType.PopRecursive : PreventContextType.Pop;
             }
 
-            if (!transition.SourceState.GetSourceSet(preventContextType).Contains(symbol))
+            if (symbol != NetworkInterpreter.UnknownSymbol && !transition.SourceState.GetSourceSet(preventContextType).Contains(symbol))
                 return false;
 
             if (transition.IsContext)
@@ -271,7 +271,7 @@
 
             if (transition.IsMatch)
             {
-                if (!transition.MatchesSymbol(symbol))
+                if (symbol != NetworkInterpreter.UnknownSymbol && !transition.MatchesSymbol(symbol))
                     return false;
 
                 ContextFrame endContext = new ContextFrame(transition.TargetState, this.EndContext.Context, this.EndContext.Parent, Interpreter);
@@ -296,7 +296,7 @@
                     preventContextType = transition.IsRecursive ? PreventContextType.PopRecursive : PreventContextType.Pop;
             }
 
-            if (!transition.TargetState.GetFollowSet(preventContextType).Contains(symbol))
+            if (symbol != NetworkInterpreter.UnknownSymbol && !transition.TargetState.GetFollowSet(preventContextType).Contains(symbol))
                 return false;
 
             if (transition.IsContext)

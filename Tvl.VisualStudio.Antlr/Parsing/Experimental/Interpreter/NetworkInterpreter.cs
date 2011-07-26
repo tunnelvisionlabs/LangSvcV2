@@ -8,9 +8,12 @@
     using Antlr.Runtime;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
     using Stopwatch = System.Diagnostics.Stopwatch;
+    using IntervalSet = Tvl.VisualStudio.Language.Parsing.Collections.IntervalSet;
 
     public class NetworkInterpreter
     {
+        public const int UnknownSymbol = -3;
+
         private readonly Network _network;
         private readonly ITokenStream _input;
 
@@ -119,6 +122,92 @@
             {
                 return _excludedStartRules;
             }
+        }
+
+        public IntervalSet GetSourceSet()
+        {
+            int symbol = UnknownSymbol;
+            int symbolPosition = _input.Index - _lookBehindPosition;
+
+            if (_lookAheadPosition == 0 && _lookBehindPosition == 0 && _contexts.Count == 0)
+            {
+                IntervalSet allTokens = new IntervalSet();
+                foreach (var transition in Network.Transitions.Where(i => i.IsMatch))
+                    allTokens.UnionWith(transition.MatchSet);
+
+                return allTokens;
+            }
+
+            Stopwatch updateTimer = Stopwatch.StartNew();
+
+            List<InterpretTrace> existing = new List<InterpretTrace>(_contexts);
+            SortedSet<int> states = new SortedSet<int>();
+            HashSet<InterpretTrace> contexts = new HashSet<InterpretTrace>(EqualityComparer<InterpretTrace>.Default);
+
+            foreach (var context in existing)
+            {
+                states.Add(context.StartContext.State.Id);
+                StepBackward(contexts, states, context, symbol, symbolPosition, PreventContextType.None);
+                states.Clear();
+            }
+
+            IntervalSet result = new IntervalSet();
+            if (contexts.Count > 0)
+            {
+                foreach (var context in contexts)
+                {
+                    var firstMatch = context.Transitions.First.Value;
+                    if (firstMatch.Transition.IsMatch)
+                        result.UnionWith(firstMatch.Transition.MatchSet);
+                }
+            }
+
+            long nfaUpdateTime = updateTimer.ElapsedMilliseconds;
+
+            return result;
+        }
+
+        public IntervalSet GetFollowSet()
+        {
+            int symbol = UnknownSymbol;
+            int symbolPosition = _input.Index + _lookAheadPosition - 1;
+
+            if (_lookAheadPosition == 0 && _lookBehindPosition == 0 && _contexts.Count == 0)
+            {
+                IntervalSet allTokens = new IntervalSet();
+                foreach (var transition in Network.Transitions.Where(i => i.IsMatch))
+                    allTokens.UnionWith(transition.MatchSet);
+
+                return allTokens;
+            }
+
+            Stopwatch updateTimer = Stopwatch.StartNew();
+
+            List<InterpretTrace> existing = new List<InterpretTrace>(_contexts);
+            SortedSet<int> states = new SortedSet<int>();
+            HashSet<InterpretTrace> contexts = new HashSet<InterpretTrace>(EqualityComparer<InterpretTrace>.Default);
+
+            foreach (var context in existing)
+            {
+                states.Add(context.EndContext.State.Id);
+                StepForward(contexts, states, context, symbol, symbolPosition, PreventContextType.None);
+                states.Clear();
+            }
+
+            IntervalSet result = new IntervalSet();
+            if (contexts.Count > 0)
+            {
+                foreach (var context in contexts)
+                {
+                    var lastMatch = context.Transitions.Last.Value;
+                    if (lastMatch.Transition.IsMatch)
+                        result.UnionWith(lastMatch.Transition.MatchSet);
+                }
+            }
+
+            long nfaUpdateTime = updateTimer.ElapsedMilliseconds;
+
+            return result;
         }
 
         public void CombineBoundedStartContexts()
