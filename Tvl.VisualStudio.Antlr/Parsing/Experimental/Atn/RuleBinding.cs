@@ -6,10 +6,11 @@
 
     public class RuleBinding : IEquatable<RuleBinding>
     {
-        public readonly string Name;
-        public readonly State StartState;
-        public readonly State EndState;
-        public bool _isStartRule;
+        private readonly string _name;
+        private readonly State _startState;
+        private readonly State _endState;
+
+        private bool _isStartRule;
 
         public RuleBinding(string name)
             : this(name, new State(), new State())
@@ -32,9 +33,36 @@
             Contract.Ensures(this.StartState != null);
             Contract.Ensures(this.EndState != null);
 
-            Name = name;
-            StartState = startState;
-            EndState = endState;
+            _name = name;
+            _startState = startState;
+            _endState = endState;
+        }
+
+        public string Name
+        {
+            get
+            {
+                Contract.Ensures(!string.IsNullOrEmpty(Contract.Result<string>()));
+                return _name;
+            }
+        }
+
+        public State StartState
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<State>() != null);
+                return _startState;
+            }
+        }
+
+        public State EndState
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<State>() != null);
+                return _endState;
+            }
         }
 
         public bool IsStartRule
