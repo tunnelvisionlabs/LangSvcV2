@@ -352,7 +352,7 @@
             return compl;
         }
 
-        /** Compute this-other via this&~other.
+        /** Compute this-other via this&amp;~other.
          *  Return a new set containing all elements in this but not in other.
          *  other is assumed to be a subset of this;
          *  anything that is in other but not in this will be ignored.
