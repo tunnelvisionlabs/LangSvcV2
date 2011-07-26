@@ -168,6 +168,11 @@
   <ItemGroup>
     <Compile Include="BraceMatchingTaggerProvider.cs" />
     <Compile Include="Experimental\JavaSimplifiedAtnBuilder.cs" />
+    <Compile Include="Experimental\JavaSymbolTagger.cs" />
+    <Compile Include="Experimental\JavaSymbolTaggerClassificationTypeNames.cs" />
+    <Compile Include="Experimental\JavaSymbolTaggerProvider.cs" />
+    <Compile Include="Experimental\JavaAtnBuilder.cs" />
+    <Compile Include="Experimental\JavaTopLevelSymbolTaggerAtnBuilder.cs" />
     <Compile Include="Java2.g3.lexer.cs">
       <DependentUpon>Java2.g3</DependentUpon>
     </Compile>
