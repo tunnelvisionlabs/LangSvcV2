@@ -1,9 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Go.Experimental
 {
     using System.Collections.Generic;
-    using Tvl.VisualStudio.Language.Parsing.Collections;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
-    using Contract = System.Diagnostics.Contracts.Contract;
 
     internal class GoSimplifiedAtnBuilder : NetworkBuilder
     {
@@ -156,15 +154,6 @@
             {
                 return _rules;
             }
-        }
-
-        protected static void TryBindRule(RuleBinding ruleBinding, Nfa nfa)
-        {
-            Contract.Requires(ruleBinding != null);
-            if (nfa == null)
-                return;
-
-            Nfa.BindRule(ruleBinding, nfa);
         }
 
         protected sealed override void BindRules()

@@ -90,15 +90,6 @@
             }
         }
 
-        protected static void TryBindRule(RuleBinding ruleBinding, Nfa nfa)
-        {
-            Contract.Requires(ruleBinding != null);
-            if (nfa == null)
-                return;
-
-            Nfa.BindRule(ruleBinding, nfa);
-        }
-
         protected sealed override void BindRules()
         {
             BindRulesImpl();
