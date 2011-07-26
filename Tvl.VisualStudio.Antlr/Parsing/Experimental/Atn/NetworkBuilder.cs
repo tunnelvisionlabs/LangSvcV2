@@ -128,7 +128,16 @@
             //stateRules = RenumberStates(reachableOptimizedStates, reachableStates, stateRules);
 #endif
 
-            return new Network(optimizer, Rules, stateRules, contextRules);
+            return new Network(this, optimizer, Rules, stateRules, contextRules);
+        }
+
+        protected virtual void TryBindRule(RuleBinding ruleBinding, Nfa nfa)
+        {
+            Contract.Requires(ruleBinding != null);
+            if (nfa == null)
+                return;
+
+            Nfa.BindRule(ruleBinding, nfa);
         }
 
         protected virtual void GetContextRules(State state, Dictionary<int, RuleBinding> stateRules, Dictionary<int, RuleBinding> contextRules)

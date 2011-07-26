@@ -8,6 +8,7 @@
 
     public class Network
     {
+        private readonly NetworkBuilder _builder;
         private readonly List<RuleBinding> _rules;
         private readonly Dictionary<int, State> _states;
         private readonly List<Transition> _transitions;
@@ -15,11 +16,13 @@
         private readonly Dictionary<int, RuleBinding> _contextRules;
         private readonly StateOptimizer _optimizer;
 
-        public Network(StateOptimizer optimizer, IEnumerable<RuleBinding> rules, Dictionary<int, RuleBinding> stateRules, Dictionary<int, RuleBinding> contextRules)
+        public Network(NetworkBuilder builder, StateOptimizer optimizer, IEnumerable<RuleBinding> rules, Dictionary<int, RuleBinding> stateRules, Dictionary<int, RuleBinding> contextRules)
         {
+            Contract.Requires<ArgumentNullException>(builder != null, "builder");
             Contract.Requires<ArgumentNullException>(optimizer != null, "optimizer");
             Contract.Requires<ArgumentNullException>(rules != null, "rules");
 
+            _builder = builder;
             _rules = new List<RuleBinding>(rules);
 
             //Dictionary<int, string> stateRules = new Dictionary<int, string>();
@@ -43,6 +46,14 @@
             _stateRules = stateRules;
             _contextRules = contextRules;
             _optimizer = optimizer;
+        }
+
+        public NetworkBuilder Builder
+        {
+            get
+            {
+                return _builder;
+            }
         }
 
         public StateOptimizer Optimizer
