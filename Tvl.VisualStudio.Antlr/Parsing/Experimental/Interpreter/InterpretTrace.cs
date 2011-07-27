@@ -71,7 +71,7 @@
                     ruleBoundary = Interpreter.BoundaryRules.Contains(Network.StateRules[pushContextTransition.TargetState.Id]);
 
                     // next, check if the transition starts outside this rule and goes through this rule
-                    if (!ruleBoundary && !Interpreter.BoundaryRules.Contains(Network.ContextRules[pushContextTransition.ContextIdentifiers[0]]))
+                    if (!ruleBoundary)
                     {
                         ruleBoundary =
                             pushContextTransition.ContextIdentifiers
@@ -242,7 +242,7 @@
                     ruleBoundary = Interpreter.BoundaryRules.Contains(Network.StateRules[popContextTransition.SourceState.Id]);
 
                     // next, check if the transition starts outside this rule and goes through this rule
-                    if (!ruleBoundary && !Interpreter.BoundaryRules.Contains(Network.ContextRules[popContextTransition.ContextIdentifiers.Last()]))
+                    if (!ruleBoundary)
                     {
                         ruleBoundary =
                             popContextTransition.ContextIdentifiers
