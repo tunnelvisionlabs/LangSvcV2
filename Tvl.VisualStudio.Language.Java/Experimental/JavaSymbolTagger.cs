@@ -151,86 +151,12 @@
                 if (_definitionFollowSet.Contains(tokens.LA(1)))
                     declColons.Add(tokens.LT(1));
 
-                switch (tokens.LA(1))
-                {
-                case Java2Lexer.IDENTIFIER:
+                if (tokens.LA(1) == Java2Lexer.IDENTIFIER)
                     identifiers.Add(tokens.LT(1));
-                    break;
-
-                case Java2Lexer.CLASS:
-                case Java2Lexer.INTERFACE:
-                case Java2Lexer.ENUM:
-                case Java2Lexer.VOID:
-                    nameKeywords.Add(tokens.LT(1));
-                    break;
-
-                //case Java2Lexer.COLON: // labels, for each
-                //case Java2Lexer.EQ: // var initializer
-                //case Java2Lexer.SEMI: // var declaration, last enum member
-                //case Java2Lexer.LBRACKET: // some formal parameters
-                //case Java2Lexer.COMMA: // some formal parameters, enum members
-                //case Java2Lexer.RPAREN: // formal parameters
-                //case Java2Lexer.LPAREN: // method names
-                //case Java2Lexer.EXTENDS: // type parameter
-                //case Java2Lexer.GT: // type parameter
-                //    declColons.Add(tokens.LT(1));
-                //    break;
-
-                case CharStreamConstants.EndOfFile:
-                    goto doneLexing;
-
-                default:
-                    break;
-                }
 
                 tokens.Consume();
             }
 
-        doneLexing:
-
-#if false // set to true to analyze leading keywords like 'class', 'interface', and 'enum'
-            foreach (var token in nameKeywords)
-            {
-                tokens.Seek(token.TokenIndex);
-                NetworkInterpreter interpreter = CreateTopLevelNetworkInterpreter(tokens, token.Type);
-                while (interpreter.TryStepForward())
-                {
-                    if (interpreter.Contexts.Count == 0 || interpreter.Contexts.Count > 400)
-                        break;
-
-                    if (interpreter.Contexts.All(context => context.BoundedEnd))
-                        break;
-                }
-
-                interpreter.CombineBoundedEndContexts();
-
-                foreach (var context in interpreter.Contexts)
-                {
-                    foreach (var transition in context.Transitions)
-                    {
-                        if (!transition.Symbol.HasValue)
-                            continue;
-
-                        switch (transition.Symbol)
-                        {
-                        case Java2Lexer.IDENTIFIER:
-                        //case Java2Lexer.KW_THIS:
-                            RuleBinding rule = interpreter.Network.StateRules[transition.Transition.TargetState.Id];
-                            if (rule.Name == JavaAtnBuilder.RuleNames.SymbolReferenceIdentifier)
-                                references.Add(tokens.Get(transition.TokenIndex.Value));
-                            else if (rule.Name == JavaAtnBuilder.RuleNames.SymbolDefinitionIdentifier)
-                                definitions.Add(tokens.Get(transition.TokenIndex.Value));
-                            break;
-
-                        default:
-                            continue;
-                        }
-                    }
-                }
-            }
-#endif
-
-#if true // set to true to analyze tokens which fall in the follow set of a definition
             foreach (var token in declColons)
             {
                 tokens.Seek(token.TokenIndex);
@@ -303,76 +229,6 @@
                     }
                 }
             }
-#endif
-
-#if false
-            foreach (var token in identifiers)
-            {
-                if (definitions.Contains(token) || references.Contains(token))
-                    continue;
-
-                tokens.Seek(token.TokenIndex);
-                tokens.Consume();
-
-                NetworkInterpreter interpreter = CreateFullNetworkInterpreter(tokens);
-
-                while (interpreter.TryStepBackward())
-                {
-                    if (interpreter.Contexts.Count == 0 || interpreter.Contexts.Count > 400)
-                        break;
-
-                    if (interpreter.Contexts.All(context => context.BoundedStart))
-                        break;
-
-                    interpreter.Contexts.RemoveAll(i => !IsConsistentWithPreviousResult(i, true, definitions, references));
-
-                    if (AllAgree(interpreter.Contexts))
-                        break;
-                }
-
-                interpreter.CombineBoundedStartContexts();
-
-                while (interpreter.TryStepForward())
-                {
-                    if (interpreter.Contexts.Count == 0 || interpreter.Contexts.Count > 400)
-                        break;
-
-                    if (interpreter.Contexts.All(context => context.BoundedEnd))
-                        break;
-
-                    interpreter.Contexts.RemoveAll(i => !IsConsistentWithPreviousResult(i, false, definitions, references));
-
-                    if (AllAgree(interpreter.Contexts))
-                        break;
-                }
-
-                interpreter.CombineBoundedEndContexts();
-
-                foreach (var context in interpreter.Contexts)
-                {
-                    foreach (var transition in context.Transitions)
-                    {
-                        if (!transition.Symbol.HasValue)
-                            continue;
-
-                        switch (transition.Symbol)
-                        {
-                        case Java2Lexer.IDENTIFIER:
-                        //case Java2Lexer.KW_THIS:
-                            RuleBinding rule = interpreter.Network.StateRules[transition.Transition.TargetState.Id];
-                            if (rule.Name == JavaAtnBuilder.RuleNames.SymbolReferenceIdentifier)
-                                references.Add(tokens.Get(transition.TokenIndex.Value));
-                            else if (rule.Name == JavaAtnBuilder.RuleNames.SymbolDefinitionIdentifier)
-                                definitions.Add(tokens.Get(transition.TokenIndex.Value));
-                            break;
-
-                        default:
-                            continue;
-                        }
-                    }
-                }
-            }
-#endif
 
             // tokens which are in both the 'definitions' and 'references' sets are actually unknown.
             HashSet<IToken> unknownIdentifiers = new HashSet<IToken>(definitions, TokenIndexEqualityComparer.Default);
@@ -411,22 +267,12 @@
             if (pane != null)
             {
                 pane.WriteLine(string.Format("Finished classifying {0} identifiers in {1}ms: {2} definitions, {3} references, {4} unknown", identifiers.Count, timer.ElapsedMilliseconds, definitions.Count, references.Count, unknownIdentifiers.Count));
-#if false
-                pane.WriteLine(string.Format("Symbol definition source set:        {0}", setAnalysisBuilder.DefinitionSourceSet.ToString(Java2Parser.tokenNames)));
-                pane.WriteLine(string.Format("Symbol reference source set:         {0}", setAnalysisBuilder.ReferenceSourceSet.ToString(Java2Parser.tokenNames)));
-                pane.WriteLine(string.Format("Symbol definition unique source set: {0}", setAnalysisBuilder.DefinitionOnlySourceSet.ToString(Java2Parser.tokenNames)));
-                pane.WriteLine(string.Format("Symbol definition unique follow set: {0}", setAnalysisBuilder.DefinitionOnlyFollowSet.ToString(Java2Parser.tokenNames)));
-                pane.WriteLine(string.Format("Symbol definition follow set:        {0}", setAnalysisBuilder.DefinitionFollowSet.ToString(Java2Parser.tokenNames)));
-                pane.WriteLine(string.Format("Symbol reference follow set:         {0}", setAnalysisBuilder.ReferenceFollowSet.ToString(Java2Parser.tokenNames)));
-                pane.WriteLine(string.Format("Symbol reference unique source set:  {0}", setAnalysisBuilder.ReferenceOnlySourceSet.ToString(Java2Parser.tokenNames)));
-                pane.WriteLine(string.Format("Symbol reference unique follow set:  {0}", setAnalysisBuilder.ReferenceOnlyFollowSet.ToString(Java2Parser.tokenNames)));
-#endif
             }
 
             OnTagsChanged(new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, new Span(0, snapshot.Length))));
         }
 
-        private void GetLl2SymbolSets()
+        private static void GetLl2SymbolSets()
         {
             lock (_lookupTablesLock)
             {
@@ -554,44 +400,6 @@
             }
 
             return tokenIndex == null || foundIndex;
-        }
-
-        private NetworkInterpreter CreateTopLevelNetworkInterpreter(ITokenStream tokens, int startToken)
-        {
-            Network network = NetworkBuilder<JavaTopLevelSymbolTaggerAtnBuilder>.GetOrBuildNetwork();
-
-            NetworkInterpreter interpreter = new NetworkInterpreter(network, tokens);
-
-            switch (startToken)
-            {
-            case Java2Lexer.CLASS:
-                // make sure we can handle forward walking from 'class'
-                interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.ClassHeader));
-                interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.IdentifierSuffix));
-                interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.Primary));
-                break;
-
-            case Java2Lexer.INTERFACE:
-                // make sure we can handle forward walking from 'interface'
-                interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.InterfaceHeader));
-                interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.AnnotationInterfaceHeader));
-                break;
-
-            case Java2Lexer.ENUM:
-                // make sure we can handle forward walking from 'enum'
-                interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.EnumHeader));
-                break;
-
-            case Java2Lexer.VOID:
-                interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.MethodDeclaration));
-                interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.InterfaceMethodDeclaration));
-                break;
-
-            default:
-                throw new NotSupportedException();
-            }
-
-            return interpreter;
         }
 
         private NetworkInterpreter CreateVarDeclarationNetworkInterpreter(ITokenStream tokens, int startToken)
