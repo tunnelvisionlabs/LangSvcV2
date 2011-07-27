@@ -271,7 +271,7 @@
                 interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.SymbolDefinitionIdentifier));
 
                 interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.ImportDeclaration));
-                interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.GenericIdentifier));
+                interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.ClassOrInterfaceType));
                 interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.QualifiedName));
                 interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.ElementValuePair));
                 interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.Statement));
