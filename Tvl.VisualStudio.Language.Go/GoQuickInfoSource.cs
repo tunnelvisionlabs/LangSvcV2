@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
@@ -26,10 +27,8 @@
 
         public GoQuickInfoSource(ITextBuffer textBuffer, GoQuickInfoSourceProvider provider)
         {
-            if (textBuffer == null)
-                throw new ArgumentNullException("textBuffer");
-            if (provider == null)
-                throw new ArgumentNullException("provider");
+            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Contract.Requires<ArgumentNullException>(provider != null, "provider");
 
             _textBuffer = textBuffer;
             _provider = provider;
@@ -39,6 +38,7 @@
         {
             get
             {
+                Contract.Ensures(Contract.Result<ITextBuffer>() != null);
                 return _textBuffer;
             }
         }
@@ -47,6 +47,7 @@
         {
             get
             {
+                Contract.Ensures(Contract.Result<GoQuickInfoSourceProvider>() != null);
                 return _provider;
             }
         }
