@@ -9,6 +9,7 @@
     {
         private readonly ICharStream _source;
         private readonly List<CharInfo> _next = new List<CharInfo>();
+        private int _slashCount;
 
         public JavaUnicodeStream(ICharStream source)
         {
@@ -91,6 +92,11 @@
                 for (int i = 0; i < count; i++)
                     _source.Consume();
 
+                if (_next[0].Char == '\\' && count == 1)
+                    _slashCount++;
+                else
+                    _slashCount = 0;
+
                 _next.RemoveAt(0);
             }
         }
@@ -106,38 +112,50 @@
                 if (_next.Count > 0)
                     nextIndex = _next[_next.Count - 1].Index;
 
+                int slashCount = _slashCount;
+                if (_next.Count > 0)
+                    slashCount = _next[_next.Count - 1].SlashCount;
+
                 for (int j = _next.Count; j < i; j++)
                 {
-                    int c = ReadCharAt(ref nextIndex);
-                    _next.Add(new CharInfo(c, nextIndex, 0));
+                    int c = ReadCharAt(ref nextIndex, ref slashCount);
+                    _next.Add(new CharInfo(c, nextIndex, slashCount));
                 }
             }
 
             return _next[i - 1].Char;
         }
 
-        private int ReadCharAt(ref int nextIndex)
+        private int ReadCharAt(ref int nextIndex, ref int slashCount)
         {
+            bool blockUnicodeEscape = (slashCount % 2) != 0;
+
             int c0 = _source.LA(nextIndex - Index + 1);
             if (c0 == '\\')
             {
-                int c1 = _source.LA(nextIndex - Index + 2);
-                if (c1 == 'u')
+                slashCount++;
+
+                if (!blockUnicodeEscape)
                 {
-                    int c2 = _source.LA(nextIndex - Index + 3);
-                    int c3 = _source.LA(nextIndex - Index + 3);
-                    int c4 = _source.LA(nextIndex - Index + 3);
-                    int c5 = _source.LA(nextIndex - Index + 3);
-
-                    if (IsHexDigit(c2) && IsHexDigit(c3) && IsHexDigit(c4) && IsHexDigit(c5))
+                    int c1 = _source.LA(nextIndex - Index + 2);
+                    if (c1 == 'u')
                     {
-                        int value = HexValue(c2);
-                        value = (value << 4) + HexValue(c3);
-                        value = (value << 4) + HexValue(c4);
-                        value = (value << 4) + HexValue(c5);
+                        int c2 = _source.LA(nextIndex - Index + 3);
+                        int c3 = _source.LA(nextIndex - Index + 4);
+                        int c4 = _source.LA(nextIndex - Index + 5);
+                        int c5 = _source.LA(nextIndex - Index + 6);
 
-                        nextIndex += 6;
-                        return value;
+                        if (IsHexDigit(c2) && IsHexDigit(c3) && IsHexDigit(c4) && IsHexDigit(c5))
+                        {
+                            int value = HexValue(c2);
+                            value = (value << 4) + HexValue(c3);
+                            value = (value << 4) + HexValue(c4);
+                            value = (value << 4) + HexValue(c5);
+
+                            nextIndex += 6;
+                            slashCount = 0;
+                            return value;
+                        }
                     }
                 }
             }
