@@ -269,7 +269,6 @@ grammar Java2;
 options {
 	language=CSharp3;
 	backtrack=true;
-	tokenVocab=Java2;
 	output=AST;
 	ASTLabelType=CommonTree;
 	TokenLabelType=CommonToken;
@@ -279,9 +278,10 @@ tokens {
 	TYPE_BODY;
 	METHOD_BODY;
 
+	CLASS_TYPE_IDENTIFIER;
 	ENUM_TYPE_IDENTIFIER;
 	INTERFACE_TYPE_IDENTIFIER;
-	CLASS_TYPE_IDENTIFIER;
+	ANNOTATION_TYPE_IDENTIFIER;
 
 	ENUM_CONSTANT_IDENTIFIER;
 	METHOD_IDENTIFIER;
@@ -289,6 +289,7 @@ tokens {
 	PARAMETER_IDENTIFIER;
 
 	FORMAL_PARAMETERS;
+	ARGUMENT_LIST;
 
 	FIELD_DECLARATION;
 	ARRAY_TYPE;
@@ -308,6 +309,12 @@ tokens {
 	LSHIFT;
 	URSHIFT;
 	RSHIFT;
+	LSHIFTEQ;
+	URSHIFTEQ;
+	RSHIFTEQ;
+	POSITIVE;
+	NEGATE;
+	NEW_ARRAY;
 }
 
 @lexer::namespace{Tvl.VisualStudio.Language.Java}
@@ -813,7 +820,7 @@ elementValueArrayInitializer
 annotationTypeDeclaration
     :   modifiers '@'
         'interface'
-        IDENTIFIER<INTERFACE_TYPE_IDENTIFIER>^
+        IDENTIFIER<ANNOTATION_TYPE_IDENTIFIER>^
         annotationTypeBody
     ;
 
@@ -871,24 +878,24 @@ localVariableDeclaration
 statement
     :   block 
 
-    |   (    'assert' 
-        |    {!AssertSupported && input.LT(1).Text.Equals("assert")}?=> IDENTIFIER
+    |   (    'assert'^
+        |    {!AssertSupported && input.LT(1).Text.Equals("assert")}?=> IDENTIFIER^
         )
         expression (':' expression)? ';'
 
-    |   'if' parExpression statement (options {k=1;}: ('else') => 'else' statement)?
+    |   'if'^ parExpression statement (options {k=1;}: ('else') => 'else' statement)?
     |   forstatement
-    |   'while' parExpression statement
-    |   'do' statement 'while' parExpression ';'
+    |   'while'^ parExpression statement
+    |   'do'^ statement 'while' parExpression ';'
     |   trystatement
-    |   'switch' parExpression '{' switchBlockStatementGroups '}'
-    |   'synchronized' parExpression block
-    |   'return' expression? ';'
-    |   'throw' expression ';'
-    |   'break' IDENTIFIER? ';'
-    |   'continue' IDENTIFIER? ';'
-    |   expression ';'     // was statementExpression,
-    |   IDENTIFIER ':' statement
+    |   'switch'^ parExpression '{' switchBlockStatementGroups '}'
+    |   'synchronized'^ parExpression block
+    |   'return'^ expression? ';'
+    |   'throw'^ expression ';'
+    |   'break'^ IDENTIFIER? ';'
+    |   'continue'^ IDENTIFIER? ';'
+    |   expression ';'^     // was statementExpression,
+    |   IDENTIFIER ':'^ statement
     |   ';'
     ;
 
@@ -946,7 +953,7 @@ forInit
     ;
 
 parExpression
-    :   '('! expression ')'!
+    :   '('^ expression ')'!
     ;
 
 expressionList
@@ -969,9 +976,9 @@ assignmentOperator
     |   '|='
     |   '^='
     |   '%='
-    |   ('<' '<' '=') => '<' '<' '='
-    |   ('>' '>' '>' '=') => '>' '>' '>' '='
-    |   ('>' '>' '=') => '>' '>' '='
+    |   ('<' '<' '=') => '<'<LSHIFTEQ> '<'! '='!
+    |   ('>' '>' '>' '=') => '>'<URSHIFTEQ> '>'! '>'! '='!
+    |   ('>' '>' '=') => '>'<RSHIFTEQ> '>'! '='!
     ;
 
 conditionalExpression
@@ -1048,10 +1055,10 @@ multiplicativeExpression
  *       it's a literal with signed value. INTLTERAL AND LONG LITERAL are added here for this.
  */
 unaryExpression
-    :   '+'^ unaryExpression
-    |   '-'^ INTLITERAL
-    |   '-'^ LONGLITERAL
-    |   '-'^ unaryExpression
+    :   '+'<POSITIVE>^ unaryExpression
+    |   '-'<NEGATE>^ INTLITERAL
+    |   '-'<NEGATE>^ LONGLITERAL
+    |   '-'<NEGATE>^ unaryExpression
     |   '++'<PREINC>^ unaryExpression
     |   '--'<PREDEC>^ unaryExpression
     |   unaryExpressionNotPlusMinus
@@ -1082,6 +1089,7 @@ castExpression
 /**
  * have to use scope here, parameter passing isn't well supported in antlr.
  */
+public
 primary
     :   parExpression
     |   'this'^ ('.' IDENTIFIER)* identifierSuffix?
@@ -1093,7 +1101,6 @@ primary
     |   'void' '.'^ 'class'
     ;
 
-
 superSuffix
     :   arguments
     |   '.'^ typeArguments? IDENTIFIER arguments?
@@ -1101,7 +1108,7 @@ superSuffix
 
 identifierSuffix
     :   ('[' ']')+ '.'^ 'class'
-    |   ('['^ expression ']')+
+    |   arrayIndexerIdentifierSuffix+
     |   arguments
     |   '.'^ 'class'
     |   '.'^ nonWildcardTypeArguments IDENTIFIER arguments
@@ -1109,6 +1116,10 @@ identifierSuffix
     |   '.'^ 'super' arguments
     |   innerCreator
     ;
+
+arrayIndexerIdentifierSuffix
+	:	'['^ expression ']'
+	;
 
 selector
     :   '.'^ IDENTIFIER arguments?
@@ -1125,9 +1136,9 @@ creator
     ;
 
 arrayCreator
-    :   'new'^ createdName '[' ']' ('[' ']')* arrayInitializer
+    :   'new'<NEW_ARRAY>^ createdName '[' ']' ('[' ']')* arrayInitializer
 
-    |   'new'^ createdName '[' expression ']' ('[' expression ']')* ('[' ']')*
+    |   'new'<NEW_ARRAY>^ createdName '[' expression ']' ('[' expression ']')* ('[' ']')*
     ;
 
 variableInitializer
@@ -1166,7 +1177,7 @@ nonWildcardTypeArguments
     ;
 
 arguments
-    :   '('^ expressionList? ')'
+    :   '('<ARGUMENT_LIST>^ expressionList? ')'
     ;
 
 literal

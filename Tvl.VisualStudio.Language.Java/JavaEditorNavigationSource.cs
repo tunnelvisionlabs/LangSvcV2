@@ -100,6 +100,8 @@
                  * ^(CLASS_TYPE_IDENTIFIER modifiers .* ^(TYPE_BODY .* '}'))
                  *
                  * ^(INTERFACE_TYPE_IDENTIFIER modifiers .* ^(TYPE_BODY .* '}'))
+                 *
+                 * ^(ANNOTATION_TYPE_IDENTIFIER modifiers .* ^(TYPE_BODY .* '}'))
                  * 
                  * ^(FIELD_DECLARATION modifiers (.* ^(VARIABLE_IDENTIFIER .*))*)
                  * 
@@ -181,6 +183,7 @@
                         break;
 
                     case Java2Lexer.ENUM_TYPE_IDENTIFIER:
+                    case Java2Lexer.ANNOTATION_TYPE_IDENTIFIER:
                     case Java2Lexer.INTERFACE_TYPE_IDENTIFIER:
                     case Java2Lexer.CLASS_TYPE_IDENTIFIER:
                         {
@@ -193,6 +196,7 @@
                                     switch (parent.Type)
                                     {
                                     case Java2Lexer.ENUM_TYPE_IDENTIFIER:
+                                    case Java2Lexer.ANNOTATION_TYPE_IDENTIFIER:
                                     case Java2Lexer.INTERFACE_TYPE_IDENTIFIER:
                                     case Java2Lexer.CLASS_TYPE_IDENTIFIER:
                                         name = parent.Text + "." + name;
@@ -221,6 +225,7 @@
                                     glyphGroup = StandardGlyphGroup.GlyphGroupEnum;
                                     break;
 
+                                case Java2Lexer.ANNOTATION_TYPE_IDENTIFIER:
                                 case Java2Lexer.INTERFACE_TYPE_IDENTIFIER:
                                     glyphGroup = StandardGlyphGroup.GlyphGroupJSharpInterface;
                                     break;
