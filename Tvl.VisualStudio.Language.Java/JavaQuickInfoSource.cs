@@ -270,7 +270,6 @@
                 // definitions always appear as a single identifier (at least the part of them we care about for Quick Info)
                 interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.SymbolDefinitionIdentifier));
 
-                interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.ImportDeclaration));
                 interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.ClassOrInterfaceType));
                 interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.QualifiedName));
                 interpreter.BoundaryRules.Add(network.GetRule(JavaAtnBuilder.RuleNames.ElementValuePair));

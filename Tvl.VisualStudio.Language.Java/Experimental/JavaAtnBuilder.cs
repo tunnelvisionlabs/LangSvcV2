@@ -308,11 +308,7 @@
             return Nfa.Sequence(
                 Nfa.Match(Java2Lexer.IMPORT),
                 Nfa.Optional(Nfa.Match(Java2Lexer.STATIC)),
-                Nfa.Rule(Bindings.SymbolReferenceIdentifier),
-                Nfa.Closure(
-                    Nfa.Sequence(
-                        Nfa.Match(Java2Lexer.DOT),
-                        Nfa.Rule(Bindings.SymbolReferenceIdentifier))),
+                Nfa.Rule(Bindings.QualifiedName),
                 Nfa.Optional(
                     Nfa.Sequence(
                         Nfa.Match(Java2Lexer.DOT),
