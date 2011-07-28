@@ -2,6 +2,7 @@
 {
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Utilities;
+    using IntelliSenseCache = Tvl.VisualStudio.Language.Java.SourceData.IntelliSenseCache;
     using IOutputWindowService = Tvl.VisualStudio.Shell.OutputWindow.IOutputWindowService;
     using IQuickInfoBroker = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoBroker;
     using IQuickInfoSource = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoSource;
@@ -32,6 +33,13 @@
 
         [Import]
         public IQuickInfoBroker QuickInfoBroker
+        {
+            get;
+            private set;
+        }
+
+        [Import]
+        public IntelliSenseCache IntelliSenseCache
         {
             get;
             private set;

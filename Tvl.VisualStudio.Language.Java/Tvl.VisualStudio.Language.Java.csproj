@@ -46,7 +46,7 @@
     <CodeContractsPlatformPath />
     <CodeContractsExtraAnalysisOptions />
     <CodeContractsBaseLineFile />
-    <CodeContractsRuntimeCheckingLevel>ReleaseRequires</CodeContractsRuntimeCheckingLevel>
+    <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
     <CodeContractsContainerAnalysis>False</CodeContractsContainerAnalysis>
     <CodeContractsExtraRewriteOptions />
@@ -199,6 +199,61 @@
       <DependentUpon>JavaDocCommentClassifierLexer.g3</DependentUpon>
     </Compile>
     <Compile Include="JavaClassificationTypes.cs" />
+    <Compile Include="SourceData\CodeArrayType.cs" />
+    <Compile Include="SourceData\CodeClass.cs" />
+    <Compile Include="SourceData\CodeElement.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SourceData\CodeField.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SourceData\CodeImportStatement.cs" />
+    <Compile Include="SourceData\CodeInterface.cs" />
+    <Compile Include="SourceData\CodeLocation.cs" />
+    <Compile Include="SourceData\CodeMember.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SourceData\CodeMethod.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SourceData\CodePackageStatement.cs" />
+    <Compile Include="SourceData\CodeParameter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SourceData\CodePhysicalFile.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SourceData\CodePrimitiveType.cs" />
+    <Compile Include="SourceData\CodeProjectFile.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SourceData\CodeType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SourceData\CodeTypeReference.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SourceData\Emit\CodeAttributeInterfaceBuilder.cs" />
+    <Compile Include="SourceData\Emit\CodeClassBuilder.cs" />
+    <Compile Include="SourceData\Emit\CodeElementBuilder.cs" />
+    <Compile Include="SourceData\Emit\CodeEnumBuilder.cs" />
+    <Compile Include="SourceData\Emit\CodeFieldBuilder.cs" />
+    <Compile Include="SourceData\Emit\CodeFileBuilder.cs" />
+    <Compile Include="SourceData\Emit\CodeImportBuilder.cs" />
+    <Compile Include="SourceData\Emit\CodeInterfaceBuilder.cs" />
+    <Compile Include="SourceData\Emit\CodeMemberBuilder.cs" />
+    <Compile Include="SourceData\Emit\CodeMethodBuilder.cs" />
+    <Compile Include="SourceData\Emit\CodePackageStatementBuilder.cs" />
+    <Compile Include="SourceData\Emit\CodeParameterBuilder.cs" />
+    <Compile Include="SourceData\Emit\CodeTypeBuilder.cs" />
+    <Compile Include="SourceData\Emit\CodeTypeReferenceBuilder.cs" />
+    <Compile Include="SourceData\Emit\ITypeBuilderContainer.cs" />
+    <Compile Include="SourceData\IntelliSenseCache.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SourceData\IntelliSenseCacheWalker.g3.cs">
+      <DependentUpon>IntelliSenseCacheWalker.g3</DependentUpon>
+    </Compile>
     <Compile Include="Text\CancellationPolicy.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="JavaClassifier.cs" />
@@ -236,10 +291,10 @@
     <Antlr3 Include="Java2.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
-    <AntlrTokens Include="Java2.tokens">
-      <DependentUpon>Java2.g3</DependentUpon>
-    </AntlrTokens>
     <Antlr3 Include="JavaDocCommentClassifierLexer.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
+    <Antlr3 Include="SourceData\IntelliSenseCacheWalker.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
     <None Include="Text\Tagger`1.cs" />

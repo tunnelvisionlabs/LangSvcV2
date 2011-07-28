@@ -24,6 +24,8 @@
     using PredefinedOutputWindowPanes = Tvl.VisualStudio.Shell.OutputWindow.PredefinedOutputWindowPanes;
     using SnapshotCharStream = Tvl.VisualStudio.Language.Parsing.SnapshotCharStream;
     using Stopwatch = System.Diagnostics.Stopwatch;
+    using System.Text.RegularExpressions;
+    using Tvl.VisualStudio.Language.Java.SourceData;
 
     internal class JavaQuickInfoSource : IQuickInfoSource
     {
@@ -65,6 +67,8 @@
             applicableToSpan = null;
             if (session == null || quickInfoContent == null)
                 return;
+
+            Provider.IntelliSenseCache.BeginReferenceSourceParsing();
 
             if (session.TextView.TextBuffer == this.TextBuffer)
             {
@@ -175,6 +179,7 @@
                 pane.WriteLine(string.Format("Located {0} QuickInfo expression(s) in {1}ms.", interpreter.Contexts.Count, stopwatch.ElapsedMilliseconds));
             }
 
+            HashSet<string> intermediateResult = new HashSet<string>();
             HashSet<string> finalResult = new HashSet<string>();
             foreach (var context in interpreter.Contexts)
             {
@@ -197,7 +202,48 @@
                 {
                     string text = currentSnapshot.GetText(span.Value);
                     text = text.Replace("\n", "\\n").Replace("\r", "\\r");
-                    finalResult.Add(text);
+                    if (!intermediateResult.Add(text))
+                        continue;
+
+                    if (Regex.IsMatch(text, @"^[A-Za-z_]+(?:\.\w+)*$"))
+                    {
+                        // check if this is a package
+                        CodePhysicalFile[] files = Provider.IntelliSenseCache.GetPackageFiles(text, true);
+                        if (files.Length > 0)
+                        {
+                            finalResult.Add(string.Format("package {0}", text));
+                        }
+                        else
+                        {
+                            // check if this is a type
+                            string typeName = text.Substring(text.LastIndexOf('.') + 1);
+                            CodeType[] types = Provider.IntelliSenseCache.GetTypes(typeName, true);
+                            foreach (var type in types)
+                            {
+                                if (type.FullName == text)
+                                    finalResult.Add(string.Format("{0}: {1}", type.GetType().Name, type.FullName));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        finalResult.Add(text);
+                    }
+#if false
+                    try
+                    {
+                        var expressionInput = new SnapshotCharStream(currentSnapshot, new Span(0, currentSnapshot.Length));
+                        var expressionUnicodeInput = new JavaUnicodeStream(expressionInput);
+                        var expressionLexer = new Java2Lexer(expressionUnicodeInput);
+                        var expressionTokens = new CommonTokenStream(expressionLexer);
+                        var expressionParser = new Java2Parser(expressionTokens);
+                        var result = expressionParser.primary();
+                    }
+                    catch (RecognitionException)
+                    {
+                        text = "Could not parse: " + text;
+                    }
+#endif
                 }
             }
 
