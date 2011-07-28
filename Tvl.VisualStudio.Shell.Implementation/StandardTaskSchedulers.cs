@@ -6,6 +6,9 @@
 
     public class StandardTaskSchedulers
     {
+        [Export(PredefinedTaskSchedulers.ProjectCacheIntelliSense, typeof(TaskScheduler))]
+        private readonly BackgroundParserTaskScheduler ProjectCacheIntelliSenseScheduler;
+
         [Export(PredefinedTaskSchedulers.BackgroundIntelliSense, typeof(TaskScheduler))]
         private readonly BackgroundParserTaskScheduler BackgroundIntelliSenseScheduler;
 
@@ -15,6 +18,7 @@
         [ImportingConstructor]
         public StandardTaskSchedulers(IOutputWindowService outputWindowService)
         {
+            ProjectCacheIntelliSenseScheduler = new BackgroundParserTaskScheduler("TVL Low Priority Background", BackgroundParserTaskScheduler.DefaultConcurrencyLevel, outputWindowService);
             BackgroundIntelliSenseScheduler = new BackgroundParserTaskScheduler(outputWindowService);
             PriorityIntelliSenseScheduler = new BackgroundParserTaskScheduler("TVL Priority IntelliSense", 2, outputWindowService);
         }

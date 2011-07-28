@@ -13,9 +13,9 @@
     public class BackgroundParserTaskScheduler : TaskScheduler
     {
 #if DEBUG
-        private static readonly int DefaultConcurrencyLevel = 1;
+        public static readonly int DefaultConcurrencyLevel = 1;
 #else
-        private static readonly int DefaultConcurrencyLevel = Environment.ProcessorCount;
+        public static readonly int DefaultConcurrencyLevel = Environment.ProcessorCount;
 #endif
 
         private readonly int _maximumConcurrencyLevel;
