@@ -153,7 +153,7 @@
             ruleBindings.Add(rules.RewriteTemplateArg);
 
             throw new NotImplementedException();
-            _network = new Network(ruleBindings, null);
+            _network = new Network(null, null, ruleBindings, null, null);
             return _network;
         }
 
