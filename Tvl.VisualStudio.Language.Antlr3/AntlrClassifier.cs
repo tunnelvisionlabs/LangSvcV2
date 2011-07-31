@@ -37,6 +37,9 @@
         private readonly IClassificationType _parserRule;
         private readonly IClassificationType _lexerRule;
 
+        private readonly IClassificationType _validOption;
+        private readonly IClassificationType _invalidOption;
+
         private readonly IClassificationType _astOperator;
 
         private readonly IClassificationType _actionLiteral;
@@ -53,6 +56,9 @@
 
             this._parserRule = classificationTypeRegistryService.GetClassificationType(AntlrClassificationTypeNames.ParserRule);
             this._lexerRule = classificationTypeRegistryService.GetClassificationType(AntlrClassificationTypeNames.LexerRule);
+
+            this._validOption = classificationTypeRegistryService.GetClassificationType(AntlrClassificationTypeNames.ValidOption);
+            this._invalidOption = classificationTypeRegistryService.GetClassificationType(AntlrClassificationTypeNames.InvalidOption);
 
             this._astOperator = classificationTypeRegistryService.GetClassificationType(AntlrClassificationTypeNames.AstOperator);
 
@@ -94,6 +100,15 @@
                 else
                     return this._lexerRule;
 
+            case AntlrGrammarClassifierLexer.ValidGrammarOption:
+                return _validOption;
+
+            case AntlrGrammarClassifierLexer.InvalidGrammarOption:
+                return _invalidOption;
+
+            case AntlrGrammarClassifierLexer.OptionValue:
+                return _standardClassificationService.Identifier;
+
             case AntlrGrammarClassifierLexer.LABEL:
                 return _standardClassificationService.SymbolDefinition;
 
@@ -114,9 +129,7 @@
             case AntlrGrammarClassifierLexer.ARG_ACTION:
             case AntlrActionClassifierLexer.ACTION_TEXT:
             case AntlrGrammarClassifierLexer.LBRACK:
-            case AntlrGrammarClassifierLexer.LCURLY:
             case AntlrGrammarClassifierLexer.RBRACK:
-            case AntlrGrammarClassifierLexer.RCURLY:
                 return _actionLiteral;
 
             case AntlrActionClassifierLexer.ACTION_CHAR_LITERAL:
@@ -159,6 +172,9 @@
             case AntlrGrammarClassifierLexer.WS:
                 return null;
                 //return _standardClassificationService.WhiteSpace;
+
+            case AntlrGrammarClassifierLexer.INT:
+                return _standardClassificationService.NumberLiteral;
 
             default:
                 return base.ClassifyToken(token);

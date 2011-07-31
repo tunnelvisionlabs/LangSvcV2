@@ -40,12 +40,22 @@ namespace Tvl.VisualStudio.Language.Antlr3
         private static readonly ClassificationTypeDefinition LexerRuleClassificationType;
 
         [Export]
+        [BaseDefinition(PredefinedClassificationTypeNames.Identifier)]
+        [Name(AntlrClassificationTypeNames.ValidOption)]
+        private static readonly ClassificationTypeDefinition ValidOptionClassificationType;
+
+        [Export]
+        [BaseDefinition(PredefinedClassificationTypeNames.Identifier)]
+        [Name(AntlrClassificationTypeNames.InvalidOption)]
+        private static readonly ClassificationTypeDefinition InvalidOptionClassificationType;
+
+        [Export]
         [BaseDefinition(PredefinedClassificationTypeNames.FormalLanguage)]
         [Name(AntlrClassificationTypeNames.AstOperator)]
         private static readonly ClassificationTypeDefinition AstOperatorClassificationType;
 
         [Export]
-        [BaseDefinition(PredefinedClassificationTypeNames.Literal)]
+        [BaseDefinition(PredefinedClassificationTypeNames.FormalLanguage)]
         [Name(AntlrClassificationTypeNames.ActionLiteral)]
         private static readonly ClassificationTypeDefinition ActionLiteralClassificationType;
 
@@ -111,6 +121,32 @@ namespace Tvl.VisualStudio.Language.Antlr3
             {
                 this.ForegroundColor = Colors.DarkBlue;
                 this.DisplayName = "ANTLR Lexer Rule";
+            }
+        }
+
+        [Export(typeof(EditorFormatDefinition))]
+        [ClassificationType(ClassificationTypeNames = AntlrClassificationTypeNames.ValidOption)]
+        [Name(AntlrClassificationTypeNames.ValidOption)]
+        [UserVisible(true)]
+        public sealed class ValidOptionFormatDefinition : ClassificationFormatDefinition
+        {
+            public ValidOptionFormatDefinition()
+            {
+                this.ForegroundColor = Colors.Teal;
+                this.DisplayName = "ANTLR Valid Option";
+            }
+        }
+
+        [Export(typeof(EditorFormatDefinition))]
+        [ClassificationType(ClassificationTypeNames = AntlrClassificationTypeNames.InvalidOption)]
+        [Name(AntlrClassificationTypeNames.InvalidOption)]
+        [UserVisible(true)]
+        public sealed class InvalidOptionFormatDefinition : ClassificationFormatDefinition
+        {
+            public InvalidOptionFormatDefinition()
+            {
+                this.ForegroundColor = Colors.DarkRed;
+                this.DisplayName = "ANTLR Invalid Option";
             }
         }
 

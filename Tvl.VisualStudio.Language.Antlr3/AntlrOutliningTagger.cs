@@ -5,10 +5,13 @@
     using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr.Runtime.Tree;
-    using IAstRuleReturnScope = Antlr.Runtime.IAstRuleReturnScope;
+    using global::Antlr3.Grammars;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
+
+    using IAstRuleReturnScope = Antlr.Runtime.IAstRuleReturnScope;
+    using TokenChannels = Antlr.Runtime.TokenChannels;
 
     internal sealed class AntlrOutliningTagger : ITagger<IOutliningRegionTag>
     {
@@ -87,9 +90,9 @@
                         if (child == null || string.IsNullOrEmpty(child.Text))
                             continue;
 
-                        if (child.Text == "rule" && child.ChildCount > 0 || child.Text.StartsWith("tokens"))
+                        if (child.Text == "rule" && child.ChildCount > 0 || child.Text.StartsWith("tokens") || child.Text.StartsWith("options"))
                         {
-                            string blockHint;
+                            string blockHint = "...";
                             if (child.Text == "rule")
                             {
                                 string ruleName = child.Children[0].Text;
@@ -99,14 +102,39 @@
 
                                 blockHint = child.Children[0].Text + "...";
                             }
-                            else
+                            else if (child.Text.StartsWith("tokens"))
                             {
                                 // this is the special tokens{} block of a combined grammar
-                                blockHint = "Tokens...";
+                                blockHint = "tokens {...}";
+                            }
+                            else if (child.Text.StartsWith("options"))
+                            {
+                                // this is the special options{} block of a grammar
+                                blockHint = "options {...}";
                             }
 
                             var startToken = antlrParseResultArgs.Tokens[child.TokenStartIndex];
                             var stopToken = antlrParseResultArgs.Tokens[child.TokenStopIndex];
+
+                            if (startToken.Type == ANTLRParser.DOC_COMMENT)
+                            {
+                                Span commentSpan = Span.FromBounds(startToken.StartIndex, startToken.StopIndex + 1);
+                                if (snapshot.GetLineNumberFromPosition(commentSpan.Start) != snapshot.GetLineNumberFromPosition(commentSpan.End))
+                                {
+                                    SnapshotSpan commentSnapshotSpan = new SnapshotSpan(antlrParseResultArgs.Snapshot, commentSpan);
+                                    IOutliningRegionTag commentTag = new OutliningRegionTag("/** ... */", commentSnapshotSpan.GetText());
+                                    TagSpan<IOutliningRegionTag> commentTagSpan = new TagSpan<IOutliningRegionTag>(commentSnapshotSpan, commentTag);
+                                    outliningRegions.Add(commentTagSpan);
+
+                                    for (int index = child.TokenStartIndex; index <= child.TokenStopIndex; index++)
+                                    {
+                                        startToken = antlrParseResultArgs.Tokens[index];
+                                        if (startToken.Type != ANTLRParser.DOC_COMMENT && startToken.Channel != TokenChannels.Hidden)
+                                            break;
+                                    }
+                                }
+                            }
+
                             Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
                             if (snapshot.GetLineNumberFromPosition(span.Start) == snapshot.GetLineNumberFromPosition(span.End))
                                 continue;

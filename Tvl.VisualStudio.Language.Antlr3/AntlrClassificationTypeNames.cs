@@ -5,6 +5,9 @@
         public const string ParserRule = "antlr.parserrule";
         public const string LexerRule = "antlr.lexerrule";
 
+        public const string ValidOption = "antlr.validoption";
+        public const string InvalidOption = "antlr.invalidoption";
+
         public const string AstOperator = "antlr.astoperator";
 
         public const string ActionLiteral = "antlr.actionliteral";

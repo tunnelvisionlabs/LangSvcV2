@@ -4,6 +4,7 @@
     using System.Diagnostics.Contracts;
     using Antlr.Runtime;
     using Tvl.VisualStudio.Language.Parsing;
+    using System.Collections.Generic;
 
     internal class AntlrClassifierLexer : ITokenSourceWithState<AntlrClassifierLexerState>
     {
@@ -14,6 +15,8 @@
         private AntlrClassifierLexerMode _mode;
         private int _actionLevel;
         private bool _inComment;
+        private bool _inOptions;
+        private bool _inTokens;
 
         public AntlrClassifierLexer(ICharStream input)
             : this(input, AntlrClassifierLexerState.Initial)
@@ -29,7 +32,7 @@
             _grammarLexer = new AntlrGrammarClassifierLexer(input, this);
             _actionLexer = new AntlrActionClassifierLexer(input, this);
 
-            State = state;
+            SetCurrentState(state);
         }
 
         public string SourceName
@@ -45,21 +48,6 @@
             get
             {
                 return _actionLexer.TokenNames;
-            }
-        }
-
-        internal AntlrClassifierLexerState State
-        {
-            get
-            {
-                return new AntlrClassifierLexerState(_mode, _actionLevel, _inComment);
-            }
-
-            set
-            {
-                _mode = value.Mode;
-                _actionLevel = value.ActionLevel;
-                _inComment = value.InComment;
             }
         }
 
@@ -102,9 +90,44 @@
             }
         }
 
+        internal bool InOptions
+        {
+            get
+            {
+                return _inOptions;
+            }
+
+            set
+            {
+                _inOptions = value;
+            }
+        }
+
+        internal bool InTokens
+        {
+            get
+            {
+                return _inTokens;
+            }
+
+            set
+            {
+                _inTokens = value;
+            }
+        }
+
         public AntlrClassifierLexerState GetCurrentState()
         {
-            return State;
+            return new AntlrClassifierLexerState(_mode, _actionLevel, _inComment, _inOptions, _inTokens);
+        }
+
+        public void SetCurrentState(AntlrClassifierLexerState state)
+        {
+            _mode = state.Mode;
+            _actionLevel = state.ActionLevel;
+            _inComment = state.InComment;
+            _inOptions = state.InOptions;
+            _inTokens = state.InTokens;
         }
 
         public IToken NextToken()
@@ -129,18 +152,31 @@
             switch (Mode)
             {
             case AntlrClassifierLexerMode.Action:
+                if (ActionLevel == 1 && (InOptions || InTokens) && _input.LA(1) != '}')
+                    goto case AntlrClassifierLexerMode.Grammar;
+
                 switch (_input.LA(1))
                 {
                 case '{':
                     token = _grammarLexer.NextToken();
                     ActionLevel++;
+                    token.Type = AntlrGrammarClassifierLexer.ACTION;
                     break;
 
                 case '}':
                     token = _grammarLexer.NextToken();
                     ActionLevel--;
+                    token.Type = AntlrGrammarClassifierLexer.ACTION;
                     if (ActionLevel == 0)
+                    {
                         Mode = AntlrClassifierLexerMode.Grammar;
+                        if (InOptions || InTokens)
+                        {
+                            token.Type = AntlrGrammarClassifierLexer.RCURLY;
+                            InOptions = false;
+                            InTokens = false;
+                        }
+                    }
 
                     break;
 
@@ -173,6 +209,8 @@
                 case AntlrGrammarClassifierLexer.LCURLY:
                     ActionLevel++;
                     Mode = AntlrClassifierLexerMode.Action;
+                    if ((!InOptions && !InTokens) || ActionLevel != 1)
+                        token.Type = AntlrGrammarClassifierLexer.ACTION;
                     break;
 
                 case AntlrGrammarClassifierLexer.LBRACK:
@@ -180,39 +218,70 @@
                     break;
 
                 case AntlrGrammarClassifierLexer.IDENTIFIER:
-                    AntlrClassifierLexerState currentState = GetCurrentState();
-                    int marker = _input.Mark();
-                    try
+                    switch (token.Text)
                     {
-                        while (true)
-                        {
-                            IToken nextToken = NextToken();
-                            switch (nextToken.Type)
-                            {
-                            case AntlrGrammarClassifierLexer.NEWLINE:
-                            case AntlrGrammarClassifierLexer.WS:
-                            case AntlrGrammarClassifierLexer.COMMENT:
-                            case AntlrGrammarClassifierLexer.DOC_COMMENT:
-                            case AntlrGrammarClassifierLexer.ML_COMMENT:
-                            case AntlrGrammarClassifierLexer.SL_COMMENT:
-                                continue;
+                    case "options":
+                        InOptions = true;
+                        break;
 
-                            default:
+                    case "tokens":
+                        InTokens = true;
+                        break;
+
+                    default:
+                        if (InOptions)
+                            token.Type = AntlrGrammarClassifierLexer.OptionValue;
+
+                        AntlrClassifierLexerState currentState = GetCurrentState();
+                        int marker = _input.Mark();
+                        try
+                        {
+                            while (true)
+                            {
+                                IToken nextToken = NextToken();
+                                switch (nextToken.Type)
+                                {
+                                case AntlrGrammarClassifierLexer.NEWLINE:
+                                case AntlrGrammarClassifierLexer.WS:
+                                case AntlrGrammarClassifierLexer.COMMENT:
+                                case AntlrGrammarClassifierLexer.DOC_COMMENT:
+                                case AntlrGrammarClassifierLexer.ML_COMMENT:
+                                case AntlrGrammarClassifierLexer.SL_COMMENT:
+                                    continue;
+
+                                default:
+                                    break;
+                                }
+
+                                if (nextToken.Type == AntlrGrammarClassifierLexer.ASSIGN)
+                                {
+                                    if (InOptions)
+                                    {
+                                        if (IsValidOption(token.Text))
+                                            token.Type = AntlrGrammarClassifierLexer.ValidGrammarOption;
+                                        else
+                                            token.Type = AntlrGrammarClassifierLexer.InvalidGrammarOption;
+                                    }
+                                    else if (InTokens)
+                                    {
+                                    }
+                                    else
+                                    {
+                                        token.Type = AntlrGrammarClassifierLexer.LABEL;
+                                    }
+                                }
+
                                 break;
                             }
-
-                            if (nextToken.Type == AntlrGrammarClassifierLexer.ASSIGN)
-                                token.Type = AntlrGrammarClassifierLexer.LABEL;
-
-                            break;
                         }
-                    }
-                    finally
-                    {
-                        _input.Rewind(marker);
-                        State = currentState;
-                    }
+                        finally
+                        {
+                            _input.Rewind(marker);
+                            SetCurrentState(currentState);
+                        }
 
+                        break;
+                    }
                     break;
 
                 default:
@@ -223,6 +292,30 @@
             }
 
             return token;
+        }
+
+        private static readonly HashSet<string> ValidOptions = new HashSet<string>
+            {
+                "language",
+                "tokenVocab",
+                "TokenLabelType",
+                "superClass",
+                "filter",
+                "k",
+                "backtrack",
+                "memoize",
+                "output",
+                "rewrite",
+                "ASTLabelType",
+                "greedy",
+            };
+
+        private static bool IsValidOption(string option)
+        {
+            if (string.IsNullOrEmpty(option))
+                return false;
+
+            return ValidOptions.Contains(option);
         }
     }
 }

@@ -15,6 +15,10 @@ options
 //////////////////////////////////////////////////////////////////////////////
 // L E X E R
 
+fragment ValidGrammarOption : ;
+fragment InvalidGrammarOption : ;
+fragment OptionValue : ;
+
 IDENTIFIER
 	:	('a'..'z' | 'A'..'Z' | '_')
 		('a'..'z' | 'A'..'Z' | '0'..'9' | '_')*
@@ -164,11 +168,6 @@ ESC
 		|	'u' XDIGIT XDIGIT XDIGIT XDIGIT
 		|	. // unknown, leave as it is
 		)
-	;
-
-fragment
-DIGIT
-	:	'0'..'9'
 	;
 
 fragment
