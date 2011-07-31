@@ -68,6 +68,8 @@
             {
                 IToken token = lexer.NextToken();
 
+                bool inBounds = token.StopIndex + 1 < span.End.Position;
+
                 int startLineCurrent;
                 if (token.Type == CharStreamConstants.EndOfFile)
                     startLineCurrent = span.Snapshot.LineCount;
@@ -94,7 +96,8 @@
                             if (!_lineStates[i].MultilineToken || lineStateChanged)
                                 extendMultilineSpanToLine = i + 1;
 
-                            SetLineState(i, LineStateInfo.Multiline);
+                            if (inBounds)
+                                SetLineState(i, LineStateInfo.Multiline);
                         }
                     }
                 }
@@ -114,7 +117,8 @@
                         if (!_lineStates[i].MultilineToken)
                             extendMultilineSpanToLine = i + 1;
 
-                        SetLineState(i, LineStateInfo.Multiline);
+                        if (inBounds)
+                            SetLineState(i, LineStateInfo.Multiline);
                     }
                 }
 
@@ -128,7 +132,8 @@
                         || !_stateComparer.Equals(_lineStates[line].EndLineState, stateAtEndOfLine);
 
                     // even if the state didn't change, we call SetLineState to make sure the _first/_lastChangedLine values get updated.
-                    SetLineState(line, new LineStateInfo(stateAtEndOfLine));
+                    if (inBounds)
+                        SetLineState(line, new LineStateInfo(stateAtEndOfLine));
 
                     if (lineStateChanged)
                     {
@@ -157,7 +162,7 @@
                 if (tokenClassificationSpans != null)
                     classificationSpans.AddRange(tokenClassificationSpans);
 
-                if (token.StopIndex + 1 >= span.End.Position)
+                if (!inBounds)
                     break;
             }
 
