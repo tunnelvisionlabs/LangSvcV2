@@ -79,11 +79,12 @@
             List<ITagSpan<IOutliningRegionTag>> outliningRegions = new List<ITagSpan<IOutliningRegionTag>>();
             if (antlrParseResultArgs != null)
             {
+                ITextSnapshot snapshot = antlrParseResultArgs.Snapshot;
+
                 IAstRuleReturnScope resultArgs = antlrParseResultArgs.Result as IAstRuleReturnScope;
                 var result = resultArgs.Tree as CommonTree;
                 if (result != null)
                 {
-                    ITextSnapshot snapshot = antlrParseResultArgs.Snapshot;
 
                     foreach (CommonTree child in result.Children)
                     {
@@ -118,20 +119,11 @@
 
                             if (startToken.Type == ANTLRParser.DOC_COMMENT)
                             {
-                                Span commentSpan = Span.FromBounds(startToken.StartIndex, startToken.StopIndex + 1);
-                                if (snapshot.GetLineNumberFromPosition(commentSpan.Start) != snapshot.GetLineNumberFromPosition(commentSpan.End))
+                                for (int index = child.TokenStartIndex; index <= child.TokenStopIndex; index++)
                                 {
-                                    SnapshotSpan commentSnapshotSpan = new SnapshotSpan(antlrParseResultArgs.Snapshot, commentSpan);
-                                    IOutliningRegionTag commentTag = new OutliningRegionTag("/** ... */", commentSnapshotSpan.GetText());
-                                    TagSpan<IOutliningRegionTag> commentTagSpan = new TagSpan<IOutliningRegionTag>(commentSnapshotSpan, commentTag);
-                                    outliningRegions.Add(commentTagSpan);
-
-                                    for (int index = child.TokenStartIndex; index <= child.TokenStopIndex; index++)
-                                    {
-                                        startToken = antlrParseResultArgs.Tokens[index];
-                                        if (startToken.Type != ANTLRParser.DOC_COMMENT && startToken.Channel != TokenChannels.Hidden)
-                                            break;
-                                    }
+                                    startToken = antlrParseResultArgs.Tokens[index];
+                                    if (startToken.Type != ANTLRParser.DOC_COMMENT && startToken.Channel != TokenChannels.Hidden)
+                                        break;
                                 }
                             }
 
@@ -144,6 +136,27 @@
                             TagSpan<IOutliningRegionTag> tagSpan = new TagSpan<IOutliningRegionTag>(snapshotSpan, tag);
                             outliningRegions.Add(tagSpan);
                         }
+                    }
+                }
+
+                foreach (var token in antlrParseResultArgs.Tokens)
+                {
+                    switch (token.Type)
+                    {
+                    case ANTLRParser.DOC_COMMENT:
+                    case ANTLRParser.ML_COMMENT:
+                        Span commentSpan = Span.FromBounds(token.StartIndex, token.StopIndex + 1);
+                        if (snapshot.GetLineNumberFromPosition(commentSpan.Start) != snapshot.GetLineNumberFromPosition(commentSpan.End))
+                        {
+                            SnapshotSpan commentSnapshotSpan = new SnapshotSpan(antlrParseResultArgs.Snapshot, commentSpan);
+                            IOutliningRegionTag commentTag = new OutliningRegionTag(string.Format("/*{0} ... */", token.Type == ANTLRParser.DOC_COMMENT ? "*" : string.Empty), commentSnapshotSpan.GetText());
+                            TagSpan<IOutliningRegionTag> commentTagSpan = new TagSpan<IOutliningRegionTag>(commentSnapshotSpan, commentTag);
+                            outliningRegions.Add(commentTagSpan);
+                        }
+                        break;
+
+                    default:
+                        continue;
                     }
                 }
             }
