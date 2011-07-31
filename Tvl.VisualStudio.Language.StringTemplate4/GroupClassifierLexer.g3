@@ -6,6 +6,7 @@ options {
 }
 
 @namespace{Tvl.VisualStudio.Language.StringTemplate4}
+@ctorModifier{private}
 
 fragment PARAMETER_DEFINITION : ;
 
@@ -42,12 +43,31 @@ END_BIGSTRINGLINE
 ID	:	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'-'|'_')*
 	;
 
-COMMENT
-	:	'/*' .* '*/'
-	;
+fragment
+LEGACY_DELIMITERS : ;
 
 LINE_COMMENT
-	:	'//' (~('\r'|'\n'))*
+	:	'//'
+		(	options{greedy=true;}
+		:	'!delimiters' (' ' | '\t')		{$type = LEGACY_DELIMITERS;}
+		|	(~('\r'|'\n'))*
+		)
+	;
+
+COMMENT
+	:	'/*' CONTINUE_COMMENT {$type = state.type;}
+	;
+
+fragment END_COMMENT : ;
+
+fragment
+CONTINUE_COMMENT
+	:	(	~('\r'|'\n'|'*')
+		|	{input.LA(2) != '/'}? => '*'
+		)*
+		(	'*/' {state.type = END_COMMENT;}
+		|	{state.type = CONTINUE_COMMENT;}
+		)
 	;
 
 WS
@@ -56,6 +76,12 @@ WS
 
 NEWLINE
 	:	('\r'|'\n')*
+	;
+
+fragment
+DELIMITER_SPEC
+	:	'"' ~('\n' | '\r' | '"')* '"'?
+		{state.type = DELIMITER_SPEC;}
 	;
 
 ANYCHAR

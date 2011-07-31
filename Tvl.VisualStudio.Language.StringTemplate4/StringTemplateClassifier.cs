@@ -8,9 +8,9 @@
     using Microsoft.VisualStudio.Text.Classification;
     using Tvl.VisualStudio.Language.Parsing;
 
-    internal sealed class StringTemplateClassifier : AntlrClassifierBase<ClassifierLexer.LexerState>
+    internal sealed class StringTemplateClassifier : AntlrClassifierBase<ClassifierLexerState>
     {
-        private static readonly string[] _keywords = { "group", "default", "import", "true", "false" };
+        private static readonly string[] _keywords = { "group", "default", "import", "true", "false", "delimiters" };
         private static readonly string[] _expressionKeywords = { "if", "elseif", "endif", "else", "end" };
 
         private readonly ITextBuffer _textBuffer;
@@ -44,14 +44,14 @@
             return input;
         }
 
-        protected override ITokenSourceWithState<ClassifierLexer.LexerState> CreateLexer(ICharStream input, ClassifierLexer.LexerState state)
+        protected override ITokenSourceWithState<ClassifierLexerState> CreateLexer(ICharStream input, ClassifierLexerState state)
         {
             return new ClassifierLexer(input, state);
         }
 
-        protected override ClassifierLexer.LexerState GetStartState()
+        protected override ClassifierLexerState GetStartState()
         {
-            return ClassifierLexer.LexerState.Initial;
+            return ClassifierLexerState.Initial;
         }
 
         //protected override ICharStream CreateInputStream(SnapshotSpan span)
@@ -88,6 +88,7 @@
             case OutsideClassifierLexer.TEXT:
             case InsideClassifierLexer.STRING:
             case OutsideClassifierLexer.QUOTE:
+            case GroupClassifierLexer.DELIMITER_SPEC:
                 return _standardClassificationService.StringLiteral;
 
             case GroupClassifierLexer.COMMENT:
@@ -97,8 +98,8 @@
             case GroupClassifierLexer.WS:
                 return _standardClassificationService.WhiteSpace;
 
-            case OutsideClassifierLexer.LANGLE:
-            case InsideClassifierLexer.RANGLE:
+            case OutsideClassifierLexer.LDELIM:
+            case InsideClassifierLexer.RDELIM:
                 return _expressionDelimiterClassificationType;
 
             case GroupClassifierLexer.LBRACE:
@@ -108,7 +109,6 @@
             case GroupClassifierLexer.DEFINED:
             case GroupClassifierLexer.EQUALS:
             case InsideClassifierLexer.ELLIPSIS:
-            case GroupClassifierLexer.AT:
                 return _standardClassificationService.Operator;
 
             case InsideClassifierLexer.REGION_REF:
@@ -127,17 +127,18 @@
 
         protected override IEnumerable<ClassificationSpan> GetClassificationSpansForToken(IToken token, ITextSnapshot snapshot)
         {
-            List<ClassificationSpan> spans = new List<ClassificationSpan>();
-            spans.AddRange(base.GetClassificationSpansForToken(token, snapshot));
-            if (spans.Count > 0)
+            if (token.Type == GroupClassifierLexer.LEGACY_DELIMITERS)
             {
-                var classification = spans[0];
-                if (classification.ClassificationType.Classification == StringTemplateClassificationTypeNames.TemplateLiteral0)
-                {
-                }
+                SnapshotSpan commentPrefix = new SnapshotSpan(snapshot, token.StartIndex, 3);
+                ClassificationSpan commentClassificationSpan = new ClassificationSpan(commentPrefix, _standardClassificationService.Comment);
+                SnapshotSpan delimitersMarker = new SnapshotSpan(snapshot, Span.FromBounds(token.StartIndex + 3, token.StopIndex + 1));
+                ClassificationSpan delimitersClassificationSpan = new ClassificationSpan(delimitersMarker, _standardClassificationService.Keyword);
+                return new ClassificationSpan[] { commentClassificationSpan, delimitersClassificationSpan };
             }
-
-            return spans;
+            else
+            {
+                return base.GetClassificationSpansForToken(token, snapshot);
+            }
         }
 
         internal class StringTemplateEscapedCharStream : SnapshotCharStream
@@ -186,12 +187,12 @@
                 if (base.LA(offset + 1) != '\\')
                     return false;
 
-                bool inString = Lexer.Outermost == ClassifierLexer.OutermostTemplate.String;
+                bool inString = Lexer.Outermost == OutermostTemplate.String;
                 if (inString)
                     return base.LA(offset + 2) == '"';
 
-                bool inBigString = Lexer.Outermost == ClassifierLexer.OutermostTemplate.BigString
-                    || Lexer.Outermost == ClassifierLexer.OutermostTemplate.BigStringLine;
+                bool inBigString = Lexer.Outermost == OutermostTemplate.BigString
+                    || Lexer.Outermost == OutermostTemplate.BigStringLine;
                 if (inBigString)
                     return base.LA(offset + 2) == '>';
 

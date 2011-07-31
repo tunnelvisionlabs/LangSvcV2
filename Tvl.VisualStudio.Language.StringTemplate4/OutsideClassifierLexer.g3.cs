@@ -19,7 +19,7 @@
             set;
         }
 
-        private ClassifierLexer.TemplateLexerMode Mode
+        private TemplateLexerMode Mode
         {
             get
             {
@@ -27,7 +27,7 @@
             }
         }
 
-        private ClassifierLexer.OutermostTemplate Outermost
+        private OutermostTemplate Outermost
         {
             get
             {
@@ -40,6 +40,22 @@
             get
             {
                 return AggregateLexer.AnonymousTemplateLevel;
+            }
+        }
+
+        private char OpenDelimiter
+        {
+            get
+            {
+                return AggregateLexer.OpenDelimiter;
+            }
+        }
+
+        private char CloseDelimiter
+        {
+            get
+            {
+                return AggregateLexer.CloseDelimiter;
             }
         }
 

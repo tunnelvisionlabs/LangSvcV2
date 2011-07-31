@@ -5,7 +5,7 @@
     using Antlr.Runtime;
     using Tvl.VisualStudio.Language.Parsing;
 
-    internal class ClassifierLexer : ITokenSourceWithState<ClassifierLexer.LexerState>
+    internal class ClassifierLexer : ITokenSourceWithState<ClassifierLexerState>
     {
         private readonly ICharStream _input;
         private readonly InsideClassifierLexer _insideLexer;
@@ -16,21 +16,23 @@
         private OutermostTemplate _outermost;
         private int _anonymousTemplateLevel;
         private bool _inComment;
+        private char _openDelimiter = '<';
+        private char _closeDelimiter = '>';
 
         public ClassifierLexer(ICharStream input)
-            : this(input, LexerState.Initial)
+            : this(input, ClassifierLexerState.Initial)
         {
             Contract.Requires(input != null);
         }
 
-        public ClassifierLexer(ICharStream input, LexerState state)
+        public ClassifierLexer(ICharStream input, ClassifierLexerState state)
         {
             Contract.Requires<ArgumentNullException>(input != null, "input");
 
             _input = input;
-            _insideLexer = new InsideClassifierLexer(input);
+            _insideLexer = new InsideClassifierLexer(input, this);
             _outsideLexer = new OutsideClassifierLexer(input, this);
-            _groupLexer = new GroupClassifierLexer(input);
+            _groupLexer = new GroupClassifierLexer(input, this);
 
             var stream = input as StringTemplateClassifier.StringTemplateEscapedCharStream;
             if (stream != null)
@@ -55,11 +57,11 @@
             }
         }
 
-        internal LexerState State
+        internal ClassifierLexerState State
         {
             get
             {
-                return new LexerState(_mode, _outermost, _anonymousTemplateLevel, _inComment);
+                return new ClassifierLexerState(_mode, _outermost, _anonymousTemplateLevel, _inComment, _openDelimiter, _closeDelimiter);
             }
 
             set
@@ -68,6 +70,8 @@
                 _outermost = value.Outermost;
                 _anonymousTemplateLevel = value.AnonymousTemplateLevel;
                 _inComment = value.InComment;
+                _openDelimiter = value.OpenDelimiter;
+                _closeDelimiter = value.CloseDelimiter;
             }
         }
 
@@ -123,7 +127,23 @@
             }
         }
 
-        public LexerState GetCurrentState()
+        internal char OpenDelimiter
+        {
+            get
+            {
+                return _openDelimiter;
+            }
+        }
+
+        internal char CloseDelimiter
+        {
+            get
+            {
+                return _closeDelimiter;
+            }
+        }
+
+        public ClassifierLexerState GetCurrentState()
         {
             return State;
         }
@@ -184,14 +204,10 @@
                 else
                 {
                     token = _outsideLexer.NextToken();
-                    if (token.Type == OutsideClassifierLexer.LANGLE)
+                    if (token.Type == OutsideClassifierLexer.LDELIM)
                     {
                         //expressionLevel++;
                         Mode = TemplateLexerMode.Expression;
-                    }
-                    else if (token.Type == OutsideClassifierLexer.PIPE)
-                    {
-                        Mode = TemplateLexerMode.Template;
                     }
                     else if (Mode == TemplateLexerMode.AnonymousTemplateParameters)
                     {
@@ -199,6 +215,10 @@
                         {
                         case OutsideClassifierLexer.ID:
                             token.Type = OutsideClassifierLexer.PARAMETER_DEFINITION;
+                            break;
+
+                        case OutsideClassifierLexer.PIPE:
+                            Mode = TemplateLexerMode.Template;
                             break;
 
                         default:
@@ -213,7 +233,6 @@
                         case OutsideClassifierLexer.PIPE:
                         case OutsideClassifierLexer.COMMA:
                         case OutsideClassifierLexer.WS:
-                        case OutsideClassifierLexer.COMMENT:
                             token.Type = OutsideClassifierLexer.TEXT;
                             break;
 
@@ -226,7 +245,7 @@
                 break;
 
             case TemplateLexerMode.Expression:
-                if (_input.LA(1) == '>')
+                if (_input.LA(1) == CloseDelimiter)
                 {
                     // no longer inside the expression - let the template lexer prepare the RANGLE token
                     token = _insideLexer.NextToken();
@@ -246,6 +265,8 @@
                 break;
 
             case TemplateLexerMode.Group:
+            case TemplateLexerMode.DelimitersOpenSpec:
+            case TemplateLexerMode.DelimitersCloseSpec:
             default:
                 switch (_input.LA(1))
                 {
@@ -258,8 +279,26 @@
 
                 case '"':
                     token = _groupLexer.NextToken();
-                    Mode = TemplateLexerMode.Template;
-                    Outermost = OutermostTemplate.String;
+                    if (Mode == TemplateLexerMode.Group)
+                    {
+                        Mode = TemplateLexerMode.Template;
+                        Outermost = OutermostTemplate.String;
+                    }
+                    else if (Mode == TemplateLexerMode.DelimitersOpenSpec)
+                    {
+                        if (token.Text.Length > 2)
+                            _openDelimiter = token.Text[1];
+
+                        Mode = TemplateLexerMode.DelimitersCloseSpec;
+                    }
+                    else if (Mode == TemplateLexerMode.DelimitersCloseSpec)
+                    {
+                        if (token.Text.Length > 2)
+                            _closeDelimiter = token.Text[1];
+
+                        Mode = TemplateLexerMode.Group;
+                    }
+
                     break;
 
                 case '<':
@@ -277,6 +316,23 @@
 
                 default:
                     token = _groupLexer.NextToken();
+
+                    switch (token.Type)
+                    {
+                    case GroupClassifierLexer.ID:
+                        if (token.Text == "delimiters")
+                            Mode = TemplateLexerMode.DelimitersOpenSpec;
+
+                        break;
+
+                    case GroupClassifierLexer.LEGACY_DELIMITERS:
+                        Mode = TemplateLexerMode.DelimitersOpenSpec;
+                        break;
+
+                    default:
+                        break;
+                    }
+
                     break;
                 }
 
@@ -289,7 +345,7 @@
         private TemplateLexerMode CheckAnonymousTemplateForParameters()
         {
             int position = _input.Mark();
-            LexerState currentState = State;
+            ClassifierLexerState currentState = State;
 
             try
             {
@@ -335,64 +391,6 @@
             {
                 _input.Rewind(position);
                 State = currentState;
-            }
-        }
-
-        internal enum TemplateLexerMode
-        {
-            Group,
-            Template,
-            Expression,
-            AnonymousTemplateParameters,
-        }
-
-        internal enum OutermostTemplate
-        {
-            None,
-            String,
-            BigString,
-            BigStringLine,
-        }
-
-        internal struct LexerState : IEquatable<LexerState>
-        {
-            internal static readonly LexerState Initial = new LexerState();
-
-            internal readonly TemplateLexerMode Mode;
-            internal readonly OutermostTemplate Outermost;
-            internal readonly int AnonymousTemplateLevel;
-            internal readonly bool InComment;
-
-            public LexerState(TemplateLexerMode mode, OutermostTemplate outermost, int anonymousTemplateLevel, bool inComment)
-            {
-                Mode = mode;
-                Outermost = outermost;
-                AnonymousTemplateLevel = anonymousTemplateLevel;
-                InComment = inComment;
-            }
-
-            public bool Equals(LexerState other)
-            {
-                return AnonymousTemplateLevel == other.AnonymousTemplateLevel
-                    && Mode == other.Mode
-                    && Outermost == other.Outermost
-                    && InComment == other.InComment;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (!(obj is LexerState))
-                    return false;
-
-                return Equals((LexerState)obj);
-            }
-
-            public override int GetHashCode()
-            {
-                return this.AnonymousTemplateLevel.GetHashCode()
-                    ^ this.Mode.GetHashCode()
-                    ^ this.Outermost.GetHashCode()
-                    ^ this.InComment.GetHashCode();
             }
         }
     }

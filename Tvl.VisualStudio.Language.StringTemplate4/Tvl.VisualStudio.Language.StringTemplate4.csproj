@@ -85,6 +85,9 @@
     <CodeContractsReferenceAssembly>DoNotBuild</CodeContractsReferenceAssembly>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ClassifierLexerState.cs" />
+    <Compile Include="TemplateLexerMode.cs" />
+    <Compile Include="OutermostTemplate.cs" />
     <Compile Include="StringTemplateLanguageInfo.cs" />
     <Compile Include="StringTemplateLanguagePackage.cs" />
     <Compile Include="ClassifierLexer.cs" />

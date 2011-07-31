@@ -7,6 +7,7 @@ options {
 }
 
 @namespace{Tvl.VisualStudio.Language.StringTemplate4}
+@ctorModifier{private}
 
 DOT : '.';
 ELLIPSIS : '...';
@@ -19,13 +20,10 @@ LBRACK : '[';
 RBRACK : ']';
 EQUALS : '=';
 NOT : '!';
-//AT : '@';
 OR : '||';
 AND : '&&';
 LBRACE : '{';
 RBRACE : '}';
-LANGLE : '<';
-RANGLE : '>';
 
 REGION_REF
 	:	'@' EXPR_IDENTIFIER
@@ -37,11 +35,11 @@ EXPR_IDENTIFIER
 	;
 
 WS
-	:	(' '|'\t')*
+	:	(' '|'\t')+
 	;
 
 NEWLINE
-	:	('\r'|'\n')*
+	:	('\r'|'\n')+
 	;
 
 STRING
@@ -51,6 +49,9 @@ STRING
 		)*
 		'"'
 	;
+
+//LDELIM	: {input.LA(1) == OpenDelimiter}? => .;
+RDELIM	: {input.LA(1) == CloseDelimiter}? => .;
 
 ANYCHAR
 	:	.
