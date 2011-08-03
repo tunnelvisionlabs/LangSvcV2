@@ -68,7 +68,7 @@
             {
                 IToken token = lexer.NextToken();
 
-                bool inBounds = token.StopIndex + 1 < span.End.Position;
+                bool inBounds = token.StartIndex < span.End.Position;
 
                 int startLineCurrent;
                 if (token.Type == CharStreamConstants.EndOfFile)
