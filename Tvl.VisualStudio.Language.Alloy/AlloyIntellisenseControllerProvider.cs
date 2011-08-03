@@ -16,7 +16,7 @@
     internal class AlloyIntellisenseControllerProvider : IntellisenseControllerProvider
     {
         [Import]
-        public IGlyphService GlyphService
+        public IDispatcherGlyphService GlyphService
         {
             get;
             private set;

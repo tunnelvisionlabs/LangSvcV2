@@ -45,7 +45,7 @@
         public static List<IEditorNavigationTarget> ExtractNavigationTargets(IAstRuleReturnScope parseResult, ReadOnlyCollection<IToken> tokens, AlloyEditorNavigationSourceProvider provider, ITextSnapshot snapshot)
         {
             BufferedTreeNodeStream input = new BufferedTreeNodeStream(parseResult.Tree);
-            AlloyEditorNavigationSourceWalker walker = new AlloyEditorNavigationSourceWalker(input, snapshot, tokens, provider.EditorNavigationTypeRegistryService, provider, provider.OutputWindowService);
+            AlloyEditorNavigationSourceWalker walker = new AlloyEditorNavigationSourceWalker(input, snapshot, tokens, provider.EditorNavigationTypeRegistryService, provider.GlyphService, provider.OutputWindowService);
             walker.compilationUnit();
 
             return walker._targets;
@@ -54,7 +54,7 @@
         public static List<IEditorNavigationTarget> ExtractNavigationTargets(IAstRuleReturnScope parseResult, ReadOnlyCollection<IToken> tokens, AlloyAtnEditorNavigationSourceProvider provider, ITextSnapshot snapshot)
         {
             BufferedTreeNodeStream input = new BufferedTreeNodeStream(parseResult.Tree);
-            AlloyEditorNavigationSourceWalker walker = new AlloyEditorNavigationSourceWalker(input, snapshot, tokens, provider.EditorNavigationTypeRegistryService, provider, provider.OutputWindowService);
+            AlloyEditorNavigationSourceWalker walker = new AlloyEditorNavigationSourceWalker(input, snapshot, tokens, provider.EditorNavigationTypeRegistryService, provider.GlyphService, provider.OutputWindowService);
             walker.compilationUnit();
 
             return walker._targets;
