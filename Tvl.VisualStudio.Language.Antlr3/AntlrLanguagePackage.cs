@@ -3,9 +3,10 @@
     using System;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio.Shell;
-    using Tvl.VisualStudio.Shell.Extensions;
-    using IServiceContainer = System.ComponentModel.Design.IServiceContainer;
     using Tvl.VisualStudio.Shell;
+    using Tvl.VisualStudio.Shell.Extensions;
+    using AntlrIntellisenseOptions = Tvl.VisualStudio.Language.Antlr3.OptionsPages.AntlrIntellisenseOptions;
+    using IServiceContainer = System.ComponentModel.Design.IServiceContainer;
 
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration(AntlrConstants.AntlrLanguagePackageNameResourceString, AntlrConstants.AntlrLanguagePackageDetailsResourceString, AntlrConstants.AntlrLanguagePackageProductVersionString/*, IconResourceID = 400*/)]
@@ -28,6 +29,8 @@
         RequestStockColors = true)]
     [ProvideLanguageExtension(typeof(AntlrLanguageInfo), AntlrConstants.AntlrFileExtension)]
     [ProvideLanguageExtension(typeof(AntlrLanguageInfo), AntlrConstants.AntlrFileExtension2)]
+
+    [ProvideLanguageEditorOptionPage(typeof(AntlrIntellisenseOptions), AntlrConstants.AntlrLanguageName, "", "IntelliSense", "#210")]
 
     [ProvideDebuggerException(typeof(Antlr.Runtime.EarlyExitException))]
     [ProvideDebuggerException(typeof(Antlr.Runtime.FailedPredicateException))]
@@ -53,6 +56,20 @@
         public AntlrLanguagePackage()
         {
             _instance = this;
+        }
+
+        public AntlrIntellisenseOptions IntellisenseOptions
+        {
+            get
+            {
+                return GetDialogPage<AntlrIntellisenseOptions>();
+            }
+        }
+
+        protected T GetDialogPage<T>()
+            where T : DialogPage
+        {
+            return (T)base.GetDialogPage(typeof(T));
         }
 
         protected override void Initialize()

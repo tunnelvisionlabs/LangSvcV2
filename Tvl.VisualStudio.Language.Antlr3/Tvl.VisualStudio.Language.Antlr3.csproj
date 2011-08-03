@@ -176,6 +176,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
@@ -224,6 +225,15 @@
     <Compile Include="AntlrTextStructureNavigator.cs" />
     <Compile Include="AntlrTextStructureNavigatorProvider.cs" />
     <Compile Include="Experimental\AntlrAtnBuilder.cs" />
+    <Compile Include="OptionsPages\AntlrIntellisenseOptions.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="OptionsPages\AntlrIntellisenseOptionsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="OptionsPages\AntlrIntellisenseOptionsControl.Designer.cs">
+      <DependentUpon>AntlrIntellisenseOptionsControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -339,6 +349,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="OptionsPages\AntlrIntellisenseOptionsControl.resx">
+      <DependentUpon>AntlrIntellisenseOptionsControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="VSPackage.resx">
       <SubType>Designer</SubType>
       <LogicalName>VSPackage.resources</LogicalName>
