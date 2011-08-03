@@ -162,6 +162,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Intellisense\DispatcherGlyphService.cs" />
     <Compile Include="Intellisense\IntellisenseCommandFilterViewCreationListener.cs" />
     <Compile Include="Intellisense\IntellisenseMouseProcessorProvider.cs" />
     <Compile Include="Intellisense\IntellisenseMouseProcessor.cs" />

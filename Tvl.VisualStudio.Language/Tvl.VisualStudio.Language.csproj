@@ -181,6 +181,7 @@
     <Compile Include="Intellisense\CompletionSource.cs" />
     <Compile Include="Intellisense\CompletionSourceProvider.cs" />
     <Compile Include="Intellisense\FileSystemNavigateToTarget.cs" />
+    <Compile Include="Intellisense\IDispatcherGlyphService.cs" />
     <Compile Include="Intellisense\INavigateToTarget.cs" />
     <Compile Include="Intellisense\IntellisenseCommandFilter.cs" />
     <Compile Include="Intellisense\IntellisenseController.cs" />
