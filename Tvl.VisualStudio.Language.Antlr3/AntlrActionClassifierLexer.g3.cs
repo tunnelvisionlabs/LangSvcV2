@@ -17,24 +17,11 @@
             _lexer = lexer;
         }
 
-        private AntlrClassifierLexerMode Mode
+        private AntlrClassifierLexer Lexer
         {
             get
             {
-                return _lexer.Mode;
-            }
-        }
-
-        private bool InComment
-        {
-            get
-            {
-                return _lexer.InComment;
-            }
-
-            set
-            {
-                _lexer.InComment = value;
+                return _lexer;
             }
         }
 
@@ -51,13 +38,33 @@
 
             switch (token.Type)
             {
+            case CONTINUE_CHAR_LITERAL:
+                Lexer.InCharLiteral = true;
+                token.Type = ACTION_CHAR_LITERAL;
+                break;
+
+            case END_CHAR_LITERAL:
+                Lexer.InCharLiteral = false;
+                token.Type = ACTION_CHAR_LITERAL;
+                break;
+
+            case CONTINUE_STRING_LITERAL:
+                Lexer.InStringLiteral = true;
+                token.Type = ACTION_STRING_LITERAL;
+                break;
+
+            case END_STRING_LITERAL:
+                Lexer.InStringLiteral = false;
+                token.Type = ACTION_STRING_LITERAL;
+                break;
+
             case CONTINUE_COMMENT:
-                InComment = true;
+                Lexer.InComment = true;
                 token.Type = ACTION_ML_COMMENT;
                 break;
 
             case END_COMMENT:
-                InComment = false;
+                Lexer.InComment = false;
                 token.Type = ACTION_ML_COMMENT;
                 break;
 
@@ -70,7 +77,11 @@
 
         protected override void ParseNextToken()
         {
-            if (InComment)
+            if (Lexer.InCharLiteral)
+                mCONTINUE_CHAR_LITERAL();
+            else if (Lexer.InStringLiteral)
+                mCONTINUE_STRING_LITERAL();
+            else if (Lexer.InComment)
                 mCONTINUE_COMMENT();
             else
                 base.ParseNextToken();

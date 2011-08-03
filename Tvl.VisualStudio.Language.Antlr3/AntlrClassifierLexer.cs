@@ -90,6 +90,45 @@
             }
         }
 
+        internal bool InDoubleAngleStringLiteral
+        {
+            get
+            {
+                return Mode == AntlrClassifierLexerMode.GrammarDoubleAngleStringLiteral;
+            }
+
+            set
+            {
+                Mode = value ? AntlrClassifierLexerMode.GrammarDoubleAngleStringLiteral : AntlrClassifierLexerMode.Grammar;
+            }
+        }
+
+        internal bool InCharLiteral
+        {
+            get
+            {
+                return Mode == AntlrClassifierLexerMode.ActionCharLiteral;
+            }
+
+            set
+            {
+                Mode = value ? AntlrClassifierLexerMode.ActionCharLiteral : AntlrClassifierLexerMode.Action;
+            }
+        }
+
+        internal bool InStringLiteral
+        {
+            get
+            {
+                return Mode == AntlrClassifierLexerMode.ActionStringLiteral;
+            }
+
+            set
+            {
+                Mode = value ? AntlrClassifierLexerMode.ActionStringLiteral : AntlrClassifierLexerMode.Action;
+            }
+        }
+
         internal bool InOptions
         {
             get
@@ -187,6 +226,11 @@
 
                 break;
 
+            case AntlrClassifierLexerMode.ActionCharLiteral:
+            case AntlrClassifierLexerMode.ActionStringLiteral:
+                token = _actionLexer.NextToken();
+                break;
+
             case AntlrClassifierLexerMode.ArgAction:
                 if (_input.LA(1) == ']')
                 {
@@ -198,6 +242,10 @@
                     token = _actionLexer.NextToken();
                 }
 
+                break;
+
+            case AntlrClassifierLexerMode.GrammarDoubleAngleStringLiteral:
+                token = _grammarLexer.NextToken();
                 break;
 
             case AntlrClassifierLexerMode.Grammar:
@@ -249,12 +297,7 @@
                                 case AntlrGrammarClassifierLexer.SL_COMMENT:
                                     continue;
 
-                                default:
-                                    break;
-                                }
-
-                                if (nextToken.Type == AntlrGrammarClassifierLexer.ASSIGN)
-                                {
+                                case AntlrGrammarClassifierLexer.ASSIGN:
                                     if (InOptions)
                                     {
                                         if (IsValidOption(token.Text))
@@ -269,6 +312,14 @@
                                     {
                                         token.Type = AntlrGrammarClassifierLexer.LABEL;
                                     }
+                                    break;
+
+                                case AntlrGrammarClassifierLexer.PLUS_ASSIGN:
+                                    token.Type = AntlrGrammarClassifierLexer.LABEL;
+                                    break;
+
+                                default:
+                                    break;
                                 }
 
                                 break;

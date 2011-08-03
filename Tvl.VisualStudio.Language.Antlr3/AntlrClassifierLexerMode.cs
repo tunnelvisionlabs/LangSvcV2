@@ -3,7 +3,10 @@
     internal enum AntlrClassifierLexerMode
     {
         Grammar,
+        GrammarDoubleAngleStringLiteral,
         Action,
+        ActionCharLiteral,
+        ActionStringLiteral,
         ArgAction,
     }
 }

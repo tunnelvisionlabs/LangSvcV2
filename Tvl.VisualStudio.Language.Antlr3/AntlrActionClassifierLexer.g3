@@ -23,19 +23,33 @@ IDENTIFIER
 DOLLAR : '$' ;
 
 ACTION_CHAR_LITERAL
-	:	'\''
-		(	ACTION_ESCAPE
-		|	~('\\' | '\'')
+	:	'\'' CONTINUE_CHAR_LITERAL {$type = state.type;}
+	;
+
+fragment END_CHAR_LITERAL : ;
+
+fragment CONTINUE_CHAR_LITERAL
+	:	(	~('\r'|'\n'|'\''|'\\')
+		|	'\\' (options{greedy=true;} : .)?
 		)*
-		'\''
+		(	'\'' {state.type = END_CHAR_LITERAL;}
+		|	{state.type = CONTINUE_CHAR_LITERAL;}
+		)
 	;
 
 ACTION_STRING_LITERAL
-	:	'"'
-		(	ACTION_ESCAPE
-		|	~('\\' | '"')
+	:	'"' CONTINUE_STRING_LITERAL {$type = state.type;}
+	;
+
+fragment END_STRING_LITERAL : ;
+
+fragment CONTINUE_STRING_LITERAL
+	:	(	~('\r'|'\n'|'"'|'\\')
+		|	'\\' (options{greedy=true;} : .)?
 		)*
-		'"'
+		(	'"' {state.type = END_STRING_LITERAL;}
+		|	{state.type = CONTINUE_STRING_LITERAL;}
+		)
 	;
 
 ACTION_COMMENT
@@ -64,8 +78,8 @@ ACTION_ESCAPE
 
 ACTION_TEXT
 	:	(	~('\r' | '\n' | '\\' | '/' | '{' | '}' | ']' | '$' | '\'' | '"')
-		|	{Mode != AntlrClassifierLexerMode.Action}? => ('{' | '}')
-		|	{Mode != AntlrClassifierLexerMode.ArgAction}? => ']'
+		|	{Lexer.Mode != AntlrClassifierLexerMode.Action}? => ('{' | '}')
+		|	{Lexer.Mode != AntlrClassifierLexerMode.ArgAction}? => ']'
 		|	{!IsIdStartChar(input.LA(2))}? => '$'
 		|	{input.LA(2) != '/' && input.LA(2) != '*'}? => '/'
 		)+

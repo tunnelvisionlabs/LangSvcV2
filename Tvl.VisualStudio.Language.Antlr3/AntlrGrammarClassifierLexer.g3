@@ -144,12 +144,18 @@ ESCAPE_BRACKET
 	;
 
 DOUBLE_ANGLE_STRING_LITERAL
-	:	'<<'
-		(	~'>'
-		|	('>' ~'>') => '>'
+	:	'<<' CONTINUE_DOUBLE_ANGLE_STRING_LITERAL {$type = state.type;}
+	;
+
+fragment END_DOUBLE_ANGLE_STRING_LITERAL : ;
+
+fragment
+CONTINUE_DOUBLE_ANGLE_STRING_LITERAL
+	:	(	~('\r'|'\n'|'>')
+		|	{input.LA(2) != '>'}? => '>'
 		)*
-		(	'>>'
-		|	// allowed to skip in colorizer
+		(	'>>' {state.type = END_DOUBLE_ANGLE_STRING_LITERAL;}
+		|	{state.type = CONTINUE_DOUBLE_ANGLE_STRING_LITERAL;}
 		)
 	;
 
