@@ -258,9 +258,16 @@
 
         public virtual void TriggerCompletion(ITrackingPoint triggerPoint)
         {
+            this.TriggerCompletion(triggerPoint, CompletionInfoType.NoInfo, IntellisenseInvocationType.Default);
+        }
+
+        public virtual void TriggerCompletion(ITrackingPoint triggerPoint, CompletionInfoType completionInfoType, IntellisenseInvocationType intellisenseInvocationType)
+        {
             Contract.Requires<ArgumentNullException>(triggerPoint != null, "triggerPoint");
 
             DismissCompletion();
+            CompletionInfo.InfoType = completionInfoType;
+            CompletionInfo.InvocationType = intellisenseInvocationType;
             ICompletionSession session = Provider.CompletionBroker.TriggerCompletion(TextView, triggerPoint, true);
             if (session != null)
             {
