@@ -184,6 +184,7 @@
     <Compile Include="Extensions\IVsCmdNameMappingExtensions.cs" />
     <Compile Include="Extensions\IVsExpansionManagerExtensions.cs" />
     <Compile Include="Extensions\IVsHierarchyExtensions.cs" />
+    <Compile Include="Extensions\IVsShellExtensions.cs" />
     <Compile Include="Extensions\IVsSolutionExtensions.cs" />
     <Compile Include="Extensions\IVsTextViewExtensions.cs" />
     <Compile Include="Extensions\IVsUIDataSourceExtensions.cs" />
