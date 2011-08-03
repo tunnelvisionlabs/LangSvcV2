@@ -163,6 +163,8 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PhpTextStructureNavigator.cs" />
+    <Compile Include="PhpTextStructureNavigatorProvider.cs" />
     <Compile Include="Classification\PhpClassifierConstants.cs" />
     <Compile Include="Navigation\PhpEditorNavigationBackgroundParser.cs" />
     <Compile Include="Navigation\PhpEditorNavigationParser.g3.cs">
