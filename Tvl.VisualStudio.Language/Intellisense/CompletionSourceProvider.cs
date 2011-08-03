@@ -10,7 +10,7 @@
     public abstract class CompletionSourceProvider : ICompletionSourceProvider
     {
         [Import]
-        public IGlyphService GlyphService
+        public IDispatcherGlyphService GlyphService
         {
             get;
             private set;

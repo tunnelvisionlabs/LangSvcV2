@@ -12,13 +12,12 @@
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Text.Navigation;
+    using IDispatcherGlyphService = Tvl.VisualStudio.Language.Intellisense.IDispatcherGlyphService;
 
     internal sealed class GoEditorNavigationSource : IEditorNavigationSource
     {
         private List<IEditorNavigationTarget> _navigationTargets;
         private readonly GoEditorNavigationSourceProvider _provider;
-        private readonly Dictionary<int, ImageSource> _glyphCache = new Dictionary<int, ImageSource>();
-        private readonly ReaderWriterLockSlim _glyphCacheLock = new ReaderWriterLockSlim();
 
         public event EventHandler NavigationTargetsChanged;
 
@@ -58,7 +57,7 @@
             }
         }
 
-        private IGlyphService GlyphService
+        private IDispatcherGlyphService GlyphService
         {
             get
             {
@@ -128,7 +127,7 @@
                                 // applies to the whole file
                                 var span = new SnapshotSpan(e.Snapshot, new Span(0, e.Snapshot.Length));
                                 SnapshotSpan ruleSeek = new SnapshotSpan(e.Snapshot, new Span(((CommonTree)child.Children[0]).Token.StartIndex, 0));
-                                var glyph = GetGlyph(StandardGlyphGroup.GlyphGroupModule, StandardGlyphItem.GlyphItemPublic);
+                                var glyph = _provider.GlyphService.GetGlyph(StandardGlyphGroup.GlyphGroupModule, StandardGlyphItem.GlyphItemPublic);
                                 navigationTargets.Add(new EditorNavigationTarget(packageName, navigationType, span, ruleSeek, glyph));
                             }
                             break;
@@ -156,7 +155,7 @@
                                 Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
                                 SnapshotSpan ruleSpan = new SnapshotSpan(e.Snapshot, span);
                                 SnapshotSpan ruleSeek = new SnapshotSpan(e.Snapshot, new Span(typeSpec.Token.StartIndex, 0));
-                                var glyph = GetGlyph(GetGlyphGroupForType(typeSpec), char.IsUpper(typeName[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate);
+                                var glyph = _provider.GlyphService.GetGlyph(GetGlyphGroupForType(typeSpec), char.IsUpper(typeName[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate);
                                 navigationTargets.Add(new EditorNavigationTarget(typeName, navigationType, ruleSpan, ruleSeek, glyph));
 
                                 if (typeSpec.ChildCount > 0 && typeSpec.Children[0].Type == GoLexer.KW_STRUCT && typeSpec.Children[0].ChildCount > 0)
@@ -175,7 +174,7 @@
                                             span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
                                             ruleSpan = new SnapshotSpan(e.Snapshot, span);
                                             ruleSeek = new SnapshotSpan(e.Snapshot, new Span(fieldNameIdentifier.Token.StartIndex, 0));
-                                            glyph = GetGlyph(StandardGlyphGroup.GlyphGroupField, char.IsUpper(fieldName[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate);
+                                            glyph = _provider.GlyphService.GetGlyph(StandardGlyphGroup.GlyphGroupField, char.IsUpper(fieldName[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate);
                                             navigationTargets.Add(new EditorNavigationTarget(fieldName, navigationType, ruleSpan, ruleSeek, glyph));
                                         }
                                     }
@@ -203,7 +202,7 @@
                                     SnapshotSpan ruleSeek = new SnapshotSpan(e.Snapshot, new Span(nameToken.Token.StartIndex, 0));
                                     var group = (child.Type == GoLexer.KW_CONST) ? StandardGlyphGroup.GlyphGroupConstant : StandardGlyphGroup.GlyphGroupVariable;
                                     var item = char.IsUpper(name[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate;
-                                    var glyph = GetGlyph(group, item);
+                                    var glyph = _provider.GlyphService.GetGlyph(group, item);
                                     navigationTargets.Add(new EditorNavigationTarget(name, navigationType, ruleSpan, ruleSeek, glyph));
                                 }
                             }
@@ -240,7 +239,7 @@
                                 Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
                                 SnapshotSpan ruleSpan = new SnapshotSpan(e.Snapshot, span);
                                 SnapshotSpan ruleSeek = new SnapshotSpan(e.Snapshot, new Span(child.Token.StartIndex, 0));
-                                var glyph = GetGlyph(StandardGlyphGroup.GlyphGroupMethod, char.IsUpper(functionName[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate);
+                                var glyph = _provider.GlyphService.GetGlyph(StandardGlyphGroup.GlyphGroupMethod, char.IsUpper(functionName[0]) ? StandardGlyphItem.GlyphItemPublic : StandardGlyphItem.GlyphItemPrivate);
                                 navigationTargets.Add(new EditorNavigationTarget(sig, navigationType, ruleSpan, ruleSeek, glyph));
                             }
 
@@ -312,54 +311,6 @@
             }
 
             return StandardGlyphGroup.GlyphGroupType;
-        }
-
-        private ImageSource GetGlyph(StandardGlyphGroup group, StandardGlyphItem item)
-        {
-            bool entered = false;
-            try
-            {
-                entered = _glyphCacheLock.TryEnterUpgradeableReadLock(50);
-                if (!entered)
-                    return null;
-
-                int key = (int)group << 16 + (int)item;
-                ImageSource source;
-                if (!_glyphCache.TryGetValue(key, out source))
-                {
-                    _glyphCacheLock.EnterWriteLock();
-                    try
-                    {
-                        // create the glyph on the UI thread
-                        Dispatcher dispatcher = _provider.Dispatcher;
-                        if (dispatcher == null)
-                        {
-                            _glyphCache[key] = source = null;
-                        }
-                        else
-                        {
-                            dispatcher.Invoke((Action)(
-                                () =>
-                                {
-                                    _glyphCache[key] = source = GlyphService.GetGlyph(group, item);
-                                }));
-                        }
-                    }
-                    finally
-                    {
-                        _glyphCacheLock.ExitWriteLock();
-                    }
-                }
-
-                return source;
-            }
-            finally
-            {
-                if (entered)
-                {
-                    _glyphCacheLock.ExitUpgradeableReadLock();
-                }
-            }
         }
     }
 }

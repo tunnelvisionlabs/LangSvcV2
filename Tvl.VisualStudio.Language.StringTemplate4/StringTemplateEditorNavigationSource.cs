@@ -97,7 +97,7 @@
                             Interval sourceInterval = templateInfo.GroupInterval;
                             SnapshotSpan span = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, sourceInterval.Length));
                             SnapshotSpan seek = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, 0));
-                            ImageSource glyph = _provider.GetGlyph(StandardGlyphGroup.GlyphGroupNamespace, StandardGlyphItem.GlyphItemPublic);
+                            ImageSource glyph = _provider.GlyphService.GetGlyph(StandardGlyphGroup.GlyphGroupNamespace, StandardGlyphItem.GlyphItemPublic);
                             NavigationTargetStyle style = NavigationTargetStyle.None;
                             navigationTargets.Add(new EditorNavigationTarget(sig, navigationType, span, seek, glyph, style));
                         }
@@ -113,7 +113,7 @@
                             SnapshotSpan seek = new SnapshotSpan(e.Snapshot, new Span(sourceInterval.Start, 0));
                             bool isAlias = false;
                             StandardGlyphGroup glyphGroup = isAlias ? StandardGlyphGroup.GlyphGroupTypedef : StandardGlyphGroup.GlyphGroupTemplate;
-                            ImageSource glyph = _provider.GetGlyph(StandardGlyphGroup.GlyphGroupTemplate, StandardGlyphItem.GlyphItemPublic);
+                            ImageSource glyph = _provider.GlyphService.GetGlyph(StandardGlyphGroup.GlyphGroupTemplate, StandardGlyphItem.GlyphItemPublic);
                             NavigationTargetStyle style = NavigationTargetStyle.None;
                             navigationTargets.Add(new EditorNavigationTarget(sig, navigationType, span, seek, glyph, style));
                         }

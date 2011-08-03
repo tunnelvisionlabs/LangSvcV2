@@ -150,7 +150,7 @@
                                 SnapshotSpan seek = new SnapshotSpan(snapshot, new Span(child.Token.StartIndex, 0));
                                 StandardGlyphGroup glyphGroup = StandardGlyphGroup.GlyphGroupJSharpField;
                                 StandardGlyphItem glyphItem = GetGlyphItemFromChildModifier((CommonTree)child.GetAncestor(Java2Lexer.FIELD_DECLARATION));
-                                ImageSource glyph = _provider.GetGlyph(glyphGroup, glyphItem);
+                                ImageSource glyph = _provider.GlyphService.GetGlyph(glyphGroup, glyphItem);
                                 NavigationTargetStyle style = NavigationTargetStyle.None;
                                 navigationTargets.Add(new EditorNavigationTarget(name, navigationType, span, seek, glyph, style));
                             }
@@ -174,7 +174,7 @@
                                 SnapshotSpan seek = new SnapshotSpan(snapshot, new Span(child.Token.StartIndex, 0));
                                 StandardGlyphGroup glyphGroup = StandardGlyphGroup.GlyphGroupJSharpMethod;
                                 StandardGlyphItem glyphItem = GetGlyphItemFromChildModifier(child);
-                                ImageSource glyph = _provider.GetGlyph(glyphGroup, glyphItem);
+                                ImageSource glyph = _provider.GlyphService.GetGlyph(glyphGroup, glyphItem);
                                 NavigationTargetStyle style = NavigationTargetStyle.None;
                                 navigationTargets.Add(new EditorNavigationTarget(sig, navigationType, span, seek, glyph, style));
                             }
@@ -237,7 +237,7 @@
                                 }
 
                                 StandardGlyphItem glyphItem = GetGlyphItemFromChildModifier(child);
-                                ImageSource glyph = _provider.GetGlyph(glyphGroup, glyphItem);
+                                ImageSource glyph = _provider.GlyphService.GetGlyph(glyphGroup, glyphItem);
                                 NavigationTargetStyle style = NavigationTargetStyle.None;
                                 navigationTargets.Add(new EditorNavigationTarget(name, navigationType, span, seek, glyph, style));
                             }
