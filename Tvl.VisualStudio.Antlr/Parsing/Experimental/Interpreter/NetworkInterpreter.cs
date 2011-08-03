@@ -240,7 +240,7 @@
                 return false;
 
             int symbol = token.Type;
-            int symbolPosition = _input.Index - _lookBehindPosition - 1;
+            int symbolPosition = token.TokenIndex;
 
             /*
              * Update the non-deterministic trace
@@ -348,8 +348,12 @@
             if (_input.Index + _lookAheadPosition >= _input.Count)
                 return false;
 
-            int symbol = _input.LA(1 + _lookAheadPosition);
-            int symbolPosition = _input.Index + _lookAheadPosition;
+            IToken token = _input.LT(-1 - _lookBehindPosition);
+            if (token == null)
+                return false;
+
+            int symbol = token.Type;
+            int symbolPosition = token.TokenIndex;
 
             Stopwatch updateTimer = Stopwatch.StartNew();
 
