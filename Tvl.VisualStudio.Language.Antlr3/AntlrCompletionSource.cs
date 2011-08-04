@@ -1,16 +1,30 @@
 ﻿namespace Tvl.VisualStudio.Language.Antlr3
 {
     using System;
-    using ImageSource = System.Windows.Media.ImageSource;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using System.Linq;
+    using Antlr.Runtime;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Operations;
+    using Tvl.VisualStudio.Language.Antlr3.Experimental;
+    using Tvl.VisualStudio.Language.Antlr3.OptionsPages;
     using Tvl.VisualStudio.Language.Intellisense;
+    using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
+    using Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter;
+    using Tvl.VisualStudio.Shell.Extensions;
+
+    using ANTLRLexer = global::Antlr3.Grammars.ANTLRLexer;
+    using Attribute = global::Antlr3.Tool.Attribute;
+    using CodeGenerator = global::Antlr3.Codegen.CodeGenerator;
+    using GrammarType = global::Antlr3.Tool.GrammarType;
+    using ImageSource = System.Windows.Media.ImageSource;
     using Regex = System.Text.RegularExpressions.Regex;
     using RegexOptions = System.Text.RegularExpressions.RegexOptions;
+    using Stopwatch = System.Diagnostics.Stopwatch;
 
     /*
      * Establishing identifier visibility scopes.
@@ -29,12 +43,17 @@
 
     internal partial class AntlrCompletionSource : CompletionSource
     {
-        private static readonly Regex IdentifierRegex = new Regex("^[A-Za-z][A-Za-z0-9_]*$", RegexOptions.Compiled);
+        private static readonly Regex IdentifierRegex = new Regex(@"^(?:(?:\$?[A-Za-z][A-Za-z0-9_]*)|\$)$", RegexOptions.Compiled);
+
+        private readonly AntlrIntellisenseOptions _intellisenseOptions;
 
         public AntlrCompletionSource(ITextBuffer textBuffer, AntlrCompletionSourceProvider provider, AntlrBackgroundParser backgroundParser)
             : base(textBuffer, provider, AntlrConstants.AntlrLanguageGuid)
         {
             BackgroundParser = backgroundParser;
+            var shell = Provider.GlobalServiceProvider.GetShell();
+            var package = shell.LoadPackage<AntlrLanguagePackage>();
+            _intellisenseOptions = package.IntellisenseOptions;
         }
 
         public new AntlrCompletionSourceProvider Provider
@@ -67,6 +86,14 @@
             set;
         }
 
+        private string CommitCharacters
+        {
+            get
+            {
+                return _intellisenseOptions.CommitCharacters ?? AntlrIntellisenseOptions.DefaultCommitCharacters;
+            }
+        }
+
         public override void AugmentCompletionSession(ICompletionSession session, IList<CompletionSet> completionSets)
         {
             if (session == null || completionSets == null)
@@ -82,6 +109,9 @@
                 ITrackingPoint point2 = triggerPoint;
                 bool flag = false;
                 bool extend = true;
+
+                // labels includes both implicit and explicit labels
+                var labels = FindLabelsInScope(point);
 
                 IntellisenseInvocationType invocationType = completionInfo.InvocationType;
                 CompletionInfoType infoType = completionInfo.InfoType;
@@ -132,7 +162,7 @@
                     string str3 = snapshot.GetText(extentOfWord.Span);
                     if (!string.IsNullOrWhiteSpace(str3))
                     {
-                        while ("!^()=<>\\:;.,+-*/{}\" '&%@?".IndexOf(str3[0]) > 0)
+                        while (CommitCharacters.IndexOf(str3[0]) > 0)
                         {
                             SnapshotSpan span2 = extentOfWord.Span;
                             SnapshotSpan span3 = new SnapshotSpan(snapshot, span2.Start + 1, span2.Length - 1);
@@ -161,18 +191,438 @@
                 IEnumerable<Completion> context = GetContextCompletions(triggerPoint.GetPoint(snapshot), (AntlrIntellisenseController)controller, session);
                 IEnumerable<Completion> keywords = GetKeywordCompletions();
                 IEnumerable<Completion> snippets = GetSnippetCompletions();
-                //List<Completion> signatures = GetSignatureCompletions();
-                //List<Completion> relations = GetRelationCompletions();
-                //List<Completion> predicates = GetPredicateCompletions();
-                //List<Completion> functions = GetFunctionCompletions();
+                IEnumerable<Completion> labelCompletions = GetLabelCompletions(labels);
                 //SnapshotSpan? Provider.IntellisenseCache.GetExpressionSpan(triggerPoint.GetPoint(snapshot));
 
-                IEnumerable<Completion> completions = context.Concat(keywords).Concat(snippets);
+                IEnumerable<Completion> completions = context.Concat(keywords).Concat(snippets).Concat(labelCompletions);
                 IEnumerable<Completion> orderedCompletions = completions.Distinct(CompletionDisplayNameComparer.CurrentCulture).OrderBy(i => i.DisplayText, StringComparer.CurrentCultureIgnoreCase);
 
                 CompletionSet completionSet = new CompletionSet("AntlrCompletions", "Antlr Completions", applicableTo, orderedCompletions, EmptyCompletions);
                 completionSets.Add(completionSet);
             }
+        }
+
+        protected override IEnumerable<Completion> GetKeywordCompletions()
+        {
+            if (!_intellisenseOptions.KeywordsInCompletionLists)
+                return Enumerable.Empty<Completion>();
+
+            return base.GetKeywordCompletions();
+        }
+
+        protected override IEnumerable<Completion> GetSnippetCompletions()
+        {
+            if (!_intellisenseOptions.CodeSnippetsInCompletionLists)
+                return Enumerable.Empty<Completion>();
+
+            return base.GetSnippetCompletions();
+        }
+
+        private IEnumerable<Completion> GetLabelCompletions(List<LabelInfo> labels)
+        {
+            return labels.Select(CreateLabelCompletion);
+        }
+
+        private Completion CreateLabelCompletion(LabelInfo label)
+        {
+            string displayText = "$" + label.Name;
+            string insertionText = "$" + label.Name;
+            string description = label.Description;
+            string iconAutomationText = string.Empty;
+            ImageSource iconSource = Provider.GlyphService.GetGlyph(label.Glyph, StandardGlyphItem.GlyphItemPublic);
+            return new Completion(displayText, insertionText, description, iconSource, iconAutomationText);
+        }
+
+        private List<LabelInfo> FindLabelsInScope(SnapshotPoint triggerPoint)
+        {
+            List<LabelInfo> labels = new List<LabelInfo>();
+
+            /* use the experimental model to locate and process the expression */
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            // lex the entire document
+            var currentSnapshot = triggerPoint.Snapshot;
+            var input = new SnapshotCharStream(currentSnapshot, new Span(0, currentSnapshot.Length));
+            var lexer = new ANTLRLexer(input);
+            var tokens = new CommonTokenStream(lexer);
+            tokens.Fill();
+
+            // locate the last token before the trigger point
+            while (true)
+            {
+                IToken nextToken = tokens.LT(1);
+                if (nextToken.Type == CharStreamConstants.EndOfFile)
+                    break;
+
+                if (nextToken.StartIndex > triggerPoint.Position)
+                    break;
+
+                tokens.Consume();
+            }
+
+            bool inAction = false;
+            IToken triggerToken = tokens.LT(-1);
+            switch (triggerToken.Type)
+            {
+            case ANTLRLexer.RULE_REF:
+            case ANTLRLexer.TOKEN_REF:
+            case ANTLRLexer.DOLLAR:
+                break;
+
+            case ANTLRLexer.ACTION:
+            case ANTLRLexer.FORCED_ACTION:
+            case ANTLRLexer.SEMPRED:
+            case ANTLRLexer.ARG_ACTION:
+                inAction = true;
+                break;
+
+            default:
+                return labels;
+            }
+
+            NetworkInterpreter interpreter = CreateNetworkInterpreter(tokens);
+            bool success = true;
+            while (interpreter.TryStepBackward())
+            {
+                if (interpreter.Contexts.Count == 0 || interpreter.Contexts.Count > 400)
+                {
+                    success = false;
+                    break;
+                }
+
+                if (interpreter.Contexts.All(context => context.BoundedStart))
+                    break;
+            }
+
+            if (!success)
+                interpreter.Contexts.RemoveAll(i => !i.BoundedStart);
+
+            interpreter.CombineBoundedStartContexts();
+
+            HashSet<IToken> labelTokens = new HashSet<IToken>(TokenIndexEqualityComparer.Default);
+            foreach (var context in interpreter.Contexts)
+            {
+                var tokenTransitions = context.Transitions.Where(i => i.TokenIndex != null).ToList();
+                for (int i = 1; i < tokenTransitions.Count - 1; i++)
+                {
+                    if (tokenTransitions[i].Symbol != ANTLRLexer.TOKEN_REF && tokenTransitions[i].Symbol != ANTLRLexer.RULE_REF)
+                        continue;
+
+                    // we add explicit labels, plus implicit labels if we're in an action
+                    if (tokenTransitions[i + 1].Symbol == ANTLRLexer.ASSIGN || tokenTransitions[i + 1].Symbol == ANTLRLexer.PLUS_ASSIGN)
+                    {
+                        RuleBinding rule = interpreter.Network.StateRules[tokenTransitions[i + 1].Transition.SourceState.Id];
+                        if (rule.Name == AntlrAtnBuilder.RuleNames.TreeRoot || rule.Name == AntlrAtnBuilder.RuleNames.ElementNoOptionSpec)
+                            labelTokens.Add(tokenTransitions[i].Token);
+                    }
+                    else if (inAction && tokenTransitions[i - 1].Symbol != ANTLRLexer.ASSIGN && tokenTransitions[i - 1].Symbol != ANTLRLexer.PLUS_ASSIGN)
+                    {
+                        RuleBinding rule = interpreter.Network.StateRules[tokenTransitions[i].Transition.SourceState.Id];
+                        if (rule.Name == AntlrAtnBuilder.RuleNames.Terminal || rule.Name == AntlrAtnBuilder.RuleNames.NotTerminal || rule.Name == AntlrAtnBuilder.RuleNames.RuleRef)
+                            labelTokens.Add(tokenTransitions[i].Token);
+                    }
+                }
+            }
+
+            foreach (var token in labelTokens)
+            {
+                labels.Add(new LabelInfo(token.Text, "(label) " + token.Text, new SnapshotSpan(triggerPoint.Snapshot, Span.FromBounds(token.StartIndex, token.StopIndex + 1)), StandardGlyphGroup.GlyphGroupField, Enumerable.Empty<LabelInfo>()));
+            }
+
+            /* add scopes */
+            if (inAction)
+            {
+                /* add global scopes */
+                IList<IToken> tokensList = tokens.GetTokens();
+                for (int i = 0; i < tokensList.Count - 1; i++)
+                {
+                    var token = tokensList[i];
+                    /* all global scopes appear before the first rule. before the first rule, the only place a ':' can appear is
+                     * in the form '::' for things like @lexer::namespace{}
+                     */
+                    if (token.Type == ANTLRLexer.COLON && tokensList[i + 1].Type == ANTLRLexer.COLON)
+                        break;
+
+                    if (token.Type == ANTLRLexer.SCOPE)
+                    {
+                        var nextToken = tokensList.Skip(i + 1).FirstOrDefault(t => t.Channel == TokenChannels.Default);
+                        if (nextToken != null && (nextToken.Type == ANTLRLexer.RULE_REF || nextToken.Type == ANTLRLexer.TOKEN_REF))
+                        {
+                            // TODO: parse scope members
+                            IToken actionToken = tokensList.Skip(nextToken.TokenIndex + 1).FirstOrDefault(t => t.Channel == TokenChannels.Default);
+                            IEnumerable<LabelInfo> members = Enumerable.Empty<LabelInfo>();
+
+                            if (actionToken != null && actionToken.Type == ANTLRLexer.ACTION)
+                            {
+                                IEnumerable<IToken> scopeMembers = ExtractScopeAttributes(nextToken);
+                                members = scopeMembers.Select(member =>
+                                    {
+                                        string name = member.Text;
+                                        SnapshotSpan definition = new SnapshotSpan(triggerPoint.Snapshot, Span.FromBounds(member.StartIndex, member.StopIndex + 1));
+                                        StandardGlyphGroup glyph = StandardGlyphGroup.GlyphGroupField;
+                                        IEnumerable<LabelInfo> nestedMembers = Enumerable.Empty<LabelInfo>();
+                                        return new LabelInfo(name, string.Empty, definition, glyph, nestedMembers);
+                                    });
+                            }
+
+                            labels.Add(new LabelInfo(nextToken.Text, "(global scope) " + nextToken.Text, new SnapshotSpan(triggerPoint.Snapshot, Span.FromBounds(nextToken.StartIndex, nextToken.StopIndex + 1)), StandardGlyphGroup.GlyphGroupNamespace, members));
+                        }
+                    }
+                }
+
+                /* add rule scopes */
+                // todo
+            }
+
+            /* add arguments and return values */
+            if (inAction)
+            {
+                HashSet<IToken> argumentTokens = new HashSet<IToken>(TokenIndexEqualityComparer.Default);
+                foreach (var context in interpreter.Contexts)
+                {
+                    var tokenTransitions = context.Transitions.Where(i => i.TokenIndex != null).ToList();
+                    for (int i = 1; i < tokenTransitions.Count; i++)
+                    {
+                        if (tokenTransitions[i].Symbol == ANTLRLexer.RETURNS || tokenTransitions[i].Symbol == ANTLRLexer.COLON)
+                            break;
+
+                        if (tokenTransitions[i].Symbol == ANTLRLexer.ARG_ACTION)
+                            argumentTokens.Add(tokenTransitions[i].Token);
+                    }
+                }
+
+                foreach (var token in argumentTokens)
+                {
+                    IEnumerable<IToken> arguments = ExtractArguments(token);
+                    foreach (var argument in arguments)
+                    {
+                        labels.Add(new LabelInfo(argument.Text, "(parameter) " + argument.Text, new SnapshotSpan(triggerPoint.Snapshot, Span.FromBounds(argument.StartIndex, argument.StopIndex + 1)), StandardGlyphGroup.GlyphGroupVariable, Enumerable.Empty<LabelInfo>()));
+                    }
+                }
+            }
+
+            /* add return values */
+            if (inAction)
+            {
+                HashSet<IToken> returnTokens = new HashSet<IToken>(TokenIndexEqualityComparer.Default);
+                foreach (var context in interpreter.Contexts)
+                {
+                    var tokenTransitions = context.Transitions.Where(i => i.TokenIndex != null).ToList();
+                    for (int i = 1; i < tokenTransitions.Count - 1; i++)
+                    {
+                        if (tokenTransitions[i].Symbol == ANTLRLexer.COLON)
+                            break;
+
+                        if (tokenTransitions[i].Symbol == ANTLRLexer.RETURNS)
+                        {
+                            if (tokenTransitions[i + 1].Symbol == ANTLRLexer.ARG_ACTION)
+                                returnTokens.Add(tokenTransitions[i + 1].Token);
+
+                            break;
+                        }
+                    }
+                }
+
+                foreach (var token in returnTokens)
+                {
+                    IEnumerable<IToken> returnValues = ExtractArguments(token);
+                    foreach (var returnValue in returnValues)
+                    {
+                        labels.Add(new LabelInfo(returnValue.Text, "(return value) "  + returnValue.Text, new SnapshotSpan(triggerPoint.Snapshot, Span.FromBounds(returnValue.StartIndex, returnValue.StopIndex + 1)), StandardGlyphGroup.GlyphGroupVariable, Enumerable.Empty<LabelInfo>()));
+                    }
+                }
+            }
+
+            /* add intrinsic labels ($start, $type, $text, $enclosingRuleName) */
+            IToken ruleNameToken = null;
+            HashSet<IToken> enclosingRuleNameTokens = new HashSet<IToken>(TokenIndexEqualityComparer.Default);
+            foreach (var context in interpreter.Contexts)
+            {
+                var tokenTransitions = context.Transitions.Where(i => i.Symbol == ANTLRLexer.RULE_REF || i.Symbol == ANTLRLexer.TOKEN_REF).ToList();
+                if (!tokenTransitions.Any())
+                    continue;
+
+                ruleNameToken = tokenTransitions.First().Token;
+                if (ruleNameToken != null)
+                    enclosingRuleNameTokens.Add(ruleNameToken);
+            }
+
+            foreach (var token in enclosingRuleNameTokens)
+            {
+                // TODO: add members
+                labels.Add(new LabelInfo(token.Text, "(enclosing rule) " + token.Text, new SnapshotSpan(triggerPoint.Snapshot, Span.FromBounds(token.StartIndex, token.StopIndex + 1)), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+            }
+
+            GrammarType grammarType = GrammarType.None;
+
+            int mark = tokens.Mark();
+            try
+            {
+                tokens.Seek(0);
+                bool hasGrammarType = false;
+                while (!hasGrammarType)
+                {
+                    int la1 = tokens.LA(1);
+                    switch (la1)
+                    {
+                    case ANTLRLexer.GRAMMAR:
+                        IToken previous = tokens.LT(-1);
+                        if (previous == null)
+                            grammarType = GrammarType.Combined;
+                        else if (previous.Type == ANTLRLexer.LEXER)
+                            grammarType = GrammarType.Lexer;
+                        else if (previous.Type == ANTLRLexer.PARSER)
+                            grammarType = GrammarType.Parser;
+                        else if (previous.Type == ANTLRLexer.TREE)
+                            grammarType = GrammarType.TreeParser;
+                        else
+                            grammarType = GrammarType.None;
+
+                        hasGrammarType = true;
+                        break;
+
+                    case CharStreamConstants.EndOfFile:
+                        hasGrammarType = true;
+                        break;
+
+                    default:
+                        break;
+                    }
+
+                    tokens.Consume();
+                }
+            }
+            finally
+            {
+                tokens.Rewind(mark);
+            }
+
+            switch (grammarType)
+            {
+            case GrammarType.Combined:
+                if (ruleNameToken == null)
+                    goto default;
+                if (ruleNameToken.Type == ANTLRLexer.RULE_REF)
+                    goto case GrammarType.Parser;
+                else
+                    goto case GrammarType.Lexer;
+
+            case GrammarType.Lexer:
+                labels.Add(new LabelInfo("text", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("type", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("line", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("index", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("pos", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("channel", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("start", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("stop", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("int", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                break;
+
+            case GrammarType.Parser:
+                labels.Add(new LabelInfo("text", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("start", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("stop", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("tree", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("st", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                break;
+
+            case GrammarType.TreeParser:
+                labels.Add(new LabelInfo("text", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("start", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("tree", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("st", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                break;
+
+            default:
+                // if we're unsure about the grammar type, include all the possible options to make sure we're covered
+                labels.Add(new LabelInfo("text", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("type", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("line", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("index", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("pos", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("channel", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("start", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("stop", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("int", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("tree", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                labels.Add(new LabelInfo("st", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                break;
+            }
+
+            return labels;
+        }
+
+        private IEnumerable<IToken> ExtractScopeAttributes(IToken token)
+        {
+            Contract.Requires(token != null);
+            return ExtractArguments(token, ';');
+        }
+
+        private IEnumerable<IToken> ExtractArguments(IToken token)
+        {
+            Contract.Requires(token != null);
+            return ExtractArguments(token, ',');
+        }
+
+        private IEnumerable<IToken> ExtractArguments(IToken token, char separator)
+        {
+            Contract.Requires<ArgumentNullException>(token != null, "token");
+
+            string actionText = token.Text;
+            List<IToken> attributeTokens = new List<IToken>();
+            List<string> attributes = new List<string>();
+            CodeGenerator.GetListOfArgumentsFromAction(token.Text, 0, -1, separator, attributes);
+            foreach (var attributeText in attributes)
+            {
+                Attribute attribute = new Attribute(attributeText);
+                int attributeStartIndex = actionText.IndexOf(attribute.Decl);
+                int attributeNameStartIndex = attribute.Decl.IndexOf(attribute.Name);
+                int start = token.StartIndex + attributeStartIndex + attributeNameStartIndex + 1;
+                int stop = start + attribute.Name.Length - 1;
+
+                // explicitly set the text in case escaped \] characters mess up the indexing
+                attributeTokens.Add(new CommonToken(token.InputStream, ANTLRLexer.ID, TokenChannels.Default, start, stop)
+                    {
+                        Text = attribute.Name
+                    });
+            }
+
+            return attributeTokens;
+        }
+
+        private NetworkInterpreter CreateNetworkInterpreter(CommonTokenStream tokens)
+        {
+            Network network = NetworkBuilder<AntlrAtnBuilder>.GetOrBuildNetwork();
+            NetworkInterpreter interpreter = new NetworkInterpreter(network, tokens);
+
+            IToken previousToken = tokens.LT(-1);
+            if (previousToken == null)
+                return new NetworkInterpreter(network, new CommonTokenStream());
+
+            switch (previousToken.Type)
+            {
+            case ANTLRLexer.RULE_REF:
+            case ANTLRLexer.TOKEN_REF:
+            case ANTLRLexer.DOLLAR:
+            case ANTLRLexer.ACTION:
+            case ANTLRLexer.FORCED_ACTION:
+            case ANTLRLexer.SEMPRED:
+            case ANTLRLexer.ARG_ACTION:
+                interpreter.BoundaryRules.Add(network.GetRule(AntlrAtnBuilder.RuleNames.Grammar));
+                interpreter.BoundaryRules.Add(network.GetRule(AntlrAtnBuilder.RuleNames.Option));
+                interpreter.BoundaryRules.Add(network.GetRule(AntlrAtnBuilder.RuleNames.DelegateGrammar));
+                interpreter.BoundaryRules.Add(network.GetRule(AntlrAtnBuilder.RuleNames.TokenSpec));
+                interpreter.BoundaryRules.Add(network.GetRule(AntlrAtnBuilder.RuleNames.AttrScope));
+                interpreter.BoundaryRules.Add(network.GetRule(AntlrAtnBuilder.RuleNames.Action));
+                interpreter.BoundaryRules.Add(network.GetRule(AntlrAtnBuilder.RuleNames.Rule));
+                break;
+
+            default:
+                return new NetworkInterpreter(network, new CommonTokenStream());
+            }
+
+            return interpreter;
         }
 
         private IEnumerable<Completion> GetContextCompletions(SnapshotPoint triggerPoint, AntlrIntellisenseController controller, ICompletionSession session)
@@ -220,6 +670,9 @@
             if (string.IsNullOrEmpty(text))
                 return false;
 
+            if (text == "$")
+                return true;
+
             return IdentifierRegex.IsMatch(text);
         }
 
@@ -234,6 +687,53 @@
                 return null;
 
             return controllers.OfType<AntlrIntellisenseController>().SingleOrDefault();
+        }
+
+        private class LabelInfo
+        {
+            public readonly string Name;
+            public readonly string Description = string.Empty;
+            public readonly SnapshotSpan Definition;
+            public readonly List<LabelInfo> Members;
+            public readonly StandardGlyphGroup Glyph;
+
+            public LabelInfo(string name, string description, SnapshotSpan definition, StandardGlyphGroup glyph, IEnumerable<LabelInfo> members)
+            {
+                Name = name;
+                Description = description;
+                Definition = definition;
+                Glyph = glyph;
+                Members = new List<LabelInfo>(members);
+            }
+        }
+
+        private class TokenIndexEqualityComparer : IEqualityComparer<IToken>
+        {
+            private static readonly TokenIndexEqualityComparer _default = new TokenIndexEqualityComparer();
+
+            public static TokenIndexEqualityComparer Default
+            {
+                get
+                {
+                    return _default;
+                }
+            }
+
+            public bool Equals(IToken x, IToken y)
+            {
+                if (x == null)
+                    return y == null;
+
+                if (y == null)
+                    return false;
+
+                return x.TokenIndex == y.TokenIndex;
+            }
+
+            public int GetHashCode(IToken obj)
+            {
+                return obj.TokenIndex.GetHashCode();
+            }
         }
     }
 }

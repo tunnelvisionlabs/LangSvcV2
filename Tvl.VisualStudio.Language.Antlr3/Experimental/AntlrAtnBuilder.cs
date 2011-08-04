@@ -1,20 +1,83 @@
 ﻿namespace Tvl.VisualStudio.Language.Antlr3.Experimental
 {
-    using System;
     using System.Collections.Generic;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
     using ANTLRParser = global::Antlr3.Grammars.ANTLRParser;
 
-    internal class AntlrAtnBuilder
+    internal class AntlrAtnBuilder : NetworkBuilder
     {
-        private static Network _network;
-        private readonly RuleBindings _ruleEndpoints = new RuleBindings();
+        private readonly RuleBindings _ruleEndpoints;
+        private readonly List<RuleBinding> _rules;
 
-        private AntlrAtnBuilder()
+        public AntlrAtnBuilder()
         {
+            _ruleEndpoints = new RuleBindings();
+
+            _rules = new List<RuleBinding>()
+                {
+                    _ruleEndpoints.Grammar,
+                    _ruleEndpoints.GrammarType,
+                    _ruleEndpoints.Actions,
+                    _ruleEndpoints.Action,
+                    _ruleEndpoints.ActionScopeName,
+                    _ruleEndpoints.OptionsSpec,
+                    _ruleEndpoints.Option,
+                    _ruleEndpoints.OptionValue,
+                    _ruleEndpoints.DelegateGrammars,
+                    _ruleEndpoints.DelegateGrammar,
+                    _ruleEndpoints.TokensSpec,
+                    _ruleEndpoints.TokenSpec,
+                    _ruleEndpoints.AttrScopes,
+                    _ruleEndpoints.AttrScope,
+                    _ruleEndpoints.RulesRule,
+                    _ruleEndpoints.Rule,
+                    _ruleEndpoints.RuleActions,
+                    _ruleEndpoints.RuleAction,
+                    _ruleEndpoints.ThrowsSpec,
+                    _ruleEndpoints.RuleScopeSpec,
+                    _ruleEndpoints.RuleAltList,
+                    _ruleEndpoints.Block,
+                    _ruleEndpoints.Alternative,
+                    _ruleEndpoints.ExceptionGroup,
+                    _ruleEndpoints.ExceptionHandler,
+                    _ruleEndpoints.FinallyClause,
+                    _ruleEndpoints.Element,
+                    _ruleEndpoints.ElementNoOptionSpec,
+                    _ruleEndpoints.Atom,
+                    _ruleEndpoints.RuleRef,
+                    _ruleEndpoints.NotSet,
+                    _ruleEndpoints.TreeRoot,
+                    _ruleEndpoints.Tree,
+                    _ruleEndpoints.Ebnf,
+                    _ruleEndpoints.Range,
+                    _ruleEndpoints.Terminal,
+                    _ruleEndpoints.ElementOptions,
+                    _ruleEndpoints.DefaultNodeOption,
+                    _ruleEndpoints.ElementOption,
+                    _ruleEndpoints.ElementOptionId,
+                    _ruleEndpoints.EbnfSuffix,
+                    _ruleEndpoints.NotTerminal,
+                    _ruleEndpoints.IdList,
+                    _ruleEndpoints.Id,
+
+                    _ruleEndpoints.Rewrite,
+                    _ruleEndpoints.RewriteWithSempred,
+                    _ruleEndpoints.RewriteBlock,
+                    _ruleEndpoints.RewriteAlternative,
+                    _ruleEndpoints.RewriteElement,
+                    _ruleEndpoints.RewriteAtom,
+                    _ruleEndpoints.Label,
+                    _ruleEndpoints.RewriteEbnf,
+                    _ruleEndpoints.RewriteTree,
+                    _ruleEndpoints.RewriteTemplate,
+                    _ruleEndpoints.RewriteTemplateHead,
+                    _ruleEndpoints.RewriteIndirectTemplateHead,
+                    _ruleEndpoints.RewriteTemplateArgs,
+                    _ruleEndpoints.RewriteTemplateArg,
+                };
         }
 
-        private RuleBindings Rules
+        protected RuleBindings Bindings
         {
             get
             {
@@ -22,157 +85,102 @@
             }
         }
 
-        public static Network BuildNetwork()
+        protected sealed override IList<RuleBinding> Rules
         {
-            if (_network != null)
-                return _network;
-
-            AntlrAtnBuilder builder = new AntlrAtnBuilder();
-            var rules = builder.Rules;
-
-            Nfa.BindRule(rules.Grammar, builder.BuildGrammarRule());
-            Nfa.BindRule(rules.GrammarType, builder.BuildGrammarTypeRule());
-            Nfa.BindRule(rules.Actions, builder.BuildActionsRule());
-            Nfa.BindRule(rules.Action, builder.BuildActionRule());
-            Nfa.BindRule(rules.ActionScopeName, builder.BuildActionScopeNameRule());
-            Nfa.BindRule(rules.OptionsSpec, builder.BuildOptionsSpecRule());
-            Nfa.BindRule(rules.Option, builder.BuildOptionRule());
-            Nfa.BindRule(rules.OptionValue, builder.BuildOptionValueRule());
-            Nfa.BindRule(rules.DelegateGrammars, builder.BuildDelegateGrammarsRule());
-            Nfa.BindRule(rules.DelegateGrammar, builder.BuildDelegateGrammarRule());
-            Nfa.BindRule(rules.TokensSpec, builder.BuildTokensSpecRule());
-            Nfa.BindRule(rules.TokenSpec, builder.BuildTokenSpecRule());
-            Nfa.BindRule(rules.AttrScopes, builder.BuildAttrScopesRule());
-            Nfa.BindRule(rules.AttrScope, builder.BuildAttrScopeRule());
-            Nfa.BindRule(rules.Rules, builder.BuildRulesRule());
-            Nfa.BindRule(rules.Rule, builder.BuildRuleRule());
-            Nfa.BindRule(rules.RuleActions, builder.BuildRuleActionsRule());
-            Nfa.BindRule(rules.RuleAction, builder.BuildRuleActionRule());
-            Nfa.BindRule(rules.ThrowsSpec, builder.BuildThrowsSpecRule());
-            Nfa.BindRule(rules.RuleScopeSpec, builder.BuildRuleScopeSpecRule());
-            Nfa.BindRule(rules.RuleAltList, builder.BuildRuleAltListRule());
-            Nfa.BindRule(rules.Block, builder.BuildBlockRule());
-            Nfa.BindRule(rules.Alternative, builder.BuildAlternativeRule());
-            Nfa.BindRule(rules.ExceptionGroup, builder.BuildExceptionGroupRule());
-            Nfa.BindRule(rules.ExceptionHandler, builder.BuildExceptionHandlerRule());
-            Nfa.BindRule(rules.FinallyClause, builder.BuildFinallyClauseRule());
-            Nfa.BindRule(rules.Element, builder.BuildElementRule());
-            Nfa.BindRule(rules.ElementNoOptionSpec, builder.BuildElementNoOptionSpecRule());
-            Nfa.BindRule(rules.Atom, builder.BuildAtomRule());
-            Nfa.BindRule(rules.RuleRef, builder.BuildRuleRefRule());
-            Nfa.BindRule(rules.NotSet, builder.BuildNotSetRule());
-            Nfa.BindRule(rules.TreeRoot, builder.BuildTreeRootRule());
-            Nfa.BindRule(rules.Tree, builder.BuildTreeRule());
-            Nfa.BindRule(rules.Ebnf, builder.BuildEbnfRule());
-            Nfa.BindRule(rules.Range, builder.BuildRangeRule());
-            Nfa.BindRule(rules.Terminal, builder.BuildTerminalRule());
-            Nfa.BindRule(rules.ElementOptions, builder.BuildElementOptionsRule());
-            Nfa.BindRule(rules.DefaultNodeOption, builder.BuildDefaultNodeOptionRule());
-            Nfa.BindRule(rules.ElementOption, builder.BuildElementOptionRule());
-            Nfa.BindRule(rules.ElementOptionId, builder.BuildElementOptionIdRule());
-            Nfa.BindRule(rules.EbnfSuffix, builder.BuildEbnfSuffixRule());
-            Nfa.BindRule(rules.NotTerminal, builder.BuildNotTerminalRule());
-            Nfa.BindRule(rules.IdList, builder.BuildIdListRule());
-            Nfa.BindRule(rules.Id, builder.BuildIdRule());
-
-            Nfa.BindRule(rules.Rewrite, builder.BuildRewriteRule());
-            Nfa.BindRule(rules.RewriteWithSempred, builder.BuildRewriteWithSempredRule());
-            Nfa.BindRule(rules.RewriteBlock, builder.BuildRewriteBlockRule());
-            Nfa.BindRule(rules.RewriteAlternative, builder.BuildRewriteAlternativeRule());
-            Nfa.BindRule(rules.RewriteElement, builder.BuildRewriteElementRule());
-            Nfa.BindRule(rules.RewriteAtom, builder.BuildRewriteAtomRule());
-            Nfa.BindRule(rules.Label, builder.BuildLabelRule());
-            Nfa.BindRule(rules.RewriteEbnf, builder.BuildRewriteEbnfRule());
-            Nfa.BindRule(rules.RewriteTree, builder.BuildRewriteTreeRule());
-            Nfa.BindRule(rules.RewriteTemplate, builder.BuildRewriteTemplateRule());
-            Nfa.BindRule(rules.RewriteTemplateHead, builder.BuildRewriteTemplateHeadRule());
-            Nfa.BindRule(rules.RewriteIndirectTemplateHead, builder.BuildRewriteIndirectTemplateHeadRule());
-            Nfa.BindRule(rules.RewriteTemplateArgs, builder.BuildRewriteTemplateArgsRule());
-            Nfa.BindRule(rules.RewriteTemplateArg, builder.BuildRewriteTemplateArgRule());
-
-            List<RuleBinding> ruleBindings = new List<RuleBinding>();
-
-            ruleBindings.Add(rules.Grammar);
-            ruleBindings.Add(rules.GrammarType);
-            ruleBindings.Add(rules.Actions);
-            ruleBindings.Add(rules.Action);
-            ruleBindings.Add(rules.ActionScopeName);
-            ruleBindings.Add(rules.OptionsSpec);
-            ruleBindings.Add(rules.Option);
-            ruleBindings.Add(rules.OptionValue);
-            ruleBindings.Add(rules.DelegateGrammars);
-            ruleBindings.Add(rules.DelegateGrammar);
-            ruleBindings.Add(rules.TokensSpec);
-            ruleBindings.Add(rules.TokenSpec);
-            ruleBindings.Add(rules.AttrScopes);
-            ruleBindings.Add(rules.AttrScope);
-            ruleBindings.Add(rules.Rules);
-            ruleBindings.Add(rules.Rule);
-            ruleBindings.Add(rules.RuleActions);
-            ruleBindings.Add(rules.RuleAction);
-            ruleBindings.Add(rules.ThrowsSpec);
-            ruleBindings.Add(rules.RuleScopeSpec);
-            ruleBindings.Add(rules.RuleAltList);
-            ruleBindings.Add(rules.Block);
-            ruleBindings.Add(rules.Alternative);
-            ruleBindings.Add(rules.ExceptionGroup);
-            ruleBindings.Add(rules.ExceptionHandler);
-            ruleBindings.Add(rules.FinallyClause);
-            ruleBindings.Add(rules.Element);
-            ruleBindings.Add(rules.ElementNoOptionSpec);
-            ruleBindings.Add(rules.Atom);
-            ruleBindings.Add(rules.RuleRef);
-            ruleBindings.Add(rules.NotSet);
-            ruleBindings.Add(rules.TreeRoot);
-            ruleBindings.Add(rules.Tree);
-            ruleBindings.Add(rules.Ebnf);
-            ruleBindings.Add(rules.Range);
-            ruleBindings.Add(rules.Terminal);
-            ruleBindings.Add(rules.ElementOptions);
-            ruleBindings.Add(rules.DefaultNodeOption);
-            ruleBindings.Add(rules.ElementOption);
-            ruleBindings.Add(rules.ElementOptionId);
-            ruleBindings.Add(rules.EbnfSuffix);
-            ruleBindings.Add(rules.NotTerminal);
-            ruleBindings.Add(rules.IdList);
-            ruleBindings.Add(rules.Id);
-
-            ruleBindings.Add(rules.Rewrite);
-            ruleBindings.Add(rules.RewriteWithSempred);
-            ruleBindings.Add(rules.RewriteBlock);
-            ruleBindings.Add(rules.RewriteAlternative);
-            ruleBindings.Add(rules.RewriteElement);
-            ruleBindings.Add(rules.RewriteAtom);
-            ruleBindings.Add(rules.Label);
-            ruleBindings.Add(rules.RewriteEbnf);
-            ruleBindings.Add(rules.RewriteTree);
-            ruleBindings.Add(rules.RewriteTemplate);
-            ruleBindings.Add(rules.RewriteTemplateHead);
-            ruleBindings.Add(rules.RewriteIndirectTemplateHead);
-            ruleBindings.Add(rules.RewriteTemplateArgs);
-            ruleBindings.Add(rules.RewriteTemplateArg);
-
-            throw new NotImplementedException();
-            _network = new Network(null, null, ruleBindings, null, null);
-            return _network;
+            get
+            {
+                return _rules;
+            }
         }
 
-        private Nfa BuildGrammarRule()
+        protected sealed override void BindRules()
+        {
+            BindRulesImpl();
+            // derived classes might remove some rules originally declared in this class
+            _rules.RemoveAll(i => i.StartState.OutgoingTransitions.Count == 0);
+        }
+
+        protected virtual void BindRulesImpl()
+        {
+            TryBindRule(Bindings.Grammar, this.Grammar());
+            TryBindRule(Bindings.GrammarType, this.GrammarType());
+            TryBindRule(Bindings.Actions, this.Actions());
+            TryBindRule(Bindings.Action, this.Action());
+            TryBindRule(Bindings.ActionScopeName, this.ActionScopeName());
+            TryBindRule(Bindings.OptionsSpec, this.OptionsSpec());
+            TryBindRule(Bindings.Option, this.Option());
+            TryBindRule(Bindings.OptionValue, this.OptionValue());
+            TryBindRule(Bindings.DelegateGrammars, this.DelegateGrammars());
+            TryBindRule(Bindings.DelegateGrammar, this.DelegateGrammar());
+            TryBindRule(Bindings.TokensSpec, this.TokensSpec());
+            TryBindRule(Bindings.TokenSpec, this.TokenSpec());
+            TryBindRule(Bindings.AttrScopes, this.AttrScopes());
+            TryBindRule(Bindings.AttrScope, this.AttrScope());
+            TryBindRule(Bindings.RulesRule, this.RulesRule());
+            TryBindRule(Bindings.Rule, this.Rule());
+            TryBindRule(Bindings.RuleActions, this.RuleActions());
+            TryBindRule(Bindings.RuleAction, this.RuleAction());
+            TryBindRule(Bindings.ThrowsSpec, this.ThrowsSpec());
+            TryBindRule(Bindings.RuleScopeSpec, this.RuleScopeSpec());
+            TryBindRule(Bindings.RuleAltList, this.RuleAltList());
+            TryBindRule(Bindings.Block, this.Block());
+            TryBindRule(Bindings.Alternative, this.Alternative());
+            TryBindRule(Bindings.ExceptionGroup, this.ExceptionGroup());
+            TryBindRule(Bindings.ExceptionHandler, this.ExceptionHandler());
+            TryBindRule(Bindings.FinallyClause, this.FinallyClause());
+            TryBindRule(Bindings.Element, this.Element());
+            TryBindRule(Bindings.ElementNoOptionSpec, this.ElementNoOptionSpec());
+            TryBindRule(Bindings.Atom, this.Atom());
+            TryBindRule(Bindings.RuleRef, this.RuleRef());
+            TryBindRule(Bindings.NotSet, this.NotSet());
+            TryBindRule(Bindings.TreeRoot, this.TreeRoot());
+            TryBindRule(Bindings.Tree, this.Tree());
+            TryBindRule(Bindings.Ebnf, this.Ebnf());
+            TryBindRule(Bindings.Range, this.Range());
+            TryBindRule(Bindings.Terminal, this.Terminal());
+            TryBindRule(Bindings.ElementOptions, this.ElementOptions());
+            TryBindRule(Bindings.DefaultNodeOption, this.DefaultNodeOption());
+            TryBindRule(Bindings.ElementOption, this.ElementOption());
+            TryBindRule(Bindings.ElementOptionId, this.ElementOptionId());
+            TryBindRule(Bindings.EbnfSuffix, this.EbnfSuffix());
+            TryBindRule(Bindings.NotTerminal, this.NotTerminal());
+            TryBindRule(Bindings.IdList, this.IdList());
+            TryBindRule(Bindings.Id, this.Id());
+
+            TryBindRule(Bindings.Rewrite, this.Rewrite());
+            TryBindRule(Bindings.RewriteWithSempred, this.RewriteWithSempred());
+            TryBindRule(Bindings.RewriteBlock, this.RewriteBlock());
+            TryBindRule(Bindings.RewriteAlternative, this.RewriteAlternative());
+            TryBindRule(Bindings.RewriteElement, this.RewriteElement());
+            TryBindRule(Bindings.RewriteAtom, this.RewriteAtom());
+            TryBindRule(Bindings.Label, this.Label());
+            TryBindRule(Bindings.RewriteEbnf, this.RewriteEbnf());
+            TryBindRule(Bindings.RewriteTree, this.RewriteTree());
+            TryBindRule(Bindings.RewriteTemplate, this.RewriteTemplate());
+            TryBindRule(Bindings.RewriteTemplateHead, this.RewriteTemplateHead());
+            TryBindRule(Bindings.RewriteIndirectTemplateHead, this.RewriteIndirectTemplateHead());
+            TryBindRule(Bindings.RewriteTemplateArgs, this.RewriteTemplateArgs());
+            TryBindRule(Bindings.RewriteTemplateArg, this.RewriteTemplateArg());
+
+            Bindings.Grammar.IsStartRule = true;
+        }
+
+        protected virtual Nfa Grammar()
         {
             Nfa optionalAction = Nfa.Optional(Nfa.Match(ANTLRParser.ACTION));
             Nfa optionalDocComment = Nfa.Optional(Nfa.Match(ANTLRParser.DOC_COMMENT));
 
-            Nfa grammarType = Nfa.Rule(Rules.GrammarType);
-            Nfa id = Nfa.Rule(Rules.Id);
+            Nfa grammarType = Nfa.Rule(Bindings.GrammarType);
+            Nfa id = Nfa.Rule(Bindings.Id);
             Nfa semi = Nfa.Match(ANTLRParser.SEMI);
 
-            Nfa optionalOptionsSpec = Nfa.Optional(Nfa.Rule(Rules.OptionsSpec));
-            Nfa optionalDelegateGrammars = Nfa.Optional(Nfa.Rule(Rules.DelegateGrammars));
+            Nfa optionalOptionsSpec = Nfa.Optional(Nfa.Rule(Bindings.OptionsSpec));
+            Nfa optionalDelegateGrammars = Nfa.Optional(Nfa.Rule(Bindings.DelegateGrammars));
 
-            Nfa optionalTokensSpec = Nfa.Optional(Nfa.Rule(Rules.TokensSpec));
-            Nfa attrScopes = Nfa.Rule(Rules.AttrScopes);
-            Nfa optionalActions = Nfa.Optional(Nfa.Rule(Rules.Actions));
-            Nfa rules = Nfa.Rule(Rules.Rules);
+            Nfa optionalTokensSpec = Nfa.Optional(Nfa.Rule(Bindings.TokensSpec));
+            Nfa attrScopes = Nfa.Rule(Bindings.AttrScopes);
+            Nfa optionalActions = Nfa.Optional(Nfa.Rule(Bindings.Actions));
+            Nfa rules = Nfa.Rule(Bindings.RulesRule);
             Nfa eof = Nfa.Match(ANTLRParser.EOF);
 
             Nfa body = Nfa.Sequence(
@@ -192,94 +200,94 @@
             return body;
         }
 
-        private Nfa BuildGrammarTypeRule()
+        protected virtual Nfa GrammarType()
         {
             Nfa type = Nfa.MatchAny(ANTLRParser.LEXER, ANTLRParser.PARSER, ANTLRParser.TREE);
             return Nfa.Sequence(Nfa.Optional(type), Nfa.Match(ANTLRParser.GRAMMAR));
         }
 
-        private Nfa BuildActionsRule()
+        protected virtual Nfa Actions()
         {
-            return Nfa.Sequence(Nfa.Rule(Rules.Action), Nfa.Closure(Nfa.Rule(Rules.Action)));
+            return Nfa.Sequence(Nfa.Rule(Bindings.Action), Nfa.Closure(Nfa.Rule(Bindings.Action)));
         }
 
-        private Nfa BuildActionRule()
+        protected virtual Nfa Action()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.AMPERSAND),
                 Nfa.Optional(
                     Nfa.Sequence(
-                        Nfa.Rule(Rules.ActionScopeName),
+                        Nfa.Rule(Bindings.ActionScopeName),
                         Nfa.Match(ANTLRParser.COLON),
                         Nfa.Match(ANTLRParser.COLON))),
-                Nfa.Rule(Rules.Id),
+                Nfa.Rule(Bindings.Id),
                 Nfa.Match(ANTLRParser.ACTION));
         }
 
-        private Nfa BuildActionScopeNameRule()
+        protected virtual Nfa ActionScopeName()
         {
             return Nfa.Choice(
-                Nfa.Rule(Rules.Id),
+                Nfa.Rule(Bindings.Id),
                 Nfa.MatchAny(ANTLRParser.LEXER, ANTLRParser.PARSER));
         }
 
-        private Nfa BuildOptionsSpecRule()
+        protected virtual Nfa OptionsSpec()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.OPTIONS),
                 Nfa.Closure(
                     Nfa.Sequence(
-                        Nfa.Rule(Rules.Option),
+                        Nfa.Rule(Bindings.Option),
                         Nfa.Match(ANTLRParser.SEMI))),
                 Nfa.Match(ANTLRParser.RCURLY));
         }
 
-        private Nfa BuildOptionRule()
+        protected virtual Nfa Option()
         {
             return Nfa.Sequence(
-                Nfa.Rule(Rules.Id),
+                Nfa.Rule(Bindings.Id),
                 Nfa.Match(ANTLRParser.ASSIGN),
-                Nfa.Rule(Rules.OptionValue));
+                Nfa.Rule(Bindings.OptionValue));
         }
 
-        private Nfa BuildOptionValueRule()
+        protected virtual Nfa OptionValue()
         {
             return Nfa.Choice(
-                Nfa.Rule(Rules.Id),
+                Nfa.Rule(Bindings.Id),
                 Nfa.MatchAny(ANTLRParser.STRING_LITERAL, ANTLRParser.CHAR_LITERAL, ANTLRParser.INT, ANTLRParser.STAR));
         }
 
-        private Nfa BuildDelegateGrammarsRule()
+        protected virtual Nfa DelegateGrammars()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.IMPORT),
-                Nfa.Rule(Rules.DelegateGrammar),
+                Nfa.Rule(Bindings.DelegateGrammar),
                 Nfa.Closure(
                     Nfa.Sequence(
                         Nfa.Match(ANTLRParser.COMMA),
-                        Nfa.Rule(Rules.DelegateGrammar))),
+                        Nfa.Rule(Bindings.DelegateGrammar))),
                 Nfa.Match(ANTLRParser.SEMI));
         }
 
-        private Nfa BuildDelegateGrammarRule()
+        protected virtual Nfa DelegateGrammar()
         {
             return Nfa.Sequence(
                 Nfa.Optional(
                     Nfa.Sequence(
-                        Nfa.Rule(Rules.Id),
+                        Nfa.Rule(Bindings.Id),
                         Nfa.Match(ANTLRParser.ASSIGN))),
-                Nfa.Rule(Rules.Id));
+                Nfa.Rule(Bindings.Id));
         }
 
-        private Nfa BuildTokensSpecRule()
+        protected virtual Nfa TokensSpec()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.TOKENS),
-                Nfa.Closure(Nfa.Rule(Rules.TokenSpec)),
+                Nfa.Closure(Nfa.Rule(Bindings.TokenSpec)),
                 Nfa.Match(ANTLRParser.RCURLY));
         }
 
-        private Nfa BuildTokenSpecRule()
+        protected virtual Nfa TokenSpec()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.TOKEN_REF),
@@ -290,142 +298,142 @@
                 Nfa.Match(ANTLRParser.SEMI));
         }
 
-        private Nfa BuildAttrScopesRule()
+        protected virtual Nfa AttrScopes()
         {
-            return Nfa.Closure(Nfa.Rule(Rules.AttrScope));
+            return Nfa.Closure(Nfa.Rule(Bindings.AttrScope));
         }
 
-        private Nfa BuildAttrScopeRule()
+        protected virtual Nfa AttrScope()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.SCOPE),
-                Nfa.Rule(Rules.Id),
-                Nfa.Optional(Nfa.Rule(Rules.RuleActions)),
+                Nfa.Rule(Bindings.Id),
+                Nfa.Optional(Nfa.Rule(Bindings.RuleActions)),
                 Nfa.Match(ANTLRParser.ACTION));
         }
 
-        private Nfa BuildRulesRule()
+        protected virtual Nfa RulesRule()
         {
             return Nfa.Sequence(
-                Nfa.Rule(Rules.Rule),
-                Nfa.Closure(Nfa.Rule(Rules.Rule)));
+                Nfa.Rule(Bindings.Rule),
+                Nfa.Closure(Nfa.Rule(Bindings.Rule)));
         }
 
-        private Nfa BuildRuleRule()
+        protected virtual Nfa Rule()
         {
             return Nfa.Sequence(
                 Nfa.Optional(Nfa.Match(ANTLRParser.DOC_COMMENT)),
                 Nfa.Optional(Nfa.MatchAny(ANTLRParser.PROTECTED, ANTLRParser.PUBLIC, ANTLRParser.PRIVATE, ANTLRParser.FRAGMENT)),
-                Nfa.Rule(Rules.Id),
+                Nfa.Rule(Bindings.Id),
                 Nfa.Optional(Nfa.Match(ANTLRParser.BANG)),
                 Nfa.Optional(Nfa.Match(ANTLRParser.ARG_ACTION)),
                 Nfa.Optional(
                     Nfa.Sequence(
                         Nfa.Match(ANTLRParser.RETURNS),
                         Nfa.Match(ANTLRParser.ARG_ACTION))),
-                Nfa.Optional(Nfa.Rule(Rules.ThrowsSpec)),
-                Nfa.Optional(Nfa.Rule(Rules.OptionsSpec)),
-                Nfa.Rule(Rules.RuleScopeSpec),
-                Nfa.Optional(Nfa.Rule(Rules.RuleActions)),
+                Nfa.Optional(Nfa.Rule(Bindings.ThrowsSpec)),
+                Nfa.Optional(Nfa.Rule(Bindings.OptionsSpec)),
+                Nfa.Rule(Bindings.RuleScopeSpec),
+                Nfa.Optional(Nfa.Rule(Bindings.RuleActions)),
                 Nfa.Match(ANTLRParser.COLON),
-                Nfa.Rule(Rules.RuleAltList),
+                Nfa.Rule(Bindings.RuleAltList),
                 Nfa.Match(ANTLRParser.SEMI),
-                Nfa.Optional(Nfa.Rule(Rules.ExceptionGroup)));
+                Nfa.Optional(Nfa.Rule(Bindings.ExceptionGroup)));
         }
 
-        private Nfa BuildRuleActionsRule()
+        protected virtual Nfa RuleActions()
         {
             return Nfa.Sequence(
-                Nfa.Rule(Rules.RuleAction),
-                Nfa.Closure(Nfa.Rule(Rules.RuleAction)));
+                Nfa.Rule(Bindings.RuleAction),
+                Nfa.Closure(Nfa.Rule(Bindings.RuleAction)));
         }
 
-        private Nfa BuildRuleActionRule()
+        protected virtual Nfa RuleAction()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.AMPERSAND),
-                Nfa.Rule(Rules.Id),
+                Nfa.Rule(Bindings.Id),
                 Nfa.Match(ANTLRParser.ACTION));
         }
 
-        private Nfa BuildThrowsSpecRule()
+        protected virtual Nfa ThrowsSpec()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.THROWS),
-                Nfa.Rule(Rules.Id),
+                Nfa.Rule(Bindings.Id),
                 Nfa.Closure(
                     Nfa.Sequence(
                         Nfa.Match(ANTLRParser.COMMA),
-                        Nfa.Rule(Rules.Id))));
+                        Nfa.Rule(Bindings.Id))));
         }
 
-        private Nfa BuildRuleScopeSpecRule()
+        protected virtual Nfa RuleScopeSpec()
         {
             return Nfa.Sequence(
                 Nfa.Optional(
                     Nfa.Sequence(
                         Nfa.Match(ANTLRParser.SCOPE),
-                        Nfa.Optional(Nfa.Rule(Rules.RuleActions)),
+                        Nfa.Optional(Nfa.Rule(Bindings.RuleActions)),
                         Nfa.Match(ANTLRParser.ACTION))),
                 Nfa.Closure(
                     Nfa.Sequence(
                         Nfa.Match(ANTLRParser.SCOPE),
-                        Nfa.Rule(Rules.IdList),
+                        Nfa.Rule(Bindings.IdList),
                         Nfa.Match(ANTLRParser.SEMI))));
         }
 
-        private Nfa BuildRuleAltListRule()
+        protected virtual Nfa RuleAltList()
         {
             return Nfa.Sequence(
                 Nfa.Sequence(
-                    Nfa.Rule(Rules.Alternative),
-                    Nfa.Rule(Rules.Rewrite)),
+                    Nfa.Rule(Bindings.Alternative),
+                    Nfa.Rule(Bindings.Rewrite)),
                 Nfa.Closure(
                     Nfa.Sequence(
                         Nfa.Match(ANTLRParser.OR),
-                        Nfa.Rule(Rules.Alternative),
-                        Nfa.Rule(Rules.Rewrite))));
+                        Nfa.Rule(Bindings.Alternative),
+                        Nfa.Rule(Bindings.Rewrite))));
         }
 
-        private Nfa BuildBlockRule()
+        protected virtual Nfa Block()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.LPAREN),
                 Nfa.Optional(
                     Nfa.Choice(
                         Nfa.Sequence(
-                            Nfa.Optional(Nfa.Rule(Rules.OptionsSpec)),
-                            Nfa.Optional(Nfa.Rule(Rules.RuleActions)),
+                            Nfa.Optional(Nfa.Rule(Bindings.OptionsSpec)),
+                            Nfa.Optional(Nfa.Rule(Bindings.RuleActions)),
                             Nfa.Match(ANTLRParser.COLON)),
                         Nfa.Sequence(
                             Nfa.Match(ANTLRParser.ACTION),
                             Nfa.Match(ANTLRParser.COLON)))),
-                Nfa.Rule(Rules.Alternative),
-                Nfa.Rule(Rules.Rewrite),
+                Nfa.Rule(Bindings.Alternative),
+                Nfa.Rule(Bindings.Rewrite),
                 Nfa.Closure(
                     Nfa.Sequence(
                         Nfa.Match(ANTLRParser.OR),
-                        Nfa.Rule(Rules.Alternative),
-                        Nfa.Rule(Rules.Rewrite))),
+                        Nfa.Rule(Bindings.Alternative),
+                        Nfa.Rule(Bindings.Rewrite))),
                 Nfa.Match(ANTLRParser.RPAREN));
         }
 
-        private Nfa BuildAlternativeRule()
+        protected virtual Nfa Alternative()
         {
-            return Nfa.Closure(Nfa.Rule(Rules.Element));
+            return Nfa.Closure(Nfa.Rule(Bindings.Element));
         }
 
-        private Nfa BuildExceptionGroupRule()
+        protected virtual Nfa ExceptionGroup()
         {
             return Nfa.Choice(
                 Nfa.Sequence(
-                    Nfa.Rule(Rules.ExceptionHandler),
-                    Nfa.Closure(Nfa.Rule(Rules.ExceptionHandler)),
-                    Nfa.Optional(Nfa.Rule(Rules.FinallyClause))),
-                Nfa.Rule(Rules.FinallyClause));
+                    Nfa.Rule(Bindings.ExceptionHandler),
+                    Nfa.Closure(Nfa.Rule(Bindings.ExceptionHandler)),
+                    Nfa.Optional(Nfa.Rule(Bindings.FinallyClause))),
+                Nfa.Rule(Bindings.FinallyClause));
         }
 
-        private Nfa BuildExceptionHandlerRule()
+        protected virtual Nfa ExceptionHandler()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.CATCH),
@@ -433,55 +441,55 @@
                 Nfa.Match(ANTLRParser.ACTION));
         }
 
-        private Nfa BuildFinallyClauseRule()
+        protected virtual Nfa FinallyClause()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.FINALLY),
                 Nfa.Match(ANTLRParser.ACTION));
         }
 
-        private Nfa BuildElementRule()
+        protected virtual Nfa Element()
         {
-            return Nfa.Rule(Rules.ElementNoOptionSpec);
+            return Nfa.Rule(Bindings.ElementNoOptionSpec);
         }
 
-        private Nfa BuildElementNoOptionSpecRule()
+        protected virtual Nfa ElementNoOptionSpec()
         {
             return Nfa.Choice(
                 Nfa.Sequence(
-                    Nfa.Rule(Rules.Id),
+                    Nfa.Rule(Bindings.Id),
                     Nfa.MatchAny(ANTLRParser.ASSIGN, ANTLRParser.PLUS_ASSIGN),
                     Nfa.Choice(
-                        Nfa.Rule(Rules.Atom),
-                        Nfa.Rule(Rules.Block)),
-                    Nfa.Optional(Nfa.Rule(Rules.EbnfSuffix))),
+                        Nfa.Rule(Bindings.Atom),
+                        Nfa.Rule(Bindings.Block)),
+                    Nfa.Optional(Nfa.Rule(Bindings.EbnfSuffix))),
                 Nfa.Sequence(
-                    Nfa.Rule(Rules.Atom),
-                    Nfa.Optional(Nfa.Rule(Rules.EbnfSuffix))),
-                Nfa.Rule(Rules.Ebnf),
+                    Nfa.Rule(Bindings.Atom),
+                    Nfa.Optional(Nfa.Rule(Bindings.EbnfSuffix))),
+                Nfa.Rule(Bindings.Ebnf),
                 Nfa.Match(ANTLRParser.FORCED_ACTION),
                 Nfa.Match(ANTLRParser.ACTION),
                 Nfa.Sequence(
                     Nfa.Match(ANTLRParser.SEMPRED),
                     Nfa.Optional(Nfa.Match(ANTLRParser.IMPLIES))),
-                Nfa.Rule(Rules.Tree));
+                Nfa.Rule(Bindings.Tree));
         }
 
-        private Nfa BuildAtomRule()
+        protected virtual Nfa Atom()
         {
             return Nfa.Choice(
                 Nfa.Sequence(
-                    Nfa.Rule(Rules.Range),
+                    Nfa.Rule(Bindings.Range),
                     Nfa.MatchAny(ANTLRParser.ROOT, ANTLRParser.BANG)),
                 Nfa.Choice(
-                    Nfa.Rule(Rules.Terminal),
-                    Nfa.Rule(Rules.RuleRef)),
+                    Nfa.Rule(Bindings.Terminal),
+                    Nfa.Rule(Bindings.RuleRef)),
                 Nfa.Sequence(
-                    Nfa.Rule(Rules.NotSet),
+                    Nfa.Rule(Bindings.NotSet),
                     Nfa.Optional(Nfa.MatchAny(ANTLRParser.BANG, ANTLRParser.BANG))));
         }
 
-        private Nfa BuildRuleRefRule()
+        protected virtual Nfa RuleRef()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.RULE_REF),
@@ -489,42 +497,42 @@
                 Nfa.Optional(Nfa.MatchAny(ANTLRParser.ROOT, ANTLRParser.BANG)));
         }
 
-        private Nfa BuildNotSetRule()
+        protected virtual Nfa NotSet()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.NOT),
                 Nfa.Choice(
-                    Nfa.Rule(Rules.NotTerminal),
-                    Nfa.Rule(Rules.Block)));
+                    Nfa.Rule(Bindings.NotTerminal),
+                    Nfa.Rule(Bindings.Block)));
         }
 
-        private Nfa BuildTreeRootRule()
+        protected virtual Nfa TreeRoot()
         {
             return Nfa.Choice(
                 Nfa.Sequence(
-                    Nfa.Rule(Rules.Id),
+                    Nfa.Rule(Bindings.Id),
                     Nfa.MatchAny(ANTLRParser.ASSIGN, ANTLRParser.PLUS_ASSIGN),
                     Nfa.Choice(
-                        Nfa.Rule(Rules.Atom),
-                        Nfa.Rule(Rules.Block))),
-                Nfa.Rule(Rules.Atom),
-                Nfa.Rule(Rules.Block));
+                        Nfa.Rule(Bindings.Atom),
+                        Nfa.Rule(Bindings.Block))),
+                Nfa.Rule(Bindings.Atom),
+                Nfa.Rule(Bindings.Block));
         }
 
-        private Nfa BuildTreeRule()
+        protected virtual Nfa Tree()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.TREE_BEGIN),
-                Nfa.Rule(Rules.TreeRoot),
-                Nfa.Rule(Rules.Element),
-                Nfa.Closure(Nfa.Rule(Rules.Element)),
+                Nfa.Rule(Bindings.TreeRoot),
+                Nfa.Rule(Bindings.Element),
+                Nfa.Closure(Nfa.Rule(Bindings.Element)),
                 Nfa.Match(ANTLRParser.RPAREN));
         }
 
-        private Nfa BuildEbnfRule()
+        protected virtual Nfa Ebnf()
         {
             return Nfa.Sequence(
-                Nfa.Rule(Rules.Block),
+                Nfa.Rule(Bindings.Block),
                 Nfa.Optional(
                     Nfa.MatchAny(
                         ANTLRParser.QUESTION,
@@ -535,7 +543,7 @@
                         ANTLRParser.BANG)));
         }
 
-        private Nfa BuildRangeRule()
+        protected virtual Nfa Range()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.CHAR_LITERAL),
@@ -543,296 +551,361 @@
                 Nfa.Match(ANTLRParser.CHAR_LITERAL));
         }
 
-        private Nfa BuildTerminalRule()
+        protected virtual Nfa Terminal()
         {
             return Nfa.Choice(
                 Nfa.Sequence(
                     Nfa.Match(ANTLRParser.CHAR_LITERAL),
-                    Nfa.Optional(Nfa.Rule(Rules.ElementOptions)),
+                    Nfa.Optional(Nfa.Rule(Bindings.ElementOptions)),
                     Nfa.Optional(Nfa.MatchAny(ANTLRParser.ROOT, ANTLRParser.BANG))),
                 Nfa.Sequence(
                     Nfa.MatchAny(ANTLRParser.TOKEN_REF),
-                    Nfa.Optional(Nfa.Rule(Rules.ElementOptions)),
+                    Nfa.Optional(Nfa.Rule(Bindings.ElementOptions)),
                     Nfa.Optional(Nfa.Match(ANTLRParser.ARG_ACTION)),
                     Nfa.Optional(Nfa.MatchAny(ANTLRParser.ROOT, ANTLRParser.BANG))),
                 Nfa.Sequence(
                     Nfa.Match(ANTLRParser.STRING_LITERAL),
-                    Nfa.Optional(Nfa.Rule(Rules.ElementOptions)),
+                    Nfa.Optional(Nfa.Rule(Bindings.ElementOptions)),
                     Nfa.Optional(Nfa.MatchAny(ANTLRParser.ROOT, ANTLRParser.BANG))),
                 Nfa.Sequence(
                     Nfa.Match(ANTLRParser.WILDCARD),
                     Nfa.Optional(Nfa.MatchAny(ANTLRParser.ROOT, ANTLRParser.BANG))));
         }
 
-        private Nfa BuildElementOptionsRule()
+        protected virtual Nfa ElementOptions()
         {
             return Nfa.Choice(
                 Nfa.Sequence(
                     Nfa.Match(ANTLRParser.OPEN_ELEMENT_OPTION),
-                    Nfa.Rule(Rules.DefaultNodeOption),
+                    Nfa.Rule(Bindings.DefaultNodeOption),
                     Nfa.Match(ANTLRParser.CLOSE_ELEMENT_OPTION)),
                 Nfa.Sequence(
                     Nfa.Match(ANTLRParser.OPEN_ELEMENT_OPTION),
-                    Nfa.Rule(Rules.ElementOption),
+                    Nfa.Rule(Bindings.ElementOption),
                     Nfa.Closure(
                         Nfa.Sequence(
                             Nfa.Match(ANTLRParser.SEMI),
-                            Nfa.Rule(Rules.ElementOption))),
+                            Nfa.Rule(Bindings.ElementOption))),
                     Nfa.Match(ANTLRParser.CLOSE_ELEMENT_OPTION)));
         }
 
-        private Nfa BuildDefaultNodeOptionRule()
+        protected virtual Nfa DefaultNodeOption()
         {
-            return Nfa.Rule(Rules.ElementOptionId);
+            return Nfa.Rule(Bindings.ElementOptionId);
         }
 
-        private Nfa BuildElementOptionRule()
+        protected virtual Nfa ElementOption()
         {
             return Nfa.Sequence(
-                Nfa.Rule(Rules.Id),
+                Nfa.Rule(Bindings.Id),
                 Nfa.Match(ANTLRParser.ASSIGN),
                 Nfa.Choice(
-                    Nfa.Rule(Rules.ElementOptionId),
+                    Nfa.Rule(Bindings.ElementOptionId),
                     Nfa.MatchAny(ANTLRParser.STRING_LITERAL, ANTLRParser.DOUBLE_QUOTE_STRING_LITERAL, ANTLRParser.DOUBLE_ANGLE_STRING_LITERAL)));
         }
 
-        private Nfa BuildElementOptionIdRule()
+        protected virtual Nfa ElementOptionId()
         {
             return Nfa.Sequence(
-                Nfa.Rule(Rules.Id),
+                Nfa.Rule(Bindings.Id),
                 Nfa.Closure(
                     Nfa.Sequence(
                         Nfa.Match(ANTLRParser.DOT),
-                        Nfa.Rule(Rules.Id))));
+                        Nfa.Rule(Bindings.Id))));
         }
 
-        private Nfa BuildEbnfSuffixRule()
+        protected virtual Nfa EbnfSuffix()
         {
             return Nfa.MatchAny(ANTLRParser.QUESTION, ANTLRParser.STAR, ANTLRParser.PLUS);
         }
 
-        private Nfa BuildNotTerminalRule()
+        protected virtual Nfa NotTerminal()
         {
             return Nfa.MatchAny(ANTLRParser.CHAR_LITERAL, ANTLRParser.TOKEN_REF, ANTLRParser.STRING_LITERAL);
         }
 
-        private Nfa BuildIdListRule()
+        protected virtual Nfa IdList()
         {
             return Nfa.Sequence(
-                Nfa.Rule(Rules.Id),
+                Nfa.Rule(Bindings.Id),
                 Nfa.Closure(
                     Nfa.Sequence(
                         Nfa.Match(ANTLRParser.COMMA),
-                        Nfa.Rule(Rules.Id))));
+                        Nfa.Rule(Bindings.Id))));
         }
 
-        private Nfa BuildIdRule()
+        protected virtual Nfa Id()
         {
             return Nfa.MatchAny(ANTLRParser.TOKEN_REF, ANTLRParser.RULE_REF);
         }
 
         // rewrite syntax
 
-        private Nfa BuildRewriteRule()
+        protected virtual Nfa Rewrite()
         {
             return Nfa.Optional(
                 Nfa.Sequence(
-                    Nfa.Closure(Nfa.Rule(Rules.RewriteWithSempred)),
+                    Nfa.Closure(Nfa.Rule(Bindings.RewriteWithSempred)),
                     Nfa.Match(ANTLRParser.REWRITE),
-                    Nfa.Rule(Rules.RewriteAlternative)));
+                    Nfa.Rule(Bindings.RewriteAlternative)));
         }
 
-        private Nfa BuildRewriteWithSempredRule()
+        protected virtual Nfa RewriteWithSempred()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.REWRITE),
                 Nfa.Match(ANTLRParser.SEMPRED),
-                Nfa.Rule(Rules.RewriteAlternative));
+                Nfa.Rule(Bindings.RewriteAlternative));
         }
 
-        private Nfa BuildRewriteBlockRule()
+        protected virtual Nfa RewriteBlock()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.LPAREN),
-                Nfa.Rule(Rules.RewriteAlternative),
+                Nfa.Rule(Bindings.RewriteAlternative),
                 Nfa.Match(ANTLRParser.RPAREN));
         }
 
-        private Nfa BuildRewriteAlternativeRule()
+        protected virtual Nfa RewriteAlternative()
         {
             // can't handle semantic predicates now so assume BuildAST is true.
             return Nfa.Optional(
                 Nfa.Choice(
                     Nfa.Sequence(
-                        Nfa.Rule(Rules.RewriteElement),
-                        Nfa.Closure(Nfa.Rule(Rules.RewriteElement))),
+                        Nfa.Rule(Bindings.RewriteElement),
+                        Nfa.Closure(Nfa.Rule(Bindings.RewriteElement))),
                     Nfa.Match(ANTLRParser.ETC)));
         }
 
-        private Nfa BuildRewriteElementRule()
+        protected virtual Nfa RewriteElement()
         {
             return Nfa.Choice(
                 Nfa.Sequence(
-                    Nfa.Rule(Rules.RewriteAtom),
-                    Nfa.Optional(Nfa.Rule(Rules.EbnfSuffix))),
-                Nfa.Rule(Rules.RewriteEbnf),
+                    Nfa.Rule(Bindings.RewriteAtom),
+                    Nfa.Optional(Nfa.Rule(Bindings.EbnfSuffix))),
+                Nfa.Rule(Bindings.RewriteEbnf),
                 Nfa.Sequence(
-                    Nfa.Rule(Rules.RewriteTree),
-                    Nfa.Optional(Nfa.Rule(Rules.EbnfSuffix))));
+                    Nfa.Rule(Bindings.RewriteTree),
+                    Nfa.Optional(Nfa.Rule(Bindings.EbnfSuffix))));
         }
 
-        private Nfa BuildRewriteAtomRule()
+        protected virtual Nfa RewriteAtom()
         {
             return Nfa.Choice(
                 Nfa.Sequence(
                     Nfa.Match(ANTLRParser.TOKEN_REF),
-                    Nfa.Optional(Nfa.Rule(Rules.ElementOptions)),
+                    Nfa.Optional(Nfa.Rule(Bindings.ElementOptions)),
                     Nfa.Optional(Nfa.Match(ANTLRParser.ARG_ACTION))),
                 Nfa.Match(ANTLRParser.RULE_REF),
                 Nfa.Sequence(
                     Nfa.Match(ANTLRParser.CHAR_LITERAL),
-                    Nfa.Optional(Nfa.Rule(Rules.ElementOptions))),
+                    Nfa.Optional(Nfa.Rule(Bindings.ElementOptions))),
                 Nfa.Sequence(
                     Nfa.Match(ANTLRParser.STRING_LITERAL),
-                    Nfa.Optional(Nfa.Rule(Rules.ElementOptions))),
+                    Nfa.Optional(Nfa.Rule(Bindings.ElementOptions))),
                 Nfa.Sequence(
                     Nfa.Match(ANTLRParser.DOLLAR),
-                    Nfa.Rule(Rules.Label)),
+                    Nfa.Rule(Bindings.Label)),
                 Nfa.Match(ANTLRParser.ACTION));
         }
 
-        private Nfa BuildLabelRule()
+        protected virtual Nfa Label()
         {
             return Nfa.MatchAny(ANTLRParser.TOKEN_REF, ANTLRParser.RULE_REF);
         }
 
-        private Nfa BuildRewriteEbnfRule()
+        protected virtual Nfa RewriteEbnf()
         {
             return Nfa.Sequence(
-                Nfa.Rule(Rules.RewriteBlock),
+                Nfa.Rule(Bindings.RewriteBlock),
                 Nfa.MatchAny(ANTLRParser.QUESTION, ANTLRParser.STAR, ANTLRParser.PLUS));
         }
 
-        private Nfa BuildRewriteTreeRule()
+        protected virtual Nfa RewriteTree()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.TREE_BEGIN),
-                Nfa.Rule(Rules.RewriteAtom),
-                Nfa.Closure(Nfa.Rule(Rules.RewriteElement)),
+                Nfa.Rule(Bindings.RewriteAtom),
+                Nfa.Closure(Nfa.Rule(Bindings.RewriteElement)),
                 Nfa.Match(ANTLRParser.RPAREN));
         }
 
-        private Nfa BuildRewriteTemplateRule()
+        protected virtual Nfa RewriteTemplate()
         {
             // doesn't handle the "template" predicate yet
             return Nfa.Choice(
-                Nfa.Rule(Rules.RewriteTemplateHead),
-                Nfa.Rule(Rules.RewriteIndirectTemplateHead),
+                Nfa.Rule(Bindings.RewriteTemplateHead),
+                Nfa.Rule(Bindings.RewriteIndirectTemplateHead),
                 Nfa.Match(ANTLRParser.ACTION));
         }
 
-        private Nfa BuildRewriteTemplateHeadRule()
+        protected virtual Nfa RewriteTemplateHead()
         {
             return Nfa.Sequence(
-                Nfa.Rule(Rules.Id),
+                Nfa.Rule(Bindings.Id),
                 Nfa.Match(ANTLRParser.LPAREN),
-                Nfa.Rule(Rules.RewriteTemplateArgs),
+                Nfa.Rule(Bindings.RewriteTemplateArgs),
                 Nfa.Match(ANTLRParser.RPAREN));
         }
 
-        private Nfa BuildRewriteIndirectTemplateHeadRule()
+        protected virtual Nfa RewriteIndirectTemplateHead()
         {
             return Nfa.Sequence(
                 Nfa.Match(ANTLRParser.LPAREN),
                 Nfa.Match(ANTLRParser.ACTION),
                 Nfa.Match(ANTLRParser.RPAREN),
                 Nfa.Match(ANTLRParser.LPAREN),
-                Nfa.Rule(Rules.RewriteTemplateArgs),
+                Nfa.Rule(Bindings.RewriteTemplateArgs),
                 Nfa.Match(ANTLRParser.RPAREN));
         }
 
-        private Nfa BuildRewriteTemplateArgsRule()
+        protected virtual Nfa RewriteTemplateArgs()
         {
             return Nfa.Optional(
                 Nfa.Sequence(
-                    Nfa.Rule(Rules.RewriteTemplateArg),
+                    Nfa.Rule(Bindings.RewriteTemplateArg),
                     Nfa.Closure(
                         Nfa.Sequence(
                             Nfa.Match(ANTLRParser.COMMA),
-                            Nfa.Rule(Rules.RewriteTemplateArg)))));
+                            Nfa.Rule(Bindings.RewriteTemplateArg)))));
         }
 
-        private Nfa BuildRewriteTemplateArgRule()
+        protected virtual Nfa RewriteTemplateArg()
         {
             return Nfa.Sequence(
-                Nfa.Rule(Rules.Id),
+                Nfa.Rule(Bindings.Id),
                 Nfa.Match(ANTLRParser.ASSIGN),
                 Nfa.Match(ANTLRParser.ACTION));
         }
 
-        private class RuleBindings
+        public static class RuleNames
         {
-            public readonly RuleBinding Grammar = new RuleBinding("Grammar");
-            public readonly RuleBinding GrammarType = new RuleBinding("GrammarType");
-            public readonly RuleBinding Actions = new RuleBinding("Actions");
-            public readonly RuleBinding Action = new RuleBinding("Action");
-            public readonly RuleBinding ActionScopeName = new RuleBinding("ActionScopeName");
-            public readonly RuleBinding OptionsSpec = new RuleBinding("OptionsSpec");
-            public readonly RuleBinding Option = new RuleBinding("Option");
-            public readonly RuleBinding OptionValue = new RuleBinding("OptionValue");
-            public readonly RuleBinding DelegateGrammars = new RuleBinding("DelegateGrammars");
-            public readonly RuleBinding DelegateGrammar = new RuleBinding("DelegateGrammar");
-            public readonly RuleBinding TokensSpec = new RuleBinding("TokensSpec");
-            public readonly RuleBinding TokenSpec = new RuleBinding("TokenSpec");
-            public readonly RuleBinding AttrScopes = new RuleBinding("AttrScopes");
-            public readonly RuleBinding AttrScope = new RuleBinding("AttrScope");
-            public readonly RuleBinding Rules = new RuleBinding("Rules");
-            public readonly RuleBinding Rule = new RuleBinding("Rule");
-            public readonly RuleBinding RuleActions = new RuleBinding("RuleActions");
-            public readonly RuleBinding RuleAction = new RuleBinding("RuleAction");
-            public readonly RuleBinding ThrowsSpec = new RuleBinding("ThrowsSpec");
-            public readonly RuleBinding RuleScopeSpec = new RuleBinding("RuleScopeSpec");
-            public readonly RuleBinding RuleAltList = new RuleBinding("RuleAltList");
-            public readonly RuleBinding Block = new RuleBinding("Block");
-            public readonly RuleBinding Alternative = new RuleBinding("Alternative");
-            public readonly RuleBinding ExceptionGroup = new RuleBinding("ExceptionGroup");
-            public readonly RuleBinding ExceptionHandler = new RuleBinding("ExceptionHandler");
-            public readonly RuleBinding FinallyClause = new RuleBinding("FinallyClause");
-            public readonly RuleBinding Element = new RuleBinding("Element");
-            public readonly RuleBinding ElementNoOptionSpec = new RuleBinding("ElementNoOptionSpec");
-            public readonly RuleBinding Atom = new RuleBinding("Atom");
-            public readonly RuleBinding RuleRef = new RuleBinding("RuleRef");
-            public readonly RuleBinding NotSet = new RuleBinding("NotSet");
-            public readonly RuleBinding TreeRoot = new RuleBinding("TreeRoot");
-            public readonly RuleBinding Tree = new RuleBinding("Tree");
-            public readonly RuleBinding Ebnf = new RuleBinding("Ebnf");
-            public readonly RuleBinding Range = new RuleBinding("Range");
-            public readonly RuleBinding Terminal = new RuleBinding("Terminal");
-            public readonly RuleBinding ElementOptions = new RuleBinding("ElementOptions");
-            public readonly RuleBinding DefaultNodeOption = new RuleBinding("DefaultNodeOption");
-            public readonly RuleBinding ElementOption = new RuleBinding("ElementOption");
-            public readonly RuleBinding ElementOptionId = new RuleBinding("ElementOptionId");
-            public readonly RuleBinding EbnfSuffix = new RuleBinding("EbnfSuffix");
-            public readonly RuleBinding NotTerminal = new RuleBinding("NotTerminal");
-            public readonly RuleBinding IdList = new RuleBinding("IdList");
-            public readonly RuleBinding Id = new RuleBinding("Id");
+            public static readonly string Grammar = "Grammar";
+            public static readonly string GrammarType = "GrammarType";
+            public static readonly string Actions = "Actions";
+            public static readonly string Action = "Action";
+            public static readonly string ActionScopeName = "ActionScopeName";
+            public static readonly string OptionsSpec = "OptionsSpec";
+            public static readonly string Option = "Option";
+            public static readonly string OptionValue = "OptionValue";
+            public static readonly string DelegateGrammars = "DelegateGrammars";
+            public static readonly string DelegateGrammar = "DelegateGrammar";
+            public static readonly string TokensSpec = "TokensSpec";
+            public static readonly string TokenSpec = "TokenSpec";
+            public static readonly string AttrScopes = "AttrScopes";
+            public static readonly string AttrScope = "AttrScope";
+            public static readonly string RulesRule = "Rules";
+            public static readonly string Rule = "Rule";
+            public static readonly string RuleActions = "RuleActions";
+            public static readonly string RuleAction = "RuleAction";
+            public static readonly string ThrowsSpec = "ThrowsSpec";
+            public static readonly string RuleScopeSpec = "RuleScopeSpec";
+            public static readonly string RuleAltList = "RuleAltList";
+            public static readonly string Block = "Block";
+            public static readonly string Alternative = "Alternative";
+            public static readonly string ExceptionGroup = "ExceptionGroup";
+            public static readonly string ExceptionHandler = "ExceptionHandler";
+            public static readonly string FinallyClause = "FinallyClause";
+            public static readonly string Element = "Element";
+            public static readonly string ElementNoOptionSpec = "ElementNoOptionSpec";
+            public static readonly string Atom = "Atom";
+            public static readonly string RuleRef = "RuleRef";
+            public static readonly string NotSet = "NotSet";
+            public static readonly string TreeRoot = "TreeRoot";
+            public static readonly string Tree = "Tree";
+            public static readonly string Ebnf = "Ebnf";
+            public static readonly string Range = "Range";
+            public static readonly string Terminal = "Terminal";
+            public static readonly string ElementOptions = "ElementOptions";
+            public static readonly string DefaultNodeOption = "DefaultNodeOption";
+            public static readonly string ElementOption = "ElementOption";
+            public static readonly string ElementOptionId = "ElementOptionId";
+            public static readonly string EbnfSuffix = "EbnfSuffix";
+            public static readonly string NotTerminal = "NotTerminal";
+            public static readonly string IdList = "IdList";
+            public static readonly string Id = "Id";
 
             // rewrite syntax
 
-            public readonly RuleBinding Rewrite = new RuleBinding("Rewrite");
-            public readonly RuleBinding RewriteWithSempred = new RuleBinding("RewriteWithSempred");
-            public readonly RuleBinding RewriteBlock = new RuleBinding("RewriteBlock");
-            public readonly RuleBinding RewriteAlternative = new RuleBinding("RewriteAlternative");
-            public readonly RuleBinding RewriteElement = new RuleBinding("RewriteElement");
-            public readonly RuleBinding RewriteAtom = new RuleBinding("RewriteAtom");
-            public readonly RuleBinding Label = new RuleBinding("Label");
-            public readonly RuleBinding RewriteEbnf = new RuleBinding("RewriteEbnf");
-            public readonly RuleBinding RewriteTree = new RuleBinding("RewriteTree");
-            public readonly RuleBinding RewriteTemplate = new RuleBinding("RewriteTemplate");
-            public readonly RuleBinding RewriteTemplateHead = new RuleBinding("RewriteTemplateHead");
-            public readonly RuleBinding RewriteIndirectTemplateHead = new RuleBinding("RewriteIndirectTemplateHead");
-            public readonly RuleBinding RewriteTemplateArgs = new RuleBinding("RewriteTemplateArgs");
-            public readonly RuleBinding RewriteTemplateArg = new RuleBinding("RewriteTemplateArg");
+            public static readonly string Rewrite = "Rewrite";
+            public static readonly string RewriteWithSempred = "RewriteWithSempred";
+            public static readonly string RewriteBlock = "RewriteBlock";
+            public static readonly string RewriteAlternative = "RewriteAlternative";
+            public static readonly string RewriteElement = "RewriteElement";
+            public static readonly string RewriteAtom = "RewriteAtom";
+            public static readonly string Label = "Label";
+            public static readonly string RewriteEbnf = "RewriteEbnf";
+            public static readonly string RewriteTree = "RewriteTree";
+            public static readonly string RewriteTemplate = "RewriteTemplate";
+            public static readonly string RewriteTemplateHead = "RewriteTemplateHead";
+            public static readonly string RewriteIndirectTemplateHead = "RewriteIndirectTemplateHead";
+            public static readonly string RewriteTemplateArgs = "RewriteTemplateArgs";
+            public static readonly string RewriteTemplateArg = "RewriteTemplateArg";
+        }
+
+        protected class RuleBindings
+        {
+            public readonly RuleBinding Grammar = new RuleBinding(RuleNames.Grammar);
+            public readonly RuleBinding GrammarType = new RuleBinding(RuleNames.GrammarType);
+            public readonly RuleBinding Actions = new RuleBinding(RuleNames.Actions);
+            public readonly RuleBinding Action = new RuleBinding(RuleNames.Action);
+            public readonly RuleBinding ActionScopeName = new RuleBinding(RuleNames.ActionScopeName);
+            public readonly RuleBinding OptionsSpec = new RuleBinding(RuleNames.OptionsSpec);
+            public readonly RuleBinding Option = new RuleBinding(RuleNames.Option);
+            public readonly RuleBinding OptionValue = new RuleBinding(RuleNames.OptionValue);
+            public readonly RuleBinding DelegateGrammars = new RuleBinding(RuleNames.DelegateGrammars);
+            public readonly RuleBinding DelegateGrammar = new RuleBinding(RuleNames.DelegateGrammar);
+            public readonly RuleBinding TokensSpec = new RuleBinding(RuleNames.TokensSpec);
+            public readonly RuleBinding TokenSpec = new RuleBinding(RuleNames.TokenSpec);
+            public readonly RuleBinding AttrScopes = new RuleBinding(RuleNames.AttrScopes);
+            public readonly RuleBinding AttrScope = new RuleBinding(RuleNames.AttrScope);
+            public readonly RuleBinding RulesRule = new RuleBinding(RuleNames.RulesRule);
+            public readonly RuleBinding Rule = new RuleBinding(RuleNames.Rule);
+            public readonly RuleBinding RuleActions = new RuleBinding(RuleNames.RuleActions);
+            public readonly RuleBinding RuleAction = new RuleBinding(RuleNames.RuleAction);
+            public readonly RuleBinding ThrowsSpec = new RuleBinding(RuleNames.ThrowsSpec);
+            public readonly RuleBinding RuleScopeSpec = new RuleBinding(RuleNames.RuleScopeSpec);
+            public readonly RuleBinding RuleAltList = new RuleBinding(RuleNames.RuleAltList);
+            public readonly RuleBinding Block = new RuleBinding(RuleNames.Block);
+            public readonly RuleBinding Alternative = new RuleBinding(RuleNames.Alternative);
+            public readonly RuleBinding ExceptionGroup = new RuleBinding(RuleNames.ExceptionGroup);
+            public readonly RuleBinding ExceptionHandler = new RuleBinding(RuleNames.ExceptionHandler);
+            public readonly RuleBinding FinallyClause = new RuleBinding(RuleNames.FinallyClause);
+            public readonly RuleBinding Element = new RuleBinding(RuleNames.Element);
+            public readonly RuleBinding ElementNoOptionSpec = new RuleBinding(RuleNames.ElementNoOptionSpec);
+            public readonly RuleBinding Atom = new RuleBinding(RuleNames.Atom);
+            public readonly RuleBinding RuleRef = new RuleBinding(RuleNames.RuleRef);
+            public readonly RuleBinding NotSet = new RuleBinding(RuleNames.NotSet);
+            public readonly RuleBinding TreeRoot = new RuleBinding(RuleNames.TreeRoot);
+            public readonly RuleBinding Tree = new RuleBinding(RuleNames.Tree);
+            public readonly RuleBinding Ebnf = new RuleBinding(RuleNames.Ebnf);
+            public readonly RuleBinding Range = new RuleBinding(RuleNames.Range);
+            public readonly RuleBinding Terminal = new RuleBinding(RuleNames.Terminal);
+            public readonly RuleBinding ElementOptions = new RuleBinding(RuleNames.ElementOptions);
+            public readonly RuleBinding DefaultNodeOption = new RuleBinding(RuleNames.DefaultNodeOption);
+            public readonly RuleBinding ElementOption = new RuleBinding(RuleNames.ElementOption);
+            public readonly RuleBinding ElementOptionId = new RuleBinding(RuleNames.ElementOptionId);
+            public readonly RuleBinding EbnfSuffix = new RuleBinding(RuleNames.EbnfSuffix);
+            public readonly RuleBinding NotTerminal = new RuleBinding(RuleNames.NotTerminal);
+            public readonly RuleBinding IdList = new RuleBinding(RuleNames.IdList);
+            public readonly RuleBinding Id = new RuleBinding(RuleNames.Id);
+
+            // rewrite syntax
+
+            public readonly RuleBinding Rewrite = new RuleBinding(RuleNames.Rewrite);
+            public readonly RuleBinding RewriteWithSempred = new RuleBinding(RuleNames.RewriteWithSempred);
+            public readonly RuleBinding RewriteBlock = new RuleBinding(RuleNames.RewriteBlock);
+            public readonly RuleBinding RewriteAlternative = new RuleBinding(RuleNames.RewriteAlternative);
+            public readonly RuleBinding RewriteElement = new RuleBinding(RuleNames.RewriteElement);
+            public readonly RuleBinding RewriteAtom = new RuleBinding(RuleNames.RewriteAtom);
+            public readonly RuleBinding Label = new RuleBinding(RuleNames.Label);
+            public readonly RuleBinding RewriteEbnf = new RuleBinding(RuleNames.RewriteEbnf);
+            public readonly RuleBinding RewriteTree = new RuleBinding(RuleNames.RewriteTree);
+            public readonly RuleBinding RewriteTemplate = new RuleBinding(RuleNames.RewriteTemplate);
+            public readonly RuleBinding RewriteTemplateHead = new RuleBinding(RuleNames.RewriteTemplateHead);
+            public readonly RuleBinding RewriteIndirectTemplateHead = new RuleBinding(RuleNames.RewriteIndirectTemplateHead);
+            public readonly RuleBinding RewriteTemplateArgs = new RuleBinding(RuleNames.RewriteTemplateArgs);
+            public readonly RuleBinding RewriteTemplateArg = new RuleBinding(RuleNames.RewriteTemplateArg);
         }
     }
 }

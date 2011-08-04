@@ -188,6 +188,7 @@
     </Compile>
     <Compile Include="AntlrClassifierLexer.cs" />
     <Compile Include="AntlrClassifierLexerMode.cs" />
+    <Compile Include="AntlrIntellisenseCommandFilter.cs" />
     <Compile Include="AntlrIntellisenseController.cs" />
     <Compile Include="AntlrIntellisenseControllerProvider.cs" />
     <Compile Include="AntlrCompletionSource.cs" />
