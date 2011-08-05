@@ -5,6 +5,7 @@
     using Microsoft.VisualStudio.Shell;
     using Tvl.VisualStudio.Shell.Extensions;
     using IServiceContainer = System.ComponentModel.Design.IServiceContainer;
+    using JavaIntellisenseOptions = Tvl.VisualStudio.Language.Java.OptionsPages.JavaIntellisenseOptions;
 
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration(Constants.JavaLanguagePackageNameResourceString, Constants.JavaLanguagePackageDetailsResourceString, Constants.JavaLanguagePackageProductVersionString/*, IconResourceID = 400*/)]
@@ -26,6 +27,9 @@
         //CodeSense = true,
         RequestStockColors = true)]
     [ProvideLanguageExtension(typeof(JavaLanguageInfo), Constants.JavaFileExtension)]
+
+    [ProvideLanguageEditorOptionPage(typeof(JavaIntellisenseOptions), Constants.JavaLanguageName, "", "IntelliSense", "#210")]
+
     public class JavaLanguagePackage : Package
     {
         private static JavaLanguagePackage _instance;
@@ -34,6 +38,28 @@
         public JavaLanguagePackage()
         {
             _instance = this;
+        }
+
+        public static JavaLanguagePackage Instance
+        {
+            get
+            {
+                return _instance;
+            }
+        }
+
+        public JavaIntellisenseOptions IntellisenseOptions
+        {
+            get
+            {
+                return GetDialogPage<JavaIntellisenseOptions>();
+            }
+        }
+
+        protected T GetDialogPage<T>()
+            where T : DialogPage
+        {
+            return (T)base.GetDialogPage(typeof(T));
         }
 
         protected override void Initialize()

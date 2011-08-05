@@ -160,6 +160,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
@@ -199,6 +200,15 @@
       <DependentUpon>JavaDocCommentClassifierLexer.g3</DependentUpon>
     </Compile>
     <Compile Include="JavaClassificationTypes.cs" />
+    <Compile Include="OptionsPages\JavaIntellisenseOptions.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="OptionsPages\JavaIntellisenseOptionsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="OptionsPages\JavaIntellisenseOptionsControl.Designer.cs">
+      <DependentUpon>JavaIntellisenseOptionsControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="SourceData\CodeArrayType.cs" />
     <Compile Include="SourceData\CodeClass.cs" />
     <Compile Include="SourceData\CodeElement.cs">
@@ -341,6 +351,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="OptionsPages\JavaIntellisenseOptionsControl.resx">
+      <DependentUpon>JavaIntellisenseOptionsControl.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="VSPackage.resx">
       <SubType>Designer</SubType>
       <LogicalName>VSPackage.resources</LogicalName>
