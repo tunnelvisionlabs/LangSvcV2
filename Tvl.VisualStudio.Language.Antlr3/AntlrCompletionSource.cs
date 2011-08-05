@@ -106,8 +106,7 @@
                 CompletionInfo completionInfo = controller.CompletionInfo;
                 ITextSnapshot snapshot = triggerPoint.TextBuffer.CurrentSnapshot;
                 SnapshotPoint point = triggerPoint.GetPoint(snapshot);
-                ITrackingPoint point2 = triggerPoint;
-                bool flag = false;
+                bool extendLeft = false;
                 bool extend = true;
 
                 // labels includes both implicit and explicit labels
@@ -130,7 +129,7 @@
                     break;
 
                 default:
-                    flag = true;
+                    extendLeft = true;
                     break;
                 }
 
@@ -139,7 +138,7 @@
                 {
                     ITextBuffer textBuffer = TextBuffer;
                     ITextStructureNavigator navigator = TextStructureNavigatorSelectorService.CreateTextStructureNavigator(textBuffer, textBuffer.ContentType);
-                    SnapshotPoint currentPosition = new SnapshotPoint(snapshot, point2.GetPosition(snapshot));
+                    SnapshotPoint currentPosition = new SnapshotPoint(snapshot, triggerPoint.GetPosition(snapshot));
                     extentOfWord = navigator.GetExtentOfWord(currentPosition);
                     if (extentOfWord.Span.Start == point)
                     {
@@ -181,7 +180,7 @@
                 }
 
                 ITrackingSpan applicableTo = snapshot.CreateTrackingSpan(extentOfWord.Span, SpanTrackingMode.EdgeInclusive, TrackingFidelityMode.Forward);
-                if (flag)
+                if (extendLeft)
                 {
                     SnapshotSpan textSoFarSpan = new SnapshotSpan(snapshot, extentOfWord.Span.Start, triggerPoint.GetPoint(snapshot));
                     string textSoFar = textSoFarSpan.GetText();
