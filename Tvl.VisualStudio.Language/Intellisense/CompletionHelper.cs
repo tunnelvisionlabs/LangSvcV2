@@ -83,12 +83,10 @@
             SnapshotPoint? point = textView.Caret.Position.Point.GetPoint(textView.TextBuffer, PositionAffinity.Predecessor);
             if (point.HasValue)
             {
-                completionInfo.InfoType = infoType;
-                completionInfo.InvocationType = invocationType;
                 ITrackingPoint trackingPoint = textView.TextBuffer.CurrentSnapshot.CreateTrackingPoint(point.Value.Position, PointTrackingMode.Positive);
                 if (!signatureHelpOnly)
                 {
-                    controller.TriggerCompletion(trackingPoint);
+                    controller.TriggerCompletion(trackingPoint, infoType, invocationType);
                     DoCallMatch(controller);
                 }
 
