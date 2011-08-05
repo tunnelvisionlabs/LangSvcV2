@@ -298,6 +298,7 @@ tokens {
 	STATIC_BLOCK;
 	LOCAL_DECLARATION;
 	FOREACH;
+	QID;
 	GE;
 	LE;
 	POSTINC;
@@ -1086,14 +1087,11 @@ castExpression
     |   '('<EXPLICIT_CAST>^ type ')'! unaryExpressionNotPlusMinus
     ;
 
-/**
- * have to use scope here, parameter passing isn't well supported in antlr.
- */
 public
 primary
     :   parExpression
-    |   'this'^ ('.' IDENTIFIER)* identifierSuffix?
-    |   IDENTIFIER^ ('.' IDENTIFIER)* identifierSuffix?
+    |   'this'^ ('.'<QID>^ IDENTIFIER)* identifierSuffix?
+    |   IDENTIFIER^ ('.'<QID>^ IDENTIFIER)* identifierSuffix?
     |   'super'^ superSuffix
     |   literal
     |   creator

@@ -651,14 +651,18 @@ castExpression
  */
 primary
     :   parExpression
-    |   ^('this' ('.' IDENTIFIER)* identifierSuffix?)
-    |   ^(IDENTIFIER ('.' IDENTIFIER)* identifierSuffix?)
+    //|   ^('this' ('.' IDENTIFIER)* identifierSuffix?)
+    //|   ^(IDENTIFIER ('.' IDENTIFIER)* identifierSuffix?)
+	|	^(QID primary IDENTIFIER identifierSuffix?)
+    |   ^('this' identifierSuffix?)
+    |   ^(IDENTIFIER identifierSuffix?)
     |   ^('super' superSuffix)
     |   literal
     |   creator
     |   ^('.' primitiveType ('[' ']')* 'class')
     |   ^('.' 'void' 'class')
 	|	IDENTIFIER
+	|	'this'
     ;
 
 
