@@ -162,6 +162,14 @@ lexer(grammar, name, tokens, scopes, rules, numRules, filterMode, labelType="Com
 		}
 	}
 
+<if(grammar.delegates)>
+	public override void SetState(RecognizerSharedState state)
+	{
+		base.SetState(state);
+		<grammar.delegates:{g|<g:delegateName()>.SetState(state);}; separator="\n">
+	}
+<endif>
+
 <endif>
 <if(filterMode)>
 	<filteringNextToken()>
@@ -291,6 +299,22 @@ genericParser(grammar, name, scopes, tokens, tokenNames, rules, numRules,
 	<last(grammar.delegators):{g|private <g.recognizerName> gParent;}>
 <endif>
 
+<if(grammar.delegates)>
+	public override void SetState(RecognizerSharedState state)
+	{
+		base.SetState(state);
+		<grammar.delegates:{g|<g:delegateName()>.SetState(state);}; separator="\n">
+	}
+
+<if(TREE_PARSER)>
+	public override void SetTreeNodeStream(ITreeNodeStream input)
+	{
+		base.SetTreeNodeStream(input);
+		<grammar.delegates:{g|<g:delegateName()>.SetTreeNodeStream(input);}; separator="\n">
+	}
+<endif>
+<endif>
+
 	<scopes:{it|<if(it.isDynamicGlobalScope)><globalAttributeScope(scope=it)><endif>}>
 	<@members()>
 
@@ -352,7 +376,6 @@ genericParser(grammar, name, scopes, tokens, tokenNames, rules, numRules,
 <actions.(actionScope).ctorModifier; null="public"> <grammar.recognizerName>(<inputStreamType> input, RecognizerSharedState state<grammar.delegators:{g|, <g.recognizerName> <g:delegateName()>}>)
 	: base(input, state)
 {
-	<parserCtorBody()>
 <if(grammar.directDelegates)>
 	<grammar.directDelegates:
 		{g|<g:delegateName()> = new <g.recognizerName>(input, state<trunc(g.delegators):{p|, <p:delegateName()>}>, this);}; separator="\n">
@@ -363,6 +386,7 @@ genericParser(grammar, name, scopes, tokens, tokenNames, rules, numRules,
 <if(grammar.delegators)>
 	<last(grammar.delegators):{g|gParent = <g:delegateName()>;}>
 <endif>
+	<parserCtorBody()>
 	OnCreated();
 }
 >>
@@ -490,13 +514,13 @@ ruleWrapperMap ::= [
 
 ruleWrapperBottomup() ::= <<
 <if(TREE_PARSER && filterMode)>
-public override IAstRuleReturnScope Bottomup() { return bottomup(); }
+protected override <if(buildAST)>IAstRuleReturnScope<else>void<endif> Bottomup() { <if(buildAST)>return <endif>bottomup(); }
 <endif>
 >>
 
 ruleWrapperTopdown() ::= <<
 <if(TREE_PARSER && filterMode)>
-public override IAstRuleReturnScope Topdown() { return topdown(); }
+protected override <if(buildAST)>IAstRuleReturnScope<else>void<endif> Topdown() { <if(buildAST)>return <endif>topdown(); }
 <endif>
 >>
 
@@ -1129,7 +1153,7 @@ if (!(<evalPredicate(...)>))
 // F i x e d  D F A  (if-then-else)
 
 dfaState(k,edges,eotPredictsAlt,description,stateNumber,semPredState) ::= <<
-int LA<decisionNumber>_<stateNumber> = input.LA(<k>);<\n>
+int LA<decisionNumber>_<k> = input.LA(<k>);<\n>
 <edges; separator="\nelse ">
 else
 {
@@ -1151,7 +1175,7 @@ else
  *  expect "if ( LA(1)==X ) match(X);" and that's it.
  */
 dfaOptionalBlockState(k,edges,eotPredictsAlt,description,stateNumber,semPredState) ::= <<
-int LA<decisionNumber>_<stateNumber> = input.LA(<k>);<\n>
+int LA<decisionNumber>_<k> = input.LA(<k>);<\n>
 <edges; separator="\nelse ">
 >>
 
@@ -1162,7 +1186,7 @@ int LA<decisionNumber>_<stateNumber> = input.LA(<k>);<\n>
  *  anything other than 'a' predicts exiting.
  */
 dfaLoopbackState(k,edges,eotPredictsAlt,description,stateNumber,semPredState) ::= <<
-int LA<decisionNumber>_<stateNumber> = input.LA(<k>);<\n>
+int LA<decisionNumber>_<k> = input.LA(<k>);<\n>
 <edges; separator="\nelse "><\n>
 <if(eotPredictsAlt)>
 <if(!edges)>
@@ -1342,12 +1366,22 @@ private int SpecialStateTransition<dfa.decisionNumber>(DFA dfa, int s, IIntStrea
 	ITreeNodeStream input = (ITreeNodeStream)_input;
 	<endif>
 	int _s = s;
-	switch (s)
+	s = -1;
+	<! pull these outside the switch cases to save space on locals !>
+	int LA<dfa.decisionNumber>_1 = input.LA(1);
+	int index<dfa.decisionNumber>_1 = input.Index;
+	switch (_s)
 	{
-	<dfa.specialStateSTs:{state |
-	case <i0>:<! compressed special state numbers 0..n-1 !>
-		<state>}; separator="\n">
+	<dfa.specialStateSTs:{state |case <i0>:<! compressed special state numbers 0..n-1 !>
+	<state>}; separator="\n">
+
+	default:
+		break;
 	}
+
+	if (s >= 0)
+		return s;
+
 <if(backtracking)>
 	if (state.backtracking > 0) {state.failed=true; return -1;}
 <endif>
@@ -1362,20 +1396,18 @@ private int SpecialStateTransition<dfa.decisionNumber>(DFA dfa, int s, IIntStrea
  *  state.
  */
 cyclicDFAState(decisionNumber,stateNumber,edges,needErrorClause,semPredState) ::= <<
-int LA<decisionNumber>_<stateNumber> = input.LA(1);<\n>
+{
 <if(semPredState)>
-<! get next lookahead symbol to test edges, then rewind !>
-<\n>int index<decisionNumber>_<stateNumber> = input.Index;
-input.Rewind();
+	<! get next lookahead symbol to test edges, then rewind !>
+	input.Rewind();
 <endif>
-s = -1;
-<edges; separator="\nelse ">
+	<edges; separator="\nelse ">
 <if(semPredState)>
-<! return input cursor to state before we rewound !>
-<\n>input.Seek(index<decisionNumber>_<stateNumber>);
+	<! return input cursor to state before we rewound !>
+	input.Seek(index<decisionNumber>_1);
 <endif>
-if (s >= 0) return s;
-break;
+	break;
+}
 >>
 
 /** Just like a fixed DFA edge, test the lookahead and indicate what
@@ -1405,7 +1437,7 @@ evalPredicate(pred,description) ::= "(<pred>)"
 
 evalSynPredicate(pred,description) ::= "EvaluatePredicate(<pred>_fragment)"
 
-lookaheadTest(atom,k,atomAsInt) ::= "LA<decisionNumber>_<stateNumber>==<atom>"
+lookaheadTest(atom,k,atomAsInt) ::= "LA<decisionNumber>_<k>==<atom>"
 
 /** Sometimes a lookahead test cannot assume that LA(k) is in a temp variable
  *  somewhere.  Must ask for the lookahead directly.
@@ -1413,7 +1445,7 @@ lookaheadTest(atom,k,atomAsInt) ::= "LA<decisionNumber>_<stateNumber>==<atom>"
 isolatedLookaheadTest(atom,k,atomAsInt) ::= "input.LA(<k>)==<atom>"
 
 lookaheadRangeTest(lower,upper,k,rangeNumber,lowerAsInt,upperAsInt) ::= <%
-(LA<decisionNumber>_<stateNumber><ge()><lower> && LA<decisionNumber>_<stateNumber><le()><upper>)
+(LA<decisionNumber>_<k><ge()><lower> && LA<decisionNumber>_<k><le()><upper>)
 %>
 
 isolatedLookaheadRangeTest(lower,upper,k,rangeNumber,lowerAsInt,upperAsInt) ::= "(input.LA(<k>)<ge()><lower> && input.LA(<k>)<le()><upper>)"
