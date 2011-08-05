@@ -12,6 +12,7 @@
     using Tvl.VisualStudio.Language.Java.SourceData.Emit;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell;
+    using Tvl.VisualStudio.Shell.Extensions;
     using Tvl.VisualStudio.Shell.OutputWindow;
 
     using CancellationToken = System.Threading.CancellationToken;
@@ -20,6 +21,7 @@
     using File = System.IO.File;
     using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;
     using SearchOption = System.IO.SearchOption;
+    using SVsServiceProvider = Microsoft.VisualStudio.Shell.SVsServiceProvider;
     using TaskScheduler = System.Threading.Tasks.TaskScheduler;
 
     [Export]
@@ -79,6 +81,13 @@
             private set;
         }
 
+        [Import]
+        public SVsServiceProvider GlobalServiceProvider
+        {
+            get;
+            private set;
+        }
+
         public CodePhysicalFile[] GetPackageFiles(string packageName, bool caseSensitive)
         {
             using (_updateLock.ReadLock())
@@ -88,7 +97,7 @@
                     return new CodePhysicalFile[0];
 
                 if (!caseSensitive)
-                    return files.ToArray();
+                return files.ToArray();
 
                 return files.Where(i => StringComparer.Ordinal.Equals(packageName, i.PackageName)).ToArray();
             }
@@ -122,13 +131,24 @@
                 _backgroundParseStarted = true;
             }
 
-            var task = Task.Factory.StartNew(QueueReferenceSourceParseTasks, CancellationToken.None, TaskCreationOptions.None, ProjectCacheIntelliSenseTaskScheduler);
+            JavaLanguagePackage package = JavaLanguagePackage.Instance ?? GlobalServiceProvider.GetShell().LoadPackage<JavaLanguagePackage>();
+            if (!package.IntellisenseOptions.ParseJreSource || !Directory.Exists(package.IntellisenseOptions.JreSourcePath))
+            {
+                _backgroundParseStarted = false;
+                return;
+            }
+
+            var task = Task.Factory.StartNew(QueueReferenceSourceParseTasks, package.IntellisenseOptions.JreSourcePath, CancellationToken.None, TaskCreationOptions.None, ProjectCacheIntelliSenseTaskScheduler);
             task.HandleNonCriticalExceptions();
         }
 
-        private void QueueReferenceSourceParseTasks()
+        private void QueueReferenceSourceParseTasks(object sourcePathObject)
         {
-            IEnumerable<string> files = Directory.EnumerateFiles(@"C:\dev\jdksrc", "*.java", SearchOption.AllDirectories);
+            string sourcePath = sourcePathObject as string;
+            if (string.IsNullOrEmpty(sourcePath))
+                return;
+
+            IEnumerable<string> files = Directory.EnumerateFiles(sourcePath, "*.java", SearchOption.AllDirectories);
             foreach (string file in files)
             {
                 Task parseTask = Task.Factory.StartNew(ParseReferenceSourceFile, file, CancellationToken.None, TaskCreationOptions.None, ProjectCacheIntelliSenseTaskScheduler);
