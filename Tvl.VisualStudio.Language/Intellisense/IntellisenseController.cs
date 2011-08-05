@@ -274,6 +274,14 @@
                 session.Committed += HandleCompletionCommitted;
                 session.Dismissed += HandleCompletionDismissed;
                 CompletionSession = session;
+
+                if (completionInfoType == CompletionInfoType.GlobalInfo
+                    && !session.IsDismissed
+                    && session.SelectedCompletionSet.SelectionStatus.IsSelected
+                    && session.SelectedCompletionSet.SelectionStatus.IsUnique)
+                {
+                    session.Commit();
+                }
             }
         }
 
@@ -442,7 +450,7 @@
                 case VsCommands2K.OPENLINEABOVE:
                     var selectionStatus = CompletionSession.SelectedCompletionSet.SelectionStatus;
                     CompletionSession.SelectedCompletionSet.SelectionStatus = new CompletionSelectionStatus(selectionStatus.Completion, true, selectionStatus.IsUnique);
-                    CompletionInfo.CommitChar = (VsCommands2K)commandId == VsCommands2K.TAB ? (char?)'\n' : null;
+                    CompletionInfo.CommitChar = (VsCommands2K)commandId == VsCommands2K.TAB ? (char?)'\t' : null;
                     return CommitCompletion();
 
                 case VsCommands2K.ToggleConsumeFirstCompletionMode:
