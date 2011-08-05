@@ -9,34 +9,46 @@
     using Microsoft.VisualStudio.Text.Editor;
     using System.Runtime.InteropServices;
     using System.ComponentModel;
+    using Tvl.VisualStudio.Language.Intellisense;
+    using VSOBJGOTOSRCTYPE = Microsoft.VisualStudio.Shell.Interop.VSOBJGOTOSRCTYPE;
 
-    internal sealed class JavaIntellisenseController : IIntellisenseController
+    internal sealed class JavaIntellisenseController : IntellisenseController
     {
-        private readonly IQuickInfoBroker QuickInfoBroker;
-        private readonly ICompletionBroker CompletionBroker;
-        private readonly ISignatureHelpBroker SignatureHelpBroker;
-        private ITextView textView;
-        private IList<ITextBuffer> subjectBuffers;
-
-        public JavaIntellisenseController(ITextView textView, IList<ITextBuffer> subjectBuffers, IQuickInfoBroker QuickInfoBroker, ICompletionBroker CompletionBroker, ISignatureHelpBroker SignatureHelpBroker)
-        {
-            this.textView = textView;
-            this.subjectBuffers = subjectBuffers;
-            this.QuickInfoBroker = QuickInfoBroker;
-            this.CompletionBroker = CompletionBroker;
-            this.SignatureHelpBroker = SignatureHelpBroker;
-        }
-
-        public void ConnectSubjectBuffer(ITextBuffer subjectBuffer)
+        public JavaIntellisenseController(ITextView textView, JavaIntellisenseControllerProvider provider)
+            : base(textView, provider)
         {
         }
 
-        public void Detach(ITextView textView)
+        public new JavaIntellisenseControllerProvider Provider
         {
+            get
+            {
+                return (JavaIntellisenseControllerProvider)base.Provider;
+            }
         }
 
-        public void DisconnectSubjectBuffer(ITextBuffer subjectBuffer)
+        public override bool SupportsCompletion
         {
+            get
+            {
+                return false;
+            }
+        }
+
+        public override bool SupportsGotoDefinition
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        public override IEnumerable<INavigateToTarget> GoToSourceImpl(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
+        {
+            if (triggerPoint == null)
+                return new INavigateToTarget[0];
+
+            return base.GoToSourceImpl(gotoSourceType, triggerPoint);
         }
     }
 }
