@@ -78,7 +78,7 @@ COMMENT
 	;
 
 DOC_COMMENT_START
-	:	{input.LT(4) != '/'}? => '/**'
+	:	{input.LA(4) != '/'}? => '/**'
 	;
 
 EMPTY_BLOCK_COMMENT
@@ -86,7 +86,7 @@ EMPTY_BLOCK_COMMENT
 	;
 
 ML_COMMENT
-	:	'/*' ~'*' CONTINUE_COMMENT {$type = state.type;}
+	:	{input.LA(3) != '*'}? => '/*' CONTINUE_COMMENT {$type = state.type;}
 	;
 
 fragment END_COMMENT : ;
