@@ -44,6 +44,14 @@
             _htmlTagState = state.HtmlTagState;
         }
 
+        public ICharStream CharStream
+        {
+            get
+            {
+                return _input;
+            }
+        }
+
         public PhpClassifierLexerMode Mode
         {
             get

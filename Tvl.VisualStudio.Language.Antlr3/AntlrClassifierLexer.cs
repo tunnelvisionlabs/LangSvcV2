@@ -35,6 +35,14 @@
             SetCurrentState(state);
         }
 
+        public ICharStream CharStream
+        {
+            get
+            {
+                return _input;
+            }
+        }
+
         public string SourceName
         {
             get
@@ -107,12 +115,40 @@
         {
             get
             {
-                return Mode == AntlrClassifierLexerMode.ActionCharLiteral;
+                return Mode == AntlrClassifierLexerMode.ActionCharLiteral
+                    || Mode == AntlrClassifierLexerMode.ArgActionCharLiteral;
             }
 
             set
             {
-                Mode = value ? AntlrClassifierLexerMode.ActionCharLiteral : AntlrClassifierLexerMode.Action;
+                if (InStringLiteral == value)
+                    return;
+
+                switch (Mode)
+                {
+                case AntlrClassifierLexerMode.Action:
+                    Mode = AntlrClassifierLexerMode.ActionCharLiteral;
+                    break;
+
+                case AntlrClassifierLexerMode.ActionCharLiteral:
+                    Mode = AntlrClassifierLexerMode.Action;
+                    break;
+
+                case AntlrClassifierLexerMode.ArgAction:
+                    Mode = AntlrClassifierLexerMode.ArgActionCharLiteral;
+                    break;
+
+                case AntlrClassifierLexerMode.ArgActionCharLiteral:
+                    Mode = AntlrClassifierLexerMode.ArgAction;
+                    break;
+
+                case AntlrClassifierLexerMode.Grammar:
+                case AntlrClassifierLexerMode.GrammarDoubleAngleStringLiteral:
+                case AntlrClassifierLexerMode.ActionStringLiteral:
+                case AntlrClassifierLexerMode.ArgActionStringLiteral:
+                default:
+                    throw new InvalidOperationException();
+                }
             }
         }
 
@@ -120,12 +156,40 @@
         {
             get
             {
-                return Mode == AntlrClassifierLexerMode.ActionStringLiteral;
+                return Mode == AntlrClassifierLexerMode.ActionStringLiteral
+                    || Mode == AntlrClassifierLexerMode.ArgActionStringLiteral;
             }
 
             set
             {
-                Mode = value ? AntlrClassifierLexerMode.ActionStringLiteral : AntlrClassifierLexerMode.Action;
+                if (InStringLiteral == value)
+                    return;
+
+                switch (Mode)
+                {
+                case AntlrClassifierLexerMode.Action:
+                    Mode = AntlrClassifierLexerMode.ActionStringLiteral;
+                    break;
+
+                case AntlrClassifierLexerMode.ActionStringLiteral:
+                    Mode = AntlrClassifierLexerMode.Action;
+                    break;
+
+                case AntlrClassifierLexerMode.ArgAction:
+                    Mode = AntlrClassifierLexerMode.ArgActionStringLiteral;
+                    break;
+
+                case AntlrClassifierLexerMode.ArgActionStringLiteral:
+                    Mode = AntlrClassifierLexerMode.ArgAction;
+                    break;
+
+                case AntlrClassifierLexerMode.Grammar:
+                case AntlrClassifierLexerMode.GrammarDoubleAngleStringLiteral:
+                case AntlrClassifierLexerMode.ActionCharLiteral:
+                case AntlrClassifierLexerMode.ArgActionCharLiteral:
+                default:
+                    throw new InvalidOperationException();
+                }
             }
         }
 
@@ -228,6 +292,8 @@
 
             case AntlrClassifierLexerMode.ActionCharLiteral:
             case AntlrClassifierLexerMode.ActionStringLiteral:
+            case AntlrClassifierLexerMode.ArgActionCharLiteral:
+            case AntlrClassifierLexerMode.ArgActionStringLiteral:
                 token = _actionLexer.NextToken();
                 break;
 

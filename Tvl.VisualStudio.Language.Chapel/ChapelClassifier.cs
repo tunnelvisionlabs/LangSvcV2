@@ -113,19 +113,6 @@
             return startLine != stopLine;
         }
 
-        protected override bool TokenEndsAtEndOfLine(ITextSnapshot snapshot, ITokenSource lexer, IToken token)
-        {
-            ChapelClassifierLexer chapelLexer = lexer as ChapelClassifierLexer;
-            if (chapelLexer != null)
-            {
-                int c = chapelLexer.CharStream.LA(1);
-                return c == '\r' || c == '\n';
-            }
-
-            ITextSnapshotLine line = snapshot.GetLineFromPosition(token.StopIndex + 1);
-            return line.End <= token.StopIndex + 1 && line.EndIncludingLineBreak >= token.StopIndex + 1;
-        }
-
         protected override IClassificationType ClassifyToken(IToken token)
         {
             switch (token.Type)

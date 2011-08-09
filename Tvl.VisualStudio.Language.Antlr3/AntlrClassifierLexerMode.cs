@@ -8,5 +8,7 @@
         ActionCharLiteral,
         ActionStringLiteral,
         ArgAction,
+        ArgActionCharLiteral,
+        ArgActionStringLiteral,
     }
 }

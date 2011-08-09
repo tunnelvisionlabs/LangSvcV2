@@ -263,12 +263,16 @@
             return startLine != stopLine;
         }
 
-        protected virtual bool TokenEndsAtEndOfLine(ITextSnapshot snapshot, ITokenSource lexer, IToken token)
+        protected virtual bool TokenEndsAtEndOfLine(ITextSnapshot snapshot, ITokenSourceWithState<TState> lexer, IToken token)
         {
-            Lexer lexerLexer = lexer as Lexer;
-            if (lexerLexer != null)
+            ICharStream charStream = lexer.CharStream;
+            if (charStream != null)
             {
-                int c = lexerLexer.CharStream.LA(1);
+                int nextCharIndex = token.StopIndex + 1;
+                if (nextCharIndex >= charStream.Count)
+                    return true;
+
+                int c = charStream.Substring(token.StopIndex + 1, 1)[0];
                 return c == '\r' || c == '\n';
             }
 
