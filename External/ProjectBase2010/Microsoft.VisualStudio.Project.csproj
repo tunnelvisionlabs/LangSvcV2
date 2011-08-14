@@ -13,7 +13,7 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\Key.snk</AssemblyOriginatorKeyFile>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
@@ -28,7 +28,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -133,25 +133,30 @@
     <Compile Include="ComReferenceNode.cs" />
     <Compile Include="ConfigProvider.cs" />
     <Compile Include="ConfigurationProperties.cs" />
+    <Compile Include="ConnectionPointContainer.cs" />
     <Compile Include="DataObject.cs" />
     <Compile Include="DependentFileNode.cs" />
     <Compile Include="DesignPropertyDescriptor.cs" />
     <Compile Include="DesignTimeAssemblyResolution.cs" />
     <Compile Include="DocumentManager.cs" />
+    <Compile Include="DropDataType.cs" />
     <Compile Include="EnumDependencies.cs" />
     <Compile Include="FileChangeManager.cs" />
     <Compile Include="FileDocumentManager.cs" />
     <Compile Include="FileNode.cs" />
     <Compile Include="FolderNode.cs" />
+    <Compile Include="GlobalAllocFlags.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HierarchyNode.cs" />
     <Compile Include="IDEBuildLogger.cs" />
     <Compile Include="ImageHandler.cs" />
     <Compile Include="Interfaces.cs" />
+    <Compile Include="IProjectSourceNode.cs" />
     <Compile Include="LocalizableProperties.cs" />
+    <Compile Include="SafeGlobalAllocHandle.cs" />
     <Compile Include="UIThread.cs" />
+    <Compile Include="UnsafeNativeMethods.cs" />
     <Compile Include="VisualStudio.Project.cs" />
-    <Compile Include="Misc\ConnectionPointContainer.cs" />
     <Compile Include="Misc\ExternDll.cs" />
     <Compile Include="Misc\NativeMethods.cs" />
     <Compile Include="Misc\UnsafeNativeMethods.cs" />
@@ -198,15 +203,18 @@
     <Compile Include="Utilities.cs" />
     <Compile Include="VsCommands.cs" />
     <Compile Include="VSShellUtilities.cs" />
+    <Compile Include="_DROPFILES.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Key.snk">
+      <Link>Key.snk</Link>
+    </None>
     <None Include="Diagrams\AutomationClasses.cd" />
     <None Include="Diagrams\ConfigurationClasses.cd" />
     <None Include="Diagrams\DocumentManagerClasses.cd" />
     <None Include="Diagrams\HierarchyClasses.cd" />
     <None Include="Diagrams\PropertiesClasses.cd" />
     <None Include="Diagrams\ReferenceClasses.cd" />
-    <None Include="Key.snk" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="VisualStudio.Project.resx">
