@@ -64,7 +64,7 @@ namespace Microsoft.VisualStudio.Project
 		#endregion
 	}
 
-	internal class ConnectionPoint<SinkType> : IConnectionPoint
+	public class ConnectionPoint<SinkType> : IConnectionPoint
 		where SinkType : class
 	{
 		Dictionary<uint, SinkType> sinks;

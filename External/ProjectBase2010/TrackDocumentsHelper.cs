@@ -19,7 +19,7 @@ namespace Microsoft.VisualStudio.Project
 	/// <summary>
 	/// Used by a project to query the environment for permission to add, remove, or rename a file or directory in a solution
 	/// </summary>
-	internal class TrackDocumentsHelper
+	public class TrackDocumentsHelper
 	{
 		#region fields
 		private ProjectNode projectMgr;

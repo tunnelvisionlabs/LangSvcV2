@@ -118,7 +118,7 @@ namespace Microsoft.VisualStudio.Project
 		public const string UserControl = "UserControl";
 	}
 
-	internal static class ProjectFileValues
+	public static class ProjectFileValues
 	{
 		internal const string AnyCPU = "AnyCPU";
 	}

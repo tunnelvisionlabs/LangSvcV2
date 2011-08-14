@@ -140,7 +140,7 @@ namespace Microsoft.VisualStudio.Project
         /// Flags for specifying which events to stop triggering.
         /// </summary>
         [Flags]
-        internal enum EventTriggering
+        public enum EventTriggering
         {
             TriggerAll = 0,
             DoNotTriggerHierarchyEvents = 1,

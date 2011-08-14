@@ -18,7 +18,7 @@ using Microsoft.Build.Execution;
 
 namespace Microsoft.VisualStudio.Project
 {
-	class Output : IVsOutput2
+	public class Output : IVsOutput2
 	{
 		private ProjectNode project;
         private ProjectItemInstance output;

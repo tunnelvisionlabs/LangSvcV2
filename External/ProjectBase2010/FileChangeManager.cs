@@ -21,7 +21,7 @@ namespace Microsoft.VisualStudio.Project
 	/// <summary>
 	/// This object is in charge of reloading nodes that have file monikers that can be listened to changes
 	/// </summary>
-	internal class FileChangeManager : IVsFileChangeEvents
+	public class FileChangeManager : IVsFileChangeEvents
 	{
 		#region nested objects
 		/// <summary>

@@ -22,7 +22,7 @@ namespace Microsoft.VisualStudio.Project
 	/// <summary>
 	/// The purpose of this class is to set a build dependency from a modeling project to all its sub projects
 	/// </summary>
-	class SolutionListenerForBuildDependencyUpdate : SolutionListener
+	public class SolutionListenerForBuildDependencyUpdate : SolutionListener
 	{
 		#region ctors
 		public SolutionListenerForBuildDependencyUpdate(IServiceProvider serviceProvider)

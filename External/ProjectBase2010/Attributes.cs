@@ -17,7 +17,7 @@ using System.Globalization;
 namespace Microsoft.VisualStudio.Project
 {
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
-	internal sealed class LocDisplayNameAttribute : DisplayNameAttribute
+	public sealed class LocDisplayNameAttribute : DisplayNameAttribute
 	{
 		#region fields
 		string name;

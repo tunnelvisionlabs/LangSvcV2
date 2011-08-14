@@ -34,7 +34,7 @@ namespace Microsoft.VisualStudio.Project
     /// This class implements an MSBuild logger that output events to VS outputwindow and tasklist.
     /// </summary>
     [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "IDE")]
-    internal class IDEBuildLogger : Logger
+    public class IDEBuildLogger : Logger
     {
         #region fields
 

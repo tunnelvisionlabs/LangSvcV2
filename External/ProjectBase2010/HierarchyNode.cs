@@ -52,7 +52,7 @@ namespace Microsoft.VisualStudio.Project
 		/// <summary>
 		/// DropEffect as defined in oleidl.h
 		/// </summary>
-		internal enum DropEffect
+		public enum DropEffect
 		{
 			None,
 			Copy = 1,

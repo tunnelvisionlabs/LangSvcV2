@@ -19,7 +19,7 @@ namespace Microsoft.VisualStudio.Project
 	/// <summary>
 	/// This class triggers the project events for "our" hierrachies.
 	/// </summary>
-	internal class SolutionListenerForProjectEvents : SolutionListener, IProjectEvents
+	public class SolutionListenerForProjectEvents : SolutionListener, IProjectEvents
 	{
 		#region events
 		/// Event raised just after the project file opened.

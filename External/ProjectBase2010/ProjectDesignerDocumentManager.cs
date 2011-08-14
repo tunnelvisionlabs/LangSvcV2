@@ -17,7 +17,7 @@ using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
 namespace Microsoft.VisualStudio.Project
 {
-	class ProjectDesignerDocumentManager : DocumentManager
+	public class ProjectDesignerDocumentManager : DocumentManager
 	{
 		#region ctors
 		public ProjectDesignerDocumentManager(ProjectNode node)

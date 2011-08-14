@@ -24,7 +24,7 @@ namespace Microsoft.VisualStudio.Project
 	/// <summary>
 	/// Provides support for single file generator.
 	/// </summary>
-	internal class SingleFileGenerator : ISingleFileGenerator, IVsGeneratorProgress
+	public class SingleFileGenerator : ISingleFileGenerator, IVsGeneratorProgress
 	{
 
 		#region fields

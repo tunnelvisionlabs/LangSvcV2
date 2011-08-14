@@ -360,7 +360,7 @@ namespace Microsoft.VisualStudio.Project
 	/// <summary>
 	/// This class is used for the events raised by a HierarchyNode object.
 	/// </summary>
-	internal class HierarchyNodeEventArgs : EventArgs
+	public class HierarchyNodeEventArgs : EventArgs
 	{
 		private HierarchyNode child;
 
@@ -378,7 +378,7 @@ namespace Microsoft.VisualStudio.Project
 	/// <summary>
 	/// Event args class for triggering file change event arguments.
 	/// </summary>
-	internal class FileChangedOnDiskEventArgs : EventArgs
+	public class FileChangedOnDiskEventArgs : EventArgs
 	{
 		#region Private fields
 		/// <summary>

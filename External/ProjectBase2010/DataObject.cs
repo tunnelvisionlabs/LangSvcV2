@@ -21,7 +21,7 @@ using Microsoft.VisualStudio.Shell;
 
 namespace Microsoft.VisualStudio.Project
 {
-	internal enum tagDVASPECT
+	public enum tagDVASPECT
 	{
 		DVASPECT_CONTENT = 1,
 		DVASPECT_THUMBNAIL = 2,
@@ -29,7 +29,7 @@ namespace Microsoft.VisualStudio.Project
 		DVASPECT_DOCPRINT = 8
 	}
 
-	internal enum tagTYMED
+	public enum tagTYMED
 	{
 		TYMED_HGLOBAL = 1,
 		TYMED_FILE = 2,
@@ -41,7 +41,7 @@ namespace Microsoft.VisualStudio.Project
 		TYMED_NULL = 0
 	}
 
-	internal sealed class DataCacheEntry : IDisposable
+	public sealed class DataCacheEntry : IDisposable
 	{
 		#region fields
 		/// <summary>
@@ -444,7 +444,7 @@ namespace Microsoft.VisualStudio.Project
 
 	} // end of dragdrophelper
 
-	internal class EnumSTATDATA : IEnumSTATDATA
+	public class EnumSTATDATA : IEnumSTATDATA
 	{
 		IEnumerable i;
 
@@ -500,7 +500,7 @@ namespace Microsoft.VisualStudio.Project
 		}
 	}
 
-	internal class EnumFORMATETC : IEnumFORMATETC
+	public class EnumFORMATETC : IEnumFORMATETC
 	{
 		IEnumerable cache; // of DataCacheEntrys.
 
