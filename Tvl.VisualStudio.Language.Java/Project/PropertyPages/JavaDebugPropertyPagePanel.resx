@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -117,32 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="100" xml:space="preserve">
-    <value>Java</value>
-    <comment>Java language name</comment>
-  </data>
-  <data name="110" xml:space="preserve">
-    <value>Java language support for Visual Studio</value>
-    <comment>Package name</comment>
-  </data>
-  <data name="111" xml:space="preserve">
-    <value>Java language tools for Visual Studio includes IntelliSense and more... eventually...</value>
-    <comment>Package description</comment>
-  </data>
-  <data name="200" xml:space="preserve">
-    <value>Java Projects</value>
-    <comment>Java project package name</comment>
-  </data>
-  <data name="210" xml:space="preserve">
-    <value>Java project support for Visual Studio</value>
-    <comment>Project package name</comment>
-  </data>
-  <data name="211" xml:space="preserve">
-    <value>Java project system for Visual Studio</value>
-    <comment>Project package description</comment>
-  </data>
-  <data name="410" xml:space="preserve">
-    <value>IntelliSense</value>
-    <comment>Language options page display name</comment>
-  </data>
+  <metadata name="label3.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>False</value>
+  </metadata>
+  <metadata name="label2.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>False</value>
+  </metadata>
 </root>

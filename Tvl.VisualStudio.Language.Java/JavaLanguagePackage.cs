@@ -28,7 +28,7 @@
         RequestStockColors = true)]
     [ProvideLanguageExtension(typeof(JavaLanguageInfo), Constants.JavaFileExtension)]
 
-    [ProvideLanguageEditorOptionPage(typeof(JavaIntellisenseOptions), Constants.JavaLanguageName, "", "IntelliSense", "#210")]
+    [ProvideLanguageEditorOptionPage(typeof(JavaIntellisenseOptions), Constants.JavaLanguageName, "", "IntelliSense", "#410")]
 
     public class JavaLanguagePackage : Package
     {
