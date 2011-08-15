@@ -37,9 +37,9 @@ namespace Microsoft.VisualStudio.Project
     public class ConfigProvider : IVsCfgProvider2, IVsProjectCfgProvider, IVsExtensibleObject
     {
         #region fields
-        internal const string configString = " '$(Configuration)' == '{0}' ";
-        internal const string AnyCPUPlatform = "Any CPU";
-        internal const string x86Platform = "x86";
+        public const string configString = " '$(Configuration)' == '{0}' ";
+        public const string AnyCPUPlatform = "Any CPU";
+        public const string x86Platform = "x86";
 
         private ProjectNode project;
         private EventSinkCollection cfgEventSinks = new EventSinkCollection();

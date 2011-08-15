@@ -161,7 +161,7 @@ namespace Microsoft.VisualStudio.Project
         /// <summary>
         /// The user file extension.
         /// </summary>
-        internal const string PerUserFileExtension = ".user";
+        protected internal const string PerUserFileExtension = ".user";
      
 		private Guid GUID_MruPage = new Guid("{19B97F03-9594-4c1c-BE28-25FF030113B3}");
 		
@@ -955,7 +955,7 @@ namespace Microsoft.VisualStudio.Project
         /// <summary>
         /// Defines the build project that has loaded the project file.
         /// </summary>
-        protected internal MSBuild.Project BuildProject
+        public MSBuild.Project BuildProject
         {
             get
             {
@@ -4128,7 +4128,7 @@ namespace Microsoft.VisualStudio.Project
         /// This does not get persisted and is used to evaluate msbuild conditions
         /// which are based on the $(Configuration) property.
         /// </summary>
-        protected internal virtual void SetCurrentConfiguration()
+        public virtual void SetCurrentConfiguration()
         {
             if (this.BuildInProgress)
             {
@@ -4151,7 +4151,7 @@ namespace Microsoft.VisualStudio.Project
         /// which are based on the $(Configuration) property.
         /// </summary>
         /// <param name="config">Configuration name</param>
-        protected internal virtual void SetConfiguration(string config)
+        public virtual void SetConfiguration(string config)
         {
             if (config == null)
             {
@@ -4651,7 +4651,7 @@ namespace Microsoft.VisualStudio.Project
         /// Note that exact behavior can also be affected based on the SCC
         /// settings under Tools->Options.
         /// </summary>
-        internal bool QueryEditProjectFile(bool suppressUI)
+        public bool QueryEditProjectFile(bool suppressUI)
         {
             bool result = true;
             if (this.site == null)
