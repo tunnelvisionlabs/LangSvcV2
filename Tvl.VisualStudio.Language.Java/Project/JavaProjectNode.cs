@@ -15,6 +15,11 @@
     using CultureInfo = System.Globalization.CultureInfo;
     using VSConstants = Microsoft.VisualStudio.VSConstants;
     using Marshal = System.Runtime.InteropServices.Marshal;
+    using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+    using Directory = System.IO.Directory;
+    using DirectoryInfo = System.IO.DirectoryInfo;
+    using FileAttributes = System.IO.FileAttributes;
+    using FileInfo = System.IO.FileInfo;
 
     public class JavaProjectNode : ProjectNode
     {
@@ -179,6 +184,59 @@
         private static bool ContainsReservedCharacters(string unescapedString)
         {
             return unescapedString.IndexOfAny(charsToEscape) != -1;
+        }
+
+        protected override void AddNonMemberFileItems(IList<string> fileList)
+        {
+            for (int i = fileList.Count - 1; i >= 0; i--)
+            {
+                if ((new FileInfo(fileList[i]).Attributes & FileAttributes.Hidden) != 0)
+                    fileList.RemoveAt(i);
+            }
+
+            base.AddNonMemberFileItems(fileList);
+        }
+
+        protected override void AddNonMemberFolderItems(IList<string> folderList)
+        {
+            for (int i = folderList.Count - 1; i >= 0; i--)
+            {
+                if ((new DirectoryInfo(folderList[i]).Attributes & FileAttributes.Hidden) != 0)
+                    folderList.RemoveAt(i);
+            }
+
+            base.AddNonMemberFolderItems(folderList);
+        }
+
+        public override FileNode CreateFileNode(ProjectElement item)
+        {
+            return new JavaFileNode(this, item);
+        }
+
+        protected override FolderNode CreateFolderNode(string path, ProjectElement element)
+        {
+            return new JavaFolderNode(this, path, element);
+        }
+
+        protected override int QueryStatusOnNode(Guid cmdGroup, uint cmd, IntPtr pCmdText, ref QueryStatusResult result)
+        {
+            if (cmdGroup == VsMenus.guidStandardCommandSet2K)
+            {
+                if ((VsCommands2K)cmd == VsCommands2K.SHOWALLFILES)
+                {
+                    result |= QueryStatusResult.NOTSUPPORTED;
+                    return VSConstants.S_OK;
+                }
+            }
+
+            return base.QueryStatusOnNode(cmdGroup, cmd, pCmdText, ref result);
+        }
+
+        protected override void ProcessFolders()
+        {
+            base.ProcessFolders();
+
+            this.AddNonMemberItems();
         }
 
         public override bool IsCodeFile(string fileName)
