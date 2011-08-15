@@ -304,12 +304,12 @@ namespace Microsoft.VisualStudio.Project.Automation
 			}
 			set
 			{
-				if(this.node == null || this.node.ProjectMgr == null || this.node.ProjectMgr.IsClosed || this.node.ProjectMgr.Site == null)
+				if(this.node == null || this.node.ProjectManager == null || this.node.ProjectManager.IsClosed || this.node.ProjectManager.Site == null)
 				{
 					throw new InvalidOperationException();
 				}
 
-				using(AutomationScope scope = new AutomationScope(this.Node.ProjectMgr.Site))
+				using(AutomationScope scope = new AutomationScope(this.Node.ProjectManager.Site))
 				{
 					this.node.SetEditLabel(value);
 				}
@@ -320,12 +320,12 @@ namespace Microsoft.VisualStudio.Project.Automation
 		/// </summary>
 		public virtual void Remove()
 		{
-			if(this.node == null || this.node.ProjectMgr == null || this.node.ProjectMgr.IsClosed || this.node.ProjectMgr.Site == null)
+			if(this.node == null || this.node.ProjectManager == null || this.node.ProjectManager.IsClosed || this.node.ProjectManager.Site == null)
 			{
 				throw new InvalidOperationException();
 			}
 
-			using(AutomationScope scope = new AutomationScope(this.Node.ProjectMgr.Site))
+			using(AutomationScope scope = new AutomationScope(this.Node.ProjectManager.Site))
 			{
 				this.node.Remove(false);
 			}
@@ -336,12 +336,12 @@ namespace Microsoft.VisualStudio.Project.Automation
 		/// </summary>
 		public virtual void Delete()
 		{
-			if(this.node == null || this.node.ProjectMgr == null || this.node.ProjectMgr.IsClosed || this.node.ProjectMgr.Site == null)
+			if(this.node == null || this.node.ProjectManager == null || this.node.ProjectManager.IsClosed || this.node.ProjectManager.Site == null)
 			{
 				throw new InvalidOperationException();
 			}
 
-			using(AutomationScope scope = new AutomationScope(this.Node.ProjectMgr.Site))
+			using(AutomationScope scope = new AutomationScope(this.Node.ProjectManager.Site))
 			{
 				this.node.Remove(true);
 			}
@@ -393,20 +393,20 @@ namespace Microsoft.VisualStudio.Project.Automation
 		/// </summary>
 		public virtual void ExpandView()
 		{
-			if(this.node == null || this.node.ProjectMgr == null || this.node.ProjectMgr.IsClosed || this.node.ProjectMgr.Site == null)
+			if(this.node == null || this.node.ProjectManager == null || this.node.ProjectManager.IsClosed || this.node.ProjectManager.Site == null)
 			{
 				throw new InvalidOperationException();
 			}
 
-			using(AutomationScope scope = new AutomationScope(this.Node.ProjectMgr.Site))
+			using(AutomationScope scope = new AutomationScope(this.Node.ProjectManager.Site))
 			{
-				IVsUIHierarchyWindow uiHierarchy = UIHierarchyUtilities.GetUIHierarchyWindow(this.node.ProjectMgr.Site, HierarchyNode.SolutionExplorer);
+				IVsUIHierarchyWindow uiHierarchy = UIHierarchyUtilities.GetUIHierarchyWindow(this.node.ProjectManager.Site, HierarchyNode.SolutionExplorer);
 				if(uiHierarchy == null)
 				{
 					throw new InvalidOperationException();
 				}
 
-				ErrorHandler.ThrowOnFailure(uiHierarchy.ExpandItem(this.node.ProjectMgr, this.node.ID, EXPANDFLAGS.EXPF_ExpandFolder));
+				ErrorHandler.ThrowOnFailure(uiHierarchy.ExpandItem(this.node.ProjectManager, this.node.ID, EXPANDFLAGS.EXPF_ExpandFolder));
 
 			}
 		}

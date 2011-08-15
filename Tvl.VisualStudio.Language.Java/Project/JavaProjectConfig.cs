@@ -14,11 +14,11 @@
         {
         }
 
-        public new JavaProjectNode ProjectMgr
+        public new JavaProjectNode ProjectManager
         {
             get
             {
-                return (JavaProjectNode)base.ProjectMgr;
+                return (JavaProjectNode)base.ProjectManager;
             }
         }
 
@@ -32,17 +32,17 @@
             {
                 if (resetCache || _currentUserConfig == null)
                 {
-                    if (ProjectMgr.UserBuildProject == null)
-                        ProjectMgr.CreateUserBuildProject();
+                    if (ProjectManager.UserBuildProject == null)
+                        ProjectManager.CreateUserBuildProject();
 
                     // Get properties for current configuration from project file and cache it
-                    ProjectMgr.SetConfiguration(this.ConfigName);
-                    ProjectMgr.UserBuildProject.ReevaluateIfNecessary();
+                    ProjectManager.SetConfiguration(this.ConfigName);
+                    ProjectManager.UserBuildProject.ReevaluateIfNecessary();
                     // Create a snapshot of the evaluated project in its current state
-                    _currentUserConfig = ProjectMgr.UserBuildProject.CreateProjectInstance();
+                    _currentUserConfig = ProjectManager.UserBuildProject.CreateProjectInstance();
 
                     // Restore configuration
-                    ProjectMgr.SetCurrentConfiguration();
+                    ProjectManager.SetCurrentConfiguration();
                 }
 
                 Microsoft.Build.Execution.ProjectPropertyInstance property = _currentUserConfig.GetProperty(propertyName);
@@ -77,12 +77,12 @@
         {
             string conditionTrimmed = (condition == null) ? string.Empty : condition.Trim();
 
-            if (ProjectMgr.UserBuildProject == null)
-                ProjectMgr.CreateUserBuildProject();
+            if (ProjectManager.UserBuildProject == null)
+                ProjectManager.CreateUserBuildProject();
 
             if (conditionTrimmed.Length == 0)
             {
-                ProjectMgr.UserBuildProject.SetProperty(propertyName, propertyValue);
+                ProjectManager.UserBuildProject.SetProperty(propertyName, propertyValue);
                 return;
             }
 
@@ -90,7 +90,7 @@
             // So do it ourselves.
             Microsoft.Build.Construction.ProjectPropertyGroupElement newGroup = null;
 
-            foreach (Microsoft.Build.Construction.ProjectPropertyGroupElement group in ProjectMgr.UserBuildProject.Xml.PropertyGroups)
+            foreach (Microsoft.Build.Construction.ProjectPropertyGroupElement group in ProjectManager.UserBuildProject.Xml.PropertyGroups)
             {
                 if (string.Equals(group.Condition.Trim(), conditionTrimmed, StringComparison.OrdinalIgnoreCase))
                 {
@@ -101,7 +101,7 @@
 
             if (newGroup == null)
             {
-                newGroup = ProjectMgr.UserBuildProject.Xml.AddPropertyGroup(); // Adds after last existing PG, else at start of project
+                newGroup = ProjectManager.UserBuildProject.Xml.AddPropertyGroup(); // Adds after last existing PG, else at start of project
                 newGroup.Condition = condition;
             }
 

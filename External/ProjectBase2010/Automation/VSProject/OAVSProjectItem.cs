@@ -39,7 +39,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 
 		public virtual EnvDTE.Project ContainingProject
 		{
-			get { return fileNode.ProjectMgr.GetAutomationObject() as EnvDTE.Project; }
+			get { return fileNode.ProjectManager.GetAutomationObject() as EnvDTE.Project; }
 		}
 
 		public virtual ProjectItem ProjectItem
@@ -49,7 +49,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 
 		public virtual DTE DTE
 		{
-			get { return (DTE)this.fileNode.ProjectMgr.Site.GetService(typeof(DTE)); }
+			get { return (DTE)this.fileNode.ProjectManager.Site.GetService(typeof(DTE)); }
 		}
 
 		public virtual void RunCustomTool()

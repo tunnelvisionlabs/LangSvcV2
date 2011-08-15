@@ -74,7 +74,7 @@ namespace Microsoft.VisualStudio.Project
 		/// <returns>Handle to icon for the node</returns>
 		public override object GetIconHandle(bool open)
 		{
-			return this.ProjectMgr.ImageHandler.GetIconHandle(this.ImageIndex);
+			return this.ProjectManager.ImageHandler.GetIconHandle(this.ImageIndex);
 		}
 
 		/// <summary>

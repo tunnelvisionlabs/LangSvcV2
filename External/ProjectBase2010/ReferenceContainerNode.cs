@@ -112,12 +112,12 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>An intance of the Automation.OAReferenceFolderItem type if succeeeded</returns>
         public override object GetAutomationObject()
         {
-            if(this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+            if(this.ProjectManager == null || this.ProjectManager.IsClosed)
             {
                 return null;
             }
 
-            return new Automation.OAReferenceFolderItem(this.ProjectMgr.GetAutomationObject() as Automation.OAProject, this);
+            return new Automation.OAReferenceFolderItem(this.ProjectManager.GetAutomationObject() as Automation.OAProject, this);
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace Microsoft.VisualStudio.Project
 
         public override object GetIconHandle(bool open)
         {
-            return this.ProjectMgr.ImageHandler.GetIconHandle(open ? (int)ProjectNode.ImageName.OpenReferenceFolder : (int)ProjectNode.ImageName.ReferenceFolder);
+            return this.ProjectManager.ImageHandler.GetIconHandle(open ? (int)ProjectNode.ImageName.OpenReferenceFolder : (int)ProjectNode.ImageName.ReferenceFolder);
         }
 
 
@@ -187,9 +187,9 @@ namespace Microsoft.VisualStudio.Project
                 switch((VsCommands2K)cmd)
                 {
                     case VsCommands2K.ADDREFERENCE:
-                        return this.ProjectMgr.AddProjectReference();
+                        return this.ProjectManager.AddProjectReference();
                     case VsCommands2K.ADDWEBREFERENCE:
-                        return this.ProjectMgr.AddWebReference();
+                        return this.ProjectManager.AddWebReference();
                 }
             }
 
@@ -238,18 +238,18 @@ namespace Microsoft.VisualStudio.Project
         {
             foreach(string referenceType in SupportedReferenceTypes)
             {
-                IEnumerable<MSBuild.ProjectItem> refererncesGroup = this.ProjectMgr.BuildProject.GetItems(referenceType);
+                IEnumerable<MSBuild.ProjectItem> refererncesGroup = this.ProjectManager.BuildProject.GetItems(referenceType);
 
                 bool isAssemblyReference = referenceType == ProjectFileConstants.Reference;
                 // If the project was loaded for browsing we should still create the nodes but as not resolved.
-                if(isAssemblyReference && this.ProjectMgr.Build(MsBuildTarget.ResolveAssemblyReferences) != MSBuildResult.Successful)
+                if(isAssemblyReference && this.ProjectManager.Build(MsBuildTarget.ResolveAssemblyReferences) != MSBuildResult.Successful)
                 {
                     continue;
                 }
 
                 foreach (MSBuild.ProjectItem item in refererncesGroup)
                 {
-                    ProjectElement element = new ProjectElement(this.ProjectMgr, item, false);
+                    ProjectElement element = new ProjectElement(this.ProjectManager, item, false);
 
                     ReferenceNode node = CreateReferenceNode(referenceType, element);
 
@@ -286,7 +286,7 @@ namespace Microsoft.VisualStudio.Project
         public ReferenceNode AddReferenceFromSelectorData(VSCOMPONENTSELECTORDATA selectorData, string wrapperTool = null)
         {
             //Make sure we can edit the project file
-            if(!this.ProjectMgr.QueryEditProjectFile(false))
+            if(!this.ProjectManager.QueryEditProjectFile(false))
             {
                 throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
             }
@@ -375,14 +375,14 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         protected virtual ProjectReferenceNode CreateProjectReferenceNode(ProjectElement element)
         {
-            return new ProjectReferenceNode(this.ProjectMgr, element);
+            return new ProjectReferenceNode(this.ProjectManager, element);
         }
         /// <summary>
         /// Create a Project to Project reference given a VSCOMPONENTSELECTORDATA structure
         /// </summary>
         protected virtual ProjectReferenceNode CreateProjectReferenceNode(VSCOMPONENTSELECTORDATA selectorData)
         {
-            return new ProjectReferenceNode(this.ProjectMgr, selectorData.bstrTitle, selectorData.bstrFile, selectorData.bstrProjRef);
+            return new ProjectReferenceNode(this.ProjectManager, selectorData.bstrTitle, selectorData.bstrFile, selectorData.bstrProjRef);
         }
 
         /// <summary>
@@ -457,7 +457,7 @@ namespace Microsoft.VisualStudio.Project
             AssemblyReferenceNode node = null;
             try
             {
-                node = new AssemblyReferenceNode(this.ProjectMgr, element);
+                node = new AssemblyReferenceNode(this.ProjectManager, element);
             }
             catch(ArgumentNullException e)
             {
@@ -490,7 +490,7 @@ namespace Microsoft.VisualStudio.Project
             AssemblyReferenceNode node = null;
             try
             {
-                node = new AssemblyReferenceNode(this.ProjectMgr, fileName);
+                node = new AssemblyReferenceNode(this.ProjectManager, fileName);
             }
             catch(ArgumentNullException e)
             {
@@ -521,14 +521,14 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         protected virtual ComReferenceNode CreateComReferenceNode(ProjectElement reference)
         {
-            return new ComReferenceNode(this.ProjectMgr, reference);
+            return new ComReferenceNode(this.ProjectManager, reference);
         }
         /// <summary>
         /// Creates a com reference node from a selector data.
         /// </summary>
         protected virtual ComReferenceNode CreateComReferenceNode(Microsoft.VisualStudio.Shell.Interop.VSCOMPONENTSELECTORDATA selectorData, string wrapperTool = null)
         {
-            ComReferenceNode node = new ComReferenceNode(this.ProjectMgr, selectorData);
+            ComReferenceNode node = new ComReferenceNode(this.ProjectManager, selectorData);
             return node;
         }
         #endregion

@@ -90,12 +90,12 @@ namespace Microsoft.VisualStudio.Project
 		/// <returns>An instance of Automation.OAReferenceItem type if succeeded</returns>
 		public override object GetAutomationObject()
 		{
-			if(this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+			if(this.ProjectManager == null || this.ProjectManager.IsClosed)
 			{
 				return null;
 			}
 
-			return new Automation.OAReferenceItem(this.ProjectMgr.GetAutomationObject() as Automation.OAProject, this);
+			return new Automation.OAReferenceItem(this.ProjectManager.GetAutomationObject() as Automation.OAProject, this);
 		}
 
 		/// <summary>
@@ -111,7 +111,7 @@ namespace Microsoft.VisualStudio.Project
 		public override object GetIconHandle(bool open)
 		{
 			int offset = (this.CanShowDefaultIcon() ? (int)ProjectNode.ImageName.Reference : (int)ProjectNode.ImageName.DanglingReference);
-			return this.ProjectMgr.ImageHandler.GetIconHandle(offset);
+			return this.ProjectManager.ImageHandler.GetIconHandle(offset);
 		}
 
 		/// <summary>
@@ -180,7 +180,7 @@ namespace Microsoft.VisualStudio.Project
 		/// </summary>
 		public virtual void AddReference()
 		{
-			ReferenceContainerNode referencesFolder = this.ProjectMgr.FindChild(ReferenceContainerNode.ReferencesNodeVirtualName) as ReferenceContainerNode;
+			ReferenceContainerNode referencesFolder = this.ProjectManager.FindChild(ReferenceContainerNode.ReferencesNodeVirtualName) as ReferenceContainerNode;
 			Debug.Assert(referencesFolder != null, "Could not find the References node");
 
 			CannotAddReferenceErrorMessage referenceErrorMessageHandler = null;
@@ -256,7 +256,7 @@ namespace Microsoft.VisualStudio.Project
 		/// <returns>true if the assembly has already been added.</returns>
 		protected internal virtual bool IsAlreadyAdded(out ReferenceNode existingEquivalentNode)
 		{
-			ReferenceContainerNode referencesFolder = this.ProjectMgr.FindChild(ReferenceContainerNode.ReferencesNodeVirtualName) as ReferenceContainerNode;
+			ReferenceContainerNode referencesFolder = this.ProjectManager.FindChild(ReferenceContainerNode.ReferencesNodeVirtualName) as ReferenceContainerNode;
 			Debug.Assert(referencesFolder != null, "Could not find the References node");
 
 			for(HierarchyNode n = referencesFolder.FirstChild; n != null; n = n.NextSibling)
@@ -304,7 +304,7 @@ namespace Microsoft.VisualStudio.Project
 				objInfo[0].pguidLib = ptr;
 				objInfo[0].pszLibName = this.Url;
 
-				IVsObjBrowser objBrowser = this.ProjectMgr.Site.GetService(typeof(SVsObjBrowser)) as IVsObjBrowser;
+				IVsObjBrowser objBrowser = this.ProjectManager.Site.GetService(typeof(SVsObjBrowser)) as IVsObjBrowser;
 
 				ErrorHandler.ThrowOnFailure(objBrowser.NavigateTo(objInfo, 0));
 			}

@@ -185,7 +185,7 @@ namespace Microsoft.VisualStudio.Project
 			{
 				if(!this.ExcludeNodeFromScc)
 				{
-					IVsSccManager2 sccManager = this.ProjectMgr.Site.GetService(typeof(SVsSccManager)) as IVsSccManager2;
+					IVsSccManager2 sccManager = this.ProjectManager.Site.GetService(typeof(SVsSccManager)) as IVsSccManager2;
 
 					if(sccManager != null)
 					{
@@ -262,7 +262,7 @@ namespace Microsoft.VisualStudio.Project
 		}
 
 		[System.ComponentModel.BrowsableAttribute(false)]
-		public ProjectNode ProjectMgr
+		public ProjectNode ProjectManager
 		{
 			get
 			{
@@ -574,7 +574,7 @@ namespace Microsoft.VisualStudio.Project
 			Object nodeWithSameID = this.projectMgr.ItemIdMap[node.hierarchyId];
 			if(!Object.ReferenceEquals(node, nodeWithSameID as HierarchyNode))
 			{
-				if(nodeWithSameID == null && node.ID <= this.ProjectMgr.ItemIdMap.Count)
+				if(nodeWithSameID == null && node.ID <= this.ProjectManager.ItemIdMap.Count)
 				{ // reuse our hierarchy id if possible.
 					this.projectMgr.ItemIdMap.SetAt(node.hierarchyId, this);
 				}
@@ -587,7 +587,7 @@ namespace Microsoft.VisualStudio.Project
 			HierarchyNode previous = null;
 			for(HierarchyNode n = this.firstChild; n != null; n = n.nextSibling)
 			{
-				if(this.ProjectMgr.CompareNodes(node, n) > 0) break;
+				if(this.ProjectManager.CompareNodes(node, n) > 0) break;
 				previous = n;
 			}
 			// insert "node" after "previous".
@@ -694,7 +694,7 @@ namespace Microsoft.VisualStudio.Project
 					break;
 
 				case __VSHPROPID.VSHPROPID_IconImgList:
-					result = this.ProjectMgr.ImageHandler.ImageList.Handle;
+					result = this.ProjectManager.ImageHandler.ImageList.Handle;
 					break;
 
 				case __VSHPROPID.VSHPROPID_OpenFolderIconIndex:
@@ -768,7 +768,7 @@ namespace Microsoft.VisualStudio.Project
 					break;
 
 				case __VSHPROPID.VSHPROPID_EditLabel:
-					if(this.ProjectMgr != null && !this.ProjectMgr.IsClosed && !this.ProjectMgr.IsCurrentStateASuppressCommandsMode())
+					if(this.ProjectManager != null && !this.ProjectManager.IsClosed && !this.ProjectManager.IsCurrentStateASuppressCommandsMode())
 					{
 						result = GetEditLabel();
 					}
@@ -810,7 +810,7 @@ namespace Microsoft.VisualStudio.Project
 						{
 							if(browseObject is DispatchWrapper)
 								browseObject = ((DispatchWrapper)browseObject).WrappedObject;
-							result = this.ProjectMgr.GetCATIDForType(browseObject.GetType()).ToString("B");
+							result = this.ProjectManager.GetCATIDForType(browseObject.GetType()).ToString("B");
 							if(String.Equals(result as string, Guid.Empty.ToString("B"), StringComparison.Ordinal))
 								result = null;
 						}
@@ -824,7 +824,7 @@ namespace Microsoft.VisualStudio.Project
 						{
 							if(extObject is DispatchWrapper)
 								extObject = ((DispatchWrapper)extObject).WrappedObject;
-							result = this.ProjectMgr.GetCATIDForType(extObject.GetType()).ToString("B");
+							result = this.ProjectManager.GetCATIDForType(extObject.GetType()).ToString("B");
 							if(String.Equals(result as string, Guid.Empty.ToString("B"), StringComparison.Ordinal))
 								result = null;
 						}
@@ -836,7 +836,7 @@ namespace Microsoft.VisualStudio.Project
 			switch (id4)
 			{
 				case __VSHPROPID4.VSHPROPID_TargetFrameworkMoniker:
-					result = this.ProjectMgr.TargetFrameworkMoniker.FullName;
+					result = this.ProjectManager.TargetFrameworkMoniker.FullName;
 					break;
 			}
 
@@ -889,7 +889,7 @@ namespace Microsoft.VisualStudio.Project
 			switch (id4)
 			{
 				case __VSHPROPID4.VSHPROPID_TargetFrameworkMoniker:
-					this.ProjectMgr.TargetFrameworkMoniker = new FrameworkName((string)value);
+					this.ProjectManager.TargetFrameworkMoniker = new FrameworkName((string)value);
 					break;
 			}
 
@@ -971,7 +971,7 @@ namespace Microsoft.VisualStudio.Project
 			// Ask Document tracker listeners if we can remove the item.
 			string[] filesToBeDeleted = new string[1] { documentToRemove };
 			VSQUERYREMOVEFILEFLAGS[] queryRemoveFlags = this.GetQueryRemoveFileFlags(filesToBeDeleted);
-			if(!this.ProjectMgr.Tracker.CanRemoveItems(filesToBeDeleted, queryRemoveFlags))
+			if(!this.ProjectManager.Tracker.CanRemoveItems(filesToBeDeleted, queryRemoveFlags))
 			{
 				return;
 			}
@@ -980,7 +980,7 @@ namespace Microsoft.VisualStudio.Project
             bool single = true;
             if (wildcard)
             {
-                var items = this.ProjectMgr.BuildProject.Items.Where(i => i.UnevaluatedInclude.Equals(ItemNode.Item.UnevaluatedInclude));
+                var items = this.ProjectManager.BuildProject.Items.Where(i => i.UnevaluatedInclude.Equals(ItemNode.Item.UnevaluatedInclude));
                 single = items.Count() == 1;
                 if (!single && !removeFromStorage)
                     return;
@@ -998,7 +998,7 @@ namespace Microsoft.VisualStudio.Project
 			}
 
 			// Check out the project file.
-			if(!this.ProjectMgr.QueryEditProjectFile(false))
+			if(!this.ProjectManager.QueryEditProjectFile(false))
 			{
 				throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
 			}
@@ -1028,7 +1028,7 @@ namespace Microsoft.VisualStudio.Project
             }
             else
             {
-                this.ProjectMgr.BuildProject.ReevaluateIfNecessary();
+                this.ProjectManager.BuildProject.ReevaluateIfNecessary();
             }
 
 			if(removeFromStorage)
@@ -1042,7 +1042,7 @@ namespace Microsoft.VisualStudio.Project
 			// Notify document tracker listeners that we have removed the item.
 			VSREMOVEFILEFLAGS[] removeFlags = this.GetRemoveFileFlags(filesToBeDeleted);
 			Debug.Assert(removeFlags != null, "At least an empty array should be returned for the GetRemoveFileFlags");
-			this.ProjectMgr.Tracker.OnItemRemoved(documentToRemove, removeFlags[0]);
+			this.ProjectManager.Tracker.OnItemRemoved(documentToRemove, removeFlags[0]);
 
 			// Notify hierarchy event listeners that we have removed the item
 			if(null != this.parentNode.onChildRemoved)
@@ -1177,7 +1177,7 @@ namespace Microsoft.VisualStudio.Project
 		protected virtual int AddNewFolder()
 		{
 			// Check out the project file.
-			if(!this.ProjectMgr.QueryEditProjectFile(false))
+			if(!this.ProjectManager.QueryEditProjectFile(false))
 			{
 				throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
 			}
@@ -1189,7 +1189,7 @@ namespace Microsoft.VisualStudio.Project
 				ErrorHandler.ThrowOnFailure(this.projectMgr.GenerateUniqueItemName(this.hierarchyId, String.Empty, String.Empty, out newFolderName));
 
 				// create the project part of it, the project file
-				HierarchyNode child = this.ProjectMgr.CreateFolderNodes(Path.Combine(this.virtualNodeName, newFolderName));
+				HierarchyNode child = this.ProjectManager.CreateFolderNodes(Path.Combine(this.virtualNodeName, newFolderName));
 
 				if (child is FolderNode)
 				{
@@ -1274,7 +1274,7 @@ namespace Microsoft.VisualStudio.Project
 		/// <returns></returns>
 		protected virtual int ExcludeFromProject()
 		{
-			Debug.Assert(this.ProjectMgr != null, "The project item " + this.ToString() + " has not been initialised correctly. It has a null ProjectMgr");
+			Debug.Assert(this.ProjectManager != null, "The project item " + this.ToString() + " has not been initialised correctly. It has a null ProjectManager");
 			this.Remove(false);
 			return VSConstants.S_OK;
 		}
@@ -1297,34 +1297,34 @@ namespace Microsoft.VisualStudio.Project
 		[SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "ClipBoard")]
 		protected internal virtual StringBuilder PrepareSelectedNodesForClipBoard()
 		{
-			Debug.Assert(this.ProjectMgr != null, " No project mananager available for this node " + ToString());
-			Debug.Assert(this.ProjectMgr.ItemsDraggedOrCutOrCopied != null, " The itemsdragged list should have been initialized prior calling this method");
+			Debug.Assert(this.ProjectManager != null, " No project mananager available for this node " + ToString());
+			Debug.Assert(this.ProjectManager.ItemsDraggedOrCutOrCopied != null, " The itemsdragged list should have been initialized prior calling this method");
 			StringBuilder sb = new StringBuilder();
 
 			if(this.hierarchyId == VSConstants.VSITEMID_ROOT)
 			{
-				if(this.ProjectMgr.ItemsDraggedOrCutOrCopied != null)
+				if(this.ProjectManager.ItemsDraggedOrCutOrCopied != null)
 				{
-					this.ProjectMgr.ItemsDraggedOrCutOrCopied.Clear();// abort
+					this.ProjectManager.ItemsDraggedOrCutOrCopied.Clear();// abort
 				}
 				return sb;
 			}
 
-			if(this.ProjectMgr.ItemsDraggedOrCutOrCopied != null)
+			if(this.ProjectManager.ItemsDraggedOrCutOrCopied != null)
 			{
-				this.ProjectMgr.ItemsDraggedOrCutOrCopied.Add(this);
+				this.ProjectManager.ItemsDraggedOrCutOrCopied.Add(this);
 			}
 
 			string projref = String.Empty;
 			IVsSolution solution = this.GetService(typeof(IVsSolution)) as IVsSolution;
 			if(solution != null)
 			{
-				ErrorHandler.ThrowOnFailure(solution.GetProjrefOfItem(this.ProjectMgr, this.hierarchyId, out projref));
+				ErrorHandler.ThrowOnFailure(solution.GetProjrefOfItem(this.ProjectManager, this.hierarchyId, out projref));
 				if(String.IsNullOrEmpty(projref))
 				{
-					if(this.ProjectMgr.ItemsDraggedOrCutOrCopied != null)
+					if(this.ProjectManager.ItemsDraggedOrCutOrCopied != null)
 					{
-						this.ProjectMgr.ItemsDraggedOrCutOrCopied.Clear();// abort
+						this.ProjectManager.ItemsDraggedOrCutOrCopied.Clear();// abort
 					}
 					return sb;
 				}
@@ -1478,7 +1478,7 @@ namespace Microsoft.VisualStudio.Project
 						return nodeToAddTo.AddNewFolder();
 
 					case VsCommands.Paste:
-						return this.ProjectMgr.PasteFromClipboard(this);
+						return this.ProjectManager.PasteFromClipboard(this);
 				}
 
 			}
@@ -1585,11 +1585,11 @@ namespace Microsoft.VisualStudio.Project
 				{
 					case VsCommands.Copy:
 						handled = true;
-						return this.ProjectMgr.CopyToClipboard();
+						return this.ProjectManager.CopyToClipboard();
 
 					case VsCommands.Cut:
 						handled = true;
-						return this.ProjectMgr.CutToClipboard();
+						return this.ProjectManager.CutToClipboard();
 
 					case VsCommands.SolutionCfg:
 						handled = true;
@@ -1815,7 +1815,7 @@ namespace Microsoft.VisualStudio.Project
 				if((VsCommands2K)cmd == VsCommands2K.SHOWALLFILES)
 				{
 					result |= QueryStatusResult.SUPPORTED | QueryStatusResult.ENABLED;
-                    if (ProjectMgr.ShowAllFilesEnabled)
+                    if (ProjectManager.ShowAllFilesEnabled)
                         result |= QueryStatusResult.LATCHED;
 
 					return VSConstants.S_OK;
@@ -1834,7 +1834,7 @@ namespace Microsoft.VisualStudio.Project
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity"), SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "InCurrent")]
 		protected virtual bool DisableCmdInCurrentMode(Guid commandGroup, uint command)
 		{
-			if(this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+			if(this.ProjectManager == null || this.ProjectManager.IsClosed)
 			{
 				return false;
 			}
@@ -1842,7 +1842,7 @@ namespace Microsoft.VisualStudio.Project
 			// Don't ask if it is not these two commandgroups.
 			if(commandGroup == VsMenus.guidStandardCommandSet97 || commandGroup == VsMenus.guidStandardCommandSet2K)
 			{
-				if(this.ProjectMgr.IsCurrentStateASuppressCommandsMode())
+				if(this.ProjectManager.IsCurrentStateASuppressCommandsMode())
 				{
 					if(commandGroup == VsMenus.guidStandardCommandSet97)
 					{
@@ -1880,7 +1880,7 @@ namespace Microsoft.VisualStudio.Project
 					}
 				}
 				// If we are not in a cut or copy mode then disable the paste command
-				else if(!this.ProjectMgr.AllowPasteCommand())
+				else if(!this.ProjectManager.AllowPasteCommand())
 				{
 					if(commandGroup == VsMenus.guidStandardCommandSet97 && (VsCommands)command == VsCommands.Paste)
 					{
@@ -2065,7 +2065,7 @@ namespace Microsoft.VisualStudio.Project
 		#endregion
 		protected virtual bool CanDeleteItem(__VSDELETEITEMOPERATION deleteOperation)
 		{
-			return this.ProjectMgr.CanProjectDeleteItems;
+			return this.ProjectManager.CanProjectDeleteItems;
 		}
 
 		/// <summary>
@@ -2819,7 +2819,7 @@ namespace Microsoft.VisualStudio.Project
 		{
 			cancelled = 0;
 
-			if(this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+			if(this.ProjectManager == null || this.ProjectManager.IsClosed)
 			{
 				return VSConstants.E_FAIL;
 			}
@@ -2830,7 +2830,7 @@ namespace Microsoft.VisualStudio.Project
 				return VSConstants.E_INVALIDARG;
 			}
 
-			HierarchyNode node = this.ProjectMgr.NodeFromItemId(itemid);
+			HierarchyNode node = this.ProjectManager.NodeFromItemId(itemid);
 			if(node == null)
 			{
 				return VSConstants.E_FAIL;
@@ -2884,7 +2884,7 @@ namespace Microsoft.VisualStudio.Project
 				// We can be unloaded after the SaveDocData() call if the save caused a designer to add a file and this caused
 				// the project file to be reloaded (QEQS caused a newer version of the project file to be downloaded). So we check
 				// here.
-				if(this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+				if(this.ProjectManager == null || this.ProjectManager.IsClosed)
 				{
 					cancelled = 1;
 					return (int)OleConstants.OLECMDERR_E_CANCELED;
@@ -2959,13 +2959,13 @@ namespace Microsoft.VisualStudio.Project
 		public virtual int IgnoreItemFileChanges(uint itemId, int ignoreFlag)
 		{
 			#region precondition
-			if(this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+			if(this.ProjectManager == null || this.ProjectManager.IsClosed)
 			{
 				return VSConstants.E_FAIL;
 			}
 			#endregion
 
-			HierarchyNode n = this.ProjectMgr.NodeFromItemId(itemId);
+			HierarchyNode n = this.ProjectManager.NodeFromItemId(itemId);
 			if(n != null)
 			{
 				n.IgnoreItemFileChanges(ignoreFlag == 0 ? false : true);
@@ -2985,12 +2985,12 @@ namespace Microsoft.VisualStudio.Project
 		{
 			isReloadable = 0;
 
-			if(this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+			if(this.ProjectManager == null || this.ProjectManager.IsClosed)
 			{
 				return VSConstants.E_FAIL;
 			}
 
-			HierarchyNode n = this.ProjectMgr.NodeFromItemId(itemId);
+			HierarchyNode n = this.ProjectManager.NodeFromItemId(itemId);
 			if(n != null)
 			{
 				isReloadable = (n.IsItemReloadable()) ? 1 : 0;
@@ -3008,13 +3008,13 @@ namespace Microsoft.VisualStudio.Project
 		public virtual int ReloadItem(uint itemId, uint reserved)
 		{
 			#region precondition
-			if(this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+			if(this.ProjectManager == null || this.ProjectManager.IsClosed)
 			{
 				return VSConstants.E_FAIL;
 			}
 			#endregion
 
-			HierarchyNode n = this.ProjectMgr.NodeFromItemId(itemId);
+			HierarchyNode n = this.ProjectManager.NodeFromItemId(itemId);
 			if(n != null)
 			{
 				n.ReloadItem(reserved);
@@ -3071,13 +3071,13 @@ namespace Microsoft.VisualStudio.Project
 				return VSConstants.E_INVALIDARG;
 			}
 
-			if(this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+			if(this.ProjectManager == null || this.ProjectManager.IsClosed)
 			{
 				return VSConstants.E_FAIL;
 			}
 
 			// We ask the project what state it is. If he is a state that should not allow delete then we return.
-			if(this.ProjectMgr.IsCurrentStateASuppressCommandsMode())
+			if(this.ProjectManager.IsCurrentStateASuppressCommandsMode())
 			{
 				return VSConstants.S_OK;
 			}
@@ -3239,7 +3239,7 @@ namespace Microsoft.VisualStudio.Project
 			string[] files = new String[1] { moniker };
 			VSADDRESULT[] vsaddresult = new VSADDRESULT[1];
 			vsaddresult[0] = VSADDRESULT.ADDRESULT_Failure;
-			int addResult = targetNode.ProjectMgr.AddItem(targetNode.ID, VSADDITEMOPERATION.VSADDITEMOP_OPENFILE, null, 0, files, IntPtr.Zero, vsaddresult);
+			int addResult = targetNode.ProjectManager.AddItem(targetNode.ID, VSADDITEMOPERATION.VSADDITEMOP_OPENFILE, null, 0, files, IntPtr.Zero, vsaddresult);
 			if(addResult != VSConstants.S_OK && addResult != VSConstants.S_FALSE && addResult != (int)OleConstants.OLECMDERR_E_CANCELED)
 			{
 				ErrorHandler.ThrowOnFailure(addResult);

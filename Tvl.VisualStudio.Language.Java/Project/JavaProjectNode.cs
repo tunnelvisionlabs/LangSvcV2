@@ -104,7 +104,7 @@
 
         internal static void SetConfigurationProperty(ProjectConfig config, string propertyName, string propertyValue, Project buildProject)
         {
-            if (!config.ProjectMgr.QueryEditProjectFile(false))
+            if (!config.ProjectManager.QueryEditProjectFile(false))
             {
                 throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
             }
@@ -223,7 +223,7 @@
             if (!String.Equals(oldValue, propertyValue, StringComparison.Ordinal))
             {
                 // check out the project file
-                if (ProjectMgr != null && !ProjectMgr.QueryEditProjectFile(false))
+                if (ProjectManager != null && !ProjectManager.QueryEditProjectFile(false))
                 {
                     throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
                 }

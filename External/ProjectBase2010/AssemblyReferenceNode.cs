@@ -188,7 +188,7 @@ namespace Microsoft.VisualStudio.Project
 			// We need to specify here the correct project element. 
 			if(this.ItemNode == null || this.ItemNode.Item == null)
 			{
-				this.ItemNode = new ProjectElement(this.ProjectMgr, this.assemblyName.FullName, ProjectFileConstants.Reference);
+				this.ItemNode = new ProjectElement(this.ProjectManager, this.assemblyName.FullName, ProjectFileConstants.Reference);
 			}
 
 			// Set the basic information we know about
@@ -256,7 +256,7 @@ namespace Microsoft.VisualStudio.Project
 		/// <returns>true if the assembly has already been added.</returns>
 		protected internal override bool IsAlreadyAdded(out ReferenceNode existingReference)
 		{
-			ReferenceContainerNode referencesFolder = this.ProjectMgr.FindChild(ReferenceContainerNode.ReferencesNodeVirtualName) as ReferenceContainerNode;
+			ReferenceContainerNode referencesFolder = this.ProjectManager.FindChild(ReferenceContainerNode.ReferencesNodeVirtualName) as ReferenceContainerNode;
 			Debug.Assert(referencesFolder != null, "Could not find the References node");
 			bool shouldCheckPath = !string.IsNullOrEmpty(this.Url);
 
@@ -323,7 +323,7 @@ namespace Microsoft.VisualStudio.Project
 			}
 			else
 			{
-				Uri uri = new Uri(this.ProjectMgr.BaseURI.Uri, path);
+				Uri uri = new Uri(this.ProjectManager.BaseURI.Uri, path);
 
 				if(uri != null)
 				{
@@ -346,7 +346,7 @@ namespace Microsoft.VisualStudio.Project
 			string privateValue = this.ItemNode.GetMetadata(ProjectFileConstants.Private);
 
 			// Get the list of items which require HintPath
-            IEnumerable<MSBuild.ProjectItem> references = this.ProjectMgr.BuildProject.GetItems(MsBuildGeneratedItemType.ReferenceCopyLocalPaths);
+            IEnumerable<MSBuild.ProjectItem> references = this.ProjectManager.BuildProject.GetItems(MsBuildGeneratedItemType.ReferenceCopyLocalPaths);
 
 			// Remove the HintPath, we will re-add it below if it is needed
 			if(!String.IsNullOrEmpty(this.assemblyPath))
@@ -367,7 +367,7 @@ namespace Microsoft.VisualStudio.Project
 					{
 						if(Path.IsPathRooted(hintPath))
 						{
-							hintPath = PackageUtilities.GetPathDistance(this.ProjectMgr.BaseURI.Uri, new Uri(hintPath));
+							hintPath = PackageUtilities.GetPathDistance(this.ProjectManager.BaseURI.Uri, new Uri(hintPath));
 						}
 
 						this.ItemNode.SetMetadata(ProjectFileConstants.HintPath, hintPath);
@@ -394,7 +394,7 @@ namespace Microsoft.VisualStudio.Project
 
 			// Resolve assembly referernces. This is needed to make sure that properties like the full path
 			// to the assembly or the hint path are set.
-			if(this.ProjectMgr.Build(MsBuildTarget.ResolveAssemblyReferences) != MSBuildResult.Successful)
+			if(this.ProjectManager.Build(MsBuildTarget.ResolveAssemblyReferences) != MSBuildResult.Successful)
 			{
 				return;
 			}
@@ -415,12 +415,12 @@ namespace Microsoft.VisualStudio.Project
 		/// </summary>
         private void ResolveAssemblyReference()
         {
-            if (this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+            if (this.ProjectManager == null || this.ProjectManager.IsClosed)
             {
                 return;
             }
 
-            var group = this.ProjectMgr.CurrentConfig.GetItems(ProjectFileConstants.ReferencePath);
+            var group = this.ProjectManager.CurrentConfig.GetItems(ProjectFileConstants.ReferencePath);
             foreach (var item in group)
             {
                 string fullPath = this.GetFullPathFromPath(item.EvaluatedInclude);
@@ -452,7 +452,7 @@ namespace Microsoft.VisualStudio.Project
 		/// </summary>
 		private void InitializeFileChangeEvents()
 		{
-			this.fileChangeListener = new FileChangeManager(this.ProjectMgr.Site);
+			this.fileChangeListener = new FileChangeManager(this.ProjectManager.Site);
 			this.fileChangeListener.FileChangedOnDisk += this.OnAssemblyReferenceChangedOnDisk;
 		}
 

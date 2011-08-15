@@ -88,7 +88,7 @@ namespace Microsoft.VisualStudio.Project
 		/// <returns>S_OK if successful, otherwise an error is returned</returns>
 		public virtual int Close(__FRAMECLOSE closeFlag)
 		{
-			if(this.node == null || this.node.ProjectMgr == null || this.node.ProjectMgr.IsClosed)
+			if(this.node == null || this.node.ProjectManager == null || this.node.ProjectManager.IsClosed)
 			{
 				return VSConstants.E_FAIL;
 			}
@@ -101,14 +101,14 @@ namespace Microsoft.VisualStudio.Project
 
 			if(isOpenedByUs)
 			{
-				IVsUIShellOpenDocument shell = this.Node.ProjectMgr.Site.GetService(typeof(IVsUIShellOpenDocument)) as IVsUIShellOpenDocument;
+				IVsUIShellOpenDocument shell = this.Node.ProjectManager.Site.GetService(typeof(IVsUIShellOpenDocument)) as IVsUIShellOpenDocument;
 				Guid logicalView = Guid.Empty;
 				uint grfIDO = 0;
 				IVsUIHierarchy pHierOpen;
 				uint[] itemIdOpen = new uint[1];
 				IVsWindowFrame windowFrame;
 				int fOpen;
-				ErrorHandler.ThrowOnFailure(shell.IsDocumentOpen(this.Node.ProjectMgr, this.Node.ID, this.Node.Url, ref logicalView, grfIDO, out pHierOpen, itemIdOpen, out windowFrame, out fOpen));
+				ErrorHandler.ThrowOnFailure(shell.IsDocumentOpen(this.Node.ProjectManager, this.Node.ID, this.Node.Url, ref logicalView, grfIDO, out pHierOpen, itemIdOpen, out windowFrame, out fOpen));
 
 				if(windowFrame != null)
 				{
@@ -156,7 +156,7 @@ namespace Microsoft.VisualStudio.Project
 			docCookie = (uint)ShellConstants.VSDOCCOOKIE_NIL;
 			persistDocData = null;
 
-			if(this.node == null || this.node.ProjectMgr == null || this.node.ProjectMgr.IsClosed)
+			if(this.node == null || this.node.ProjectManager == null || this.node.ProjectManager.IsClosed)
 			{
 				return;
 			}
@@ -164,7 +164,7 @@ namespace Microsoft.VisualStudio.Project
 			IVsHierarchy hierarchy;
 			uint vsitemid = VSConstants.VSITEMID_NIL;
 
-			VsShellUtilities.GetRDTDocumentInfo(this.node.ProjectMgr.Site, this.node.Url, out hierarchy, out vsitemid, out persistDocData, out docCookie);
+			VsShellUtilities.GetRDTDocumentInfo(this.node.ProjectManager.Site, this.node.Url, out hierarchy, out vsitemid, out persistDocData, out docCookie);
 
 			if(hierarchy == null || docCookie == (uint)ShellConstants.VSDOCCOOKIE_NIL)
 			{
@@ -173,7 +173,7 @@ namespace Microsoft.VisualStudio.Project
 
 			isOpen = true;
 			// check if the doc is opened by another project
-			if(Utilities.IsSameComObject(this.node.ProjectMgr, hierarchy))
+			if(Utilities.IsSameComObject(this.node.ProjectManager, hierarchy))
 			{
 				isOpenedByUs = true;
 			}

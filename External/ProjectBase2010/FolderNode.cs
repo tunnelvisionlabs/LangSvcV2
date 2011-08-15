@@ -128,12 +128,12 @@ namespace Microsoft.VisualStudio.Project
 		/// <returns>An instance of the Automation.OAFolderNode type if succeeded</returns>
 		public override object GetAutomationObject()
 		{
-			if(this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+			if(this.ProjectManager == null || this.ProjectManager.IsClosed)
 			{
 				return null;
 			}
 
-			return new Automation.OAFolderItem(this.ProjectMgr.GetAutomationObject() as Automation.OAProject, this);
+			return new Automation.OAFolderItem(this.ProjectManager.GetAutomationObject() as Automation.OAProject, this);
 		}
 
         /// <summary>
@@ -211,10 +211,10 @@ namespace Microsoft.VisualStudio.Project
 		{
             if (this.IsNonMemberItem)
             {
-                return this.ProjectMgr.ImageHandler.GetIconHandle(open ? (int)ProjectNode.ImageName.OpenExcludedFolder : (int)ProjectNode.ImageName.ExcludedFolder);
+                return this.ProjectManager.ImageHandler.GetIconHandle(open ? (int)ProjectNode.ImageName.OpenExcludedFolder : (int)ProjectNode.ImageName.ExcludedFolder);
             }
 
-			return this.ProjectMgr.ImageHandler.GetIconHandle(open ? (int)ProjectNode.ImageName.OpenFolder : (int)ProjectNode.ImageName.Folder);
+			return this.ProjectManager.ImageHandler.GetIconHandle(open ? (int)ProjectNode.ImageName.OpenFolder : (int)ProjectNode.ImageName.Folder);
 		}
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace Microsoft.VisualStudio.Project
 				RenameFolder(label);
 
 				//Refresh the properties in the properties window
-				IVsUIShell shell = this.ProjectMgr.GetService(typeof(SVsUIShell)) as IVsUIShell;
+				IVsUIShell shell = this.ProjectManager.GetService(typeof(SVsUIShell)) as IVsUIShell;
 				Debug.Assert(shell != null, "Could not get the ui shell from the project");
 				ErrorHandler.ThrowOnFailure(shell.RefreshPropertyBrowser(0));
 
@@ -309,7 +309,7 @@ namespace Microsoft.VisualStudio.Project
 		{
 			get
 			{
-				return Path.Combine(Path.GetDirectoryName(this.ProjectMgr.Url), this.VirtualNodeName) + "\\";
+				return Path.Combine(Path.GetDirectoryName(this.ProjectManager.Url), this.VirtualNodeName) + "\\";
 			}
 		}
 
@@ -481,12 +481,12 @@ namespace Microsoft.VisualStudio.Project
         /// <param name="recursive">Flag to indicate if the addition should be recursive.</param>
         protected virtual void AddToMSBuild(bool recursive)
         {
-            if (ProjectMgr == null || ProjectMgr.IsClosed)
+            if (ProjectManager == null || ProjectManager.IsClosed)
             {
                 return; // do nothing
             }
 
-            this.ItemNode = ProjectMgr.AddFileToMsBuild(this.Url);
+            this.ItemNode = ProjectManager.AddFileToMsBuild(this.Url);
             this.SetProperty((int)__VSHPROPID.VSHPROPID_IsNonMemberItem, false);
             if (recursive)
             {
@@ -512,15 +512,15 @@ namespace Microsoft.VisualStudio.Project
             this.SetProperty((int)__VSHPROPID.VSHPROPID_Expanded, expanded);
 
             // If we are in automation mode then skip the ui part
-            if (!Utilities.IsInAutomationFunction(this.ProjectMgr.Site))
+            if (!Utilities.IsInAutomationFunction(this.ProjectManager.Site))
             {
-                IVsUIHierarchyWindow uiWindow = UIHierarchyUtilities.GetUIHierarchyWindow(this.ProjectMgr.Site, SolutionExplorer);
-                int result = uiWindow.ExpandItem(this.ProjectMgr, this.ID, expanded ? EXPANDFLAGS.EXPF_ExpandFolder : EXPANDFLAGS.EXPF_CollapseFolder);
+                IVsUIHierarchyWindow uiWindow = UIHierarchyUtilities.GetUIHierarchyWindow(this.ProjectManager.Site, SolutionExplorer);
+                int result = uiWindow.ExpandItem(this.ProjectManager, this.ID, expanded ? EXPANDFLAGS.EXPF_ExpandFolder : EXPANDFLAGS.EXPF_CollapseFolder);
                 ErrorHandler.ThrowOnFailure(result);
 
                 // then post the expand command to the shell. Folder verification and creation will
                 // happen in the setlabel code...
-                IVsUIShell shell = ProjectMgr.Site.GetService(typeof(SVsUIShell)) as IVsUIShell;
+                IVsUIShell shell = ProjectManager.Site.GetService(typeof(SVsUIShell)) as IVsUIShell;
 
                 object dummy = null;
                 Guid cmdGroup = VsMenus.guidStandardCommandSet97;
@@ -533,7 +533,7 @@ namespace Microsoft.VisualStudio.Project
 		{
 			if(deleteOperation == __VSDELETEITEMOPERATION.DELITEMOP_DeleteFromStorage)
 			{
-				return this.ProjectMgr.CanProjectDeleteItems;
+				return this.ProjectManager.CanProjectDeleteItems;
 			}
 			return false;
 		}
@@ -549,7 +549,7 @@ namespace Microsoft.VisualStudio.Project
         [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes")]
         int IProjectSourceNode.ExcludeFromProject()
         {
-            if (ProjectMgr == null || ProjectMgr.IsClosed)
+            if (ProjectManager == null || ProjectManager.IsClosed)
             {
                 return (int)OleConstants.OLECMDERR_E_NOTSUPPORTED;
             }
@@ -561,7 +561,7 @@ namespace Microsoft.VisualStudio.Project
             //using ( WixHelperMethods.NewWaitCursor() )
             //{
             // Check out the project file.
-            if (!ProjectMgr.QueryEditProjectFile(false))
+            if (!ProjectManager.QueryEditProjectFile(false))
             {
                 throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
             }
@@ -580,12 +580,12 @@ namespace Microsoft.VisualStudio.Project
                 }
             }
 
-            if (ProjectMgr != null && ProjectMgr.ShowAllFilesEnabled && Directory.Exists(this.Url))
+            if (ProjectManager != null && ProjectManager.ShowAllFilesEnabled && Directory.Exists(this.Url))
             {
                 string url = this.Url;
                 this.SetProperty((int)__VSHPROPID.VSHPROPID_IsNonMemberItem, true);
                 this.ItemNode.RemoveFromProjectFile();
-                this.ItemNode = new ProjectElement(this.ProjectMgr, null, true);  // now we have to create a new ItemNode to indicate that this is virtual node.
+                this.ItemNode = new ProjectElement(this.ProjectManager, null, true);  // now we have to create a new ItemNode to indicate that this is virtual node.
                 this.ItemNode.Rename(url);
                 this.ItemNode.SetMetadata(ProjectFileConstants.Name, this.Url);
                 this.ReDraw(UIHierarchyElement.Icon); // we have to redraw the icon of the node as it is now not a member of the project and shoul be drawn using a different icon.
@@ -627,7 +627,7 @@ namespace Microsoft.VisualStudio.Project
         [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes")]
         int IProjectSourceNode.IncludeInProject(bool recursive)
         {
-            if (this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+            if (this.ProjectManager == null || this.ProjectManager.IsClosed)
             {
                 return (int)OleConstants.OLECMDERR_E_NOTSUPPORTED;
             }
@@ -639,7 +639,7 @@ namespace Microsoft.VisualStudio.Project
             //using ( WixHelperMethods.NewWaitCursor() )
             //{
             // Check out the project file.
-            if (!this.ProjectMgr.QueryEditProjectFile(false))
+            if (!this.ProjectManager.QueryEditProjectFile(false))
             {
                 throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
             }
@@ -758,7 +758,7 @@ namespace Microsoft.VisualStudio.Project
 			string newPath = Path.Combine(this.Parent.VirtualNodeName, newName);
 			if(!String.Equals(Path.GetFileName(VirtualNodeName), newName, StringComparison.Ordinal))
 			{
-				this.RenameDirectory(Path.Combine(this.ProjectMgr.ProjectFolder, newPath));
+				this.RenameDirectory(Path.Combine(this.ProjectManager.ProjectFolder, newPath));
 			}
 			this.VirtualNodeName = newPath;
 
@@ -780,14 +780,14 @@ namespace Microsoft.VisualStudio.Project
 			}
 
 			// Some of the previous operation may have changed the selection so set it back to us
-			IVsUIHierarchyWindow uiWindow = UIHierarchyUtilities.GetUIHierarchyWindow(this.ProjectMgr.Site, SolutionExplorer);
+			IVsUIHierarchyWindow uiWindow = UIHierarchyUtilities.GetUIHierarchyWindow(this.ProjectManager.Site, SolutionExplorer);
 			// This happens in the context of renaming a folder.
 			// Since we are already in solution explorer, it is extremely unlikely that we get a null return.
 			// If we do, the consequences are minimal: the parent node will be selected instead of the
 			// renamed node.
 			if (uiWindow != null)
 			{
-				ErrorHandler.ThrowOnFailure(uiWindow.ExpandItem(this.ProjectMgr, this.ID, EXPANDFLAGS.EXPF_SelectItem));
+				ErrorHandler.ThrowOnFailure(uiWindow.ExpandItem(this.ProjectManager, this.ID, EXPANDFLAGS.EXPF_SelectItem));
 			}
 		}
 
@@ -801,13 +801,13 @@ namespace Microsoft.VisualStudio.Project
 			//A file or folder with the name '{0}' already exists on disk at this location. Please choose another name.
 			//If this file or folder does not appear in the Solution Explorer, then it is not currently part of your project. To view files which exist on disk, but are not in the project, select Show All Files from the Project menu.
 			string errorMessage = (String.Format(CultureInfo.CurrentCulture, SR.GetString(SR.FileOrFolderAlreadyExists, CultureInfo.CurrentUICulture), newPath));
-			if(!Utilities.IsInAutomationFunction(this.ProjectMgr.Site))
+			if(!Utilities.IsInAutomationFunction(this.ProjectManager.Site))
 			{
 				string title = null;
 				OLEMSGICON icon = OLEMSGICON.OLEMSGICON_CRITICAL;
 				OLEMSGBUTTON buttons = OLEMSGBUTTON.OLEMSGBUTTON_OK;
 				OLEMSGDEFBUTTON defaultButton = OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST;
-				VsShellUtilities.ShowMessageBox(this.ProjectMgr.Site, title, errorMessage, icon, buttons, defaultButton);
+				VsShellUtilities.ShowMessageBox(this.ProjectManager.Site, title, errorMessage, icon, buttons, defaultButton);
 				return VSConstants.S_OK;
 			}
 			else

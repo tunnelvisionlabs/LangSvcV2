@@ -136,7 +136,7 @@ namespace Microsoft.VisualStudio.Project
 			{
 				throw new InvalidOperationException();
 			}
-			hier = HierarchyNode.GetOuterHierarchy(this.node.ProjectMgr);
+			hier = HierarchyNode.GetOuterHierarchy(this.node.ProjectManager);
 			itemid = this.node.ID;
 			return VSConstants.S_OK;
 		}
@@ -198,7 +198,7 @@ namespace Microsoft.VisualStudio.Project
 				// Retrieve the list of guids from hierarchy properties.
 				// Because a flavor could modify that list we must make sure we are calling the outer most implementation of IVsHierarchy
 				string guidsList = String.Empty;
-				IVsHierarchy hierarchy = HierarchyNode.GetOuterHierarchy(this.Node.ProjectMgr);
+				IVsHierarchy hierarchy = HierarchyNode.GetOuterHierarchy(this.Node.ProjectManager);
 				object variant = null;
 				ErrorHandler.ThrowOnFailure(hierarchy.GetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID2.VSHPROPID_PropertyPagesCLSIDList, out variant));
 				guidsList = (string)variant;
@@ -269,7 +269,7 @@ namespace Microsoft.VisualStudio.Project
 		{
 			get
 			{
-				Guid catid = this.Node.ProjectMgr.GetCATIDForType(this.GetType());
+				Guid catid = this.Node.ProjectManager.GetCATIDForType(this.GetType());
 				if(Guid.Empty.CompareTo(catid) == 0)
 				{
 					return null;
@@ -536,7 +536,7 @@ namespace Microsoft.VisualStudio.Project
 		{
 			get
 			{
-				return this.Node.ProjectMgr.ProjectFolder;
+				return this.Node.ProjectManager.ProjectFolder;
 			}
 		}
 
@@ -548,11 +548,11 @@ namespace Microsoft.VisualStudio.Project
 		{
 			get
 			{
-				return this.Node.ProjectMgr.ProjectFile;
+				return this.Node.ProjectManager.ProjectFile;
 			}
 			set
 			{
-				this.Node.ProjectMgr.ProjectFile = value;
+				this.Node.ProjectManager.ProjectFile = value;
 			}
 		}
 
@@ -562,11 +562,11 @@ namespace Microsoft.VisualStudio.Project
 		{
 			get
 			{
-				return this.Node.ProjectMgr.ProjectFile;
+				return this.Node.ProjectManager.ProjectFile;
 			}
 			set
 			{
-				this.Node.ProjectMgr.ProjectFile = value;
+				this.Node.ProjectManager.ProjectFile = value;
 			}
 		}
 
@@ -576,7 +576,7 @@ namespace Microsoft.VisualStudio.Project
 		{
 			get
 			{
-				string fullPath = this.Node.ProjectMgr.ProjectFolder;
+				string fullPath = this.Node.ProjectManager.ProjectFolder;
 				if(!fullPath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
 				{
 					return fullPath + Path.DirectorySeparatorChar;
@@ -630,9 +630,9 @@ namespace Microsoft.VisualStudio.Project
 
 		public override int GetCfgProvider(out IVsCfgProvider p)
 		{
-			if(this.Node != null && this.Node.ProjectMgr != null)
+			if(this.Node != null && this.Node.ProjectManager != null)
 			{
-				return this.Node.ProjectMgr.GetCfgProvider(out p);
+				return this.Node.ProjectManager.GetCfgProvider(out p);
 			}
 
 			return base.GetCfgProvider(out p);

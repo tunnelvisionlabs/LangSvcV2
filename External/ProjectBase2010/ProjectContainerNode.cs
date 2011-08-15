@@ -648,7 +648,7 @@ namespace Microsoft.VisualStudio.Project
 			string typeGuidString = elementToUse.GetMetadataAndThrow(ProjectFileConstants.TypeGuid, new Exception());
 			Guid projectFactoryGuid = new Guid(typeGuidString);
 
-			EnvDTE.DTE dte = this.ProjectMgr.Site.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+			EnvDTE.DTE dte = this.ProjectManager.Site.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
 			Debug.Assert(dte != null, "Could not get the automation object from the services exposed by this project");
 
 			if(dte == null)

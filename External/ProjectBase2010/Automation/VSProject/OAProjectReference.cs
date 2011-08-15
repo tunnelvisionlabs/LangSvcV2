@@ -62,7 +62,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 				{
 					return null;
 				}
-				IVsHierarchy hierarchy = VsShellUtilities.GetHierarchy(BaseReferenceNode.ProjectMgr.Site, BaseReferenceNode.ReferencedProjectGuid);
+				IVsHierarchy hierarchy = VsShellUtilities.GetHierarchy(BaseReferenceNode.ProjectManager.Site, BaseReferenceNode.ReferencedProjectGuid);
 				if(null == hierarchy)
 				{
 					return null;

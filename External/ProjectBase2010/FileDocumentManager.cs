@@ -97,7 +97,7 @@ namespace Microsoft.VisualStudio.Project
 		public int Open(bool newFile, bool openWith, Guid logicalView, out IVsWindowFrame frame, WindowFrameShowAction windowFrameAction)
 		{
 			frame = null;
-			IVsRunningDocumentTable rdt = this.Node.ProjectMgr.Site.GetService(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
+			IVsRunningDocumentTable rdt = this.Node.ProjectManager.Site.GetService(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
 			Debug.Assert(rdt != null, " Could not get running document table from the services exposed by this project");
 			if(rdt == null)
 			{
@@ -161,13 +161,13 @@ namespace Microsoft.VisualStudio.Project
 		private int Open(bool newFile, bool openWith, uint editorFlags, ref Guid editorType, string physicalView, ref Guid logicalView, IntPtr docDataExisting, out IVsWindowFrame windowFrame, WindowFrameShowAction windowFrameAction)
 		{
 			windowFrame = null;
-			if(this.Node == null || this.Node.ProjectMgr == null || this.Node.ProjectMgr.IsClosed)
+			if(this.Node == null || this.Node.ProjectManager == null || this.Node.ProjectManager.IsClosed)
 			{
 				return VSConstants.E_FAIL;
 			}
 
 			Debug.Assert(this.Node != null, "No node has been initialized for the document manager");
-			Debug.Assert(this.Node.ProjectMgr != null, "No project manager has been initialized for the document manager");
+			Debug.Assert(this.Node.ProjectManager != null, "No project manager has been initialized for the document manager");
 			Debug.Assert(this.Node is FileNode, "Node is not FileNode object");
 
 			int returnValue = VSConstants.S_OK;
@@ -186,17 +186,17 @@ namespace Microsoft.VisualStudio.Project
 				return VSConstants.S_FALSE;
 			}
 
-			IVsUIShellOpenDocument uiShellOpenDocument = this.Node.ProjectMgr.Site.GetService(typeof(SVsUIShellOpenDocument)) as IVsUIShellOpenDocument;
-			IOleServiceProvider serviceProvider = this.Node.ProjectMgr.Site.GetService(typeof(IOleServiceProvider)) as IOleServiceProvider;
+			IVsUIShellOpenDocument uiShellOpenDocument = this.Node.ProjectManager.Site.GetService(typeof(SVsUIShellOpenDocument)) as IVsUIShellOpenDocument;
+			IOleServiceProvider serviceProvider = this.Node.ProjectManager.Site.GetService(typeof(IOleServiceProvider)) as IOleServiceProvider;
 
 			try
 			{
-				this.Node.ProjectMgr.OnOpenItem(fullPath);
+				this.Node.ProjectManager.OnOpenItem(fullPath);
 				int result = VSConstants.E_FAIL;
 
 				if(openWith)
 				{
-					result = uiShellOpenDocument.OpenStandardEditor((uint)__VSOSEFLAGS.OSE_UseOpenWithDialog, fullPath, ref logicalView, caption, this.Node.ProjectMgr, this.Node.ID, docDataExisting, serviceProvider, out windowFrame);
+					result = uiShellOpenDocument.OpenStandardEditor((uint)__VSOSEFLAGS.OSE_UseOpenWithDialog, fullPath, ref logicalView, caption, this.Node.ProjectManager, this.Node.ID, docDataExisting, serviceProvider, out windowFrame);
 				}
 				else
 				{
@@ -210,12 +210,12 @@ namespace Microsoft.VisualStudio.Project
 					// of the node being opened, otherwise the debugger doesn't work.
 					if(editorType != Guid.Empty)
 					{
-						result = uiShellOpenDocument.OpenSpecificEditor(editorFlags, fullPath, ref editorType, physicalView, ref logicalView, caption, this.Node.ProjectMgr, this.Node.ID, docDataExisting, serviceProvider, out windowFrame);
+						result = uiShellOpenDocument.OpenSpecificEditor(editorFlags, fullPath, ref editorType, physicalView, ref logicalView, caption, this.Node.ProjectManager, this.Node.ID, docDataExisting, serviceProvider, out windowFrame);
 					}
 					else
 					{
 						openFlags |= __VSOSEFLAGS.OSE_ChooseBestStdEditor;
-						result = uiShellOpenDocument.OpenStandardEditor((uint)openFlags, fullPath, ref logicalView, caption, this.Node.ProjectMgr, this.Node.ID, docDataExisting, serviceProvider, out windowFrame);
+						result = uiShellOpenDocument.OpenStandardEditor((uint)openFlags, fullPath, ref logicalView, caption, this.Node.ProjectManager, this.Node.ID, docDataExisting, serviceProvider, out windowFrame);
 					}
 				}
 

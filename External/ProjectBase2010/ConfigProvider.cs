@@ -51,7 +51,7 @@ namespace Microsoft.VisualStudio.Project
         /// <summary>
         /// The associated project.
         /// </summary>
-        protected ProjectNode ProjectMgr
+        protected ProjectNode ProjectManager
         {
             get
             {
@@ -181,7 +181,7 @@ namespace Microsoft.VisualStudio.Project
         public virtual int AddCfgsOfCfgName(string name, string cloneName, int fPrivate)
         {
             // We need to QE/QS the project file
-            if(!this.ProjectMgr.QueryEditProjectFile(false))
+            if(!this.ProjectManager.QueryEditProjectFile(false))
             {
                 throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
             }
@@ -243,7 +243,7 @@ namespace Microsoft.VisualStudio.Project
 
 
             //add the output path
-            string outputBasePath = this.ProjectMgr.OutputBaseRelativePath;
+            string outputBasePath = this.ProjectManager.OutputBaseRelativePath;
             if(outputBasePath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
                 outputBasePath = Path.GetDirectoryName(outputBasePath);
             newConfig.AddProperty("OutputPath", Path.Combine(outputBasePath, name) + Path.DirectorySeparatorChar.ToString());
@@ -275,7 +275,7 @@ namespace Microsoft.VisualStudio.Project
         public virtual int DeleteCfgsOfCfgName(string name)
         {
             // We need to QE/QS the project file
-            if(!this.ProjectMgr.QueryEditProjectFile(false))
+            if(!this.ProjectManager.QueryEditProjectFile(false))
             {
                 throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
             }
@@ -652,7 +652,7 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>An array of supported platform names.</returns>
         private string[] GetSupportedPlatformsFromProject()
         {
-            string platforms = this.ProjectMgr.BuildProject.GetPropertyValue(ProjectFileConstants.AvailablePlatforms);
+            string platforms = this.ProjectManager.BuildProject.GetPropertyValue(ProjectFileConstants.AvailablePlatforms);
 
             if(platforms == null)
             {

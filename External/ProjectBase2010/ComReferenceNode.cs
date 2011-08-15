@@ -225,7 +225,7 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>true if the assembly has already been added.</returns>
 		protected internal override bool IsAlreadyAdded(out ReferenceNode existingReference)
         {
-            ReferenceContainerNode referencesFolder = this.ProjectMgr.FindChild(ReferenceContainerNode.ReferencesNodeVirtualName) as ReferenceContainerNode;
+            ReferenceContainerNode referencesFolder = this.ProjectManager.FindChild(ReferenceContainerNode.ReferencesNodeVirtualName) as ReferenceContainerNode;
             Debug.Assert(referencesFolder != null, "Could not find the References node");
 
             for(HierarchyNode n = referencesFolder.FirstChild; n != null; n = n.NextSibling)
@@ -267,7 +267,7 @@ namespace Microsoft.VisualStudio.Project
         private ProjectElement GetProjectElementBasedOnInputFromComponentSelectorData()
         {
 
-            ProjectElement element = new ProjectElement(this.ProjectMgr, this.typeName, ProjectFileConstants.COMReference);
+            ProjectElement element = new ProjectElement(this.ProjectManager, this.typeName, ProjectFileConstants.COMReference);
 
             // Set the basic information regarding this COM component
             element.SetMetadata(ProjectFileConstants.Guid, this.typeGuid.ToString("B"));
@@ -298,12 +298,12 @@ namespace Microsoft.VisualStudio.Project
         {
             // Call MSBuild to build the target ResolveComReferences
             bool success;
-            ErrorHandler.ThrowOnFailure(this.ProjectMgr.BuildTarget(MsBuildTarget.ResolveComReferences, out success));
+            ErrorHandler.ThrowOnFailure(this.ProjectManager.BuildTarget(MsBuildTarget.ResolveComReferences, out success));
             if(!success)
                 throw new InvalidOperationException();
 
             // Now loop through the generated COM References to find the corresponding one
-            IEnumerable<ProjectItem> comReferences = this.ProjectMgr.BuildProject.GetItems(MsBuildGeneratedItemType.ComReferenceWrappers);
+            IEnumerable<ProjectItem> comReferences = this.ProjectManager.BuildProject.GetItems(MsBuildGeneratedItemType.ComReferenceWrappers);
             foreach (ProjectItem reference in comReferences)
             {
                 if(String.Equals(reference.GetMetadataValue(ProjectFileConstants.Guid), this.typeGuid.ToString("B"), StringComparison.OrdinalIgnoreCase)
@@ -318,7 +318,7 @@ namespace Microsoft.VisualStudio.Project
                     }
                     else
                     {
-                        this.projectRelativeFilePath = Path.Combine(this.ProjectMgr.ProjectFolder, name);
+                        this.projectRelativeFilePath = Path.Combine(this.ProjectManager.ProjectFolder, name);
                     }
 
                     if(renameItemNode)

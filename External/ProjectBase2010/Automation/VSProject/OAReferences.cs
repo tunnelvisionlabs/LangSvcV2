@@ -98,7 +98,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 				return null;
 			}
 			// Get the soulution.
-			IVsSolution solution = container.ProjectMgr.Site.GetService(typeof(SVsSolution)) as IVsSolution;
+			IVsSolution solution = container.ProjectManager.Site.GetService(typeof(SVsSolution)) as IVsSolution;
 			if(null == solution)
 			{
 				return null;
@@ -125,7 +125,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 		{
 			get
 			{
-				return container.ProjectMgr.GetAutomationObject() as EnvDTE.Project;
+				return container.ProjectManager.GetAutomationObject() as EnvDTE.Project;
 			}
 		}
 
@@ -141,7 +141,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 		{
 			get
 			{
-				return container.ProjectMgr.Site.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+				return container.ProjectManager.Site.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
 			}
 		}
 

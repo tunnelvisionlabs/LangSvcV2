@@ -59,7 +59,7 @@ namespace Microsoft.VisualStudio.Project
 
 		protected override void BindProperties()
 		{
-			if(this.ProjectMgr == null)
+			if(this.ProjectManager == null)
 			{
 				Debug.Assert(false);
 				return;
@@ -70,7 +70,7 @@ namespace Microsoft.VisualStudio.Project
 
 		protected override int ApplyChanges()
 		{
-			if(this.ProjectMgr == null)
+			if(this.ProjectManager == null)
 			{
 				Debug.Assert(false);
 				return VSConstants.E_INVALIDARG;

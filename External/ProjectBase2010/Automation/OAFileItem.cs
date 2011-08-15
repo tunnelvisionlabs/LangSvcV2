@@ -49,13 +49,13 @@ namespace Microsoft.VisualStudio.Project.Automation
 		{
 			get
 			{
-				if(this.Node == null || this.Node.ProjectMgr == null || this.Node.ProjectMgr.IsClosed || this.Node.ProjectMgr.Site == null)
+				if(this.Node == null || this.Node.ProjectManager == null || this.Node.ProjectManager.IsClosed || this.Node.ProjectManager.Site == null)
 				{
 					throw new InvalidOperationException();
 				}
 				bool isDirty = false;
 
-				using(AutomationScope scope = new AutomationScope(this.Node.ProjectMgr.Site))
+				using(AutomationScope scope = new AutomationScope(this.Node.ProjectManager.Site))
 				{
 					DocumentManager manager = this.Node.GetDocumentManager();
 
@@ -81,21 +81,21 @@ namespace Microsoft.VisualStudio.Project.Automation
 		{
 			get
 			{
-				if(this.Node == null || this.Node.ProjectMgr == null || this.Node.ProjectMgr.IsClosed || this.Node.ProjectMgr.Site == null)
+				if(this.Node == null || this.Node.ProjectManager == null || this.Node.ProjectManager.IsClosed || this.Node.ProjectManager.Site == null)
 				{
 					throw new InvalidOperationException();
 				}
 
 				EnvDTE.Document document = null;
 
-				using(AutomationScope scope = new AutomationScope(this.Node.ProjectMgr.Site))
+				using(AutomationScope scope = new AutomationScope(this.Node.ProjectManager.Site))
 				{
 					IVsUIHierarchy hier;
 					uint itemid;
 
 					IVsWindowFrame windowFrame;
 
-					VsShellUtilities.IsDocumentOpen(this.Node.ProjectMgr.Site, this.Node.Url, VSConstants.LOGVIEWID_Any, out hier, out itemid, out windowFrame);
+					VsShellUtilities.IsDocumentOpen(this.Node.ProjectManager.Site, this.Node.Url, VSConstants.LOGVIEWID_Any, out hier, out itemid, out windowFrame);
 
 					if(windowFrame != null)
 					{
@@ -127,7 +127,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 		/// <returns>Window object</returns>
 		public override EnvDTE.Window Open(string viewKind)
 		{
-			if(this.Node == null || this.Node.ProjectMgr == null || this.Node.ProjectMgr.IsClosed || this.Node.ProjectMgr.Site == null)
+			if(this.Node == null || this.Node.ProjectManager == null || this.Node.ProjectManager.IsClosed || this.Node.ProjectManager.Site == null)
 			{
 				throw new InvalidOperationException();
 			}
@@ -135,7 +135,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 			IVsWindowFrame windowFrame = null;
 			IntPtr docData = IntPtr.Zero;
 
-			using(AutomationScope scope = new AutomationScope(this.Node.ProjectMgr.Site))
+			using(AutomationScope scope = new AutomationScope(this.Node.ProjectManager.Site))
 			{
 				try
 				{
@@ -157,7 +157,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 					uint itemid;
 					IVsHierarchy ivsHierarchy;
 					uint docCookie;
-					IVsRunningDocumentTable rdt = this.Node.ProjectMgr.Site.GetService(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
+					IVsRunningDocumentTable rdt = this.Node.ProjectManager.Site.GetService(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
 					Debug.Assert(rdt != null, " Could not get running document table from the services exposed by this project");
 					if(rdt == null)
 					{
@@ -167,7 +167,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 					ErrorHandler.ThrowOnFailure(rdt.FindAndLockDocument((uint)_VSRDTFLAGS.RDT_NoLock, this.Node.Url, out ivsHierarchy, out itemid, out docData, out docCookie));
 
 					// Open the file using the IVsProject3 interface
-					ErrorHandler.ThrowOnFailure(this.Node.ProjectMgr.OpenItem(this.Node.ID, ref logicalViewGuid, docData, out windowFrame));
+					ErrorHandler.ThrowOnFailure(this.Node.ProjectManager.OpenItem(this.Node.ID, ref logicalViewGuid, docData, out windowFrame));
 
 				}
 				finally
@@ -223,7 +223,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 		/// <returns>A Boolean value indicating true if the project is open in the given view type; false if not. </returns>
 		public override bool get_IsOpen(string viewKind)
 		{
-			if(this.Node == null || this.Node.ProjectMgr == null || this.Node.ProjectMgr.IsClosed || this.Node.ProjectMgr.Site == null)
+			if(this.Node == null || this.Node.ProjectManager == null || this.Node.ProjectManager.IsClosed || this.Node.ProjectManager.Site == null)
 			{
 				throw new InvalidOperationException();
 			}
@@ -245,14 +245,14 @@ namespace Microsoft.VisualStudio.Project.Automation
 
 			bool isOpen = false;
 
-			using(AutomationScope scope = new AutomationScope(this.Node.ProjectMgr.Site))
+			using(AutomationScope scope = new AutomationScope(this.Node.ProjectManager.Site))
 			{
 				IVsUIHierarchy hier;
 				uint itemid;
 
 				IVsWindowFrame windowFrame;
 
-				isOpen = VsShellUtilities.IsDocumentOpen(this.Node.ProjectMgr.Site, this.Node.Url, logicalViewGuid, out hier, out itemid, out windowFrame);
+				isOpen = VsShellUtilities.IsDocumentOpen(this.Node.ProjectManager.Site, this.Node.Url, logicalViewGuid, out hier, out itemid, out windowFrame);
 
 			}
 
@@ -289,18 +289,18 @@ namespace Microsoft.VisualStudio.Project.Automation
 				throw new ArgumentNullException("fileName");
 			}
 
-			if(this.Node == null || this.Node.ProjectMgr == null || this.Node.ProjectMgr.IsClosed || this.Node.ProjectMgr.Site == null)
+			if(this.Node == null || this.Node.ProjectManager == null || this.Node.ProjectManager.IsClosed || this.Node.ProjectManager.Site == null)
 			{
 				throw new InvalidOperationException();
 			}
 
-			using(AutomationScope scope = new AutomationScope(this.Node.ProjectMgr.Site))
+			using(AutomationScope scope = new AutomationScope(this.Node.ProjectManager.Site))
 			{
 				IntPtr docData = IntPtr.Zero;
 
 				try
 				{
-					IVsRunningDocumentTable rdt = this.Node.ProjectMgr.Site.GetService(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
+					IVsRunningDocumentTable rdt = this.Node.ProjectManager.Site.GetService(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
 					Debug.Assert(rdt != null, " Could not get running document table from the services exposed by this project");
 					if(rdt == null)
 					{
@@ -319,11 +319,11 @@ namespace Microsoft.VisualStudio.Project.Automation
 					// If an empty file name is passed in for Save then make the file name the project name.
 					if(!isCalledFromSaveAs && fileName.Length == 0)
 					{
-						ErrorHandler.ThrowOnFailure(this.Node.ProjectMgr.SaveItem(VSSAVEFLAGS.VSSAVE_SilentSave, url, this.Node.ID, docData, out canceled));
+						ErrorHandler.ThrowOnFailure(this.Node.ProjectManager.SaveItem(VSSAVEFLAGS.VSSAVE_SilentSave, url, this.Node.ID, docData, out canceled));
 					}
 					else
 					{
-						Utilities.ValidateFileName(this.Node.ProjectMgr.Site, fileName);
+						Utilities.ValidateFileName(this.Node.ProjectManager.Site, fileName);
 
 						// Compute the fullpath from the directory of the existing Url.
 						string fullPath = fileName;
@@ -340,11 +340,11 @@ namespace Microsoft.VisualStudio.Project.Automation
 								throw new InvalidOperationException();
 							}
 
-							ErrorHandler.ThrowOnFailure(this.Node.ProjectMgr.SaveItem(VSSAVEFLAGS.VSSAVE_SilentSave, fullPath, this.Node.ID, docData, out canceled));
+							ErrorHandler.ThrowOnFailure(this.Node.ProjectManager.SaveItem(VSSAVEFLAGS.VSSAVE_SilentSave, fullPath, this.Node.ID, docData, out canceled));
 						}
 						else
 						{
-							ErrorHandler.ThrowOnFailure(this.Node.ProjectMgr.SaveItem(VSSAVEFLAGS.VSSAVE_SilentSave, fullPath, this.Node.ID, docData, out canceled));
+							ErrorHandler.ThrowOnFailure(this.Node.ProjectManager.SaveItem(VSSAVEFLAGS.VSSAVE_SilentSave, fullPath, this.Node.ID, docData, out canceled));
 						}
 					}
 

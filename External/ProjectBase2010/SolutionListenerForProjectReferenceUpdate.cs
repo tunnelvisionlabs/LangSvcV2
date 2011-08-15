@@ -111,7 +111,7 @@ namespace Microsoft.VisualStudio.Project
 				// Remove and re add the node.
 				foreach(ProjectReferenceNode projectReference in projectReferences)
 				{
-					ProjectNode projectMgr = projectReference.ProjectMgr;
+					ProjectNode projectMgr = projectReference.ProjectManager;
 					projectReference.Remove(false);
 
 					IReferenceContainer refContainer = projectMgr.GetReferenceContainer();

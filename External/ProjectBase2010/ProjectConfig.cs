@@ -54,7 +54,7 @@ namespace Microsoft.VisualStudio.Project
         #endregion
 
         #region properties
-        public ProjectNode ProjectMgr
+        public ProjectNode ProjectManager
         {
             get
             {
@@ -124,7 +124,7 @@ namespace Microsoft.VisualStudio.Project
 
             // Because the project can be aggregated by a flavor, we need to make sure
             // we get the outer most implementation of that interface (hence: project --> IUnknown --> Interface)
-            IntPtr projectUnknown = Marshal.GetIUnknownForObject(this.ProjectMgr);
+            IntPtr projectUnknown = Marshal.GetIUnknownForObject(this.ProjectManager);
             try
             {
                 IVsProjectFlavorCfgProvider flavorCfgProvider = (IVsProjectFlavorCfgProvider)Marshal.GetTypedObjectForIUnknown(projectUnknown, typeof(IVsProjectFlavorCfgProvider));
@@ -835,7 +835,7 @@ namespace Microsoft.VisualStudio.Project
             if(supported != null && supported.Length > 0)
                 supported[0] = 1;
             if(ready != null && ready.Length > 0)
-                ready[0] = (this.config.ProjectMgr.BuildInProgress) ? 0 : 1;
+                ready[0] = (this.config.ProjectManager.BuildInProgress) ? 0 : 1;
             return VSConstants.S_OK;
         }
 
@@ -846,7 +846,7 @@ namespace Microsoft.VisualStudio.Project
             if(supported != null && supported.Length > 0)
                 supported[0] = 1;
             if(ready != null && ready.Length > 0)
-                ready[0] = (this.config.ProjectMgr.BuildInProgress) ? 0 : 1;
+                ready[0] = (this.config.ProjectManager.BuildInProgress) ? 0 : 1;
             return VSConstants.S_OK;
         }
 
@@ -857,7 +857,7 @@ namespace Microsoft.VisualStudio.Project
             if(supported != null && supported.Length > 0)
                 supported[0] = 0; // TODO:
             if(ready != null && ready.Length > 0)
-                ready[0] = (this.config.ProjectMgr.BuildInProgress) ? 0 : 1;
+                ready[0] = (this.config.ProjectManager.BuildInProgress) ? 0 : 1;
             return VSConstants.S_OK;
         }
 
@@ -865,7 +865,7 @@ namespace Microsoft.VisualStudio.Project
         {
             CCITracing.TraceCall();
 
-            done = (this.config.ProjectMgr.BuildInProgress) ? 0 : 1;
+            done = (this.config.ProjectManager.BuildInProgress) ? 0 : 1;
             return VSConstants.S_OK;
         }
 
@@ -992,7 +992,7 @@ namespace Microsoft.VisualStudio.Project
 
             try
             {
-                config.ProjectMgr.BuildAsync(options, this.config.ConfigName, output, target, (result, buildTarget) => this.NotifyBuildEnd(result, buildTarget));
+                config.ProjectManager.BuildAsync(options, this.config.ConfigName, output, target, (result, buildTarget) => this.NotifyBuildEnd(result, buildTarget));
             }
             catch(Exception e)
             {
@@ -1013,7 +1013,7 @@ namespace Microsoft.VisualStudio.Project
         private void RefreshReferences()
         {
             // Refresh the reference container node for assemblies that could be resolved.
-            IReferenceContainer referenceContainer = this.config.ProjectMgr.GetReferenceContainer();
+            IReferenceContainer referenceContainer = this.config.ProjectManager.GetReferenceContainer();
             if (referenceContainer == null)
                 return;
 

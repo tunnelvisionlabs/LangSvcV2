@@ -32,9 +32,9 @@ namespace Microsoft.VisualStudio.Project.Automation
 				throw new ArgumentNullException("associatedNode");
 			}
 
-			Debug.Assert(associatedNode.ProjectMgr is ProjectContainerNode, "Expecting obejct of type" + typeof(ProjectContainerNode).Name);
+			Debug.Assert(associatedNode.ProjectManager is ProjectContainerNode, "Expecting obejct of type" + typeof(ProjectContainerNode).Name);
 
-			if(!(associatedNode.ProjectMgr is ProjectContainerNode))
+			if(!(associatedNode.ProjectManager is ProjectContainerNode))
 				throw new ArgumentException(SR.GetString(SR.InvalidParameter, CultureInfo.CurrentUICulture), "associatedNode");
 
 			this.node = associatedNode;
@@ -45,7 +45,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 
 		public virtual EnvDTE.Project AddFromFile(string fileName)
 		{
-			ProjectContainerNode projectContainer = (ProjectContainerNode)this.node.ProjectMgr;
+			ProjectContainerNode projectContainer = (ProjectContainerNode)this.node.ProjectManager;
 			ProjectElement newElement = new ProjectElement(projectContainer, fileName, ProjectFileConstants.SubProject);
 			NestedProjectNode newNode = projectContainer.AddExistingNestedProject(newElement, __VSCREATEPROJFLAGS.CPF_NOTINSLNEXPLR | __VSCREATEPROJFLAGS.CPF_SILENT | __VSCREATEPROJFLAGS.CPF_OPENFILE);
 			if(newNode == null)
@@ -66,9 +66,9 @@ namespace Microsoft.VisualStudio.Project.Automation
 			if(isVSTemplate)
 			{
 				// Get the wizard to run, we will get called again and use the alternate code path
-				ProjectElement newElement = new ProjectElement(this.node.ProjectMgr, System.IO.Path.Combine(destination, projectName), ProjectFileConstants.SubProject);
+				ProjectElement newElement = new ProjectElement(this.node.ProjectManager, System.IO.Path.Combine(destination, projectName), ProjectFileConstants.SubProject);
 				newElement.SetMetadata(ProjectFileConstants.Template, fileName);
-				((ProjectContainerNode)this.node.ProjectMgr).RunVsTemplateWizard(newElement, false);
+				((ProjectContainerNode)this.node.ProjectManager).RunVsTemplateWizard(newElement, false);
 			}
 			else
 			{
@@ -78,7 +78,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 					projectName = System.IO.Path.ChangeExtension(projectName, targetExtension);
 				}
 
-				ProjectContainerNode projectContainer = (ProjectContainerNode)this.node.ProjectMgr;
+				ProjectContainerNode projectContainer = (ProjectContainerNode)this.node.ProjectManager;
 				newNode = projectContainer.AddNestedProjectFromTemplate(fileName, destination, projectName, null, __VSCREATEPROJFLAGS.CPF_NOTINSLNEXPLR | __VSCREATEPROJFLAGS.CPF_SILENT | __VSCREATEPROJFLAGS.CPF_CLONEFILE);
 			}
 			if(newNode == null)
@@ -121,7 +121,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 		{
 			get
 			{
-				return (EnvDTE.DTE)this.node.ProjectMgr.Site.GetService(typeof(EnvDTE.DTE));
+				return (EnvDTE.DTE)this.node.ProjectManager.Site.GetService(typeof(EnvDTE.DTE));
 			}
 		}
 

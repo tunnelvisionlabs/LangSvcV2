@@ -207,7 +207,7 @@
                     ProjectConfig config = (ProjectConfig)ppunk[i];
                     if (_project == null)
                     {
-                        _project = config.ProjectMgr as JavaProjectNode;
+                        _project = config.ProjectManager as JavaProjectNode;
                         //_project.CurrentOutputTypeChanging += new PropertyChangingEventHandler( HandleOutputTypeChanging );
                     }
 
@@ -220,7 +220,7 @@
             {
                 if (_project == null)
                 {
-                    _project = (ppunk[0] as NodeProperties).Node.ProjectMgr as JavaProjectNode;
+                    _project = (ppunk[0] as NodeProperties).Node.ProjectManager as JavaProjectNode;
                     //_project.CurrentOutputTypeChanging += new PropertyChangingEventHandler( HandleOutputTypeChanging );
                 }
 
@@ -230,7 +230,7 @@
                 {
                     NodeProperties property = (NodeProperties)ppunk[i];
                     IVsCfgProvider provider;
-                    ErrorHandler.ThrowOnFailure(property.Node.ProjectMgr.GetCfgProvider(out provider));
+                    ErrorHandler.ThrowOnFailure(property.Node.ProjectManager.GetCfgProvider(out provider));
                     uint[] expected = new uint[1];
                     ErrorHandler.ThrowOnFailure(provider.GetCfgs(0, null, expected, null));
                     if (expected[0] > 0)

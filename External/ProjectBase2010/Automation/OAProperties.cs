@@ -107,12 +107,12 @@ namespace Microsoft.VisualStudio.Project.Automation
 		{
 			get
 			{
-				if(this.target == null || this.target.Node == null || this.target.Node.ProjectMgr == null || this.target.Node.ProjectMgr.IsClosed ||
-					this.target.Node.ProjectMgr.Site == null)
+				if(this.target == null || this.target.Node == null || this.target.Node.ProjectManager == null || this.target.Node.ProjectManager.IsClosed ||
+					this.target.Node.ProjectManager.Site == null)
 				{
 					throw new InvalidOperationException();
 				}
-				return this.target.Node.ProjectMgr.Site.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+				return this.target.Node.ProjectManager.Site.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
 			}
 		}
 

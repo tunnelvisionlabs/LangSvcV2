@@ -61,7 +61,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 		{
 			get
 			{
-				return BaseReferenceNode.ProjectMgr.GetAutomationObject() as EnvDTE.Project;
+				return BaseReferenceNode.ProjectManager.GetAutomationObject() as EnvDTE.Project;
 			}
 		}
 
@@ -86,7 +86,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 		{
 			get
 			{
-				return BaseReferenceNode.ProjectMgr.Site.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+				return BaseReferenceNode.ProjectManager.Site.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
 			}
 		}
 

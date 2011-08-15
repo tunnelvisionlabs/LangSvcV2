@@ -145,7 +145,7 @@ namespace Microsoft.VisualStudio.Project
                 else
                 {
                     // Path is relative, so make it relative to project path
-                    url = new Url(this.ProjectMgr.BaseURI, path);
+                    url = new Url(this.ProjectManager.BaseURI, path);
                 }
                 return url.AbsoluteUrl;
 
@@ -206,7 +206,7 @@ namespace Microsoft.VisualStudio.Project
         public FileNode(ProjectNode root, ProjectElement element)
             : base(root, element)
         {
-            if(this.ProjectMgr.NodeHasDesigner(this.ItemNode.GetMetadata(ProjectFileConstants.Include)))
+            if(this.ProjectManager.NodeHasDesigner(this.ItemNode.GetMetadata(ProjectFileConstants.Include)))
             {
                 this.HasDesigner = true;
             }
@@ -248,7 +248,7 @@ namespace Microsoft.VisualStudio.Project
                 return base.GetIconHandle(open);
             }
             // Return the handle for the image.
-            return this.ProjectMgr.ImageHandler.GetIconHandle(index);
+            return this.ProjectManager.ImageHandler.GetIconHandle(index);
         }
 
         /// <summary>
@@ -257,12 +257,12 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>An instance of the Automation.OAFileNode if succeeded</returns>
         public override object GetAutomationObject()
         {
-            if(this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+            if(this.ProjectManager == null || this.ProjectManager.IsClosed)
             {
                 return null;
             }
 
-            return new Automation.OAFileItem(this.ProjectMgr.GetAutomationObject() as Automation.OAProject, this);
+            return new Automation.OAFileItem(this.ProjectManager.GetAutomationObject() as Automation.OAProject, this);
         }
 
         /// <summary>
@@ -283,7 +283,7 @@ namespace Microsoft.VisualStudio.Project
             //                 expected that we can be called with a label which is the same as the current
             //                 label and this should not be considered a NO-OP.
 
-            if(this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+            if(this.ProjectManager == null || this.ProjectManager.IsClosed)
             {
                 return VSConstants.E_FAIL;
             }
@@ -326,7 +326,7 @@ namespace Microsoft.VisualStudio.Project
             {
                 // Prompt to confirm that they really want to change the extension of the file
                 string message = SR.GetString(SR.ConfirmExtensionChange, CultureInfo.CurrentUICulture, new string[] { label });
-                IVsUIShell shell = this.ProjectMgr.Site.GetService(typeof(SVsUIShell)) as IVsUIShell;
+                IVsUIShell shell = this.ProjectManager.Site.GetService(typeof(SVsUIShell)) as IVsUIShell;
 
                 Debug.Assert(shell != null, "Could not get the ui shell from the project");
                 if(shell == null)
@@ -386,7 +386,7 @@ namespace Microsoft.VisualStudio.Project
 
             if(!Path.IsPathRooted(relativePath))
             {
-                strSavePath = Path.Combine(Path.GetDirectoryName(this.ProjectMgr.BaseURI.Uri.LocalPath), strSavePath);
+                strSavePath = Path.Combine(Path.GetDirectoryName(this.ProjectManager.BaseURI.Uri.LocalPath), strSavePath);
             }
 
             string newName = Path.Combine(strSavePath, label);
@@ -470,18 +470,18 @@ namespace Microsoft.VisualStudio.Project
         /// <returns></returns>
         protected internal override HierarchyNode GetDragTargetHandlerNode()
         {
-            Debug.Assert(this.ProjectMgr != null, " The project manager is null for the filenode");
+            Debug.Assert(this.ProjectManager != null, " The project manager is null for the filenode");
             HierarchyNode handlerNode = this;
             while(handlerNode != null && !(handlerNode is ProjectNode || handlerNode is FolderNode))
                 handlerNode = handlerNode.Parent;
             if(handlerNode == null)
-                handlerNode = this.ProjectMgr;
+                handlerNode = this.ProjectManager;
             return handlerNode;
         }
 
         protected override int ExecCommandOnNode(Guid cmdGroup, uint cmd, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
-            if(this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+            if(this.ProjectManager == null || this.ProjectManager.IsClosed)
             {
                 return (int)OleConstants.OLECMDERR_E_NOTSUPPORTED;
             }
@@ -651,7 +651,7 @@ namespace Microsoft.VisualStudio.Project
             bool isSameFile = NativeMethods.IsSamePath(newFilePath, this.Url);
 
 			string linkPath = null;
-            string projectCannonicalDirecoryName = new Uri(this.ProjectMgr.ProjectFolder).LocalPath;
+            string projectCannonicalDirecoryName = new Uri(this.ProjectManager.ProjectFolder).LocalPath;
             projectCannonicalDirecoryName = projectCannonicalDirecoryName.TrimEnd(Path.DirectorySeparatorChar);
             if(!isSamePath && newCanonicalDirectoryName.IndexOf(projectCannonicalDirecoryName, StringComparison.OrdinalIgnoreCase) == -1)
             {
@@ -675,12 +675,12 @@ namespace Microsoft.VisualStudio.Project
             else if(NativeMethods.IsSamePath(newCanonicalDirectoryName, projectCannonicalDirecoryName))
             {
                 //the projectnode is the target container
-                targetContainer = this.ProjectMgr;
+                targetContainer = this.ProjectManager;
             }
             else
             {
                 //search for the target container among existing child nodes
-                targetContainer = this.ProjectMgr.FindChild(newDirectoryName);
+                targetContainer = this.ProjectManager.FindChild(newDirectoryName);
                 if(targetContainer != null && (targetContainer is FileNode))
                 {
                     // We already have a file node with this name in the hierarchy.
@@ -692,22 +692,22 @@ namespace Microsoft.VisualStudio.Project
             if(targetContainer == null)
             {
                 // Add a chain of subdirectories to the project.
-                string relativeUri = PackageUtilities.GetPathDistance(this.ProjectMgr.BaseURI.Uri, newDirectoryUri);
-                Debug.Assert(!String.IsNullOrEmpty(relativeUri) && relativeUri != newDirectoryUri.LocalPath, "Could not make pat distance of " + this.ProjectMgr.BaseURI.Uri.LocalPath + " and " + newDirectoryUri);
-                targetContainer = this.ProjectMgr.CreateFolderNodes(relativeUri);
+                string relativeUri = PackageUtilities.GetPathDistance(this.ProjectManager.BaseURI.Uri, newDirectoryUri);
+                Debug.Assert(!String.IsNullOrEmpty(relativeUri) && relativeUri != newDirectoryUri.LocalPath, "Could not make pat distance of " + this.ProjectManager.BaseURI.Uri.LocalPath + " and " + newDirectoryUri);
+                targetContainer = this.ProjectManager.CreateFolderNodes(relativeUri);
             }
             Debug.Assert(targetContainer != null, "We should have found a target node by now");
 
             //Suspend file changes while we rename the document
             string oldrelPath = this.ItemNode.GetMetadata(ProjectFileConstants.Include);
-            string oldName = Path.Combine(this.ProjectMgr.ProjectFolder, oldrelPath);
-            SuspendFileChanges sfc = new SuspendFileChanges(this.ProjectMgr.Site, oldName);
+            string oldName = Path.Combine(this.ProjectManager.ProjectFolder, oldrelPath);
+            SuspendFileChanges sfc = new SuspendFileChanges(this.ProjectManager.Site, oldName);
             sfc.Suspend();
 
             try
             {
                 // Rename the node.	
-                DocumentManager.UpdateCaption(this.ProjectMgr.Site, Path.GetFileName(newFilePath), docData);
+                DocumentManager.UpdateCaption(this.ProjectManager.Site, Path.GetFileName(newFilePath), docData);
                 // Check if the file name was actually changed.
                 // In same cases (e.g. if the item is a file and the user has changed its encoding) this function
                 // is called even if there is no real rename.
@@ -774,14 +774,14 @@ namespace Microsoft.VisualStudio.Project
         {
             bool fileExist = IsFileOnDisk(this.Url);
 
-            if(!fileExist && showMessage && !Utilities.IsInAutomationFunction(this.ProjectMgr.Site))
+            if(!fileExist && showMessage && !Utilities.IsInAutomationFunction(this.ProjectManager.Site))
             {
                 string message = String.Format(CultureInfo.CurrentCulture, SR.GetString(SR.ItemDoesNotExistInProjectDirectory, CultureInfo.CurrentUICulture), this.Caption);
                 string title = string.Empty;
                 OLEMSGICON icon = OLEMSGICON.OLEMSGICON_CRITICAL;
                 OLEMSGBUTTON buttons = OLEMSGBUTTON.OLEMSGBUTTON_OK;
                 OLEMSGDEFBUTTON defaultButton = OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST;
-                VsShellUtilities.ShowMessageBox(this.ProjectMgr.Site, title, message, icon, buttons, defaultButton);
+                VsShellUtilities.ShowMessageBox(this.ProjectManager.Site, title, message, icon, buttons, defaultButton);
             }
 
             return fileExist;
@@ -825,8 +825,8 @@ namespace Microsoft.VisualStudio.Project
             VSADDRESULT[] result = new VSADDRESULT[1];
             Guid emptyGuid = Guid.Empty;
             VSADDITEMOPERATION op = (String.IsNullOrEmpty(linkPath) ? VSADDITEMOPERATION.VSADDITEMOP_OPENFILE : VSADDITEMOPERATION.VSADDITEMOP_LINKTOFILE);
-            ErrorHandler.ThrowOnFailure(this.ProjectMgr.AddItemWithSpecific(newParentId, op, null, 0, file, IntPtr.Zero, 0, ref emptyGuid, null, ref emptyGuid, result));
-            FileNode childAdded = this.ProjectMgr.FindChild(newFileName) as FileNode;
+            ErrorHandler.ThrowOnFailure(this.ProjectManager.AddItemWithSpecific(newParentId, op, null, 0, file, IntPtr.Zero, 0, ref emptyGuid, null, ref emptyGuid, result));
+            FileNode childAdded = this.ProjectManager.FindChild(newFileName) as FileNode;
             Debug.Assert(childAdded != null, "Could not find the renamed item in the hierarchy");
             // Update the itemid to the newly added.
             this.ID = childAdded.ID;
@@ -863,17 +863,17 @@ namespace Microsoft.VisualStudio.Project
             }
 
             //Update the new document in the RDT.
-            DocumentManager.RenameDocument(this.ProjectMgr.Site, oldFileName, newFileName, childAdded.ID);
+            DocumentManager.RenameDocument(this.ProjectManager.Site, oldFileName, newFileName, childAdded.ID);
 
             //Select the new node in the hierarchy
-            IVsUIHierarchyWindow uiWindow = UIHierarchyUtilities.GetUIHierarchyWindow(this.ProjectMgr.Site, SolutionExplorer);
+            IVsUIHierarchyWindow uiWindow = UIHierarchyUtilities.GetUIHierarchyWindow(this.ProjectManager.Site, SolutionExplorer);
 			// This happens in the context of renaming a file.
 			// Since we are already in solution explorer, it is extremely unlikely that we get a null return.
 			// If we do, the consequences are minimal: the parent node will be selected instead of the
 			// renamed node.
 			if (uiWindow != null)
 			{
-				ErrorHandler.ThrowOnFailure(uiWindow.ExpandItem(this.ProjectMgr, this.ID, EXPANDFLAGS.EXPF_SelectItem));
+				ErrorHandler.ThrowOnFailure(uiWindow.ExpandItem(this.ProjectManager, this.ID, EXPANDFLAGS.EXPF_SelectItem));
 			}
 
             //Update FirstChild
@@ -946,7 +946,7 @@ namespace Microsoft.VisualStudio.Project
 
             if (deleteOperation == supportedOp)
             {
-                return this.ProjectMgr.CanProjectDeleteItems;
+                return this.ProjectManager.CanProjectDeleteItems;
             }
 
             return false;
@@ -968,7 +968,7 @@ namespace Microsoft.VisualStudio.Project
         /// <returns></returns>
         protected virtual ISingleFileGenerator CreateSingleFileGenerator()
         {
-            return new SingleFileGenerator(this.ProjectMgr);
+            return new SingleFileGenerator(this.ProjectManager);
         }
 
         /// <summary>
@@ -1086,7 +1086,7 @@ namespace Microsoft.VisualStudio.Project
         [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes")]
         int IProjectSourceNode.ExcludeFromProject()
         {
-            if (this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+            if (this.ProjectManager == null || this.ProjectManager.IsClosed)
             {
                 return (int)OleConstants.OLECMDERR_E_NOTSUPPORTED;
             }
@@ -1102,7 +1102,7 @@ namespace Microsoft.VisualStudio.Project
                 string documentToRemove = this.GetMkDocument();
                 string[] filesToBeDeleted = new string[1] { documentToRemove };
                 VSQUERYREMOVEFILEFLAGS[] queryRemoveFlags = this.GetQueryRemoveFileFlags(filesToBeDeleted);
-                if (!this.ProjectMgr.Tracker.CanRemoveItems(filesToBeDeleted, queryRemoveFlags))
+                if (!this.ProjectManager.Tracker.CanRemoveItems(filesToBeDeleted, queryRemoveFlags))
                 {
                     return (int)OleConstants.OLECMDERR_E_CANCELED;
                 }
@@ -1119,7 +1119,7 @@ namespace Microsoft.VisualStudio.Project
                 }
 
                 // Check out the project file.
-                if (!this.ProjectMgr.QueryEditProjectFile(false))
+                if (!this.ProjectManager.QueryEditProjectFile(false))
                 {
                     throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
                 }
@@ -1128,19 +1128,19 @@ namespace Microsoft.VisualStudio.Project
             // close the document window if open.
             this.CloseDocumentWindow(this);
 
-            ProjectNode projectNode = this.ProjectMgr as ProjectNode;
+            ProjectNode projectNode = this.ProjectManager as ProjectNode;
 
             if (projectNode != null && projectNode.ShowAllFilesEnabled && File.Exists(this.Url))
             {
                 string url = this.Url; // need to store before removing the node.
                 this.ItemNode.RemoveFromProjectFile();
-                this.ProjectMgr.Tracker.OnItemRemoved(url, VSREMOVEFILEFLAGS.VSREMOVEFILEFLAGS_NoFlags);
+                this.ProjectManager.Tracker.OnItemRemoved(url, VSREMOVEFILEFLAGS.VSREMOVEFILEFLAGS_NoFlags);
                 this.SetProperty((int)__VSHPROPID.VSHPROPID_IsNonMemberItem, true); // Set it as non member item
-                this.ItemNode = new ProjectElement(this.ProjectMgr, null, true); // now we have to set a new ItemNode to indicate that this is virtual node.
+                this.ItemNode = new ProjectElement(this.ProjectManager, null, true); // now we have to set a new ItemNode to indicate that this is virtual node.
                 this.ItemNode.Rename(url);
                 this.ItemNode.SetMetadata(ProjectFileConstants.Name, url);
 
-                ////this.ProjectMgr.OnItemAdded(this.Parent, this);
+                ////this.ProjectManager.OnItemAdded(this.Parent, this);
                 this.ReDraw(UIHierarchyElement.Icon); // We have to redraw the icon of the node as it is now not a member of the project and should be drawn using a different icon.
                 this.ReDraw(UIHierarchyElement.SccState); // update the SCC state icon.
             }
@@ -1168,7 +1168,7 @@ namespace Microsoft.VisualStudio.Project
         [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes")]
         int IProjectSourceNode.IncludeInProject()
         {
-            if (ProjectMgr == null || ProjectMgr.IsClosed)
+            if (ProjectManager == null || ProjectManager.IsClosed)
             {
                 return (int)OleConstants.OLECMDERR_E_NOTSUPPORTED;
             }
@@ -1180,7 +1180,7 @@ namespace Microsoft.VisualStudio.Project
             //using ( WixHelperMethods.NewWaitCursor() )
             //{
             // Check out the project file.
-            if (!ProjectMgr.QueryEditProjectFile(false))
+            if (!ProjectManager.QueryEditProjectFile(false))
             {
                 throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
             }
@@ -1190,8 +1190,8 @@ namespace Microsoft.VisualStudio.Project
 
             // now add this node to the project.
             this.SetProperty((int)__VSHPROPID.VSHPROPID_IsNonMemberItem, false);
-            this.ItemNode = ProjectMgr.AddFileToMsBuild(this.Url);
-            this.ProjectMgr.Tracker.OnItemAdded(this.Url, VSADDFILEFLAGS.VSADDFILEFLAGS_NoFlags);
+            this.ItemNode = ProjectManager.AddFileToMsBuild(this.Url);
+            this.ProjectManager.Tracker.OnItemAdded(this.Url, VSADDFILEFLAGS.VSADDFILEFLAGS_NoFlags);
 
             // notify others
             ////projectNode.OnItemAdded(this.Parent, this);
@@ -1234,7 +1234,7 @@ namespace Microsoft.VisualStudio.Project
             uint itemId;
             uint uiVsDocCookie;
 
-            SuspendFileChanges sfc = new SuspendFileChanges(this.ProjectMgr.Site, oldName);
+            SuspendFileChanges sfc = new SuspendFileChanges(this.ProjectManager.Site, oldName);
             sfc.Suspend();
 
             try
@@ -1250,17 +1250,17 @@ namespace Microsoft.VisualStudio.Project
                 VSRENAMEFILEFLAGS renameflag = VSRENAMEFILEFLAGS.VSRENAMEFILEFLAGS_NoFlags;
                 try
                 {
-                    this.ProjectMgr.SuspendMSBuild();
+                    this.ProjectManager.SuspendMSBuild();
                     ErrorHandler.ThrowOnFailure(pRDT.FindAndLockDocument((uint)_VSRDTFLAGS.RDT_NoLock, oldName, out pIVsHierarchy, out itemId, out docData, out uiVsDocCookie));
 
-                    if(pIVsHierarchy != null && !Utilities.IsSameComObject(pIVsHierarchy, this.ProjectMgr))
+                    if(pIVsHierarchy != null && !Utilities.IsSameComObject(pIVsHierarchy, this.ProjectManager))
                     {
                         // Don't rename it if it wasn't opened by us.
                         return false;
                     }
 
                     // ask other potentially running packages
-                    if(!this.ProjectMgr.Tracker.CanRenameItem(oldName, newName, renameflag))
+                    if(!this.ProjectManager.Tracker.CanRenameItem(oldName, newName, renameflag))
                     {
                         return false;
                     }
@@ -1272,12 +1272,12 @@ namespace Microsoft.VisualStudio.Project
                     }
 
                     string newFileName = Path.GetFileName(newName);
-                    DocumentManager.UpdateCaption(this.ProjectMgr.Site, newFileName, docData);
+                    DocumentManager.UpdateCaption(this.ProjectManager.Site, newFileName, docData);
                     bool caseOnlyChange = NativeMethods.IsSamePath(oldName, newName);
                     if(!caseOnlyChange)
                     {
                         // Check out the project file if necessary.
-                        if(!this.ProjectMgr.QueryEditProjectFile(false))
+                        if(!this.ProjectManager.QueryEditProjectFile(false))
                         {
                             throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
                         }
@@ -1291,10 +1291,10 @@ namespace Microsoft.VisualStudio.Project
                 }
                 finally
                 {
-                    this.ProjectMgr.ResumeMSBuild(this.ProjectMgr.ReEvaluateProjectFileTargetName);
+                    this.ProjectManager.ResumeMSBuild(this.ProjectManager.ReEvaluateProjectFileTargetName);
                 }
 
-                this.ProjectMgr.Tracker.OnItemRenamed(oldName, newName, renameflag);
+                this.ProjectManager.Tracker.OnItemRenamed(oldName, newName, renameflag);
             }
             finally
             {
@@ -1337,7 +1337,7 @@ namespace Microsoft.VisualStudio.Project
             this.RenameChildNodes(this);
 
             // Refresh the property browser.
-            IVsUIShell shell = this.ProjectMgr.Site.GetService(typeof(SVsUIShell)) as IVsUIShell;
+            IVsUIShell shell = this.ProjectManager.Site.GetService(typeof(SVsUIShell)) as IVsUIShell;
             Debug.Assert(shell != null, "Could not get the ui shell from the project");
             if(shell == null)
             {
@@ -1347,12 +1347,12 @@ namespace Microsoft.VisualStudio.Project
             ErrorHandler.ThrowOnFailure(shell.RefreshPropertyBrowser(0));
 
             //Select the new node in the hierarchy
-            IVsUIHierarchyWindow uiWindow = UIHierarchyUtilities.GetUIHierarchyWindow(this.ProjectMgr.Site, SolutionExplorer);
+            IVsUIHierarchyWindow uiWindow = UIHierarchyUtilities.GetUIHierarchyWindow(this.ProjectManager.Site, SolutionExplorer);
             // This happens in the context of renaming a file by case only (Table.sql -> table.sql)
             // Since we are already in solution explorer, it is extremely unlikely that we get a null return.
 			if (uiWindow != null)
 			{
-				ErrorHandler.ThrowOnFailure(uiWindow.ExpandItem(this.ProjectMgr, this.ID, EXPANDFLAGS.EXPF_SelectItem));
+				ErrorHandler.ThrowOnFailure(uiWindow.ExpandItem(this.ProjectManager, this.ID, EXPANDFLAGS.EXPF_SelectItem));
 			}
         }
 

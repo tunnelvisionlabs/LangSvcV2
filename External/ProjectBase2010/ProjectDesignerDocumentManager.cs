@@ -40,22 +40,22 @@ namespace Microsoft.VisualStudio.Project
 			Debug.Assert(editorType == VSConstants.GUID_ProjectDesignerEditor, "Cannot open project designer with guid " + editorType.ToString());
 
 
-			if(this.Node == null || this.Node.ProjectMgr == null || this.Node.ProjectMgr.IsClosed)
+			if(this.Node == null || this.Node.ProjectManager == null || this.Node.ProjectManager.IsClosed)
 			{
 				return VSConstants.E_FAIL;
 			}
 
-			IVsUIShellOpenDocument uiShellOpenDocument = this.Node.ProjectMgr.Site.GetService(typeof(SVsUIShellOpenDocument)) as IVsUIShellOpenDocument;
-			IOleServiceProvider serviceProvider = this.Node.ProjectMgr.Site.GetService(typeof(IOleServiceProvider)) as IOleServiceProvider;
+			IVsUIShellOpenDocument uiShellOpenDocument = this.Node.ProjectManager.Site.GetService(typeof(SVsUIShellOpenDocument)) as IVsUIShellOpenDocument;
+			IOleServiceProvider serviceProvider = this.Node.ProjectManager.Site.GetService(typeof(IOleServiceProvider)) as IOleServiceProvider;
 
 			if(serviceProvider != null && uiShellOpenDocument != null)
 			{
 				string fullPath = this.GetFullPathForDocument();
 				string caption = this.GetOwnerCaption();
 
-				IVsUIHierarchy parentHierarchy = this.Node.ProjectMgr.GetProperty((int)__VSHPROPID.VSHPROPID_ParentHierarchy) as IVsUIHierarchy;
+				IVsUIHierarchy parentHierarchy = this.Node.ProjectManager.GetProperty((int)__VSHPROPID.VSHPROPID_ParentHierarchy) as IVsUIHierarchy;
 
-                int parentHierarchyItemId = (int)this.Node.ProjectMgr.GetProperty((int)__VSHPROPID.VSHPROPID_ParentHierarchyItemid);
+                int parentHierarchyItemId = (int)this.Node.ProjectManager.GetProperty((int)__VSHPROPID.VSHPROPID_ParentHierarchyItemid);
 
                 ErrorHandler.ThrowOnFailure(uiShellOpenDocument.OpenSpecificEditor(editorFlags, fullPath, ref editorType, physicalView, ref logicalView, caption, parentHierarchy, (uint)parentHierarchyItemId, docDataExisting, serviceProvider, out frame));
 

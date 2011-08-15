@@ -64,7 +64,7 @@ namespace Microsoft.VisualStudio.Project
 
 		[Browsable(false)]
 		[AutomationBrowsable(false)]
-		public ProjectNode ProjectMgr
+		public ProjectNode ProjectManager
 		{
 			get
 			{
@@ -128,10 +128,10 @@ namespace Microsoft.VisualStudio.Project
 
 		public string GetProperty(string propertyName)
 		{
-			if(this.ProjectMgr != null)
+			if(this.ProjectManager != null)
 			{
                 string property;
-                bool found = this.ProjectMgr.BuildProject.GlobalProperties.TryGetValue(propertyName, out property);
+                bool found = this.ProjectManager.BuildProject.GlobalProperties.TryGetValue(propertyName, out property);
 
 				if(found)
 				{
@@ -145,7 +145,7 @@ namespace Microsoft.VisualStudio.Project
 		// relative to active configuration.
 		public string GetConfigProperty(string propertyName)
 		{
-			if(this.ProjectMgr != null)
+			if(this.ProjectManager != null)
 			{
 				string unifiedResult = null;
 				bool cacheNeedReset = true;
@@ -188,7 +188,7 @@ namespace Microsoft.VisualStudio.Project
 				value = String.Empty;
 			}
 
-			if(this.ProjectMgr != null)
+			if(this.ProjectManager != null)
 			{
 				for(int i = 0, n = this.projectConfigs.Length; i < n; i++)
 				{
@@ -197,7 +197,7 @@ namespace Microsoft.VisualStudio.Project
 					config.SetConfigurationProperty(name, value);
 				}
 
-				this.ProjectMgr.SetProjectFileDirty(true);
+				this.ProjectManager.SetProjectFileDirty(true);
 			}
 		}
 
@@ -324,9 +324,9 @@ namespace Microsoft.VisualStudio.Project
 					{
 						ProjectConfig config = (ProjectConfig)punk[i];
 
-						if(this.project == null || (this.project != (punk[0] as ProjectConfig).ProjectMgr))
+						if(this.project == null || (this.project != (punk[0] as ProjectConfig).ProjectManager))
 						{
-							this.project = config.ProjectMgr;
+							this.project = config.ProjectManager;
 						}
 
 						configs.Add(config);
@@ -336,9 +336,9 @@ namespace Microsoft.VisualStudio.Project
 				}
 				else if(punk[0] is NodeProperties)
 				{
-                    if (this.project == null || (this.project != (punk[0] as NodeProperties).Node.ProjectMgr))
+                    if (this.project == null || (this.project != (punk[0] as NodeProperties).Node.ProjectManager))
 					{
-						this.project = (punk[0] as NodeProperties).Node.ProjectMgr;
+						this.project = (punk[0] as NodeProperties).Node.ProjectManager;
 					}
 
 					System.Collections.Generic.Dictionary<string, ProjectConfig> configsMap = new System.Collections.Generic.Dictionary<string, ProjectConfig>();
@@ -347,7 +347,7 @@ namespace Microsoft.VisualStudio.Project
 					{
 						NodeProperties property = (NodeProperties)punk[i];
 						IVsCfgProvider provider;
-						ErrorHandler.ThrowOnFailure(property.Node.ProjectMgr.GetCfgProvider(out provider));
+						ErrorHandler.ThrowOnFailure(property.Node.ProjectManager.GetCfgProvider(out provider));
 						uint[] expected = new uint[1];
 						ErrorHandler.ThrowOnFailure(provider.GetCfgs(0, null, expected, null));
 						if(expected[0] > 0)

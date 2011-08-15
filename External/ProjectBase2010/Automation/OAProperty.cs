@@ -153,7 +153,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 				object[] index = new object[len];
 				Array.Copy(new object[4] { index1, index2, index3, index4 }, index, len);
 
-				using(AutomationScope scope = new AutomationScope(this.parent.Target.Node.ProjectMgr.Site))
+				using(AutomationScope scope = new AutomationScope(this.parent.Target.Node.ProjectManager.Site))
 				{
 					this.pi.SetValue(this.parent.Target, value, index);
 				}
@@ -169,7 +169,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 			get { return pi.GetValue(this.parent.Target, null); }
 			set
 			{
-				using(AutomationScope scope = new AutomationScope(this.parent.Target.Node.ProjectMgr.Site))
+				using(AutomationScope scope = new AutomationScope(this.parent.Target.Node.ProjectManager.Site))
 				{
 					this.pi.SetValue(this.parent.Target, value, null);
 				}

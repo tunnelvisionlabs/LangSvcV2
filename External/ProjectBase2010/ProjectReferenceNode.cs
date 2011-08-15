@@ -132,7 +132,7 @@ namespace Microsoft.VisualStudio.Project
 
                     // Search for the project in the collection of the projects in the
                     // current solution.
-                    EnvDTE.DTE dte = (EnvDTE.DTE)this.ProjectMgr.GetService(typeof(EnvDTE.DTE));
+                    EnvDTE.DTE dte = (EnvDTE.DTE)this.ProjectManager.GetService(typeof(EnvDTE.DTE));
                     if ((null == dte) || (null == dte.Solution))
                     {
                         return null;
@@ -301,8 +301,8 @@ namespace Microsoft.VisualStudio.Project
 			{
 				this.referencedProjectGuid = new Guid(guidString);
 
-				this.buildDependency = new BuildDependency(this.ProjectMgr, this.referencedProjectGuid);
-				this.ProjectMgr.AddBuildDependency(this.buildDependency);
+				this.buildDependency = new BuildDependency(this.ProjectManager, this.referencedProjectGuid);
+				this.ProjectManager.AddBuildDependency(this.buildDependency);
 			}
 			finally
 			{
@@ -313,7 +313,7 @@ namespace Microsoft.VisualStudio.Project
 				Debug.Assert(!String.IsNullOrEmpty(this.referencedProjectName), "Could not retrive referenced project name form project file");
 			}
 
-			Uri uri = new Uri(this.ProjectMgr.BaseURI.Uri, this.referencedProjectRelativePath);
+			Uri uri = new Uri(this.ProjectManager.BaseURI.Uri, this.referencedProjectRelativePath);
 
 			if(uri != null)
 			{
@@ -368,7 +368,7 @@ namespace Microsoft.VisualStudio.Project
 			// Did we get just a file or a relative path?
 			Uri uri = new Uri(projectPath);
 
-			string referenceDir = PackageUtilities.GetPathDistance(this.ProjectMgr.BaseURI.Uri, uri);
+			string referenceDir = PackageUtilities.GetPathDistance(this.ProjectManager.BaseURI.Uri, uri);
 
 			Debug.Assert(!String.IsNullOrEmpty(referenceDir), "Can not add a project reference because the input for adding one is invalid.");
 
@@ -377,7 +377,7 @@ namespace Microsoft.VisualStudio.Project
 
 			this.referencedProjectFullPath = Path.Combine(projectPath, justTheFileName);
 
-			this.buildDependency = new BuildDependency(this.ProjectMgr, this.referencedProjectGuid);
+			this.buildDependency = new BuildDependency(this.ProjectManager, this.referencedProjectGuid);
 
 		}
 		#endregion
@@ -393,12 +393,12 @@ namespace Microsoft.VisualStudio.Project
 		/// </summary>
 		public override void AddReference()
 		{
-			if(this.ProjectMgr == null)
+			if(this.ProjectManager == null)
 			{
 				return;
 			}
 			base.AddReference();
-			this.ProjectMgr.AddBuildDependency(this.buildDependency);
+			this.ProjectManager.AddBuildDependency(this.buildDependency);
 			return;
 		}
 
@@ -407,11 +407,11 @@ namespace Microsoft.VisualStudio.Project
 		/// </summary>
 		public override void Remove(bool removeFromStorage)
 		{
-			if(this.ProjectMgr == null || !this.CanRemoveReference)
+			if(this.ProjectManager == null || !this.CanRemoveReference)
 			{
 				return;
 			}
-			this.ProjectMgr.RemoveBuildDependency(this.buildDependency);
+			this.ProjectManager.RemoveBuildDependency(this.buildDependency);
 			base.Remove(removeFromStorage);
 			return;
 		}
@@ -424,7 +424,7 @@ namespace Microsoft.VisualStudio.Project
 			Debug.Assert(!String.IsNullOrEmpty(this.referencedProjectName), "The referencedProjectName field has not been initialized");
 			Debug.Assert(this.referencedProjectGuid != Guid.Empty, "The referencedProjectName field has not been initialized");
 
-			this.ItemNode = new ProjectElement(this.ProjectMgr, this.referencedProjectRelativePath, ProjectFileConstants.ProjectReference);
+			this.ItemNode = new ProjectElement(this.ProjectManager, this.referencedProjectRelativePath, ProjectFileConstants.ProjectReference);
 
 			this.ItemNode.SetMetadata(ProjectFileConstants.Name, this.referencedProjectName);
 			this.ItemNode.SetMetadata(ProjectFileConstants.Project, this.referencedProjectGuid.ToString("B"));
@@ -437,14 +437,14 @@ namespace Microsoft.VisualStudio.Project
 		/// <returns></returns>
 		protected override bool CanShowDefaultIcon()
 		{
-			if(this.referencedProjectGuid == Guid.Empty || this.ProjectMgr == null || this.ProjectMgr.IsClosed || this.isNodeValid)
+			if(this.referencedProjectGuid == Guid.Empty || this.ProjectManager == null || this.ProjectManager.IsClosed || this.isNodeValid)
 			{
 				return false;
 			}
 
 			IVsHierarchy hierarchy = null;
 
-			hierarchy = VsShellUtilities.GetHierarchy(this.ProjectMgr.Site, this.referencedProjectGuid);
+			hierarchy = VsShellUtilities.GetHierarchy(this.ProjectManager.Site, this.referencedProjectGuid);
 
 			if(hierarchy == null)
 			{
@@ -495,7 +495,7 @@ namespace Microsoft.VisualStudio.Project
 			OLEMSGICON icon = OLEMSGICON.OLEMSGICON_CRITICAL;
 			OLEMSGBUTTON buttons = OLEMSGBUTTON.OLEMSGBUTTON_OK;
 			OLEMSGDEFBUTTON defaultButton = OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST;
-			VsShellUtilities.ShowMessageBox(this.ProjectMgr.Site, title, message, icon, buttons, defaultButton);
+			VsShellUtilities.ShowMessageBox(this.ProjectManager.Site, title, message, icon, buttons, defaultButton);
 		}
 
 		/// <summary>
@@ -503,9 +503,9 @@ namespace Microsoft.VisualStudio.Project
 		/// </summary>
 		private bool IsReferenceInCycle(Guid projectGuid)
 		{
-			IVsHierarchy referencedHierarchy = VsShellUtilities.GetHierarchy(this.ProjectMgr.Site, projectGuid);
+			IVsHierarchy referencedHierarchy = VsShellUtilities.GetHierarchy(this.ProjectManager.Site, projectGuid);
 
-			var solutionBuildManager = this.ProjectMgr.Site.GetService(typeof(SVsSolutionBuildManager)) as IVsSolutionBuildManager2;
+			var solutionBuildManager = this.ProjectManager.Site.GetService(typeof(SVsSolutionBuildManager)) as IVsSolutionBuildManager2;
 			if (solutionBuildManager == null)
 			{
 				throw new InvalidOperationException("Cannot find the IVsSolutionBuildManager2 service.");
@@ -513,7 +513,7 @@ namespace Microsoft.VisualStudio.Project
 
 			int circular;
 			Marshal.ThrowExceptionForHR(solutionBuildManager.CalculateProjectDependencies());
-			Marshal.ThrowExceptionForHR(solutionBuildManager.QueryProjectDependency(referencedHierarchy, this.ProjectMgr, out circular));
+			Marshal.ThrowExceptionForHR(solutionBuildManager.QueryProjectDependency(referencedHierarchy, this.ProjectManager, out circular));
 
 			return circular != 0;
 		}

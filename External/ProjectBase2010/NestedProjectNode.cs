@@ -193,12 +193,12 @@ namespace Microsoft.VisualStudio.Project
         public override object GetAutomationObject()
         {
             //Validate that we are not disposed or the project is closing
-            if (this.isDisposed || this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+            if (this.isDisposed || this.ProjectManager == null || this.ProjectManager.IsClosed)
             {
                 return null;
             }
 
-            return new Automation.OANestedProjectItem(this.ProjectMgr.GetAutomationObject() as Automation.OAProject, this);
+            return new Automation.OANestedProjectItem(this.ProjectManager.GetAutomationObject() as Automation.OAProject, this);
         }
 
         /// <summary>
@@ -350,7 +350,7 @@ namespace Microsoft.VisualStudio.Project
 
                 if (null == iconHandle)
                 {
-                    iconHandle = this.ProjectMgr.ImageHandler.GetIconHandle((int)ProjectNode.ImageName.Application);
+                    iconHandle = this.ProjectManager.ImageHandler.GetIconHandle((int)ProjectNode.ImageName.Application);
                 }
             }
 
@@ -374,7 +374,7 @@ namespace Microsoft.VisualStudio.Project
         public override string GetMkDocument()
         {
             Debug.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
-            if (this.isDisposed || this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+            if (this.isDisposed || this.ProjectManager == null || this.ProjectManager.IsClosed)
             {
                 return String.Empty;
             }
@@ -422,7 +422,7 @@ namespace Microsoft.VisualStudio.Project
         protected internal override void ReloadItem(uint reserved)
         {
             #region precondition
-            if (this.isDisposed || this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+            if (this.isDisposed || this.ProjectManager == null || this.ProjectManager.IsClosed)
             {
                 throw new InvalidOperationException();
             }
@@ -449,7 +449,7 @@ namespace Microsoft.VisualStudio.Project
         protected internal override void IgnoreItemFileChanges(bool ignoreFlag)
         {
             #region precondition
-            if (this.isDisposed || this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+            if (this.isDisposed || this.ProjectManager == null || this.ProjectManager.IsClosed)
             {
                 throw new InvalidOperationException();
             }
@@ -637,7 +637,7 @@ namespace Microsoft.VisualStudio.Project
             }
 
             // Link into the nested VS hierarchy.
-            ErrorHandler.ThrowOnFailure(this.nestedHierarchy.SetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_ParentHierarchy, this.ProjectMgr));
+            ErrorHandler.ThrowOnFailure(this.nestedHierarchy.SetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_ParentHierarchy, this.ProjectManager));
             ErrorHandler.ThrowOnFailure(this.nestedHierarchy.SetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_ParentHierarchyItemid, (object)(int)this.ID));
 
             this.LockRDTEntry();
@@ -769,7 +769,7 @@ namespace Microsoft.VisualStudio.Project
                     // get inptr for hierarchy
                     projectPtr = Marshal.GetIUnknownForObject(this.nestedHierarchy);
                     Debug.Assert(projectPtr != IntPtr.Zero, " Project pointer for the nested hierarchy has not been initialized");
-                    ErrorHandler.ThrowOnFailure(rdt.RegisterAndLockDocument((uint)flags, this.projectPath, this.ProjectMgr, this.ID, projectPtr, out docCookie));
+                    ErrorHandler.ThrowOnFailure(rdt.RegisterAndLockDocument((uint)flags, this.projectPath, this.ProjectManager, this.ID, projectPtr, out docCookie));
 
                     this.DocCookie = docCookie;
                     Debug.Assert(this.DocCookie != (uint)ShellConstants.VSDOCCOOKIE_NIL, "Invalid cookie when registering document in the running document table.");
@@ -799,7 +799,7 @@ namespace Microsoft.VisualStudio.Project
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "RDT")]
         protected virtual void UnlockRDTEntry()
         {
-            if (this.isDisposed || this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+            if (this.isDisposed || this.ProjectManager == null || this.ProjectManager.IsClosed)
             {
                 return;
             }
@@ -834,10 +834,10 @@ namespace Microsoft.VisualStudio.Project
             try
             {
                 this.StopObservingNestedProjectFile();
-                this.ProjectMgr.SuspendMSBuild();
+                this.ProjectManager.SuspendMSBuild();
 
                 // Check out the project file if necessary.
-                if (!this.ProjectMgr.QueryEditProjectFile(false))
+                if (!this.ProjectManager.QueryEditProjectFile(false))
                 {
                     throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
                 }
@@ -857,12 +857,12 @@ namespace Microsoft.VisualStudio.Project
                 this.LockRDTEntry();
 
                 // Since actually this is a rename in our hierarchy notify the tracker that a rename has happened.
-                this.ProjectMgr.Tracker.OnItemRenamed(oldPath, this.projectPath, VSRENAMEFILEFLAGS.VSRENAMEFILEFLAGS_IsNestedProjectFile);
+                this.ProjectManager.Tracker.OnItemRenamed(oldPath, this.projectPath, VSRENAMEFILEFLAGS.VSRENAMEFILEFLAGS_IsNestedProjectFile);
             }
             finally
             {
                 this.ObserveNestedProjectFile();
-                this.ProjectMgr.ResumeMSBuild(this.ProjectMgr.ReEvaluateProjectFileTargetName);
+                this.ProjectManager.ResumeMSBuild(this.ProjectManager.ReEvaluateProjectFileTargetName);
             }
         }
         /// <summary>
@@ -884,7 +884,7 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         internal void CloseNestedProjectNode()
         {
-            if (this.isDisposed || this.ProjectMgr == null || this.ProjectMgr.IsClosed)
+            if (this.isDisposed || this.ProjectManager == null || this.ProjectManager.IsClosed)
             {
                 return;
             }
@@ -897,7 +897,7 @@ namespace Microsoft.VisualStudio.Project
                 IVsUIHierarchy hier;
 
                 IVsWindowFrame windowFrame;
-                VsShellUtilities.IsDocumentOpen(this.ProjectMgr.Site, this.projectPath, Guid.Empty, out hier, out itemid, out windowFrame);
+                VsShellUtilities.IsDocumentOpen(this.ProjectManager.Site, this.projectPath, Guid.Empty, out hier, out itemid, out windowFrame);
 
 
                 if (itemid == VSConstants.VSITEMID_NIL)
@@ -940,7 +940,7 @@ namespace Microsoft.VisualStudio.Project
             Debug.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
 
             // This method should be called from the open children method, then we can safely use the IsNewProject property
-            if (this.ProjectMgr.IsNewProject)
+            if (this.ProjectManager.IsNewProject)
             {
                 instanceGuid = Guid.NewGuid();
                 this.ItemNode.SetMetadata(ProjectFileConstants.InstanceGuid, instanceGuid.ToString("B"));
@@ -1022,7 +1022,7 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>The return of the GetProperty from nested.</returns>
         private object DelegateGetPropertyToNested(int propID)
         {
-            if (!this.ProjectMgr.IsClosed)
+            if (!this.ProjectManager.IsClosed)
             {
                 Debug.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
 
@@ -1047,7 +1047,7 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>The return of the SetProperty from nested.</returns>
         private int DelegateSetPropertyToNested(int propID, object value)
         {
-            if (this.ProjectMgr.IsClosed)
+            if (this.ProjectManager.IsClosed)
             {
                 return VSConstants.E_FAIL;
             }
@@ -1063,7 +1063,7 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         private void ObserveNestedProjectFile()
         {
-            ProjectContainerNode parent = this.ProjectMgr as ProjectContainerNode;
+            ProjectContainerNode parent = this.ProjectManager as ProjectContainerNode;
             Debug.Assert(parent != null, "The parent project for nested projects should be subclassed from ProjectContainerNode");
             parent.NestedProjectNodeReloader.ObserveItem(this.GetMkDocument(), this.ID);
         }
@@ -1073,7 +1073,7 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         private void StopObservingNestedProjectFile()
         {
-            ProjectContainerNode parent = this.ProjectMgr as ProjectContainerNode;
+            ProjectContainerNode parent = this.ProjectManager as ProjectContainerNode;
             Debug.Assert(parent != null, "The parent project for nested projects should be subclassed from ProjectContainerNode");
             parent.NestedProjectNodeReloader.StopObservingItem(this.GetMkDocument());
         }
@@ -1084,7 +1084,7 @@ namespace Microsoft.VisualStudio.Project
         /// <param name="ignoreFlag">Flag indicating whether or not to ignore changes (1 to ignore, 0 to stop ignoring).</param>
         private void IgnoreNestedProjectFile(bool ignoreFlag)
         {
-            ProjectContainerNode parent = this.ProjectMgr as ProjectContainerNode;
+            ProjectContainerNode parent = this.ProjectManager as ProjectContainerNode;
             Debug.Assert(parent != null, "The parent project for nested projects should be subclassed from ProjectContainerNode");
             parent.NestedProjectNodeReloader.IgnoreItemChanges(this.GetMkDocument(), ignoreFlag);
         }
