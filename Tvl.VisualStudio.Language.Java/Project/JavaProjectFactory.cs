@@ -6,7 +6,7 @@
     using Tvl.VisualStudio.Shell.Extensions;
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
-    [Guid(JavaProjectConstants.JavaProjectPackageGuidString)]
+    [Guid(JavaProjectConstants.JavaProjectFactoryGuidString)]
     public class JavaProjectFactory : ProjectFactory
     {
         internal JavaProjectFactory(JavaProjectPackage package)
