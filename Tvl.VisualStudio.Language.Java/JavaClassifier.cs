@@ -67,7 +67,6 @@
                 "null"
             };
 
-        private readonly ITextBuffer _textBuffer;
         private readonly IStandardClassificationService _standardClassificationService;
         private readonly IClassificationTypeRegistryService _classificationTypeRegistryService;
 
@@ -78,7 +77,6 @@
         public JavaClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService, IClassificationTypeRegistryService classificationTypeRegistryService)
             : base(textBuffer)
         {
-            this._textBuffer = textBuffer;
             this._standardClassificationService = standardClassificationService;
             this._classificationTypeRegistryService = classificationTypeRegistryService;
 
@@ -95,17 +93,6 @@
         protected override ITokenSourceWithState<JavaClassifierLexerState> CreateLexer(ICharStream input, JavaClassifierLexerState state)
         {
             return new JavaClassifierLexer(input, state);
-        }
-
-        protected override bool IsMultilineToken(ITextSnapshot snapshot, ITokenSource lexer, IToken token)
-        {
-            JavaClassifierLexer javaLexer = lexer as JavaClassifierLexer;
-            if (javaLexer != null && javaLexer.CharStream.Line >= token.Line)
-                return false;
-
-            int startLine = snapshot.GetLineNumberFromPosition(token.StartIndex);
-            int stopLine = snapshot.GetLineNumberFromPosition(token.StopIndex + 1);
-            return startLine != stopLine;
         }
 
         protected override IClassificationType ClassifyToken(IToken token)
