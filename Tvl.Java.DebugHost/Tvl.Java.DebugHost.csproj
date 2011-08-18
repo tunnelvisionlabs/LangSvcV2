@@ -1,0 +1,176 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{833550B8-B651-4FFB-B3AE-BF572AC4A18C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Tvl.Java.DebugHost</RootNamespace>
+    <AssemblyName>Tvl.Java.DebugHost</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <CodeContractsAssemblyMode>1</CodeContractsAssemblyMode>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
+    <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
+    <CodeContractsRuntimeThrowOnFailure>True</CodeContractsRuntimeThrowOnFailure>
+    <CodeContractsRuntimeCallSiteRequires>False</CodeContractsRuntimeCallSiteRequires>
+    <CodeContractsRuntimeSkipQuantifiers>False</CodeContractsRuntimeSkipQuantifiers>
+    <CodeContractsRunCodeAnalysis>False</CodeContractsRunCodeAnalysis>
+    <CodeContractsNonNullObligations>False</CodeContractsNonNullObligations>
+    <CodeContractsBoundsObligations>False</CodeContractsBoundsObligations>
+    <CodeContractsArithmeticObligations>False</CodeContractsArithmeticObligations>
+    <CodeContractsEnumObligations>False</CodeContractsEnumObligations>
+    <CodeContractsRedundantAssumptions>False</CodeContractsRedundantAssumptions>
+    <CodeContractsRunInBackground>True</CodeContractsRunInBackground>
+    <CodeContractsShowSquigglies>False</CodeContractsShowSquigglies>
+    <CodeContractsUseBaseLine>False</CodeContractsUseBaseLine>
+    <CodeContractsEmitXMLDocs>False</CodeContractsEmitXMLDocs>
+    <CodeContractsCustomRewriterAssembly />
+    <CodeContractsCustomRewriterClass />
+    <CodeContractsLibPaths />
+    <CodeContractsExtraRewriteOptions />
+    <CodeContractsExtraAnalysisOptions />
+    <CodeContractsBaseLineFile />
+    <CodeContractsCacheAnalysisResults>False</CodeContractsCacheAnalysisResults>
+    <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
+    <CodeContractsReferenceAssembly>DoNotBuild</CodeContractsReferenceAssembly>
+    <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
+    <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
+    <CodeContractsRuntimeThrowOnFailure>True</CodeContractsRuntimeThrowOnFailure>
+    <CodeContractsRuntimeCallSiteRequires>False</CodeContractsRuntimeCallSiteRequires>
+    <CodeContractsRuntimeSkipQuantifiers>False</CodeContractsRuntimeSkipQuantifiers>
+    <CodeContractsRunCodeAnalysis>False</CodeContractsRunCodeAnalysis>
+    <CodeContractsNonNullObligations>False</CodeContractsNonNullObligations>
+    <CodeContractsBoundsObligations>False</CodeContractsBoundsObligations>
+    <CodeContractsArithmeticObligations>False</CodeContractsArithmeticObligations>
+    <CodeContractsEnumObligations>False</CodeContractsEnumObligations>
+    <CodeContractsRedundantAssumptions>False</CodeContractsRedundantAssumptions>
+    <CodeContractsRunInBackground>True</CodeContractsRunInBackground>
+    <CodeContractsShowSquigglies>False</CodeContractsShowSquigglies>
+    <CodeContractsUseBaseLine>False</CodeContractsUseBaseLine>
+    <CodeContractsEmitXMLDocs>False</CodeContractsEmitXMLDocs>
+    <CodeContractsCustomRewriterAssembly />
+    <CodeContractsCustomRewriterClass />
+    <CodeContractsLibPaths />
+    <CodeContractsExtraRewriteOptions />
+    <CodeContractsExtraAnalysisOptions />
+    <CodeContractsBaseLineFile />
+    <CodeContractsCacheAnalysisResults>False</CodeContractsCacheAnalysisResults>
+    <CodeContractsRuntimeCheckingLevel>ReleaseRequires</CodeContractsRuntimeCheckingLevel>
+    <CodeContractsReferenceAssembly>DoNotBuild</CodeContractsReferenceAssembly>
+    <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Interop\AgentExports.cs" />
+    <Compile Include="Interop\JavaVM.cs" />
+    <Compile Include="Interop\JavaVMUnsafeNativeMethods.cs" />
+    <Compile Include="Interop\jclass.cs" />
+    <Compile Include="Interop\jfieldID.cs" />
+    <Compile Include="Interop\jmethodID.cs" />
+    <Compile Include="Interop\JNIEnvHandle.cs" />
+    <Compile Include="Interop\JniInvokeInterface.cs" />
+    <Compile Include="Interop\jniNativeInterface.cs" />
+    <Compile Include="Interop\JNINativeMethod.cs" />
+    <Compile Include="Interop\JniUnsafeNativeMethods.cs" />
+    <Compile Include="Interop\jobject.cs" />
+    <Compile Include="Interop\jobjectRefType.cs" />
+    <Compile Include="Interop\jthread.cs" />
+    <Compile Include="Interop\jthreadGroup.cs" />
+    <Compile Include="Interop\jthrowable.cs" />
+    <Compile Include="Interop\jvmtiAddressLocationMap.cs" />
+    <Compile Include="Interop\jvmtiCapabilities.cs" />
+    <Compile Include="Interop\jvmtiClassDefinition.cs" />
+    <Compile Include="Interop\jvmtiClassStatus.cs" />
+    <Compile Include="Interop\jvmtiEnvHandle.cs" />
+    <Compile Include="Interop\jvmtiError.cs" />
+    <Compile Include="JvmAccessModifiers.cs" />
+    <Compile Include="JvmEventType.cs" />
+    <Compile Include="Interop\jvmtiEventCallbacks.cs" />
+    <Compile Include="JvmEventMode.cs" />
+    <Compile Include="Interop\jvmtiFrameInfo.cs" />
+    <Compile Include="Interop\jvmtiHeapReferenceKind.cs" />
+    <Compile Include="Interop\jvmtiInterface.cs" />
+    <Compile Include="Interop\jvmtiJLocationFormat.cs" />
+    <Compile Include="Interop\jvmtiMonitorUsage.cs" />
+    <Compile Include="Interop\jvmtiPhase.cs" />
+    <Compile Include="Interop\jvmtiPrimitiveType.cs" />
+    <Compile Include="Interop\jvmtiThreadGroupInfo.cs" />
+    <Compile Include="Interop\jvmtiThreadInfo.cs" />
+    <Compile Include="Interop\jvmtiThreadState.cs" />
+    <Compile Include="Interop\jvmtiTimerInfo.cs" />
+    <Compile Include="Interop\jvmtiTimerKind.cs" />
+    <Compile Include="Interop\jvmtiVerboseFlag.cs" />
+    <Compile Include="Interop\jvmtiVersion.cs" />
+    <Compile Include="Interop\ModifiedUTF8StringData.cs" />
+    <Compile Include="Interop\UnsafeNativeMethods.cs" />
+    <Compile Include="JvmAddressLocationMap.cs" />
+    <Compile Include="JvmClassReference.cs" />
+    <Compile Include="JvmEnvironment.cs" />
+    <Compile Include="JvmEventManager.cs" />
+    <Compile Include="JvmEventProcessorBase.cs" />
+    <Compile Include="JvmField.cs" />
+    <Compile Include="JvmLocation.cs" />
+    <Compile Include="JvmMethod.cs" />
+    <Compile Include="JvmMonitorInfo.cs" />
+    <Compile Include="JvmNativeEnvironment.cs" />
+    <Compile Include="JvmObjectReference.cs" />
+    <Compile Include="DisposableObjectCollection`1.cs" />
+    <Compile Include="JvmResourceExhaustedFlags.cs" />
+    <Compile Include="JvmStackFrame.cs" />
+    <Compile Include="JvmStackInfo.cs" />
+    <Compile Include="JvmThreadPriority.cs" />
+    <Compile Include="JvmThreadReference.cs" />
+    <Compile Include="JvmThreadGroupReference.cs" />
+    <Compile Include="JvmThreadStatus.cs" />
+    <Compile Include="ModifiedUTF8Encoding.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SafeJvmAllocHandle.cs" />
+    <Compile Include="SafeJvmGlobalReferenceHandle.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Tvl.Java.DebugHostWrapper\Tvl.Java.DebugHostWrapper.vcxproj">
+      <Project>{538F6A87-53C9-4F02-B154-2A6925715C1C}</Project>
+      <Name>Tvl.Java.DebugHostWrapper</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
