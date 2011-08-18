@@ -4,16 +4,31 @@
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Linq;
-    using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
+    using Tvl.Extensions;
+    using CharStreamConstants = Antlr.Runtime.CharStreamConstants;
+    using ICharStream = Antlr.Runtime.ICharStream;
+    using IToken = Antlr.Runtime.IToken;
+    using LockRecursionPolicy = System.Threading.LockRecursionPolicy;
+    using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;
+    using VsShellUtilities = Microsoft.VisualStudio.Shell.VsShellUtilities;
+    using OLEMSGICON = Microsoft.VisualStudio.Shell.Interop.OLEMSGICON;
+    using OLEMSGBUTTON = Microsoft.VisualStudio.Shell.Interop.OLEMSGBUTTON;
+    using OLEMSGDEFBUTTON = Microsoft.VisualStudio.Shell.Interop.OLEMSGDEFBUTTON;
 
     public abstract class AntlrClassifierBase<TState> : IClassifier
         where TState : struct
     {
-        private readonly List<LineStateInfo> _lineStates = new List<LineStateInfo>();
+        private static bool _timeoutReported;
+
+        private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         private readonly ITextBuffer _textBuffer;
         private readonly IEqualityComparer<TState> _stateComparer;
+        private readonly ClassifierOptions _options;
+
+        private readonly List<LineStateInfo> _lineStates = new List<LineStateInfo>();
+        private ITextVersion _lineStatesVersion;
 
         private int? _firstDirtyLine;
         private int? _lastDirtyLine;
@@ -21,149 +36,171 @@
         private int? _firstChangedLine;
         private int? _lastChangedLine;
 
+        private bool _failedTimeout;
+
         public AntlrClassifierBase(ITextBuffer textBuffer)
             : this(textBuffer, EqualityComparer<TState>.Default)
         {
         }
 
         public AntlrClassifierBase(ITextBuffer textBuffer, IEqualityComparer<TState> stateComparer)
+            : this(textBuffer, stateComparer, ClassifierOptions.None)
+        {
+        }
+
+        public AntlrClassifierBase(ITextBuffer textBuffer, IEqualityComparer<TState> stateComparer, ClassifierOptions options)
         {
             Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
             Contract.Requires<ArgumentNullException>(stateComparer != null, "stateComparer");
 
             _textBuffer = textBuffer;
             _stateComparer = stateComparer;
+            _options = options;
 
             _lineStates.AddRange(Enumerable.Repeat(LineStateInfo.Dirty, textBuffer.CurrentSnapshot.LineCount));
-            SubscribeEvents();
+            if ((options & ClassifierOptions.ManualUpdate) == 0)
+                SubscribeEvents();
+
             ForceReclassifyLines(0, textBuffer.CurrentSnapshot.LineCount - 1);
         }
 
         public event EventHandler<ClassificationChangedEventArgs> ClassificationChanged;
 
+        public virtual AntlrClassifierBase<TState> GetClassifierSnapshot()
+        {
+            throw new NotSupportedException();
+        }
+
         public virtual IList<ClassificationSpan> GetClassificationSpans(SnapshotSpan span)
         {
             Contract.Ensures(Contract.Result<IList<ClassificationSpan>>() != null);
 
-            Span requestedSpan = span;
-            TState startState = AdjustParseSpan(ref span);
-
-            ICharStream input = CreateInputStream(span);
-            ITokenSourceWithState<TState> lexer = CreateLexer(input, startState);
             List<ClassificationSpan> classificationSpans = new List<ClassificationSpan>();
+            if (_failedTimeout)
+                return classificationSpans;
 
-            IToken previousToken = null;
-            bool previousTokenEndsLine = false;
-
-            /* this is held outside the loop because only tokens which end at the end of a line
-             * impact its value.
-             */
-            bool lineStateChanged = false;
+            bool spanExtended = false;
 
             int extendMultilineSpanToLine = 0;
             SnapshotSpan extendedSpan = span;
-            bool spanExtended = false;
 
-            while (true)
+            using (_lock.UpgradableReadLock(TimeSpan.FromMilliseconds(250)))
             {
-                IToken token = lexer.NextToken();
+                Span requestedSpan = span;
+                TState startState = AdjustParseSpan(ref span);
 
-                bool inBounds = token.StartIndex < span.End.Position;
+                ICharStream input = CreateInputStream(span);
+                ITokenSourceWithState<TState> lexer = CreateLexer(input, startState);
 
-                int startLineCurrent;
-                if (token.Type == CharStreamConstants.EndOfFile)
-                    startLineCurrent = span.Snapshot.LineCount;
-                else
-                    startLineCurrent = token.Line;
+                IToken previousToken = null;
+                bool previousTokenEndsLine = false;
 
-                if (previousToken == null || previousToken.Line < startLineCurrent - 1)
+                /* this is held outside the loop because only tokens which end at the end of a line
+                 * impact its value.
+                 */
+                bool lineStateChanged = false;
+
+                while (true)
                 {
-                    // endLinePrevious is the line number the previous token ended on
-                    int endLinePrevious;
-                    if (previousToken != null)
-                        endLinePrevious = span.Snapshot.GetLineNumberFromPosition(previousToken.StopIndex + 1);
+                    IToken token = lexer.NextToken();
+
+                    bool inBounds = token.StartIndex < span.End.Position;
+
+                    int startLineCurrent;
+                    if (token.Type == CharStreamConstants.EndOfFile)
+                        startLineCurrent = span.Snapshot.LineCount;
                     else
-                        endLinePrevious = span.Snapshot.GetLineNumberFromPosition(span.Start) - 1;
+                        startLineCurrent = token.Line;
 
-                    if (startLineCurrent > endLinePrevious + 1)
+                    if (previousToken == null || previousToken.Line < startLineCurrent - 1)
                     {
-                        int firstMultilineLine = endLinePrevious;
-                        if (previousToken == null || previousTokenEndsLine)
-                            firstMultilineLine++;
+                        // endLinePrevious is the line number the previous token ended on
+                        int endLinePrevious;
+                        if (previousToken != null)
+                            endLinePrevious = span.Snapshot.GetLineNumberFromPosition(previousToken.StopIndex + 1);
+                        else
+                            endLinePrevious = span.Snapshot.GetLineNumberFromPosition(span.Start) - 1;
 
-                        for (int i = firstMultilineLine; i < startLineCurrent; i++)
+                        if (startLineCurrent > endLinePrevious + 1)
                         {
-                            if (!_lineStates[i].MultilineToken || lineStateChanged)
+                            int firstMultilineLine = endLinePrevious;
+                            if (previousToken == null || previousTokenEndsLine)
+                                firstMultilineLine++;
+
+                            for (int i = firstMultilineLine; i < startLineCurrent; i++)
+                            {
+                                if (!_lineStates[i].MultilineToken || lineStateChanged)
+                                    extendMultilineSpanToLine = i + 1;
+
+                                if (inBounds)
+                                    SetLineState(i, LineStateInfo.Multiline);
+                            }
+                        }
+                    }
+
+                    if (token.Type == CharStreamConstants.EndOfFile)
+                        break;
+
+                    previousToken = token;
+                    previousTokenEndsLine = TokenEndsAtEndOfLine(span.Snapshot, lexer, token);
+
+                    if (IsMultilineToken(span.Snapshot, lexer, token))
+                    {
+                        int startLine = span.Snapshot.GetLineNumberFromPosition(token.StartIndex);
+                        int stopLine = span.Snapshot.GetLineNumberFromPosition(token.StopIndex + 1);
+                        for (int i = startLine; i < stopLine; i++)
+                        {
+                            if (!_lineStates[i].MultilineToken)
                                 extendMultilineSpanToLine = i + 1;
 
                             if (inBounds)
                                 SetLineState(i, LineStateInfo.Multiline);
                         }
                     }
-                }
 
-                if (token.Type == CharStreamConstants.EndOfFile)
-                    break;
-
-                previousToken = token;
-                previousTokenEndsLine = TokenEndsAtEndOfLine(span.Snapshot, lexer, token);
-
-                if (IsMultilineToken(span.Snapshot, lexer, token))
-                {
-                    int startLine = span.Snapshot.GetLineNumberFromPosition(token.StartIndex);
-                    int stopLine = span.Snapshot.GetLineNumberFromPosition(token.StopIndex + 1);
-                    for (int i = startLine; i < stopLine; i++)
+                    bool tokenEndsLine = previousTokenEndsLine;
+                    if (tokenEndsLine)
                     {
-                        if (!_lineStates[i].MultilineToken)
-                            extendMultilineSpanToLine = i + 1;
+                        TState stateAtEndOfLine = lexer.GetCurrentState();
+                        int line = span.Snapshot.GetLineNumberFromPosition(token.StopIndex + 1);
+                        lineStateChanged =
+                            _lineStates[line].MultilineToken
+                            || !_stateComparer.Equals(_lineStates[line].EndLineState, stateAtEndOfLine);
 
+                        // even if the state didn't change, we call SetLineState to make sure the _first/_lastChangedLine values get updated.
                         if (inBounds)
-                            SetLineState(i, LineStateInfo.Multiline);
-                    }
-                }
+                            SetLineState(line, new LineStateInfo(stateAtEndOfLine));
 
-                bool tokenEndsLine = previousTokenEndsLine;
-                if (tokenEndsLine)
-                {
-                    TState stateAtEndOfLine = lexer.GetCurrentState();
-                    int line = span.Snapshot.GetLineNumberFromPosition(token.StopIndex + 1);
-                    lineStateChanged =
-                        _lineStates[line].MultilineToken
-                        || !_stateComparer.Equals(_lineStates[line].EndLineState, stateAtEndOfLine);
-
-                    // even if the state didn't change, we call SetLineState to make sure the _first/_lastChangedLine values get updated.
-                    if (inBounds)
-                        SetLineState(line, new LineStateInfo(stateAtEndOfLine));
-
-                    if (lineStateChanged)
-                    {
-                        if (line < span.Snapshot.LineCount - 1)
+                        if (lineStateChanged)
                         {
-                            /* update the span's end position or the line state change won't be reflected
-                             * in the editor
-                             */
-                            int endPosition = span.Snapshot.GetLineFromLineNumber(line + 1).EndIncludingLineBreak;
-                            if (endPosition > extendedSpan.End)
+                            if (line < span.Snapshot.LineCount - 1)
                             {
-                                spanExtended = true;
-                                extendedSpan = new SnapshotSpan(extendedSpan.Snapshot, Span.FromBounds(extendedSpan.Start, endPosition));
+                                /* update the span's end position or the line state change won't be reflected
+                                 * in the editor
+                                 */
+                                int endPosition = span.Snapshot.GetLineFromLineNumber(line + 1).EndIncludingLineBreak;
+                                if (endPosition > extendedSpan.End)
+                                {
+                                    spanExtended = true;
+                                    extendedSpan = new SnapshotSpan(extendedSpan.Snapshot, Span.FromBounds(extendedSpan.Start, endPosition));
+                                }
                             }
                         }
                     }
+
+                    if (token.StartIndex >= span.End.Position)
+                        break;
+
+                    if (token.StopIndex < requestedSpan.Start)
+                        continue;
+
+                    var tokenClassificationSpans = GetClassificationSpansForToken(token, span.Snapshot);
+                    if (tokenClassificationSpans != null)
+                        classificationSpans.AddRange(tokenClassificationSpans);
+
+                    if (!inBounds)
+                        break;
                 }
-
-                if (token.StartIndex >= span.End.Position)
-                    break;
-
-                if (token.StopIndex < requestedSpan.Start)
-                    continue;
-
-                var tokenClassificationSpans = GetClassificationSpansForToken(token, span.Snapshot);
-                if (tokenClassificationSpans != null)
-                    classificationSpans.AddRange(tokenClassificationSpans);
-
-                if (!inBounds)
-                    break;
             }
 
             if (extendMultilineSpanToLine > 0)
@@ -191,16 +228,19 @@
 
         protected virtual void SetLineState(int line, LineStateInfo state)
         {
-            _lineStates[line] = state;
-            if (!state.IsDirty && _firstDirtyLine.HasValue && _firstDirtyLine == line)
+            using (_lock.WriteLock())
             {
-                _firstDirtyLine++;
-            }
+                _lineStates[line] = state;
+                if (!state.IsDirty && _firstDirtyLine.HasValue && _firstDirtyLine == line)
+                {
+                    _firstDirtyLine++;
+                }
 
-            if (!state.IsDirty && _lastDirtyLine.HasValue && _lastDirtyLine == line)
-            {
-                _firstDirtyLine = null;
-                _lastDirtyLine = null;
+                if (!state.IsDirty && _lastDirtyLine.HasValue && _lastDirtyLine == line)
+                {
+                    _firstDirtyLine = null;
+                    _lastDirtyLine = null;
+                }
             }
         }
 
@@ -209,7 +249,7 @@
             return default(TState);
         }
 
-        private TState AdjustParseSpan(ref SnapshotSpan span)
+        protected virtual TState AdjustParseSpan(ref SnapshotSpan span)
         {
             int start = span.Start.Position;
             int endPosition = span.End.Position;
@@ -246,17 +286,16 @@
             return state;
         }
 
-        private static bool TokensSkippedLines(ITextSnapshot snapshot, int endLinePrevious, IToken token)
+        protected virtual bool TokensSkippedLines(ITextSnapshot snapshot, int endLinePrevious, IToken token)
         {
             int startLineCurrent = snapshot.GetLineNumberFromPosition(token.StartIndex);
             return startLineCurrent > endLinePrevious + 1;
         }
 
-        protected virtual bool IsMultilineToken(ITextSnapshot snapshot, ITokenSource lexer, IToken token)
+        protected virtual bool IsMultilineToken(ITextSnapshot snapshot, ITokenSourceWithState<TState> lexer, IToken token)
         {
-            Lexer lexerLexer = lexer as Lexer;
-            if (lexerLexer != null && lexerLexer.Line >= token.Line)
-                return false;
+            if (lexer != null && lexer.CharStream.Line >= token.Line)
+                return true;
 
             int startLine = snapshot.GetLineNumberFromPosition(token.StartIndex);
             int stopLine = snapshot.GetLineNumberFromPosition(token.StopIndex + 1);
@@ -325,7 +364,7 @@
                 t(this, e);
         }
 
-        private static bool IsMultilineClassificationSpan(ClassificationSpan span)
+        protected virtual bool IsMultilineClassificationSpan(ClassificationSpan span)
         {
             Contract.Requires<ArgumentNullException>(span != null, "span");
 
@@ -363,6 +402,26 @@
 
         protected virtual void HandleTextBufferChangedLowPriority(object sender, TextContentChangedEventArgs e)
         {
+            if (_failedTimeout)
+            {
+                if (!_timeoutReported)
+                {
+                    IServiceProvider serviceProvider = null;
+                    string message = null;
+                    string title = null;
+                    OLEMSGICON icon = OLEMSGICON.OLEMSGICON_CRITICAL;
+                    OLEMSGBUTTON button = OLEMSGBUTTON.OLEMSGBUTTON_OK;
+                    OLEMSGDEFBUTTON defaultButton = OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST;
+                    if (serviceProvider != null)
+                    {
+                        _timeoutReported = true;
+                        VsShellUtilities.ShowMessageBox(serviceProvider, message, title, icon, button, defaultButton);
+                    }
+                }
+
+                return;
+            }
+
             if (e.After == _textBuffer.CurrentSnapshot)
             {
                 if (_firstChangedLine.HasValue && _lastChangedLine.HasValue)
@@ -380,40 +439,53 @@
 
         protected virtual void HandleTextBufferChangedHighPriority(object sender, TextContentChangedEventArgs e)
         {
-            foreach (ITextChange change in e.Changes)
+            try
             {
-                int lineNumberFromPosition = e.After.GetLineNumberFromPosition(change.NewPosition);
-                int num2 = e.After.GetLineNumberFromPosition(change.NewEnd);
-                if (change.LineCountDelta < 0)
+                using (_lock.WriteLock(TimeSpan.FromSeconds(1)))
                 {
-                    _lineStates.RemoveRange(lineNumberFromPosition, Math.Abs(change.LineCountDelta));
-                }
-                else if (change.LineCountDelta > 0)
-                {
-                    TState endLineState = _lineStates[lineNumberFromPosition].EndLineState;
-                    LineStateInfo element = new LineStateInfo(endLineState);
-                    _lineStates.InsertRange(lineNumberFromPosition, Enumerable.Repeat(element, change.LineCountDelta));
-                }
+                    foreach (ITextChange change in e.Changes)
+                    {
+                        int lineNumberFromPosition = e.After.GetLineNumberFromPosition(change.NewPosition);
+                        int num2 = e.After.GetLineNumberFromPosition(change.NewEnd);
+                        if (change.LineCountDelta < 0)
+                        {
+                            _lineStates.RemoveRange(lineNumberFromPosition, Math.Abs(change.LineCountDelta));
+                        }
+                        else if (change.LineCountDelta > 0)
+                        {
+                            TState endLineState = _lineStates[lineNumberFromPosition].EndLineState;
+                            LineStateInfo element = new LineStateInfo(endLineState);
+                            _lineStates.InsertRange(lineNumberFromPosition, Enumerable.Repeat(element, change.LineCountDelta));
+                        }
 
-                if (_lastDirtyLine.HasValue && _lastDirtyLine.Value > lineNumberFromPosition)
-                {
-                    _lastDirtyLine += change.LineCountDelta;
-                }
+                        if (_lastDirtyLine.HasValue && _lastDirtyLine.Value > lineNumberFromPosition)
+                        {
+                            _lastDirtyLine += change.LineCountDelta;
+                        }
 
-                if (_lastChangedLine.HasValue && _lastChangedLine.Value > lineNumberFromPosition)
-                {
-                    _lastChangedLine += change.LineCountDelta;
-                }
+                        if (_lastChangedLine.HasValue && _lastChangedLine.Value > lineNumberFromPosition)
+                        {
+                            _lastChangedLine += change.LineCountDelta;
+                        }
 
-                for (int i = lineNumberFromPosition; i <= num2; i++)
-                {
-                    TState num5 = _lineStates[i].EndLineState;
-                    LineStateInfo info2 = new LineStateInfo(num5, true);
-                    _lineStates[i] = info2;
-                }
+                        for (int i = lineNumberFromPosition; i <= num2; i++)
+                        {
+                            TState num5 = _lineStates[i].EndLineState;
+                            LineStateInfo info2 = new LineStateInfo(num5, true);
+                            _lineStates[i] = info2;
+                        }
 
-                _firstChangedLine = _firstChangedLine.HasValue ? Math.Min(_firstChangedLine.Value, lineNumberFromPosition) : lineNumberFromPosition;
-                _lastChangedLine = _lastChangedLine.HasValue ? Math.Max(_lastChangedLine.Value, num2) : num2;
+                        _firstChangedLine = _firstChangedLine.HasValue ? Math.Min(_firstChangedLine.Value, lineNumberFromPosition) : lineNumberFromPosition;
+                        _lastChangedLine = _lastChangedLine.HasValue ? Math.Max(_lastChangedLine.Value, num2) : num2;
+                    }
+
+                    _lineStatesVersion = e.AfterVersion;
+                }
+            }
+            catch (TimeoutException)
+            {
+                _failedTimeout = true;
+                UnsubscribeEvents();
             }
         }
 
