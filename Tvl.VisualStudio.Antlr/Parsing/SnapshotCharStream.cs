@@ -42,14 +42,20 @@
         }
 
         public SnapshotCharStream(ITextSnapshot snapshot, Span cachedSpan)
+            : this(new SnapshotSpan(snapshot, cachedSpan))
         {
             Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
+        }
 
-            this.Snapshot = snapshot;
+        public SnapshotCharStream(SnapshotSpan cachedSpan)
+        {
+            Contract.Requires<ArgumentException>(cachedSpan.Snapshot != null);
+
+            this.Snapshot = cachedSpan.Snapshot;
             _count = Snapshot.Length;
             _explicitCache = true;
             _currentSnapshotLineStartIndex = cachedSpan.Start;
-            _currentSnapshotLine = snapshot.GetText(cachedSpan);
+            _currentSnapshotLine = cachedSpan.GetText();
         }
 
         public ITextSnapshot Snapshot
