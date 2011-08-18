@@ -2,25 +2,24 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+    using System.Diagnostics;
+    using System.Runtime.InteropServices;
     using System.Text;
     using Microsoft.VisualStudio.Project;
-    using Tvl.VisualStudio.Shell.Extensions;
-    using SVSMDCodeDomProvider = Microsoft.VisualStudio.Shell.Interop.SVSMDCodeDomProvider;
-    using OAVSProject = Microsoft.VisualStudio.Project.Automation.OAVSProject;
-    using Project = Microsoft.Build.Evaluation.Project;
-    using File = System.IO.File;
-    using System.Diagnostics;
-    using Path = System.IO.Path;
+
     using CultureInfo = System.Globalization.CultureInfo;
-    using VSConstants = Microsoft.VisualStudio.VSConstants;
-    using Marshal = System.Runtime.InteropServices.Marshal;
-    using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
-    using Directory = System.IO.Directory;
     using DirectoryInfo = System.IO.DirectoryInfo;
+    using File = System.IO.File;
     using FileAttributes = System.IO.FileAttributes;
     using FileInfo = System.IO.FileInfo;
+    using Marshal = System.Runtime.InteropServices.Marshal;
+    using OAVSProject = Microsoft.VisualStudio.Project.Automation.OAVSProject;
+    using Path = System.IO.Path;
+    using Project = Microsoft.Build.Evaluation.Project;
+    using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+    using VSConstants = Microsoft.VisualStudio.VSConstants;
 
+    [ComVisible(true)]
     public class JavaProjectNode : ProjectNode
     {
         private static readonly char[] charsToEscape = new char[] { '%', '*', '?', '@', '$', '(', ')', ';', '\'' };
@@ -190,7 +189,7 @@
         {
             for (int i = fileList.Count - 1; i >= 0; i--)
             {
-                if ((new FileInfo(fileList[i]).Attributes & FileAttributes.Hidden) != 0)
+                if ((new FileInfo(Path.Combine(ProjectFolder, fileList[i])).Attributes & FileAttributes.Hidden) != 0)
                     fileList.RemoveAt(i);
             }
 
@@ -201,11 +200,17 @@
         {
             for (int i = folderList.Count - 1; i >= 0; i--)
             {
-                if ((new DirectoryInfo(folderList[i]).Attributes & FileAttributes.Hidden) != 0)
+                if ((new DirectoryInfo(Path.Combine(ProjectFolder, folderList[i])).Attributes & FileAttributes.Hidden) != 0)
                     folderList.RemoveAt(i);
             }
 
             base.AddNonMemberFolderItems(folderList);
+        }
+
+        protected override bool FilterItemTypeToBeAddedToHierarchy(string itemType)
+        {
+            return string.Equals(itemType, JavaProjectFileConstants.SourceFolder, StringComparison.OrdinalIgnoreCase)
+                || base.FilterItemTypeToBeAddedToHierarchy(itemType);
         }
 
         public override FileNode CreateFileNode(ProjectElement item)
@@ -216,6 +221,11 @@
         protected override FolderNode CreateFolderNode(string path, ProjectElement element)
         {
             return new JavaFolderNode(this, path, element);
+        }
+
+        protected override ConfigProvider CreateConfigProvider()
+        {
+            return new JavaConfigProvider(this);
         }
 
         protected override int QueryStatusOnNode(Guid cmdGroup, uint cmd, IntPtr pCmdText, ref QueryStatusResult result)

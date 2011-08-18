@@ -3,5 +3,7 @@
     public static class JavaProjectFileConstants
     {
         public const int UnspecifiedValue = -1;
+
+        public const string SourceFolder = "SourceFolder";
     }
 }
