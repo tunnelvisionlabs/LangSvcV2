@@ -94,10 +94,17 @@ ruleLabelDefs(ruleDescriptor, labelType, ASTLabelType, rewriteElementType) ::= <
 <[ruleDescriptor.tokenLabels,ruleDescriptor.wildcardTreeLabels,ruleDescriptor.wildcardTreeListLabels]
 	:{it|<\n><ASTLabelType> <it.label.text>_tree = default(<ASTLabelType>);}>
 <ruleDescriptor.tokenListLabels:{it|<\n><ASTLabelType> <it.label.text>_tree = default(<ASTLabelType>);}>
+<if(ruleDescriptor.supportsLabelOptimization)>
+<ruleDescriptor.allTokenRefsInRewrites
+	:{it|<\n>RewriteRule<rewriteElementType>Stream stream_<it>=new RewriteRule<rewriteElementType>Stream(adaptor,"token <it>");}>
+<ruleDescriptor.allRuleRefsInRewrites
+	:{it|<\n>RewriteRuleSubtreeStream stream_<it>=new RewriteRuleSubtreeStream(adaptor,"rule <it>");}>
+<else>
 <ruleDescriptor.allTokenRefsInAltsWithRewrites
 	:{it|<\n>RewriteRule<rewriteElementType>Stream stream_<it>=new RewriteRule<rewriteElementType>Stream(adaptor,"token <it>");}>
 <ruleDescriptor.allRuleRefsInAltsWithRewrites
 	:{it|<\n>RewriteRuleSubtreeStream stream_<it>=new RewriteRuleSubtreeStream(adaptor,"rule <it>");}>
+<endif>
 <endif>
 %>
 

@@ -33,7 +33,7 @@
     <AntlrBuildTaskAssemblyName Condition="'$(AntlrBuildTaskAssemblyName)'==''">AntlrBuildTask, Version=$(TaskVersion), Culture=neutral, PublicKeyToken=$(TaskKeyToken)</AntlrBuildTaskAssemblyName>
   </PropertyGroup>
 
-  <!--<PropertyGroup>
+  <PropertyGroup>
     <LoadTimeSensitiveTargets>
       $(LoadTimeSensitiveTargets);
       AntlrCompile;
@@ -42,13 +42,7 @@
       $(LoadTimeSensitiveProperties);
       AntlrCompileDependsOn;
     </LoadTimeSensitiveProperties>
-
-
-    <PrepareResourcesDependsOn>
-      AntlrCompile;
-      $(PrepareResourcesDependsOn)
-    </PrepareResourcesDependsOn>
-  </PropertyGroup>-->
+  </PropertyGroup>
 
   <PropertyGroup>
     <AntlrBuildTaskLocation Condition="'$(AntlrBuildTaskPath)'==''">$(MSBuildBinPath)</AntlrBuildTaskLocation>
@@ -131,7 +125,7 @@
       AbstractGrammarFiles="@(AntlrAbstractGrammar)">
 
       <Output ItemName="AntlrGeneratedCodeFiles" TaskParameter="GeneratedCodeFiles" />
-      <Output ItemName="Compile" TaskParameter="GeneratedCodeFiles" />
+      <!--<Output ItemName="Compile" TaskParameter="GeneratedCodeFiles" />-->
     </AntlrClassGenerationTask>
 
     <WriteLinesToFile
@@ -142,21 +136,20 @@
   </Target>
 
   <Target Name="AntlrCompileAddFilesGenerated"
-          DependsOnTargets="AntlrCompile"
+          AfterTargets="AntlrCompile"
           Condition="'@(Antlr3)' != ''">
 
     <ItemGroup>
-      <Compile Condition="'@(AntlrGeneratedCodeFiles)' == ''" Include="@(AntlrOutputCodeFilesList)" />
+      <AntlrGeneratedCodeFiles Condition="'@(AntlrGeneratedCodeFiles)' == ''" Include="@(AntlrOutputCodeFilesList)" />
     </ItemGroup>
 
     <ItemGroup>
-      <_AntlrCodeGenFileWrites Condition="'@(AntlrGeneratedCodeFiles)' != ''" Include="@(AntlrGeneratedCodeFiles)" />
-      <_AntlrCodeGenFileWrites Condition="'@(AntlrGeneratedCodeFiles)' == ''" Include="@(AntlrOutputCodeFilesList)" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <FileWrites Include="@(_AntlrCodeGenFileWrites);
+      <FileWrites Include="@(AntlrGeneratedCodeFiles);
                            $(IntermediateOutputPath)$(AntlrGenCodeFileNames);" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="@(AntlrGeneratedCodeFiles)" />
     </ItemGroup>
 
   </Target>

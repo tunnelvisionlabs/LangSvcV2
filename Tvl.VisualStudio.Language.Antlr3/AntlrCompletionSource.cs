@@ -570,10 +570,11 @@
 
             string actionText = token.Text;
             List<IToken> attributeTokens = new List<IToken>();
-            List<string> attributes = new List<string>();
+            List<IToken> attributes = new List<IToken>();
             CodeGenerator.GetListOfArgumentsFromAction(token.Text, 0, -1, separator, attributes);
-            foreach (var attributeText in attributes)
+            foreach (IToken attributeToken in attributes)
             {
+                string attributeText = attributeToken.Text;
                 Attribute attribute = new Attribute(attributeText);
                 int attributeStartIndex = actionText.IndexOf(attribute.Decl);
                 int attributeNameStartIndex = attribute.Decl.IndexOf(attribute.Name);

@@ -84,7 +84,7 @@ _last = (<ASTLabelType>)input.LT(1);
 <if(backtracking)>if (<actions.(actionScope).synpredgate>)<endif>
 <if(root.el.rule)>
 if (_first_<enclosingTreeLevel> == null) _first_<enclosingTreeLevel> = <root.el.label>.Tree;
-<else>
+<elseif(root.el.label)>
 if (_first_<enclosingTreeLevel> == null) _first_<enclosingTreeLevel> = <root.el.label>;
 <endif>
 <endif>
