@@ -62,7 +62,7 @@
             }
         }
 
-        public ICollection<Interval> Intervals
+        public IList<Interval> Intervals
         {
             get
             {
@@ -146,23 +146,23 @@
          */
         public virtual void Add(int el)
         {
-            Add(el, el);
+            Add(new Interval(el, 1));
         }
 
         /** Add interval; i.e., add all integers from a to b to set.
-         *  If b<a, do nothing.
+         *  If b&lt;a, do nothing.
          *  Keep list in sorted order (by left range value).
          *  If overlap, combine ranges.  For example,
          *  If this is {1..5, 10..20}, adding 6..7 yields
          *  {1..5, 6..7, 10..20}.  Adding 4..8 yields {1..8, 10..20}.
          */
-        public virtual void Add(int a, int b)
+        public virtual void Add(Interval interval)
         {
-            Add(Interval.FromBounds(a, b));
+            AddImpl(interval);
         }
 
         // copy on write so we can cache a..Start intervals and sets of that
-        protected virtual void Add(Interval addition)
+        public virtual void AddImpl(Interval addition)
         {
             //JSystem.@out.println("add "+addition+" to "+intervals.toString());
             if (addition.IsEmpty)
@@ -280,7 +280,7 @@
             {
                 // walk set and add each interval
                 foreach (Interval interval in otherIntervalSet.Intervals)
-                    Add(interval);
+                    AddImpl(interval);
 
                 return;
             }
@@ -567,7 +567,7 @@
                 else if (mine.IntersectsWith(theirs))
                 {
                     // overlap, add intersection
-                    intersection.Add(mine.Intersection(theirs).Value);
+                    intersection.AddImpl(mine.Intersection(theirs).Value);
                     // Move the iterator of lower range [a..EndInclusive], but not
                     // the upper range as it may contain elements that will collide
                     // with the next iterator. So, if mine=[0..115] and

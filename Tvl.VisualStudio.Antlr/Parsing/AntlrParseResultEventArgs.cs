@@ -13,7 +13,7 @@
         {
             Tokens = tokens as ReadOnlyCollection<IToken>;
             if (Tokens == null)
-                Tokens = new ReadOnlyCollection<IToken>(tokens);
+                Tokens = new ReadOnlyCollection<IToken>(tokens ?? new IToken[0]);
 
             Result = result;
         }
