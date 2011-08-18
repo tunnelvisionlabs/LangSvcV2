@@ -102,17 +102,6 @@
             return new ChapelClassifierLexer(input, state);
         }
 
-        protected override bool IsMultilineToken(ITextSnapshot snapshot, ITokenSource lexer, IToken token)
-        {
-            ChapelClassifierLexer chapelLexer = lexer as ChapelClassifierLexer;
-            if (chapelLexer != null && chapelLexer.CharStream.Line >= token.Line)
-                return false;
-
-            int startLine = snapshot.GetLineNumberFromPosition(token.StartIndex);
-            int stopLine = snapshot.GetLineNumberFromPosition(token.StopIndex + 1);
-            return startLine != stopLine;
-        }
-
         protected override IClassificationType ClassifyToken(IToken token)
         {
             switch (token.Type)
