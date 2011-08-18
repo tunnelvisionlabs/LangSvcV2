@@ -111,7 +111,7 @@ namespace Microsoft.VisualStudio.Project
         {
             get
             {
-                // Non member items donot participate in SCC.
+                // Non member items do not participate in SCC.
                 if (this.IsNonMemberItem)
                 {
                     return true;
@@ -228,6 +228,16 @@ namespace Microsoft.VisualStudio.Project
             get
             {
                 return this.isNonMemberItem;
+            }
+
+            set
+            {
+                if (this.isNonMemberItem == value)
+                    return;
+
+                this.isNonMemberItem = value;
+                // Reset exclude from scc
+                this.ExcludeNodeFromScc = this.ExcludeNodeFromScc;
             }
         }
 
@@ -1024,10 +1034,7 @@ namespace Microsoft.VisualStudio.Project
                 CCITracing.TraceCall(this.ID + "," + id.ToString());
                 if (Boolean.TryParse(value.ToString(), out boolValue))
                 {
-                    this.isNonMemberItem = boolValue;
-
-                    // Reset exclude from scc
-                    this.ExcludeNodeFromScc = this.IsNonMemberItem;
+                    this.IsNonMemberItem = boolValue;
                 }
                 else
                 {

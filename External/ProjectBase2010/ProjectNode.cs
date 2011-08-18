@@ -1063,19 +1063,19 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         /// <param name="project">The project to modify.</param>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "NonMember")]
-        internal static void AddNonMemberItems(ProjectNode project)
+        public virtual void AddNonMemberItems()
         {
             IList<string> files = new List<string>();
             IList<string> folders = new List<string>();
 
             // obtain the list of files and folders under the project folder.
-            GetRelativeFileSystemEntries(project.ProjectFolder, null, files, folders);
+            GetRelativeFileSystemEntries(this.ProjectFolder, null, files, folders);
 
             // exclude the items which are the part of the build.
-            ExcludeProjectBuildItems(project, files, folders);
+            this.ExcludeProjectBuildItems(files, folders);
 
-            AddNonMemberFolderItems(project, folders);
-            AddNonMemberFileItems(project, files);
+            this.AddNonMemberFolderItems(folders);
+            this.AddNonMemberFileItems(files);
         }
 
         /// <summary>
@@ -1083,10 +1083,10 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         /// <param name="project">The project to modify.</param>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "NonMember")]
-        internal static void RemoveNonMemberItems(ProjectNode project)
+        public virtual void RemoveNonMemberItems()
         {
             IList<HierarchyNode> nodeList = new List<HierarchyNode>();
-            FindNodes(nodeList, project, IsNodeNonMemberItem, null);
+            FindNodes(nodeList, this, IsNodeNonMemberItem, null);
             for (int index = nodeList.Count - 1; index >= 0; index--)
             {
                 HierarchyNode parent = nodeList[index].Parent;
@@ -1102,7 +1102,7 @@ namespace Microsoft.VisualStudio.Project
         /// <param name="criteria">Filter criteria.</param>
         /// <returns>Returns if the node is a non member item node or not.</returns>
         [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "System.Boolean.TryParse(System.String,System.Boolean@)")]
-        private static bool IsNodeNonMemberItem(HierarchyNode node, object criteria)
+        protected virtual bool IsNodeNonMemberItem(HierarchyNode node, object criteria)
         {
             bool isNonMemberItem = false;
             if (node != null)
@@ -1166,12 +1166,11 @@ namespace Microsoft.VisualStudio.Project
         /// <summary>
         /// Excludes the file and folder items from their corresponding maps if they are part of the build.
         /// </summary>
-        /// <param name="project">The project to modify.</param>
         /// <param name="fileList">List containing relative files paths.</param>
         /// <param name="folderList">List containing relative folder paths.</param>
-        private static void ExcludeProjectBuildItems(ProjectNode project, IList<string> fileList, IList<string> folderList)
+        protected virtual void ExcludeProjectBuildItems(IList<string> fileList, IList<string> folderList)
         {
-            ICollection<MSBuild.ProjectItem> projectItems = project.BuildProject.Items;
+            ICollection<MSBuild.ProjectItem> projectItems = this.BuildProject.Items;
 
             if (projectItems == null)
             {
@@ -1216,7 +1215,7 @@ namespace Microsoft.VisualStudio.Project
                     string relativePath = buildItem.EvaluatedInclude;
                     if (Path.IsPathRooted(relativePath)) // if not the relative path, make it relative
                     {
-                        relativePath = GetRelativePath(project.ProjectFolder, relativePath);
+                        relativePath = GetRelativePath(this.ProjectFolder, relativePath);
                     }
 
                     if (folderMap.ContainsKey(relativePath))
@@ -1232,7 +1231,7 @@ namespace Microsoft.VisualStudio.Project
                     string relativePath = buildItem.EvaluatedInclude;
                     if (Path.IsPathRooted(relativePath)) // if not the relative path, make it relative
                     {
-                        relativePath = GetRelativePath(project.ProjectFolder, relativePath);
+                        relativePath = GetRelativePath(this.ProjectFolder, relativePath);
                     }
 
                     if (fileMap.ContainsKey(relativePath))
@@ -1250,7 +1249,7 @@ namespace Microsoft.VisualStudio.Project
         /// <param name="project">The project to modify.</param>
         /// <param name="folderList">Folders list containing the folder names.</param>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "NonMember")]
-        private static void AddNonMemberFolderItems(ProjectNode project, IList<string> folderList)
+        protected virtual void AddNonMemberFolderItems(IList<string> folderList)
         {
             if (folderList == null)
             {
@@ -1259,7 +1258,7 @@ namespace Microsoft.VisualStudio.Project
 
             foreach (string folderKey in folderList)
             {
-                HierarchyNode parentNode = project;
+                HierarchyNode parentNode = this;
                 string[] folders = folderKey.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
                 FolderNode topFolderNode = null;
                 foreach (string folder in folders)
@@ -1277,8 +1276,8 @@ namespace Microsoft.VisualStudio.Project
                             }
                         }
 
-                        ProjectElement element = new ProjectElement(project, null, true);
-                        childNode = project.CreateFolderNode(childNodeId, element);
+                        ProjectElement element = new ProjectElement(this, null, true);
+                        childNode = this.CreateFolderNode(childNodeId, element);
                         parentNode.AddChild(childNode);
                     }
 
@@ -1298,7 +1297,7 @@ namespace Microsoft.VisualStudio.Project
         /// <param name="project">The project to modify.</param>
         /// <param name="fileList">Files containing the information about the non member file items.</param>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "NonMember")]
-        private static void AddNonMemberFileItems(ProjectNode project, IList<string> fileList)
+        protected virtual void AddNonMemberFileItems(IList<string> fileList)
         {
             if (fileList == null)
             {
@@ -1307,7 +1306,7 @@ namespace Microsoft.VisualStudio.Project
 
             foreach (string fileKey in fileList)
             {
-                HierarchyNode parentNode = project;
+                HierarchyNode parentNode = this;
                 string[] pathItems = fileKey.Split(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar });
                 FolderNode topFolderNode = null;
                 foreach (string fileOrDir in pathItems)
@@ -1316,7 +1315,7 @@ namespace Microsoft.VisualStudio.Project
                     HierarchyNode childNode = parentNode.FindChild(childNodeId);
                     if (childNode == null)
                     {
-                        if (String.Equals(project.ProjectFile, childNodeId, StringComparison.OrdinalIgnoreCase)) // skip the project file itself.
+                        if (String.Equals(this.ProjectFile, childNodeId, StringComparison.OrdinalIgnoreCase)) // skip the project file itself.
                         {
                             break;
                         }
@@ -1329,10 +1328,10 @@ namespace Microsoft.VisualStudio.Project
                             }
                         }
 
-                        ProjectElement element = new ProjectElement(project, null, true);
+                        ProjectElement element = new ProjectElement(this, null, true);
                         element.Rename(childNodeId);
                         element.SetMetadata(ProjectFileConstants.Name, childNodeId);
-                        childNode = project.CreateFileNode(element);
+                        childNode = this.CreateFileNode(element);
                         parentNode.AddChild(childNode);
                         break;
                     }
@@ -3275,7 +3274,6 @@ namespace Microsoft.VisualStudio.Project
             }
         }
 
-
         /// <summary>
         /// Handles the shows all objects command.
         /// </summary>
@@ -3300,13 +3298,13 @@ namespace Microsoft.VisualStudio.Project
             //{
             this.showAllFilesEnabled = !this.showAllFilesEnabled; // toggle the flag
 
-            if (this.showAllFilesEnabled)
+            if (this.ShowAllFilesEnabled)
             {
-                AddNonMemberItems(this);
+                this.AddNonMemberItems();
             }
             else
             {
-                RemoveNonMemberItems(this);
+                this.RemoveNonMemberItems();
             }
             //}
 
