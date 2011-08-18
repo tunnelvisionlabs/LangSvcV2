@@ -312,8 +312,11 @@
     <Compile Include="Project\Controls\FolderBrowserTextBox.Designer.cs">
       <DependentUpon>FolderBrowserTextBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="Project\JavaConfigProvider.cs" />
     <Compile Include="Project\JavaBuildOptions.cs" />
     <Compile Include="Project\JavaConfigConstants.cs" />
+    <Compile Include="Project\JavaFileNode.cs" />
+    <Compile Include="Project\JavaFolderNode.cs" />
     <Compile Include="Project\JavaProjectConstants.cs" />
     <Compile Include="Project\JavaProjectFactory.cs" />
     <Compile Include="Project\JavaProjectFileConstants.cs" />
@@ -527,6 +530,7 @@
       <MergeWithCTO>true</MergeWithCTO>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <!-- Folder containing AntlrBuildTask.dll -->
     <AntlrBuildTaskPath>$(SolutionDir)External\Antlr</AntlrBuildTaskPath>

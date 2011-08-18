@@ -1,5 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Project
 {
+    using System;
+    using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Project;
 
     using CultureInfo = System.Globalization.CultureInfo;
@@ -71,6 +73,17 @@
         {
             base.Invalidate();
             _currentUserConfig = null;
+        }
+
+        public override int QueryDebugLaunch(uint flags, out int fCanLaunch)
+        {
+            fCanLaunch = 0;
+            return VSConstants.S_OK;
+        }
+
+        public override int DebugLaunch(uint grfLaunch)
+        {
+            throw new NotSupportedException();
         }
 
         private void SetUserPropertyUnderCondition(string propertyName, string propertyValue, string condition)
