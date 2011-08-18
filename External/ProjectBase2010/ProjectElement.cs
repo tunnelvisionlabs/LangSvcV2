@@ -210,7 +210,8 @@ namespace Microsoft.VisualStudio.Project
                 {
                     return String.Empty;
                 }
-                return virtualProperties[attributeName];
+
+                return ProjectCollection.Unescape(virtualProperties[attributeName]);
             }
 
             // cannot ask MSBuild for Include, so intercept it and return the corresponding property
@@ -240,7 +241,8 @@ namespace Microsoft.VisualStudio.Project
                 // For virtual items, use our virtual property collection
                 if(!virtualProperties.ContainsKey(attributeName))
                     return String.Empty;
-                return virtualProperties[attributeName];
+
+                return ProjectCollection.Unescape(virtualProperties[attributeName]);
             }
 
             // cannot ask MSBuild for Include, so intercept it and return the corresponding property
