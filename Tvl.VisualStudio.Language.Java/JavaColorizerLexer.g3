@@ -13,8 +13,8 @@ options
 // separators
 LPAREN:'(';
 RPAREN:')';
-LBRACK:'[';
-RBRACK:']';
+LBRACKET:'[';
+RBRACKET:']';
 LBRACE:'{';
 RBRACE:'}';
 SEMI:';';
