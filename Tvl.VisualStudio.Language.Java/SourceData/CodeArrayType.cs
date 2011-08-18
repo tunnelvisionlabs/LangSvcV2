@@ -13,5 +13,9 @@
         {
             Contract.Requires(elementType != null);
         }
+
+        public override void AugmentQuickInfoSession(IList<object> content)
+        {
+        }
     }
 }

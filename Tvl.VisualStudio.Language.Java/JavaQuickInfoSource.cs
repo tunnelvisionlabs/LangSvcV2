@@ -26,6 +26,9 @@
     using Stopwatch = System.Diagnostics.Stopwatch;
     using System.Text.RegularExpressions;
     using Tvl.VisualStudio.Language.Java.SourceData;
+    using Antlr.Runtime.Tree;
+    using Tvl.VisualStudio.Language.Java.Experimental;
+    using Microsoft.VisualStudio.Text.Tagging;
 
     internal class JavaQuickInfoSource : IQuickInfoSource
     {
@@ -181,6 +184,7 @@
 
             HashSet<string> intermediateResult = new HashSet<string>();
             HashSet<string> finalResult = new HashSet<string>();
+            List<object> quickInfoContent = new List<object>();
             foreach (var context in interpreter.Contexts)
             {
                 Span? span = null;
@@ -201,54 +205,77 @@
                 if (span.HasValue && !span.Value.IsEmpty)
                 {
                     string text = currentSnapshot.GetText(span.Value);
-                    text = text.Replace("\n", "\\n").Replace("\r", "\\r");
                     if (!intermediateResult.Add(text))
                         continue;
 
-                    if (Regex.IsMatch(text, @"^[A-Za-z_]+(?:\.\w+)*$"))
-                    {
-                        // check if this is a package
-                        CodePhysicalFile[] files = Provider.IntelliSenseCache.GetPackageFiles(text, true);
-                        if (files.Length > 0)
-                        {
-                            finalResult.Add(string.Format("package {0}", text));
-                        }
-                        else
-                        {
-                            // check if this is a type
-                            string typeName = text.Substring(text.LastIndexOf('.') + 1);
-                            CodeType[] types = Provider.IntelliSenseCache.GetTypes(typeName, true);
-                            foreach (var type in types)
-                            {
-                                if (type.FullName == text)
-                                    finalResult.Add(string.Format("{0}: {1}", type.GetType().Name, type.FullName));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        finalResult.Add(text);
-                    }
-#if false
+                    AstParserRuleReturnScope<CommonTree, CommonToken> result = null;
+
                     try
                     {
-                        var expressionInput = new SnapshotCharStream(currentSnapshot, new Span(0, currentSnapshot.Length));
+                        var expressionInput = new ANTLRStringStream(text);
                         var expressionUnicodeInput = new JavaUnicodeStream(expressionInput);
                         var expressionLexer = new Java2Lexer(expressionUnicodeInput);
                         var expressionTokens = new CommonTokenStream(expressionLexer);
                         var expressionParser = new Java2Parser(expressionTokens);
-                        var result = expressionParser.primary();
+                        result = expressionParser.primary();
+
+                        // anchors experiment
+                        Contract.Assert(TextBuffer.CurrentSnapshot == triggerPoint.Snapshot);
+                        ClassAnchorTracker tracker = new ClassAnchorTracker(TextBuffer, null);
+                        SnapshotSpan trackedSpan = new SnapshotSpan(triggerPoint.Snapshot, 0, triggerPoint.Position);
+                        ITagSpan<ScopeAnchorTag>[] tags = tracker.GetTags(new NormalizedSnapshotSpanCollection(trackedSpan)).ToArray();
+
+                        text = result.Tree.ToStringTree();
                     }
                     catch (RecognitionException)
                     {
                         text = "Could not parse: " + text;
                     }
-#endif
+
+                    text = text.Replace("\n", "\\n").Replace("\r", "\\r");
+                    finalResult.Add(text);
+
+                    //if (Regex.IsMatch(text, @"^[A-Za-z_]+(?:\.\w+)*$"))
+                    //{
+                    //    NameResolutionContext resolutionContext = NameResolutionContext.Global(Provider.IntelliSenseCache);
+                    //    resolutionContext = resolutionContext.Filter(text, null, true);
+                    //    CodeElement[] matching = resolutionContext.GetMatchingElements();
+                    //    if (matching.Length > 0)
+                    //    {
+                    //        foreach (var element in matching)
+                    //        {
+                    //            element.AugmentQuickInfoSession(quickInfoContent);
+                    //        }
+                    //    }
+                    //    else
+                    //    {
+                    //        // check if this is a package
+                    //        CodePhysicalFile[] files = Provider.IntelliSenseCache.GetPackageFiles(text, true);
+                    //        if (files.Length > 0)
+                    //        {
+                    //            finalResult.Add(string.Format("package {0}", text));
+                    //        }
+                    //        else
+                    //        {
+                    //            // check if this is a type
+                    //            string typeName = text.Substring(text.LastIndexOf('.') + 1);
+                    //            CodeType[] types = Provider.IntelliSenseCache.GetTypes(typeName, true);
+                    //            foreach (var type in types)
+                    //            {
+                    //                if (type.FullName == text)
+                    //                    finalResult.Add(string.Format("{0}: {1}", type.GetType().Name, type.FullName));
+                    //            }
+                    //        }
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    finalResult.Add(text);
+                    //}
                 }
             }
 
             ITrackingSpan applicableToSpan = null;
-            List<object> quickInfoContent = new List<object>();
 
             foreach (var result in finalResult)
             {

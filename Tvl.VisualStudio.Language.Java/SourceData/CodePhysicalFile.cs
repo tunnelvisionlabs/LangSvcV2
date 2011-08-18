@@ -4,6 +4,7 @@
     using System.Diagnostics.Contracts;
     using Path = System.IO.Path;
     using System.Linq;
+    using System.Collections.Generic;
 
     public class CodePhysicalFile : CodeElement
     {
@@ -23,6 +24,11 @@
 
                 return packageStatement.FullName;
             }
+        }
+
+        public override void AugmentQuickInfoSession(IList<object> content)
+        {
+            content.Add("file " + FullName);
         }
     }
 }

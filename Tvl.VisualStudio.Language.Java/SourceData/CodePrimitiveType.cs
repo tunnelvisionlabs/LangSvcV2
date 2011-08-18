@@ -30,7 +30,7 @@
             {
                 return CodePrimitiveType._boolean;
             }
-        } 
+        }
 
         public static CodePrimitiveType Char
         {
@@ -38,7 +38,7 @@
             {
                 return CodePrimitiveType._char;
             }
-        } 
+        }
 
         public static CodePrimitiveType Byte
         {
@@ -46,7 +46,7 @@
             {
                 return CodePrimitiveType._byte;
             }
-        } 
+        }
 
         public static CodePrimitiveType Short
         {
@@ -54,7 +54,7 @@
             {
                 return CodePrimitiveType._short;
             }
-        } 
+        }
 
         public static CodePrimitiveType Int
         {
@@ -62,7 +62,7 @@
             {
                 return CodePrimitiveType._int;
             }
-        } 
+        }
 
         public static CodePrimitiveType Long
         {
@@ -70,7 +70,7 @@
             {
                 return CodePrimitiveType._long;
             }
-        } 
+        }
 
         public static CodePrimitiveType Float
         {
@@ -78,7 +78,7 @@
             {
                 return CodePrimitiveType._float;
             }
-        } 
+        }
 
         public static CodePrimitiveType Double
         {
@@ -86,7 +86,7 @@
             {
                 return CodePrimitiveType._double;
             }
-        } 
+        }
 
         public static CodePrimitiveType Void
         {
@@ -94,6 +94,11 @@
             {
                 return CodePrimitiveType._void;
             }
-        } 
+        }
+
+        public override void AugmentQuickInfoSession(IList<object> content)
+        {
+            content.Add("(primitive) " + Name);
+        }
     }
 }

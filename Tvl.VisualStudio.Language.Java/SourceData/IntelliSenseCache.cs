@@ -62,6 +62,9 @@
          * element description above.
          */
         private readonly SortedDictionary<string, HashSet<CodePhysicalFile>> _packages =
+            new SortedDictionary<string, HashSet<CodePhysicalFile>>(StringComparer.Ordinal);
+
+        private readonly SortedDictionary<string, HashSet<CodePhysicalFile>> _packagesIgnoreCase =
             new SortedDictionary<string, HashSet<CodePhysicalFile>>(StringComparer.OrdinalIgnoreCase);
 
         private readonly object _backgroundParseSyncObject = new object();
@@ -88,18 +91,82 @@
             private set;
         }
 
+        public string[] GetPackageNames(bool caseSensitive)
+        {
+            using (_updateLock.ReadLock())
+            {
+                IDictionary<string, HashSet<CodePhysicalFile>> packages = caseSensitive ? _packages : _packagesIgnoreCase;
+                return packages.Keys.ToArray();
+            }
+        }
+
+        public CodePackage[] GetPackages()
+        {
+            HashSet<string> packageNames = new HashSet<string>(StringComparer.Ordinal);
+
+            using (_updateLock.ReadLock())
+            {
+                foreach (var packageName in _packages.Keys)
+                {
+                    int dot = packageName.IndexOf('.');
+                    if (dot >= 0)
+                        packageNames.Add(packageName.Substring(0, dot));
+                    else
+                        packageNames.Add(packageName);
+                }
+            }
+
+            return packageNames.Select(i => new CodePackage(this, i, i, CodeElement.Intrinsic)).ToArray();
+        }
+
+        public CodePackage[] ResolvePackage(string packageName, bool caseSensitive)
+        {
+            if (caseSensitive)
+            {
+                using (_updateLock.ReadLock())
+                {
+                    if (!_packages.ContainsKey(packageName))
+                    {
+                        string prefix = packageName + '.';
+                        if (!_packages.Keys.Any(i => i.StartsWith(prefix)))
+                            return new CodePackage[0];
+                    }
+                }
+
+                CodeElement parentPackage = CodeElement.Intrinsic;
+                string name = packageName.Substring(packageName.LastIndexOf('.') + 1);
+                if (name.Length < packageName.Length)
+                    parentPackage = ResolvePackage(packageName.Substring(0, packageName.LastIndexOf('.')), true).Single();
+
+                return new CodePackage[] { new CodePackage(this, name, packageName, parentPackage) };
+            }
+            else
+            {
+                // get the case-sensitive package names matching this name
+                HashSet<string> matchingNames = new HashSet<string>(StringComparer.Ordinal);
+                CodePhysicalFile[] files = GetPackageFiles(packageName, caseSensitive);
+                foreach (var file in files)
+                {
+                    CodePackageStatement packageStatement = file.Children.OfType<CodePackageStatement>().FirstOrDefault();
+                    if (packageStatement != null)
+                        matchingNames.Add(packageStatement.FullName);
+                }
+
+                return matchingNames.SelectMany(name => ResolvePackage(name, true)).ToArray();
+            }
+        }
+
         public CodePhysicalFile[] GetPackageFiles(string packageName, bool caseSensitive)
         {
             using (_updateLock.ReadLock())
             {
                 HashSet<CodePhysicalFile> files;
-                if (!_packages.TryGetValue(packageName, out files))
+                if (caseSensitive && !_packages.TryGetValue(packageName, out files))
+                    return new CodePhysicalFile[0];
+                else if (!_packagesIgnoreCase.TryGetValue(packageName, out files))
                     return new CodePhysicalFile[0];
 
-                if (!caseSensitive)
                 return files.ToArray();
-
-                return files.Where(i => StringComparer.Ordinal.Equals(packageName, i.PackageName)).ToArray();
             }
         }
 
@@ -236,6 +303,13 @@
                     foreach (var type in elementsToRemove.OfType<CodeType>())
                         _types[type.Name].Remove(type);
 
+                    string previousPackage = string.Empty;
+                    CodePackageStatement previousPackageStatement = elementsToRemove.OfType<CodePackageStatement>().FirstOrDefault();
+                    if (previousPackageStatement != null)
+                        previousPackage = previousPackageStatement.FullName;
+
+                    _packages[previousPackage].Remove(existingFile);
+                    _packagesIgnoreCase[previousPackage].Remove(existingFile);
                     _files.Remove(existingFile.FullName);
                 }
 
@@ -262,6 +336,14 @@
                 {
                     packageFiles = new HashSet<CodePhysicalFile>(ObjectReferenceEqualityComparer<CodePhysicalFile>.Default);
                     _packages.Add(package, packageFiles);
+                }
+
+                packageFiles.Add(file);
+
+                if (!_packagesIgnoreCase.TryGetValue(package, out packageFiles))
+                {
+                    packageFiles = new HashSet<CodePhysicalFile>(ObjectReferenceEqualityComparer<CodePhysicalFile>.Default);
+                    _packagesIgnoreCase.Add(package, packageFiles);
                 }
 
                 packageFiles.Add(file);

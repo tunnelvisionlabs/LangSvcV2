@@ -1,11 +1,14 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.SourceData
 {
-    using System.Diagnostics.Contracts;
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Diagnostics.Contracts;
 
-    public class CodeField : CodeMember
+    public class CodeStatementBlock : CodeElement
     {
-        public CodeField(string name, string fullName, CodeLocation location, CodeElement parent)
+        public CodeStatementBlock(string name, string fullName, CodeLocation location, CodeElement parent)
             : base(name, fullName, location, parent)
         {
             Contract.Requires(!string.IsNullOrEmpty(name));
@@ -16,7 +19,6 @@
 
         public override void AugmentQuickInfoSession(IList<object> content)
         {
-            content.Add("field " + FullName);
         }
     }
 }

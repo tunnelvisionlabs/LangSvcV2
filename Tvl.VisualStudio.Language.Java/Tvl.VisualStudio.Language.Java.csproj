@@ -260,12 +260,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BraceMatchingTaggerProvider.cs" />
+    <Compile Include="Experimental\BraceLevelTracker.cs" />
+    <Compile Include="Experimental\ClassAnchorTracker.cs" />
+    <Compile Include="Experimental\IJavaClassifierLexerState`1.cs" />
+    <Compile Include="Experimental\JavaClassifierLexerWrapper`1.cs" />
     <Compile Include="Experimental\JavaSimplifiedAtnBuilder.cs" />
     <Compile Include="Experimental\JavaSymbolTagger.cs" />
     <Compile Include="Experimental\JavaSymbolTaggerClassificationTypeNames.cs" />
     <Compile Include="Experimental\JavaSymbolTaggerProvider.cs" />
     <Compile Include="Experimental\JavaAtnBuilder.cs" />
     <Compile Include="Experimental\JavaTopLevelSymbolTaggerAtnBuilder.cs" />
+    <Compile Include="Experimental\ScopeAnchorTag.cs" />
     <Compile Include="Java2.g3.lexer.cs">
       <DependentUpon>Java2.g3</DependentUpon>
     </Compile>
@@ -285,6 +290,7 @@
     </Content>
     <Compile Include="JavaLanguageInfo.cs" />
     <Compile Include="JavaLanguagePackage.cs" />
+    <Compile Include="JavaParseResultEventArgs.cs" />
     <Compile Include="JavaUnicodeStream.cs" />
     <Compile Include="JavaEditorNavigationSourceProvider.cs" />
     <Compile Include="JavaEditorNavigationSource.cs" />
@@ -378,6 +384,7 @@
     <Compile Include="SourceData\CodeMethod.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="SourceData\CodePackage.cs" />
     <Compile Include="SourceData\CodePackageStatement.cs" />
     <Compile Include="SourceData\CodeParameter.cs">
       <SubType>Code</SubType>
@@ -389,6 +396,7 @@
     <Compile Include="SourceData\CodeProjectFile.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="SourceData\CodeStatementBlock.cs" />
     <Compile Include="SourceData\CodeType.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -410,12 +418,18 @@
     <Compile Include="SourceData\Emit\CodeTypeBuilder.cs" />
     <Compile Include="SourceData\Emit\CodeTypeReferenceBuilder.cs" />
     <Compile Include="SourceData\Emit\ITypeBuilderContainer.cs" />
+    <Compile Include="SourceData\ExpressionEvaluatorWalker.g3.cs" />
     <Compile Include="SourceData\IntelliSenseCache.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SourceData\IntelliSenseCacheWalker.g3.cs">
       <DependentUpon>IntelliSenseCacheWalker.g3</DependentUpon>
     </Compile>
+    <Compile Include="SourceData\NameResolutionContext.AggregateContext.cs" />
+    <Compile Include="SourceData\NameResolutionContext.cs" />
+    <Compile Include="SourceData\NameResolutionContext.GlobalContext.cs" />
+    <Compile Include="SourceData\NameResolutionContext.ImportContext.cs" />
+    <Compile Include="SourceData\NameResolutionContext.TypeContext.cs" />
     <Compile Include="Text\CancellationPolicy.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="JavaClassifier.cs" />
@@ -457,6 +471,9 @@
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
     <Antlr3 Include="SourceData\IntelliSenseCacheWalker.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
+    <Antlr3 Include="SourceData\ExpressionEvaluatorWalker.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
     <None Include="Text\Tagger`1.cs" />

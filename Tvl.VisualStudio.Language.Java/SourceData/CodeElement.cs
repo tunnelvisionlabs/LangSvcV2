@@ -83,11 +83,11 @@
             }
         }
 
-        public ReadOnlyCollection<CodeElement> Children
+        public virtual IEnumerable<CodeElement> Children
         {
             get
             {
-                Contract.Ensures(Contract.Result<ReadOnlyCollection<CodeElement>>() != null);
+                Contract.Ensures(Contract.Result<IEnumerable<CodeElement>>() != null);
 
                 return _children.AsReadOnly();
             }
@@ -100,6 +100,8 @@
                 return _isFrozen;
             }
         }
+
+        public abstract void AugmentQuickInfoSession(IList<object> content);
 
         public IEnumerable<CodeElement> GetDescendents(bool includeSelf = false)
         {
@@ -138,6 +140,10 @@
         {
             public IntrinsicElement()
                 : base("__INTRINSIC__", "__INTRINSIC__", CodeLocation.Intrinsic, null)
+            {
+            }
+
+            public override void AugmentQuickInfoSession(IList<object> content)
             {
             }
         }

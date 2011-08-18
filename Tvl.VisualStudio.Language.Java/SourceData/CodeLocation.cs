@@ -4,7 +4,9 @@
 
     public class CodeLocation
     {
-        private static readonly string _intrinsicLocation = "__INTRINSIC__";
+        private static readonly string _abstractLocation = "<ABSTRACT>";
+        private static readonly CodeLocation _abstract = new CodeLocation(_abstractLocation);
+        private static readonly string _intrinsicLocation = "<INTRINSIC>";
         private static readonly CodeLocation _intrinsic = new CodeLocation(_intrinsicLocation);
 
         private readonly string _fileName;
@@ -23,11 +25,27 @@
             _seek = seek;
         }
 
+        public static CodeLocation Abstract
+        {
+            get
+            {
+                return _intrinsic;
+            }
+        }
+
         public static CodeLocation Intrinsic
         {
             get
             {
                 return _intrinsic;
+            }
+        }
+
+        public bool IsAbstract
+        {
+            get
+            {
+                return object.ReferenceEquals(this, _abstract);
             }
         }
 

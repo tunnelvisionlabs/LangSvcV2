@@ -16,5 +16,9 @@
             Contract.Requires(location != null);
             Contract.Requires(parent != null);
         }
+
+        public override void AugmentQuickInfoSession(IList<object> content)
+        {
+        }
     }
 }
