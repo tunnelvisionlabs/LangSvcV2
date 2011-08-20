@@ -12,7 +12,7 @@
     using IConnectionPointContainer = Microsoft.VisualStudio.OLE.Interop.IConnectionPointContainer;
     using System.Diagnostics.Contracts;
 
-    public abstract class LanguageInfo : IVsLanguageInfo, IDisposable
+    public abstract class LanguageInfo : IVsLanguageInfo, IVsLanguageDebugInfo, IDisposable
     {
         private readonly SVsServiceProvider _serviceProvider;
         private readonly Guid _languageGuid;
@@ -91,6 +91,65 @@
             return VSConstants.E_FAIL;
         }
 
+        public virtual int GetLanguageID(IVsTextBuffer buffer, int line, int col, out Guid languageId)
+        {
+            Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
+
+            languageId = LanguageGuid;
+            return VSConstants.S_OK;
+        }
+
+        [Obsolete]
+        public virtual int GetLocationOfName(string name, out string pbstrMkDoc, TextSpan[] spans)
+        {
+            Contract.Requires<ArgumentNullException>(name != null, "name");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(name));
+
+            pbstrMkDoc = null;
+            return VSConstants.E_NOTIMPL;
+        }
+
+        public virtual int GetNameOfLocation(IVsTextBuffer buffer, int line, int col, out string name, out int lineOffset)
+        {
+            Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
+
+            name = null;
+            lineOffset = 0;
+            return VSConstants.S_OK;
+        }
+
+        public virtual int GetProximityExpressions(IVsTextBuffer buffer, int line, int col, int cLines, out IVsEnumBSTR expressions)
+        {
+            Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
+
+            expressions = null;
+            return VSConstants.S_FALSE;
+        }
+
+        public virtual int IsMappedLocation(IVsTextBuffer buffer, int line, int col)
+        {
+            Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
+            return VSConstants.S_FALSE;
+        }
+
+        public virtual int ResolveName(string name, RESOLVENAMEFLAGS flags, out IVsEnumDebugName names)
+        {
+            Contract.Requires<ArgumentNullException>(name != null, "name");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(name));
+
+            names = null;
+            return VSConstants.E_NOTIMPL;
+        }
+
+        public virtual int ValidateBreakpointLocation(IVsTextBuffer buffer, int line, int col, TextSpan[] pCodeSpan)
+        {
+            Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
+            Contract.Requires<ArgumentNullException>(pCodeSpan != null, "pCodeSpan");
+            Contract.Requires<ArgumentException>(pCodeSpan.Length > 0);
+
+            return VSConstants.E_NOTIMPL;
+        }
+
         int IVsLanguageInfo.GetColorizer(IVsTextLines buffer, out IVsColorizer colorizer)
         {
             if (buffer == null)
@@ -127,6 +186,67 @@
         {
             bstrName = LanguageName;
             return string.IsNullOrEmpty(bstrName) ? VSConstants.E_FAIL : VSConstants.S_OK;
+        }
+
+        int IVsLanguageDebugInfo.GetLanguageID(IVsTextBuffer pBuffer, int iLine, int iCol, out Guid pguidLanguageID)
+        {
+            if (pBuffer == null)
+                throw new ArgumentNullException("pBuffer");
+
+            return GetLanguageID(pBuffer, iLine, iCol, out pguidLanguageID);
+        }
+
+        [Obsolete]
+        int IVsLanguageDebugInfo.GetLocationOfName(string pszName, out string pbstrMkDoc, TextSpan[] pspanLocation)
+        {
+            if (pszName == null)
+                throw new ArgumentNullException("pszName");
+            if (pszName.Length == 0)
+                throw new ArgumentException();
+
+            return GetLocationOfName(pszName, out pbstrMkDoc, pspanLocation);
+        }
+
+        int IVsLanguageDebugInfo.GetNameOfLocation(IVsTextBuffer pBuffer, int iLine, int iCol, out string pbstrName, out int piLineOffset)
+        {
+            if (pBuffer == null)
+                throw new ArgumentNullException("pBuffer");
+
+            return GetNameOfLocation(pBuffer, iLine, iCol, out pbstrName, out piLineOffset);
+        }
+
+        int IVsLanguageDebugInfo.GetProximityExpressions(IVsTextBuffer pBuffer, int iLine, int iCol, int cLines, out IVsEnumBSTR ppEnum)
+        {
+            if (pBuffer == null)
+                throw new ArgumentNullException("pBuffer");
+
+            return GetProximityExpressions(pBuffer, iLine, iCol, cLines, out ppEnum);
+        }
+
+        int IVsLanguageDebugInfo.IsMappedLocation(IVsTextBuffer pBuffer, int iLine, int iCol)
+        {
+            if (pBuffer == null)
+                throw new ArgumentNullException("pBuffer");
+
+            return IsMappedLocation(pBuffer, iLine, iCol);
+        }
+
+        int IVsLanguageDebugInfo.ResolveName(string pszName, uint dwFlags, out IVsEnumDebugName ppNames)
+        {
+            if (pszName == null)
+                throw new ArgumentNullException("pszName");
+            if (pszName.Length == 0)
+                throw new ArgumentException();
+
+            return ResolveName(pszName, (RESOLVENAMEFLAGS)dwFlags, out ppNames);
+        }
+
+        int IVsLanguageDebugInfo.ValidateBreakpointLocation(IVsTextBuffer pBuffer, int iLine, int iCol, TextSpan[] pCodeSpan)
+        {
+            if (pBuffer == null)
+                throw new ArgumentNullException("pBuffer");
+
+            return ValidateBreakpointLocation(pBuffer, iLine, iCol, pCodeSpan);
         }
 
         protected virtual void Dispose(bool disposing)
