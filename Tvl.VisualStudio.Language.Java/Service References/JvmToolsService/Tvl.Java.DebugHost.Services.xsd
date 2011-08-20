@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+  <xs:complexType name="JvmVirtualMachineRemoteHandle">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Handle" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JvmVirtualMachineRemoteHandle" nillable="true" type="tns:JvmVirtualMachineRemoteHandle" />
+  <xs:complexType name="JvmThreadRemoteHandle">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Handle" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JvmThreadRemoteHandle" nillable="true" type="tns:JvmThreadRemoteHandle" />
+  <xs:complexType name="JvmRemoteLocation">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Location" type="xs:long" />
+      <xs:element minOccurs="0" name="Method" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JvmRemoteLocation" nillable="true" type="tns:JvmRemoteLocation" />
+  <xs:complexType name="JvmFieldRemoteHandle">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Class" type="tns:JvmClassRemoteHandle" />
+      <xs:element name="Handle" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JvmFieldRemoteHandle" nillable="true" type="tns:JvmFieldRemoteHandle" />
+  <xs:complexType name="JvmClassRemoteHandle">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Handle" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JvmClassRemoteHandle" nillable="true" type="tns:JvmClassRemoteHandle" />
+  <xs:complexType name="ArrayOfJvmClassRemoteHandle">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JvmClassRemoteHandle" type="tns:JvmClassRemoteHandle" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJvmClassRemoteHandle" nillable="true" type="tns:ArrayOfJvmClassRemoteHandle" />
+  <xs:complexType name="JvmObjectRemoteHandle">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Handle" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JvmObjectRemoteHandle" nillable="true" type="tns:JvmObjectRemoteHandle" />
+  <xs:complexType name="ArrayOfJvmMethodRemoteHandle">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JvmMethodRemoteHandle" type="tns:JvmMethodRemoteHandle" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJvmMethodRemoteHandle" nillable="true" type="tns:ArrayOfJvmMethodRemoteHandle" />
+  <xs:complexType name="JvmMethodRemoteHandle">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Handle" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JvmMethodRemoteHandle" nillable="true" type="tns:JvmMethodRemoteHandle" />
+  <xs:complexType name="ArrayOfJvmFieldRemoteHandle">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JvmFieldRemoteHandle" type="tns:JvmFieldRemoteHandle" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJvmFieldRemoteHandle" nillable="true" type="tns:ArrayOfJvmFieldRemoteHandle" />
+  <xs:complexType name="ArrayOfJvmThreadRemoteHandle">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JvmThreadRemoteHandle" type="tns:JvmThreadRemoteHandle" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJvmThreadRemoteHandle" nillable="true" type="tns:ArrayOfJvmThreadRemoteHandle" />
+  <xs:complexType name="JvmThreadRemoteInfo">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ContextClassLoader" type="tns:JvmObjectRemoteHandle" />
+      <xs:element minOccurs="0" name="IsDaemon" type="xs:boolean" />
+      <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Priority" type="xs:int" />
+      <xs:element minOccurs="0" name="ThreadGroup" type="tns:JvmThreadGroupRemoteHandle" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JvmThreadRemoteInfo" nillable="true" type="tns:JvmThreadRemoteInfo" />
+  <xs:complexType name="JvmThreadGroupRemoteHandle">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Handle" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JvmThreadGroupRemoteHandle" nillable="true" type="tns:JvmThreadGroupRemoteHandle" />
+  <xs:complexType name="ArrayOfJvmObjectRemoteHandle">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JvmObjectRemoteHandle" type="tns:JvmObjectRemoteHandle" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJvmObjectRemoteHandle" nillable="true" type="tns:ArrayOfJvmObjectRemoteHandle" />
+  <xs:complexType name="ArrayOfJvmThreadGroupRemoteHandle">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JvmThreadGroupRemoteHandle" type="tns:JvmThreadGroupRemoteHandle" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJvmThreadGroupRemoteHandle" nillable="true" type="tns:ArrayOfJvmThreadGroupRemoteHandle" />
+  <xs:complexType name="ArrayOfJvmRemoteLocation">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JvmRemoteLocation" type="tns:JvmRemoteLocation" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJvmRemoteLocation" nillable="true" type="tns:ArrayOfJvmRemoteLocation" />
+  <xs:complexType name="ArrayOfJvmRemoteStackInfo">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JvmRemoteStackInfo" type="tns:JvmRemoteStackInfo" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJvmRemoteStackInfo" nillable="true" type="tns:ArrayOfJvmRemoteStackInfo" />
+  <xs:complexType name="JvmRemoteStackInfo">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence />
+  </xs:complexType>
+  <xs:element name="JvmRemoteStackInfo" nillable="true" type="tns:JvmRemoteStackInfo" />
+</xs:schema>

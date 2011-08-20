@@ -1,5 +1,7 @@
 ﻿namespace Tvl.Java.DebugHost
 {
+    using ManualResetEventSlim = System.Threading.ManualResetEventSlim;
+    using System.Linq;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
@@ -15,6 +17,8 @@
         private readonly jvmtiEnvHandle _env;
         private readonly jvmtiInterface _rawInterface;
         private readonly JvmEventManager _eventManager;
+
+        private JavaVM _virtualMachine;
 
         private JvmEnvironment(jvmtiEnvHandle env)
         {
@@ -173,6 +177,9 @@
             Contract.Assert(!capabilities.CanGetThreadCpuTime || rawInterface.GetCurrentThreadCpuTimerInfo != null);
             Contract.Assert(!capabilities.CanGetThreadCpuTime || rawInterface.GetCurrentThreadCpuTime != null);
 
+            capabilities = new jvmtiCapabilities(jvmtiCapabilities.CapabilityFlags1.CanTagObjects);
+            rawInterface.AddCapabilities(env, ref capabilities);
+
             _env = env;
             _rawInterface = rawInterface;
 
@@ -180,9 +187,62 @@
             _eventManager.Attach();
         }
 
-        internal static JvmEnvironment GetOrCreateEnvironment(jvmtiEnvHandle env)
+        public jvmtiEnvHandle Handle
         {
-            return _environments.GetOrAdd(env, CreateEnvironment);
+            get
+            {
+                return _env;
+            }
+        }
+
+        internal JvmEventManager EventManager
+        {
+            get
+            {
+                return _eventManager;
+            }
+        }
+
+        internal jvmtiInterface RawInterface
+        {
+            get
+            {
+                return _rawInterface;
+            }
+        }
+
+        internal JavaVM VirtualMachine
+        {
+            get
+            {
+                return _virtualMachine;
+            }
+
+            set
+            {
+                _virtualMachine = value;
+            }
+        }
+
+        internal static JvmEnvironment GetCurrentInstance()
+        {
+            return _environments.Values.Single();
+        }
+
+        internal static JvmEnvironment GetEnvironment(jvmtiEnvHandle env)
+        {
+            return _environments[env];
+        }
+
+        internal static JvmEnvironment GetOrCreateEnvironment(JavaVM virtualMachine, jvmtiEnvHandle env)
+        {
+            Contract.Requires<ArgumentNullException>(virtualMachine != null, "virtualMachine");
+
+            JvmEnvironment environment = _environments.GetOrAdd(env, CreateEnvironment);
+            if (environment.VirtualMachine == null)
+                environment.VirtualMachine = virtualMachine;
+
+            return environment;
         }
 
         private static JvmEnvironment CreateEnvironment(jvmtiEnvHandle env)
@@ -201,6 +261,9 @@
 
         internal void Deallocate(IntPtr handle)
         {
+            if (!AgentExports.IsLoaded)
+                return;
+
             _rawInterface.Deallocate(_env, handle);
         }
 
@@ -613,6 +676,13 @@
         #endregion
 
         #region General
+
+        public jvmtiPhase GetPhase()
+        {
+            jvmtiPhase phase;
+            ThrowOnFailure(_rawInterface.GetPhase(_env, out phase));
+            return phase;
+        }
 
         #endregion
 

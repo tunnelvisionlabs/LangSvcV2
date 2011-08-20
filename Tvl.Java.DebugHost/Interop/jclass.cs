@@ -11,6 +11,11 @@ namespace Tvl.Java.DebugHost.Interop
 
         private readonly IntPtr _handle;
 
+        public jclass(IntPtr handle)
+        {
+            _handle = handle;
+        }
+
         internal IntPtr Handle
         {
             get
@@ -32,6 +37,14 @@ namespace Tvl.Java.DebugHost.Interop
         public static implicit operator jobject(jclass @class)
         {
             return new jobject(@class.Handle);
+        }
+
+        public static explicit operator jclass(JvmClassReference @class)
+        {
+            if (@class == null)
+                return jclass.Null;
+
+            return new jclass(@class.Handle.DangerousGetHandle());
         }
 
         public bool Equals(jclass other)

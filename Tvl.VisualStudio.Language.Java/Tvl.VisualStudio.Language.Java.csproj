@@ -112,6 +112,9 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.Debugger.InteropA, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.Editor, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 2010 SDK\VisualStudioIntegration\Common\Assemblies\v4.0\Microsoft.VisualStudio.Editor.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
@@ -233,6 +236,8 @@
     <Reference Include="System.Design">
       <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Design.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows.Forms">
       <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Windows.Forms.dll</HintPath>
     </Reference>
@@ -260,6 +265,93 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BraceMatchingTaggerProvider.cs" />
+    <Compile Include="Debugger\BreakpointResolutionLocation.cs" />
+    <Compile Include="Debugger\BreakpointResolutionLocationCode.cs" />
+    <Compile Include="Debugger\BreakpointResolutionLocationData.cs" />
+    <Compile Include="Debugger\Collections\EnumDebugErrorBreakpoints.cs" />
+    <Compile Include="Debugger\Collections\DebugEnumerator`2.cs" />
+    <Compile Include="Debugger\Collections\EnumCodePaths.cs" />
+    <Compile Include="Debugger\Collections\EnumDebugBoundBreakpoints.cs" />
+    <Compile Include="Debugger\Collections\EnumDebugCodeContexts.cs" />
+    <Compile Include="Debugger\Collections\EnumDebugFrameInfo.cs" />
+    <Compile Include="Debugger\Collections\EnumDebugModules.cs" />
+    <Compile Include="Debugger\Collections\EnumDebugPorts.cs" />
+    <Compile Include="Debugger\Collections\EnumDebugProcesses.cs" />
+    <Compile Include="Debugger\Collections\EnumDebugPrograms.cs" />
+    <Compile Include="Debugger\Collections\EnumDebugPropertyInfo.cs" />
+    <Compile Include="Debugger\Collections\EnumDebugReferenceInfo.cs" />
+    <Compile Include="Debugger\Collections\EnumDebugThreads.cs" />
+    <Compile Include="Debugger\Events\DebugActivateDocumentEvent.cs" />
+    <Compile Include="Debugger\Events\DebugBeforeSymbolSearchEvent.cs" />
+    <Compile Include="Debugger\Events\DebugBreakEvent.cs" />
+    <Compile Include="Debugger\Events\DebugBreakpointBoundEvent.cs" />
+    <Compile Include="Debugger\Events\DebugBreakpointErrorEvent.cs" />
+    <Compile Include="Debugger\Events\DebugBreakpointEvent.cs" />
+    <Compile Include="Debugger\Events\DebugBreakpointUnboundEvent.cs" />
+    <Compile Include="Debugger\Events\DebugCanStopEvent.cs" />
+    <Compile Include="Debugger\Events\DebugEngineCreateEvent.cs" />
+    <Compile Include="Debugger\Events\DebugEntryPointEvent.cs" />
+    <Compile Include="Debugger\Events\DebugErrorEvent.cs" />
+    <Compile Include="Debugger\Events\DebugEvent.cs" />
+    <Compile Include="Debugger\Events\DebugExceptionEvent.cs" />
+    <Compile Include="Debugger\Events\DebugExpressionEvaluationCompleteEvent.cs" />
+    <Compile Include="Debugger\Events\DebugInterceptExceptionCompleteEvent.cs" />
+    <Compile Include="Debugger\Events\DebugLoadCompleteEvent.cs" />
+    <Compile Include="Debugger\Events\DebugMessageEvent.cs" />
+    <Compile Include="Debugger\Events\DebugModuleLoadEvent.cs" />
+    <Compile Include="Debugger\Events\DebugNoSymbolsEvent.cs" />
+    <Compile Include="Debugger\Events\DebugOutputStringEvent.cs" />
+    <Compile Include="Debugger\Events\DebugProcessCreateEvent.cs" />
+    <Compile Include="Debugger\Events\DebugProcessDestroyEvent.cs" />
+    <Compile Include="Debugger\Events\DebugProgramCreateEvent.cs" />
+    <Compile Include="Debugger\Events\DebugProgramDestroyEvent.cs" />
+    <Compile Include="Debugger\Events\DebugProgramNameChangedEvent.cs" />
+    <Compile Include="Debugger\Events\DebugPropertyCreateEvent.cs" />
+    <Compile Include="Debugger\Events\DebugPropertyDestroyEvent.cs" />
+    <Compile Include="Debugger\Events\DebugReturnValueEvent.cs" />
+    <Compile Include="Debugger\Events\DebugStepCompleteEvent.cs" />
+    <Compile Include="Debugger\Events\DebugSymbolSearchEvent.cs" />
+    <Compile Include="Debugger\Events\DebugThreadDestroyEvent.cs" />
+    <Compile Include="Debugger\Events\DebugThreadNameChangedEvent.cs" />
+    <Compile Include="Debugger\Extensions\DebugEventExtensions.cs" />
+    <Compile Include="Debugger\Extensions\DebugPortExtensions.cs" />
+    <Compile Include="Debugger\Extensions\DebugProcessExtensions.cs" />
+    <Compile Include="Debugger\Extensions\DebugProgramExtensions.cs" />
+    <Compile Include="Debugger\Extensions\DebugThreadExtensions.cs" />
+    <Compile Include="Debugger\Extensions\ConstGuidArrayExtensions.cs" />
+    <Compile Include="Debugger\Extensions\ServiceExtensions.cs" />
+    <Compile Include="Debugger\Interop\IDebugProcessQueryProperties.cs" />
+    <Compile Include="Debugger\Interop\IDebugProgramHost2.cs" />
+    <Compile Include="Debugger\Interop\IDebugQueryEngine2.cs" />
+    <Compile Include="Debugger\JavaDebugBoundBreakpoint.cs" />
+    <Compile Include="Debugger\JavaDebugBreakpointResolution.cs" />
+    <Compile Include="Debugger\JavaDebugCodeContext.cs" />
+    <Compile Include="Debugger\JavaDebugDisassemblyStream.cs" />
+    <Compile Include="Debugger\JavaDebugDocumentContext.cs" />
+    <Compile Include="Debugger\JavaDebugEngine.cs" />
+    <Compile Include="Debugger\DebugErrorBreakpoint.cs" />
+    <Compile Include="Debugger\DebugErrorBreakpointResolution.cs" />
+    <Compile Include="Debugger\JavaDebugExpression.cs" />
+    <Compile Include="Debugger\JavaDebugExpressionContext.cs" />
+    <Compile Include="Debugger\JavaDebugFunctionPosition.cs" />
+    <Compile Include="Debugger\JavaDebuggerConstants.cs" />
+    <Compile Include="Debugger\JavaDebuggerPackage.cs" />
+    <Compile Include="Debugger\JavaDebugMemoryBytes.cs" />
+    <Compile Include="Debugger\JavaDebugMemoryContext.cs" />
+    <Compile Include="Debugger\JavaDebugModule.cs" />
+    <Compile Include="Debugger\JavaDebugPendingBreakpoint.cs" />
+    <None Include="app.config" />
+    <None Include="Debugger\JavaDebugPort.cs" />
+    <None Include="Debugger\JavaDebugPortSupplier.cs" />
+    <Compile Include="Debugger\JavaDebugProcess.cs" />
+    <Compile Include="Debugger\JavaDebugProgram.cs" />
+    <Compile Include="Debugger\JavaDebugProgram.JvmEventsCallback.cs" />
+    <Compile Include="Debugger\JavaDebugProgramProvider.cs" />
+    <Compile Include="Debugger\JavaDebugProperty.cs" />
+    <Compile Include="Debugger\JavaDebugReference.cs" />
+    <Compile Include="Debugger\JavaDebugStackFrame.cs" />
+    <Compile Include="Debugger\JavaDebugThread.cs" />
+    <Compile Include="Debugger\Events\DebugThreadCreateEvent.cs" />
     <Compile Include="Experimental\BraceLevelTracker.cs" />
     <Compile Include="Experimental\ClassAnchorTracker.cs" />
     <Compile Include="Experimental\IJavaClassifierLexerState`1.cs" />
@@ -367,6 +459,21 @@
     </Compile>
     <Compile Include="Project\ProjectPropertyStorage.cs" />
     <Compile Include="Project\PropertyPages\PropertyPageArgumentException.cs" />
+    <Compile Include="Service References\JvmDebugSessionService\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\JvmEventsService\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\JvmToolsService\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
     <Compile Include="SourceData\CodeArrayType.cs" />
     <Compile Include="SourceData\CodeClass.cs" />
     <Compile Include="SourceData\CodeElement.cs">
@@ -453,6 +560,44 @@
     <Compile Include="Text.Language\LanguageElementManager.cs" />
     <Compile Include="Text.Language\LanguageElementManagerService.cs" />
     <Compile Include="Text.Language\LanguageElementsChangedEventArgs.cs" />
+    <None Include="Service References\JvmDebugSessionService\service.wsdl" />
+    <None Include="Service References\JvmDebugSessionService\service.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\JvmEventsService\service.wsdl" />
+    <None Include="Service References\JvmEventsService\service.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\JvmEventsService\service1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\JvmEventsService\Tvl.Java.DebugHost.Services.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\JvmEventsService\Tvl.Java.DebugHost.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\JvmToolsService\Arrays.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\JvmToolsService\configuration91.svcinfo" />
+    <None Include="Service References\JvmToolsService\configuration.svcinfo" />
+    <None Include="Service References\JvmToolsService\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Service References\JvmEventsService\configuration91.svcinfo" />
+    <None Include="Service References\JvmEventsService\configuration.svcinfo" />
+    <None Include="Service References\JvmEventsService\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Service References\JvmDebugSessionService\configuration91.svcinfo" />
+    <None Include="Service References\JvmDebugSessionService\configuration.svcinfo" />
+    <None Include="Service References\JvmDebugSessionService\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
     <Content Include="VSIXProject_large.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -476,6 +621,61 @@
     <Antlr3 Include="SourceData\ExpressionEvaluatorWalker.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
+    <None Include="Service References\JvmToolsService\service.wsdl" />
+    <None Include="Service References\JvmToolsService\service.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\JvmToolsService\service1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.Java.DebugHost.Interop.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.Java.DebugHost.Services.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.Java.DebugHost.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmAccessModifiers.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmClassRemoteHandle.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmFieldRemoteHandle.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmObjectRemoteHandle.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmRemoteLocation.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmRemoteStackInfo.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmThreadGroupRemoteHandle.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmThreadRemoteHandle.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmThreadRemoteInfo.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiClassStatus.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiThreadState.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
     <None Include="Text\Tagger`1.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -548,7 +748,14 @@
       <MergeWithCTO>true</MergeWithCTO>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Service References\JvmDebugSessionService\" />
+    <WCFMetadataStorage Include="Service References\JvmEventsService\" />
+    <WCFMetadataStorage Include="Service References\JvmToolsService\" />
+  </ItemGroup>
   <PropertyGroup>
     <!-- Folder containing AntlrBuildTask.dll -->
     <AntlrBuildTaskPath>$(SolutionDir)External\Antlr</AntlrBuildTaskPath>

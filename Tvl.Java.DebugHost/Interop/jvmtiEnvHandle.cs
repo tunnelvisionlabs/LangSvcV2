@@ -13,6 +13,11 @@ namespace Tvl.Java.DebugHost.Interop
 
         private readonly IntPtr _handle;
 
+        public jvmtiEnvHandle(IntPtr handle)
+        {
+            _handle = handle;
+        }
+
         internal IntPtr Handle
         {
             get

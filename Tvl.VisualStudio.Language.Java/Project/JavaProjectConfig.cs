@@ -3,9 +3,18 @@
     using System;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Project;
+    using DEBUG_LAUNCH_OPERATION = Microsoft.VisualStudio.Shell.Interop.DEBUG_LAUNCH_OPERATION;
 
     using CultureInfo = System.Globalization.CultureInfo;
     using StringComparison = System.StringComparison;
+    using System.Collections.Generic;
+    using Tvl.VisualStudio.Shell.Extensions;
+    using IVsDebugger2 = Microsoft.VisualStudio.Shell.Interop.IVsDebugger2;
+    using JavaDebugEngine = Tvl.VisualStudio.Language.Java.Debugger.JavaDebugEngine;
+    using __VSDBGLAUNCHFLAGS = Microsoft.VisualStudio.Shell.Interop.__VSDBGLAUNCHFLAGS;
+    using SVsShellDebugger = Microsoft.VisualStudio.Shell.Interop.SVsShellDebugger;
+    using IVsUIShell = Microsoft.VisualStudio.Shell.Interop.IVsUIShell;
+    using SVsUIShell = Microsoft.VisualStudio.Shell.Interop.SVsUIShell;
 
     public class JavaProjectConfig : ProjectConfig
     {
@@ -77,13 +86,49 @@
 
         public override int QueryDebugLaunch(uint flags, out int fCanLaunch)
         {
-            fCanLaunch = 0;
+            fCanLaunch = 1;
             return VSConstants.S_OK;
         }
 
         public override int DebugLaunch(uint grfLaunch)
         {
-            throw new NotSupportedException();
+            DebugTargetInfo info = new DebugTargetInfo();
+
+            List<string> arguments = new List<string>();
+            arguments.Add(@"-agentpath:C:\dev\SimpleC\Tvl.Java.DebugHost\bin\Debug\Tvl.Java.DebugHostWrapper.dll");
+            //arguments.Add(@"-verbose:jni");
+            //arguments.Add(@"-cp");
+            //arguments.Add(@"C:\dev\JavaProjectTest\JavaProject\out\Debug");
+            arguments.Add("tvl.school.ee382v.a3.problem1.program1");
+            //arguments.Add(GetConfigurationProperty("OutputPath", true));
+            //arguments.Add(GetConfigurationProperty(JavaConfigConstants.DebugStartClass, false, ProjectPropertyStorage.UserFile));
+            //arguments.Add(GetConfigurationProperty(JavaConfigConstants.DebugExtraArgs, false, ProjectPropertyStorage.UserFile));
+
+            info.Arguments = string.Join(" ", arguments);
+
+            info.Executable = @"C:\Program Files (x86)\Java\jdk1.6.0_26\bin\java.exe";
+            //info.CurrentDirectory = GetConfigurationProperty("WorkingDirectory", false, ProjectPropertyStorage.UserFile);
+            info.CurrentDirectory = @"C:\dev\JavaProjectTest\JavaProject\out\Debug";
+            info.SendToOutputWindow = false;
+            info.DebugEngines = new Guid[]
+                {
+                    typeof(JavaDebugEngine).GUID,
+                    //VSConstants.DebugEnginesGuids.ManagedOnly_guid,
+                };
+            info.PortSupplier = new Guid("{708C1ECA-FF48-11D2-904F-00C04FA302A1}");
+            info.LaunchOperation = DEBUG_LAUNCH_OPERATION.DLO_CreateProcess;
+            info.LaunchFlags = (__VSDBGLAUNCHFLAGS)grfLaunch;
+
+            var debugger = (IVsDebugger2)Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SVsShellDebugger));
+            int result = debugger.LaunchDebugTargets(info);
+
+            if (result != VSConstants.S_OK)
+            {
+                IVsUIShell uishell = (IVsUIShell)Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SVsUIShell));
+                string message = uishell.GetErrorInfo();
+            }
+
+            return result;
         }
 
         private void SetUserPropertyUnderCondition(string propertyName, string propertyValue, string condition)

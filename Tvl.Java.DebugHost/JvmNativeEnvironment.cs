@@ -20,6 +20,14 @@
             _nativeInterface = nativeInterface;
         }
 
+        internal JNIEnvHandle Handle
+        {
+            get
+            {
+                return _nativeEnvironmentHandle;
+            }
+        }
+
         internal SafeJvmGlobalReferenceHandle NewGlobalReference(jobject @object)
         {
             return new SafeJvmGlobalReferenceHandle(this, _nativeInterface.NewGlobalRef(_nativeEnvironmentHandle, @object), true);
@@ -27,6 +35,9 @@
 
         internal void DeleteGlobalReference(jobject reference)
         {
+            if (!AgentExports.IsLoaded)
+                return;
+
             _nativeInterface.DeleteGlobalRef(_nativeEnvironmentHandle, reference);
         }
     }

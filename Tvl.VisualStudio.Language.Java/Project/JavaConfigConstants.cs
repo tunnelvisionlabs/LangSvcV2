@@ -33,5 +33,6 @@
         //
         public const string DebugExe = "StartProgram";
         public const string DebugExtraArgs = "CmdArgs";
+        public const string DebugStartClass = "StartClass";
     }
 }

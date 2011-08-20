@@ -14,6 +14,14 @@ namespace Tvl.Java.DebugHost.Interop
         private readonly CapabilityFlags3 _flags3;
         private readonly CapabilityFlags4 _flags4;
 
+        public jvmtiCapabilities(CapabilityFlags1 flags1 = 0, CapabilityFlags2 flags2 = 0, CapabilityFlags3 flags3 = 0, CapabilityFlags4 flags4 = 0)
+        {
+            _flags1 = flags1;
+            _flags2 = flags2;
+            _flags3 = flags3;
+            _flags4 = flags4;
+        }
+
         public bool CanTagObjects
         {
             get

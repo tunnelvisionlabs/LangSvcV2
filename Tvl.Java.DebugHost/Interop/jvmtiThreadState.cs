@@ -1,12 +1,9 @@
 ﻿namespace Tvl.Java.DebugHost.Interop
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
 
     [Flags]
-    internal enum jvmtiThreadState
+    public enum jvmtiThreadState
     {
         None = 0,
 

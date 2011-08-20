@@ -1,6 +1,6 @@
 ﻿namespace Tvl.Java.DebugHost.Interop
 {
-    internal enum jvmtiPhase
+    public enum jvmtiPhase
     {
         Invalid = 0,
         OnLoad = 1,

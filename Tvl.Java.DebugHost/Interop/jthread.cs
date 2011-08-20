@@ -42,6 +42,11 @@ namespace Tvl.Java.DebugHost.Interop
             return new jthread(thread.Handle.DangerousGetHandle());
         }
 
+        public static explicit operator jthread(jobject @object)
+        {
+            return new jthread(@object.Handle);
+        }
+
         public static implicit operator jobject(jthread thread)
         {
             return new jobject(thread.Handle);

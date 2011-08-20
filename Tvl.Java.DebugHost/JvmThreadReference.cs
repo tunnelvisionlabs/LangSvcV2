@@ -4,15 +4,22 @@
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using Tvl.Java.DebugHost.Interop;
+    using JvmThreadRemoteHandle = Tvl.Java.DebugHost.Services.JvmThreadRemoteHandle;
+    using System.Collections.Generic;
 
     public class JvmThreadReference : JvmObjectReference
     {
+        private static readonly List<SafeJvmGlobalReferenceHandle> pinnedReferences = new List<SafeJvmGlobalReferenceHandle>();
+
         internal JvmThreadReference(JvmEnvironment environment, JvmNativeEnvironment nativeEnvironment, jthread handle)
             : base(environment, nativeEnvironment, handle)
         {
             Contract.Requires(environment != null);
             Contract.Requires(nativeEnvironment != null);
             Contract.Requires(handle != jthread.Null);
+
+            // quick experiment to see if the lifetime of thread references is killing the process.
+            pinnedReferences.Add(base.Handle);
         }
 
         internal JvmThreadReference(JvmEnvironment environment, SafeJvmGlobalReferenceHandle handle)
@@ -20,6 +27,20 @@
         {
             Contract.Requires(environment != null);
             Contract.Requires(handle != null);
+        }
+
+        public static implicit operator JvmThreadRemoteHandle(JvmThreadReference thread)
+        {
+            return new JvmThreadRemoteHandle((jthread)thread);
+        }
+
+        public static JvmThreadReference FromHandle(JvmEnvironment environment, JNIEnvHandle jniEnv, jthread threadHandle)
+        {
+            if (threadHandle == jthread.Null)
+                return null;
+
+            JvmNativeEnvironment nativeEnvironment = environment.GetNativeFunctionTable(jniEnv);
+            return new JvmThreadReference(environment, nativeEnvironment, threadHandle);
         }
 
         public ReadOnlyCollection<JvmStackFrame> GetFrames()

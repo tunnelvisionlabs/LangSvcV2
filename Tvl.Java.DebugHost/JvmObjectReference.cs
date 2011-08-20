@@ -44,6 +44,15 @@
             }
         }
 
+        public static JvmObjectReference FromHandle(JvmEnvironment environment, JNIEnvHandle jniEnv, jobject objectHandle)
+        {
+            if (objectHandle == jobject.Null)
+                return null;
+
+            JvmNativeEnvironment nativeEnvironment = environment.GetNativeFunctionTable(jniEnv);
+            return new JvmObjectReference(environment, nativeEnvironment, objectHandle);
+        }
+
         public void Dispose()
         {
             Dispose(true);

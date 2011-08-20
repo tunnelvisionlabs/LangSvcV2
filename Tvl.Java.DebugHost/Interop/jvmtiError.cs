@@ -1,11 +1,13 @@
 ﻿namespace Tvl.Java.DebugHost.Interop
 {
-    internal enum jvmtiError
+    public enum jvmtiError
     {
         #region Universal Errors
 
+        /// <summary>
+        /// No error has occurred. This is the error code that is returned on successful completion of the function.
+        /// </summary>
         None = 0,
-        //No error has occurred. This is the error code that is returned on successful completion of the function. 
 
         NullPointer = 100,
         //Pointer is unexpectedly NULL. 

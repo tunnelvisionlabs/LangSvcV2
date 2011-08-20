@@ -10,6 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Tvl.Java.DebugHost</RootNamespace>
     <AssemblyName>Tvl.Java.DebugHost</AssemblyName>
+    <ProjectTypeGuids>{3D9AD99F-2412-4246-B90B-4EAA41C64699};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <CodeContractsAssemblyMode>1</CodeContractsAssemblyMode>
@@ -86,13 +87,25 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interop\JavaVMAttachArgs.cs" />
+    <Compile Include="Interop\JniErrorHandler.cs" />
+    <Compile Include="Interop\jniVersion.cs" />
+    <Compile Include="Interop\JvmtiErrorHandler.cs" />
+    <Compile Include="Services\IJvmDebugSessionService.cs" />
+    <Compile Include="Services\IJvmEvents.cs" />
+    <Compile Include="Services\IJvmEventsService.cs" />
+    <Compile Include="Services\IJvmToolsInterfaceService.cs" />
     <Compile Include="Interop\AgentExports.cs" />
     <Compile Include="Interop\JavaVM.cs" />
     <Compile Include="Interop\JavaVMUnsafeNativeMethods.cs" />
@@ -116,6 +129,8 @@
     <Compile Include="Interop\jvmtiEnvHandle.cs" />
     <Compile Include="Interop\jvmtiError.cs" />
     <Compile Include="JvmAccessModifiers.cs" />
+    <Compile Include="Services\JvmClassRemoteHandle.cs" />
+    <Compile Include="Services\JvmDebugSessionService.cs" />
     <Compile Include="JvmEventType.cs" />
     <Compile Include="Interop\jvmtiEventCallbacks.cs" />
     <Compile Include="JvmEventMode.cs" />
@@ -154,18 +169,45 @@
     <Compile Include="JvmThreadReference.cs" />
     <Compile Include="JvmThreadGroupReference.cs" />
     <Compile Include="JvmThreadStatus.cs" />
+    <Compile Include="Services\JvmEventsPublisher.cs" />
+    <Compile Include="Services\JvmFieldRemoteHandle.cs" />
+    <Compile Include="Services\JvmMethodRemoteHandle.cs" />
+    <Compile Include="Services\JvmObjectRemoteHandle.cs" />
+    <Compile Include="Services\JvmRemoteLocation.cs" />
+    <Compile Include="Services\JvmRemoteStackInfo.cs" />
+    <Compile Include="Services\JvmThreadGroupRemoteHandle.cs" />
+    <Compile Include="Services\JvmThreadRemoteHandle.cs" />
+    <Compile Include="Services\JvmThreadRemoteInfo.cs" />
+    <Compile Include="Services\JvmToolsInterfaceService.cs" />
     <Compile Include="ModifiedUTF8Encoding.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SafeJvmAllocHandle.cs" />
     <Compile Include="SafeJvmGlobalReferenceHandle.cs" />
+    <Compile Include="Services\JvmVirtualMachineRemoteHandle.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
+      <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
+      <Name>Tvl.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Tvl.Java.DebugHostWrapper\Tvl.Java.DebugHostWrapper.vcxproj">
       <Project>{538F6A87-53C9-4F02-B154-2A6925715C1C}</Project>
       <Name>Tvl.Java.DebugHostWrapper</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{3D9AD99F-2412-4246-B90B-4EAA41C64699}">
+        <WcfProjectProperties>
+          <AutoStart>False</AutoStart>
+        </WcfProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
