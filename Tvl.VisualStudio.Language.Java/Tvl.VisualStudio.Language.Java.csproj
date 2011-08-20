@@ -324,7 +324,7 @@
     <Compile Include="Debugger\Interop\IDebugProgramHost2.cs" />
     <Compile Include="Debugger\Interop\IDebugQueryEngine2.cs" />
     <Compile Include="Debugger\JavaDebugBoundBreakpoint.cs" />
-    <Compile Include="Debugger\JavaDebugBreakpointResolution.cs" />
+    <Compile Include="Debugger\DebugBreakpointResolution.cs" />
     <Compile Include="Debugger\JavaDebugCodeContext.cs" />
     <Compile Include="Debugger\JavaDebugDisassemblyStream.cs" />
     <Compile Include="Debugger\JavaDebugDocumentContext.cs" />
@@ -341,9 +341,9 @@
     <Compile Include="Debugger\JavaDebugModule.cs" />
     <Compile Include="Debugger\JavaDebugPendingBreakpoint.cs" />
     <None Include="app.config" />
+    <None Include="Debugger\JavaDebugProcess.cs" />
     <None Include="Debugger\JavaDebugPort.cs" />
     <None Include="Debugger\JavaDebugPortSupplier.cs" />
-    <Compile Include="Debugger\JavaDebugProcess.cs" />
     <Compile Include="Debugger\JavaDebugProgram.cs" />
     <Compile Include="Debugger\JavaDebugProgram.JvmEventsCallback.cs" />
     <Compile Include="Debugger\JavaDebugProgramProvider.cs" />
