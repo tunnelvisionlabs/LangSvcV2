@@ -267,8 +267,12 @@
     <Compile Include="Contracts\IActiveViewTrackerServiceContracts.cs" />
     <Compile Include="Contracts\IMonitorSelectionServiceContracts.cs" />
     <Compile Include="Contracts\IOpenedViewTrackerServiceContracts.cs" />
+    <Compile Include="DebuggerRegistrationAttribute.cs" />
+    <Compile Include="DebugMetricAttribute.cs" />
+    <Compile Include="Extensions\DebugTargetInfo.cs" />
     <Compile Include="Extensions\IConnectionPointContainerExtensions.cs" />
     <Compile Include="Extensions\IVsCmdNameMappingExtensions.cs" />
+    <Compile Include="Extensions\IVsDebuggerExtensions.cs" />
     <Compile Include="Extensions\IVsExpansionManagerExtensions.cs" />
     <Compile Include="Extensions\IVsHierarchyExtensions.cs" />
     <Compile Include="Extensions\IVsShellExtensions.cs" />
@@ -281,6 +285,7 @@
     <Compile Include="IActiveViewTrackerService.cs" />
     <Compile Include="IMonitorSelectionService.cs" />
     <Compile Include="IOpenedViewTrackerService.cs" />
+    <Compile Include="MetricTypes.cs" />
     <Compile Include="OutputWindow\IOutputWindowPane.cs" />
     <Compile Include="OutputWindow\IOutputWindowService.cs" />
     <Compile Include="OutputWindow\IOutputWindowServiceContracts.cs" />
@@ -290,6 +295,7 @@
     <Compile Include="PredefinedTaskSchedulers.cs" />
     <Compile Include="PriorityCommandFilter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProvideDebugEngineAttribute.cs" />
     <Compile Include="ProvideDebuggerExceptionAttribute.cs" />
     <Compile Include="WpfToolWindowPane.cs" />
     <Compile Include="ViewChangedEventArgs.cs" />
