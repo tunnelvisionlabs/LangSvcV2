@@ -23,6 +23,13 @@
             }
         }
 
+        public static string GetErrorInfo(this IVsUIShell shell)
+        {
+            string message;
+            ErrorHandler.ThrowOnFailure(shell.GetErrorInfo(out message));
+            return message;
+        }
+
         public static IEnumerable<IVsWindowFrame> GetToolWindows(this IVsUIShell shell)
         {
             Contract.Requires<ArgumentNullException>(shell != null, "shell");
