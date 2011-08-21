@@ -1,0 +1,24 @@
+﻿namespace Tvl.Java.DebugInterface.Connect
+{
+    /// <summary>
+    /// Specification for and value of a Connector argument, whose value is Boolean. Boolean
+    /// values are represented by the localized versions of the strings "true" and "false".
+    /// </summary>
+    public interface IConnectorBooleanArgument : IConnectorArgument
+    {
+        /// <summary>
+        /// Return the value of the argument as a bool.
+        /// </summary>
+        bool GetBooleanValue();
+
+        /// <summary>
+        /// Sets the value of the argument.
+        /// </summary>
+        void SetValue(bool value);
+
+        /// <summary>
+        /// Return the string representation of the <param name="value"/> parameter.
+        /// </summary>
+        string GetStringValueOf(bool value);
+    }
+}

@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{DB91E4D1-20D6-44D1-94DA-971ACEDAA0B8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Tvl.Java.DebugInterface</RootNamespace>
+    <AssemblyName>Tvl.Java.DebugInterface</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AccessModifiers.cs" />
+    <Compile Include="Connect\IAttachingConnector.cs" />
+    <Compile Include="Connect\IConnector.cs" />
+    <Compile Include="Connect\IConnectorArgument.cs" />
+    <Compile Include="Connect\IConnectorBooleanArgument.cs" />
+    <Compile Include="Connect\IConnectorIntegerArgument.cs" />
+    <Compile Include="Connect\IConnectorSelectedArgument.cs" />
+    <Compile Include="Connect\IConnectorStringArgument.cs" />
+    <Compile Include="Connect\ILaunchingConnector.cs" />
+    <Compile Include="Connect\IListeningConnector.cs" />
+    <Compile Include="Connect\ITransport.cs" />
+    <Compile Include="Events\IMonitorWaitEvent.cs" />
+    <Compile Include="Events\IMonitorCondendedEnterEvent.cs" />
+    <Compile Include="Events\IAccessWatchpointEvent.cs" />
+    <Compile Include="Events\IBreakpointEvent.cs" />
+    <Compile Include="Events\IClassPrepareEvent.cs" />
+    <Compile Include="Events\IClassUnloadEvent.cs" />
+    <Compile Include="Events\IEvent.cs" />
+    <Compile Include="Events\IEventQueue.cs" />
+    <Compile Include="Events\IExceptionEvent.cs" />
+    <Compile Include="Events\IMethodEntryEvent.cs" />
+    <Compile Include="Events\IMethodExitEvent.cs" />
+    <Compile Include="Events\IModificationWatchpointEvent.cs" />
+    <Compile Include="Events\IMonitorCondendedEnteredEvent.cs" />
+    <Compile Include="Events\IMonitorEvent.cs" />
+    <Compile Include="Events\IMonitorWaitedEvent.cs" />
+    <Compile Include="Events\IStepEvent.cs" />
+    <Compile Include="Events\IThreadDeathEvent.cs" />
+    <Compile Include="Events\IThreadEvent.cs" />
+    <Compile Include="Events\IThreadStartEvent.cs" />
+    <Compile Include="Events\IVirtualMachineDeathEvent.cs" />
+    <Compile Include="Events\IVirtualMachineDisconnectEvent.cs" />
+    <Compile Include="Events\IVirtualMachineStartEvent.cs" />
+    <Compile Include="InvokeOptions.cs" />
+    <Compile Include="Request\IAccessWatchpointRequest.cs" />
+    <Compile Include="Request\IBreakpointRequest.cs" />
+    <Compile Include="Request\IClassPrepareRequest.cs" />
+    <Compile Include="Request\IClassUnloadRequest.cs" />
+    <Compile Include="Request\IEventRequest.cs" />
+    <Compile Include="Events\IEventSet.cs" />
+    <Compile Include="Events\ILocatableEvent.cs" />
+    <Compile Include="Events\IWatchpointEvent.cs" />
+    <Compile Include="IVirtualMachineManager.cs" />
+    <Compile Include="IVoidType.cs" />
+    <Compile Include="IShortType.cs" />
+    <Compile Include="IShortValue.cs" />
+    <Compile Include="ILongType.cs" />
+    <Compile Include="ILongValue.cs" />
+    <Compile Include="IIntegerType.cs" />
+    <Compile Include="IIntegerValue.cs" />
+    <Compile Include="IFloatType.cs" />
+    <Compile Include="IFloatValue.cs" />
+    <Compile Include="IAccessible.cs" />
+    <Compile Include="IArrayReference.cs" />
+    <Compile Include="IBooleanType.cs" />
+    <Compile Include="IBooleanValue.cs" />
+    <Compile Include="IByteType.cs" />
+    <Compile Include="IByteValue.cs" />
+    <Compile Include="ICharType.cs" />
+    <Compile Include="ICharValue.cs" />
+    <Compile Include="IClassLoaderReference.cs" />
+    <Compile Include="IClassObjectReference.cs" />
+    <Compile Include="IClassType.cs" />
+    <Compile Include="IDoubleType.cs" />
+    <Compile Include="IDoubleValue.cs" />
+    <Compile Include="IField.cs" />
+    <Compile Include="IInterfaceType.cs" />
+    <Compile Include="ILocalVariable.cs" />
+    <Compile Include="IArrayType.cs" />
+    <Compile Include="ILocatable.cs" />
+    <Compile Include="ILocation.cs" />
+    <Compile Include="IMethod.cs" />
+    <Compile Include="IMirror.cs" />
+    <Compile Include="IMonitorInfo.cs" />
+    <Compile Include="IObjectReference.cs" />
+    <Compile Include="IPathSearchingVirtualMachine.cs" />
+    <Compile Include="IPrimitiveType.cs" />
+    <Compile Include="IPrimitiveValue.cs" />
+    <Compile Include="IReferenceType.cs" />
+    <Compile Include="IStackFrame.cs" />
+    <Compile Include="IStringReference.cs" />
+    <Compile Include="IThreadGroupReference.cs" />
+    <Compile Include="IThreadReference.cs" />
+    <Compile Include="IType.cs" />
+    <Compile Include="ITypeComponent.cs" />
+    <Compile Include="IValue.cs" />
+    <Compile Include="IVirtualMachine.cs" />
+    <Compile Include="IVoidValue.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Request\IEventRequestManager.cs" />
+    <Compile Include="Request\IExceptionRequest.cs" />
+    <Compile Include="Request\IMethodEntryRequest.cs" />
+    <Compile Include="Request\IMethodExitRequest.cs" />
+    <Compile Include="Request\IModificationWatchpointRequest.cs" />
+    <Compile Include="Request\IMonitorContendedEnteredRequest.cs" />
+    <Compile Include="Request\IMonitorContendedEnterRequest.cs" />
+    <Compile Include="Request\IMonitorWaitedRequest.cs" />
+    <Compile Include="Request\IMonitorWaitRequest.cs" />
+    <Compile Include="Request\IStepRequest.cs" />
+    <Compile Include="Request\IThreadDeathRequest.cs" />
+    <Compile Include="Request\IThreadStartRequest.cs" />
+    <Compile Include="Request\IVirtualMachineDeathRequest.cs" />
+    <Compile Include="Request\IWatchpointRequest.cs" />
+    <Compile Include="Request\StepSize.cs" />
+    <Compile Include="Request\SuspendPolicy.cs" />
+    <Compile Include="ThreadStatus.cs" />
+    <Compile Include="TraceModes.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
