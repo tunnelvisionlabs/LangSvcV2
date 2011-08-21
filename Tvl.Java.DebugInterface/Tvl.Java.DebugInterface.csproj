@@ -41,6 +41,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccessModifiers.cs" />
+    <Compile Include="ClassNotLoadedException.cs" />
+    <Compile Include="ClassNotPreparedException.cs" />
+    <Compile Include="Connect\ConnectorArgumentException.cs" />
+    <Compile Include="Connect\VirtualMachineStartException.cs" />
+    <Compile Include="DebuggerTimeoutException.cs" />
     <Compile Include="Connect\IAttachingConnector.cs" />
     <Compile Include="Connect\IConnector.cs" />
     <Compile Include="Connect\IConnectorArgument.cs" />
@@ -51,6 +56,10 @@
     <Compile Include="Connect\ILaunchingConnector.cs" />
     <Compile Include="Connect\IListeningConnector.cs" />
     <Compile Include="Connect\ITransport.cs" />
+    <Compile Include="Connect\TransportTimeoutException.cs" />
+    <Compile Include="DebuggerArgumentException.cs" />
+    <Compile Include="DebuggerException.cs" />
+    <Compile Include="DebuggerInvalidOperationException.cs" />
     <Compile Include="Events\IMonitorWaitEvent.cs" />
     <Compile Include="Events\IMonitorCondendedEnterEvent.cs" />
     <Compile Include="Events\IAccessWatchpointEvent.cs" />
@@ -73,7 +82,17 @@
     <Compile Include="Events\IVirtualMachineDeathEvent.cs" />
     <Compile Include="Events\IVirtualMachineDisconnectEvent.cs" />
     <Compile Include="Events\IVirtualMachineStartEvent.cs" />
+    <Compile Include="IncompatibleThreadStateException.cs" />
+    <Compile Include="InconsistentDebugInfoException.cs" />
+    <Compile Include="InternalException.cs" />
+    <Compile Include="InvalidStackFrameException.cs" />
+    <Compile Include="InvalidTypeException.cs" />
+    <Compile Include="InvocationException.cs" />
     <Compile Include="InvokeOptions.cs" />
+    <Compile Include="MissingInformationException.cs" />
+    <Compile Include="NativeMethodException.cs" />
+    <Compile Include="ObjectCollectionException.cs" />
+    <Compile Include="Request\DuplicateRequestException.cs" />
     <Compile Include="Request\IAccessWatchpointRequest.cs" />
     <Compile Include="Request\IBreakpointRequest.cs" />
     <Compile Include="Request\IClassPrepareRequest.cs" />
@@ -138,6 +157,7 @@
     <Compile Include="Request\IMonitorContendedEnterRequest.cs" />
     <Compile Include="Request\IMonitorWaitedRequest.cs" />
     <Compile Include="Request\IMonitorWaitRequest.cs" />
+    <Compile Include="Request\InvalidRequestStateException.cs" />
     <Compile Include="Request\IStepRequest.cs" />
     <Compile Include="Request\IThreadDeathRequest.cs" />
     <Compile Include="Request\IThreadStartRequest.cs" />
@@ -147,6 +167,10 @@
     <Compile Include="Request\SuspendPolicy.cs" />
     <Compile Include="ThreadStatus.cs" />
     <Compile Include="TraceModes.cs" />
+    <Compile Include="VirtualMachineCannotBeModifiedException.cs" />
+    <Compile Include="VirtualMachineDisconnectedException.cs" />
+    <Compile Include="VirtualMachineMismatchException.cs" />
+    <Compile Include="VirtualMachineOutOfMemoryException.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
