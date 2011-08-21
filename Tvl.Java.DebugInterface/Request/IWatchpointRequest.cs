@@ -1,17 +1,7 @@
 ﻿namespace Tvl.Java.DebugInterface.Request
 {
-    public interface IWatchpointRequest : IEventRequest
+    public interface IWatchpointRequest : IEventRequest, IClassFilter, IInstanceFilter, IThreadFilter
     {
-        void AddClassExclusionFilter(string classPattern);
-
-        void AddClassFilter(IReferenceType referenceType);
-
-        void AddClassFilter(string classPattern);
-
-        void AddInstanceFilter(IObjectReference instance);
-
-        void AddThreadFilter(IThreadReference thread);
-
         IField GetField();
     }
 }

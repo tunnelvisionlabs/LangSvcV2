@@ -1,9 +1,6 @@
 ﻿namespace Tvl.Java.DebugInterface.Request
 {
-    public interface IClassUnloadRequest : IEventRequest
+    public interface IClassUnloadRequest : IEventRequest, IClassNameFilter
     {
-        void AddClassExclusionFilter(string classPattern);
-
-        void AddClassFilter(string classPattern);
     }
 }

@@ -1,13 +1,7 @@
 ﻿namespace Tvl.Java.DebugInterface.Request
 {
-    public interface IClassPrepareRequest : IEventRequest
+    public interface IClassPrepareRequest : IEventRequest, IClassFilter
     {
-        void AddClassExclusionFilter(string classPattern);
-
-        void AddClassFilter(IReferenceType referenceType);
-
-        void AddClassFilter(string classPattern);
-
         void AddSourceNameFilter(string sourceNamePattern);
     }
 }

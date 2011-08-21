@@ -95,6 +95,8 @@
     <Compile Include="Request\DuplicateRequestException.cs" />
     <Compile Include="Request\IAccessWatchpointRequest.cs" />
     <Compile Include="Request\IBreakpointRequest.cs" />
+    <Compile Include="Request\IClassFilter.cs" />
+    <Compile Include="Request\IClassNameFilter.cs" />
     <Compile Include="Request\IClassPrepareRequest.cs" />
     <Compile Include="Request\IClassUnloadRequest.cs" />
     <Compile Include="Request\IEventRequest.cs" />
@@ -150,6 +152,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Request\IEventRequestManager.cs" />
     <Compile Include="Request\IExceptionRequest.cs" />
+    <Compile Include="Request\IInstanceFilter.cs" />
     <Compile Include="Request\IMethodEntryRequest.cs" />
     <Compile Include="Request\IMethodExitRequest.cs" />
     <Compile Include="Request\IModificationWatchpointRequest.cs" />
@@ -160,6 +163,7 @@
     <Compile Include="Request\InvalidRequestStateException.cs" />
     <Compile Include="Request\IStepRequest.cs" />
     <Compile Include="Request\IThreadDeathRequest.cs" />
+    <Compile Include="Request\IThreadFilter.cs" />
     <Compile Include="Request\IThreadStartRequest.cs" />
     <Compile Include="Request\IVirtualMachineDeathRequest.cs" />
     <Compile Include="Request\IWatchpointRequest.cs" />

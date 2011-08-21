@@ -1,9 +1,6 @@
 ﻿namespace Tvl.Java.DebugInterface.Request
 {
-    public interface IBreakpointRequest : IEventRequest, ILocatable
+    public interface IBreakpointRequest : IEventRequest, ILocatable, IInstanceFilter, IThreadFilter
     {
-        void AddInstanceFilter(IObjectReference instance);
-
-        void AddThreadFilter(IThreadReference thread);
     }
 }

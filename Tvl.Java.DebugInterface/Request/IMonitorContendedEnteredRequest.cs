@@ -1,15 +1,6 @@
 ﻿namespace Tvl.Java.DebugInterface.Request
 {
-    public interface IMonitorContendedEnteredRequest : IEventRequest
+    public interface IMonitorContendedEnteredRequest : IEventRequest, IClassFilter, IInstanceFilter, IThreadFilter
     {
-        void AddClassExclusionFilter(string classPattern);
-
-        void AddClassFilter(IReferenceType referenceType);
-
-        void AddClassFilter(string classPattern);
-
-        void AddInstanceFilter(IObjectReference instance);
-
-        void AddThreadFilter(IThreadReference thread);
     }
 }

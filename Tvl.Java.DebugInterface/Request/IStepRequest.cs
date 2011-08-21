@@ -1,15 +1,7 @@
 ﻿namespace Tvl.Java.DebugInterface.Request
 {
-    public interface IStepRequest : IEventRequest
+    public interface IStepRequest : IEventRequest, IClassFilter, IInstanceFilter
     {
-        void AddClassExclusionFilter(string classPattern);
-
-        void AddClassFilter(IReferenceType referenceType);
-
-        void AddClassFilter(string classPattern);
-
-        void AddInstanceFilter(IObjectReference instance);
-
         int GetDepth();
 
         StepSize GetSize();

@@ -1,7 +1,6 @@
 ﻿namespace Tvl.Java.DebugInterface.Request
 {
-    public interface IThreadDeathRequest : IEventRequest
+    public interface IThreadDeathRequest : IEventRequest, IThreadFilter
     {
-        void AddThreadFilter(IThreadReference thread);
     }
 }
