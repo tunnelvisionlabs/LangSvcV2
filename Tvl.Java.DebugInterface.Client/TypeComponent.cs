@@ -91,7 +91,7 @@
 
         public bool GetIsSynthetic()
         {
-            return (GetModifiers() & AccessModifiers.Synchronized) != 0;
+            return (GetModifiers() & AccessModifiers.Synthetic) != 0;
         }
 
         public string GetName()

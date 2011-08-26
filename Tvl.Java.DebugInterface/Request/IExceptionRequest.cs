@@ -2,10 +2,19 @@
 {
     public interface IExceptionRequest : IEventRequest, IClassFilter, IInstanceFilter, IThreadFilter
     {
-        IReferenceType GetException();
+        IReferenceType Exception
+        {
+            get;
+        }
 
-        bool GetNotifyCaught();
+        bool NotifyWhenCaught
+        {
+            get;
+        }
 
-        bool GetNotifyUncaught();
+        bool NotifyWhenUncaught
+        {
+            get;
+        }
     }
 }

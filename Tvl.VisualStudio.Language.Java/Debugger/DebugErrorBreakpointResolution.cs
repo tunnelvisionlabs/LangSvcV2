@@ -18,8 +18,8 @@
 
         public DebugErrorBreakpointResolution(IDebugProgram2 program, IDebugThread2 thread, enum_BP_TYPE breakpointType, BreakpointResolutionLocation location, enum_BP_ERROR_TYPE errorType, string message)
         {
-            Contract.Requires<ArgumentNullException>(program != null, "program");
-            Contract.Requires<ArgumentNullException>(thread != null, "thread");
+            //Contract.Requires<ArgumentNullException>(program != null, "program");
+            //Contract.Requires<ArgumentNullException>(thread != null, "thread");
             Contract.Requires<ArgumentNullException>(message != null, "message");
             Contract.Requires<ArgumentNullException>(location != null, "location");
             Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(message));
@@ -52,19 +52,19 @@
 
             pErrorResolutionInfo[0].dwFields = 0;
 
-            if ((dwFields & enum_BPERESI_FIELDS.BPERESI_MESSAGE) != 0)
+            if ((dwFields & enum_BPERESI_FIELDS.BPERESI_MESSAGE) != 0 && _message != null)
             {
                 pErrorResolutionInfo[0].dwFields |= enum_BPERESI_FIELDS.BPERESI_MESSAGE;
                 pErrorResolutionInfo[0].bstrMessage = _message;
             }
 
-            if ((dwFields & enum_BPERESI_FIELDS.BPERESI_PROGRAM) != 0)
+            if ((dwFields & enum_BPERESI_FIELDS.BPERESI_PROGRAM) != 0 && _program != null)
             {
                 pErrorResolutionInfo[0].dwFields |= enum_BPERESI_FIELDS.BPERESI_PROGRAM;
                 pErrorResolutionInfo[0].pProgram = _program;
             }
 
-            if ((dwFields & enum_BPERESI_FIELDS.BPERESI_THREAD) != 0)
+            if ((dwFields & enum_BPERESI_FIELDS.BPERESI_THREAD) != 0 && _thread != null)
             {
                 pErrorResolutionInfo[0].dwFields |= enum_BPERESI_FIELDS.BPERESI_THREAD;
                 pErrorResolutionInfo[0].pThread = _thread;
@@ -76,7 +76,7 @@
                 pErrorResolutionInfo[0].dwType = _errorType;
             }
 
-            if ((dwFields & enum_BPERESI_FIELDS.BPERESI_BPRESLOCATION) != 0)
+            if ((dwFields & enum_BPERESI_FIELDS.BPERESI_BPRESLOCATION) != 0 && _location != null)
             {
                 pErrorResolutionInfo[0].dwFields |= enum_BPERESI_FIELDS.BPERESI_BPRESLOCATION;
                 _location.ToNativeForm(out pErrorResolutionInfo[0].bpResLocation);

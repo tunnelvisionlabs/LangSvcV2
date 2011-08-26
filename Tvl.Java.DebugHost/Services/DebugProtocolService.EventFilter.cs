@@ -6,6 +6,7 @@
     using System.Text;
     using Tvl.Java.DebugInterface.Types;
     using System.Diagnostics.Contracts;
+    using System.Collections.ObjectModel;
 
     partial class DebugProtocolService
     {
@@ -36,7 +37,7 @@
                 }
             }
 
-            public abstract bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class);
+            public abstract bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class, Location? location);
 
             public static EventFilter CreateFilter(RequestId requestId, SuspendPolicy suspendPolicy, EventRequestModifier[] modifiers)
             {
@@ -70,7 +71,7 @@
                     throw new NotImplementedException();
 
                 case ModifierKind.LocationFilter:
-                    throw new NotImplementedException();
+                    return new LocationEventFilter(requestId, suspendPolicy, modifier.Location);
 
                 case ModifierKind.ExceptionFilter:
                     throw new NotImplementedException();
@@ -104,7 +105,7 @@
             {
             }
 
-            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class)
+            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
                 return true;
             }
@@ -121,11 +122,19 @@
                 _filters = filters.ToArray();
             }
 
-            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class)
+            public ReadOnlyCollection<EventFilter> Filters
+            {
+                get
+                {
+                    return new ReadOnlyCollection<EventFilter>(_filters);
+                }
+            }
+
+            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
                 foreach (EventFilter filter in _filters)
                 {
-                    if (!filter.ProcessEvent(thread, @class))
+                    if (!filter.ProcessEvent(thread, @class, location))
                         return false;
                 }
 
@@ -145,7 +154,7 @@
                 _count = count;
             }
 
-            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class)
+            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
                 _current++;
                 if (_current == _count)
@@ -168,10 +177,39 @@
                 _thread = thread;
             }
 
-            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class)
+            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
                 return _thread == default(ThreadId)
                     || _thread == thread;
+            }
+        }
+
+        public sealed class LocationEventFilter : EventFilter
+        {
+            private readonly Location _location;
+
+            public LocationEventFilter(RequestId requestId, SuspendPolicy suspendPolicy, Location location)
+                : base(requestId, suspendPolicy)
+            {
+                _location = location;
+            }
+
+            public Location Location
+            {
+                get
+                {
+                    return _location;
+                }
+            }
+
+            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class, Location? location)
+            {
+                if (!location.HasValue)
+                    return false;
+
+                return _location.Index == location.Value.Index
+                    && _location.Class == location.Value.Class
+                    && _location.Method == location.Value.Method;
             }
         }
 
@@ -187,9 +225,9 @@
                 _depth = depth;
             }
 
-            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class)
+            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
-                if (!base.ProcessEvent(thread, @class))
+                if (!base.ProcessEvent(thread, @class, location))
                     return false;
 
                 if (_size != StepSize.Minimum || _depth != StepDepth.Into)

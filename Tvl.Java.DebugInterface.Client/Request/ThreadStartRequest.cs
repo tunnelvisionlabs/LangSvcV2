@@ -22,7 +22,7 @@
         public void AddThreadFilter(IThreadReference thread)
         {
             ThreadReference threadReference = thread as ThreadReference;
-            if (threadReference == null)
+            if (threadReference == null || !threadReference.VirtualMachine.Equals(this.VirtualMachine))
                 throw new VirtualMachineMismatchException();
 
             Modifiers.Add(Types.EventRequestModifier.ThreadFilter(threadReference.ThreadId));

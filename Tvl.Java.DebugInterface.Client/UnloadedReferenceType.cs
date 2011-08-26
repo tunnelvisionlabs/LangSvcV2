@@ -201,7 +201,7 @@
             throw new ClassNotLoadedException(GetName());
         }
 
-        public ReadOnlyCollection<IField> GetVisibleMethods()
+        public ReadOnlyCollection<IMethod> GetVisibleMethods()
         {
             throw new ClassNotLoadedException(GetName());
         }

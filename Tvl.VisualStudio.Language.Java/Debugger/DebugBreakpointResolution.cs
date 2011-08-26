@@ -17,7 +17,6 @@
         public DebugBreakpointResolution(IDebugProgram2 program, IDebugThread2 thread, enum_BP_TYPE breakpointType, BreakpointResolutionLocation location)
         {
             Contract.Requires<ArgumentNullException>(program != null, "program");
-            Contract.Requires<ArgumentNullException>(thread != null, "thread");
             Contract.Requires<ArgumentNullException>(location != null, "location");
 
             _program = program;
@@ -52,13 +51,13 @@
                 pBPResolutionInfo[0].pProgram = _program;
             }
 
-            if ((dwFields & enum_BPRESI_FIELDS.BPRESI_THREAD) != 0)
+            if ((dwFields & enum_BPRESI_FIELDS.BPRESI_THREAD) != 0 && _thread != null)
             {
                 pBPResolutionInfo[0].dwFields |= enum_BPRESI_FIELDS.BPRESI_THREAD;
                 pBPResolutionInfo[0].pThread = _thread;
             }
 
-            if ((dwFields & enum_BPRESI_FIELDS.BPRESI_BPRESLOCATION) != 0)
+            if ((dwFields & enum_BPRESI_FIELDS.BPRESI_BPRESLOCATION) != 0 && false)
             {
                 pBPResolutionInfo[0].dwFields |= enum_BPRESI_FIELDS.BPRESI_BPRESLOCATION;
                 _location.ToNativeForm(out pBPResolutionInfo[0].bpResLocation);

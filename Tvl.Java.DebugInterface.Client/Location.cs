@@ -11,6 +11,8 @@
         private readonly Method _method;
         private readonly long _codeIndex;
 
+        private int? _lineNumber;
+
         internal Location(VirtualMachine virtualMachine, Method method, long codeIndex)
             : base(virtualMachine)
         {
@@ -19,6 +21,15 @@
 
             _method = method;
             _codeIndex = codeIndex;
+        }
+
+        internal Location(VirtualMachine virtualMachine, Method method, long codeIndex, int lineNumber)
+            : this(virtualMachine, method, codeIndex)
+        {
+            Contract.Requires(virtualMachine != null);
+            Contract.Requires(method != null);
+
+            _lineNumber = lineNumber;
         }
 
         public long CodeIndex
@@ -49,16 +60,21 @@
 
         public int GetLineNumber()
         {
-            long start;
-            long end;
-            Types.LineNumberData[] lines;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodLineTable(out start, out end, out lines, _method.DeclaringType.ReferenceTypeId, _method.MethodId));
+            if (_lineNumber == null)
+            {
+                long start;
+                long end;
+                Types.LineNumberData[] lines;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodLineTable(out start, out end, out lines, _method.DeclaringType.ReferenceTypeId, _method.MethodId));
 
-            if (_codeIndex < start || _codeIndex > end)
-                throw new NativeMethodException();
+                if (_codeIndex < start || _codeIndex > end)
+                    throw new NativeMethodException();
 
-            Types.LineNumberData lineData = lines.Last(i => i.LineCodeIndex <= _codeIndex);
-            return lineData.LineNumber;
+                Types.LineNumberData lineData = lines.Last(i => i.LineCodeIndex <= _codeIndex);
+                _lineNumber = lineData.LineNumber;
+            }
+
+            return _lineNumber.Value;
         }
 
         public int GetLineNumber(string stratum)

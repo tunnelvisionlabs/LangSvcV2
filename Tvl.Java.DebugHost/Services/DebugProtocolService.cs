@@ -37,6 +37,7 @@
             var capabilities =
                 new jvmtiCapabilities(
                     jvmtiCapabilities.CapabilityFlags1.CanTagObjects
+                    | jvmtiCapabilities.CapabilityFlags1.CanGetSyntheticAttribute
                     | jvmtiCapabilities.CapabilityFlags1.CanGetSourceFileName
                     | jvmtiCapabilities.CapabilityFlags1.CanGetLineNumbers
                     | jvmtiCapabilities.CapabilityFlags1.CanGetSourceDebugExtension

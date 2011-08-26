@@ -11,20 +11,28 @@
 
     internal abstract class ReferenceType : JavaType, IReferenceType
     {
-        private readonly ReferenceTypeId _typeId;
+        private readonly TaggedReferenceTypeId _taggedTypeId;
 
-        protected ReferenceType(VirtualMachine virtualMachine, ReferenceTypeId typeId)
+        protected ReferenceType(VirtualMachine virtualMachine, TaggedReferenceTypeId taggedTypeId)
             : base(virtualMachine)
         {
             Contract.Requires(virtualMachine != null);
-            _typeId = typeId;
+            _taggedTypeId = taggedTypeId;
         }
 
         public ReferenceTypeId ReferenceTypeId
         {
             get
             {
-                return _typeId;
+                return _taggedTypeId.TypeId;
+            }
+        }
+
+        public TaggedReferenceTypeId TaggedReferenceTypeId
+        {
+            get
+            {
+                return _taggedTypeId;
             }
         }
 
@@ -95,7 +103,7 @@
 
         public string GetDefaultStratum()
         {
-            throw new NotImplementedException();
+            return "Java";
         }
 
         public bool GetFailedToInitialize()
@@ -171,12 +179,26 @@
 
         public ReadOnlyCollection<ILocation> GetLocationsOfLine(int lineNumber)
         {
-            throw new NotImplementedException();
+            string stratum = GetDefaultStratum();
+            ReadOnlyCollection<string> paths = GetSourcePaths(stratum);
+            return paths.SelectMany(i => GetLocationsOfLine(stratum, i, lineNumber)).ToList().AsReadOnly();
         }
 
         public ReadOnlyCollection<ILocation> GetLocationsOfLine(string stratum, string sourceName, int lineNumber)
         {
-            throw new NotImplementedException();
+            if (stratum != "Java")
+                return new ReadOnlyCollection<ILocation>(new ILocation[0]);
+
+            List<ILocation> locations = new List<ILocation>();
+            foreach (var method in GetMethods(false))
+            {
+                if (method.GetIsNative())
+                    continue;
+
+                locations.AddRange(method.GetLocationsOfLine(stratum, sourceName, lineNumber));
+            }
+
+            return locations.AsReadOnly();
         }
 
         public int GetMajorVersion()
@@ -211,17 +233,23 @@
 
         public string GetSourceName()
         {
-            throw new NotImplementedException();
+            string sourceFile;
+            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetSourceFile(out sourceFile, ReferenceTypeId));
+            return sourceFile;
         }
 
         public ReadOnlyCollection<string> GetSourceNames(string stratum)
         {
-            throw new NotImplementedException();
+            if (stratum != "Java")
+                return new ReadOnlyCollection<string>(new string[0]);
+
+            return new ReadOnlyCollection<string>(new[] { GetSourceName() });
         }
 
         public ReadOnlyCollection<string> GetSourcePaths(string stratum)
         {
-            throw new NotImplementedException();
+            // TODO: get actual source paths
+            return GetSourceNames(stratum);
         }
 
         public ReadOnlyCollection<IField> GetVisibleFields()
@@ -229,7 +257,7 @@
             throw new NotImplementedException();
         }
 
-        public ReadOnlyCollection<IField> GetVisibleMethods()
+        public ReadOnlyCollection<IMethod> GetVisibleMethods()
         {
             throw new NotImplementedException();
         }

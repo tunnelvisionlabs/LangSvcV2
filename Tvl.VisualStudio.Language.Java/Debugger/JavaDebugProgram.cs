@@ -1,4 +1,6 @@
-﻿namespace Tvl.VisualStudio.Language.Java.Debugger
+﻿//#define HIDE_THREADS
+
+namespace Tvl.VisualStudio.Language.Java.Debugger
 {
     using Tvl.Extensions;
     using Task = System.Threading.Tasks.Task;
@@ -106,6 +108,7 @@
             IConnectorIntegerArgument argument = new ConnectorIntegerArgument(defaultArgument, (int)_process.GetPhysicalProcessId().dwProcessId);
             arguments.Add(argumentName, argument);
 
+            connector.AttachComplete += HandleAttachComplete;
             _virtualMachine = connector.Attach(arguments);
 
             IVirtualMachineEvents events = _virtualMachine.GetEventQueue() as IVirtualMachineEvents;
@@ -128,12 +131,15 @@
                 events.FieldAccess += HandleFieldAccess;
                 events.FieldModification += HandleFieldModification;
             }
+        }
 
+        private void HandleAttachComplete(object virtualMachine, EventArgs e)
+        {
             _causeBreakRequest = VirtualMachine.GetEventRequestManager().CreateStepRequest(null, StepSize.Minimum, StepDepth.Into);
             _causeBreakRequest.SuspendPolicy = SuspendPolicy.All;
 
             DebugEvent @event = new DebugProgramCreateEvent(enum_EVENTATTRIBUTES.EVENT_ASYNCHRONOUS);
-            callback.Event(DebugEngine, Process, this, null, @event);
+            Callback.Event(DebugEngine, Process, this, null, @event);
         }
 
         #region IDebugProgram2 Members
@@ -245,9 +251,14 @@
 
         public int EnumThreads(out IEnumDebugThreads2 ppEnum)
         {
+
             lock (_threads)
             {
+#if HIDE_THREADS
+                ppEnum = new EnumDebugThreads(Enumerable.Empty<IDebugThread2>());
+#else
                 ppEnum = new EnumDebugThreads(_threads.Values);
+#endif
             }
 
             return VSConstants.S_OK;
@@ -579,6 +590,10 @@
             threadDeathRequest.SuspendPolicy = SuspendPolicy.EventThread;
             threadDeathRequest.IsEnabled = true;
 
+            var classPrepareRequest = requestManager.CreateClassPrepareRequest();
+            classPrepareRequest.SuspendPolicy = SuspendPolicy.EventThread;
+            classPrepareRequest.IsEnabled = true;
+
             var virtualMachineDeathRequest = requestManager.CreateVirtualMachineDeathRequest();
             virtualMachineDeathRequest.SuspendPolicy = SuspendPolicy.All;
             virtualMachineDeathRequest.IsEnabled = true;
@@ -598,7 +613,9 @@
                 }
 
                 debugEvent = new DebugThreadCreateEvent(enum_EVENTATTRIBUTES.EVENT_ASYNCHRONOUS);
+#if !HIDE_THREADS
                 Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+#endif
             }
 
             debugEvent = new DebugEntryPointEvent(GetAttributesForEvent(e));
@@ -629,7 +646,36 @@
 
         private void HandleBreakpoint(object sender, ThreadLocationEventArgs e)
         {
-            throw new NotImplementedException();
+            List<IDebugBoundBreakpoint2> breakpoints = new List<IDebugBoundBreakpoint2>();
+
+            foreach (var pending in DebugEngine.PendingBreakpoints)
+            {
+                if (pending.GetState() != enum_PENDING_BP_STATE.PBPS_ENABLED)
+                    continue;
+
+                foreach (var breakpoint in pending.EnumBoundBreakpoints().OfType<JavaDebugBoundBreakpoint>())
+                {
+                    if (breakpoint.EventRequest.Equals(e.Request) && breakpoint.GetState() == enum_BP_STATE.BPS_ENABLED)
+                        breakpoints.Add(breakpoint);
+                }
+            }
+
+            JavaDebugThread thread;
+            lock (_threads)
+            {
+                this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
+            }
+
+            DebugEvent debugEvent = new DebugBreakpointEvent(GetAttributesForEvent(e), new EnumDebugBoundBreakpoints(breakpoints));
+            SetEventProperties(debugEvent, e);
+            if (breakpoints.Count > 0)
+            {
+                Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+            }
+            else if ((debugEvent.Attributes & enum_EVENTATTRIBUTES.EVENT_SYNCHRONOUS) != 0)
+            {
+                DebugEngine.ContinueFromSynchronousEvent(debugEvent);
+            }
         }
 
         private void HandleMethodEntry(object sender, ThreadLocationEventArgs e)
@@ -677,7 +723,12 @@
 
             DebugEvent debugEvent = new DebugThreadCreateEvent(GetAttributesForEvent(e));
             SetEventProperties(debugEvent, e);
+#if HIDE_THREADS
+            if ((debugEvent.Attributes & enum_EVENTATTRIBUTES.EVENT_SYNCHRONOUS) != 0)
+                DebugEngine.ContinueFromSynchronousEvent(debugEvent);
+#else
             Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+#endif
         }
 
         private void HandleThreadDeath(object sender, ThreadEventArgs e)
@@ -692,7 +743,9 @@
             //string name = thread.GetName();
             DebugEvent debugEvent = new DebugThreadDestroyEvent(GetAttributesForEvent(e), 0);
             SetEventProperties(debugEvent, e);
+#if !HIDE_THREADS
             Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+#endif
 
             lock (_threads)
             {
@@ -702,7 +755,24 @@
 
         private void HandleClassPrepare(object sender, ClassPrepareEventArgs e)
         {
-            throw new NotImplementedException();
+            ReadOnlyCollection<string> sourceFiles = e.Type.GetSourcePaths(e.Type.GetDefaultStratum());
+            DebugEngine.BindVirtualizedBreakpoints(this, _threads[e.Thread.GetUniqueId()], e.Type, sourceFiles);
+
+            switch (e.SuspendPolicy)
+            {
+            case SuspendPolicy.All:
+                IVirtualMachine virtualMachine = e.VirtualMachine;
+                Task.Factory.StartNew(virtualMachine.Resume).HandleNonCriticalExceptions();
+                break;
+
+            case SuspendPolicy.EventThread:
+                IThreadReference thread = e.Thread;
+                Task.Factory.StartNew(thread.Resume).HandleNonCriticalExceptions();
+                break;
+
+            case SuspendPolicy.None:
+                break;
+            }
         }
 
         private void HandleClassUnload(object sender, ClassUnloadEventArgs e)

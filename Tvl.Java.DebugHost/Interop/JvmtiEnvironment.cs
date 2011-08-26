@@ -778,6 +778,16 @@
             return RawInterface.GetFrameLocation(this, thread, depth, out method, out location);
         }
 
+        internal jvmtiError SetBreakpoint(jmethodID methodId, jlocation location)
+        {
+            return RawInterface.SetBreakpoint(this, methodId, location);
+        }
+
+        internal jvmtiError ClearBreakpoint(jmethodID methodId, jlocation location)
+        {
+            return RawInterface.ClearBreakpoint(this, methodId, location);
+        }
+
         internal jvmtiError SetEventCallbacks(jvmtiEventCallbacks callbacks)
         {
             return RawInterface.SetEventCallbacks(this, ref callbacks, Marshal.SizeOf(callbacks));

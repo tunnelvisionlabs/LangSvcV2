@@ -17,6 +17,7 @@
     using Tvl.Java.DebugInterface;
     using Tvl.Extensions;
     using System.Threading.Tasks;
+    using System.Collections.ObjectModel;
 
     [ComVisible(true)]
     [Guid(JavaDebuggerConstants.JavaDebugEngineGuidString)]
@@ -30,10 +31,36 @@
         private string[] _symbolSearchPath;
         private string[] _symbolCachePath;
 
-        private readonly List<IDebugProgram2> _programs = new List<IDebugProgram2>();
+        private readonly List<JavaDebugProgram> _programs = new List<JavaDebugProgram>();
+        private readonly List<IDebugPendingBreakpoint2> _pendingBreakpoints = new List<IDebugPendingBreakpoint2>();
+        private readonly HashSet<IJavaVirtualizableBreakpoint> _virtualizedBreakpoints = new HashSet<IJavaVirtualizableBreakpoint>();
 
         public JavaDebugEngine()
         {
+        }
+
+        internal IEnumerable<JavaDebugProgram> Programs
+        {
+            get
+            {
+                return _programs;
+            }
+        }
+
+        internal ReadOnlyCollection<IDebugPendingBreakpoint2> PendingBreakpoints
+        {
+            get
+            {
+                return _pendingBreakpoints.AsReadOnly();
+            }
+        }
+
+        internal ISet<IJavaVirtualizableBreakpoint> VirtualizedBreakpoints
+        {
+            get
+            {
+                return _virtualizedBreakpoints;
+            }
         }
 
         #region IDebugEngine2 Members
@@ -144,6 +171,13 @@
             if (requestInfo.LanguageGuid != Constants.JavaLanguageGuid)
                 return VSConstants.E_FAIL;
 
+            if (requestInfo.Location.LocationType == enum_BP_LOCATION_TYPE.BPLT_CODE_FILE_LINE)
+            {
+                pendingBreakpoint = new JavaDebugLocationPendingBreakpoint(this, requestInfo);
+                _pendingBreakpoints.Add(pendingBreakpoint);
+                return VSConstants.S_OK;
+            }
+
             throw new NotImplementedException();
         }
 
@@ -155,7 +189,7 @@
 
             lock (_programs)
             {
-                _programs.Remove(program);
+                _programs.Remove(javaProgram);
             }
 
             return VSConstants.S_OK;
@@ -272,5 +306,17 @@
         }
 
         #endregion
+
+        internal void BindVirtualizedBreakpoints(JavaDebugProgram program, JavaDebugThread thread, IReferenceType type, IEnumerable<string> sourcePaths)
+        {
+            Contract.Requires<ArgumentNullException>(program != null, "program");
+            Contract.Requires<ArgumentNullException>(sourcePaths != null, "sourcePaths");
+
+            var breakpoints = VirtualizedBreakpoints.ToArray();
+            foreach (var breakpoint in VirtualizedBreakpoints)
+            {
+                breakpoint.Bind(program, thread, type, sourcePaths);
+            }
+        }
     }
 }

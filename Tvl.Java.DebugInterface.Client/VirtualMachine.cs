@@ -17,6 +17,7 @@
     using System.ServiceModel;
     using Tvl.Java.DebugInterface.Client.Events;
     using System.Diagnostics.Contracts;
+    using Task = System.Threading.Tasks.Task;
 
     internal partial class VirtualMachine : IVirtualMachine
     {
@@ -36,6 +37,8 @@
             _eventRequestManager = new EventRequestManager(this);
             _eventQueue = new EventQueue(this);
         }
+
+        public event EventHandler AttachComplete;
 
         internal EventQueue EventQueue
         {
@@ -81,8 +84,8 @@
         {
             VirtualMachine virtualMachine = new VirtualMachine();
             virtualMachine._ipcHandle = new EventWaitHandle(false, EventResetMode.ManualReset, string.Format("JavaDebuggerInitHandle{0}", processId));
-            Action waitToInitializeServices = virtualMachine.InitializeServicesAfterProcessStarts;
-            waitToInitializeServices.BeginInvoke(null, null);
+
+            Task initializeTask = Task.Factory.StartNew(virtualMachine.InitializeServicesAfterProcessStarts).HandleNonCriticalExceptions();
 
             return virtualMachine;
         }
@@ -99,6 +102,8 @@
                 CreateProtocolServiceClient();
 
                 _sessionService.Attach();
+
+                OnAttachComplete(EventArgs.Empty);
             }
             catch (Exception e)
             {
@@ -138,6 +143,9 @@
 
         public ReadOnlyCollection<IReferenceType> GetAllClasses()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             ReferenceTypeData[] classes;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetAllClasses(out classes));
             return new ReadOnlyCollection<IReferenceType>(Array.ConvertAll(classes, GetMirrorOf));
@@ -145,6 +153,9 @@
 
         public ReadOnlyCollection<IThreadReference> GetAllThreads()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             ThreadId[] threads;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetAllThreads(out threads));
             return new ReadOnlyCollection<IThreadReference>(Array.ConvertAll(threads, GetMirrorOf));
@@ -152,6 +163,9 @@
 
         public bool GetCanAddMethod()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             //return (capabilities & Capabilities.CanAddMethod) != 0;
@@ -160,6 +174,9 @@
 
         public bool GetCanBeModified()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             //return (capabilities & Capabilities.CanBeModified) != 0;
@@ -168,6 +185,9 @@
 
         public bool GetCanForceEarlyReturn()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             return (capabilities & Capabilities.CanForceEarlyReturn) != 0;
@@ -175,6 +195,9 @@
 
         public bool GetCanGetBytecodes()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             return (capabilities & Capabilities.CanGetBytecodes) != 0;
@@ -182,6 +205,9 @@
 
         public bool GetCanGetClassFileVersion()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             //return (capabilities & Capabilities.CanGetClassFileVersion) != 0;
@@ -190,6 +216,9 @@
 
         public bool GetCanGetConstantPool()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             return (capabilities & Capabilities.CanGetConstantPool) != 0;
@@ -197,6 +226,9 @@
 
         public bool GetCanGetCurrentContendedMonitor()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             return (capabilities & Capabilities.CanGetCurrentContendedMonitor) != 0;
@@ -204,6 +236,9 @@
 
         public bool GetCanGetInstanceInfo()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             //return (capabilities & Capabilities.CanGetInstanceInfo) != 0;
@@ -212,6 +247,9 @@
 
         public bool GetCanGetMethodReturnValues()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             //return (capabilities & Capabilities.CanGetMethodReturnValues) != 0;
@@ -220,6 +258,9 @@
 
         public bool GetCanGetMonitorFrameInfo()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             return (capabilities & Capabilities.CanGetOwnedMonitorStackDepthInfo) != 0;
@@ -227,6 +268,9 @@
 
         public bool GetCanGetMonitorInfo()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             return (capabilities & Capabilities.CanGetMonitorInfo) != 0;
@@ -234,6 +278,9 @@
 
         public bool GetCanGetOwnedMonitorInfo()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             return (capabilities & Capabilities.CanGetOwnedMonitorInfo) != 0;
@@ -241,6 +288,9 @@
 
         public bool GetCanGetSourceDebugExtension()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             return (capabilities & Capabilities.CanGetSourceDebugExtension) != 0;
@@ -248,6 +298,9 @@
 
         public bool GetCanGetSyntheticAttribute()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             return (capabilities & Capabilities.CanGetSyntheticAttribute) != 0;
@@ -255,6 +308,9 @@
 
         public bool GetCanPopFrames()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             return (capabilities & Capabilities.CanPopFrame) != 0;
@@ -262,6 +318,9 @@
 
         public bool GetCanRedefineClasses()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             return (capabilities & Capabilities.CanRedefineClasses) != 0;
@@ -269,6 +328,9 @@
 
         public bool GetCanRequestMonitorEvents()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             return (capabilities & Capabilities.CanGenerateMonitorEvents) != 0;
@@ -276,6 +338,9 @@
 
         public bool GetCanRequestVMDeathEvent()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             //return (capabilities & Capabilities.CanRequestVMDeathEvent) != 0;
@@ -284,6 +349,9 @@
 
         public bool GetCanUnrestrictedlyRedefineClasses()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             return (capabilities & Capabilities.CanRedefineAnyClass) != 0;
@@ -291,6 +359,9 @@
 
         public bool GetCanUseInstanceFilters()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             //return (capabilities & Capabilities.CanUseInstanceFilters) != 0;
@@ -299,6 +370,9 @@
 
         public bool GetCanUseSourceNameFilters()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             //return (capabilities & Capabilities.CanUseSourceNameFilters) != 0;
@@ -307,6 +381,9 @@
 
         public bool GetCanWatchFieldAccess()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             return (capabilities & Capabilities.CanGenerateFieldAccessEvents) != 0;
@@ -314,6 +391,9 @@
 
         public bool GetCanWatchFieldModification()
         {
+            if (ProtocolService == null)
+                throw new VirtualMachineDisconnectedException();
+
             Capabilities capabilities;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.GetCapabilities(out capabilities));
             return (capabilities & Capabilities.CanGenerateFieldModificationEvents) != 0;
@@ -609,6 +689,11 @@
             return loc;
         }
 
+        internal Location GetMirrorOf(Method method, Types.LineNumberData lineNumberData)
+        {
+            return new Location(this, method, lineNumberData.LineCodeIndex, lineNumberData.LineNumber);
+        }
+
         internal LocalVariable GetMirrorOf(Method method, Types.VariableData variableData)
         {
             ulong codeIndex = variableData.CodeIndex;
@@ -812,5 +897,12 @@
         }
 
         #endregion
+
+        private void OnAttachComplete(EventArgs e)
+        {
+            var t = AttachComplete;
+            if (t != null)
+                t(this, e);
+        }
     }
 }

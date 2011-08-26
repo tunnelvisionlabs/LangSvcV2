@@ -131,7 +131,7 @@
         {
             // TODO: implement modules?
             ppModule = null;
-            return VSConstants.S_OK;
+            return VSConstants.E_FAIL;
         }
 
         public int GetProcess(out IDebugProcess2 ppProcess)

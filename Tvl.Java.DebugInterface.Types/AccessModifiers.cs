@@ -26,7 +26,9 @@
         Super = 0x0020,
         Synchronized = 0x0020,
         Volatile = 0x0040,
+        Bridge = 0x0040,
         Transient = 0x0080,
+        VarArgs = 0x0080,
         Native = 0x0100,
 
         /// <summary>
@@ -51,5 +53,11 @@
         /// </summary>
         Abstract = 0x0400,
         Strict = 0x0800,
+
+        Synthetic = 0x1000,
+
+        Annotation = 0x2000,
+
+        Enum = 0x4000,
     }
 }

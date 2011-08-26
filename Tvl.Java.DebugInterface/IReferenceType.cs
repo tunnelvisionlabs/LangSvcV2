@@ -187,6 +187,6 @@
         /// <summary>
         /// Returns a list containing each <see cref="IMethod"/> declared or inherited by this type.
         /// </summary>
-        ReadOnlyCollection<IField> GetVisibleMethods();
+        ReadOnlyCollection<IMethod> GetVisibleMethods();
     }
 }

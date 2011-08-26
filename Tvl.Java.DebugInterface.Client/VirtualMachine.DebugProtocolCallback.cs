@@ -51,9 +51,14 @@
                 VirtualMachine.EventQueue.OnSingleStep(e);
             }
 
-            public void Breakpoint(Types.SuspendPolicy suspendPolicy, RequestId requestId, ThreadId thread, Types.Location location)
+            public void Breakpoint(Types.SuspendPolicy suspendPolicy, RequestId requestId, ThreadId threadId, Types.Location location)
             {
-                throw new NotImplementedException();
+                ThreadReference thread = VirtualMachine.GetMirrorOf(threadId);
+                EventRequest request = VirtualMachine.EventRequestManager.GetEventRequest(EventKind.Breakpoint, requestId);
+                Location loc = VirtualMachine.GetMirrorOf(location);
+
+                ThreadLocationEventArgs e = new ThreadLocationEventArgs(VirtualMachine, (SuspendPolicy)suspendPolicy, request, thread, loc);
+                VirtualMachine.EventQueue.OnBreakpoint(e);
             }
 
             public void MethodEntry(Types.SuspendPolicy suspendPolicy, RequestId requestId, ThreadId thread, Types.Location location)
@@ -107,9 +112,13 @@
                 VirtualMachine.EventQueue.OnThreadDeath(e);
             }
 
-            public void ClassPrepare(Types.SuspendPolicy suspendPolicy, RequestId requestId, ThreadId thread, TypeTag typeTag, ReferenceTypeId typeId, string signature, ClassStatus status)
+            public void ClassPrepare(Types.SuspendPolicy suspendPolicy, RequestId requestId, ThreadId threadId, TypeTag typeTag, ReferenceTypeId typeId, string signature, ClassStatus status)
             {
-                throw new NotImplementedException();
+                ThreadReference thread = VirtualMachine.GetMirrorOf(threadId);
+                EventRequest request = VirtualMachine.EventRequestManager.GetEventRequest(EventKind.ClassPrepare, requestId);
+                ReferenceType type = VirtualMachine.GetMirrorOf(typeTag, typeId);
+                ClassPrepareEventArgs e = new ClassPrepareEventArgs(VirtualMachine, (SuspendPolicy)suspendPolicy, request, thread, signature, type);
+                VirtualMachine.EventQueue.OnClassPrepare(e);
             }
 
             public void ClassUnload(Types.SuspendPolicy suspendPolicy, RequestId requestId, string signature)

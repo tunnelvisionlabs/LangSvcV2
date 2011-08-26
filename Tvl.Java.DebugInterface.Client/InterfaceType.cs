@@ -11,7 +11,7 @@
     internal sealed class InterfaceType : ReferenceType, IInterfaceType
     {
         internal InterfaceType(VirtualMachine virtualMachine, InterfaceId typeId)
-            : base(virtualMachine, typeId)
+            : base(virtualMachine, new TaggedReferenceTypeId(TypeTag.Interface, typeId))
         {
             Contract.Requires(virtualMachine != null);
         }

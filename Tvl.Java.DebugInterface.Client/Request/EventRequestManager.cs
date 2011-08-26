@@ -1,10 +1,10 @@
 ﻿namespace Tvl.Java.DebugInterface.Client.Request
 {
     using System;
-    using System.Linq;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
+    using System.Linq;
     using Tvl.Java.DebugInterface.Request;
     using EventKind = Tvl.Java.DebugInterface.Types.EventKind;
     using RequestId = Tvl.Java.DebugInterface.Types.RequestId;
@@ -116,68 +116,108 @@
 
         public IAccessWatchpointRequest CreateAccessWatchpointRequest(IField field)
         {
-            throw new NotImplementedException();
+            Field internalField = field as Field;
+            if (internalField == null || !internalField.VirtualMachine.Equals(VirtualMachine))
+                throw new VirtualMachineMismatchException();
+
+            var request = new AccessWatchpointRequest(VirtualMachine, internalField);
+            _accessWatchpointRequests.Add(request);
+            return request;
         }
 
         public IBreakpointRequest CreateBreakpointRequest(ILocation location)
         {
-            throw new NotImplementedException();
+            Location internalLocation = location as Location;
+            if (internalLocation == null || !internalLocation.VirtualMachine.Equals(VirtualMachine))
+                throw new VirtualMachineMismatchException();
+
+            var request = new BreakpointRequest(VirtualMachine, internalLocation);
+            _breakpointRequests.Add(request);
+            return request;
         }
 
         public IClassPrepareRequest CreateClassPrepareRequest()
         {
-            throw new NotImplementedException();
+            var request = new ClassPrepareRequest(VirtualMachine);
+            _classPrepareRequests.Add(request);
+            return request;
         }
 
         public IClassUnloadRequest CreateClassUnloadRequest()
         {
-            throw new NotImplementedException();
+            var request = new ClassUnloadRequest(VirtualMachine);
+            _classUnloadRequests.Add(request);
+            return request;
         }
 
         public IExceptionRequest CreateExceptionRequest(IReferenceType referenceType, bool notifyCaught, bool notifyUncaught)
         {
-            throw new NotImplementedException();
+            ReferenceType type = referenceType as ReferenceType;
+            if ((type == null || !type.VirtualMachine.Equals(this.VirtualMachine)) && referenceType != null)
+                throw new VirtualMachineMismatchException();
+
+            var request = new ExceptionRequest(VirtualMachine, type, notifyCaught, notifyUncaught);
+            _exceptionRequests.Add(request);
+            return request;
         }
 
         public IMethodEntryRequest CreateMethodEntryRequest()
         {
-            throw new NotImplementedException();
+            var request = new MethodEntryRequest(VirtualMachine);
+            _methodEntryRequests.Add(request);
+            return request;
         }
 
         public IMethodExitRequest CreateMethodExitRequest()
         {
-            throw new NotImplementedException();
+            var request = new MethodExitRequest(VirtualMachine);
+            _methodExitRequests.Add(request);
+            return request;
         }
 
         public IModificationWatchpointRequest CreateModificationWatchpointRequest(IField field)
         {
-            throw new NotImplementedException();
+            Field internalField = field as Field;
+            if (internalField == null || !internalField.VirtualMachine.Equals(VirtualMachine))
+                throw new VirtualMachineMismatchException();
+
+            var request = new ModificationWatchpointRequest(VirtualMachine, internalField);
+            _modificationWatchpointRequests.Add(request);
+            return request;
         }
 
         public IMonitorContendedEnteredRequest CreateMonitorContendedEnteredRequest()
         {
-            throw new NotImplementedException();
+            var request = new MonitorContendedEnteredRequest(VirtualMachine);
+            _monitorContendedEnteredRequests.Add(request);
+            return request;
         }
 
         public IMonitorContendedEnterRequest CreateMonitorContendedEnterRequest()
         {
-            throw new NotImplementedException();
+            var request = new MonitorContendedEnterRequest(VirtualMachine);
+            _monitorContendedEnterRequests.Add(request);
+            return request;
         }
 
         public IMonitorWaitedRequest CreateMonitorWaitedRequest()
         {
-            throw new NotImplementedException();
+            var request = new MonitorWaitedRequest(VirtualMachine);
+            _monitorWaitedRequests.Add(request);
+            return request;
         }
 
         public IMonitorWaitRequest CreateMonitorWaitRequest()
         {
-            throw new NotImplementedException();
+            var request = new MonitorWaitRequest(VirtualMachine);
+            _monitorWaitRequests.Add(request);
+            return request;
         }
 
         public IStepRequest CreateStepRequest(IThreadReference thread, StepSize size, StepDepth depth)
         {
             ThreadReference threadReference = thread as ThreadReference;
-            if (threadReference == null && thread != null)
+            if ((threadReference == null || !threadReference.VirtualMachine.Equals(this.VirtualMachine)) && thread != null)
                 throw new VirtualMachineMismatchException();
 
             var request = new StepRequest(VirtualMachine, threadReference, size, depth);

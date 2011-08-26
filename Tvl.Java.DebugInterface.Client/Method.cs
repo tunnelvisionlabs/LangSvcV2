@@ -8,6 +8,7 @@
     using System.Diagnostics.Contracts;
     using System.Collections.ObjectModel;
     using System.Text.RegularExpressions;
+    using Path = System.IO.Path;
 
     internal sealed class Method : TypeComponent, IMethod
     {
@@ -57,11 +58,25 @@
 
         public ReadOnlyCollection<ILocation> GetLineLocations()
         {
-            throw new NotImplementedException();
+            long startCodeIndex;
+            long endCodeIndex;
+            Types.LineNumberData[] lines;
+            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodLineTable(out startCodeIndex, out endCodeIndex, out lines, DeclaringType.ReferenceTypeId, this.MethodId));
+
+            List<ILocation> locations = new List<ILocation>();
+            foreach (var line in lines)
+            {
+                locations.Add(VirtualMachine.GetMirrorOf(this, line));
+            }
+
+            return locations.AsReadOnly();
         }
 
         public ReadOnlyCollection<ILocation> GetLineLocations(string stratum, string sourceName)
         {
+            if (stratum != "Java")
+                return new ReadOnlyCollection<ILocation>(new ILocation[0]);
+
             throw new NotImplementedException();
         }
 
@@ -94,7 +109,7 @@
 
         public bool GetIsBridge()
         {
-            throw new NotImplementedException();
+            return (GetModifiers() & AccessModifiers.Bridge) != 0;
         }
 
         public bool GetIsConstructor()
@@ -126,22 +141,42 @@
 
         public bool GetIsVarArgs()
         {
-            throw new NotImplementedException();
+            return (GetModifiers() & AccessModifiers.VarArgs) != 0;
         }
 
         public ILocation GetLocationOfCodeIndex(long codeIndex)
         {
-            throw new NotImplementedException();
+            return new Location(VirtualMachine, this, codeIndex);
         }
 
         public ReadOnlyCollection<ILocation> GetLocationsOfLine(int lineNumber)
         {
-            throw new NotImplementedException();
+            return GetLocationsOfLine(DeclaringType.GetDefaultStratum(), DeclaringType.GetSourceName(), lineNumber);
         }
 
         public ReadOnlyCollection<ILocation> GetLocationsOfLine(string stratum, string sourceName, int lineNumber)
         {
-            throw new NotImplementedException();
+            if (stratum != "Java")
+                return new ReadOnlyCollection<ILocation>(new ILocation[0]);
+
+            if (Path.GetFileName(sourceName) != Path.GetFileName(DeclaringType.GetSourceName()))
+                return new ReadOnlyCollection<ILocation>(new ILocation[0]);
+
+            long startCodeIndex;
+            long endCodeIndex;
+            Types.LineNumberData[] lines;
+            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodLineTable(out startCodeIndex, out endCodeIndex, out lines, DeclaringType.ReferenceTypeId, this.MethodId));
+
+            List<ILocation> locations = new List<ILocation>();
+            foreach (var line in lines)
+            {
+                if (line.LineNumber != lineNumber)
+                    continue;
+
+                locations.Add(VirtualMachine.GetMirrorOf(this, line));
+            }
+
+            return locations.AsReadOnly();
         }
 
         public IType GetReturnType()
@@ -176,7 +211,11 @@
 
         public ILocation GetLocation()
         {
-            throw new NotImplementedException();
+            long startCodeIndex;
+            long endCodeIndex;
+            Types.LineNumberData[] lines;
+            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodLineTable(out startCodeIndex, out endCodeIndex, out lines, DeclaringType.ReferenceTypeId, this.MethodId));
+            return VirtualMachine.GetMirrorOf(this, lines[0]);
         }
 
         #endregion

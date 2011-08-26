@@ -2,6 +2,9 @@
 {
     public interface IWatchpointRequest : IEventRequest, IClassFilter, IInstanceFilter, IThreadFilter
     {
-        IField GetField();
+        IField Field
+        {
+            get;
+        }
     }
 }

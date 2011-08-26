@@ -18,6 +18,8 @@
             _defaultArguments.Add("pid", new ConnectorIntegerArgument("pid", "Process ID", "The system process ID of the process to attach to.", true, 0, 0, int.MaxValue));
         }
 
+        public event EventHandler AttachComplete;
+
         #region IAttachingConnector Members
 
         public IVirtualMachine Attach(IEnumerable<KeyValuePair<string, IConnectorArgument>> arguments)
@@ -25,6 +27,7 @@
             var pid = (IConnectorIntegerArgument)arguments.Single(i => i.Key == "pid").Value;
 
             VirtualMachine virtualMachine = VirtualMachine.BeginAttachToProcess(pid.Value);
+            virtualMachine.AttachComplete += OnAttachComplete;
             return virtualMachine;
         }
 
@@ -65,5 +68,12 @@
         }
 
         #endregion
+
+        private void OnAttachComplete(object machine, EventArgs e)
+        {
+            var t = AttachComplete;
+            if (t != null)
+                t(machine, e);
+        }
     }
 }

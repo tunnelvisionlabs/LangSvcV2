@@ -20,6 +20,7 @@
 
             private ManualResetEventSlim _agentStartedEvent = new ManualResetEventSlim();
             private jthread _agentThread;
+            private UnsafeNativeMethods.jvmtiStartFunction _agentCallbackDelegate;
             private Dispatcher _agentEventDispatcher;
 
             private readonly Dictionary<EventKind, Dictionary<RequestId, EventFilter>> _eventRequests =
@@ -178,6 +179,17 @@
 
             public Error SetEvent(EventKind eventKind, SuspendPolicy suspendPolicy, EventRequestModifier[] modifiers, out RequestId requestId)
             {
+                requestId = default(RequestId);
+
+                EventRequestModifier locationModifier = default(EventRequestModifier);
+                if (eventKind == EventKind.Breakpoint)
+                {
+                    // we're going to need the location modifier to set the breakpoint
+                    locationModifier = modifiers.FirstOrDefault(i => i.Kind == ModifierKind.LocationFilter);
+                    if (locationModifier.Kind != ModifierKind.LocationFilter)
+                        return Error.IllegalArgument;
+                }
+
                 lock (_eventRequests)
                 {
                     Dictionary<RequestId, EventFilter> requests;
@@ -192,37 +204,26 @@
                     requests.Add(requestId, filter);
                     if (requests.Count == 1)
                     {
-                        JvmEventType? eventToEnable = null;
-                        switch (eventKind)
-                        {
-                        case EventKind.Breakpoint:
-                            eventToEnable = JvmEventType.Breakpoint;
-                            break;
-
-                        case EventKind.SingleStep:
-                            eventToEnable = JvmEventType.SingleStep;
-                            break;
-
-                        case EventKind.ThreadStart:
-                            eventToEnable = JvmEventType.ThreadStart;
-                            break;
-
-                        case EventKind.ThreadEnd:
-                            eventToEnable = JvmEventType.ThreadEnd;
-                            break;
-
-                        default:
-                            break;
-                        }
+                        JvmEventType? eventToEnable = GetJvmEventType(eventKind);
 
                         if (eventToEnable != null)
                         {
                             Environment.SetEventNotificationMode(JvmEventMode.Enable, eventToEnable.Value);
                         }
                     }
-
-                    return Error.None;
                 }
+
+                if (eventKind == EventKind.Breakpoint)
+                {
+                    Contract.Assert(locationModifier.Kind == ModifierKind.LocationFilter);
+                    jmethodID methodId = locationModifier.Location.Method;
+                    jlocation location = new jlocation((long)locationModifier.Location.Index);
+                    jvmtiError error = Environment.SetBreakpoint(methodId, location);
+                    if (error != jvmtiError.None)
+                        return GetStandardError(error);
+                }
+
+                return Error.None;
             }
 
             public Error ClearEvent(EventKind eventKind, RequestId requestId)
@@ -233,39 +234,90 @@
                     if (!_eventRequests.TryGetValue(eventKind, out requests))
                         return Error.None;
 
+                    EventFilter eventFilter;
+                    if (!requests.TryGetValue(requestId, out eventFilter))
+                        return Error.None;
+
                     requests.Remove(requestId);
                     if (requests.Count == 0)
                     {
-                        JvmEventType? eventToDisable = null;
-                        switch (eventKind)
-                        {
-                        case EventKind.Breakpoint:
-                            eventToDisable = JvmEventType.Breakpoint;
-                            break;
-
-                        case EventKind.SingleStep:
-                            eventToDisable = JvmEventType.SingleStep;
-                            break;
-
-                        case EventKind.ThreadStart:
-                            eventToDisable = JvmEventType.ThreadStart;
-                            break;
-
-                        case EventKind.ThreadEnd:
-                            eventToDisable = JvmEventType.ThreadEnd;
-                            break;
-
-                        default:
-                            break;
-                        }
-
+                        JvmEventType? eventToDisable = GetJvmEventType(eventKind);
                         if (eventToDisable != null)
                         {
                             Environment.SetEventNotificationMode(JvmEventMode.Disable, eventToDisable.Value);
                         }
                     }
 
+                    if (eventKind == EventKind.Breakpoint)
+                    {
+                        LocationEventFilter locationFilter = eventFilter as LocationEventFilter;
+                        if (locationFilter == null)
+                        {
+                            AggregateEventFilter aggregateFilter = eventFilter as AggregateEventFilter;
+                            Contract.Assert(aggregateFilter != null);
+                            locationFilter = aggregateFilter.Filters.OfType<LocationEventFilter>().FirstOrDefault();
+                        }
+
+                        Contract.Assert(locationFilter != null);
+                        jmethodID methodId = locationFilter.Location.Method;
+                        jlocation location = new jlocation((long)locationFilter.Location.Index);
+                        jvmtiError error = Environment.ClearBreakpoint(methodId, location);
+                        if (error != jvmtiError.None)
+                            return GetStandardError(error);
+                    }
+
                     return Error.None;
+                }
+            }
+
+            private static JvmEventType? GetJvmEventType(EventKind eventKind)
+            {
+                switch (eventKind)
+                {
+                case EventKind.Breakpoint:
+                    return JvmEventType.Breakpoint;
+
+                case EventKind.SingleStep:
+                    return JvmEventType.SingleStep;
+
+                case EventKind.ThreadStart:
+                    return JvmEventType.ThreadStart;
+
+                case EventKind.ThreadEnd:
+                    return JvmEventType.ThreadEnd;
+
+                case EventKind.ClassLoad:
+                    return JvmEventType.ClassLoad;
+
+                case EventKind.ClassPrepare:
+                    return JvmEventType.ClassPrepare;
+
+                case EventKind.ClassUnload:
+                    throw new NotSupportedException();
+
+                case EventKind.Exception:
+                    return JvmEventType.Exception;
+
+                case EventKind.ExceptionCatch:
+                    return JvmEventType.ExceptionCatch;
+
+                case EventKind.FieldAccess:
+                    return JvmEventType.FieldAccess;
+
+                case EventKind.FieldModification:
+                    return JvmEventType.FieldModification;
+
+                case EventKind.FramePop:
+                    return JvmEventType.FramePop;
+
+                case EventKind.MethodEntry:
+                    return JvmEventType.MethodEntry;
+
+                case EventKind.MethodExit:
+                    return JvmEventType.MethodExit;
+
+                default:
+                    return null;
                 }
             }
 
@@ -341,7 +393,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.VirtualMachineStart);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(threadId, default(TaggedReferenceTypeId)))
+                    if (filter.ProcessEvent(threadId, default(TaggedReferenceTypeId), default(Location?)))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                         Callback.VirtualMachineStart(filter.SuspendPolicy, filter.RequestId, threadId);
@@ -361,7 +413,8 @@
             {
                 _agentStartedEvent = new ManualResetEventSlim(false);
                 _agentThread = CreateAgentThread(nativeEnvironment);
-                JvmtiErrorHandler.ThrowOnFailure(environment.RawInterface.RunAgentThread(environment, _agentThread, AgentDispatcherThread, IntPtr.Zero, JvmThreadPriority.Maximum));
+                _agentCallbackDelegate = AgentDispatcherThread;
+                JvmtiErrorHandler.ThrowOnFailure(environment.RawInterface.RunAgentThread(environment, _agentThread, _agentCallbackDelegate, IntPtr.Zero, JvmThreadPriority.Maximum));
                 _agentStartedEvent.Wait();
             }
 
@@ -428,7 +481,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.VirtualMachineDeath);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(default(ThreadId), default(TaggedReferenceTypeId)))
+                    if (filter.ProcessEvent(default(ThreadId), default(TaggedReferenceTypeId), default(Location?)))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, default(ThreadId));
                         Callback.VirtualMachineDeath(filter.SuspendPolicy, filter.RequestId);
@@ -473,7 +526,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.ThreadStart);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(threadId, default(TaggedReferenceTypeId)))
+                    if (filter.ProcessEvent(threadId, default(TaggedReferenceTypeId), default(Location?)))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                         Callback.ThreadStart(filter.SuspendPolicy, filter.RequestId, threadId);
@@ -508,7 +561,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.ThreadEnd);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(threadId, default(TaggedReferenceTypeId)))
+                    if (filter.ProcessEvent(threadId, default(TaggedReferenceTypeId), default(Location?)))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                         Callback.ThreadDeath(filter.SuspendPolicy, filter.RequestId, threadId);
@@ -623,7 +676,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.ClassPrepare);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(threadId, classId))
+                    if (filter.ProcessEvent(threadId, classId, default(Location?)))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                         Callback.ClassPrepare(filter.SuspendPolicy, filter.RequestId, threadId, classId.TypeTag, classId.TypeId, signature, classStatus);
@@ -745,7 +798,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.SingleStep);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(threadId, default(TaggedReferenceTypeId)))
+                    if (filter.ProcessEvent(threadId, default(TaggedReferenceTypeId), location))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                         Callback.SingleStep(filter.SuspendPolicy, filter.RequestId, threadId, location);
@@ -786,19 +839,32 @@
                         return;
 
                     // dispatch this call to an agent thread
-                    Action<jvmtiEnvHandle, JNIEnvHandle, jthread, jmethodID, jlocation> method = HandleBreakpoint;
-                    AgentEventDispatcher.Invoke(method, env, jniEnv, threadHandle, methodId, jlocation);
+                    Action<jvmtiEnvHandle, JNIEnvHandle, jthread, jmethodID, jlocation> invokeMethod = HandleBreakpoint;
+                    AgentEventDispatcher.Invoke(invokeMethod, env, jniEnv, threadHandle, methodId, jlocation);
                     return;
                 }
 
-                //JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-                //JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
-                //JvmLocation location = new JvmLocation(environment, method, jlocation);
+                JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(_service.VirtualMachine, env);
+                JniEnvironment nativeEnvironment;
+                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, true));
 
-                //foreach (var processor in _processors)
-                //{
-                //    processor.HandleBreakpoint(environment, thread, location);
-                //}
+                ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, true);
+
+                TaggedReferenceTypeId declaringClass;
+                MethodId method = new MethodId(methodId.Handle);
+                ulong index = (ulong)jlocation.Value;
+                JvmtiErrorHandler.ThrowOnFailure(environment.GetMethodDeclaringClass(nativeEnvironment, method, out declaringClass));
+                Location location = new Location(declaringClass, method, index);
+
+                EventFilter[] filters = GetEventFilters(EventKind.Breakpoint);
+                foreach (var filter in filters)
+                {
+                    if (filter.ProcessEvent(threadId, default(TaggedReferenceTypeId), location))
+                    {
+                        ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
+                        Callback.Breakpoint(filter.SuspendPolicy, filter.RequestId, threadId, location);
+                    }
+                }
             }
 
             private void HandleFieldAccess(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID methodId, jlocation jlocation, jclass fieldClassHandle, jobject objectHandle, jfieldID fieldId)

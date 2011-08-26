@@ -326,9 +326,12 @@
     <Compile Include="Debugger\Events\DebugSymbolSearchEvent.cs" />
     <Compile Include="Debugger\Events\DebugThreadDestroyEvent.cs" />
     <Compile Include="Debugger\Events\DebugThreadNameChangedEvent.cs" />
+    <Compile Include="Debugger\Extensions\DebugBoundBreakpointExtensions.cs" />
     <Compile Include="Debugger\Extensions\DebugBreakpointRequestExtensions.cs" />
+    <Compile Include="Debugger\Extensions\DebugDocumentPositionExtensions.cs" />
     <Compile Include="Debugger\Extensions\DebugEventCallbackExtensions.cs" />
     <Compile Include="Debugger\Extensions\DebugEventExtensions.cs" />
+    <Compile Include="Debugger\Extensions\DebugPendingBreakpointExtensions.cs" />
     <Compile Include="Debugger\Extensions\DebugPortExtensions.cs" />
     <Compile Include="Debugger\Extensions\DebugProcessExtensions.cs" />
     <Compile Include="Debugger\Extensions\DebugProgramExtensions.cs" />
@@ -338,11 +341,14 @@
     <Compile Include="Debugger\Interop\IDebugProcessQueryProperties.cs" />
     <Compile Include="Debugger\Interop\IDebugProgramHost2.cs" />
     <Compile Include="Debugger\Interop\IDebugQueryEngine2.cs" />
+    <Compile Include="Debugger\IJavaVirtualizableBreakpoint.cs" />
     <Compile Include="Debugger\JavaDebugBoundBreakpoint.cs" />
     <Compile Include="Debugger\DebugBreakpointResolution.cs" />
     <Compile Include="Debugger\JavaDebugCodeContext.cs" />
     <Compile Include="Debugger\JavaDebugDisassemblyStream.cs" />
+    <Compile Include="Debugger\DebugDocumentCodeContext.cs" />
     <Compile Include="Debugger\JavaDebugDocumentContext.cs" />
+    <Compile Include="Debugger\DebugDocumentPositionContext.cs" />
     <Compile Include="Debugger\JavaDebugEngine.cs" />
     <Compile Include="Debugger\DebugErrorBreakpoint.cs" />
     <Compile Include="Debugger\DebugErrorBreakpointResolution.cs" />
@@ -351,6 +357,7 @@
     <Compile Include="Debugger\JavaDebugFunctionPosition.cs" />
     <Compile Include="Debugger\JavaDebuggerConstants.cs" />
     <Compile Include="Debugger\JavaDebuggerPackage.cs" />
+    <Compile Include="Debugger\JavaDebugLocationPendingBreakpoint.cs" />
     <Compile Include="Debugger\JavaDebugMemoryBytes.cs" />
     <Compile Include="Debugger\JavaDebugMemoryContext.cs" />
     <Compile Include="Debugger\JavaDebugModule.cs" />

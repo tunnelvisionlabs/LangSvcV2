@@ -10,7 +10,7 @@
     internal sealed class ArrayType : ReferenceType, IArrayType
     {
         internal ArrayType(VirtualMachine virtualMachine, ArrayTypeId typeId)
-            : base(virtualMachine, typeId)
+            : base(virtualMachine, new TaggedReferenceTypeId(TypeTag.Array, typeId))
         {
             Contract.Requires(virtualMachine != null);
         }

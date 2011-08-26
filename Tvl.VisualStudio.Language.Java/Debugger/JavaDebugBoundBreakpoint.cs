@@ -8,66 +8,104 @@
     using System.Runtime.InteropServices;
     using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
+    using Tvl.Java.DebugInterface.Request;
+    using Tvl.VisualStudio.Language.Java.Debugger.Events;
 
     [ComVisible(true)]
     public class JavaDebugBoundBreakpoint : IDebugBoundBreakpoint3, IDebugBoundBreakpoint2
     {
-        private readonly JavaDebugPendingBreakpoint _pendingBreakpoint;
+        private readonly IDebugPendingBreakpoint2 _pendingBreakpoint;
+        private readonly JavaDebugProgram _program;
+        private readonly IBreakpointRequest _eventRequest;
         private readonly DebugBreakpointResolution _resolution;
 
-        public JavaDebugBoundBreakpoint(JavaDebugPendingBreakpoint pendingBreakpoint, DebugBreakpointResolution resolution)
+        private uint _hitcount;
+        private bool _disabled;
+        private bool _deleted;
+
+        public JavaDebugBoundBreakpoint(IDebugPendingBreakpoint2 pendingBreakpoint, JavaDebugProgram program, IBreakpointRequest eventRequest, DebugBreakpointResolution resolution)
         {
             Contract.Requires<ArgumentNullException>(pendingBreakpoint != null, "pendingBreakpoint");
+            Contract.Requires<ArgumentNullException>(program != null, "program");
+            Contract.Requires<ArgumentNullException>(eventRequest != null, "eventRequest");
             Contract.Requires<ArgumentNullException>(resolution != null, "resolution");
 
             _pendingBreakpoint = pendingBreakpoint;
+            _program = program;
+            _eventRequest = eventRequest;
             _resolution = resolution;
+            _disabled = true;
+        }
+
+        public JavaDebugProgram Program
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<JavaDebugProgram>() != null);
+                return _program;
+            }
+        }
+
+        internal IBreakpointRequest EventRequest
+        {
+            get
+            {
+                return _eventRequest;
+            }
         }
 
         #region IDebugBoundBreakpoint2 Members
 
         public int Delete()
         {
-            throw new NotImplementedException();
+            if (_deleted)
+            {
+                return AD7Constants.E_BP_DELETED;
+            }
+
+            _eventRequest.IsEnabled = false;
+            _deleted = true;
+            return VSConstants.S_OK;
         }
 
         public int Enable(int fEnable)
         {
-            throw new NotImplementedException();
+            if (_deleted)
+            {
+                return AD7Constants.E_BP_DELETED;
+            }
+
+            bool enable = fEnable != 0;
+            if (_disabled == !enable)
+                return VSConstants.S_OK;
+
+            _eventRequest.IsEnabled = enable;
+            _disabled = !enable;
+            return VSConstants.S_OK;
         }
 
         public int GetBreakpointResolution(out IDebugBreakpointResolution2 resolution)
         {
+            if (_deleted)
+            {
+                resolution = null;
+                return AD7Constants.E_BP_DELETED;
+            }
+
             resolution = _resolution;
             return VSConstants.S_OK;
         }
 
         public int GetHitCount(out uint pdwHitCount)
         {
-            throw new NotImplementedException();
-        }
+            if (_deleted)
+            {
+                pdwHitCount = 0;
+                return AD7Constants.E_BP_DELETED;
+            }
 
-        public int GetPendingBreakpoint(out IDebugPendingBreakpoint2 pendingBreakpoint)
-        {
-            pendingBreakpoint = _pendingBreakpoint;
+            pdwHitCount = _hitcount;
             return VSConstants.S_OK;
-        }
-
-        public int GetState(enum_BP_STATE[] pState)
-        {
-            if (pState == null)
-                throw new ArgumentNullException("pState");
-            if (pState.Length == 0)
-                throw new ArgumentException();
-
-
-            //pState[0] = enum_BP_STATE.
-            throw new NotImplementedException();
-        }
-
-        public int SetCondition(BP_CONDITION bpCondition)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -85,11 +123,61 @@
         /// </remarks>
         public int SetHitCount(uint dwHitCount)
         {
+            if (_deleted)
+            {
+                return AD7Constants.E_BP_DELETED;
+            }
+
+            _hitcount = dwHitCount;
+            return VSConstants.S_OK;
+        }
+
+        public int GetPendingBreakpoint(out IDebugPendingBreakpoint2 pendingBreakpoint)
+        {
+            if (_deleted)
+            {
+                pendingBreakpoint = null;
+                return AD7Constants.E_BP_DELETED;
+            }
+
+            pendingBreakpoint = _pendingBreakpoint;
+            return VSConstants.S_OK;
+        }
+
+        public int GetState(enum_BP_STATE[] pState)
+        {
+            if (pState == null)
+                throw new ArgumentNullException("pState");
+            if (pState.Length == 0)
+                throw new ArgumentException();
+
+            if (_deleted)
+                pState[0] = enum_BP_STATE.BPS_DELETED;
+            else if (_disabled)
+                pState[0] = enum_BP_STATE.BPS_DISABLED;
+            else
+                pState[0] = enum_BP_STATE.BPS_ENABLED;
+
+            return VSConstants.S_OK;
+        }
+
+        public int SetCondition(BP_CONDITION bpCondition)
+        {
+            if (_deleted)
+            {
+                return AD7Constants.E_BP_DELETED;
+            }
+
             throw new NotImplementedException();
         }
 
         public int SetPassCount(BP_PASSCOUNT bpPassCount)
         {
+            if (_deleted)
+            {
+                return AD7Constants.E_BP_DELETED;
+            }
+
             throw new NotImplementedException();
         }
 
@@ -99,6 +187,11 @@
 
         public int SetTracepoint(string bpBstrTracepoint, enum_BP_FLAGS bpFlags)
         {
+            if (_deleted)
+            {
+                return AD7Constants.E_BP_DELETED;
+            }
+
             throw new NotImplementedException();
         }
 

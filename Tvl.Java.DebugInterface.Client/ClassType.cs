@@ -7,11 +7,12 @@
     using InvokeOptions = Tvl.Java.DebugInterface.InvokeOptions;
     using Tvl.Java.DebugInterface.Types;
     using System.Diagnostics.Contracts;
+    using AccessModifiers = Tvl.Java.DebugInterface.AccessModifiers;
 
     internal sealed class ClassType : ReferenceType, IClassType
     {
         internal ClassType(VirtualMachine virtualMachine, ClassId typeId)
-            : base(virtualMachine, typeId)
+            : base(virtualMachine, new TaggedReferenceTypeId(TypeTag.Class, typeId))
         {
             Contract.Requires(virtualMachine != null);
         }
@@ -33,7 +34,7 @@
 
         public bool GetIsEnum()
         {
-            throw new NotImplementedException();
+            return (GetModifiers() & AccessModifiers.Enum) != 0;
         }
 
         public IObjectReference CreateInstance(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
