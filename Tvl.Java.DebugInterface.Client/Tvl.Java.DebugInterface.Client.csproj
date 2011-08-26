@@ -207,42 +207,23 @@
     </None>
     <None Include="app.config" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ClassId.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ClassId1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ClassLoaderId.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ClassLoaderId1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ClassObjectId.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ClassObjectId1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.DeclaredFieldData.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.DeclaredFieldData1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.DeclaredMethodData.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.DeclaredMethodData1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.FrameLocationData.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.FrameLocationData1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.InterfaceId.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.InterfaceId1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.LineNumberData.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.LineNumberData1.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ObjectId.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ReferenceTypeData.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ReferenceTypeData1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ReferenceTypeId.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ReferenceTypeId1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.RequestId.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.RequestId1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.StringId.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.StringId1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.TaggedObjectId.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.TaggedObjectId1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.TaggedReferenceTypeId.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.TaggedReferenceTypeId1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ThreadGroupId.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ThreadGroupId1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ThreadId.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ThreadId1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.Value.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.Value1.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.VariableData.datasource" />
-    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.VariableData1.datasource" />
     <None Include="Service References\DebugProtocol\Arrays.xsd">
       <SubType>Designer</SubType>
     </None>
