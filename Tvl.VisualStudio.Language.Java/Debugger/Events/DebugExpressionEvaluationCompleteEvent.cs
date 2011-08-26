@@ -2,9 +2,9 @@
 {
     using System;
     using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
 
     [ComVisible(true)]
     public class DebugExpressionEvaluationCompleteEvent : DebugEvent, IDebugExpressionEvaluationCompleteEvent2
@@ -20,6 +20,14 @@
 
             _expression = expression;
             _property = property;
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugExpressionEvaluationCompleteEvent2).GUID;
+            }
         }
 
         public int GetExpression(out IDebugExpression2 ppExpr)

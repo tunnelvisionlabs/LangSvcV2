@@ -2,22 +2,22 @@
 {
     public interface IEventRequest : IMirror
     {
-        void AddCountFilter(int count);
+        bool IsEnabled
+        {
+            get;
+            set;
+        }
 
-        void Disable();
-
-        void Enable();
+        SuspendPolicy SuspendPolicy
+        {
+            get;
+            set;
+        }
 
         object GetProperty(object key);
 
-        bool GetIsEnabled();
-
         void PutProperty(object key, object value);
 
-        void SetIsEnabled(bool value);
-
-        SuspendPolicy GetSuspendPolicy();
-
-        void SetSuspendPolicy(SuspendPolicy policy);
+        void AddCountFilter(int count);
     }
 }

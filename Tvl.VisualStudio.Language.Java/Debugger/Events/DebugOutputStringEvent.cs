@@ -2,9 +2,9 @@
 {
     using System;
     using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
 
     [ComVisible(true)]
     public class DebugOutputStringEvent : DebugEvent, IDebugOutputStringEvent2
@@ -17,6 +17,14 @@
             Contract.Requires<ArgumentNullException>(message != null, "message");
 
             _message = message;
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugOutputStringEvent2).GUID;
+            }
         }
 
         public int GetString(out string pbstrString)

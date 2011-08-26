@@ -5,8 +5,6 @@
     using System.Diagnostics.Contracts;
     using Tvl.Java.DebugHost.Interop;
     using Marshal = System.Runtime.InteropServices.Marshal;
-    using jlocation = System.Int64;
-    using jvalue = System.Int64;
     using DispatcherFrame = System.Windows.Threading.DispatcherFrame;
 
     internal class JvmEventManager
@@ -139,7 +137,7 @@
         private void HandleVMInit(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
 
             jvmtiError result = environment.RawInterface.RunAgentThread(env, alloc_thread(jniEnv), DispatchJvmEvents, IntPtr.Zero, JvmThreadPriority.Maximum);
 
@@ -193,7 +191,7 @@
         private void HandleThreadStart(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
 
             foreach (var processor in _processors)
             {
@@ -204,7 +202,7 @@
         private void HandleThreadEnd(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
 
             foreach (var processor in _processors)
             {
@@ -215,9 +213,9 @@
         private void HandleClassFileLoadHook(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jclass classBeingRedefinedHandle, jobject loaderHandle, ModifiedUTF8StringData name, jobject protectionDomainHandle, int classDataLength, IntPtr classData, ref int newClassDataLength, ref IntPtr newClassData)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmClassReference classBeingRedefined = JvmClassReference.FromHandle(environment, jniEnv, classBeingRedefinedHandle);
-            JvmObjectReference loader = JvmObjectReference.FromHandle(environment, jniEnv, loaderHandle);
-            JvmObjectReference protectionDomain = JvmObjectReference.FromHandle(environment, jniEnv, protectionDomainHandle);
+            JvmClassReference classBeingRedefined = JvmClassReference.FromHandle(environment, jniEnv, classBeingRedefinedHandle, true);
+            JvmObjectReference loader = JvmObjectReference.FromHandle(environment, jniEnv, loaderHandle, true);
+            JvmObjectReference protectionDomain = JvmObjectReference.FromHandle(environment, jniEnv, protectionDomainHandle, true);
 
             foreach (var processor in _processors)
             {
@@ -228,8 +226,8 @@
         private void HandleClassLoad(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jclass classHandle)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
-            JvmClassReference @class = JvmClassReference.FromHandle(environment, jniEnv, classHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
+            JvmClassReference @class = JvmClassReference.FromHandle(environment, jniEnv, classHandle, true);
 
             foreach (var processor in _processors)
             {
@@ -240,9 +238,9 @@
         private void HandleClassPrepare(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jclass classHandle)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
-            JvmClassReference @class = JvmClassReference.FromHandle(environment, jniEnv, classHandle);
+
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
+            JvmClassReference @class = JvmClassReference.FromHandle(environment, jniEnv, classHandle, true);
 
             foreach (var processor in _processors)
             {
@@ -263,9 +261,9 @@
         private void HandleException(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID method, jlocation jlocation, jobject exceptionHandle, jmethodID catchMethod, jlocation catchjLocation)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
             JvmLocation location = new JvmLocation(environment, method, jlocation);
-            JvmObjectReference exception = JvmObjectReference.FromHandle(environment, jniEnv, exceptionHandle);
+            JvmObjectReference exception = JvmObjectReference.FromHandle(environment, jniEnv, exceptionHandle, true);
             JvmLocation catchLocation = new JvmLocation(environment, catchMethod, catchjLocation);
 
             foreach (var processor in _processors)
@@ -277,9 +275,9 @@
         private void HandleExceptionCatch(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID method, jlocation jlocation, jobject exceptionHandle)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
             JvmLocation location = new JvmLocation(environment, method, jlocation);
-            JvmObjectReference exception = JvmObjectReference.FromHandle(environment, jniEnv, exceptionHandle);
+            JvmObjectReference exception = JvmObjectReference.FromHandle(environment, jniEnv, exceptionHandle, true);
 
             foreach (var processor in _processors)
             {
@@ -290,7 +288,7 @@
         private void HandleSingleStep(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID method, jlocation jlocation)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
             JvmLocation location = new JvmLocation(environment, method, jlocation);
 
             foreach (var processor in _processors)
@@ -302,7 +300,7 @@
         private void HandleFramePop(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID methodId, bool wasPoppedByException)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
             JvmMethod method = new JvmMethod(environment, methodId);
 
             foreach (var processor in _processors)
@@ -314,7 +312,7 @@
         private void HandleBreakpoint(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID method, jlocation jlocation)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
             JvmLocation location = new JvmLocation(environment, method, jlocation);
 
             foreach (var processor in _processors)
@@ -326,10 +324,10 @@
         private void HandleFieldAccess(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID method, jlocation jlocation, jclass fieldClassHandle, jobject objectHandle, jfieldID fieldId)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
             JvmLocation location = new JvmLocation(environment, method, jlocation);
-            JvmClassReference fieldClass = JvmClassReference.FromHandle(environment, jniEnv, fieldClassHandle);
-            JvmObjectReference @object = JvmObjectReference.FromHandle(environment, jniEnv, objectHandle);
+            JvmClassReference fieldClass = JvmClassReference.FromHandle(environment, jniEnv, fieldClassHandle, true);
+            JvmObjectReference @object = JvmObjectReference.FromHandle(environment, jniEnv, objectHandle, true);
             JvmField field = new JvmField(environment, fieldId);
 
             foreach (var processor in _processors)
@@ -341,10 +339,10 @@
         private void HandleFieldModification(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID method, jlocation jlocation, jclass fieldClassHandle, jobject @objectHandle, jfieldID fieldId, byte signatureType, jvalue newValue)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
             JvmLocation location = new JvmLocation(environment, method, jlocation);
-            JvmClassReference fieldClass = JvmClassReference.FromHandle(environment, jniEnv, fieldClassHandle);
-            JvmObjectReference @object = JvmObjectReference.FromHandle(environment, jniEnv, objectHandle);
+            JvmClassReference fieldClass = JvmClassReference.FromHandle(environment, jniEnv, fieldClassHandle, true);
+            JvmObjectReference @object = JvmObjectReference.FromHandle(environment, jniEnv, objectHandle, true);
             JvmField field = new JvmField(environment, fieldId);
 
             foreach (var processor in _processors)
@@ -356,7 +354,7 @@
         private void HandleMethodEntry(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID methodId)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
             JvmMethod method = new JvmMethod(environment, methodId);
 
             foreach (var processor in _processors)
@@ -368,7 +366,7 @@
         private void HandleMethodExit(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID methodId, bool wasPoppedByException, jvalue returnValue)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
             JvmMethod method = new JvmMethod(environment, methodId);
 
             foreach (var processor in _processors)
@@ -380,7 +378,7 @@
         private void HandleNativeMethodBind(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID methodId, IntPtr address, ref IntPtr newAddressPtr)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
             JvmMethod method = new JvmMethod(environment, methodId);
 
             foreach (var processor in _processors)
@@ -435,8 +433,8 @@
         private void HandleMonitorWait(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jobject objectHandle, long millisecondsTimeout)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
-            JvmObjectReference @object = JvmObjectReference.FromHandle(environment, jniEnv, objectHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
+            JvmObjectReference @object = JvmObjectReference.FromHandle(environment, jniEnv, objectHandle, true);
 
             foreach (var processor in _processors)
             {
@@ -447,8 +445,8 @@
         private void HandleMonitorWaited(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jobject objectHandle, bool timedOut)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
-            JvmObjectReference @object = JvmObjectReference.FromHandle(environment, jniEnv, objectHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
+            JvmObjectReference @object = JvmObjectReference.FromHandle(environment, jniEnv, objectHandle, true);
 
             foreach (var processor in _processors)
             {
@@ -459,8 +457,8 @@
         private void HandleMonitorContendedEnter(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jobject objectHandle)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
-            JvmObjectReference @object = JvmObjectReference.FromHandle(environment, jniEnv, objectHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
+            JvmObjectReference @object = JvmObjectReference.FromHandle(environment, jniEnv, objectHandle, true);
 
             foreach (var processor in _processors)
             {
@@ -471,8 +469,8 @@
         private void HandleMonitorContendedEntered(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jobject objectHandle)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
-            JvmObjectReference @object = JvmObjectReference.FromHandle(environment, jniEnv, objectHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
+            JvmObjectReference @object = JvmObjectReference.FromHandle(environment, jniEnv, objectHandle, true);
 
             foreach (var processor in _processors)
             {
@@ -523,9 +521,9 @@
         private void HandleVMObjectAlloc(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jobject objectHandle, jclass objectClassHandle, long size)
         {
             JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle);
-            JvmObjectReference @object = JvmObjectReference.FromHandle(environment, jniEnv, objectHandle);
-            JvmClassReference objectClass = JvmClassReference.FromHandle(environment, jniEnv, objectClassHandle);
+            JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
+            JvmObjectReference @object = JvmObjectReference.FromHandle(environment, jniEnv, objectHandle, true);
+            JvmClassReference objectClass = JvmClassReference.FromHandle(environment, jniEnv, objectClassHandle, true);
 
             foreach (var processor in _processors)
             {

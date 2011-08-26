@@ -31,10 +31,21 @@
     </xs:annotation>
     <xs:sequence>
       <xs:element minOccurs="0" name="Location" type="xs:long" />
-      <xs:element minOccurs="0" name="Method" type="xs:long" />
+      <xs:element minOccurs="0" name="Method" type="tns:JvmMethodRemoteHandle" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="JvmRemoteLocation" nillable="true" type="tns:JvmRemoteLocation" />
+  <xs:complexType name="JvmMethodRemoteHandle">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Handle" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JvmMethodRemoteHandle" nillable="true" type="tns:JvmMethodRemoteHandle" />
   <xs:complexType name="JvmClassRemoteHandle">
     <xs:annotation>
       <xs:appinfo>

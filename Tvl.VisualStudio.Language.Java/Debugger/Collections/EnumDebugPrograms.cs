@@ -16,5 +16,15 @@
         {
             Contract.Requires(programs != null);
         }
+
+        protected EnumDebugPrograms(IDebugProgram2[] elements, int currentIndex)
+            : base(elements, currentIndex)
+        {
+        }
+
+        protected override IEnumDebugPrograms2 CreateClone(IDebugProgram2[] elements, int currentIndex)
+        {
+            return new EnumDebugPrograms(elements, currentIndex);
+        }
     }
 }

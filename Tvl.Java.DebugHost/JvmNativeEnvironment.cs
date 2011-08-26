@@ -33,12 +33,25 @@
             return new SafeJvmGlobalReferenceHandle(this, _nativeInterface.NewGlobalRef(_nativeEnvironmentHandle, @object), true);
         }
 
+        internal SafeJvmWeakGlobalReferenceHandle NewWeakGlobalReference(jobject @object)
+        {
+            return new SafeJvmWeakGlobalReferenceHandle(this, _nativeInterface.NewWeakGlobalRef(_nativeEnvironmentHandle, @object), true);
+        }
+
         internal void DeleteGlobalReference(jobject reference)
         {
             if (!AgentExports.IsLoaded)
                 return;
 
             _nativeInterface.DeleteGlobalRef(_nativeEnvironmentHandle, reference);
+        }
+
+        internal void DeleteWeakGlobalReference(jweak reference)
+        {
+            if (!AgentExports.IsLoaded)
+                return;
+
+            _nativeInterface.DeleteWeakGlobalRef(_nativeEnvironmentHandle, reference);
         }
     }
 }

@@ -7,8 +7,10 @@ namespace Tvl.Java.DebugHost.Interop
 {
     using ObsoleteAttribute = System.ObsoleteAttribute;
     using IntPtr = System.IntPtr;
+    using System.Runtime.InteropServices;
 
-    internal struct jvmtiInterface
+    [StructLayout(LayoutKind.Sequential)]
+    internal class jvmtiInterface
     {
         /*   1 :  RESERVED */
         private IntPtr reserved1;
@@ -480,7 +482,9 @@ namespace Tvl.Java.DebugHost.Interop
         /*   154 : Get Object Size */
         public UnsafeNativeMethods.GetObjectSize GetObjectSize;
 
+#if TOOLS_VERSION_1_2
         /*   155 : Get Local Instance */
         public UnsafeNativeMethods.GetLocalInstance GetLocalInstance;
+#endif
     }
 }

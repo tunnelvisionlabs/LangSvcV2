@@ -16,5 +16,15 @@
         {
             Contract.Requires(processes != null);
         }
+
+        protected EnumDebugProcesses(IDebugProcess2[] elements, int currentIndex)
+            : base(elements, currentIndex)
+        {
+        }
+
+        protected override IEnumDebugProcesses2 CreateClone(IDebugProcess2[] elements, int currentIndex)
+        {
+            return new EnumDebugProcesses(elements, currentIndex);
+        }
     }
 }

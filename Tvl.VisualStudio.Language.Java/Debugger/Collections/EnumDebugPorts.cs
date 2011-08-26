@@ -16,5 +16,15 @@
         {
             Contract.Requires(ports != null);
         }
+
+        protected EnumDebugPorts(IDebugPort2[] elements, int currentIndex)
+            : base(elements, currentIndex)
+        {
+        }
+
+        protected override IEnumDebugPorts2 CreateClone(IDebugPort2[] elements, int currentIndex)
+        {
+            return new EnumDebugPorts(elements, currentIndex);
+        }
     }
 }

@@ -2,9 +2,9 @@
 {
     using System;
     using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
 
     [ComVisible(true)]
     public class DebugModuleLoadEvent : DebugEvent, IDebugModuleLoadEvent2
@@ -21,6 +21,14 @@
             _module = module;
             _debugMessage = debugMessage;
             _isLoading = isLoading;
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugModuleLoadEvent2).GUID;
+            }
         }
 
         public int GetModule(out IDebugModule2 pModule, ref string pbstrDebugMessage, ref int pbLoad)

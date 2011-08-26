@@ -177,7 +177,11 @@
             Contract.Assert(!capabilities.CanGetThreadCpuTime || rawInterface.GetCurrentThreadCpuTimerInfo != null);
             Contract.Assert(!capabilities.CanGetThreadCpuTime || rawInterface.GetCurrentThreadCpuTime != null);
 
-            capabilities = new jvmtiCapabilities(jvmtiCapabilities.CapabilityFlags1.CanTagObjects);
+            capabilities = new jvmtiCapabilities(
+                jvmtiCapabilities.CapabilityFlags1.CanTagObjects
+                | jvmtiCapabilities.CapabilityFlags1.CanGetSourceFileName
+                | jvmtiCapabilities.CapabilityFlags1.CanGetLineNumbers
+                );
             rawInterface.AddCapabilities(env, ref capabilities);
 
             _env = env;
@@ -278,11 +282,11 @@
             return threadState;
         }
 
-        public JvmThreadReference GetCurrentThread(JvmNativeEnvironment nativeEnvironment)
+        public JvmThreadReference GetCurrentThread(JNIEnvHandle jniEnv)
         {
             jthread threadHandle;
             ThrowOnFailure(_rawInterface.GetCurrentThread(_env, out threadHandle));
-            return new JvmThreadReference(this, nativeEnvironment, threadHandle);
+            return JvmThreadReference.FromHandle(this, jniEnv, threadHandle, true);
         }
 
         public DisposableObjectCollection<JvmThreadReference> GetAllThreads(JvmNativeEnvironment nativeEnvironment)
@@ -299,7 +303,7 @@
                     jthread* rawThreads = (jthread*)threads;
                     for (int i = 0; i < threadsCount; i++)
                     {
-                        result.Add(new JvmThreadReference(this, nativeEnvironment, rawThreads[i]));
+                        result.Add(new JvmThreadReference(this, nativeEnvironment, rawThreads[i], true));
                     }
                 }
 
@@ -347,11 +351,11 @@
             throw new NotImplementedException();
         }
 
-        internal jvmtiThreadInfo GetThreadInfo(JvmThreadReference thread)
+        internal JvmThreadInfo GetThreadInfo(JvmThreadReference thread, JNIEnvHandle jniEnv)
         {
             jvmtiThreadInfo info;
             ThrowOnFailure(_rawInterface.GetThreadInfo(_env, (jthread)thread, out info));
-            return info;
+            return new JvmThreadInfo(this, jniEnv, info, true);
         }
 
         public DisposableObjectCollection<JvmObjectReference> GetOwnedMonitorInfo(JvmThreadReference thread, JvmNativeEnvironment nativeEnvironment)
@@ -368,7 +372,7 @@
                     jobject* rawMonitors = (jobject*)ownedMonitors;
                     for (int i = 0; i < ownedMonitorCount; i++)
                     {
-                        result.Add(new JvmObjectReference(this, nativeEnvironment, rawMonitors[i]));
+                        result.Add(new JvmObjectReference(this, nativeEnvironment, rawMonitors[i], true));
                     }
                 }
 
@@ -417,7 +421,7 @@
             throw new NotImplementedException();
         }
 
-        internal jvmtiThreadGroupInfo GetThreadGroupInfo(JvmThreadGroupReference group)
+        internal JvmThreadGroupInfo GetThreadGroupInfo(JvmThreadGroupReference group)
         {
             throw new NotImplementedException();
         }

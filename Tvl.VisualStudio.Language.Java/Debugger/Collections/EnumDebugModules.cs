@@ -16,5 +16,15 @@
         {
             Contract.Requires(modules != null);
         }
+
+        protected EnumDebugModules(IDebugModule2[] elements, int currentIndex)
+            : base(elements, currentIndex)
+        {
+        }
+
+        protected override IEnumDebugModules2 CreateClone(IDebugModule2[] elements, int currentIndex)
+        {
+            return new EnumDebugModules(elements, currentIndex);
+        }
     }
 }

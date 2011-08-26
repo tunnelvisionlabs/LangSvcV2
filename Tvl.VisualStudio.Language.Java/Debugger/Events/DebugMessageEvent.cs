@@ -2,11 +2,11 @@
 {
     using System;
     using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
     using DialogResult = System.Windows.Forms.DialogResult;
     using MessageBoxIcon = System.Windows.Forms.MessageBoxIcon;
-    using System.Runtime.InteropServices;
 
     [ComVisible(true)]
     public class DebugMessageEvent : DebugEvent, IDebugMessageEvent2
@@ -30,6 +30,14 @@
             _severity = severity;
             _helpFileName = helpFileName;
             _helpId = helpId;
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugMessageEvent2).GUID;
+            }
         }
 
         public DialogResult? Response

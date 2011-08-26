@@ -2,9 +2,9 @@
 {
     using System;
     using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
 
     [ComVisible(true)]
     public class DebugBreakpointUnboundEvent : DebugEvent, IDebugBreakpointUnboundEvent2
@@ -19,6 +19,14 @@
 
             _breakpoint = breakpoint;
             _reason = reason;
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugBreakpointUnboundEvent2).GUID;
+            }
         }
 
         public int GetBreakpoint(out IDebugBoundBreakpoint2 ppBP)

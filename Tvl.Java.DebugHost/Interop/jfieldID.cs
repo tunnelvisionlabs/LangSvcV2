@@ -4,6 +4,7 @@
 namespace Tvl.Java.DebugHost.Interop
 {
     using System;
+    using Tvl.Java.DebugInterface.Types;
 
     internal struct jfieldID : IEquatable<jfieldID>
     {
@@ -11,12 +12,27 @@ namespace Tvl.Java.DebugHost.Interop
 
         private readonly IntPtr _handle;
 
+        public jfieldID(IntPtr handle)
+        {
+            _handle = handle;
+        }
+
         internal IntPtr Handle
         {
             get
             {
                 return _handle;
             }
+        }
+
+        public static implicit operator jfieldID(FieldId fieldId)
+        {
+            return new jfieldID((IntPtr)fieldId.Handle);
+        }
+
+        public static implicit operator FieldId(jfieldID fieldId)
+        {
+            return new FieldId(fieldId.Handle.ToInt64());
         }
 
         public static bool operator ==(jfieldID x, jfieldID y)

@@ -4,7 +4,6 @@
 namespace Tvl.Java.DebugHost.Interop
 {
     using IntPtr = System.IntPtr;
-    using jlocation = System.Int64;
 
     internal struct jvmtiAddressLocationMap
     {

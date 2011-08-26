@@ -16,5 +16,15 @@
         {
             Contract.Requires(breakpoints != null);
         }
+
+        protected EnumDebugErrorBreakpoints(IDebugErrorBreakpoint2[] elements, int currentIndex)
+            : base(elements, currentIndex)
+        {
+        }
+
+        protected override IEnumDebugErrorBreakpoints2 CreateClone(IDebugErrorBreakpoint2[] elements, int currentIndex)
+        {
+            return new EnumDebugErrorBreakpoints(elements, currentIndex);
+        }
     }
 }

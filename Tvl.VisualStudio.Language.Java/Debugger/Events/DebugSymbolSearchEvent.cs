@@ -1,13 +1,10 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger.Events
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Debugger.Interop;
     using System.Diagnostics.Contracts;
-    using Microsoft.VisualStudio;
     using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Debugger.Interop;
 
     [ComVisible(true)]
     public class DebugSymbolSearchEvent : DebugEvent, IDebugSymbolSearchEvent2
@@ -26,6 +23,14 @@
             _module = module;
             _debugMessage = debugMessage;
             _moduleInfoFlags = moduleInfoFlags;
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugSymbolSearchEvent2).GUID;
+            }
         }
 
         public int GetSymbolSearchInfo(out IDebugModule3 pModule, ref string pbstrDebugMessage, enum_MODULE_INFO_FLAGS[] pdwModuleInfoFlags)

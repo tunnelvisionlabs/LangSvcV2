@@ -1,12 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger.Events
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Debugger.Interop;
-    using Microsoft.VisualStudio;
     using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Debugger.Interop;
 
     [ComVisible(true)]
     public class DebugProgramDestroyEvent : DebugEvent, IDebugProgramDestroyEvent2
@@ -17,6 +14,14 @@
             : base(attributes)
         {
             _exitCode = exitCode;
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugProgramDestroyEvent2).GUID;
+            }
         }
 
         public int GetExitCode(out uint pdwExit)

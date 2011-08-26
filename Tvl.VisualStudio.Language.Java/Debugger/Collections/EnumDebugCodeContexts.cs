@@ -16,5 +16,15 @@
         {
             Contract.Requires(codeContexts != null);
         }
+
+        protected EnumDebugCodeContexts(IDebugCodeContext2[] elements, int currentIndex)
+            : base(elements, currentIndex)
+        {
+        }
+
+        protected override IEnumDebugCodeContexts2 CreateClone(IDebugCodeContext2[] elements, int currentIndex)
+        {
+            return new EnumDebugCodeContexts(elements, currentIndex);
+        }
     }
 }

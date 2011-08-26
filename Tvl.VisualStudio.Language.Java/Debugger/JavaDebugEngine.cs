@@ -12,6 +12,11 @@
     using System.Globalization;
     using Tvl.VisualStudio.Language.Java.Debugger.Events;
     using Tvl.VisualStudio.Language.Java.Debugger.Extensions;
+    using Microsoft.VisualStudio.Utilities;
+    using Tvl.Java.DebugInterface.Request;
+    using Tvl.Java.DebugInterface;
+    using Tvl.Extensions;
+    using System.Threading.Tasks;
 
     [ComVisible(true)]
     [Guid(JavaDebuggerConstants.JavaDebugEngineGuidString)]
@@ -60,9 +65,8 @@
                 _programs.Add(program);
             }
 
-            IDebugEvent2 @event = new DebugEngineCreateEvent(enum_EVENTATTRIBUTES.EVENT_SYNCHRONOUS, this);
-            Guid guid = typeof(IDebugEngineCreateEvent2).GUID;
-            pCallback.Event(this, program.GetProcess(), program, null, @event, ref guid, (uint)@event.GetAttributes());
+            DebugEvent @event = new DebugEngineCreateEvent(enum_EVENTATTRIBUTES.EVENT_ASYNCHRONOUS, this);
+            pCallback.Event(this, program.GetProcess(), program, null, @event);
 
             program.InitializeDebuggerChannel(this, pCallback);
             return VSConstants.S_OK;
@@ -83,11 +87,63 @@
             if (pEvent is IDebugEngineCreateEvent2)
                 return VSConstants.S_OK;
 
+            IPropertyOwner propertyOwner = pEvent as IPropertyOwner;
+            if (propertyOwner != null)
+            {
+                SuspendPolicy suspendPolicy;
+                if (propertyOwner.Properties.TryGetProperty(typeof(SuspendPolicy), out suspendPolicy))
+                {
+                    switch (suspendPolicy)
+                    {
+                    case SuspendPolicy.All:
+                        IVirtualMachine virtualMachine = propertyOwner.Properties.GetProperty<IVirtualMachine>(typeof(IVirtualMachine));
+                        Task.Factory.StartNew(virtualMachine.Resume).HandleNonCriticalExceptions();
+                        break;
+
+                    case SuspendPolicy.EventThread:
+                        IThreadReference thread = propertyOwner.Properties.GetProperty<IThreadReference>(typeof(IThreadReference));
+                        Task.Factory.StartNew(thread.Resume).HandleNonCriticalExceptions();
+                        break;
+
+                    case SuspendPolicy.None:
+                        break;
+                    }
+                }
+            }
+
             return VSConstants.S_OK;
         }
 
+        /// <summary>
+        /// Creates a pending breakpoint in the debug engine (DE).
+        /// </summary>
+        /// <param name="breakpointRequest">An IDebugBreakpointRequest2 object that describes the pending breakpoint to create.</param>
+        /// <param name="pendingBreakpoint">Returns an IDebugPendingBreakpoint2 object that represents the pending breakpoint.</param>
+        /// <returns>
+        /// If successful, returns S_OK; otherwise, returns an error code. Typically returns E_FAIL if the pBPRequest parameter
+        /// does not match any language supported by the DE of if the pBPRequest parameter is invalid or incomplete.
+        /// </returns>
+        /// <remarks>
+        /// A pending breakpoint is essentially a collection of all the information needed to bind a breakpoint to code. The
+        /// pending breakpoint returned from this method is not bound to code until the IDebugPendingBreakpoint2.Bind method
+        /// is called.
+        /// 
+        /// For each pending breakpoint the user sets, the session debug manager (SDM) calls this method in each attached DE.
+        /// It is up to the DE to verify that the breakpoint is valid for programs running in that DE.
+        /// 
+        /// When the user sets a breakpoint on a line of code, the DE is free to bind the breakpoint to the closest line in
+        /// the document that corresponds to this code. This makes it possible for the user to set a breakpoint on the first
+        /// line of a multi-line statement, but bind it on the last line (where all the code is attributed in the debug
+        /// information).
+        /// </remarks>
         public int CreatePendingBreakpoint(IDebugBreakpointRequest2 breakpointRequest, out IDebugPendingBreakpoint2 pendingBreakpoint)
         {
+            pendingBreakpoint = null;
+
+            BreakpointRequestInfo requestInfo = new BreakpointRequestInfo(breakpointRequest);
+            if (requestInfo.LanguageGuid != Constants.JavaLanguageGuid)
+                return VSConstants.E_FAIL;
+
             throw new NotImplementedException();
         }
 

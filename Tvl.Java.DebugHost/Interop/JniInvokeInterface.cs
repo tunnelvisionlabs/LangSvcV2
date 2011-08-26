@@ -3,9 +3,11 @@
 
 namespace Tvl.Java.DebugHost.Interop
 {
-    using System;
+    using IntPtr = System.IntPtr;
+    using System.Runtime.InteropServices;
 
-    public struct JniInvokeInterface
+    [StructLayout(LayoutKind.Sequential)]
+    public class JniInvokeInterface
     {
         private readonly IntPtr _reserved0;
         private readonly IntPtr _reserved1;

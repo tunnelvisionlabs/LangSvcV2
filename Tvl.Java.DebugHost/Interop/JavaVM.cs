@@ -1,5 +1,9 @@
 ﻿namespace Tvl.Java.DebugHost.Interop
 {
+    using ReferenceTypeId = Tvl.Java.DebugInterface.Types.ReferenceTypeId;
+    using TypeTag = Tvl.Java.DebugInterface.Types.TypeTag;
+    using TaggedReferenceTypeId = Tvl.Java.DebugInterface.Types.TaggedReferenceTypeId;
+    using ThreadId = Tvl.Java.DebugInterface.Types.ThreadId;
     using DispatcherOperation = System.Windows.Threading.DispatcherOperation;
     using Thread = System.Threading.Thread;
     using System.Collections.Concurrent;
@@ -12,29 +16,89 @@
     using System.Diagnostics.Contracts;
     using DispatcherPriority = System.Windows.Threading.DispatcherPriority;
     using System.Collections.Generic;
+    using System.Linq;
+    using TaggedObjectId = Tvl.Java.DebugInterface.Types.TaggedObjectId;
+    using Tag = Tvl.Java.DebugInterface.Types.Tag;
+    using ObjectId = Tvl.Java.DebugInterface.Types.ObjectId;
+    using Interlocked = System.Threading.Interlocked;
 
     public class JavaVM
     {
-        private static readonly ConcurrentDictionary<IntPtr, JavaVM> _instances =
-            new ConcurrentDictionary<IntPtr, JavaVM>();
+        private static readonly ConcurrentDictionary<JavaVMHandle, JavaVM> _instances =
+            new ConcurrentDictionary<JavaVMHandle, JavaVM>();
 
-        private readonly IntPtr _jniInvokeInterface;
-        private readonly List<Tuple<Dispatcher, DispatcherFrame, JvmEnvironment, IAsyncResult>> _dispatchers =
-            new List<Tuple<Dispatcher, DispatcherFrame, JvmEnvironment, IAsyncResult>>();
+        private readonly JavaVMHandle _handle;
+        private readonly JniInvokeInterface _jniInvokeInterface;
+        private readonly List<Tuple<Dispatcher, DispatcherFrame, jvmtiEnvHandle, IAsyncResult>> _dispatchers =
+            new List<Tuple<Dispatcher, DispatcherFrame, jvmtiEnvHandle, IAsyncResult>>();
+        private readonly HashSet<ThreadId> _agentThreads = new HashSet<ThreadId>();
 
-        private JavaVM(IntPtr jniInterfacePointer)
+        private readonly ConcurrentDictionary<ThreadId, int> _suspendCounts = new ConcurrentDictionary<ThreadId, int>();
+
+        #region Object tracking
+
+        private readonly Dictionary<ThreadId, jthread> _threads = new Dictionary<ThreadId, jthread>();
+        private readonly Dictionary<ObjectId, jweak> _objects = new Dictionary<ObjectId, jweak>();
+        private readonly Dictionary<ReferenceTypeId, jclass> _classes = new Dictionary<ReferenceTypeId, jclass>();
+
+        private long _nextTag = 1000;
+
+        private jclass _stringClass;
+        private jclass _threadClass;
+        private jclass _threadGroupClass;
+        private jclass _classClass;
+        private jclass _classLoaderClass;
+
+        #endregion
+
+        internal readonly System.Threading.ThreadLocal<bool> IsAgentThread = new System.Threading.ThreadLocal<bool>(() => false);
+
+        private JavaVM(JavaVMHandle vmHandle)
         {
-            _jniInvokeInterface = jniInterfacePointer;
+            _handle = vmHandle;
+            _jniInvokeInterface = (JniInvokeInterface)Marshal.PtrToStructure(Marshal.ReadIntPtr(vmHandle.Handle), typeof(JniInvokeInterface));
+        }
+
+        public JniInvokeInterface RawInterface
+        {
+            get
+            {
+                return _jniInvokeInterface;
+            }
+        }
+
+        public ThreadId[] AgentThreads
+        {
+            get
+            {
+                lock (_agentThreads)
+                {
+                    return _agentThreads.ToArray();
+                }
+            }
+        }
+
+        internal ConcurrentDictionary<ThreadId, int> SuspendCounts
+        {
+            get
+            {
+                return _suspendCounts;
+            }
         }
 
         public static implicit operator JvmVirtualMachineRemoteHandle(JavaVM virtualMachine)
         {
-            return new JvmVirtualMachineRemoteHandle(virtualMachine._jniInvokeInterface);
+            return new JvmVirtualMachineRemoteHandle(virtualMachine._handle);
+        }
+
+        public static implicit operator JavaVMHandle(JavaVM vm)
+        {
+            return vm._handle;
         }
 
         public static JavaVM GetInstance(JvmVirtualMachineRemoteHandle virtualMachineHandle)
         {
-            JavaVM vm = _instances[(IntPtr)virtualMachineHandle.Handle];
+            JavaVM vm = _instances[new JavaVMHandle((IntPtr)virtualMachineHandle.Handle)];
 
             //JNIEnvHandle env;
             //JavaVMAttachArgs args = new JavaVMAttachArgs(jniVersion.Version1_6, IntPtr.Zero, jthreadGroup.Null);
@@ -59,14 +123,14 @@
             return vm;
         }
 
-        internal static JavaVM GetOrCreateInstance(IntPtr jniInterfacePointer)
+        internal static JavaVM GetOrCreateInstance(JavaVMHandle handle)
         {
-            return _instances.GetOrAdd(jniInterfacePointer, CreateVirtualMachine);
+            return _instances.GetOrAdd(handle, CreateVirtualMachine);
         }
 
-        private static JavaVM CreateVirtualMachine(IntPtr jniInterfacePointer)
+        private static JavaVM CreateVirtualMachine(JavaVMHandle handle)
         {
-            return new JavaVM(jniInterfacePointer);
+            return new JavaVM(handle);
         }
 
         public void ShutdownAgentDispatchers()
@@ -95,7 +159,7 @@
             }
         }
 
-        public void PushDispatcherFrame(DispatcherFrame frame, JvmEnvironment environment, IAsyncResult asyncResult)
+        public void PushDispatcherFrame(DispatcherFrame frame, jvmtiEnvHandle environment, IAsyncResult asyncResult)
         {
             Contract.Requires<ArgumentNullException>(frame != null, "frame");
             Contract.Requires<ArgumentNullException>(environment != null, "environment");
@@ -109,7 +173,7 @@
             Dispatcher.PushFrame(frame);
         }
 
-        public void PushAgentDispatcherFrame(DispatcherFrame frame, JvmEnvironment environment)
+        public void PushAgentDispatcherFrame(DispatcherFrame frame, jvmtiEnvHandle environment)
         {
             Contract.Requires<ArgumentNullException>(frame != null, "frame");
             Contract.Requires<ArgumentNullException>(environment != null, "environment");
@@ -122,7 +186,7 @@
             Dispatcher.PushFrame(frame);
         }
 
-        public void InvokeOnJvmThread(Action<JvmEnvironment> action)
+        public void InvokeOnJvmThread(Action<jvmtiEnvHandle> action)
         {
             Contract.Requires<ArgumentNullException>(action != null, "action");
 
@@ -160,6 +224,96 @@
             dispatcher.BeginInvoke((Action)(() => frame.Continue = false), DispatcherPriority.Background);
         }
 
+        public int GetEnvironment(out JvmtiEnvironment environment)
+        {
+            jvmtiEnvHandle env;
+            int error = RawInterface.GetEnv(this, out env, jvmtiVersion.Version1_1);
+            if (error == 0)
+                environment = JvmtiEnvironment.GetOrCreateInstance(this, env);
+            else
+                environment = null;
+
+            return error;
+        }
+
+        public int AttachCurrentThread(JvmtiEnvironment environment, out JniEnvironment nativeEnvironment, bool preventSuspend)
+        {
+            JavaVMAttachArgs args = new JavaVMAttachArgs(jniVersion.Version1_6, IntPtr.Zero, jthreadGroup.Null);
+
+            if (preventSuspend)
+                IsAgentThread.Value = true;
+
+            JNIEnvHandle jniEnv;
+            int error = RawInterface.AttachCurrentThread(this, out jniEnv, ref args);
+            if (error == 0)
+            {
+                bool created;
+                nativeEnvironment = JniEnvironment.GetOrCreateInstance(jniEnv, out created);
+                if (created && preventSuspend)
+                {
+                    if (environment == null)
+                        GetEnvironment(out environment);
+
+                    jthread thread;
+                    environment.RawInterface.GetCurrentThread(environment, out thread);
+                    if (thread != jthread.Null)
+                    {
+                        ThreadId threadId = TrackLocalThreadReference(thread, environment, nativeEnvironment, true);
+                        lock (_agentThreads)
+                        {
+                            _agentThreads.Add(threadId);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                nativeEnvironment = null;
+            }
+
+            return error;
+        }
+
+        public int AttachCurrentThreadAsDaemon(JvmtiEnvironment environment, out JniEnvironment nativeEnvironment, bool agentThread)
+        {
+            JavaVMAttachArgs args = new JavaVMAttachArgs(jniVersion.Version1_6, IntPtr.Zero, jthreadGroup.Null);
+
+            bool alreadyAgent = IsAgentThread.Value;
+            if (agentThread && !alreadyAgent)
+                IsAgentThread.Value = true;
+
+            JNIEnvHandle jniEnv;
+            int error = RawInterface.AttachCurrentThreadAsDaemon(this, out jniEnv, ref args);
+            if (error == 0)
+            {
+                bool created;
+                nativeEnvironment = JniEnvironment.GetOrCreateInstance(jniEnv, out created);
+                if (agentThread && !alreadyAgent)
+                {
+                    if (environment == null)
+                        GetEnvironment(out environment);
+
+                    jthread thread;
+                    JvmtiErrorHandler.ThrowOnFailure(environment.RawInterface.GetCurrentThread(environment, out thread));
+                    if (thread != jthread.Null)
+                    {
+                        ThreadId threadId = TrackLocalThreadReference(thread, environment, nativeEnvironment, true);
+                        lock (_agentThreads)
+                        {
+                            _agentThreads.Add(threadId);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                nativeEnvironment = null;
+            }
+
+            return error;
+        }
+
+#if false
         public JvmEnvironment GetEnvironment(jvmtiVersion version)
         {
             JniInvokeInterface jniInvokeInterface = GetRawInterface();
@@ -180,10 +334,273 @@
 
             return GetEnvironment(toolsVersion).GetNativeFunctionTable(env);
         }
+#endif
 
-        private JniInvokeInterface GetRawInterface()
+        #region Object tracking
+
+        internal jvmtiError GetThread(ThreadId threadId, out jthread thread)
         {
-            return (JniInvokeInterface)Marshal.PtrToStructure(_jniInvokeInterface, typeof(JniInvokeInterface));
+            lock (_threads)
+            {
+                if (!_threads.TryGetValue(threadId, out thread))
+                    return jvmtiError.InvalidThread;
+
+                return jvmtiError.None;
+            }
         }
+
+        internal jvmtiError GetLocalReferenceForThread(JniEnvironment nativeEnvironment, ThreadId threadId, out LocalThreadReferenceHolder thread)
+        {
+            thread = default(LocalThreadReferenceHolder);
+
+            jthread threadHandle;
+            jvmtiError error = GetThread(threadId, out threadHandle);
+            if (error != jvmtiError.None)
+                return error;
+
+            thread = new LocalThreadReferenceHolder(nativeEnvironment, threadHandle);
+            return jvmtiError.None;
+        }
+
+        internal LocalThreadReferenceHolder GetLocalReferenceForThread(JniEnvironment nativeEnvironment, ThreadId threadId)
+        {
+            LocalThreadReferenceHolder thread;
+            var error = GetLocalReferenceForThread(nativeEnvironment, threadId, out thread);
+            if (error != jvmtiError.None)
+                return new LocalThreadReferenceHolder();
+
+            return thread;
+        }
+
+        internal jvmtiError GetClass(ReferenceTypeId classId, out jclass @class)
+        {
+            lock (_classes)
+            {
+                if (!_classes.TryGetValue(classId, out @class))
+                    return jvmtiError.InvalidClass;
+
+                return jvmtiError.None;
+            }
+        }
+
+        internal jvmtiError GetLocalReferenceForClass(JniEnvironment nativeEnvironment, ReferenceTypeId typeId, out LocalClassReferenceHolder thread)
+        {
+            thread = default(LocalClassReferenceHolder);
+
+            jclass threadHandle;
+            jvmtiError error = GetClass(typeId, out threadHandle);
+            if (error != jvmtiError.None)
+                return error;
+
+            thread = new LocalClassReferenceHolder(nativeEnvironment, threadHandle);
+            return jvmtiError.None;
+        }
+
+        internal LocalClassReferenceHolder GetLocalReferenceForClass(JniEnvironment nativeEnvironment, ReferenceTypeId classId)
+        {
+            LocalClassReferenceHolder thread;
+            var error = GetLocalReferenceForClass(nativeEnvironment, classId, out thread);
+            if (error != jvmtiError.None)
+                return new LocalClassReferenceHolder();
+
+            return thread;
+        }
+
+        internal ThreadId TrackLocalThreadReference(jthread thread, JvmtiEnvironment environment, JniEnvironment jniEnvironment, bool freeLocalReference)
+        {
+            if (thread == jthread.Null)
+                return default(ThreadId);
+
+            int hashCode;
+            JvmtiErrorHandler.ThrowOnFailure(environment.RawInterface.GetObjectHashCode(environment, thread, out hashCode));
+
+            ThreadId threadId = new ThreadId(hashCode);
+            if (!_threads.ContainsKey(threadId))
+            {
+                jweak weak = jniEnvironment.NewWeakGlobalReference(thread);
+                bool added = false;
+                lock (_threads)
+                {
+                    if (!_threads.ContainsKey(threadId))
+                    {
+                        _threads.Add(threadId, new jthread(weak.Handle));
+                        added = true;
+                    }
+                }
+
+                if (!added)
+                {
+                    jniEnvironment.DeleteWeakGlobalReference(weak);
+                }
+            }
+
+            if (freeLocalReference)
+                jniEnvironment.DeleteLocalReference(thread);
+
+            return threadId;
+        }
+
+        internal jvmtiError GetObject(ObjectId objectId, out jobject @object)
+        {
+            @object = jobject.Null;
+
+            lock (_objects)
+            {
+                jweak weak;
+                if (!_objects.TryGetValue(objectId, out weak))
+                    return jvmtiError.InvalidObject;
+
+                @object = new jobject(weak.Handle);
+                return jvmtiError.None;
+            }
+        }
+
+        internal jvmtiError GetLocalReferenceForObject(JniEnvironment nativeEnvironment, ObjectId objectId, out LocalObjectReferenceHolder thread)
+        {
+            thread = default(LocalObjectReferenceHolder);
+
+            jobject threadHandle;
+            jvmtiError error = GetObject(objectId, out threadHandle);
+            if (error != jvmtiError.None)
+                return error;
+
+            thread = new LocalObjectReferenceHolder(nativeEnvironment, threadHandle);
+            return jvmtiError.None;
+        }
+
+        internal LocalObjectReferenceHolder GetLocalReferenceForObject(JniEnvironment nativeEnvironment, ObjectId objectId)
+        {
+            LocalObjectReferenceHolder thread;
+            jvmtiError error = GetLocalReferenceForObject(nativeEnvironment, objectId, out thread);
+            if (error != jvmtiError.None)
+                return new LocalObjectReferenceHolder();
+
+            return thread;
+        }
+
+        internal TaggedObjectId TrackLocalObjectReference(jobject @object, JvmtiEnvironment environment, JniEnvironment nativeEnvironment, bool freeLocalReference)
+        {
+            if (nativeEnvironment.IsSameObject(@object, jobject.Null))
+                return new TaggedObjectId(Tag.Object, new ObjectId(0));
+
+            long tag;
+            JvmtiErrorHandler.ThrowOnFailure(environment.GetTag(@object, out tag));
+
+            Tag objectKind;
+            if (tag == 0)
+            {
+                long uniqueTag = Interlocked.Increment(ref _nextTag);
+
+                /* first figure out what type of object we're dealing with. could be:
+                 *  - String
+                 *  - Thread
+                 *  - ThreadGroup
+                 *  - ClassLoader
+                 *  - ClassObject
+                 *  - Array
+                 *  - Object
+                 */
+
+                // check for array
+                jclass objectClass = nativeEnvironment.RawInterface.GetObjectClass(nativeEnvironment, @object);
+                nativeEnvironment.ExceptionClear();
+                try
+                {
+                    bool isArray;
+                    JvmtiErrorHandler.ThrowOnFailure(environment.IsArrayClass(objectClass, out isArray));
+                    if (isArray)
+                    {
+                        objectKind = Tag.Array;
+                    }
+                    else
+                    {
+                        InitializeGlobalClassHandle(nativeEnvironment, ref _stringClass, "java/lang/String");
+                        InitializeGlobalClassHandle(nativeEnvironment, ref _threadClass, "java/lang/Thread");
+                        InitializeGlobalClassHandle(nativeEnvironment, ref _threadGroupClass, "java/lang/ThreadGroup");
+                        InitializeGlobalClassHandle(nativeEnvironment, ref _classClass, "java/lang/Class");
+                        InitializeGlobalClassHandle(nativeEnvironment, ref _classLoaderClass, "java/lang/ClassLoader");
+
+                        if (nativeEnvironment.IsInstanceOf(@object, _stringClass))
+                            objectKind = Tag.String;
+                        else if (nativeEnvironment.IsInstanceOf(@object, _threadClass))
+                            objectKind = Tag.Thread;
+                        else if (nativeEnvironment.IsInstanceOf(@object, _threadGroupClass))
+                            objectKind = Tag.ThreadGroup;
+                        else if (nativeEnvironment.IsInstanceOf(@object, _classClass))
+                            objectKind = Tag.ClassObject;
+                        else if (nativeEnvironment.IsInstanceOf(@object, _classLoaderClass))
+                            objectKind = Tag.ClassLoader;
+                        else
+                            objectKind = Tag.Object;
+                    }
+                }
+                finally
+                {
+                    nativeEnvironment.DeleteLocalReference(objectClass);
+                }
+
+                tag = (uniqueTag << 8) | (uint)objectKind;
+                JvmtiErrorHandler.ThrowOnFailure(environment.SetTag(@object, tag));
+                _objects.Add(new ObjectId(tag), nativeEnvironment.NewWeakGlobalReference(@object));
+            }
+
+            if (freeLocalReference)
+                nativeEnvironment.DeleteLocalReference(@object);
+
+            objectKind = (Tag)(tag & 0xFF);
+            return new TaggedObjectId(objectKind, new ObjectId(tag));
+        }
+
+        private static void InitializeGlobalClassHandle(JniEnvironment nativeEnvironment, ref jclass classHandle, string className)
+        {
+            Contract.Requires<ArgumentNullException>(nativeEnvironment != null, "nativeEnvironment");
+            if (nativeEnvironment.IsSameObject(classHandle, jclass.Null))
+            {
+                jclass local = nativeEnvironment.FindClass(className);
+                classHandle = (jclass)nativeEnvironment.NewGlobalReference(local);
+                nativeEnvironment.DeleteLocalReference(local);
+            }
+        }
+
+        internal TaggedReferenceTypeId TrackLocalClassReference(jclass classHandle, JvmtiEnvironment environment, JniEnvironment nativeEnvironment, bool freeLocalReference)
+        {
+            bool isArrayClass;
+            JvmtiErrorHandler.ThrowOnFailure(environment.IsArrayClass(classHandle, out isArrayClass));
+            bool isInterface;
+            JvmtiErrorHandler.ThrowOnFailure(environment.IsInterface(classHandle, out isInterface));
+
+            TypeTag typeTag = isArrayClass ? TypeTag.Array : (isInterface ? TypeTag.Interface : TypeTag.Class);
+
+            int hashCode;
+            JvmtiErrorHandler.ThrowOnFailure(environment.RawInterface.GetObjectHashCode(environment, classHandle, out hashCode));
+
+            ReferenceTypeId typeId = new ReferenceTypeId(hashCode);
+            TaggedReferenceTypeId taggedTypeId = new TaggedReferenceTypeId(typeTag, typeId);
+            if (!_classes.ContainsKey(typeId))
+            {
+                jweak weak = nativeEnvironment.NewWeakGlobalReference(classHandle);
+                bool added = false;
+                lock (_threads)
+                {
+                    if (!_classes.ContainsKey(typeId))
+                    {
+                        _classes.Add(typeId, new jclass(weak.Handle));
+                        added = true;
+                    }
+                }
+
+                if (!added)
+                {
+                    nativeEnvironment.DeleteWeakGlobalReference(weak);
+                }
+            }
+
+            if (freeLocalReference)
+                nativeEnvironment.DeleteLocalReference(classHandle);
+
+            return taggedTypeId;
+        }
+
+        #endregion
     }
 }

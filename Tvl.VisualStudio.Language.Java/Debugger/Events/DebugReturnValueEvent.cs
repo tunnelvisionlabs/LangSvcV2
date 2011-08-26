@@ -2,9 +2,9 @@
 {
     using System;
     using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
 
     [ComVisible(true)]
     public class DebugReturnValueEvent : DebugEvent, IDebugReturnValueEvent2
@@ -17,6 +17,14 @@
             Contract.Requires<ArgumentNullException>(returnValue != null, "returnValue");
 
             _returnValue = returnValue;
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugReturnValueEvent2).GUID;
+            }
         }
 
         public int GetReturnValue(out IDebugProperty2 ppReturnValue)

@@ -18,12 +18,16 @@
     using FirstChanceExceptionEventArgs = System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs;
     using MessageBox = System.Windows.Forms.MessageBox;
     using MessageBoxButtons = System.Windows.Forms.MessageBoxButtons;
+    using System.Collections.Generic;
 
     public static class AgentExports
     {
         private static ServiceHost _jvmDebugSessionHost;
+#if false
         private static ServiceHost _jvmEventsPublisherHost;
         private static ServiceHost _jvmToolsInterfaceHost;
+#endif
+        private static ServiceHost _debugProtocolHost;
         private static readonly ManualResetEventSlim _debuggerAttachComplete = new ManualResetEventSlim();
 
         private static bool _loaded;
@@ -48,13 +52,21 @@
         {
             _loaded = true;
 
-            JavaVM vm = JavaVM.GetOrCreateInstance(Marshal.ReadIntPtr(vmPtr));
+            JavaVM vm = JavaVM.GetOrCreateInstance(new JavaVMHandle(vmPtr));
 
             string options = null;
             if (optionsPtr != IntPtr.Zero)
                 options = ModifiedUTF8Encoding.GetString((byte*)optionsPtr);
 
-            JvmEnvironment env = vm.GetEnvironment(jvmtiVersion.Version1_1);
+#if false
+            // quick test
+            GetEnvironmentVersion(vm);
+
+            Action<JavaVM> action = GetEnvironmentVersion;
+            IAsyncResult result = action.BeginInvoke(vm, null, null);
+            result.AsyncWaitHandle.WaitOne();
+#endif
+
 
 #if false
             AppDomain.CurrentDomain.FirstChanceException += HandleFirstChanceException;
@@ -62,7 +74,16 @@
             AppDomain.CurrentDomain.ProcessExit += HandleProcessExit;
 #endif
 
-            // start the wcf services and wait for the client to connect
+            List<WaitHandle> waitHandles = new List<WaitHandle>();
+            Binding binding;
+
+            /*
+             * start the wcf services and wait for the client to connect
+             */
+
+#if false
+            /* IJvmEventsService
+             */
             _jvmEventsPublisherHost = new ServiceHost(typeof(JvmEventsPublisher));
             Binding binding = new NetNamedPipeBinding(NetNamedPipeSecurityMode.None)
             {
@@ -72,7 +93,10 @@
 
             _jvmEventsPublisherHost.AddServiceEndpoint(typeof(IJvmEventsService), binding, "net.pipe://localhost/Tvl.Java.DebugHost/JvmEventsService/");
             IAsyncResult jvmEventsPublisherStartResult = _jvmEventsPublisherHost.BeginOpen(null, null);
+            waitHandles.Add(jvmEventsPublisherStartResult.AsyncWaitHandle);
 
+            /* IJvmToolsInterfaceService
+             */
             _jvmToolsInterfaceHost = new ServiceHost(typeof(JvmToolsInterfaceService));
             binding = new NetNamedPipeBinding(NetNamedPipeSecurityMode.None)
             {
@@ -82,7 +106,11 @@
 
             _jvmToolsInterfaceHost.AddServiceEndpoint(typeof(IJvmToolsInterfaceService), binding, "net.pipe://localhost/Tvl.Java.DebugHost/JvmToolsInterfaceService/");
             IAsyncResult toolsInterfaceStartResult = _jvmToolsInterfaceHost.BeginOpen(null, null);
+            waitHandles.Add(toolsInterfaceStartResult.AsyncWaitHandle);
+#endif
 
+            /* IJvmDebugSessionService
+             */
             _jvmDebugSessionHost = new ServiceHost(typeof(JvmDebugSessionService));
             binding = new NetNamedPipeBinding(NetNamedPipeSecurityMode.None)
             {
@@ -92,8 +120,24 @@
 
             _jvmDebugSessionHost.AddServiceEndpoint(typeof(IJvmDebugSessionService), binding, "net.pipe://localhost/Tvl.Java.DebugHost/JvmDebugSessionService/");
             IAsyncResult debugSessionStartResult = _jvmDebugSessionHost.BeginOpen(null, null);
+            waitHandles.Add(debugSessionStartResult.AsyncWaitHandle);
 
-            WaitHandle.WaitAll(new WaitHandle[] { jvmEventsPublisherStartResult.AsyncWaitHandle, toolsInterfaceStartResult.AsyncWaitHandle, debugSessionStartResult.AsyncWaitHandle });
+            /* IDebugProtocolService
+             */
+            _debugProtocolHost = new ServiceHost(new DebugProtocolService(vm));
+            binding = new NetNamedPipeBinding(NetNamedPipeSecurityMode.None)
+            {
+                ReceiveTimeout = TimeSpan.MaxValue,
+                SendTimeout = TimeSpan.MaxValue
+            };
+
+            _debugProtocolHost.AddServiceEndpoint(typeof(IDebugProtocolService), binding, "net.pipe://localhost/Tvl.Java.DebugHost/DebugProtocolService/");
+            IAsyncResult debugProtocolStartResult = _debugProtocolHost.BeginOpen(null, null);
+            waitHandles.Add(debugProtocolStartResult.AsyncWaitHandle);
+
+            /* Wait for the services to finish opening
+             */
+            WaitHandle.WaitAll(waitHandles.ToArray());
 
             EventWaitHandle.OpenExisting(string.Format("JavaDebuggerInitHandle{0}", Process.GetCurrentProcess().Id)).Set();
             _debuggerAttachComplete.Wait();
@@ -101,11 +145,20 @@
             return 0;
         }
 
+        private static void GetEnvironmentVersion(JavaVM vm)
+        {
+            JvmtiEnvironment env;
+            int error = vm.GetEnvironment(out env);
+
+            int version;
+            jvmtiError error2 = env.GetVersionNumber(out version);
+        }
+
         public static unsafe int OnAttach(IntPtr vmPtr, IntPtr optionsPtr, IntPtr reserved)
         {
             _loaded = true;
 
-            JavaVM vm = JavaVM.GetOrCreateInstance(Marshal.ReadIntPtr(vmPtr));
+            JavaVM vm = JavaVM.GetOrCreateInstance(new JavaVMHandle(vmPtr));
 
             string options = null;
             if (optionsPtr != IntPtr.Zero)

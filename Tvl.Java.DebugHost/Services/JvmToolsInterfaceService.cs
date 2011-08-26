@@ -2,10 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Runtime.Serialization;
     using System.ServiceModel;
-    using System.Text;
     using Tvl.Java.DebugHost.Interop;
 
     [ServiceBehavior(IncludeExceptionDetailInFaults = true, ConcurrencyMode = ConcurrencyMode.Reentrant)]
@@ -418,7 +415,35 @@
 
         public jvmtiError GetSourceFileName(JvmVirtualMachineRemoteHandle virtualMachine, JvmClassRemoteHandle @class, out string sourceName)
         {
-            throw new NotImplementedException();
+            JavaVM machine = JavaVM.GetInstance(virtualMachine);
+
+            string sourceNameResult = null;
+            jvmtiError result = jvmtiError.Internal;
+
+            machine.InvokeOnJvmThread(
+                (environment) =>
+                {
+                    jvmtiInterface rawInterface = environment.RawInterface;
+
+                    IntPtr sourceNamePtr = IntPtr.Zero;
+                    try
+                    {
+                        result = rawInterface.GetSourceFileName(environment.Handle, @class, out sourceNamePtr);
+
+                        unsafe
+                        {
+                            if (sourceNamePtr != IntPtr.Zero)
+                                sourceNameResult = ModifiedUTF8Encoding.GetString((byte*)sourceNamePtr);
+                        }
+                    }
+                    finally
+                    {
+                        rawInterface.Deallocate(environment.Handle, sourceNamePtr);
+                    }
+                });
+
+            sourceName = sourceNameResult;
+            return result;
         }
 
         public jvmtiError GetClassModifiers(JvmVirtualMachineRemoteHandle virtualMachine, JvmClassRemoteHandle @class, out JvmAccessModifiers modifiers)
@@ -428,7 +453,37 @@
 
         public jvmtiError GetClassMethods(JvmVirtualMachineRemoteHandle virtualMachine, JvmClassRemoteHandle @class, out JvmMethodRemoteHandle[] methods)
         {
-            throw new NotImplementedException();
+            JavaVM machine = JavaVM.GetInstance(virtualMachine);
+
+            List<JvmMethodRemoteHandle> methodsList = new List<JvmMethodRemoteHandle>();
+            jvmtiError result = jvmtiError.Internal;
+
+            machine.InvokeOnJvmThread(
+                (environment) =>
+                {
+                    jvmtiInterface rawInterface = environment.RawInterface;
+
+                    IntPtr methodsPtr = IntPtr.Zero;
+                    try
+                    {
+                        int methodCount;
+                        result = rawInterface.GetClassMethods(environment.Handle, @class, out methodCount, out methodsPtr);
+
+                        unsafe
+                        {
+                            jmethodID* rawMethods = (jmethodID*)methodsPtr;
+                            for (int i = 0; i < methodCount; i++)
+                                methodsList.Add(new JvmMethodRemoteHandle(rawMethods[i]));
+                        }
+                    }
+                    finally
+                    {
+                        rawInterface.Deallocate(environment.Handle, methodsPtr);
+                    }
+                });
+
+            methods = methodsList.ToArray();
+            return result;
         }
 
         public jvmtiError GetClassFields(JvmVirtualMachineRemoteHandle virtualMachine, JvmClassRemoteHandle @class, out JvmFieldRemoteHandle[] fields)
@@ -515,6 +570,126 @@
 
             hashCode = hashCodeResult;
             return result;
+        }
+
+        public jvmtiError GetFieldName(JvmVirtualMachineRemoteHandle virtualMachine, JvmFieldRemoteHandle field, out string name, out string signature, out string generic)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError GetFieldDeclaringClass(JvmVirtualMachineRemoteHandle virtualMachine, JvmFieldRemoteHandle field, out JvmClassRemoteHandle declaringClass)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError GetFieldModifiers(JvmVirtualMachineRemoteHandle virtualMachine, JvmFieldRemoteHandle field, out JvmAccessModifiers modifiers)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError IsFieldSynthetic(JvmVirtualMachineRemoteHandle virtualMachine, JvmFieldRemoteHandle field, out bool isSynthetic)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError GetMethodName(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out string name, out string signature, out string generic)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError GetMethodDeclaringClass(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out JvmClassRemoteHandle declaringClass)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError GetMethodModifiers(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out JvmAccessModifiers modifiers)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError GetMaxLocals(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out int maxLocals)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError GetArgumentsSize(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out int size)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError GetLineNumberTable(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out JvmLineNumberEntry[] lineNumbers)
+        {
+            JavaVM machine = JavaVM.GetInstance(virtualMachine);
+
+            List<JvmLineNumberEntry> lineNumbersList = new List<JvmLineNumberEntry>();
+            jvmtiError result = jvmtiError.Internal;
+
+            machine.InvokeOnJvmThread(
+                (environment) =>
+                {
+                    jvmtiInterface rawInterface = environment.RawInterface;
+
+                    IntPtr lineNumbersPtr = IntPtr.Zero;
+                    try
+                    {
+                        int entryCount;
+                        result = rawInterface.GetLineNumberTable(environment.Handle, (jmethodID)method, out entryCount, out lineNumbersPtr);
+
+                        unsafe
+                        {
+                            jvmtiLineNumberEntry* rawLineNumbers = (jvmtiLineNumberEntry*)lineNumbersPtr;
+                            for (int i = 0; i < entryCount; i++)
+                                lineNumbersList.Add(new JvmLineNumberEntry(method, rawLineNumbers[i]));
+                        }
+                    }
+                    finally
+                    {
+                        rawInterface.Deallocate(environment.Handle, lineNumbersPtr);
+                    }
+                });
+
+            lineNumbers = lineNumbersList.ToArray();
+            return result;
+        }
+
+        public jvmtiError GetMethodLocation(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out JvmRemoteLocation startLocation, out JvmRemoteLocation endLocation)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError GetLocalVariableTable(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out JvmLocalVariableEntry[] localVariables)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError GetBytecodes(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out byte[] bytecode)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError IsMethodNative(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out bool isNative)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError IsMethodSynthetic(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out bool isSynthetic)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError IsMethodObsolete(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out bool isObsolete)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError SetNativeMethodPrefix(JvmVirtualMachineRemoteHandle virtualMachine, string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        public jvmtiError SetNativeMethodPrefixes(JvmVirtualMachineRemoteHandle virtualMachine, string[] prefixes)
+        {
+            throw new NotImplementedException();
         }
     }
 }

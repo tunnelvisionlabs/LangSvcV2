@@ -34,14 +34,6 @@ namespace Tvl.Java.DebugHost.Interop
             return x._handle != y._handle;
         }
 
-        public static explicit operator jthread(JvmThreadReference thread)
-        {
-            if (thread == null)
-                return jthread.Null;
-
-            return new jthread(thread.Handle.DangerousGetHandle());
-        }
-
         public static explicit operator jthread(jobject @object)
         {
             return new jthread(@object.Handle);

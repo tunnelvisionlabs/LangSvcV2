@@ -1,10 +1,10 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger.Events
 {
     using System;
+    using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
     using MessageBoxIcon = System.Windows.Forms.MessageBoxIcon;
-    using System.Runtime.InteropServices;
 
     [ComVisible(true)]
     public class DebugErrorEvent : DebugEvent, IDebugErrorEvent2
@@ -25,6 +25,14 @@
             _severity = severity;
             _helpFileName = helpFileName;
             _helpId = helpId;
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugErrorEvent2).GUID;
+            }
         }
 
         /// <summary>

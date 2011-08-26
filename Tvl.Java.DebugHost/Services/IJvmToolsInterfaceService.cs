@@ -1,14 +1,8 @@
 ﻿namespace Tvl.Java.DebugHost.Services
 {
-    using jvmtiClassStatus = Tvl.Java.DebugHost.Interop.jvmtiClassStatus;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Runtime.Serialization;
     using System.ServiceModel;
-    using System.Text;
+    using jvmtiClassStatus = Tvl.Java.DebugHost.Interop.jvmtiClassStatus;
     using jvmtiError = Tvl.Java.DebugHost.Interop.jvmtiError;
-    using jvmtiEnvHandle = Tvl.Java.DebugHost.Interop.jvmtiEnvHandle;
     using jvmtiThreadState = Tvl.Java.DebugHost.Interop.jvmtiThreadState;
 
     [ServiceContract]
@@ -288,9 +282,63 @@
 
         #region Field
 
+        [OperationContract]
+        jvmtiError GetFieldName(JvmVirtualMachineRemoteHandle virtualMachine, JvmFieldRemoteHandle field, out string name, out string signature, out string generic);
+
+        [OperationContract]
+        jvmtiError GetFieldDeclaringClass(JvmVirtualMachineRemoteHandle virtualMachine, JvmFieldRemoteHandle field, out JvmClassRemoteHandle declaringClass);
+
+        [OperationContract]
+        jvmtiError GetFieldModifiers(JvmVirtualMachineRemoteHandle virtualMachine, JvmFieldRemoteHandle field, out JvmAccessModifiers modifiers);
+
+        [OperationContract]
+        jvmtiError IsFieldSynthetic(JvmVirtualMachineRemoteHandle virtualMachine, JvmFieldRemoteHandle field, out bool isSynthetic);
+
         #endregion
 
         #region Method
+
+        [OperationContract]
+        jvmtiError GetMethodName(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out string name, out string signature, out string generic);
+
+        [OperationContract]
+        jvmtiError GetMethodDeclaringClass(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out JvmClassRemoteHandle declaringClass);
+
+        [OperationContract]
+        jvmtiError GetMethodModifiers(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out JvmAccessModifiers modifiers);
+
+        [OperationContract]
+        jvmtiError GetMaxLocals(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out int maxLocals);
+
+        [OperationContract]
+        jvmtiError GetArgumentsSize(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out int size);
+
+        [OperationContract]
+        jvmtiError GetLineNumberTable(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out JvmLineNumberEntry[] lineNumbers);
+
+        [OperationContract]
+        jvmtiError GetMethodLocation(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out JvmRemoteLocation startLocation, out JvmRemoteLocation endLocation);
+
+        [OperationContract]
+        jvmtiError GetLocalVariableTable(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out JvmLocalVariableEntry[] localVariables);
+
+        [OperationContract]
+        jvmtiError GetBytecodes(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out byte[] bytecode);
+
+        [OperationContract]
+        jvmtiError IsMethodNative(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out bool isNative);
+
+        [OperationContract]
+        jvmtiError IsMethodSynthetic(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out bool isSynthetic);
+
+        [OperationContract]
+        jvmtiError IsMethodObsolete(JvmVirtualMachineRemoteHandle virtualMachine, JvmMethodRemoteHandle method, out bool isObsolete);
+
+        [OperationContract]
+        jvmtiError SetNativeMethodPrefix(JvmVirtualMachineRemoteHandle virtualMachine, string prefix);
+
+        [OperationContract]
+        jvmtiError SetNativeMethodPrefixes(JvmVirtualMachineRemoteHandle virtualMachine, string[] prefixes);
 
         #endregion
 

@@ -5,25 +5,23 @@
     using jboolean = System.Byte;
     using jbyte = System.Byte;
     using jsize = System.Int32;
-    using jvalue = System.Int64;
     using va_list = System.IntPtr;
     using jchar = System.Char;
     using jshort = System.Int16;
     using jlong = System.Int64;
     using jfloat = System.Single;
     using jdouble = System.Double;
-    using jstring = System.IntPtr;
-    using jarray = System.IntPtr;
-    using jobjectArray = System.IntPtr;
-    using jbooleanArray = System.IntPtr;
-    using jintArray = System.IntPtr;
-    using jlongArray = System.IntPtr;
-    using jfloatArray = System.IntPtr;
-    using jdoubleArray = System.IntPtr;
-    using jcharArray = System.IntPtr;
-    using jshortArray = System.IntPtr;
-    using jbyteArray = System.IntPtr;
-    using jweak = System.IntPtr;
+    using jstring = jobject;
+    using jarray = jobject;
+    using jobjectArray = jobject;
+    using jbooleanArray = jobject;
+    using jintArray = jobject;
+    using jlongArray = jobject;
+    using jfloatArray = jobject;
+    using jdoubleArray = jobject;
+    using jcharArray = jobject;
+    using jshortArray = jobject;
+    using jbyteArray = jobject;
     using IntPtr = System.IntPtr;
 
     internal static class JniUnsafeNativeMethods
@@ -90,7 +88,7 @@
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jobject NewObjectV(JNIEnvHandle env, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jobject NewObjectA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jobject NewObjectA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jclass GetObjectClass(JNIEnvHandle env, jobject obj);
@@ -105,140 +103,140 @@
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jobject CallObjectMethodV(JNIEnvHandle env, jobject obj, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jobject CallObjectMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, jvalue[] args);
+        public delegate jobject CallObjectMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jboolean CallBooleanMethod(JNIEnvHandle env, jobject obj, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jboolean CallBooleanMethodV(JNIEnvHandle env, jobject obj, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jboolean CallBooleanMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, jvalue[] args);
+        public delegate jboolean CallBooleanMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jbyte CallByteMethod(JNIEnvHandle env, jobject obj, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jbyte CallByteMethodV(JNIEnvHandle env, jobject obj, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jbyte CallByteMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jbyte CallByteMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jchar CallCharMethod(JNIEnvHandle env, jobject obj, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jchar CallCharMethodV(JNIEnvHandle env, jobject obj, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jchar CallCharMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jchar CallCharMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jshort CallShortMethod(JNIEnvHandle env, jobject obj, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jshort CallShortMethodV(JNIEnvHandle env, jobject obj, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jshort CallShortMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jshort CallShortMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jint CallIntMethod(JNIEnvHandle env, jobject obj, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jint CallIntMethodV(JNIEnvHandle env, jobject obj, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jint CallIntMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jint CallIntMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jlong CallLongMethod(JNIEnvHandle env, jobject obj, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jlong CallLongMethodV(JNIEnvHandle env, jobject obj, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jlong CallLongMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jlong CallLongMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jfloat CallFloatMethod(JNIEnvHandle env, jobject obj, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jfloat CallFloatMethodV(JNIEnvHandle env, jobject obj, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jfloat CallFloatMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jfloat CallFloatMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jdouble CallDoubleMethod(JNIEnvHandle env, jobject obj, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jdouble CallDoubleMethodV(JNIEnvHandle env, jobject obj, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jdouble CallDoubleMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jdouble CallDoubleMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void CallVoidMethod(JNIEnvHandle env, jobject obj, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void CallVoidMethodV(JNIEnvHandle env, jobject obj, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate void CallVoidMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate void CallVoidMethodA(JNIEnvHandle env, jobject obj, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jobject CallNonvirtualObjectMethod(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jobject CallNonvirtualObjectMethodV(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jobject CallNonvirtualObjectMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jobject CallNonvirtualObjectMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jboolean CallNonvirtualBooleanMethod(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jboolean CallNonvirtualBooleanMethodV(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jboolean CallNonvirtualBooleanMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jboolean CallNonvirtualBooleanMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jbyte CallNonvirtualByteMethod(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jbyte CallNonvirtualByteMethodV(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jbyte CallNonvirtualByteMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jbyte CallNonvirtualByteMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jchar CallNonvirtualCharMethod(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jchar CallNonvirtualCharMethodV(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jchar CallNonvirtualCharMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jchar CallNonvirtualCharMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jshort CallNonvirtualShortMethod(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jshort CallNonvirtualShortMethodV(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jshort CallNonvirtualShortMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jshort CallNonvirtualShortMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jint CallNonvirtualIntMethod(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jint CallNonvirtualIntMethodV(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jint CallNonvirtualIntMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jint CallNonvirtualIntMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jlong CallNonvirtualLongMethod(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jlong CallNonvirtualLongMethodV(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jlong CallNonvirtualLongMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jlong CallNonvirtualLongMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jfloat CallNonvirtualFloatMethod(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jfloat CallNonvirtualFloatMethodV(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jfloat CallNonvirtualFloatMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jfloat CallNonvirtualFloatMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jdouble CallNonvirtualDoubleMethod(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jdouble CallNonvirtualDoubleMethodV(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jdouble CallNonvirtualDoubleMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jdouble CallNonvirtualDoubleMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void CallNonvirtualVoidMethod(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void CallNonvirtualVoidMethodV(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate void CallNonvirtualVoidMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate void CallNonvirtualVoidMethodA(JNIEnvHandle env, jobject obj, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jfieldID GetFieldID(JNIEnvHandle env, jclass clazz, [MarshalAs(UnmanagedType.LPStr)]string name, [MarshalAs(UnmanagedType.LPStr)]string sig);
@@ -289,70 +287,70 @@
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jobject CallStaticObjectMethodV(JNIEnvHandle env, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jobject CallStaticObjectMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jobject CallStaticObjectMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jboolean CallStaticBooleanMethod(JNIEnvHandle env, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jboolean CallStaticBooleanMethodV(JNIEnvHandle env, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jboolean CallStaticBooleanMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jboolean CallStaticBooleanMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jbyte CallStaticByteMethod(JNIEnvHandle env, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jbyte CallStaticByteMethodV(JNIEnvHandle env, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jbyte CallStaticByteMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jbyte CallStaticByteMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jchar CallStaticCharMethod(JNIEnvHandle env, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jchar CallStaticCharMethodV(JNIEnvHandle env, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jchar CallStaticCharMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jchar CallStaticCharMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jshort CallStaticShortMethod(JNIEnvHandle env, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jshort CallStaticShortMethodV(JNIEnvHandle env, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jshort CallStaticShortMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jshort CallStaticShortMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jint CallStaticIntMethod(JNIEnvHandle env, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jint CallStaticIntMethodV(JNIEnvHandle env, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jint CallStaticIntMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jint CallStaticIntMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jlong CallStaticLongMethod(JNIEnvHandle env, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jlong CallStaticLongMethodV(JNIEnvHandle env, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jlong CallStaticLongMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jlong CallStaticLongMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jfloat CallStaticFloatMethod(JNIEnvHandle env, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jfloat CallStaticFloatMethodV(JNIEnvHandle env, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jfloat CallStaticFloatMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jfloat CallStaticFloatMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate jdouble CallStaticDoubleMethod(JNIEnvHandle env, jclass clazz, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jdouble CallStaticDoubleMethodV(JNIEnvHandle env, jclass clazz, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jdouble CallStaticDoubleMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate jdouble CallStaticDoubleMethodA(JNIEnvHandle env, jclass clazz, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void CallStaticVoidMethod(JNIEnvHandle env, jclass cls, jmethodID methodID/*, __arglist*/);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void CallStaticVoidMethodV(JNIEnvHandle env, jclass cls, jmethodID methodID, va_list args);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate void CallStaticVoidMethodA(JNIEnvHandle env, jclass cls, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]jvalue[] args);
+        public delegate void CallStaticVoidMethodA(JNIEnvHandle env, jclass cls, jmethodID methodID, [MarshalAs(UnmanagedType.LPArray)]params jvalue[] args);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate jfieldID GetStaticFieldID(JNIEnvHandle env, jclass clazz, [MarshalAs(UnmanagedType.LPStr)]string name, [MarshalAs(UnmanagedType.LPStr)]string sig);
@@ -474,7 +472,7 @@
         public delegate void ReleaseDoubleArrayElements(JNIEnvHandle env, jdoubleArray array, IntPtr elems, jint mode);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate void GetBooleanArrayRegion(JNIEnvHandle env, jbooleanArray array, jsize start, jsize len, [Out, MarshalAs(UnmanagedType.LPArray)]jboolean[] buf);
+        public delegate void GetBooleanArrayRegion(JNIEnvHandle env, jbooleanArray array, jsize start, jsize len, [Out, MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.U1)]bool[] buf);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void GetByteArrayRegion(JNIEnvHandle env, jbyteArray array, jsize start, jsize len, [Out, MarshalAs(UnmanagedType.LPArray)]jbyte[] buf);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
@@ -491,7 +489,7 @@
         public delegate void GetDoubleArrayRegion(JNIEnvHandle env, jdoubleArray array, jsize start, jsize len, [Out, MarshalAs(UnmanagedType.LPArray)]jdouble[] buf);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate void SetBooleanArrayRegion(JNIEnvHandle env, jbooleanArray array, jsize start, jsize len, [MarshalAs(UnmanagedType.LPArray)]jboolean[] buf);
+        public delegate void SetBooleanArrayRegion(JNIEnvHandle env, jbooleanArray array, jsize start, jsize len, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.U1)]bool[] buf);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void SetByteArrayRegion(JNIEnvHandle env, jbyteArray array, jsize start, jsize len, [MarshalAs(UnmanagedType.LPArray)]jbyte[] buf);
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
@@ -518,7 +516,7 @@
         public delegate jint MonitorExit(JNIEnvHandle env, jobject obj);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jint GetJavaVM(JNIEnvHandle env, out JavaVM vm);
+        public delegate jint GetJavaVM(JNIEnvHandle env, out JavaVMHandle vm);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void GetStringRegion(JNIEnvHandle env, jstring str, jsize start, jsize len, [Out, MarshalAs(UnmanagedType.LPArray)]jchar[] buf);

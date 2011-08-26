@@ -2,9 +2,9 @@
 {
     using System;
     using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
 
     [ComVisible(true)]
     public class DebugEngineCreateEvent : DebugEvent, IDebugEngineCreateEvent2
@@ -16,6 +16,14 @@
         {
             Contract.Requires<ArgumentNullException>(engine != null, "engine");
             _engine = engine;
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugEngineCreateEvent2).GUID;
+            }
         }
 
         public int GetEngine(out IDebugEngine2 pEngine)

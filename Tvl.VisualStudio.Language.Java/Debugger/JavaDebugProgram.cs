@@ -1,5 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger
 {
+    using Tvl.Extensions;
+    using Task = System.Threading.Tasks.Task;
     using Path = System.IO.Path;
     using System;
     using System.Collections.Generic;
@@ -18,6 +20,12 @@
     using Tvl.VisualStudio.Language.Java.Debugger.Events;
     using Tvl.VisualStudio.Language.Java.Debugger.Collections;
     using System.Runtime.InteropServices;
+    using Tvl.Java.DebugInterface;
+    using Tvl.Java.DebugInterface.Client.Connect;
+    using Tvl.Java.DebugInterface.Connect;
+    using Tvl.Java.DebugInterface.Client.Events;
+    using Tvl.Java.DebugInterface.Request;
+    using System.Collections.ObjectModel;
 
     [ComVisible(true)]
     public partial class JavaDebugProgram
@@ -37,12 +45,10 @@
         private JavaDebugEngine _debugEngine;
         private IDebugEventCallback2 _callback;
 
-        private System.Threading.EventWaitHandle _ipcHandle;
-        private JvmDebugSessionService.IJvmDebugSessionService _sessionService;
-        private JvmEventsService.IJvmEventsService _eventsService;
-        private JvmToolsService.IJvmToolsInterfaceService _toolsService;
+        private IVirtualMachine _virtualMachine;
+        private IStepRequest _causeBreakRequest;
 
-        private readonly Dictionary<int, JavaDebugThread> _threads = new Dictionary<int, JavaDebugThread>();
+        private readonly Dictionary<long, JavaDebugThread> _threads = new Dictionary<long, JavaDebugThread>();
 
         public JavaDebugProgram(IDebugProcess2 process)
         {
@@ -75,27 +81,11 @@
             }
         }
 
-        internal JvmDebugSessionService.IJvmDebugSessionService SessionService
+        internal IVirtualMachine VirtualMachine
         {
             get
             {
-                return _sessionService;
-            }
-        }
-
-        internal JvmEventsService.IJvmEventsService EventsService
-        {
-            get
-            {
-                return _eventsService;
-            }
-        }
-
-        internal JvmToolsService.IJvmToolsInterfaceService ToolsService
-        {
-            get
-            {
-                return _toolsService;
+                return _virtualMachine;
             }
         }
 
@@ -107,78 +97,53 @@
             _debugEngine = debugEngine;
             _callback = callback;
 
-            _ipcHandle = new EventWaitHandle(false, EventResetMode.ManualReset, string.Format("JavaDebuggerInitHandle{0}", _process.GetPhysicalProcessId().dwProcessId));
-            Action waitToInitializeServices = InitializeServicesAfterProcessStarts;
-            waitToInitializeServices.BeginInvoke(null, null);
+            var connector = new LocalDebuggingAttachingConnector();
 
-            IDebugEvent2 @event = new DebugProgramCreateEvent(enum_EVENTATTRIBUTES.EVENT_SYNCHRONOUS);
-            Guid guid = typeof(IDebugProgramCreateEvent2).GUID;
-            callback.Event(DebugEngine, Process, this, null, @event, ref guid, (uint)@event.GetAttributes());
-        }
+            Dictionary<string, IConnectorArgument> arguments = new Dictionary<string, IConnectorArgument>();
 
-        private void InitializeServicesAfterProcessStarts()
-        {
-            try
+            string argumentName = "pid";
+            IConnectorIntegerArgument defaultArgument = (IConnectorIntegerArgument)connector.DefaultArguments["pid"];
+            IConnectorIntegerArgument argument = new ConnectorIntegerArgument(defaultArgument, (int)_process.GetPhysicalProcessId().dwProcessId);
+            arguments.Add(argumentName, argument);
+
+            _virtualMachine = connector.Attach(arguments);
+
+            IVirtualMachineEvents events = _virtualMachine.GetEventQueue() as IVirtualMachineEvents;
+            if (events != null)
             {
-                _ipcHandle.WaitOne();
-                _ipcHandle.Dispose();
-                _ipcHandle = null;
-
-                CreateSessionServiceClient();
-                CreateEventsServiceClient();
-                CreateToolsServiceClient();
-
-                _sessionService.Attach();
+                events.VirtualMachineStart += HandleVirtualMachineStart;
+                events.SingleStep += HandleSingleStep;
+                events.Breakpoint += HandleBreakpoint;
+                events.MethodEntry += HandleMethodEntry;
+                events.MethodExit += HandleMethodExit;
+                events.MonitorContendedEnter += HandleMonitorContendedEnter;
+                events.MonitorContendedEntered += HandleMonitorContendedEntered;
+                events.MonitorContendedWait += HandleMonitorContendedWait;
+                events.MonitorContendedWaited += HandleMonitorContendedWaited;
+                events.Exception += HandleException;
+                events.ThreadStart += HandleThreadStart;
+                events.ThreadDeath += HandleThreadDeath;
+                events.ClassPrepare += HandleClassPrepare;
+                events.ClassUnload += HandleClassUnload;
+                events.FieldAccess += HandleFieldAccess;
+                events.FieldModification += HandleFieldModification;
             }
-            catch (Exception e)
-            {
-                if (ErrorHandler.IsCriticalException(e))
-                    throw;
-            }
-        }
 
-        private void CreateSessionServiceClient()
-        {
-            var binding = new NetNamedPipeBinding(NetNamedPipeSecurityMode.None)
-            {
-                ReceiveTimeout = TimeSpan.MaxValue,
-                SendTimeout = TimeSpan.MaxValue
-            };
+            _causeBreakRequest = VirtualMachine.GetEventRequestManager().CreateStepRequest(null, StepSize.Minimum, StepDepth.Into);
+            _causeBreakRequest.SuspendPolicy = SuspendPolicy.All;
 
-            var remoteAddress = new EndpointAddress("net.pipe://localhost/Tvl.Java.DebugHost/JvmDebugSessionService/");
-            _sessionService = new JvmDebugSessionService.JvmDebugSessionServiceClient(binding, remoteAddress);
-        }
-
-        private void CreateEventsServiceClient()
-        {
-            var binding = new NetNamedPipeBinding(NetNamedPipeSecurityMode.None)
-            {
-                ReceiveTimeout = TimeSpan.MaxValue,
-                SendTimeout = TimeSpan.MaxValue
-            };
-
-            JvmEventsCallback callback = new JvmEventsCallback(this);
-            var callbackInstance = new InstanceContext(callback);
-            var remoteAddress = new EndpointAddress("net.pipe://localhost/Tvl.Java.DebugHost/JvmEventsService/");
-            _eventsService = new JvmEventsService.JvmEventsServiceClient(callbackInstance, binding, remoteAddress);
-            callback.Subscribe();
-        }
-
-        private void CreateToolsServiceClient()
-        {
-            var binding = new NetNamedPipeBinding(NetNamedPipeSecurityMode.None)
-            {
-                ReceiveTimeout = TimeSpan.MaxValue,
-                SendTimeout = TimeSpan.MaxValue
-            };
-
-            var remoteAddress = new EndpointAddress("net.pipe://localhost/Tvl.Java.DebugHost/JvmToolsInterfaceService/");
-            _toolsService = new JvmToolsService.JvmToolsInterfaceServiceClient(binding, remoteAddress);
+            DebugEvent @event = new DebugProgramCreateEvent(enum_EVENTATTRIBUTES.EVENT_ASYNCHRONOUS);
+            callback.Event(DebugEngine, Process, this, null, @event);
         }
 
         #region IDebugProgram2 Members
 
         int IDebugProgram2.Attach(IDebugEventCallback2 pCallback)
+        {
+            throw new NotSupportedException("Per MSDN, a debug engine never calls this method to attach to a program.");
+        }
+
+        int IDebugProgram3.Attach(IDebugEventCallback2 pCallback)
         {
             throw new NotSupportedException("Per MSDN, a debug engine never calls this method to attach to a program.");
         }
@@ -190,12 +155,46 @@
 
         public int CauseBreak()
         {
-            throw new NotImplementedException();
+            Task.Factory.StartNew(() => _causeBreakRequest.IsEnabled = true).HandleNonCriticalExceptions();
+            return VSConstants.S_OK;
         }
 
+        /// <summary>
+        /// Continues running this program from a stopped state. Any previous execution state (such
+        /// as a step) is preserved, and the program starts executing again.
+        /// </summary>
+        /// <param name="pThread">An IDebugThread2 object that represents the thread.</param>
+        /// <returns>If successful, returns S_OK; otherwise, returns an error code.</returns>
+        /// <remarks>
+        /// This method is called on this program regardless of how many programs are being debugged,
+        /// or which program generated the stopping event. The implementation must retain the previous
+        /// execution state (such as a step) and continue execution as though it had never stopped
+        /// before completing its prior execution. That is, if a thread in this program was doing a
+        /// step-over operation and was stopped because some other program stopped, and then this
+        /// method was called, the program must complete the original step-over operation.
+        /// 
+        /// Do not send a stopping event or an immediate (synchronous) event to IDebugEventCallback2.Event
+        /// while handling this call; otherwise the debugger might stop responding.
+        /// </remarks>
         public int Continue(IDebugThread2 pThread)
         {
-            throw new NotImplementedException();
+#if true
+            Task.Factory.StartNew(VirtualMachine.Resume).HandleNonCriticalExceptions();
+            return VSConstants.S_OK;
+#else
+            if (pThread == null)
+            {
+                Task.Factory.StartNew(VirtualMachine.Resume).HandleNonCriticalExceptions();
+                return VSConstants.S_OK;
+            }
+
+            JavaDebugThread javaThread = pThread as JavaDebugThread;
+            if (javaThread == null)
+                return VSConstants.E_INVALIDARG;
+
+            Task.Factory.StartNew(() => javaThread.Resume()).HandleNonCriticalExceptions();
+            return VSConstants.S_OK;
+#endif
         }
 
         public int Detach()
@@ -203,8 +202,32 @@
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Retrieves a list of the code contexts for a given position in a source file.
+        /// </summary>
+        /// <param name="pDocPos">An IDebugDocumentPosition2 object representing an abstract position in a source file known to the IDE.</param>
+        /// <param name="ppEnum">Returns an IEnumDebugCodeContexts2 object that contains a list of the code contexts.</param>
+        /// <returns>If successful, returns S_OK; otherwise, returns an error code.</returns>
+        /// <remarks>
+        /// This method allows the session debug manager (SDM) or IDE to map a source file position into a code
+        /// position. More than one code context is returned if the source generates multiple blocks of code (for
+        /// example, C++ templates).
+        /// </remarks>
         public int EnumCodeContexts(IDebugDocumentPosition2 pDocPos, out IEnumDebugCodeContexts2 ppEnum)
         {
+            if (pDocPos == null)
+                throw new ArgumentNullException("pDocPos");
+
+            ppEnum = null;
+
+            string fileName;
+            int error = pDocPos.GetFileName(out fileName);
+            if (error != VSConstants.S_OK)
+                return error;
+
+            if (!Path.GetExtension(fileName).Equals(".java", StringComparison.OrdinalIgnoreCase))
+                return VSConstants.E_FAIL;
+
             throw new NotImplementedException();
         }
 
@@ -215,13 +238,19 @@
 
         public int EnumModules(out IEnumDebugModules2 ppEnum)
         {
-            throw new NotImplementedException();
+            // TODO: implement modules?
+            ppEnum = new EnumDebugModules(Enumerable.Empty<IDebugModule2>());
+            return VSConstants.S_OK;
         }
 
         public int EnumThreads(out IEnumDebugThreads2 ppEnum)
         {
-            ppEnum = new EnumDebugThreads(_threads.Values);
-            throw new NotImplementedException();
+            lock (_threads)
+            {
+                ppEnum = new EnumDebugThreads(_threads.Values);
+            }
+
+            return VSConstants.S_OK;
         }
 
         public int Execute()
@@ -278,9 +307,25 @@
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Terminates the program.
+        /// </summary>
+        /// <returns>If successful, returns S_OK; otherwise, returns an error code.</returns>
+        /// <remarks>
+        /// If possible, the program will be terminated and unloaded from the process; otherwise,
+        /// the debug engine (DE) will perform any necessary cleanup.
+        ///
+        /// This method or the IDebugProcess2.Terminate method is called by the IDE, typically in
+        /// response to the user halting all debugging. The implementation of this method should,
+        /// ideally, terminate the program within the process. If this is not possible, the DE
+        /// should prevent the program from running any more in this process (and do any necessary
+        /// cleanup). If the IDebugProcess2.Terminate method was called by the IDE, the entire
+        /// process will be terminated sometime after the IDebugProgram2.Terminate method is called.
+        /// </remarks>
         public int Terminate()
         {
-            throw new NotImplementedException();
+            Task.Factory.StartNew(() => VirtualMachine.Exit(1)).HandleNonCriticalExceptions();
+            return VSConstants.S_OK;
         }
 
         public int WriteDump(enum_DUMPTYPE DUMPTYPE, string pszDumpUrl)
@@ -292,9 +337,28 @@
 
         #region IDebugProgram3 Members
 
+        /// <summary>
+        /// Executes the debugger program. The thread is returned to give the debugger information on which
+        /// thread the user is viewing when executing the program.
+        /// </summary>
+        /// <param name="pThread">An IDebugThread2 object.</param>
+        /// <returns>If successful, returns S_OK; otherwise, returns an error code.</returns>
+        /// <remarks>
+        /// There are three different ways that a debugger can resume execution after stopping:
+        ///
+        /// <list type="bullet">
+        /// <item>Execute: Cancel any previous step, and run until the next breakpoint and so on.</item>
+        /// <item>Step: Cancel any old step, and run until the new step completes.</item>
+        /// <item>Continue: Run again, and leave any old step active.</item>
+        /// </list>
+        ///
+        /// The thread passed to ExecuteOnThread is useful when deciding which step to cancel. If you do not
+        /// know the thread, running execute cancels all steps. With knowledge of the thread, you only need
+        /// to cancel the step on the active thread.
+        /// </remarks>
         public int ExecuteOnThread(IDebugThread2 pThread)
         {
-            throw new NotImplementedException();
+            return Continue(pThread);
         }
 
         #endregion
@@ -336,16 +400,60 @@
 
         public int Stop()
         {
-            throw new NotImplementedException();
+            return CauseBreak();
         }
 
+        /// <summary>
+        /// Allows (or disallows) expression evaluation to occur on the given thread, even if the program has stopped.
+        /// </summary>
+        /// <param name="pOriginatingProgram">An IDebugProgram2 object representing the program that is evaluating an expression.</param>
+        /// <param name="dwTid">Specifies the identifier of the thread.</param>
+        /// <param name="dwEvalFlags">A combination of flags from the EVALFLAGS enumeration that specify how the evaluation is to be performed.</param>
+        /// <param name="pExprCallback">An IDebugEventCallback2 object to be used to send debug events that occur during expression evaluation.</param>
+        /// <param name="fWatch">If non-zero (TRUE), allows expression evaluation on the thread identified by dwTid; otherwise, zero (FALSE) disallows expression evaluation on that thread.</param>
+        /// <returns>If successful, returns S_OK; otherwise, returns an error code.</returns>
+        /// <remarks>
+        /// When the session debug manager (SDM) asks a program, identified by the <paramref name="pOriginatingProgram"/>
+        /// parameter, to evaluate an expression, it notifies all other attached programs by calling this method.
+        /// 
+        /// Expression evaluation in one program may cause code to run in another, due to function evaluation or
+        /// evaluation of any IDispatch properties. Because of this, this method allows expression evaluation to
+        /// run and complete even though the thread may be stopped in this program.
+        /// </remarks>
         public int WatchForExpressionEvaluationOnThread(IDebugProgram2 pOriginatingProgram, uint dwTid, uint dwEvalFlags, IDebugEventCallback2 pExprCallback, int fWatch)
         {
+            JavaDebugProgram javaProgram = pOriginatingProgram as JavaDebugProgram;
+            if (javaProgram == null)
+                return VSConstants.S_OK;
+
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Watches for execution (or stops watching for execution) to occur on the given thread.
+        /// </summary>
+        /// <param name="pOriginatingProgram">An IDebugProgram2 object representing the program being stepped.</param>
+        /// <param name="dwTid">Specifies the identifier of the thread to watch.</param>
+        /// <param name="fWatch">Non-zero (TRUE) means start watching for execution on the thread identified by dwTid; otherwise, zero (FALSE) means stop watching for execution on dwTid.</param>
+        /// <param name="dwFrame">
+        /// Specifies a frame index that controls the step type. When this is value is zero (0), the step type is
+        /// "step into" and the program should stop whenever the thread identified by dwTid executes. When dwFrame
+        /// is non-zero, the step type is "step over" and the program should stop only if the thread identified by
+        /// dwTid is running in a frame whose index is equal to or higher on the stack than dwFrame.
+        /// </param>
+        /// <returns>If successful, returns S_OK; otherwise, returns an error code.</returns>
+        /// <remarks>
+        /// When the session debug manager (SDM) steps a program, identified by the pOriginatingProgram parameter,
+        /// it notifies all other attached programs by calling this method.
+        /// 
+        /// This method is applicable only to same-thread stepping.
+        /// </remarks>
         public int WatchForThreadStep(IDebugProgram2 pOriginatingProgram, uint dwTid, int fWatch, uint dwFrame)
         {
+            JavaDebugProgram javaProgram = pOriginatingProgram as JavaDebugProgram;
+            if (javaProgram == null)
+                return VSConstants.S_OK;
+
             throw new NotImplementedException();
         }
 
@@ -458,5 +566,191 @@
         }
 
         #endregion
+
+        private void HandleVirtualMachineStart(object sender, ThreadEventArgs e)
+        {
+            var requestManager = _virtualMachine.GetEventRequestManager();
+
+            var threadStartRequest = requestManager.CreateThreadStartRequest();
+            threadStartRequest.SuspendPolicy = SuspendPolicy.EventThread;
+            threadStartRequest.IsEnabled = true;
+
+            var threadDeathRequest = requestManager.CreateThreadDeathRequest();
+            threadDeathRequest.SuspendPolicy = SuspendPolicy.EventThread;
+            threadDeathRequest.IsEnabled = true;
+
+            var virtualMachineDeathRequest = requestManager.CreateVirtualMachineDeathRequest();
+            virtualMachineDeathRequest.SuspendPolicy = SuspendPolicy.All;
+            virtualMachineDeathRequest.IsEnabled = true;
+
+            DebugEvent debugEvent = new DebugLoadCompleteEvent(enum_EVENTATTRIBUTES.EVENT_ASYNC_STOP);
+            SetEventProperties(debugEvent, e);
+            Callback.Event(DebugEngine, Process, this, null, debugEvent);
+
+            ReadOnlyCollection<IThreadReference> threads = VirtualMachine.GetAllThreads();
+            for (int i = 0; i < threads.Count; i++)
+            {
+                bool mainThread = threads[i].Equals(e.Thread);
+                JavaDebugThread thread = new JavaDebugThread(this, threads[i], mainThread ? ThreadCategory.Main : ThreadCategory.Worker);
+                lock (this._threads)
+                {
+                    this._threads[threads[i].GetUniqueId()] = thread;
+                }
+
+                debugEvent = new DebugThreadCreateEvent(enum_EVENTATTRIBUTES.EVENT_ASYNCHRONOUS);
+                Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+            }
+
+            debugEvent = new DebugEntryPointEvent(GetAttributesForEvent(e));
+            SetEventProperties(debugEvent, e);
+            Callback.Event(DebugEngine, Process, this, _threads[e.Thread.GetUniqueId()], debugEvent);
+        }
+
+        private void HandleSingleStep(object sender, ThreadLocationEventArgs e)
+        {
+            if (e.Request == _causeBreakRequest)
+            {
+                _causeBreakRequest.IsEnabled = false;
+
+                JavaDebugThread thread;
+                lock (_threads)
+                {
+                    this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
+                }
+
+                DebugEvent debugEvent = new DebugBreakEvent(GetAttributesForEvent(e));
+                SetEventProperties(debugEvent, e);
+                Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+                return;
+            }
+
+            throw new NotImplementedException();
+        }
+
+        private void HandleBreakpoint(object sender, ThreadLocationEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleMethodEntry(object sender, ThreadLocationEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleMethodExit(object sender, MethodExitEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleMonitorContendedEnter(object sender, MonitorEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleMonitorContendedEntered(object sender, MonitorEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleMonitorContendedWait(object sender, MonitorWaitEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleMonitorContendedWaited(object sender, MonitorWaitedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleException(object sender, ExceptionEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleThreadStart(object sender, ThreadEventArgs e)
+        {
+            JavaDebugThread thread = new JavaDebugThread(this, e.Thread, ThreadCategory.Worker);
+            lock (this._threads)
+            {
+                this._threads[e.Thread.GetUniqueId()] = thread;
+            }
+
+            DebugEvent debugEvent = new DebugThreadCreateEvent(GetAttributesForEvent(e));
+            SetEventProperties(debugEvent, e);
+            Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+        }
+
+        private void HandleThreadDeath(object sender, ThreadEventArgs e)
+        {
+            JavaDebugThread thread;
+
+            lock (_threads)
+            {
+                this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
+            }
+
+            //string name = thread.GetName();
+            DebugEvent debugEvent = new DebugThreadDestroyEvent(GetAttributesForEvent(e), 0);
+            SetEventProperties(debugEvent, e);
+            Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+
+            lock (_threads)
+            {
+                this._threads.Remove(e.Thread.GetUniqueId());
+            }
+        }
+
+        private void HandleClassPrepare(object sender, ClassPrepareEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleClassUnload(object sender, ClassUnloadEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleFieldAccess(object sender, FieldAccessEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleFieldModification(object sender, FieldModificationEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static enum_EVENTATTRIBUTES GetAttributesForEvent(VirtualMachineEventArgs e)
+        {
+            enum_EVENTATTRIBUTES attributes = 0;
+            if (e.SuspendPolicy != SuspendPolicy.None)
+                attributes |= enum_EVENTATTRIBUTES.EVENT_SYNCHRONOUS;
+            else
+                attributes |= enum_EVENTATTRIBUTES.EVENT_ASYNCHRONOUS;
+
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                attributes |= enum_EVENTATTRIBUTES.EVENT_STOPPING;
+
+            return attributes;
+        }
+
+        private static void SetEventProperties(DebugEvent debugEvent, VirtualMachineEventArgs e)
+        {
+            SetEventProperties(debugEvent, e.Request, e.SuspendPolicy, e.VirtualMachine, default(IThreadReference));
+        }
+
+        private static void SetEventProperties(DebugEvent debugEvent, ThreadEventArgs e)
+        {
+            SetEventProperties(debugEvent, e.Request, e.SuspendPolicy, e.VirtualMachine, e.Thread);
+        }
+
+        private static void SetEventProperties(DebugEvent debugEvent, IEventRequest request, SuspendPolicy suspendPolicy, IVirtualMachine virtualMachine, IThreadReference thread)
+        {
+            Contract.Requires<ArgumentNullException>(debugEvent != null, "debugEvent");
+            debugEvent.Properties.AddProperty(typeof(IEventRequest), request);
+            debugEvent.Properties.AddProperty(typeof(SuspendPolicy), suspendPolicy);
+            debugEvent.Properties.AddProperty(typeof(IVirtualMachine), virtualMachine);
+            debugEvent.Properties.AddProperty(typeof(IThreadReference), thread);
+        }
     }
 }

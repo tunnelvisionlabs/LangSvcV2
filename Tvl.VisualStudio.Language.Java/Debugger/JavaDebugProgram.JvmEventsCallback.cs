@@ -2,11 +2,10 @@
 {
     using System;
     using System.Diagnostics.Contracts;
+    using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
     using Tvl.VisualStudio.Language.Java.Debugger.Events;
     using Tvl.VisualStudio.Language.Java.Debugger.Extensions;
-    using Microsoft.VisualStudio;
-    using Debug = System.Diagnostics.Debug;
 
     partial class JavaDebugProgram
     {
@@ -51,7 +50,7 @@
 
             public void HandleVMStart(JvmEventsService.JvmVirtualMachineRemoteHandle virtualMachine)
             {
-                IDebugEvent2 @event = new DebugLoadCompleteEvent(enum_EVENTATTRIBUTES.EVENT_SYNC_STOP);
+                DebugEvent @event = new DebugLoadCompleteEvent(enum_EVENTATTRIBUTES.EVENT_SYNC_STOP);
                 Guid guid = typeof(IDebugLoadCompleteEvent2).GUID;
                 enum_EVENTATTRIBUTES attrib = @event.GetAttributes();
                 Program.Callback.Event(Program.DebugEngine, Program.Process, Program, null, @event, ref guid, (uint)attrib);
@@ -79,7 +78,7 @@
                 JavaDebugThread thread = new JavaDebugThread(Program, virtualMachine, threadHandle, id);
                 Program._threads[hashCode] = thread;
 
-                IDebugEvent2 @event = new DebugThreadCreateEvent(enum_EVENTATTRIBUTES.EVENT_SYNCHRONOUS);
+                DebugEvent @event = new DebugThreadCreateEvent(enum_EVENTATTRIBUTES.EVENT_SYNCHRONOUS);
                 Guid guid = typeof(IDebugThreadCreateEvent2).GUID;
                 enum_EVENTATTRIBUTES attrib = @event.GetAttributes();
                 Program.Callback.Event(Program.DebugEngine, Program.Process, Program, thread, @event, ref guid, (uint)attrib);
@@ -93,7 +92,7 @@
                 {
                     JavaDebugThread thread = Program._threads[hashCode];
 
-                    IDebugEvent2 @event = new DebugThreadDestroyEvent(enum_EVENTATTRIBUTES.EVENT_SYNCHRONOUS, 0);
+                    DebugEvent @event = new DebugThreadDestroyEvent(enum_EVENTATTRIBUTES.EVENT_SYNCHRONOUS, 0);
                     Guid guid = typeof(IDebugThreadDestroyEvent2).GUID;
                     enum_EVENTATTRIBUTES attrib = @event.GetAttributes();
                     Program.Callback.Event(Program.DebugEngine, Program.Process, Program, thread, @event, ref guid, (uint)attrib);
@@ -104,6 +103,7 @@
 
             public void HandleClassLoad(JvmEventsService.JvmVirtualMachineRemoteHandle virtualMachine, JvmEventsService.JvmThreadRemoteHandle threadHandle, JvmEventsService.JvmClassRemoteHandle @class)
             {
+                // The format of the message created by the .NET debugger is this:
                 // 'devenv.exe' (Managed (v4.0.30319)): Loaded 'C:\Windows\Microsoft.Net\assembly\GAC_MSIL\Microsoft.VisualStudio.Windows.Forms\v4.0_10.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.Windows.Forms.dll'
                 string programName = Program.GetName();
                 string debuggerName;
@@ -123,7 +123,7 @@
                 }
 
                 string message = string.Format("'{0}' ({1}): Loaded class '{2}'" + Environment.NewLine, programName, debuggerName, signature);
-                IDebugEvent2 @event = new DebugOutputStringEvent(enum_EVENTATTRIBUTES.EVENT_SYNCHRONOUS, message);
+                DebugEvent @event = new DebugOutputStringEvent(enum_EVENTATTRIBUTES.EVENT_SYNCHRONOUS, message);
                 Guid guid = typeof(IDebugOutputStringEvent2).GUID;
                 enum_EVENTATTRIBUTES attrib = @event.GetAttributes();
                 Program.Callback.Event(Program.DebugEngine, Program.Process, Program, thread, @event, ref guid, (uint)attrib);
@@ -131,6 +131,18 @@
 
             public void HandleClassPrepare(JvmEventsService.JvmVirtualMachineRemoteHandle virtualMachine, JvmEventsService.JvmThreadRemoteHandle thread, JvmEventsService.JvmClassRemoteHandle @class)
             {
+                // try to get debugging information from the class
+                string sourceName;
+                JvmToolsService.jvmtiError error = Program.ToolsService.GetSourceFileName(out sourceName, virtualMachine, @class);
+
+                JvmToolsService.JvmMethodRemoteHandle[] methods;
+                error = Program.ToolsService.GetClassMethods(out methods, virtualMachine, @class);
+
+                foreach (var method in methods)
+                {
+                    JvmToolsService.JvmLineNumberEntry[] lineNumbers;
+                    error = Program.ToolsService.GetLineNumberTable(out lineNumbers, virtualMachine, method);
+                }
             }
         }
     }

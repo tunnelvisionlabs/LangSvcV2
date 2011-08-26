@@ -2,10 +2,19 @@
 {
     public interface IStepRequest : IEventRequest, IClassFilter, IInstanceFilter
     {
-        int GetDepth();
+        StepDepth Depth
+        {
+            get;
+        }
 
-        StepSize GetSize();
+        StepSize Size
+        {
+            get;
+        }
 
-        IThreadReference GetThread();
+        IThreadReference Thread
+        {
+            get;
+        }
     }
 }

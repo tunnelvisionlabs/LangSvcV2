@@ -12,6 +12,17 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="JvmVirtualMachineRemoteHandle" nillable="true" type="tns:JvmVirtualMachineRemoteHandle" />
+  <xs:complexType name="JvmMethodRemoteHandle">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Handle" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JvmMethodRemoteHandle" nillable="true" type="tns:JvmMethodRemoteHandle" />
   <xs:complexType name="JvmThreadRemoteHandle">
     <xs:annotation>
       <xs:appinfo>
@@ -31,7 +42,7 @@
     </xs:annotation>
     <xs:sequence>
       <xs:element minOccurs="0" name="Location" type="xs:long" />
-      <xs:element minOccurs="0" name="Method" type="xs:long" />
+      <xs:element minOccurs="0" name="Method" type="tns:JvmMethodRemoteHandle" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="JvmRemoteLocation" nillable="true" type="tns:JvmRemoteLocation" />
@@ -81,23 +92,52 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="ArrayOfJvmMethodRemoteHandle" nillable="true" type="tns:ArrayOfJvmMethodRemoteHandle" />
-  <xs:complexType name="JvmMethodRemoteHandle">
-    <xs:annotation>
-      <xs:appinfo>
-        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
-      </xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="Handle" type="xs:long" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="JvmMethodRemoteHandle" nillable="true" type="tns:JvmMethodRemoteHandle" />
   <xs:complexType name="ArrayOfJvmFieldRemoteHandle">
     <xs:sequence>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="JvmFieldRemoteHandle" type="tns:JvmFieldRemoteHandle" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="ArrayOfJvmFieldRemoteHandle" nillable="true" type="tns:ArrayOfJvmFieldRemoteHandle" />
+  <xs:complexType name="ArrayOfJvmLineNumberEntry">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JvmLineNumberEntry" type="tns:JvmLineNumberEntry" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJvmLineNumberEntry" nillable="true" type="tns:ArrayOfJvmLineNumberEntry" />
+  <xs:complexType name="JvmLineNumberEntry">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="LineNumber" type="xs:int" />
+      <xs:element name="StartLocation" type="tns:JvmRemoteLocation" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JvmLineNumberEntry" nillable="true" type="tns:JvmLineNumberEntry" />
+  <xs:complexType name="ArrayOfJvmLocalVariableEntry">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JvmLocalVariableEntry" type="tns:JvmLocalVariableEntry" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJvmLocalVariableEntry" nillable="true" type="tns:ArrayOfJvmLocalVariableEntry" />
+  <xs:complexType name="JvmLocalVariableEntry">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="GenericSignature" nillable="true" type="xs:string" />
+      <xs:element name="Length" type="xs:int" />
+      <xs:element name="Name" nillable="true" type="xs:string" />
+      <xs:element name="Signature" nillable="true" type="xs:string" />
+      <xs:element name="Slot" type="xs:int" />
+      <xs:element name="StartLocation" type="tns:JvmRemoteLocation" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JvmLocalVariableEntry" nillable="true" type="tns:JvmLocalVariableEntry" />
   <xs:complexType name="ArrayOfJvmThreadRemoteHandle">
     <xs:sequence>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="JvmThreadRemoteHandle" type="tns:JvmThreadRemoteHandle" />

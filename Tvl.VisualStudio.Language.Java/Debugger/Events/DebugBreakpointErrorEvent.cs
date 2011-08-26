@@ -2,9 +2,9 @@
 {
     using System;
     using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
 
     [ComVisible(true)]
     public class DebugBreakpointErrorEvent : DebugEvent, IDebugBreakpointErrorEvent2
@@ -16,6 +16,14 @@
         {
             Contract.Requires<ArgumentNullException>(breakpoint != null, "breakpoint");
             _breakpoint = breakpoint;
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugBreakpointErrorEvent2).GUID;
+            }
         }
 
         public int GetErrorBreakpoint(out IDebugErrorBreakpoint2 ppErrorBP)

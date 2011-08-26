@@ -16,5 +16,15 @@
         {
             Contract.Requires(frameInfo != null);
         }
+
+        protected EnumDebugFrameInfo(FRAMEINFO[] elements, int currentIndex)
+            : base(elements, currentIndex)
+        {
+        }
+
+        protected override IEnumDebugFrameInfo2 CreateClone(FRAMEINFO[] elements, int currentIndex)
+        {
+            return new EnumDebugFrameInfo(elements, currentIndex);
+        }
     }
 }

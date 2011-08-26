@@ -2,13 +2,91 @@
 <xs:schema xmlns:tns="http://tempuri.org/" elementFormDefault="qualified" targetNamespace="http://tempuri.org/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:import namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" />
   <xs:import namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" />
-  <xs:import namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost" />
   <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
-  <xs:element name="SetLocalInt">
+  <xs:import namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost" />
+  <xs:element name="IsMethodNative">
     <xs:complexType>
       <xs:sequence>
         <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q1:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q2:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="method" type="q2:JvmMethodRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="IsMethodNativeResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="IsMethodNativeResult" type="q3:jvmtiError" />
+        <xs:element minOccurs="0" name="isNative" type="xs:boolean" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="IsMethodSynthetic">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q4:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="method" type="q5:JvmMethodRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="IsMethodSyntheticResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="IsMethodSyntheticResult" type="q6:jvmtiError" />
+        <xs:element minOccurs="0" name="isSynthetic" type="xs:boolean" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="IsMethodObsolete">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q7="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q7:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q8="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="method" type="q8:JvmMethodRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="IsMethodObsoleteResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q9="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="IsMethodObsoleteResult" type="q9:jvmtiError" />
+        <xs:element minOccurs="0" name="isObsolete" type="xs:boolean" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SetNativeMethodPrefix">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q10="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q10:JvmVirtualMachineRemoteHandle" />
+        <xs:element minOccurs="0" name="prefix" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SetNativeMethodPrefixResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q11="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetNativeMethodPrefixResult" type="q11:jvmtiError" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SetNativeMethodPrefixes">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q12="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q12:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q13="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="prefixes" nillable="true" type="q13:ArrayOfstring" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SetNativeMethodPrefixesResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q14="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetNativeMethodPrefixesResult" type="q14:jvmtiError" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SetLocalInt">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q15="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q15:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q16="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q16:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="depth" type="xs:int" />
         <xs:element minOccurs="0" name="slot" type="xs:int" />
         <xs:element minOccurs="0" name="value" type="xs:int" />
@@ -18,15 +96,15 @@
   <xs:element name="SetLocalIntResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetLocalIntResult" type="q3:jvmtiError" />
+        <xs:element xmlns:q17="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetLocalIntResult" type="q17:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetLocalLong">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q4:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q5:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q18="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q18:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q19="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q19:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="depth" type="xs:int" />
         <xs:element minOccurs="0" name="slot" type="xs:int" />
         <xs:element minOccurs="0" name="value" type="xs:long" />
@@ -36,15 +114,15 @@
   <xs:element name="SetLocalLongResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetLocalLongResult" type="q6:jvmtiError" />
+        <xs:element xmlns:q20="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetLocalLongResult" type="q20:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetLocalFloat">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q7="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q7:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q8="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q8:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q21="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q21:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q22="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q22:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="depth" type="xs:int" />
         <xs:element minOccurs="0" name="slot" type="xs:int" />
         <xs:element minOccurs="0" name="value" type="xs:float" />
@@ -54,15 +132,15 @@
   <xs:element name="SetLocalFloatResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q9="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetLocalFloatResult" type="q9:jvmtiError" />
+        <xs:element xmlns:q23="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetLocalFloatResult" type="q23:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetLocalDouble">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q10="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q10:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q11="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q11:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q24="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q24:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q25="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q25:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="depth" type="xs:int" />
         <xs:element minOccurs="0" name="slot" type="xs:int" />
         <xs:element minOccurs="0" name="value" type="xs:double" />
@@ -72,143 +150,143 @@
   <xs:element name="SetLocalDoubleResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q12="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetLocalDoubleResult" type="q12:jvmtiError" />
+        <xs:element xmlns:q26="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetLocalDoubleResult" type="q26:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetBreakpoint">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q13="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q13:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q14="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="location" type="q14:JvmRemoteLocation" />
+        <xs:element xmlns:q27="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q27:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q28="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="location" type="q28:JvmRemoteLocation" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetBreakpointResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q15="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetBreakpointResult" type="q15:jvmtiError" />
+        <xs:element xmlns:q29="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetBreakpointResult" type="q29:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ClearBreakpoint">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q16="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q16:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q17="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="location" type="q17:JvmRemoteLocation" />
+        <xs:element xmlns:q30="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q30:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q31="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="location" type="q31:JvmRemoteLocation" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ClearBreakpointResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q18="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ClearBreakpointResult" type="q18:jvmtiError" />
+        <xs:element xmlns:q32="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ClearBreakpointResult" type="q32:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetFieldAccessWatch">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q19="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q19:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q20="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="field" type="q20:JvmFieldRemoteHandle" />
+        <xs:element xmlns:q33="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q33:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q34="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="field" type="q34:JvmFieldRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetFieldAccessWatchResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q21="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetFieldAccessWatchResult" type="q21:jvmtiError" />
+        <xs:element xmlns:q35="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetFieldAccessWatchResult" type="q35:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ClearFieldAccessWatch">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q22="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q22:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q23="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="field" type="q23:JvmFieldRemoteHandle" />
+        <xs:element xmlns:q36="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q36:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q37="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="field" type="q37:JvmFieldRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ClearFieldAccessWatchResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q24="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ClearFieldAccessWatchResult" type="q24:jvmtiError" />
+        <xs:element xmlns:q38="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ClearFieldAccessWatchResult" type="q38:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetFieldModificationWatch">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q25="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q25:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q26="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="field" type="q26:JvmFieldRemoteHandle" />
+        <xs:element xmlns:q39="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q39:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q40="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="field" type="q40:JvmFieldRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetFieldModificationWatchResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q27="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetFieldModificationWatchResult" type="q27:jvmtiError" />
+        <xs:element xmlns:q41="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetFieldModificationWatchResult" type="q41:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ClearFieldModificationWatch">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q28="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q28:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q29="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="field" type="q29:JvmFieldRemoteHandle" />
+        <xs:element xmlns:q42="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q42:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q43="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="field" type="q43:JvmFieldRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ClearFieldModificationWatchResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q30="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ClearFieldModificationWatchResult" type="q30:jvmtiError" />
+        <xs:element xmlns:q44="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ClearFieldModificationWatchResult" type="q44:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetLoadedClasses">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q31="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q31:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q45="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q45:JvmVirtualMachineRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetLoadedClassesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q32="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLoadedClassesResult" type="q32:jvmtiError" />
-        <xs:element xmlns:q33="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="classes" nillable="true" type="q33:ArrayOfJvmClassRemoteHandle" />
+        <xs:element xmlns:q46="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLoadedClassesResult" type="q46:jvmtiError" />
+        <xs:element xmlns:q47="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="classes" nillable="true" type="q47:ArrayOfJvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassLoaderClasses">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q34="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q34:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q35="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="initiatingLoader" type="q35:JvmObjectRemoteHandle" />
+        <xs:element xmlns:q48="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q48:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q49="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="initiatingLoader" type="q49:JvmObjectRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassLoaderClassesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q36="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassLoaderClassesResult" type="q36:jvmtiError" />
-        <xs:element xmlns:q37="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="classes" nillable="true" type="q37:ArrayOfJvmClassRemoteHandle" />
+        <xs:element xmlns:q50="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassLoaderClassesResult" type="q50:jvmtiError" />
+        <xs:element xmlns:q51="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="classes" nillable="true" type="q51:ArrayOfJvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassSignature">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q38="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q38:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q39="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q39:JvmClassRemoteHandle" />
+        <xs:element xmlns:q52="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q52:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q53="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q53:JvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassSignatureResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q40="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassSignatureResult" type="q40:jvmtiError" />
+        <xs:element xmlns:q54="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassSignatureResult" type="q54:jvmtiError" />
         <xs:element minOccurs="0" name="signature" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="generic" nillable="true" type="xs:string" />
       </xs:sequence>
@@ -217,31 +295,31 @@
   <xs:element name="GetClassStatus">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q41="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q41:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q42="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q42:JvmClassRemoteHandle" />
+        <xs:element xmlns:q55="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q55:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q56="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q56:JvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassStatusResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q43="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassStatusResult" type="q43:jvmtiError" />
-        <xs:element xmlns:q44="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="status" type="q44:jvmtiClassStatus" />
+        <xs:element xmlns:q57="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassStatusResult" type="q57:jvmtiError" />
+        <xs:element xmlns:q58="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="status" type="q58:jvmtiClassStatus" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetSourceFileName">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q45="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q45:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q46="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q46:JvmClassRemoteHandle" />
+        <xs:element xmlns:q59="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q59:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q60="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q60:JvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetSourceFileNameResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q47="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetSourceFileNameResult" type="q47:jvmtiError" />
+        <xs:element xmlns:q61="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetSourceFileNameResult" type="q61:jvmtiError" />
         <xs:element minOccurs="0" name="sourceName" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -249,79 +327,79 @@
   <xs:element name="GetClassModifiers">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q48="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q48:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q49="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q49:JvmClassRemoteHandle" />
+        <xs:element xmlns:q62="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q62:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q63="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q63:JvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassModifiersResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q50="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassModifiersResult" type="q50:jvmtiError" />
-        <xs:element xmlns:q51="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost" minOccurs="0" name="modifiers" type="q51:JvmAccessModifiers" />
+        <xs:element xmlns:q64="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassModifiersResult" type="q64:jvmtiError" />
+        <xs:element xmlns:q65="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost" minOccurs="0" name="modifiers" type="q65:JvmAccessModifiers" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassMethods">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q52="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q52:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q53="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q53:JvmClassRemoteHandle" />
+        <xs:element xmlns:q66="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q66:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q67="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q67:JvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassMethodsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q54="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassMethodsResult" type="q54:jvmtiError" />
-        <xs:element xmlns:q55="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="methods" nillable="true" type="q55:ArrayOfJvmMethodRemoteHandle" />
+        <xs:element xmlns:q68="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassMethodsResult" type="q68:jvmtiError" />
+        <xs:element xmlns:q69="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="methods" nillable="true" type="q69:ArrayOfJvmMethodRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassFields">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q56="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q56:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q57="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q57:JvmClassRemoteHandle" />
+        <xs:element xmlns:q70="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q70:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q71="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q71:JvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassFieldsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q58="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassFieldsResult" type="q58:jvmtiError" />
-        <xs:element xmlns:q59="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="fields" nillable="true" type="q59:ArrayOfJvmFieldRemoteHandle" />
+        <xs:element xmlns:q72="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassFieldsResult" type="q72:jvmtiError" />
+        <xs:element xmlns:q73="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="fields" nillable="true" type="q73:ArrayOfJvmFieldRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetImplementedInterfaces">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q60="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q60:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q61="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q61:JvmClassRemoteHandle" />
+        <xs:element xmlns:q74="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q74:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q75="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q75:JvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetImplementedInterfacesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q62="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetImplementedInterfacesResult" type="q62:jvmtiError" />
-        <xs:element xmlns:q63="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="interfaces" nillable="true" type="q63:ArrayOfJvmClassRemoteHandle" />
+        <xs:element xmlns:q76="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetImplementedInterfacesResult" type="q76:jvmtiError" />
+        <xs:element xmlns:q77="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="interfaces" nillable="true" type="q77:ArrayOfJvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassVersionNumbers">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q64="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q64:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q65="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q65:JvmClassRemoteHandle" />
+        <xs:element xmlns:q78="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q78:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q79="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q79:JvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassVersionNumbersResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q66="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassVersionNumbersResult" type="q66:jvmtiError" />
+        <xs:element xmlns:q80="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassVersionNumbersResult" type="q80:jvmtiError" />
         <xs:element minOccurs="0" name="minorVersion" type="xs:int" />
         <xs:element minOccurs="0" name="majorVersion" type="xs:int" />
       </xs:sequence>
@@ -330,15 +408,15 @@
   <xs:element name="GetConstantPool">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q67="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q67:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q68="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q68:JvmClassRemoteHandle" />
+        <xs:element xmlns:q81="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q81:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q82="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q82:JvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetConstantPoolResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q69="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetConstantPoolResult" type="q69:jvmtiError" />
+        <xs:element xmlns:q83="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetConstantPoolResult" type="q83:jvmtiError" />
         <xs:element minOccurs="0" name="constantPool" nillable="true" type="xs:base64Binary" />
       </xs:sequence>
     </xs:complexType>
@@ -346,15 +424,15 @@
   <xs:element name="IsInterface">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q70="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q70:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q71="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q71:JvmClassRemoteHandle" />
+        <xs:element xmlns:q84="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q84:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q85="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q85:JvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="IsInterfaceResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q72="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="IsInterfaceResult" type="q72:jvmtiError" />
+        <xs:element xmlns:q86="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="IsInterfaceResult" type="q86:jvmtiError" />
         <xs:element minOccurs="0" name="isInterface" type="xs:boolean" />
       </xs:sequence>
     </xs:complexType>
@@ -362,15 +440,15 @@
   <xs:element name="IsArrayClass">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q73="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q73:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q74="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q74:JvmClassRemoteHandle" />
+        <xs:element xmlns:q87="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q87:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q88="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q88:JvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="IsArrayClassResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q75="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="IsArrayClassResult" type="q75:jvmtiError" />
+        <xs:element xmlns:q89="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="IsArrayClassResult" type="q89:jvmtiError" />
         <xs:element minOccurs="0" name="isArrayClass" type="xs:boolean" />
       </xs:sequence>
     </xs:complexType>
@@ -378,15 +456,15 @@
   <xs:element name="IsModifiableClass">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q76="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q76:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q77="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q77:JvmClassRemoteHandle" />
+        <xs:element xmlns:q90="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q90:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q91="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q91:JvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="IsModifiableClassResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q78="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="IsModifiableClassResult" type="q78:jvmtiError" />
+        <xs:element xmlns:q92="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="IsModifiableClassResult" type="q92:jvmtiError" />
         <xs:element minOccurs="0" name="isModifiableClass" type="xs:boolean" />
       </xs:sequence>
     </xs:complexType>
@@ -394,31 +472,31 @@
   <xs:element name="GetClassLoader">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q79="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q79:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q80="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q80:JvmClassRemoteHandle" />
+        <xs:element xmlns:q93="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q93:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q94="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q94:JvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassLoaderResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q81="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassLoaderResult" type="q81:jvmtiError" />
-        <xs:element xmlns:q82="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="classLoader" type="q82:JvmObjectRemoteHandle" />
+        <xs:element xmlns:q95="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetClassLoaderResult" type="q95:jvmtiError" />
+        <xs:element xmlns:q96="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="classLoader" type="q96:JvmObjectRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetSourceDebugExtension">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q83="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q83:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q84="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q84:JvmClassRemoteHandle" />
+        <xs:element xmlns:q97="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q97:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q98="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="class" type="q98:JvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetSourceDebugExtensionResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q85="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetSourceDebugExtensionResult" type="q85:jvmtiError" />
+        <xs:element xmlns:q99="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetSourceDebugExtensionResult" type="q99:jvmtiError" />
         <xs:element minOccurs="0" name="sourceDebugExtension" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -426,30 +504,30 @@
   <xs:element name="RetransformClasses">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q86="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q86:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q87="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="classes" nillable="true" type="q87:ArrayOfJvmClassRemoteHandle" />
+        <xs:element xmlns:q100="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q100:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q101="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="classes" nillable="true" type="q101:ArrayOfJvmClassRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="RetransformClassesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q88="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="RetransformClassesResult" type="q88:jvmtiError" />
+        <xs:element xmlns:q102="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="RetransformClassesResult" type="q102:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetObjectSize">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q89="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q89:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q90="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="object" type="q90:JvmObjectRemoteHandle" />
+        <xs:element xmlns:q103="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q103:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q104="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="object" type="q104:JvmObjectRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetObjectSizeResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q91="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetObjectSizeResult" type="q91:jvmtiError" />
+        <xs:element xmlns:q105="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetObjectSizeResult" type="q105:jvmtiError" />
         <xs:element minOccurs="0" name="size" type="xs:long" />
       </xs:sequence>
     </xs:complexType>
@@ -457,23 +535,236 @@
   <xs:element name="GetObjectHashCode">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q92="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q92:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q93="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="object" type="q93:JvmObjectRemoteHandle" />
+        <xs:element xmlns:q106="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q106:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q107="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="object" type="q107:JvmObjectRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetObjectHashCodeResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q94="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetObjectHashCodeResult" type="q94:jvmtiError" />
+        <xs:element xmlns:q108="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetObjectHashCodeResult" type="q108:jvmtiError" />
         <xs:element minOccurs="0" name="hashCode" type="xs:int" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetFieldName">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q109="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q109:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q110="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="field" type="q110:JvmFieldRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetFieldNameResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q111="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetFieldNameResult" type="q111:jvmtiError" />
+        <xs:element minOccurs="0" name="name" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="signature" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="generic" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetFieldDeclaringClass">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q112="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q112:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q113="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="field" type="q113:JvmFieldRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetFieldDeclaringClassResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q114="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetFieldDeclaringClassResult" type="q114:jvmtiError" />
+        <xs:element xmlns:q115="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="declaringClass" type="q115:JvmClassRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetFieldModifiers">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q116="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q116:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q117="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="field" type="q117:JvmFieldRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetFieldModifiersResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q118="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetFieldModifiersResult" type="q118:jvmtiError" />
+        <xs:element xmlns:q119="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost" minOccurs="0" name="modifiers" type="q119:JvmAccessModifiers" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="IsFieldSynthetic">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q120="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q120:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q121="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="field" type="q121:JvmFieldRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="IsFieldSyntheticResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q122="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="IsFieldSyntheticResult" type="q122:jvmtiError" />
+        <xs:element minOccurs="0" name="isSynthetic" type="xs:boolean" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetMethodName">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q123="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q123:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q124="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="method" type="q124:JvmMethodRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetMethodNameResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q125="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetMethodNameResult" type="q125:jvmtiError" />
+        <xs:element minOccurs="0" name="name" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="signature" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="generic" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetMethodDeclaringClass">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q126="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q126:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q127="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="method" type="q127:JvmMethodRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetMethodDeclaringClassResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q128="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetMethodDeclaringClassResult" type="q128:jvmtiError" />
+        <xs:element xmlns:q129="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="declaringClass" type="q129:JvmClassRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetMethodModifiers">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q130="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q130:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q131="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="method" type="q131:JvmMethodRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetMethodModifiersResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q132="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetMethodModifiersResult" type="q132:jvmtiError" />
+        <xs:element xmlns:q133="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost" minOccurs="0" name="modifiers" type="q133:JvmAccessModifiers" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetMaxLocals">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q134="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q134:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q135="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="method" type="q135:JvmMethodRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetMaxLocalsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q136="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetMaxLocalsResult" type="q136:jvmtiError" />
+        <xs:element minOccurs="0" name="maxLocals" type="xs:int" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetArgumentsSize">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q137="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q137:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q138="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="method" type="q138:JvmMethodRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetArgumentsSizeResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q139="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetArgumentsSizeResult" type="q139:jvmtiError" />
+        <xs:element minOccurs="0" name="size" type="xs:int" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetLineNumberTable">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q140="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q140:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q141="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="method" type="q141:JvmMethodRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetLineNumberTableResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q142="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLineNumberTableResult" type="q142:jvmtiError" />
+        <xs:element xmlns:q143="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="lineNumbers" nillable="true" type="q143:ArrayOfJvmLineNumberEntry" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetMethodLocation">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q144="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q144:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q145="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="method" type="q145:JvmMethodRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetMethodLocationResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q146="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetMethodLocationResult" type="q146:jvmtiError" />
+        <xs:element xmlns:q147="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="startLocation" type="q147:JvmRemoteLocation" />
+        <xs:element xmlns:q148="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="endLocation" type="q148:JvmRemoteLocation" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetLocalVariableTable">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q149="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q149:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q150="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="method" type="q150:JvmMethodRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetLocalVariableTableResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q151="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLocalVariableTableResult" type="q151:jvmtiError" />
+        <xs:element xmlns:q152="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="localVariables" nillable="true" type="q152:ArrayOfJvmLocalVariableEntry" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetBytecodes">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q153="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q153:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q154="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="method" type="q154:JvmMethodRemoteHandle" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetBytecodesResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q155="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetBytecodesResult" type="q155:jvmtiError" />
+        <xs:element minOccurs="0" name="bytecode" nillable="true" type="xs:base64Binary" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="Allocate">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q95="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q95:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q156="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q156:JvmVirtualMachineRemoteHandle" />
         <xs:element minOccurs="0" name="size" type="xs:long" />
       </xs:sequence>
     </xs:complexType>
@@ -481,7 +772,7 @@
   <xs:element name="AllocateResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q96="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="AllocateResult" type="q96:jvmtiError" />
+        <xs:element xmlns:q157="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="AllocateResult" type="q157:jvmtiError" />
         <xs:element minOccurs="0" name="address" type="xs:long" />
       </xs:sequence>
     </xs:complexType>
@@ -489,7 +780,7 @@
   <xs:element name="Deallocate">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q97="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q97:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q158="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q158:JvmVirtualMachineRemoteHandle" />
         <xs:element minOccurs="0" name="address" type="xs:long" />
       </xs:sequence>
     </xs:complexType>
@@ -497,200 +788,200 @@
   <xs:element name="DeallocateResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q98="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="DeallocateResult" type="q98:jvmtiError" />
+        <xs:element xmlns:q159="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="DeallocateResult" type="q159:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadState">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q99="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q99:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q100="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q100:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q160="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q160:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q161="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q161:JvmThreadRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadStateResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q101="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetThreadStateResult" type="q101:jvmtiError" />
-        <xs:element xmlns:q102="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="threadState" type="q102:jvmtiThreadState" />
+        <xs:element xmlns:q162="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetThreadStateResult" type="q162:jvmtiError" />
+        <xs:element xmlns:q163="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="threadState" type="q163:jvmtiThreadState" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetCurrentThread">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q103="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q103:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q164="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q164:JvmVirtualMachineRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetCurrentThreadResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q104="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetCurrentThreadResult" type="q104:jvmtiError" />
-        <xs:element xmlns:q105="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q105:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q165="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetCurrentThreadResult" type="q165:jvmtiError" />
+        <xs:element xmlns:q166="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q166:JvmThreadRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetAllThreads">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q106="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q106:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q167="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q167:JvmVirtualMachineRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetAllThreadsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q107="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetAllThreadsResult" type="q107:jvmtiError" />
-        <xs:element xmlns:q108="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="threads" nillable="true" type="q108:ArrayOfJvmThreadRemoteHandle" />
+        <xs:element xmlns:q168="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetAllThreadsResult" type="q168:jvmtiError" />
+        <xs:element xmlns:q169="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="threads" nillable="true" type="q169:ArrayOfJvmThreadRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SuspendThread">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q109="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q109:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q110="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q110:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q170="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q170:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q171="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q171:JvmThreadRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SuspendThreadResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q111="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SuspendThreadResult" type="q111:jvmtiError" />
+        <xs:element xmlns:q172="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SuspendThreadResult" type="q172:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SuspendThreads">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q112="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q112:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q113="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="threads" nillable="true" type="q113:ArrayOfJvmThreadRemoteHandle" />
+        <xs:element xmlns:q173="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q173:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q174="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="threads" nillable="true" type="q174:ArrayOfJvmThreadRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SuspendThreadsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q114="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SuspendThreadsResult" type="q114:jvmtiError" />
+        <xs:element xmlns:q175="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SuspendThreadsResult" type="q175:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ResumeThread">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q115="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q115:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q116="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q116:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q176="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q176:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q177="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q177:JvmThreadRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ResumeThreadResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q117="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ResumeThreadResult" type="q117:jvmtiError" />
+        <xs:element xmlns:q178="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ResumeThreadResult" type="q178:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ResumeThreads">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q118="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q118:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q119="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="threads" type="q119:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q179="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q179:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q180="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="threads" type="q180:JvmThreadRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ResumeThreadsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q120="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ResumeThreadsResult" type="q120:jvmtiError" />
+        <xs:element xmlns:q181="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ResumeThreadsResult" type="q181:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="StopThread">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q121="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q121:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q122="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q122:JvmThreadRemoteHandle" />
-        <xs:element xmlns:q123="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="exception" type="q123:JvmObjectRemoteHandle" />
+        <xs:element xmlns:q182="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q182:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q183="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q183:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q184="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="exception" type="q184:JvmObjectRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="StopThreadResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q124="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="StopThreadResult" type="q124:jvmtiError" />
+        <xs:element xmlns:q185="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="StopThreadResult" type="q185:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="InterruptThread">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q125="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q125:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q126="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q126:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q186="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q186:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q187="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q187:JvmThreadRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="InterruptThreadResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q127="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="InterruptThreadResult" type="q127:jvmtiError" />
+        <xs:element xmlns:q188="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="InterruptThreadResult" type="q188:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadInfo">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q128="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q128:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q129="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q129:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q189="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q189:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q190="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q190:JvmThreadRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadInfoResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q130="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetThreadInfoResult" type="q130:jvmtiError" />
-        <xs:element xmlns:q131="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="info" type="q131:JvmThreadRemoteInfo" />
+        <xs:element xmlns:q191="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetThreadInfoResult" type="q191:jvmtiError" />
+        <xs:element xmlns:q192="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="info" type="q192:JvmThreadRemoteInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetOwnedMonitorInfo">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q132="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q132:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q133="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q133:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q193="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q193:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q194="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q194:JvmThreadRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetOwnedMonitorInfoResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q134="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetOwnedMonitorInfoResult" type="q134:jvmtiError" />
-        <xs:element xmlns:q135="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="ownedMonitors" nillable="true" type="q135:ArrayOfJvmObjectRemoteHandle" />
+        <xs:element xmlns:q195="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetOwnedMonitorInfoResult" type="q195:jvmtiError" />
+        <xs:element xmlns:q196="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="ownedMonitors" nillable="true" type="q196:ArrayOfJvmObjectRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetCurrentContendedMonitor">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q136="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q136:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q137="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q137:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q197="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q197:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q198="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q198:JvmThreadRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetCurrentContendedMonitorResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q138="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetCurrentContendedMonitorResult" type="q138:jvmtiError" />
-        <xs:element xmlns:q139="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="monitor" type="q139:JvmObjectRemoteHandle" />
+        <xs:element xmlns:q199="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetCurrentContendedMonitorResult" type="q199:jvmtiError" />
+        <xs:element xmlns:q200="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="monitor" type="q200:JvmObjectRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetThreadLocalStorage">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q140="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q140:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q141="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q141:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q201="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q201:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q202="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q202:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="data" type="xs:long" />
       </xs:sequence>
     </xs:complexType>
@@ -698,22 +989,22 @@
   <xs:element name="SetThreadLocalStorageResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q142="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetThreadLocalStorageResult" type="q142:jvmtiError" />
+        <xs:element xmlns:q203="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetThreadLocalStorageResult" type="q203:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadLocalStorage">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q143="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q143:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q144="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q144:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q204="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q204:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q205="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q205:JvmThreadRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadLocalStorageResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q145="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetThreadLocalStorageResult" type="q145:jvmtiError" />
+        <xs:element xmlns:q206="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetThreadLocalStorageResult" type="q206:jvmtiError" />
         <xs:element minOccurs="0" name="data" type="xs:long" />
       </xs:sequence>
     </xs:complexType>
@@ -721,40 +1012,40 @@
   <xs:element name="GetTopThreadGroups">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q146="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q146:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q207="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q207:JvmVirtualMachineRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetTopThreadGroupsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q147="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetTopThreadGroupsResult" type="q147:jvmtiError" />
-        <xs:element xmlns:q148="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="groups" nillable="true" type="q148:ArrayOfJvmThreadGroupRemoteHandle" />
+        <xs:element xmlns:q208="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetTopThreadGroupsResult" type="q208:jvmtiError" />
+        <xs:element xmlns:q209="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="groups" nillable="true" type="q209:ArrayOfJvmThreadGroupRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadGroupChildren">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q149="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q149:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q150="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="group" type="q150:JvmThreadGroupRemoteHandle" />
+        <xs:element xmlns:q210="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q210:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q211="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="group" type="q211:JvmThreadGroupRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadGroupChildrenResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q151="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetThreadGroupChildrenResult" type="q151:jvmtiError" />
-        <xs:element xmlns:q152="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="threads" nillable="true" type="q152:ArrayOfJvmThreadRemoteHandle" />
-        <xs:element xmlns:q153="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="groups" nillable="true" type="q153:ArrayOfJvmThreadGroupRemoteHandle" />
+        <xs:element xmlns:q212="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetThreadGroupChildrenResult" type="q212:jvmtiError" />
+        <xs:element xmlns:q213="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="threads" nillable="true" type="q213:ArrayOfJvmThreadRemoteHandle" />
+        <xs:element xmlns:q214="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="groups" nillable="true" type="q214:ArrayOfJvmThreadGroupRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetStackTrace">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q154="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q154:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q155="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q155:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q215="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q215:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q216="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q216:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="startDepth" type="xs:int" />
         <xs:element minOccurs="0" name="maxFrameCount" type="xs:int" />
       </xs:sequence>
@@ -763,15 +1054,15 @@
   <xs:element name="GetStackTraceResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q156="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetStackTraceResult" type="q156:jvmtiError" />
-        <xs:element xmlns:q157="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="frames" nillable="true" type="q157:ArrayOfJvmRemoteLocation" />
+        <xs:element xmlns:q217="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetStackTraceResult" type="q217:jvmtiError" />
+        <xs:element xmlns:q218="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="frames" nillable="true" type="q218:ArrayOfJvmRemoteLocation" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetAllStackTraces">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q158="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q158:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q219="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q219:JvmVirtualMachineRemoteHandle" />
         <xs:element minOccurs="0" name="maxFrameCount" type="xs:int" />
       </xs:sequence>
     </xs:complexType>
@@ -779,16 +1070,16 @@
   <xs:element name="GetAllStackTracesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q159="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetAllStackTracesResult" type="q159:jvmtiError" />
-        <xs:element xmlns:q160="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="stackTraces" nillable="true" type="q160:ArrayOfJvmRemoteStackInfo" />
+        <xs:element xmlns:q220="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetAllStackTracesResult" type="q220:jvmtiError" />
+        <xs:element xmlns:q221="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="stackTraces" nillable="true" type="q221:ArrayOfJvmRemoteStackInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadListStackTraces">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q161="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q161:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q162="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="threads" nillable="true" type="q162:ArrayOfJvmThreadRemoteHandle" />
+        <xs:element xmlns:q222="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q222:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q223="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="threads" nillable="true" type="q223:ArrayOfJvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="maxFrameCount" type="xs:int" />
       </xs:sequence>
     </xs:complexType>
@@ -796,23 +1087,23 @@
   <xs:element name="GetThreadListStackTracesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q163="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetThreadListStackTracesResult" type="q163:jvmtiError" />
-        <xs:element xmlns:q164="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="stackTraces" nillable="true" type="q164:ArrayOfJvmRemoteStackInfo" />
+        <xs:element xmlns:q224="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetThreadListStackTracesResult" type="q224:jvmtiError" />
+        <xs:element xmlns:q225="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="stackTraces" nillable="true" type="q225:ArrayOfJvmRemoteStackInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetFrameCount">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q165="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q165:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q166="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q166:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q226="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q226:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q227="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q227:JvmThreadRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetFrameCountResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q167="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetFrameCountResult" type="q167:jvmtiError" />
+        <xs:element xmlns:q228="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetFrameCountResult" type="q228:jvmtiError" />
         <xs:element minOccurs="0" name="frameCount" type="xs:int" />
       </xs:sequence>
     </xs:complexType>
@@ -820,23 +1111,23 @@
   <xs:element name="PopFrame">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q168="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q168:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q169="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q169:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q229="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q229:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q230="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q230:JvmThreadRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="PopFrameResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q170="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="PopFrameResult" type="q170:jvmtiError" />
+        <xs:element xmlns:q231="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="PopFrameResult" type="q231:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetFrameLocation">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q171="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q171:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q172="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q172:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q232="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q232:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q233="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q233:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="depth" type="xs:int" />
       </xs:sequence>
     </xs:complexType>
@@ -844,16 +1135,16 @@
   <xs:element name="GetFrameLocationResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q173="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetFrameLocationResult" type="q173:jvmtiError" />
-        <xs:element xmlns:q174="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="location" type="q174:JvmRemoteLocation" />
+        <xs:element xmlns:q234="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetFrameLocationResult" type="q234:jvmtiError" />
+        <xs:element xmlns:q235="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="location" type="q235:JvmRemoteLocation" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="NotifyFramePop">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q175="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q175:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q176="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q176:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q236="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q236:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q237="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q237:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="depth" type="xs:int" />
       </xs:sequence>
     </xs:complexType>
@@ -861,31 +1152,31 @@
   <xs:element name="NotifyFramePopResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q177="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="NotifyFramePopResult" type="q177:jvmtiError" />
+        <xs:element xmlns:q238="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="NotifyFramePopResult" type="q238:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ForceEarlyReturnObject">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q178="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q178:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q179="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q179:JvmThreadRemoteHandle" />
-        <xs:element xmlns:q180="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="value" type="q180:JvmObjectRemoteHandle" />
+        <xs:element xmlns:q239="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q239:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q240="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q240:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q241="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="value" type="q241:JvmObjectRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ForceEarlyReturnObjectResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q181="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ForceEarlyReturnObjectResult" type="q181:jvmtiError" />
+        <xs:element xmlns:q242="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ForceEarlyReturnObjectResult" type="q242:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ForceEarlyReturnInt">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q182="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q182:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q183="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q183:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q243="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q243:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q244="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q244:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="value" type="xs:int" />
       </xs:sequence>
     </xs:complexType>
@@ -893,15 +1184,15 @@
   <xs:element name="ForceEarlyReturnIntResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q184="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ForceEarlyReturnIntResult" type="q184:jvmtiError" />
+        <xs:element xmlns:q245="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ForceEarlyReturnIntResult" type="q245:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ForceEarlyReturnLong">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q185="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q185:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q186="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q186:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q246="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q246:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q247="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q247:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="value" type="xs:long" />
       </xs:sequence>
     </xs:complexType>
@@ -909,15 +1200,15 @@
   <xs:element name="ForceEarlyReturnLongResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q187="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ForceEarlyReturnLongResult" type="q187:jvmtiError" />
+        <xs:element xmlns:q248="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ForceEarlyReturnLongResult" type="q248:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ForceEarlyReturnFloat">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q188="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q188:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q189="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q189:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q249="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q249:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q250="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q250:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="value" type="xs:float" />
       </xs:sequence>
     </xs:complexType>
@@ -925,15 +1216,15 @@
   <xs:element name="ForceEarlyReturnFloatResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q190="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ForceEarlyReturnFloatResult" type="q190:jvmtiError" />
+        <xs:element xmlns:q251="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ForceEarlyReturnFloatResult" type="q251:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ForceEarlyReturnDouble">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q191="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q191:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q192="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q192:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q252="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q252:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q253="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q253:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="value" type="xs:double" />
       </xs:sequence>
     </xs:complexType>
@@ -941,37 +1232,37 @@
   <xs:element name="ForceEarlyReturnDoubleResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q193="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ForceEarlyReturnDoubleResult" type="q193:jvmtiError" />
+        <xs:element xmlns:q254="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ForceEarlyReturnDoubleResult" type="q254:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ForceEarlyReturnVoid">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q194="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q194:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q195="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q195:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q255="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q255:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q256="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q256:JvmThreadRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ForceEarlyReturnVoidResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q196="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ForceEarlyReturnVoidResult" type="q196:jvmtiError" />
+        <xs:element xmlns:q257="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ForceEarlyReturnVoidResult" type="q257:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetTag">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q197="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q197:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q198="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="object" type="q198:JvmObjectRemoteHandle" />
+        <xs:element xmlns:q258="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q258:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q259="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="object" type="q259:JvmObjectRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetTagResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q199="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetTagResult" type="q199:jvmtiError" />
+        <xs:element xmlns:q260="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetTagResult" type="q260:jvmtiError" />
         <xs:element minOccurs="0" name="tag" type="xs:long" />
       </xs:sequence>
     </xs:complexType>
@@ -979,8 +1270,8 @@
   <xs:element name="SetTag">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q200="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q200:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q201="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="object" type="q201:JvmObjectRemoteHandle" />
+        <xs:element xmlns:q261="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q261:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q262="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="object" type="q262:JvmObjectRemoteHandle" />
         <xs:element minOccurs="0" name="tag" type="xs:long" />
       </xs:sequence>
     </xs:complexType>
@@ -988,46 +1279,46 @@
   <xs:element name="SetTagResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q202="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetTagResult" type="q202:jvmtiError" />
+        <xs:element xmlns:q263="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetTagResult" type="q263:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetObjectsWithTags">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q203="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q203:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q204="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="tagFilter" nillable="true" type="q204:ArrayOflong" />
+        <xs:element xmlns:q264="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q264:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q265="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="tagFilter" nillable="true" type="q265:ArrayOflong" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetObjectsWithTagsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q205="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetObjectsWithTagsResult" type="q205:jvmtiError" />
-        <xs:element xmlns:q206="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="objects" nillable="true" type="q206:ArrayOfJvmObjectRemoteHandle" />
-        <xs:element xmlns:q207="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="tags" nillable="true" type="q207:ArrayOflong" />
+        <xs:element xmlns:q266="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetObjectsWithTagsResult" type="q266:jvmtiError" />
+        <xs:element xmlns:q267="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="objects" nillable="true" type="q267:ArrayOfJvmObjectRemoteHandle" />
+        <xs:element xmlns:q268="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="tags" nillable="true" type="q268:ArrayOflong" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ForceGarbageCollection">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q208="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q208:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q269="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q269:JvmVirtualMachineRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ForceGarbageCollectionResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q209="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ForceGarbageCollectionResult" type="q209:jvmtiError" />
+        <xs:element xmlns:q270="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="ForceGarbageCollectionResult" type="q270:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetLocalObject">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q210="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q210:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q211="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q211:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q271="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q271:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q272="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q272:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="depth" type="xs:int" />
         <xs:element minOccurs="0" name="slot" type="xs:int" />
       </xs:sequence>
@@ -1036,16 +1327,16 @@
   <xs:element name="GetLocalObjectResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q212="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLocalObjectResult" type="q212:jvmtiError" />
-        <xs:element xmlns:q213="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="value" type="q213:JvmObjectRemoteHandle" />
+        <xs:element xmlns:q273="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLocalObjectResult" type="q273:jvmtiError" />
+        <xs:element xmlns:q274="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="value" type="q274:JvmObjectRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetLocalInstance">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q214="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q214:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q215="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q215:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q275="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q275:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q276="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q276:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="depth" type="xs:int" />
       </xs:sequence>
     </xs:complexType>
@@ -1053,16 +1344,16 @@
   <xs:element name="GetLocalInstanceResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q216="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLocalInstanceResult" type="q216:jvmtiError" />
-        <xs:element xmlns:q217="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="value" type="q217:JvmObjectRemoteHandle" />
+        <xs:element xmlns:q277="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLocalInstanceResult" type="q277:jvmtiError" />
+        <xs:element xmlns:q278="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="value" type="q278:JvmObjectRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetLocalInt">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q218="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q218:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q219="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q219:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q279="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q279:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q280="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q280:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="depth" type="xs:int" />
         <xs:element minOccurs="0" name="slot" type="xs:int" />
       </xs:sequence>
@@ -1071,7 +1362,7 @@
   <xs:element name="GetLocalIntResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q220="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLocalIntResult" type="q220:jvmtiError" />
+        <xs:element xmlns:q281="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLocalIntResult" type="q281:jvmtiError" />
         <xs:element minOccurs="0" name="value" type="xs:int" />
       </xs:sequence>
     </xs:complexType>
@@ -1079,8 +1370,8 @@
   <xs:element name="GetLocalLong">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q221="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q221:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q222="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q222:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q282="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q282:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q283="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q283:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="depth" type="xs:int" />
         <xs:element minOccurs="0" name="slot" type="xs:int" />
       </xs:sequence>
@@ -1089,7 +1380,7 @@
   <xs:element name="GetLocalLongResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q223="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLocalLongResult" type="q223:jvmtiError" />
+        <xs:element xmlns:q284="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLocalLongResult" type="q284:jvmtiError" />
         <xs:element minOccurs="0" name="value" type="xs:long" />
       </xs:sequence>
     </xs:complexType>
@@ -1097,8 +1388,8 @@
   <xs:element name="GetLocalFloat">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q224="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q224:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q225="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q225:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q285="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q285:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q286="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q286:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="depth" type="xs:int" />
         <xs:element minOccurs="0" name="slot" type="xs:int" />
       </xs:sequence>
@@ -1107,7 +1398,7 @@
   <xs:element name="GetLocalFloatResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q226="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLocalFloatResult" type="q226:jvmtiError" />
+        <xs:element xmlns:q287="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLocalFloatResult" type="q287:jvmtiError" />
         <xs:element minOccurs="0" name="value" type="xs:float" />
       </xs:sequence>
     </xs:complexType>
@@ -1115,8 +1406,8 @@
   <xs:element name="GetLocalDouble">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q227="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q227:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q228="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q228:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q288="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q288:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q289="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q289:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="depth" type="xs:int" />
         <xs:element minOccurs="0" name="slot" type="xs:int" />
       </xs:sequence>
@@ -1125,7 +1416,7 @@
   <xs:element name="GetLocalDoubleResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q229="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLocalDoubleResult" type="q229:jvmtiError" />
+        <xs:element xmlns:q290="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="GetLocalDoubleResult" type="q290:jvmtiError" />
         <xs:element minOccurs="0" name="value" type="xs:double" />
       </xs:sequence>
     </xs:complexType>
@@ -1133,18 +1424,18 @@
   <xs:element name="SetLocalObject">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q230="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q230:JvmVirtualMachineRemoteHandle" />
-        <xs:element xmlns:q231="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q231:JvmThreadRemoteHandle" />
+        <xs:element xmlns:q291="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="virtualMachine" type="q291:JvmVirtualMachineRemoteHandle" />
+        <xs:element xmlns:q292="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="thread" type="q292:JvmThreadRemoteHandle" />
         <xs:element minOccurs="0" name="depth" type="xs:int" />
         <xs:element minOccurs="0" name="slot" type="xs:int" />
-        <xs:element xmlns:q232="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="value" type="q232:JvmObjectRemoteHandle" />
+        <xs:element xmlns:q293="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" minOccurs="0" name="value" type="q293:JvmObjectRemoteHandle" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetLocalObjectResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q233="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetLocalObjectResult" type="q233:jvmtiError" />
+        <xs:element xmlns:q294="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" minOccurs="0" name="SetLocalObjectResult" type="q294:jvmtiError" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

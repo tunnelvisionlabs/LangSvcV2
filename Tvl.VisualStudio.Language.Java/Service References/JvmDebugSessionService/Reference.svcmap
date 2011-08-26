@@ -18,11 +18,11 @@
     <ServiceContractMappings />
   </ClientOptions>
   <MetadataSources>
-    <MetadataSource Address="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost.Services/JvmDebugSessionService/mex" Protocol="mex" SourceId="1" />
+    <MetadataSource Address="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost/JvmDebugSessionService/mex" Protocol="mex" SourceId="1" />
   </MetadataSources>
   <Metadata>
-    <MetadataFile FileName="service.wsdl" MetadataType="Wsdl" ID="096ff70c-8e35-4490-ab45-95de8530697f" SourceId="1" SourceUrl="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost.Services/JvmDebugSessionService/mex" />
-    <MetadataFile FileName="service.xsd" MetadataType="Schema" ID="55ab1b78-70ad-4482-b953-99e8c8576387" SourceId="1" SourceUrl="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost.Services/JvmDebugSessionService/mex" />
+    <MetadataFile FileName="service.wsdl" MetadataType="Wsdl" ID="096ff70c-8e35-4490-ab45-95de8530697f" SourceId="1" SourceUrl="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost/JvmDebugSessionService/mex" />
+    <MetadataFile FileName="service.xsd" MetadataType="Schema" ID="55ab1b78-70ad-4482-b953-99e8c8576387" SourceId="1" SourceUrl="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost/JvmDebugSessionService/mex" />
   </Metadata>
   <Extensions>
     <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />

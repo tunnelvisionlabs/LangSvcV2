@@ -8,36 +8,47 @@
         /// <summary>
         /// Returns a human-readable description of this argument and its purpose.
         /// </summary>
-        string GetDescription();
-
-        /// <summary>
-        /// Performs basic sanity check of argument.
-        /// </summary>
-        bool GetIsValid(string value);
+        string Description
+        {
+            get;
+        }
 
         /// <summary>
         /// Returns a short human-readable label for this argument.
         /// </summary>
-        string GetLabel();
+        string Label
+        {
+            get;
+        }
 
         /// <summary>
         /// Indicates whether the argument must be specified.
         /// </summary>
-        bool GetMustSpecify();
+        bool Required
+        {
+            get;
+        }
 
         /// <summary>
         /// Returns a short, unique identifier for the argument.
         /// </summary>
-        string GetName();
+        string Name
+        {
+            get;
+        }
 
         /// <summary>
-        /// Sets the value of the argument.
+        /// Gets or sets the current value of the argument.
         /// </summary>
-        void SetValue(string value);
+        string StringValue
+        {
+            get;
+            set;
+        }
 
         /// <summary>
-        /// Returns the current value of the argument.
+        /// Performs basic sanity check of argument.
         /// </summary>
-        string GetValue();
+        bool IsValid(string value);
     }
 }

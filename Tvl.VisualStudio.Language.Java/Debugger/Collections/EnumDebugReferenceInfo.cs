@@ -16,11 +16,21 @@
         {
             Contract.Requires(referenceInfo != null);
         }
+        
+        protected EnumDebugReferenceInfo(DEBUG_REFERENCE_INFO[] elements, int currentIndex)
+            : base(elements, currentIndex)
+        {
+        }
 
         int IEnumDebugReferenceInfo2.Next(uint celt, DEBUG_REFERENCE_INFO[] rgelt, out uint pceltFetched)
         {
             pceltFetched = 0;
             return base.Next(celt, rgelt, ref pceltFetched);
+        }
+
+        protected override IEnumDebugReferenceInfo2 CreateClone(DEBUG_REFERENCE_INFO[] elements, int currentIndex)
+        {
+            return new EnumDebugReferenceInfo(elements, currentIndex);
         }
     }
 }

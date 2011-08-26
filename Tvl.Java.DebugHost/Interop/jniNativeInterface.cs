@@ -6,8 +6,10 @@
 namespace Tvl.Java.DebugHost.Interop
 {
     using IntPtr = System.IntPtr;
+    using System.Runtime.InteropServices;
 
-    internal struct jniNativeInterface
+    [StructLayout(LayoutKind.Sequential)]
+    internal sealed class jniNativeInterface
     {
         private IntPtr _reserved0;
         private IntPtr _reserved1;
@@ -57,85 +59,84 @@ namespace Tvl.Java.DebugHost.Interop
 
         public JniUnsafeNativeMethods.GetMethodID GetMethodID;
 
-        public JniUnsafeNativeMethods.CallObjectMethod CallObjectMethod;
-
-        public JniUnsafeNativeMethods.CallObjectMethodV CallObjectMethodV;
+        private IntPtr CallObjectMethod;
+        private IntPtr CallObjectMethodV;
         public JniUnsafeNativeMethods.CallObjectMethodA CallObjectMethodA;
 
-        public JniUnsafeNativeMethods.CallBooleanMethod CallBooleanMethod;
-        public JniUnsafeNativeMethods.CallBooleanMethodV CallBooleanMethodV;
+        private IntPtr CallBooleanMethod;
+        private IntPtr CallBooleanMethodV;
         public JniUnsafeNativeMethods.CallBooleanMethodA CallBooleanMethodA;
 
-        public JniUnsafeNativeMethods.CallByteMethod CallByteMethod;
-        public JniUnsafeNativeMethods.CallByteMethodV CallByteMethodV;
+        private IntPtr CallByteMethod;
+        private IntPtr CallByteMethodV;
         public JniUnsafeNativeMethods.CallByteMethodA CallByteMethodA;
 
-        public JniUnsafeNativeMethods.CallCharMethod CallCharMethod;
-        public JniUnsafeNativeMethods.CallCharMethodV CallCharMethodV;
+        private IntPtr CallCharMethod;
+        private IntPtr CallCharMethodV;
         public JniUnsafeNativeMethods.CallCharMethodA CallCharMethodA;
 
-        public JniUnsafeNativeMethods.CallShortMethod CallShortMethod;
-        public JniUnsafeNativeMethods.CallShortMethodV CallShortMethodV;
+        private IntPtr CallShortMethod;
+        private IntPtr CallShortMethodV;
         public JniUnsafeNativeMethods.CallShortMethodA CallShortMethodA;
 
-        public JniUnsafeNativeMethods.CallIntMethod CallIntMethod;
-        public JniUnsafeNativeMethods.CallIntMethodV CallIntMethodV;
+        private IntPtr CallIntMethod;
+        private IntPtr CallIntMethodV;
         public JniUnsafeNativeMethods.CallIntMethodA CallIntMethodA;
 
-        public JniUnsafeNativeMethods.CallLongMethod CallLongMethod;
-        public JniUnsafeNativeMethods.CallLongMethodV CallLongMethodV;
+        private IntPtr CallLongMethod;
+        private IntPtr CallLongMethodV;
         public JniUnsafeNativeMethods.CallLongMethodA CallLongMethodA;
 
-        public JniUnsafeNativeMethods.CallFloatMethod CallFloatMethod;
-        public JniUnsafeNativeMethods.CallFloatMethodV CallFloatMethodV;
+        private IntPtr CallFloatMethod;
+        private IntPtr CallFloatMethodV;
         public JniUnsafeNativeMethods.CallFloatMethodA CallFloatMethodA;
 
-        public JniUnsafeNativeMethods.CallDoubleMethod CallDoubleMethod;
-        public JniUnsafeNativeMethods.CallDoubleMethodV CallDoubleMethodV;
+        private IntPtr CallDoubleMethod;
+        private IntPtr CallDoubleMethodV;
         public JniUnsafeNativeMethods.CallDoubleMethodA CallDoubleMethodA;
 
-        public JniUnsafeNativeMethods.CallVoidMethod CallVoidMethod;
-        public JniUnsafeNativeMethods.CallVoidMethodV CallVoidMethodV;
+        private IntPtr CallVoidMethod;
+        private IntPtr CallVoidMethodV;
         public JniUnsafeNativeMethods.CallVoidMethodA CallVoidMethodA;
 
-        public JniUnsafeNativeMethods.CallNonvirtualObjectMethod CallNonvirtualObjectMethod;
-        public JniUnsafeNativeMethods.CallNonvirtualObjectMethodV CallNonvirtualObjectMethodV;
+        private IntPtr CallNonvirtualObjectMethod;
+        private IntPtr CallNonvirtualObjectMethodV;
         public JniUnsafeNativeMethods.CallNonvirtualObjectMethodA CallNonvirtualObjectMethodA;
 
-        public JniUnsafeNativeMethods.CallNonvirtualBooleanMethod CallNonvirtualBooleanMethod;
-        public JniUnsafeNativeMethods.CallNonvirtualBooleanMethodV CallNonvirtualBooleanMethodV;
+        private IntPtr CallNonvirtualBooleanMethod;
+        private IntPtr CallNonvirtualBooleanMethodV;
         public JniUnsafeNativeMethods.CallNonvirtualBooleanMethodA CallNonvirtualBooleanMethodA;
 
-        public JniUnsafeNativeMethods.CallNonvirtualByteMethod CallNonvirtualByteMethod;
-        public JniUnsafeNativeMethods.CallNonvirtualByteMethodV CallNonvirtualByteMethodV;
+        private IntPtr CallNonvirtualByteMethod;
+        private IntPtr CallNonvirtualByteMethodV;
         public JniUnsafeNativeMethods.CallNonvirtualByteMethodA CallNonvirtualByteMethodA;
 
-        public JniUnsafeNativeMethods.CallNonvirtualCharMethod CallNonvirtualCharMethod;
-        public JniUnsafeNativeMethods.CallNonvirtualCharMethodV CallNonvirtualCharMethodV;
+        private IntPtr CallNonvirtualCharMethod;
+        private IntPtr CallNonvirtualCharMethodV;
         public JniUnsafeNativeMethods.CallNonvirtualCharMethodA CallNonvirtualCharMethodA;
 
-        public JniUnsafeNativeMethods.CallNonvirtualShortMethod CallNonvirtualShortMethod;
-        public JniUnsafeNativeMethods.CallNonvirtualShortMethodV CallNonvirtualShortMethodV;
+        private IntPtr CallNonvirtualShortMethod;
+        private IntPtr CallNonvirtualShortMethodV;
         public JniUnsafeNativeMethods.CallNonvirtualShortMethodA CallNonvirtualShortMethodA;
 
-        public JniUnsafeNativeMethods.CallNonvirtualIntMethod CallNonvirtualIntMethod;
-        public JniUnsafeNativeMethods.CallNonvirtualIntMethodV CallNonvirtualIntMethodV;
+        private IntPtr CallNonvirtualIntMethod;
+        private IntPtr CallNonvirtualIntMethodV;
         public JniUnsafeNativeMethods.CallNonvirtualIntMethodA CallNonvirtualIntMethodA;
 
-        public JniUnsafeNativeMethods.CallNonvirtualLongMethod CallNonvirtualLongMethod;
-        public JniUnsafeNativeMethods.CallNonvirtualLongMethodV CallNonvirtualLongMethodV;
+        private IntPtr CallNonvirtualLongMethod;
+        private IntPtr CallNonvirtualLongMethodV;
         public JniUnsafeNativeMethods.CallNonvirtualLongMethodA CallNonvirtualLongMethodA;
 
-        public JniUnsafeNativeMethods.CallNonvirtualFloatMethod CallNonvirtualFloatMethod;
-        public JniUnsafeNativeMethods.CallNonvirtualFloatMethodV CallNonvirtualFloatMethodV;
+        private IntPtr CallNonvirtualFloatMethod;
+        private IntPtr CallNonvirtualFloatMethodV;
         public JniUnsafeNativeMethods.CallNonvirtualFloatMethodA CallNonvirtualFloatMethodA;
 
-        public JniUnsafeNativeMethods.CallNonvirtualDoubleMethod CallNonvirtualDoubleMethod;
-        public JniUnsafeNativeMethods.CallNonvirtualDoubleMethodV CallNonvirtualDoubleMethodV;
+        private IntPtr CallNonvirtualDoubleMethod;
+        private IntPtr CallNonvirtualDoubleMethodV;
         public JniUnsafeNativeMethods.CallNonvirtualDoubleMethodA CallNonvirtualDoubleMethodA;
 
-        public JniUnsafeNativeMethods.CallNonvirtualVoidMethod CallNonvirtualVoidMethod;
-        public JniUnsafeNativeMethods.CallNonvirtualVoidMethodV CallNonvirtualVoidMethodV;
+        private IntPtr CallNonvirtualVoidMethod;
+        private IntPtr CallNonvirtualVoidMethodV;
         public JniUnsafeNativeMethods.CallNonvirtualVoidMethodA CallNonvirtualVoidMethodA;
 
         public JniUnsafeNativeMethods.GetFieldID GetFieldID;
@@ -162,44 +163,44 @@ namespace Tvl.Java.DebugHost.Interop
 
         public JniUnsafeNativeMethods.GetStaticMethodID GetStaticMethodID;
 
-        public JniUnsafeNativeMethods.CallStaticObjectMethod CallStaticObjectMethod;
-        public JniUnsafeNativeMethods.CallStaticObjectMethodV CallStaticObjectMethodV;
+        private IntPtr CallStaticObjectMethod;
+        private IntPtr CallStaticObjectMethodV;
         public JniUnsafeNativeMethods.CallStaticObjectMethodA CallStaticObjectMethodA;
 
-        public JniUnsafeNativeMethods.CallStaticBooleanMethod CallStaticBooleanMethod;
-        public JniUnsafeNativeMethods.CallStaticBooleanMethodV CallStaticBooleanMethodV;
+        private IntPtr CallStaticBooleanMethod;
+        private IntPtr CallStaticBooleanMethodV;
         public JniUnsafeNativeMethods.CallStaticBooleanMethodA CallStaticBooleanMethodA;
 
-        public JniUnsafeNativeMethods.CallStaticByteMethod CallStaticByteMethod;
-        public JniUnsafeNativeMethods.CallStaticByteMethodV CallStaticByteMethodV;
+        private IntPtr CallStaticByteMethod;
+        private IntPtr CallStaticByteMethodV;
         public JniUnsafeNativeMethods.CallStaticByteMethodA CallStaticByteMethodA;
 
-        public JniUnsafeNativeMethods.CallStaticCharMethod CallStaticCharMethod;
-        public JniUnsafeNativeMethods.CallStaticCharMethodV CallStaticCharMethodV;
+        private IntPtr CallStaticCharMethod;
+        private IntPtr CallStaticCharMethodV;
         public JniUnsafeNativeMethods.CallStaticCharMethodA CallStaticCharMethodA;
 
-        public JniUnsafeNativeMethods.CallStaticShortMethod CallStaticShortMethod;
-        public JniUnsafeNativeMethods.CallStaticShortMethodV CallStaticShortMethodV;
+        private IntPtr CallStaticShortMethod;
+        private IntPtr CallStaticShortMethodV;
         public JniUnsafeNativeMethods.CallStaticShortMethodA CallStaticShortMethodA;
 
-        public JniUnsafeNativeMethods.CallStaticIntMethod CallStaticIntMethod;
-        public JniUnsafeNativeMethods.CallStaticIntMethodV CallStaticIntMethodV;
+        private IntPtr CallStaticIntMethod;
+        private IntPtr CallStaticIntMethodV;
         public JniUnsafeNativeMethods.CallStaticIntMethodA CallStaticIntMethodA;
 
-        public JniUnsafeNativeMethods.CallStaticLongMethod CallStaticLongMethod;
-        public JniUnsafeNativeMethods.CallStaticLongMethodV CallStaticLongMethodV;
+        private IntPtr CallStaticLongMethod;
+        private IntPtr CallStaticLongMethodV;
         public JniUnsafeNativeMethods.CallStaticLongMethodA CallStaticLongMethodA;
 
-        public JniUnsafeNativeMethods.CallStaticFloatMethod CallStaticFloatMethod;
-        public JniUnsafeNativeMethods.CallStaticFloatMethodV CallStaticFloatMethodV;
+        private IntPtr CallStaticFloatMethod;
+        private IntPtr CallStaticFloatMethodV;
         public JniUnsafeNativeMethods.CallStaticFloatMethodA CallStaticFloatMethodA;
 
-        public JniUnsafeNativeMethods.CallStaticDoubleMethod CallStaticDoubleMethod;
-        public JniUnsafeNativeMethods.CallStaticDoubleMethodV CallStaticDoubleMethodV;
+        private IntPtr CallStaticDoubleMethod;
+        private IntPtr CallStaticDoubleMethodV;
         public JniUnsafeNativeMethods.CallStaticDoubleMethodA CallStaticDoubleMethodA;
 
-        public JniUnsafeNativeMethods.CallStaticVoidMethod CallStaticVoidMethod;
-        public JniUnsafeNativeMethods.CallStaticVoidMethodV CallStaticVoidMethodV;
+        private IntPtr CallStaticVoidMethod;
+        private IntPtr CallStaticVoidMethodV;
         public JniUnsafeNativeMethods.CallStaticVoidMethodA CallStaticVoidMethodA;
 
         public JniUnsafeNativeMethods.GetStaticFieldID GetStaticFieldID;

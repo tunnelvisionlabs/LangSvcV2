@@ -2,15 +2,26 @@
 {
     public interface IConnectorIntegerArgument : IConnectorArgument
     {
-        int GetIntValue();
+        /// <summary>
+        /// Gets or sets the value of the argument as an integer.
+        /// </summary>
+        int Value
+        {
+            get;
+            set;
+        }
 
-        bool GetIsValid(int value);
+        int MinimumValue
+        {
+            get;
+        }
 
-        int GetMax();
+        int MaximumValue
+        {
+            get;
+        }
 
-        int GetMin();
-
-        void SetValue(int value);
+        bool IsValid(int value);
 
         string GetStringValueOf(int value);
     }

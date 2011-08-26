@@ -7,8 +7,6 @@ namespace Tvl.Java.DebugHost.Interop
 {
     using System.Runtime.InteropServices;
     using IntPtr = System.IntPtr;
-    using jlocation = System.Int64;
-    using jvalue = System.Int64;
     using jvmtiEventReserved = System.IntPtr;
 
     internal struct jvmtiEventCallbacks

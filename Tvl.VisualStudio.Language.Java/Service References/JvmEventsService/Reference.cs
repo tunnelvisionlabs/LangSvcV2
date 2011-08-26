@@ -213,7 +213,7 @@ namespace Tvl.VisualStudio.Language.Java.JvmEventsService {
         private long LocationField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private long MethodField;
+        private Tvl.VisualStudio.Language.Java.JvmEventsService.JvmMethodRemoteHandle MethodField;
         
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
             get {
@@ -238,7 +238,7 @@ namespace Tvl.VisualStudio.Language.Java.JvmEventsService {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public long Method {
+        public Tvl.VisualStudio.Language.Java.JvmEventsService.JvmMethodRemoteHandle Method {
             get {
                 return this.MethodField;
             }
@@ -246,6 +246,49 @@ namespace Tvl.VisualStudio.Language.Java.JvmEventsService {
                 if ((this.MethodField.Equals(value) != true)) {
                     this.MethodField = value;
                     this.RaisePropertyChanged("Method");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="JvmMethodRemoteHandle", Namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services")]
+    [System.SerializableAttribute()]
+    public partial struct JvmMethodRemoteHandle : System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        private long HandleField;
+        
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
+        public long Handle {
+            get {
+                return this.HandleField;
+            }
+            set {
+                if ((this.HandleField.Equals(value) != true)) {
+                    this.HandleField = value;
+                    this.RaisePropertyChanged("Handle");
                 }
             }
         }

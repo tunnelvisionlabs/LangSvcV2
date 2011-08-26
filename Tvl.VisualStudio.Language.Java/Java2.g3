@@ -961,11 +961,14 @@ expressionList
     :   expression (','! expression)*
     ;
 
-
 expression
     :   conditionalExpression (assignmentOperator^ expression)?
     ;
 
+public
+standaloneExpression
+	:	expression EOF!
+	;
 
 assignmentOperator
     :   '='

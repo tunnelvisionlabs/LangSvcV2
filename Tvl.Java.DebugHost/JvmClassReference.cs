@@ -5,12 +5,12 @@
 
     public class JvmClassReference : JvmObjectReference
     {
-        internal JvmClassReference(JvmEnvironment environment, JvmNativeEnvironment nativeEnvironment, jclass handle)
-            : base(environment, nativeEnvironment, handle)
+        internal JvmClassReference(JvmEnvironment environment, JvmNativeEnvironment nativeEnvironment, jclass handle, bool freeLocalReference)
+            : base(environment, nativeEnvironment, handle, freeLocalReference)
         {
         }
 
-        internal JvmClassReference(JvmEnvironment environment, SafeJvmGlobalReferenceHandle handle)
+        internal JvmClassReference(JvmEnvironment environment, SafeJvmWeakGlobalReferenceHandle handle)
             : base(environment, handle)
         {
         }
@@ -20,13 +20,21 @@
             return new JvmClassRemoteHandle((jclass)@class);
         }
 
-        public static JvmClassReference FromHandle(JvmEnvironment environment, JNIEnvHandle jniEnv, jclass classHandle)
+        public static explicit operator jclass(JvmClassReference @class)
+        {
+            if (@class == null)
+                return jclass.Null;
+
+            return new jclass(@class.Handle.DangerousGetHandle());
+        }
+
+        public static JvmClassReference FromHandle(JvmEnvironment environment, JNIEnvHandle jniEnv, jclass classHandle, bool freeLocalReference)
         {
             if (classHandle == jclass.Null)
                 return null;
 
             JvmNativeEnvironment nativeEnvironment = environment.GetNativeFunctionTable(jniEnv);
-            return new JvmClassReference(environment, nativeEnvironment, classHandle);
+            return new JvmClassReference(environment, nativeEnvironment, classHandle, freeLocalReference);
         }
     }
 }

@@ -100,7 +100,7 @@
         /// <summary>
         /// Creates a new disabled <see cref="IStepRequest"/>.
         /// </summary>
-        IStepRequest CreateStepRequest(IThreadReference thread, StepSize size, int depth);
+        IStepRequest CreateStepRequest(IThreadReference thread, StepSize size, StepDepth depth);
 
         /// <summary>
         /// Creates a new disabled <see cref="IThreadDeathRequest"/>.

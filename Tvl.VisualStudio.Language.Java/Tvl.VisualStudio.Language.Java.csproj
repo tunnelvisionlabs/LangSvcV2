@@ -112,6 +112,9 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.Debugger.Interop.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.Debugger.InteropA, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
@@ -265,6 +268,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BraceMatchingTaggerProvider.cs" />
+    <Compile Include="Debugger\AD7Constants.cs" />
+    <Compile Include="Debugger\BreakpointLocation.cs" />
+    <Compile Include="Debugger\BreakpointLocationCodeAddress.cs" />
+    <Compile Include="Debugger\BreakpointLocationCodeContext.cs" />
+    <Compile Include="Debugger\BreakpointLocationCodeFileLine.cs" />
+    <Compile Include="Debugger\BreakpointLocationCodeFunctionOffset.cs" />
+    <Compile Include="Debugger\BreakpointLocationCodeString.cs" />
+    <Compile Include="Debugger\BreakpointLocationDataString.cs" />
+    <Compile Include="Debugger\BreakpointLocationResolution.cs" />
+    <Compile Include="Debugger\BreakpointRequestInfo.cs" />
     <Compile Include="Debugger\BreakpointResolutionLocation.cs" />
     <Compile Include="Debugger\BreakpointResolutionLocationCode.cs" />
     <Compile Include="Debugger\BreakpointResolutionLocationData.cs" />
@@ -313,6 +326,8 @@
     <Compile Include="Debugger\Events\DebugSymbolSearchEvent.cs" />
     <Compile Include="Debugger\Events\DebugThreadDestroyEvent.cs" />
     <Compile Include="Debugger\Events\DebugThreadNameChangedEvent.cs" />
+    <Compile Include="Debugger\Extensions\DebugBreakpointRequestExtensions.cs" />
+    <Compile Include="Debugger\Extensions\DebugEventCallbackExtensions.cs" />
     <Compile Include="Debugger\Extensions\DebugEventExtensions.cs" />
     <Compile Include="Debugger\Extensions\DebugPortExtensions.cs" />
     <Compile Include="Debugger\Extensions\DebugProcessExtensions.cs" />
@@ -345,13 +360,15 @@
     <None Include="Debugger\JavaDebugPort.cs" />
     <None Include="Debugger\JavaDebugPortSupplier.cs" />
     <Compile Include="Debugger\JavaDebugProgram.cs" />
-    <Compile Include="Debugger\JavaDebugProgram.JvmEventsCallback.cs" />
+    <None Include="Debugger\JavaDebugProgram.JvmEventsCallback.cs" />
     <Compile Include="Debugger\JavaDebugProgramProvider.cs" />
     <Compile Include="Debugger\JavaDebugProperty.cs" />
     <Compile Include="Debugger\JavaDebugReference.cs" />
     <Compile Include="Debugger\JavaDebugStackFrame.cs" />
     <Compile Include="Debugger\JavaDebugThread.cs" />
     <Compile Include="Debugger\Events\DebugThreadCreateEvent.cs" />
+    <Compile Include="Debugger\JvmtiErrorHandler.cs" />
+    <Compile Include="Debugger\ThreadCategory.cs" />
     <Compile Include="Experimental\BraceLevelTracker.cs" />
     <Compile Include="Experimental\ClassAnchorTracker.cs" />
     <Compile Include="Experimental\IJavaClassifierLexerState`1.cs" />
@@ -646,6 +663,12 @@
     <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmFieldRemoteHandle.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
+    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmLineNumberEntry.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmLocalVariableEntry.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
     <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
@@ -694,6 +717,18 @@
     <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
       <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
       <Name>Tvl.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.Java.DebugInterface.Client\Tvl.Java.DebugInterface.Client.csproj">
+      <Project>{4BB229A4-3259-49E9-B05B-A4C0F3496CA6}</Project>
+      <Name>Tvl.Java.DebugInterface.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.Java.DebugInterface.Types\Tvl.Java.DebugInterface.Types.csproj">
+      <Project>{889EF7CB-9682-4D01-8757-D6FE5B460E9A}</Project>
+      <Name>Tvl.Java.DebugInterface.Types</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.Java.DebugInterface\Tvl.Java.DebugInterface.csproj">
+      <Project>{DB91E4D1-20D6-44D1-94DA-971ACEDAA0B8}</Project>
+      <Name>Tvl.Java.DebugInterface</Name>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Antlr\Tvl.VisualStudio.Language.Antlr.csproj">
       <Project>{3852C7D0-60EA-45CC-A84C-BF66B350CF3B}</Project>

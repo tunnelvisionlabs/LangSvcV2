@@ -1,18 +1,21 @@
 ﻿namespace Tvl.Java.DebugHost.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Runtime.Serialization;
+    using Tvl.Java.DebugHost.Interop;
 
     [DataContract]
     public struct JvmRemoteLocation
     {
         [DataMember]
-        public long Method;
+        public JvmMethodRemoteHandle Method;
 
         [DataMember]
-        public long Location;
+        public jlocation Location;
+
+        public JvmRemoteLocation(JvmMethodRemoteHandle method, jlocation location)
+        {
+            Method = method;
+            Location = location;
+        }
     }
 }

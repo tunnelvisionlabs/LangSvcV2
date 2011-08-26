@@ -3,8 +3,6 @@
 
 namespace Tvl.Java.DebugHost.Interop
 {
-    using jlocation = System.Int64;
-
     internal struct jvmtiFrameInfo
     {
         public readonly jmethodID _method;

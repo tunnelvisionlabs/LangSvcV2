@@ -4,6 +4,9 @@
 
     public interface IConnectorSelectedArgument : IConnectorArgument
     {
-        ReadOnlyCollection<string> GetChoices();
+        ReadOnlyCollection<string> Choices
+        {
+            get;
+        }
     }
 }

@@ -98,10 +98,29 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interop\jvmtiLocalVariableEntry.cs" />
+    <Compile Include="Interop\LocalClassReferenceHolder.cs" />
+    <Compile Include="Interop\LocalThreadReferenceHolder.cs" />
     <Compile Include="Interop\JavaVMAttachArgs.cs" />
+    <Compile Include="Interop\JavaVMHandle.cs" />
+    <Compile Include="Interop\jlocation.cs" />
+    <Compile Include="Interop\JniEnvironment.cs" />
     <Compile Include="Interop\JniErrorHandler.cs" />
     <Compile Include="Interop\jniVersion.cs" />
+    <Compile Include="Interop\jvalue.cs" />
+    <Compile Include="Interop\JvmtiEnvironment.cs" />
     <Compile Include="Interop\JvmtiErrorHandler.cs" />
+    <Compile Include="Interop\jvmtiLineNumberEntry.cs" />
+    <Compile Include="Interop\jweak.cs" />
+    <None Include="JvmThreadGroupInfo.cs" />
+    <None Include="JvmThreadInfo.cs" />
+    <None Include="SafeJvmWeakGlobalReferenceHandle.cs" />
+    <Compile Include="Interop\LocalObjectReferenceHolder.cs" />
+    <Compile Include="Services\DebugProtocolService.cs" />
+    <Compile Include="Services\DebugProtocolService.EventFilter.cs" />
+    <Compile Include="Services\DebugProtocolService.EventProcessor.cs" />
+    <Compile Include="Services\IDebugProcotolCallback.cs" />
+    <Compile Include="Services\IDebugProtocolService.cs" />
     <Compile Include="Services\IJvmDebugSessionService.cs" />
     <Compile Include="Services\IJvmEvents.cs" />
     <Compile Include="Services\IJvmEventsService.cs" />
@@ -150,27 +169,29 @@
     <Compile Include="Interop\jvmtiVersion.cs" />
     <Compile Include="Interop\ModifiedUTF8StringData.cs" />
     <Compile Include="Interop\UnsafeNativeMethods.cs" />
-    <Compile Include="JvmAddressLocationMap.cs" />
-    <Compile Include="JvmClassReference.cs" />
-    <Compile Include="JvmEnvironment.cs" />
-    <Compile Include="JvmEventManager.cs" />
-    <Compile Include="JvmEventProcessorBase.cs" />
-    <Compile Include="JvmField.cs" />
-    <Compile Include="JvmLocation.cs" />
-    <Compile Include="JvmMethod.cs" />
-    <Compile Include="JvmMonitorInfo.cs" />
-    <Compile Include="JvmNativeEnvironment.cs" />
-    <Compile Include="JvmObjectReference.cs" />
+    <None Include="JvmAddressLocationMap.cs" />
+    <None Include="JvmClassReference.cs" />
+    <None Include="JvmEnvironment.cs" />
+    <None Include="JvmEventManager.cs" />
+    <None Include="JvmEventProcessorBase.cs" />
+    <None Include="JvmField.cs" />
+    <None Include="JvmLocation.cs" />
+    <None Include="JvmMethod.cs" />
+    <None Include="JvmMonitorInfo.cs" />
+    <None Include="JvmNativeEnvironment.cs" />
+    <None Include="JvmObjectReference.cs" />
     <Compile Include="DisposableObjectCollection`1.cs" />
     <Compile Include="JvmResourceExhaustedFlags.cs" />
-    <Compile Include="JvmStackFrame.cs" />
-    <Compile Include="JvmStackInfo.cs" />
+    <None Include="JvmStackFrame.cs" />
+    <None Include="JvmStackInfo.cs" />
     <Compile Include="JvmThreadPriority.cs" />
-    <Compile Include="JvmThreadReference.cs" />
-    <Compile Include="JvmThreadGroupReference.cs" />
-    <Compile Include="JvmThreadStatus.cs" />
-    <Compile Include="Services\JvmEventsPublisher.cs" />
+    <None Include="JvmThreadReference.cs" />
+    <None Include="JvmThreadGroupReference.cs" />
+    <None Include="JvmThreadStatus.cs" />
+    <None Include="Services\JvmEventsPublisher.cs" />
     <Compile Include="Services\JvmFieldRemoteHandle.cs" />
+    <Compile Include="Services\JvmLineNumberEntry.cs" />
+    <Compile Include="Services\JvmLocalVariableEntry.cs" />
     <Compile Include="Services\JvmMethodRemoteHandle.cs" />
     <Compile Include="Services\JvmObjectRemoteHandle.cs" />
     <Compile Include="Services\JvmRemoteLocation.cs" />
@@ -178,11 +199,11 @@
     <Compile Include="Services\JvmThreadGroupRemoteHandle.cs" />
     <Compile Include="Services\JvmThreadRemoteHandle.cs" />
     <Compile Include="Services\JvmThreadRemoteInfo.cs" />
-    <Compile Include="Services\JvmToolsInterfaceService.cs" />
+    <None Include="Services\JvmToolsInterfaceService.cs" />
     <Compile Include="ModifiedUTF8Encoding.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SafeJvmAllocHandle.cs" />
-    <Compile Include="SafeJvmGlobalReferenceHandle.cs" />
+    <None Include="SafeJvmAllocHandle.cs" />
+    <None Include="SafeJvmGlobalReferenceHandle.cs" />
     <Compile Include="Services\JvmVirtualMachineRemoteHandle.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +214,10 @@
     <ProjectReference Include="..\Tvl.Java.DebugHostWrapper\Tvl.Java.DebugHostWrapper.vcxproj">
       <Project>{538F6A87-53C9-4F02-B154-2A6925715C1C}</Project>
       <Name>Tvl.Java.DebugHostWrapper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.Java.DebugInterface.Types\Tvl.Java.DebugInterface.Types.csproj">
+      <Project>{889EF7CB-9682-4D01-8757-D6FE5B460E9A}</Project>
+      <Name>Tvl.Java.DebugInterface.Types</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -3,33 +3,13 @@
     public enum StepSize
     {
         /// <summary>
-        /// Step to the next location on a different line.
+        /// Step by the minimum possible amount (often a bytecode instruction).
         /// </summary>
-        Line = -2,
+        Minimum = 0,
 
         /// <summary>
-        /// Step to the next available location.
+        /// Step to the next source line unless there is no line number information in which case a <see cref="Minimum"/> step is done instead.
         /// </summary>
-        Min = -1,
-
-        /// <summary>
-        /// Invalid step size.
-        /// </summary>
-        Invalid = 0,
-
-        /// <summary>
-        /// Step into any newly pushed frames.
-        /// </summary>
-        Into = 1,
-
-        /// <summary>
-        /// Step over any newly pushed frames.
-        /// </summary>
-        Over = 2,
-
-        /// <summary>
-        /// Step out of the current frame.
-        /// </summary>
-        Out = 3,
+        Line = 1,
     }
 }

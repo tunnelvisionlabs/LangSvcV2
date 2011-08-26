@@ -34,17 +34,14 @@ namespace Tvl.Java.DebugHost.Interop
             return x._handle != y._handle;
         }
 
+        public static explicit operator jclass(jobject @object)
+        {
+            return new jclass(@object.Handle);
+        }
+
         public static implicit operator jobject(jclass @class)
         {
             return new jobject(@class.Handle);
-        }
-
-        public static explicit operator jclass(JvmClassReference @class)
-        {
-            if (@class == null)
-                return jclass.Null;
-
-            return new jclass(@class.Handle.DangerousGetHandle());
         }
 
         public bool Equals(jclass other)

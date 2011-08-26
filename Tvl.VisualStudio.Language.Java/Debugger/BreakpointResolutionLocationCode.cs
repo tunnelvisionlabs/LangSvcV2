@@ -28,7 +28,7 @@
             finally
             {
                 if (releaseComObjects && location.unionmember1 != IntPtr.Zero)
-                    Marshal.ReleaseComObject(location.unionmember1);
+                    Marshal.Release(location.unionmember1);
             }
         }
 

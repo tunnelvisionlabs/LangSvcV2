@@ -1,8 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger.Events
 {
+    using System;
+    using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
 
     [ComVisible(true)]
     public class DebugInterceptExceptionCompleteEvent : DebugEvent, IDebugInterceptExceptionCompleteEvent2
@@ -13,6 +14,14 @@
             : base(attributes)
         {
             _cookie = cookie;
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugInterceptExceptionCompleteEvent2).GUID;
+            }
         }
 
         public int GetInterceptCookie(out ulong pqwCookie)

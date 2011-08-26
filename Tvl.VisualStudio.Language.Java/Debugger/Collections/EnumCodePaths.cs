@@ -16,5 +16,15 @@
         {
             Contract.Requires(codePaths != null);
         }
+
+        protected EnumCodePaths(CODE_PATH[] elements, int currentIndex)
+            : base(elements, currentIndex)
+        {
+        }
+
+        protected override IEnumCodePaths2 CreateClone(CODE_PATH[] elements, int currentIndex)
+        {
+            return new EnumCodePaths(elements, currentIndex);
+        }
     }
 }

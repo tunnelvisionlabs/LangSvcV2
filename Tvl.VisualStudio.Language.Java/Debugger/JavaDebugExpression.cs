@@ -6,10 +6,24 @@
     using System.Text;
     using Microsoft.VisualStudio.Debugger.Interop;
     using System.Runtime.InteropServices;
+    using Antlr.Runtime.Tree;
+    using System.Diagnostics.Contracts;
 
     [ComVisible(true)]
     public class JavaDebugExpression : IDebugExpression2
     {
+        private readonly JavaDebugExpressionContext _context;
+        private readonly CommonTree _expression;
+
+        public JavaDebugExpression(JavaDebugExpressionContext context, CommonTree expression)
+        {
+            Contract.Requires<ArgumentNullException>(context != null, "context");
+            Contract.Requires<ArgumentNullException>(expression != null, "expression");
+
+            _context = context;
+            _expression = expression;
+        }
+
         #region IDebugExpression2 Members
 
         public int Abort()

@@ -2,9 +2,9 @@
 {
     using System;
     using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
 
     [ComVisible(true)]
     public class DebugActivateDocumentEvent : DebugEvent, IDebugActivateDocumentEvent2
@@ -20,6 +20,14 @@
 
             _document = document;
             _documentContext = documentContext;
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugActivateDocumentEvent2).GUID;
+            }
         }
 
         public int GetDocument(out IDebugDocument2 ppDoc)

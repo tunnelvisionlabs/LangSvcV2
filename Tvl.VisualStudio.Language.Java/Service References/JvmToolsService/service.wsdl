@@ -96,6 +96,196 @@
       </wsp:All>
     </wsp:ExactlyOne>
   </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_IsMethodNative_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_IsMethodNative_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_IsMethodSynthetic_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_IsMethodSynthetic_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_IsMethodObsolete_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_IsMethodObsolete_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_SetNativeMethodPrefix_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_SetNativeMethodPrefix_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_SetNativeMethodPrefixes_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_SetNativeMethodPrefixes_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
   <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_SetLocalInt_Input_policy">
     <wsp:ExactlyOne>
       <wsp:All>
@@ -1180,6 +1370,500 @@
     </wsp:ExactlyOne>
   </wsp:Policy>
   <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetObjectHashCode_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetFieldName_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetFieldName_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetFieldDeclaringClass_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetFieldDeclaringClass_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetFieldModifiers_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetFieldModifiers_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_IsFieldSynthetic_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_IsFieldSynthetic_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetMethodName_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetMethodName_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetMethodDeclaringClass_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetMethodDeclaringClass_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetMethodModifiers_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetMethodModifiers_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetMaxLocals_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetMaxLocals_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetArgumentsSize_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetArgumentsSize_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetLineNumberTable_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetLineNumberTable_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetMethodLocation_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetMethodLocation_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetLocalVariableTable_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetLocalVariableTable_output_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetBytecodes_Input_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+          <sp:Header Name="To" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="From" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="FaultTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="ReplyTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="MessageID" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="RelatesTo" Namespace="http://www.w3.org/2005/08/addressing" />
+          <sp:Header Name="Action" Namespace="http://www.w3.org/2005/08/addressing" />
+        </sp:SignedParts>
+        <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <sp:Body />
+        </sp:EncryptedParts>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="WSHttpBinding_IJvmToolsInterfaceService_GetBytecodes_output_policy">
     <wsp:ExactlyOne>
       <wsp:All>
         <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
@@ -2800,10 +3484,40 @@
       <xsd:import namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
       <xsd:import namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services" />
       <xsd:import namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Interop" />
-      <xsd:import namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost" />
       <xsd:import namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+      <xsd:import namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost" />
     </xsd:schema>
   </wsdl:types>
+  <wsdl:message name="IJvmToolsInterfaceService_IsMethodNative_InputMessage">
+    <wsdl:part name="parameters" element="tns:IsMethodNative" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_IsMethodNative_OutputMessage">
+    <wsdl:part name="parameters" element="tns:IsMethodNativeResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_IsMethodSynthetic_InputMessage">
+    <wsdl:part name="parameters" element="tns:IsMethodSynthetic" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_IsMethodSynthetic_OutputMessage">
+    <wsdl:part name="parameters" element="tns:IsMethodSyntheticResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_IsMethodObsolete_InputMessage">
+    <wsdl:part name="parameters" element="tns:IsMethodObsolete" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_IsMethodObsolete_OutputMessage">
+    <wsdl:part name="parameters" element="tns:IsMethodObsoleteResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_SetNativeMethodPrefix_InputMessage">
+    <wsdl:part name="parameters" element="tns:SetNativeMethodPrefix" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_SetNativeMethodPrefix_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SetNativeMethodPrefixResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_SetNativeMethodPrefixes_InputMessage">
+    <wsdl:part name="parameters" element="tns:SetNativeMethodPrefixes" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_SetNativeMethodPrefixes_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SetNativeMethodPrefixesResponse" />
+  </wsdl:message>
   <wsdl:message name="IJvmToolsInterfaceService_SetLocalInt_InputMessage">
     <wsdl:part name="parameters" element="tns:SetLocalInt" />
   </wsdl:message>
@@ -2977,6 +3691,84 @@
   </wsdl:message>
   <wsdl:message name="IJvmToolsInterfaceService_GetObjectHashCode_OutputMessage">
     <wsdl:part name="parameters" element="tns:GetObjectHashCodeResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetFieldName_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetFieldName" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetFieldName_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetFieldNameResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetFieldDeclaringClass_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetFieldDeclaringClass" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetFieldDeclaringClass_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetFieldDeclaringClassResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetFieldModifiers_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetFieldModifiers" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetFieldModifiers_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetFieldModifiersResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_IsFieldSynthetic_InputMessage">
+    <wsdl:part name="parameters" element="tns:IsFieldSynthetic" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_IsFieldSynthetic_OutputMessage">
+    <wsdl:part name="parameters" element="tns:IsFieldSyntheticResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetMethodName_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetMethodName" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetMethodName_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetMethodNameResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetMethodDeclaringClass_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetMethodDeclaringClass" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetMethodDeclaringClass_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetMethodDeclaringClassResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetMethodModifiers_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetMethodModifiers" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetMethodModifiers_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetMethodModifiersResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetMaxLocals_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetMaxLocals" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetMaxLocals_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetMaxLocalsResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetArgumentsSize_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetArgumentsSize" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetArgumentsSize_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetArgumentsSizeResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetLineNumberTable_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetLineNumberTable" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetLineNumberTable_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetLineNumberTableResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetMethodLocation_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetMethodLocation" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetMethodLocation_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetMethodLocationResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetLocalVariableTable_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetLocalVariableTable" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetLocalVariableTable_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetLocalVariableTableResponse" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetBytecodes_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetBytecodes" />
+  </wsdl:message>
+  <wsdl:message name="IJvmToolsInterfaceService_GetBytecodes_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetBytecodesResponse" />
   </wsdl:message>
   <wsdl:message name="IJvmToolsInterfaceService_Allocate_InputMessage">
     <wsdl:part name="parameters" element="tns:Allocate" />
@@ -3231,6 +4023,26 @@
     <wsdl:part name="parameters" element="tns:SetLocalObjectResponse" />
   </wsdl:message>
   <wsdl:portType name="IJvmToolsInterfaceService">
+    <wsdl:operation name="IsMethodNative">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/IsMethodNative" message="tns:IJvmToolsInterfaceService_IsMethodNative_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/IsMethodNativeResponse" message="tns:IJvmToolsInterfaceService_IsMethodNative_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="IsMethodSynthetic">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/IsMethodSynthetic" message="tns:IJvmToolsInterfaceService_IsMethodSynthetic_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/IsMethodSyntheticResponse" message="tns:IJvmToolsInterfaceService_IsMethodSynthetic_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="IsMethodObsolete">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/IsMethodObsolete" message="tns:IJvmToolsInterfaceService_IsMethodObsolete_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/IsMethodObsoleteResponse" message="tns:IJvmToolsInterfaceService_IsMethodObsolete_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SetNativeMethodPrefix">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/SetNativeMethodPrefix" message="tns:IJvmToolsInterfaceService_SetNativeMethodPrefix_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/SetNativeMethodPrefixResponse" message="tns:IJvmToolsInterfaceService_SetNativeMethodPrefix_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SetNativeMethodPrefixes">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/SetNativeMethodPrefixes" message="tns:IJvmToolsInterfaceService_SetNativeMethodPrefixes_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/SetNativeMethodPrefixesResponse" message="tns:IJvmToolsInterfaceService_SetNativeMethodPrefixes_OutputMessage" />
+    </wsdl:operation>
     <wsdl:operation name="SetLocalInt">
       <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/SetLocalInt" message="tns:IJvmToolsInterfaceService_SetLocalInt_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/SetLocalIntResponse" message="tns:IJvmToolsInterfaceService_SetLocalInt_OutputMessage" />
@@ -3346,6 +4158,58 @@
     <wsdl:operation name="GetObjectHashCode">
       <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetObjectHashCode" message="tns:IJvmToolsInterfaceService_GetObjectHashCode_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetObjectHashCodeResponse" message="tns:IJvmToolsInterfaceService_GetObjectHashCode_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetFieldName">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetFieldName" message="tns:IJvmToolsInterfaceService_GetFieldName_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetFieldNameResponse" message="tns:IJvmToolsInterfaceService_GetFieldName_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetFieldDeclaringClass">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetFieldDeclaringClass" message="tns:IJvmToolsInterfaceService_GetFieldDeclaringClass_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetFieldDeclaringClassResponse" message="tns:IJvmToolsInterfaceService_GetFieldDeclaringClass_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetFieldModifiers">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetFieldModifiers" message="tns:IJvmToolsInterfaceService_GetFieldModifiers_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetFieldModifiersResponse" message="tns:IJvmToolsInterfaceService_GetFieldModifiers_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="IsFieldSynthetic">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/IsFieldSynthetic" message="tns:IJvmToolsInterfaceService_IsFieldSynthetic_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/IsFieldSyntheticResponse" message="tns:IJvmToolsInterfaceService_IsFieldSynthetic_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetMethodName">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetMethodName" message="tns:IJvmToolsInterfaceService_GetMethodName_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetMethodNameResponse" message="tns:IJvmToolsInterfaceService_GetMethodName_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetMethodDeclaringClass">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetMethodDeclaringClass" message="tns:IJvmToolsInterfaceService_GetMethodDeclaringClass_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetMethodDeclaringClassResponse" message="tns:IJvmToolsInterfaceService_GetMethodDeclaringClass_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetMethodModifiers">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetMethodModifiers" message="tns:IJvmToolsInterfaceService_GetMethodModifiers_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetMethodModifiersResponse" message="tns:IJvmToolsInterfaceService_GetMethodModifiers_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetMaxLocals">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetMaxLocals" message="tns:IJvmToolsInterfaceService_GetMaxLocals_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetMaxLocalsResponse" message="tns:IJvmToolsInterfaceService_GetMaxLocals_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetArgumentsSize">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetArgumentsSize" message="tns:IJvmToolsInterfaceService_GetArgumentsSize_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetArgumentsSizeResponse" message="tns:IJvmToolsInterfaceService_GetArgumentsSize_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetLineNumberTable">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetLineNumberTable" message="tns:IJvmToolsInterfaceService_GetLineNumberTable_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetLineNumberTableResponse" message="tns:IJvmToolsInterfaceService_GetLineNumberTable_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetMethodLocation">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetMethodLocation" message="tns:IJvmToolsInterfaceService_GetMethodLocation_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetMethodLocationResponse" message="tns:IJvmToolsInterfaceService_GetMethodLocation_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetLocalVariableTable">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetLocalVariableTable" message="tns:IJvmToolsInterfaceService_GetLocalVariableTable_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetLocalVariableTableResponse" message="tns:IJvmToolsInterfaceService_GetLocalVariableTable_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetBytecodes">
+      <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetBytecodes" message="tns:IJvmToolsInterfaceService_GetBytecodes_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/GetBytecodesResponse" message="tns:IJvmToolsInterfaceService_GetBytecodes_OutputMessage" />
     </wsdl:operation>
     <wsdl:operation name="Allocate">
       <wsdl:input wsaw:Action="http://tempuri.org/IJvmToolsInterfaceService/Allocate" message="tns:IJvmToolsInterfaceService_Allocate_InputMessage" />
@@ -3519,6 +4383,61 @@
   <wsdl:binding name="WSHttpBinding_IJvmToolsInterfaceService" type="tns:IJvmToolsInterfaceService">
     <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_policy" />
     <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="IsMethodNative">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/IsMethodNative" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_IsMethodNative_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_IsMethodNative_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="IsMethodSynthetic">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/IsMethodSynthetic" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_IsMethodSynthetic_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_IsMethodSynthetic_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="IsMethodObsolete">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/IsMethodObsolete" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_IsMethodObsolete_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_IsMethodObsolete_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SetNativeMethodPrefix">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/SetNativeMethodPrefix" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_SetNativeMethodPrefix_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_SetNativeMethodPrefix_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SetNativeMethodPrefixes">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/SetNativeMethodPrefixes" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_SetNativeMethodPrefixes_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_SetNativeMethodPrefixes_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="SetLocalInt">
       <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/SetLocalInt" style="document" />
       <wsdl:input>
@@ -3835,6 +4754,149 @@
       </wsdl:input>
       <wsdl:output>
         <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetObjectHashCode_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetFieldName">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/GetFieldName" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetFieldName_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetFieldName_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetFieldDeclaringClass">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/GetFieldDeclaringClass" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetFieldDeclaringClass_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetFieldDeclaringClass_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetFieldModifiers">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/GetFieldModifiers" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetFieldModifiers_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetFieldModifiers_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="IsFieldSynthetic">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/IsFieldSynthetic" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_IsFieldSynthetic_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_IsFieldSynthetic_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMethodName">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/GetMethodName" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetMethodName_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetMethodName_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMethodDeclaringClass">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/GetMethodDeclaringClass" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetMethodDeclaringClass_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetMethodDeclaringClass_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMethodModifiers">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/GetMethodModifiers" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetMethodModifiers_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetMethodModifiers_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMaxLocals">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/GetMaxLocals" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetMaxLocals_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetMaxLocals_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetArgumentsSize">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/GetArgumentsSize" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetArgumentsSize_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetArgumentsSize_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetLineNumberTable">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/GetLineNumberTable" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetLineNumberTable_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetLineNumberTable_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMethodLocation">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/GetMethodLocation" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetMethodLocation_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetMethodLocation_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetLocalVariableTable">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/GetLocalVariableTable" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetLocalVariableTable_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetLocalVariableTable_output_policy" />
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetBytecodes">
+      <soap12:operation soapAction="http://tempuri.org/IJvmToolsInterfaceService/GetBytecodes" style="document" />
+      <wsdl:input>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetBytecodes_Input_policy" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#WSHttpBinding_IJvmToolsInterfaceService_GetBytecodes_output_policy" />
         <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>

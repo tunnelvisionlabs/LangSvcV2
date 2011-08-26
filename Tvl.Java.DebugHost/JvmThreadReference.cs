@@ -9,10 +9,10 @@
 
     public class JvmThreadReference : JvmObjectReference
     {
-        private static readonly List<SafeJvmGlobalReferenceHandle> pinnedReferences = new List<SafeJvmGlobalReferenceHandle>();
+        private static readonly List<SafeJvmWeakGlobalReferenceHandle> pinnedReferences = new List<SafeJvmWeakGlobalReferenceHandle>();
 
-        internal JvmThreadReference(JvmEnvironment environment, JvmNativeEnvironment nativeEnvironment, jthread handle)
-            : base(environment, nativeEnvironment, handle)
+        internal JvmThreadReference(JvmEnvironment environment, JvmNativeEnvironment nativeEnvironment, jthread handle, bool freeLocalReference)
+            : base(environment, nativeEnvironment, handle, freeLocalReference)
         {
             Contract.Requires(environment != null);
             Contract.Requires(nativeEnvironment != null);
@@ -22,7 +22,7 @@
             pinnedReferences.Add(base.Handle);
         }
 
-        internal JvmThreadReference(JvmEnvironment environment, SafeJvmGlobalReferenceHandle handle)
+        internal JvmThreadReference(JvmEnvironment environment, SafeJvmWeakGlobalReferenceHandle handle)
             : base(environment, handle)
         {
             Contract.Requires(environment != null);
@@ -34,13 +34,21 @@
             return new JvmThreadRemoteHandle((jthread)thread);
         }
 
-        public static JvmThreadReference FromHandle(JvmEnvironment environment, JNIEnvHandle jniEnv, jthread threadHandle)
+        public static explicit operator jthread(JvmThreadReference thread)
+        {
+            if (thread == null)
+                return jthread.Null;
+
+            return new jthread(thread.Handle.DangerousGetHandle());
+        }
+
+        public static JvmThreadReference FromHandle(JvmEnvironment environment, JNIEnvHandle jniEnv, jthread threadHandle, bool freeLocalReference)
         {
             if (threadHandle == jthread.Null)
                 return null;
 
             JvmNativeEnvironment nativeEnvironment = environment.GetNativeFunctionTable(jniEnv);
-            return new JvmThreadReference(environment, nativeEnvironment, threadHandle);
+            return new JvmThreadReference(environment, nativeEnvironment, threadHandle, freeLocalReference);
         }
 
         public ReadOnlyCollection<JvmStackFrame> GetFrames()
@@ -61,7 +69,8 @@
 
         public string GetName()
         {
-            jvmtiThreadInfo info = Environment.GetThreadInfo(this);
+            jvmtiThreadInfo info;
+            Environment.RawInterface.GetThreadInfo(Environment.Handle, (jthread)this, out info);
             return info.Name;
         }
 
@@ -102,8 +111,9 @@
 
         public JvmThreadGroupReference GetThreadGroup()
         {
-            jvmtiThreadInfo threadInfo = Environment.GetThreadInfo(this);
-            return new JvmThreadGroupReference(Environment, Handle.NativeEnvironment, threadInfo._threadGroup);
+            throw new NotImplementedException();
+            //JvmThreadInfo threadInfo = Environment.GetThreadInfo(this);
+            //return threadInfo.ThreadGroup;
         }
     }
 }

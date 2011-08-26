@@ -6,18 +6,18 @@
     public static class JavaVMUnsafeNativeMethods
     {
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate int DestroyJavaVM(JavaVM vm);
+        public delegate int DestroyJavaVM(JavaVMHandle vm);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate int AttachCurrentThread(JavaVM vm, out JNIEnvHandle penv, ref JavaVMAttachArgs args);
+        public delegate int AttachCurrentThread(JavaVMHandle vm, out JNIEnvHandle penv, ref JavaVMAttachArgs args);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate int DetachCurrentThread(JavaVM vm);
+        public delegate int DetachCurrentThread(JavaVMHandle vm);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate int GetEnv(JavaVM vm, out jvmtiEnvHandle penv, jvmtiVersion version);
+        public delegate int GetEnv(JavaVMHandle vm, out jvmtiEnvHandle penv, jvmtiVersion version);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate int AttachCurrentThreadAsDaemon(JavaVM vm, out JNIEnvHandle penv, ref JavaVMAttachArgs args);
+        public delegate int AttachCurrentThreadAsDaemon(JavaVMHandle vm, out JNIEnvHandle penv, ref JavaVMAttachArgs args);
     }
 }

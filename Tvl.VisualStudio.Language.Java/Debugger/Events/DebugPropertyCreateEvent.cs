@@ -2,9 +2,9 @@
 {
     using System;
     using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
 
     [ComVisible(true)]
     public class DebugPropertyCreateEvent : DebugEvent, IDebugPropertyCreateEvent2
@@ -17,6 +17,14 @@
             Contract.Requires<ArgumentNullException>(property != null, "property");
 
             _property = property;
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugPropertyCreateEvent2).GUID;
+            }
         }
 
         public int GetDebugProperty(out IDebugProperty2 ppProperty)

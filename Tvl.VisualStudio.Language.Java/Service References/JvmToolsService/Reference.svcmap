@@ -26,8 +26,8 @@
     <MetadataFile FileName="service1.xsd" MetadataType="Schema" ID="859d4676-a3ba-4b13-bda8-4af46412e39f" SourceId="1" SourceUrl="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost/JvmToolsInterfaceService/mex" />
     <MetadataFile FileName="Tvl.Java.DebugHost.Services.xsd" MetadataType="Schema" ID="70b57e70-06e2-4cfc-9c74-738e2ce2098f" SourceId="1" SourceUrl="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost/JvmToolsInterfaceService/mex" />
     <MetadataFile FileName="Tvl.Java.DebugHost.Interop.xsd" MetadataType="Schema" ID="30bf752b-f0eb-4f29-8f66-3544bd857f11" SourceId="1" SourceUrl="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost/JvmToolsInterfaceService/mex" />
-    <MetadataFile FileName="Tvl.Java.DebugHost.xsd" MetadataType="Schema" ID="a952c955-1db2-4b7a-8f77-6cc68e99c82b" SourceId="1" SourceUrl="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost/JvmToolsInterfaceService/mex" />
     <MetadataFile FileName="Arrays.xsd" MetadataType="Schema" ID="19ff3d93-73f6-4f07-9cff-90439ee1c41e" SourceId="1" SourceUrl="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost/JvmToolsInterfaceService/mex" />
+    <MetadataFile FileName="Tvl.Java.DebugHost.xsd" MetadataType="Schema" ID="a952c955-1db2-4b7a-8f77-6cc68e99c82b" SourceId="1" SourceUrl="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost/JvmToolsInterfaceService/mex" />
   </Metadata>
   <Extensions>
     <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />

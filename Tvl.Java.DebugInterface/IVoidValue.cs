@@ -5,7 +5,7 @@
     /// <summary>
     /// Provides access to a primitive void value in the target VM.
     /// </summary>
-    public interface IVoidValue : IMirror, IValue, IEquatable<IVoidValue>
+    public interface IVoidValue : IValue, IEquatable<IVoidValue>
     {
     }
 }

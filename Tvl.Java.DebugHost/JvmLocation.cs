@@ -2,7 +2,6 @@
 {
     using System;
     using Tvl.Java.DebugHost.Interop;
-    using jlocation = System.Int64;
 
     public class JvmLocation
     {

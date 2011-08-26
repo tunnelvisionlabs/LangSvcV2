@@ -2,7 +2,6 @@
 {
     using Tvl.Java.DebugHost.Interop;
     using IntPtr = System.IntPtr;
-    using jvalue = System.Int64;
 
     public abstract class JvmEventProcessorBase
     {

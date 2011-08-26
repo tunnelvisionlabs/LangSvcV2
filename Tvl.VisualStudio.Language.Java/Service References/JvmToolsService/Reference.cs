@@ -58,9 +58,9 @@ namespace Tvl.VisualStudio.Language.Java.JvmToolsService {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="JvmThreadRemoteHandle", Namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="JvmMethodRemoteHandle", Namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services")]
     [System.SerializableAttribute()]
-    public partial struct JvmThreadRemoteHandle : System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+    public partial struct JvmMethodRemoteHandle : System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
         
         [System.NonSerializedAttribute()]
         private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
@@ -253,6 +253,49 @@ namespace Tvl.VisualStudio.Language.Java.JvmToolsService {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="JvmThreadRemoteHandle", Namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services")]
+    [System.SerializableAttribute()]
+    public partial struct JvmThreadRemoteHandle : System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        private long HandleField;
+        
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
+        public long Handle {
+            get {
+                return this.HandleField;
+            }
+            set {
+                if ((this.HandleField.Equals(value) != true)) {
+                    this.HandleField = value;
+                    this.RaisePropertyChanged("Handle");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="JvmRemoteLocation", Namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services")]
     [System.SerializableAttribute()]
     public partial struct JvmRemoteLocation : System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
@@ -264,7 +307,7 @@ namespace Tvl.VisualStudio.Language.Java.JvmToolsService {
         private long LocationField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private long MethodField;
+        private Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle MethodField;
         
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
             get {
@@ -289,7 +332,7 @@ namespace Tvl.VisualStudio.Language.Java.JvmToolsService {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public long Method {
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle Method {
             get {
                 return this.MethodField;
             }
@@ -532,14 +575,16 @@ namespace Tvl.VisualStudio.Language.Java.JvmToolsService {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="JvmMethodRemoteHandle", Namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="JvmLineNumberEntry", Namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services")]
     [System.SerializableAttribute()]
-    public partial struct JvmMethodRemoteHandle : System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+    public partial struct JvmLineNumberEntry : System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
         
         [System.NonSerializedAttribute()]
         private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
         
-        private long HandleField;
+        private int LineNumberField;
+        
+        private Tvl.VisualStudio.Language.Java.JvmToolsService.JvmRemoteLocation StartLocationField;
         
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
             get {
@@ -551,14 +596,145 @@ namespace Tvl.VisualStudio.Language.Java.JvmToolsService {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
-        public long Handle {
+        public int LineNumber {
             get {
-                return this.HandleField;
+                return this.LineNumberField;
             }
             set {
-                if ((this.HandleField.Equals(value) != true)) {
-                    this.HandleField = value;
-                    this.RaisePropertyChanged("Handle");
+                if ((this.LineNumberField.Equals(value) != true)) {
+                    this.LineNumberField = value;
+                    this.RaisePropertyChanged("LineNumber");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.JvmRemoteLocation StartLocation {
+            get {
+                return this.StartLocationField;
+            }
+            set {
+                if ((this.StartLocationField.Equals(value) != true)) {
+                    this.StartLocationField = value;
+                    this.RaisePropertyChanged("StartLocation");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="JvmLocalVariableEntry", Namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugHost.Services")]
+    [System.SerializableAttribute()]
+    public partial struct JvmLocalVariableEntry : System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        private string GenericSignatureField;
+        
+        private int LengthField;
+        
+        private string NameField;
+        
+        private string SignatureField;
+        
+        private int SlotField;
+        
+        private Tvl.VisualStudio.Language.Java.JvmToolsService.JvmRemoteLocation StartLocationField;
+        
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
+        public string GenericSignature {
+            get {
+                return this.GenericSignatureField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.GenericSignatureField, value) != true)) {
+                    this.GenericSignatureField = value;
+                    this.RaisePropertyChanged("GenericSignature");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
+        public int Length {
+            get {
+                return this.LengthField;
+            }
+            set {
+                if ((this.LengthField.Equals(value) != true)) {
+                    this.LengthField = value;
+                    this.RaisePropertyChanged("Length");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
+        public string Name {
+            get {
+                return this.NameField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.NameField, value) != true)) {
+                    this.NameField = value;
+                    this.RaisePropertyChanged("Name");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
+        public string Signature {
+            get {
+                return this.SignatureField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.SignatureField, value) != true)) {
+                    this.SignatureField = value;
+                    this.RaisePropertyChanged("Signature");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
+        public int Slot {
+            get {
+                return this.SlotField;
+            }
+            set {
+                if ((this.SlotField.Equals(value) != true)) {
+                    this.SlotField = value;
+                    this.RaisePropertyChanged("Slot");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.JvmRemoteLocation StartLocation {
+            get {
+                return this.StartLocationField;
+            }
+            set {
+                if ((this.StartLocationField.Equals(value) != true)) {
+                    this.StartLocationField = value;
+                    this.RaisePropertyChanged("StartLocation");
                 }
             }
         }
@@ -813,6 +989,21 @@ namespace Tvl.VisualStudio.Language.Java.JvmToolsService {
     [System.ServiceModel.ServiceContractAttribute(ConfigurationName="JvmToolsService.IJvmToolsInterfaceService")]
     public interface IJvmToolsInterfaceService {
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/IsMethodNative", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/IsMethodNativeResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError IsMethodNative(out bool isNative, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/IsMethodSynthetic", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/IsMethodSyntheticResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError IsMethodSynthetic(out bool isSynthetic, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/IsMethodObsolete", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/IsMethodObsoleteResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError IsMethodObsolete(out bool isObsolete, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/SetNativeMethodPrefix", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/SetNativeMethodPrefixResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError SetNativeMethodPrefix(Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, string prefix);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/SetNativeMethodPrefixes", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/SetNativeMethodPrefixesResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError SetNativeMethodPrefixes(Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, string[] prefixes);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/SetLocalInt", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/SetLocalIntResponse")]
         Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError SetLocalInt(Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmThreadRemoteHandle thread, int depth, int slot, int value);
         
@@ -899,6 +1090,45 @@ namespace Tvl.VisualStudio.Language.Java.JvmToolsService {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/GetObjectHashCode", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/GetObjectHashCodeResponse")]
         Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetObjectHashCode(out int hashCode, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmObjectRemoteHandle @object);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/GetFieldName", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/GetFieldNameResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetFieldName(out string name, out string signature, out string generic, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmFieldRemoteHandle field);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/GetFieldDeclaringClass", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/GetFieldDeclaringClassResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetFieldDeclaringClass(out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmClassRemoteHandle declaringClass, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmFieldRemoteHandle field);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/GetFieldModifiers", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/GetFieldModifiersResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetFieldModifiers(out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmAccessModifiers modifiers, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmFieldRemoteHandle field);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/IsFieldSynthetic", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/IsFieldSyntheticResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError IsFieldSynthetic(out bool isSynthetic, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmFieldRemoteHandle field);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/GetMethodName", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/GetMethodNameResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetMethodName(out string name, out string signature, out string generic, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/GetMethodDeclaringClass", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/GetMethodDeclaringClassResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetMethodDeclaringClass(out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmClassRemoteHandle declaringClass, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/GetMethodModifiers", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/GetMethodModifiersResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetMethodModifiers(out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmAccessModifiers modifiers, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/GetMaxLocals", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/GetMaxLocalsResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetMaxLocals(out int maxLocals, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/GetArgumentsSize", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/GetArgumentsSizeResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetArgumentsSize(out int size, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/GetLineNumberTable", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/GetLineNumberTableResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetLineNumberTable(out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmLineNumberEntry[] lineNumbers, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/GetMethodLocation", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/GetMethodLocationResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetMethodLocation(out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmRemoteLocation startLocation, out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmRemoteLocation endLocation, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/GetLocalVariableTable", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/GetLocalVariableTableResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetLocalVariableTable(out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmLocalVariableEntry[] localVariables, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/GetBytecodes", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/GetBytecodesResponse")]
+        Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetBytecodes(out byte[] bytecode, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IJvmToolsInterfaceService/Allocate", ReplyAction="http://tempuri.org/IJvmToolsInterfaceService/AllocateResponse")]
         Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError Allocate(out long address, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, long size);
@@ -1054,6 +1284,26 @@ namespace Tvl.VisualStudio.Language.Java.JvmToolsService {
                 base(binding, remoteAddress) {
         }
         
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError IsMethodNative(out bool isNative, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method) {
+            return base.Channel.IsMethodNative(out isNative, virtualMachine, method);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError IsMethodSynthetic(out bool isSynthetic, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method) {
+            return base.Channel.IsMethodSynthetic(out isSynthetic, virtualMachine, method);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError IsMethodObsolete(out bool isObsolete, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method) {
+            return base.Channel.IsMethodObsolete(out isObsolete, virtualMachine, method);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError SetNativeMethodPrefix(Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, string prefix) {
+            return base.Channel.SetNativeMethodPrefix(virtualMachine, prefix);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError SetNativeMethodPrefixes(Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, string[] prefixes) {
+            return base.Channel.SetNativeMethodPrefixes(virtualMachine, prefixes);
+        }
+        
         public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError SetLocalInt(Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmThreadRemoteHandle thread, int depth, int slot, int value) {
             return base.Channel.SetLocalInt(virtualMachine, thread, depth, slot, value);
         }
@@ -1168,6 +1418,58 @@ namespace Tvl.VisualStudio.Language.Java.JvmToolsService {
         
         public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetObjectHashCode(out int hashCode, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmObjectRemoteHandle @object) {
             return base.Channel.GetObjectHashCode(out hashCode, virtualMachine, @object);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetFieldName(out string name, out string signature, out string generic, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmFieldRemoteHandle field) {
+            return base.Channel.GetFieldName(out name, out signature, out generic, virtualMachine, field);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetFieldDeclaringClass(out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmClassRemoteHandle declaringClass, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmFieldRemoteHandle field) {
+            return base.Channel.GetFieldDeclaringClass(out declaringClass, virtualMachine, field);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetFieldModifiers(out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmAccessModifiers modifiers, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmFieldRemoteHandle field) {
+            return base.Channel.GetFieldModifiers(out modifiers, virtualMachine, field);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError IsFieldSynthetic(out bool isSynthetic, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmFieldRemoteHandle field) {
+            return base.Channel.IsFieldSynthetic(out isSynthetic, virtualMachine, field);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetMethodName(out string name, out string signature, out string generic, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method) {
+            return base.Channel.GetMethodName(out name, out signature, out generic, virtualMachine, method);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetMethodDeclaringClass(out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmClassRemoteHandle declaringClass, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method) {
+            return base.Channel.GetMethodDeclaringClass(out declaringClass, virtualMachine, method);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetMethodModifiers(out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmAccessModifiers modifiers, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method) {
+            return base.Channel.GetMethodModifiers(out modifiers, virtualMachine, method);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetMaxLocals(out int maxLocals, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method) {
+            return base.Channel.GetMaxLocals(out maxLocals, virtualMachine, method);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetArgumentsSize(out int size, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method) {
+            return base.Channel.GetArgumentsSize(out size, virtualMachine, method);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetLineNumberTable(out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmLineNumberEntry[] lineNumbers, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method) {
+            return base.Channel.GetLineNumberTable(out lineNumbers, virtualMachine, method);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetMethodLocation(out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmRemoteLocation startLocation, out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmRemoteLocation endLocation, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method) {
+            return base.Channel.GetMethodLocation(out startLocation, out endLocation, virtualMachine, method);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetLocalVariableTable(out Tvl.VisualStudio.Language.Java.JvmToolsService.JvmLocalVariableEntry[] localVariables, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method) {
+            return base.Channel.GetLocalVariableTable(out localVariables, virtualMachine, method);
+        }
+        
+        public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError GetBytecodes(out byte[] bytecode, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle method) {
+            return base.Channel.GetBytecodes(out bytecode, virtualMachine, method);
         }
         
         public Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError Allocate(out long address, Tvl.VisualStudio.Language.Java.JvmToolsService.JvmVirtualMachineRemoteHandle virtualMachine, long size) {

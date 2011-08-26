@@ -7,19 +7,19 @@
     public class JvmObjectReference : IDisposable
     {
         private readonly JvmEnvironment _environment;
-        private readonly SafeJvmGlobalReferenceHandle _handle;
+        private readonly SafeJvmWeakGlobalReferenceHandle _handle;
 
-        internal JvmObjectReference(JvmEnvironment environment, JvmNativeEnvironment nativeEnvironment, jobject handle)
+        internal JvmObjectReference(JvmEnvironment environment, JvmNativeEnvironment nativeEnvironment, jobject handle, bool freeLocalReference)
         {
             Contract.Requires<ArgumentNullException>(environment != null, "environment");
             Contract.Requires<ArgumentNullException>(nativeEnvironment != null, "nativeEnvironment");
             Contract.Requires<ArgumentException>(handle != jobject.Null);
 
             _environment = environment;
-            _handle = nativeEnvironment.NewGlobalReference(handle);
+            _handle = nativeEnvironment.NewWeakGlobalReference(handle);
         }
 
-        internal JvmObjectReference(JvmEnvironment environment, SafeJvmGlobalReferenceHandle handle)
+        internal JvmObjectReference(JvmEnvironment environment, SafeJvmWeakGlobalReferenceHandle handle)
         {
             Contract.Requires<ArgumentNullException>(environment != null, "environment");
             Contract.Requires<ArgumentNullException>(handle != null, "handle");
@@ -36,7 +36,7 @@
             }
         }
 
-        protected internal SafeJvmGlobalReferenceHandle Handle
+        protected internal SafeJvmWeakGlobalReferenceHandle Handle
         {
             get
             {
@@ -44,13 +44,13 @@
             }
         }
 
-        public static JvmObjectReference FromHandle(JvmEnvironment environment, JNIEnvHandle jniEnv, jobject objectHandle)
+        public static JvmObjectReference FromHandle(JvmEnvironment environment, JNIEnvHandle jniEnv, jobject objectHandle, bool freeLocalReference)
         {
             if (objectHandle == jobject.Null)
                 return null;
 
             JvmNativeEnvironment nativeEnvironment = environment.GetNativeFunctionTable(jniEnv);
-            return new JvmObjectReference(environment, nativeEnvironment, objectHandle);
+            return new JvmObjectReference(environment, nativeEnvironment, objectHandle, freeLocalReference);
         }
 
         public void Dispose()
@@ -61,7 +61,7 @@
 
         protected virtual void Dispose(bool disposing)
         {
-            SafeJvmGlobalReferenceHandle handle = _handle;
+            SafeJvmWeakGlobalReferenceHandle handle = _handle;
             if (handle != null)
                 handle.Dispose();
         }

@@ -7,7 +7,7 @@
     /// <summary>
     /// The type of an object in a target VM.
     /// </summary>
-    public interface IReferenceType : IEquatable<IReferenceType>
+    public interface IReferenceType : IType, IAccessible, IEquatable<IReferenceType>
     {
         /// <summary>
         /// Returns a list containing each <see cref="IField"/> declared in this type.
@@ -152,11 +152,6 @@
         /// Returns a list containing each visible <see cref="IMethod"/> that has the given name and signature.
         /// </summary>
         ReadOnlyCollection<IMethod> GetMethodsByName(string name, string signature);
-
-        /// <summary>
-        /// Gets the fully qualified name of this type.
-        /// </summary>
-        string GetName();
 
         /// <summary>
         /// Returns a list containing <see cref="IReferenceType"/> objects that are declared within this

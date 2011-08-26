@@ -2,9 +2,9 @@
 {
     using System;
     using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
 
     [ComVisible(true)]
     public class DebugBeforeSymbolSearchEvent : DebugEvent, IDebugBeforeSymbolSearchEvent2
@@ -18,6 +18,14 @@
             Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(moduleName));
 
             _moduleName = moduleName;
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugBeforeSymbolSearchEvent2).GUID;
+            }
         }
 
         public int GetModuleName(out string pbstrModuleName)

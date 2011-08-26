@@ -1,8 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger.Events
 {
     using System;
-    using Microsoft.VisualStudio.Debugger.Interop;
     using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio.Debugger.Interop;
 
     [ComVisible(true)]
     public class DebugCanStopEvent : DebugEvent, IDebugCanStopEvent2
@@ -11,6 +11,14 @@
             : base(attributes)
         {
             throw new NotImplementedException();
+        }
+
+        public override Guid EventGuid
+        {
+            get
+            {
+                return typeof(IDebugCanStopEvent2).GUID;
+            }
         }
 
         public int CanStop(int fCanStop)

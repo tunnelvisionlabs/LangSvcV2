@@ -7,19 +7,28 @@
 
     public class JvmThreadGroupReference : JvmObjectReference
     {
-        internal JvmThreadGroupReference(JvmEnvironment environment, JvmNativeEnvironment nativeEnvironment, jthreadGroup handle)
-            : base(environment, nativeEnvironment, handle)
+        internal JvmThreadGroupReference(JvmEnvironment environment, JvmNativeEnvironment nativeEnvironment, jthreadGroup handle, bool freeLocalReference)
+            : base(environment, nativeEnvironment, handle, freeLocalReference)
         {
             Contract.Requires(environment != null);
             Contract.Requires(nativeEnvironment != null);
             Contract.Requires(handle != jthreadGroup.Null);
         }
 
-        internal JvmThreadGroupReference(JvmEnvironment environment, SafeJvmGlobalReferenceHandle handle)
+        internal JvmThreadGroupReference(JvmEnvironment environment, SafeJvmWeakGlobalReferenceHandle handle)
             : base(environment, handle)
         {
             Contract.Requires(environment != null);
             Contract.Requires(handle != null);
+        }
+
+        public static JvmThreadGroupReference FromHandle(JvmEnvironment environment, JNIEnvHandle jniEnv, jthreadGroup objectHandle, bool freeLocalReference)
+        {
+            if (objectHandle == jobject.Null)
+                return null;
+
+            JvmNativeEnvironment nativeEnvironment = environment.GetNativeFunctionTable(jniEnv);
+            return new JvmThreadGroupReference(environment, nativeEnvironment, objectHandle, freeLocalReference);
         }
 
         public string GetName()
@@ -29,7 +38,7 @@
 
         public JvmThreadGroupReference GetParent()
         {
-            return new JvmThreadGroupReference(Environment, Handle.NativeEnvironment, GetInfo()._parent);
+            return GetInfo().Parent;
         }
 
         public void Suspend()
@@ -58,7 +67,7 @@
             return new ReadOnlyCollection<JvmThreadReference>(threads);
         }
 
-        private jvmtiThreadGroupInfo GetInfo()
+        private JvmThreadGroupInfo GetInfo()
         {
             return Environment.GetThreadGroupInfo(this);
         }

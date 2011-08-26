@@ -7,14 +7,13 @@
     public interface IConnectorBooleanArgument : IConnectorArgument
     {
         /// <summary>
-        /// Return the value of the argument as a bool.
+        /// Gets or sets the value of the argument as a bool.
         /// </summary>
-        bool GetBooleanValue();
-
-        /// <summary>
-        /// Sets the value of the argument.
-        /// </summary>
-        void SetValue(bool value);
+        bool Value
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Return the string representation of the <param name="value"/> parameter.

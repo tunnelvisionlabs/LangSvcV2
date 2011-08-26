@@ -4,12 +4,19 @@
 namespace Tvl.Java.DebugHost.Interop
 {
     using System;
+    using Tvl.Java.DebugHost.Services;
+    using Tvl.Java.DebugInterface.Types;
 
-    internal struct jmethodID : IEquatable<jmethodID>
+    public struct jmethodID : IEquatable<jmethodID>
     {
         public static readonly jmethodID Null = default(jmethodID);
 
         private readonly IntPtr _handle;
+
+        public jmethodID(IntPtr handle)
+        {
+            _handle = handle;
+        }
 
         internal IntPtr Handle
         {
@@ -29,9 +36,19 @@ namespace Tvl.Java.DebugHost.Interop
             return x._handle != y._handle;
         }
 
-        public static explicit operator jmethodID(JvmMethod method)
+        public static explicit operator jmethodID(JvmMethodRemoteHandle methodHandle)
         {
-            return method.MethodId;
+            return new jmethodID((IntPtr)methodHandle.Handle);
+        }
+
+        public static implicit operator jmethodID(MethodId methodHandle)
+        {
+            return new jmethodID((IntPtr)methodHandle.Handle);
+        }
+
+        public static implicit operator MethodId(jmethodID methodHandle)
+        {
+            return new MethodId(methodHandle.Handle.ToInt64());
         }
 
         public bool Equals(jmethodID other)

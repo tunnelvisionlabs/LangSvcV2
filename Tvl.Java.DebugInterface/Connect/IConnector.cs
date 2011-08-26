@@ -16,21 +16,33 @@
         /// <summary>
         /// Returns the arguments accepted by this connector and their default values.
         /// </summary>
-        IDictionary<string, IConnectorArgument> GetDefaultArguments();
+        IDictionary<string, IConnectorArgument> DefaultArguments
+        {
+            get;
+        }
 
         /// <summary>
         /// Returns a human-readable description of this connector and its purpose.
         /// </summary>
-        string GetDescription();
+        string Description
+        {
+            get;
+        }
 
         /// <summary>
         /// Returns a short identifier for the connector.
         /// </summary>
-        string GetName();
+        string Name
+        {
+            get;
+        }
 
         /// <summary>
         /// Returns the transport mechanism used by this connector to establish connections with a target VM.
         /// </summary>
-        ITransport GetTransport();
+        ITransport Transport
+        {
+            get;
+        }
     }
 }

@@ -1,7 +1,7 @@
 ﻿namespace Tvl.Java.DebugHost.Services
 {
-    using System;
     using System.Runtime.Serialization;
+    using JavaVMHandle = Tvl.Java.DebugHost.Interop.JavaVMHandle;
 
     [DataContract]
     public struct JvmVirtualMachineRemoteHandle
@@ -9,9 +9,9 @@
         [DataMember(IsRequired = true)]
         public long Handle;
 
-        public JvmVirtualMachineRemoteHandle(IntPtr handle)
+        public JvmVirtualMachineRemoteHandle(JavaVMHandle handle)
         {
-            Handle = handle.ToInt64();
+            Handle = handle.Handle.ToInt64();
         }
     }
 }

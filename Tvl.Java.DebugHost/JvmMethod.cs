@@ -41,6 +41,11 @@
             return signature;
         }
 
+        public static explicit operator jmethodID(JvmMethod method)
+        {
+            return method.MethodId;
+        }
+
         public bool IsAbstract()
         {
             return (GetModifiers() & JvmAccessModifiers.Abstract) != 0;
