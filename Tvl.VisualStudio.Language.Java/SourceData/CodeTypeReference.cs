@@ -4,7 +4,7 @@
 
     public class CodeTypeReference
     {
-        private string _name;
+        //private string _name;
 
         public CodeType Resolve()
         {
