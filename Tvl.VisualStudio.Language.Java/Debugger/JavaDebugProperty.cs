@@ -18,6 +18,7 @@
         private readonly IDebugProperty2 _parent;
         private readonly string _name;
         private readonly string _fullName;
+        private readonly IField _field;
 
         /* The property could be a java.lang.Object property even if the value it hold is a java.lang.String
          * (or any other object type). _propertyType is the type of this property and is assignable from
@@ -26,7 +27,7 @@
         private readonly IType _propertyType;
         private readonly IValue _value;
 
-        public JavaDebugProperty(IDebugProperty2 parent, string name, string fullName, IType propertyType, IValue value)
+        public JavaDebugProperty(IDebugProperty2 parent, string name, string fullName, IType propertyType, IValue value, IField field = null)
         {
             Contract.Requires<ArgumentNullException>(name != null, "name");
             Contract.Requires<ArgumentNullException>(fullName != null, "fullName");
@@ -37,6 +38,7 @@
             _fullName = fullName;
             _propertyType = propertyType;
             _value = value;
+            _field = field;
         }
 
         #region IDebugProperty2 Members
@@ -170,23 +172,37 @@
             {
                 IReferenceType objectType = objectReference.GetReferenceType();
                 ReadOnlyCollection<IField> fields = objectType.GetFields(false);
+                List<IField> staticFields = new List<IField>(fields.Where(i => i.GetIsStatic()));
 
                 foreach (var field in fields)
                 {
+                    if (field.GetIsStatic())
+                        continue;
+
                     propertyInfo[0] = default(DEBUG_PROPERTY_INFO);
 
                     if (getValue || getProperty)
                     {
-                        string name = field.GetName();
-                        IType propertyType = field.GetFieldType();
-                        IValue value = objectReference.GetValue(field);
-                        JavaDebugProperty property = new JavaDebugProperty(this, name, this._fullName + "." + name, propertyType, value);
-                        int hr = property.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo);
-                        if (ErrorHandler.Failed(hr))
-                            return hr;
+                        IDebugProperty2 property;
+                        try
+                        {
+                            string name = field.GetName();
+                            IType propertyType = field.GetFieldType();
+                            IValue value = objectReference.GetValue(field);
+                            property = new JavaDebugProperty(this, name, this._fullName + "." + name, propertyType, value, field);
+                            ErrorHandler.ThrowOnFailure(property.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo));
+                        }
+                        catch (Exception e)
+                        {
+                            if (ErrorHandler.IsCriticalException(e))
+                                throw;
 
-                        properties.Add(propertyInfo[0]);
-                        continue;
+                            string name = field.GetName();
+                            IType propertyType = field.GetFieldType();
+                            IValue value = field.GetVirtualMachine().GetMirrorOf(0);
+                            property = new JavaDebugProperty(this, name, this._fullName + "." + name, propertyType, value, field);
+                            ErrorHandler.ThrowOnFailure(property.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo));
+                        }
                     }
                     else
                     {
@@ -212,6 +228,12 @@
                         {
                             if (field.GetIsStatic())
                                 propertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_STORAGE_STATIC;
+                            if (field.GetIsPrivate())
+                                propertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_PRIVATE;
+                            if (field.GetIsProtected())
+                                propertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_PROTECTED;
+                            if (field.GetIsPublic())
+                                propertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_PUBLIC;
 
                             propertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_VALUE_READONLY;
                             propertyInfo[0].dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_ATTRIB;
@@ -261,6 +283,18 @@
 #endif
                         }
                     }
+
+                    properties.Add(propertyInfo[0]);
+                    continue;
+                }
+
+                if (staticFields.Count > 0)
+                {
+                    propertyInfo[0] = default(DEBUG_PROPERTY_INFO);
+
+                    JavaDebugStaticMembersPseudoProperty property = new JavaDebugStaticMembersPseudoProperty(this, objectType, staticFields);
+                    ErrorHandler.ThrowOnFailure(property.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo));
+                    properties.Add(propertyInfo[0]);
                 }
             }
 
@@ -293,7 +327,7 @@
                 return AD7Constants.S_GETDERIVEDMOST_NO_DERIVED_MOST;
 
             string castName = string.Format("({0})({1})", valueReferenceType.GetName(), _fullName);
-            ppDerivedMost = new JavaDebugProperty(this, _name, castName, valueReferenceType, _value);
+            ppDerivedMost = new JavaDebugProperty(this, _name, castName, valueReferenceType, _value, _field);
             return VSConstants.S_OK;
         }
 
@@ -483,6 +517,16 @@
 
             if (getAttributes)
             {
+                if (_field != null)
+                {
+                    if (_field.GetIsPrivate())
+                        pPropertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_PRIVATE;
+                    if (_field.GetIsProtected())
+                        pPropertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_PROTECTED;
+                    if (_field.GetIsPublic())
+                        pPropertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_PUBLIC;
+                }
+
                 pPropertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_VALUE_READONLY;
                 pPropertyInfo[0].dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_ATTRIB;
 #if false

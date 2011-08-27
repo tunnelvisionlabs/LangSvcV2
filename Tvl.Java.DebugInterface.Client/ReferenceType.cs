@@ -128,12 +128,39 @@
 
         public IValue GetValue(IField field)
         {
-            throw new NotImplementedException();
+            Field localField = field as Field;
+            if (localField == null)
+                throw new VirtualMachineMismatchException();
+
+            Types.Value[] values;
+            FieldId[] fields = { localField.FieldId };
+            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetReferenceTypeValues(out values, ReferenceTypeId, fields));
+            return VirtualMachine.GetMirrorOf(values.Single());
         }
 
         public IDictionary<IField, IValue> GetValues(IEnumerable<IField> fields)
         {
-            throw new NotImplementedException();
+            IField[] fieldsArray = fields.ToArray();
+
+            FieldId[] fieldIds = new FieldId[fieldsArray.Length];
+            // verify each field comes from this VM
+            for (int i = 0; i < fieldsArray.Length; i++)
+            {
+                Field field = fieldsArray[i] as Field;
+                if (field == null)
+                    throw new VirtualMachineMismatchException();
+
+                fieldIds[i] = field.FieldId;
+            }
+
+            Types.Value[] values;
+            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetReferenceTypeValues(out values, ReferenceTypeId, fieldIds));
+
+            Dictionary<IField, IValue> result = new Dictionary<IField, IValue>();
+            for (int i = 0; i < fieldIds.Length; i++)
+                result[fieldsArray[i]] = VirtualMachine.GetMirrorOf(values[i]);
+
+            return result;
         }
 
         public ReadOnlyCollection<IObjectReference> GetInstances(long maxInstances)

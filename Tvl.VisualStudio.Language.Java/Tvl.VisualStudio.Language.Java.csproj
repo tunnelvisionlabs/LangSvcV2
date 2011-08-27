@@ -374,6 +374,7 @@
     <Compile Include="Debugger\JavaDebugStackFrame.cs" />
     <Compile Include="Debugger\JavaDebugThread.cs" />
     <Compile Include="Debugger\Events\DebugThreadCreateEvent.cs" />
+    <Compile Include="Debugger\JavaDebugStaticMembersPseudoProperty.cs" />
     <Compile Include="Debugger\JvmtiErrorHandler.cs" />
     <Compile Include="Debugger\ThreadCategory.cs" />
     <Compile Include="Experimental\BraceLevelTracker.cs" />

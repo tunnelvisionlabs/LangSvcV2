@@ -7,6 +7,7 @@
     using System.Diagnostics.Contracts;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.ExceptionServices;
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Reentrant, IncludeExceptionDetailInFaults = true)]
     public partial class DebugProtocolService : IDebugProtocolService
@@ -389,88 +390,96 @@
             return Error.None;
         }
 
+        [HandleProcessCorruptedStateExceptions]
         public Error GetReferenceTypeValues(ReferenceTypeId referenceType, FieldId[] fields, out Value[] values)
         {
             values = null;
 
-            JniEnvironment nativeEnvironment;
-            JvmtiEnvironment environment;
-            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
-            if (error != jvmtiError.None)
-                return GetStandardError(error);
-
-            using (LocalClassReferenceHolder classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
+            try
             {
-                Value[] valuesArray = new Value[fields.Length];
-                for (int i = 0; i < valuesArray.Length; i++)
+                JniEnvironment nativeEnvironment;
+                JvmtiEnvironment environment;
+                jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
+
+                using (LocalClassReferenceHolder classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
                 {
-                    string name;
-                    string signature;
-                    string genericSignature;
-
-                    error = environment.GetFieldName(classHandle.Value, fields[i], out name, out signature, out genericSignature);
-                    if (error != jvmtiError.None)
-                        return GetStandardError(error);
-
-                    switch (signature[0])
+                    Value[] valuesArray = new Value[fields.Length];
+                    for (int i = 0; i < valuesArray.Length; i++)
                     {
-                    case 'Z':
-                        valuesArray[i] = nativeEnvironment.GetStaticBooleanField(classHandle.Value, fields[i]);
-                        nativeEnvironment.ExceptionClear();
-                        break;
+                        string name;
+                        string signature;
+                        string genericSignature;
 
-                    case 'B':
-                        valuesArray[i] = nativeEnvironment.GetStaticByteField(classHandle.Value, fields[i]);
-                        nativeEnvironment.ExceptionClear();
-                        break;
+                        error = environment.GetFieldName(classHandle.Value, fields[i], out name, out signature, out genericSignature);
+                        if (error != jvmtiError.None)
+                            return GetStandardError(error);
 
-                    case 'C':
-                        valuesArray[i] = nativeEnvironment.GetStaticCharField(classHandle.Value, fields[i]);
-                        nativeEnvironment.ExceptionClear();
-                        break;
+                        switch (signature[0])
+                        {
+                        case 'Z':
+                            valuesArray[i] = nativeEnvironment.GetStaticBooleanField(classHandle.Value, fields[i]);
+                            nativeEnvironment.ExceptionClear();
+                            break;
 
-                    case 'D':
-                        valuesArray[i] = nativeEnvironment.GetStaticDoubleField(classHandle.Value, fields[i]);
-                        nativeEnvironment.ExceptionClear();
-                        break;
+                        case 'B':
+                            valuesArray[i] = nativeEnvironment.GetStaticByteField(classHandle.Value, fields[i]);
+                            nativeEnvironment.ExceptionClear();
+                            break;
 
-                    case 'F':
-                        valuesArray[i] = nativeEnvironment.GetStaticFloatField(classHandle.Value, fields[i]);
-                        nativeEnvironment.ExceptionClear();
-                        break;
+                        case 'C':
+                            valuesArray[i] = nativeEnvironment.GetStaticCharField(classHandle.Value, fields[i]);
+                            nativeEnvironment.ExceptionClear();
+                            break;
 
-                    case 'I':
-                        valuesArray[i] = nativeEnvironment.GetStaticIntField(classHandle.Value, fields[i]);
-                        nativeEnvironment.ExceptionClear();
-                        break;
+                        case 'D':
+                            valuesArray[i] = nativeEnvironment.GetStaticDoubleField(classHandle.Value, fields[i]);
+                            nativeEnvironment.ExceptionClear();
+                            break;
 
-                    case 'J':
-                        valuesArray[i] = nativeEnvironment.GetStaticLongField(classHandle.Value, fields[i]);
-                        nativeEnvironment.ExceptionClear();
-                        break;
+                        case 'F':
+                            valuesArray[i] = nativeEnvironment.GetStaticFloatField(classHandle.Value, fields[i]);
+                            nativeEnvironment.ExceptionClear();
+                            break;
 
-                    case 'S':
-                        valuesArray[i] = nativeEnvironment.GetStaticShortField(classHandle.Value, fields[i]);
-                        nativeEnvironment.ExceptionClear();
-                        break;
+                        case 'I':
+                            valuesArray[i] = nativeEnvironment.GetStaticIntField(classHandle.Value, fields[i]);
+                            nativeEnvironment.ExceptionClear();
+                            break;
 
-                    case 'V':
-                        return Error.InvalidFieldid;
+                        case 'J':
+                            valuesArray[i] = nativeEnvironment.GetStaticLongField(classHandle.Value, fields[i]);
+                            nativeEnvironment.ExceptionClear();
+                            break;
 
-                    case '[':
-                    case 'L':
-                        jobject value = nativeEnvironment.GetStaticObjectField(classHandle.Value, fields[i]);
-                        nativeEnvironment.ExceptionClear();
-                        valuesArray[i] = VirtualMachine.TrackLocalObjectReference(value, environment, nativeEnvironment, true);
-                        break;
+                        case 'S':
+                            valuesArray[i] = nativeEnvironment.GetStaticShortField(classHandle.Value, fields[i]);
+                            nativeEnvironment.ExceptionClear();
+                            break;
 
-                    default:
-                        throw new FormatException();
+                        case 'V':
+                            return Error.InvalidFieldid;
+
+                        case '[':
+                        case 'L':
+                            jobject value = nativeEnvironment.GetStaticObjectField(classHandle.Value, fields[i]);
+                            nativeEnvironment.ExceptionClear();
+                            valuesArray[i] = VirtualMachine.TrackLocalObjectReference(value, environment, nativeEnvironment, true);
+                            break;
+
+                        default:
+                            throw new FormatException();
+                        }
                     }
-                }
 
-                values = valuesArray;
-                return Error.None;
+                    values = valuesArray;
+                    return Error.None;
+                }
+            }
+            catch (Exception)
+            {
+                return Error.Internal;
             }
         }
 
@@ -647,94 +656,102 @@
             }
         }
 
+        [HandleProcessCorruptedStateExceptions]
         public Error GetObjectValues(ObjectId @object, FieldId[] fields, out Value[] values)
         {
             values = null;
 
-            JniEnvironment nativeEnvironment;
-            JvmtiEnvironment environment;
-            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
-            if (error != jvmtiError.None)
-                return GetStandardError(error);
-
-            using (LocalObjectReferenceHolder objectHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, @object))
+            try
             {
-                if (nativeEnvironment.IsSameObject(objectHandle.Value, jobject.Null))
-                    return Error.InvalidObject;
+                JniEnvironment nativeEnvironment;
+                JvmtiEnvironment environment;
+                jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
 
-                Value[] valuesArray = new Value[fields.Length];
-                for (int i = 0; i < valuesArray.Length; i++)
+                using (LocalObjectReferenceHolder objectHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, @object))
                 {
-                    string name;
-                    string signature;
-                    string genericSignature;
+                    if (nativeEnvironment.IsSameObject(objectHandle.Value, jobject.Null))
+                        return Error.InvalidObject;
 
-                    using (LocalClassReferenceHolder declaringType = new LocalClassReferenceHolder(nativeEnvironment, nativeEnvironment.GetObjectClass(objectHandle.Value)))
+                    Value[] valuesArray = new Value[fields.Length];
+                    for (int i = 0; i < valuesArray.Length; i++)
                     {
-                        error = environment.GetFieldName(declaringType.Value, fields[i], out name, out signature, out genericSignature);
-                        if (error != jvmtiError.None)
-                            return GetStandardError(error);
+                        string name;
+                        string signature;
+                        string genericSignature;
 
-                        switch (signature[0])
+                        using (LocalClassReferenceHolder declaringType = new LocalClassReferenceHolder(nativeEnvironment, nativeEnvironment.GetObjectClass(objectHandle.Value)))
                         {
-                        case 'Z':
-                            valuesArray[i] = nativeEnvironment.GetBooleanField(objectHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
-                            break;
+                            error = environment.GetFieldName(declaringType.Value, fields[i], out name, out signature, out genericSignature);
+                            if (error != jvmtiError.None)
+                                return GetStandardError(error);
 
-                        case 'B':
-                            valuesArray[i] = nativeEnvironment.GetByteField(objectHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
-                            break;
+                            switch (signature[0])
+                            {
+                            case 'Z':
+                                valuesArray[i] = nativeEnvironment.GetBooleanField(objectHandle.Value, fields[i]);
+                                nativeEnvironment.ExceptionClear();
+                                break;
 
-                        case 'C':
-                            valuesArray[i] = nativeEnvironment.GetCharField(objectHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
-                            break;
+                            case 'B':
+                                valuesArray[i] = nativeEnvironment.GetByteField(objectHandle.Value, fields[i]);
+                                nativeEnvironment.ExceptionClear();
+                                break;
 
-                        case 'D':
-                            valuesArray[i] = nativeEnvironment.GetDoubleField(objectHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
-                            break;
+                            case 'C':
+                                valuesArray[i] = nativeEnvironment.GetCharField(objectHandle.Value, fields[i]);
+                                nativeEnvironment.ExceptionClear();
+                                break;
 
-                        case 'F':
-                            valuesArray[i] = nativeEnvironment.GetFloatField(objectHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
-                            break;
+                            case 'D':
+                                valuesArray[i] = nativeEnvironment.GetDoubleField(objectHandle.Value, fields[i]);
+                                nativeEnvironment.ExceptionClear();
+                                break;
 
-                        case 'I':
-                            valuesArray[i] = nativeEnvironment.GetIntField(objectHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
-                            break;
+                            case 'F':
+                                valuesArray[i] = nativeEnvironment.GetFloatField(objectHandle.Value, fields[i]);
+                                nativeEnvironment.ExceptionClear();
+                                break;
 
-                        case 'J':
-                            valuesArray[i] = nativeEnvironment.GetLongField(objectHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
-                            break;
+                            case 'I':
+                                valuesArray[i] = nativeEnvironment.GetIntField(objectHandle.Value, fields[i]);
+                                nativeEnvironment.ExceptionClear();
+                                break;
 
-                        case 'S':
-                            valuesArray[i] = nativeEnvironment.GetShortField(objectHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
-                            break;
+                            case 'J':
+                                valuesArray[i] = nativeEnvironment.GetLongField(objectHandle.Value, fields[i]);
+                                nativeEnvironment.ExceptionClear();
+                                break;
 
-                        case 'V':
-                            return Error.InvalidFieldid;
+                            case 'S':
+                                valuesArray[i] = nativeEnvironment.GetShortField(objectHandle.Value, fields[i]);
+                                nativeEnvironment.ExceptionClear();
+                                break;
 
-                        case '[':
-                        case 'L':
-                            jobject value = nativeEnvironment.GetObjectField(objectHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
-                            valuesArray[i] = VirtualMachine.TrackLocalObjectReference(value, environment, nativeEnvironment, true);
-                            break;
+                            case 'V':
+                                return Error.InvalidFieldid;
 
-                        default:
-                            throw new FormatException();
+                            case '[':
+                            case 'L':
+                                jobject value = nativeEnvironment.GetObjectField(objectHandle.Value, fields[i]);
+                                nativeEnvironment.ExceptionClear();
+                                valuesArray[i] = VirtualMachine.TrackLocalObjectReference(value, environment, nativeEnvironment, true);
+                                break;
+
+                            default:
+                                throw new FormatException();
+                            }
                         }
                     }
-                }
 
-                values = valuesArray;
-                return Error.None;
+                    values = valuesArray;
+                    return Error.None;
+                }
+            }
+            catch (Exception)
+            {
+                return Error.Internal;
             }
         }
 
@@ -983,147 +1000,155 @@
             }
         }
 
+        [HandleProcessCorruptedStateExceptions]
         public Error GetArrayValues(ArrayId arrayObject, int firstIndex, int length, out Value[] values)
         {
             values = null;
 
-            JniEnvironment nativeEnvironment;
-            JvmtiEnvironment environment;
-            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
-            if (error != jvmtiError.None)
-                return GetStandardError(error);
-
-            using (LocalObjectReferenceHolder objectHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, arrayObject))
+            try
             {
-                if (nativeEnvironment.IsSameObject(objectHandle.Value, jobject.Null))
-                    return Error.InvalidObject;
+                JniEnvironment nativeEnvironment;
+                JvmtiEnvironment environment;
+                jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
 
-                Value[] valuesArray = new Value[length];
-
-                using (LocalClassReferenceHolder declaringType = new LocalClassReferenceHolder(nativeEnvironment, nativeEnvironment.GetObjectClass(objectHandle.Value)))
+                using (LocalObjectReferenceHolder objectHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, arrayObject))
                 {
-                    string signature;
-                    string genericSignature;
+                    if (nativeEnvironment.IsSameObject(objectHandle.Value, jobject.Null))
+                        return Error.InvalidObject;
 
-                    error = environment.GetClassSignature(declaringType.Value, out signature, out genericSignature);
-                    if (error != jvmtiError.None)
-                        return GetStandardError(error);
+                    Value[] valuesArray = new Value[length];
 
-                    // the array element type signature starts after the '['
-                    Contract.Assert(signature[0] == '[');
-                    switch (signature[1])
+                    using (LocalClassReferenceHolder declaringType = new LocalClassReferenceHolder(nativeEnvironment, nativeEnvironment.GetObjectClass(objectHandle.Value)))
                     {
-                    case 'Z':
+                        string signature;
+                        string genericSignature;
+
+                        error = environment.GetClassSignature(declaringType.Value, out signature, out genericSignature);
+                        if (error != jvmtiError.None)
+                            return GetStandardError(error);
+
+                        // the array element type signature starts after the '['
+                        Contract.Assert(signature[0] == '[');
+                        switch (signature[1])
                         {
-                            bool[] buffer = new bool[length];
-                            nativeEnvironment.GetBooleanArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                            nativeEnvironment.ExceptionClear();
-                            for (int i = 0; i < length; i++)
-                                valuesArray[i] = (Value)buffer[i];
-
-                            break;
-                        }
-
-                    case 'B':
-                        {
-                            byte[] buffer = new byte[length];
-                            nativeEnvironment.GetByteArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                            nativeEnvironment.ExceptionClear();
-                            for (int i = 0; i < length; i++)
-                                valuesArray[i] = (Value)buffer[i];
-
-                            break;
-                        }
-
-                    case 'C':
-                        {
-                            char[] buffer = new char[length];
-                            nativeEnvironment.GetCharArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                            nativeEnvironment.ExceptionClear();
-                            for (int i = 0; i < length; i++)
-                                valuesArray[i] = (Value)buffer[i];
-
-                            break;
-                        }
-
-                    case 'D':
-                        {
-                            double[] buffer = new double[length];
-                            nativeEnvironment.GetDoubleArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                            nativeEnvironment.ExceptionClear();
-                            for (int i = 0; i < length; i++)
-                                valuesArray[i] = (Value)buffer[i];
-
-                            break;
-                        }
-
-                    case 'F':
-                        {
-                            float[] buffer = new float[length];
-                            nativeEnvironment.GetFloatArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                            nativeEnvironment.ExceptionClear();
-                            for (int i = 0; i < length; i++)
-                                valuesArray[i] = (Value)buffer[i];
-
-                            break;
-                        }
-
-                    case 'I':
-                        {
-                            int[] buffer = new int[length];
-                            nativeEnvironment.GetIntArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                            nativeEnvironment.ExceptionClear();
-                            for (int i = 0; i < length; i++)
-                                valuesArray[i] = (Value)buffer[i];
-
-                            break;
-                        }
-
-                    case 'J':
-                        {
-                            long[] buffer = new long[length];
-                            nativeEnvironment.GetLongArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                            nativeEnvironment.ExceptionClear();
-                            for (int i = 0; i < length; i++)
-                                valuesArray[i] = (Value)buffer[i];
-
-                            break;
-                        }
-
-                    case 'S':
-                        {
-                            short[] buffer = new short[length];
-                            nativeEnvironment.GetShortArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                            nativeEnvironment.ExceptionClear();
-                            for (int i = 0; i < length; i++)
-                                valuesArray[i] = (Value)buffer[i];
-
-                            break;
-                        }
-
-                    case 'V':
-                        return Error.InvalidFieldid;
-
-                    case '[':
-                    case 'L':
-                        {
-                            for (int i = 0; i < length; i++)
+                        case 'Z':
                             {
-                                jobject value = nativeEnvironment.GetObjectArrayElement(objectHandle.Value, firstIndex + i);
+                                bool[] buffer = new bool[length];
+                                nativeEnvironment.GetBooleanArrayRegion(objectHandle.Value, firstIndex, length, buffer);
                                 nativeEnvironment.ExceptionClear();
-                                valuesArray[i] = (Value)VirtualMachine.TrackLocalObjectReference(value, environment, nativeEnvironment, true);
+                                for (int i = 0; i < length; i++)
+                                    valuesArray[i] = (Value)buffer[i];
+
+                                break;
                             }
 
-                            break;
+                        case 'B':
+                            {
+                                byte[] buffer = new byte[length];
+                                nativeEnvironment.GetByteArrayRegion(objectHandle.Value, firstIndex, length, buffer);
+                                nativeEnvironment.ExceptionClear();
+                                for (int i = 0; i < length; i++)
+                                    valuesArray[i] = (Value)buffer[i];
+
+                                break;
+                            }
+
+                        case 'C':
+                            {
+                                char[] buffer = new char[length];
+                                nativeEnvironment.GetCharArrayRegion(objectHandle.Value, firstIndex, length, buffer);
+                                nativeEnvironment.ExceptionClear();
+                                for (int i = 0; i < length; i++)
+                                    valuesArray[i] = (Value)buffer[i];
+
+                                break;
+                            }
+
+                        case 'D':
+                            {
+                                double[] buffer = new double[length];
+                                nativeEnvironment.GetDoubleArrayRegion(objectHandle.Value, firstIndex, length, buffer);
+                                nativeEnvironment.ExceptionClear();
+                                for (int i = 0; i < length; i++)
+                                    valuesArray[i] = (Value)buffer[i];
+
+                                break;
+                            }
+
+                        case 'F':
+                            {
+                                float[] buffer = new float[length];
+                                nativeEnvironment.GetFloatArrayRegion(objectHandle.Value, firstIndex, length, buffer);
+                                nativeEnvironment.ExceptionClear();
+                                for (int i = 0; i < length; i++)
+                                    valuesArray[i] = (Value)buffer[i];
+
+                                break;
+                            }
+
+                        case 'I':
+                            {
+                                int[] buffer = new int[length];
+                                nativeEnvironment.GetIntArrayRegion(objectHandle.Value, firstIndex, length, buffer);
+                                nativeEnvironment.ExceptionClear();
+                                for (int i = 0; i < length; i++)
+                                    valuesArray[i] = (Value)buffer[i];
+
+                                break;
+                            }
+
+                        case 'J':
+                            {
+                                long[] buffer = new long[length];
+                                nativeEnvironment.GetLongArrayRegion(objectHandle.Value, firstIndex, length, buffer);
+                                nativeEnvironment.ExceptionClear();
+                                for (int i = 0; i < length; i++)
+                                    valuesArray[i] = (Value)buffer[i];
+
+                                break;
+                            }
+
+                        case 'S':
+                            {
+                                short[] buffer = new short[length];
+                                nativeEnvironment.GetShortArrayRegion(objectHandle.Value, firstIndex, length, buffer);
+                                nativeEnvironment.ExceptionClear();
+                                for (int i = 0; i < length; i++)
+                                    valuesArray[i] = (Value)buffer[i];
+
+                                break;
+                            }
+
+                        case 'V':
+                            return Error.InvalidFieldid;
+
+                        case '[':
+                        case 'L':
+                            {
+                                for (int i = 0; i < length; i++)
+                                {
+                                    jobject value = nativeEnvironment.GetObjectArrayElement(objectHandle.Value, firstIndex + i);
+                                    nativeEnvironment.ExceptionClear();
+                                    valuesArray[i] = (Value)VirtualMachine.TrackLocalObjectReference(value, environment, nativeEnvironment, true);
+                                }
+
+                                break;
+                            }
+
+                        default:
+                            throw new FormatException();
                         }
-
-                    default:
-                        throw new FormatException();
                     }
-                }
 
-                values = valuesArray;
-                return Error.None;
+                    values = valuesArray;
+                    return Error.None;
+                }
+            }
+            catch (Exception)
+            {
+                return Error.Internal;
             }
         }
 
