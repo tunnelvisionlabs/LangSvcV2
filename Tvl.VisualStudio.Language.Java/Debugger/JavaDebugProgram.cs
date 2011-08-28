@@ -135,7 +135,7 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
         private void HandleAttachComplete(object virtualMachine, EventArgs e)
         {
-            _causeBreakRequest = VirtualMachine.GetEventRequestManager().CreateStepRequest(null, StepSize.Minimum, StepDepth.Into);
+            _causeBreakRequest = VirtualMachine.GetEventRequestManager().CreateStepRequest(null, StepSize.Instruction, StepDepth.Into);
             _causeBreakRequest.SuspendPolicy = SuspendPolicy.All;
 
             DebugEvent @event = new DebugProgramCreateEvent(enum_EVENTATTRIBUTES.EVENT_ASYNCHRONOUS);
@@ -276,7 +276,17 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
         public int GetDisassemblyStream(enum_DISASSEMBLY_STREAM_SCOPE dwScope, IDebugCodeContext2 pCodeContext, out IDebugDisassemblyStream2 ppDisassemblyStream)
         {
-            throw new NotImplementedException();
+            ppDisassemblyStream = null;
+
+            if (pCodeContext == null)
+                throw new ArgumentNullException("pCodeContext");
+
+            JavaDebugCodeContext codeContext = pCodeContext as JavaDebugCodeContext;
+            if (codeContext == null)
+                return VSConstants.E_INVALIDARG;
+
+            ppDisassemblyStream = new JavaDebugDisassemblyStream(codeContext);
+            return VSConstants.S_OK;
         }
 
         public int GetENCUpdate(out object ppUpdate)
@@ -315,7 +325,56 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
         public int Step(IDebugThread2 pThread, enum_STEPKIND sk, enum_STEPUNIT Step)
         {
-            throw new NotImplementedException();
+            JavaDebugThread thread = pThread as JavaDebugThread;
+            if (thread == null)
+                return VSConstants.E_INVALIDARG;
+
+            StepSize size;
+            StepDepth depth;
+            switch (Step)
+            {
+            case enum_STEPUNIT.STEP_INSTRUCTION:
+                size = StepSize.Instruction;
+                break;
+
+            case enum_STEPUNIT.STEP_LINE:
+                size = StepSize.Line;
+                break;
+
+            case enum_STEPUNIT.STEP_STATEMENT:
+                size = StepSize.Statement;
+                break;
+
+            default:
+                throw new NotSupportedException();
+            }
+
+            switch (sk)
+            {
+            case enum_STEPKIND.STEP_INTO:
+                depth = StepDepth.Into;
+                break;
+
+            case enum_STEPKIND.STEP_OUT:
+                depth = StepDepth.Out;
+                break;
+
+            case enum_STEPKIND.STEP_OVER:
+                depth = StepDepth.Over;
+                break;
+
+            case enum_STEPKIND.STEP_BACKWARDS:
+            default:
+                throw new NotSupportedException();
+            }
+
+            IStepRequest stepRequest = thread.GetStepRequest(size, depth);
+            if (stepRequest == null)
+                throw new InvalidOperationException();
+
+            stepRequest.IsEnabled = true;
+            Task.Factory.StartNew(VirtualMachine.Resume).HandleNonCriticalExceptions();
+            return VSConstants.S_OK;
         }
 
         /// <summary>
@@ -625,20 +684,37 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
         private void HandleSingleStep(object sender, ThreadLocationEventArgs e)
         {
+            IStepRequest request = e.Request as IStepRequest;
+            if (request == null)
+                throw new ArgumentException();
+
+            JavaDebugThread thread;
+            lock (_threads)
+            {
+                this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
+            }
+
             if (e.Request == _causeBreakRequest)
             {
                 _causeBreakRequest.IsEnabled = false;
-
-                JavaDebugThread thread;
-                lock (_threads)
-                {
-                    this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
-                }
 
                 DebugEvent debugEvent = new DebugBreakEvent(GetAttributesForEvent(e));
                 SetEventProperties(debugEvent, e);
                 Callback.Event(DebugEngine, Process, this, thread, debugEvent);
                 return;
+            }
+            else if (thread != null)
+            {
+                bool wasThreadStepRequest = thread.StepRequests.Contains(request);
+
+                if (wasThreadStepRequest)
+                {
+                    e.Request.IsEnabled = false;
+                    DebugEvent debugEvent = new DebugStepCompleteEvent(GetAttributesForEvent(e));
+                    SetEventProperties(debugEvent, e);
+                    Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+                    return;
+                }
             }
 
             throw new NotImplementedException();

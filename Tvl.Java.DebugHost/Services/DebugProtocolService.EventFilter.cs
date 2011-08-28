@@ -7,6 +7,7 @@
     using Tvl.Java.DebugInterface.Types;
     using System.Diagnostics.Contracts;
     using System.Collections.ObjectModel;
+    using Tvl.Java.DebugHost.Interop;
 
     partial class DebugProtocolService
     {
@@ -37,21 +38,21 @@
                 }
             }
 
-            public abstract bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class, Location? location);
+            public abstract bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, ThreadId thread, TaggedReferenceTypeId @class, Location? location);
 
-            public static EventFilter CreateFilter(RequestId requestId, SuspendPolicy suspendPolicy, EventRequestModifier[] modifiers)
+            public static EventFilter CreateFilter(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, RequestId requestId, SuspendPolicy suspendPolicy, EventRequestModifier[] modifiers)
             {
                 if (modifiers.Length == 0)
                     return new PassThroughEventFilter(requestId, suspendPolicy);
 
-                EventFilter[] elements = Array.ConvertAll(modifiers, modifier => CreateFilter(requestId, suspendPolicy, modifier));
+                EventFilter[] elements = Array.ConvertAll(modifiers, modifier => CreateFilter(environment, nativeEnvironment, requestId, suspendPolicy, modifier));
                 if (elements.Length == 1)
                     return elements[0];
 
                 return new AggregateEventFilter(requestId, suspendPolicy, elements);
             }
 
-            public static EventFilter CreateFilter(RequestId requestId, SuspendPolicy suspendPolicy, EventRequestModifier modifier)
+            public static EventFilter CreateFilter(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, RequestId requestId, SuspendPolicy suspendPolicy, EventRequestModifier modifier)
             {
                 switch (modifier.Kind)
                 {
@@ -80,7 +81,7 @@
                     throw new NotImplementedException();
 
                 case ModifierKind.Step:
-                    return new StepEventFilter(requestId, suspendPolicy, modifier.Thread, modifier.StepSize, modifier.StepDepth);
+                    return new StepEventFilter(environment, nativeEnvironment, requestId, suspendPolicy, modifier.Thread, modifier.StepSize, modifier.StepDepth);
 
                 case ModifierKind.InstanceFilter:
                     throw new NotImplementedException();
@@ -105,7 +106,7 @@
             {
             }
 
-            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class, Location? location)
+            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
                 return true;
             }
@@ -130,11 +131,11 @@
                 }
             }
 
-            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class, Location? location)
+            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
                 foreach (EventFilter filter in _filters)
                 {
-                    if (!filter.ProcessEvent(thread, @class, location))
+                    if (!filter.ProcessEvent(environment, nativeEnvironment, thread, @class, location))
                         return false;
                 }
 
@@ -154,7 +155,7 @@
                 _count = count;
             }
 
-            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class, Location? location)
+            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
                 _current++;
                 if (_current == _count)
@@ -177,7 +178,7 @@
                 _thread = thread;
             }
 
-            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class, Location? location)
+            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
                 return _thread == default(ThreadId)
                     || _thread == thread;
@@ -202,7 +203,7 @@
                 }
             }
 
-            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class, Location? location)
+            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
                 if (!location.HasValue)
                     return false;
@@ -218,22 +219,69 @@
             private readonly StepSize _size;
             private readonly StepDepth _depth;
 
-            public StepEventFilter(RequestId requestId, SuspendPolicy suspendPolicy, ThreadId thread, StepSize size, StepDepth depth)
+            // used for step over
+            private jmethodID _lastMethod;
+            private jlocation _lastLocation;
+            private int _stackDepth;
+
+            // used for step out
+            private jmethodID _parentMethod;
+            private jlocation _parentLocation;
+
+            public StepEventFilter(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, RequestId requestId, SuspendPolicy suspendPolicy, ThreadId thread, StepSize size, StepDepth depth)
                 : base(requestId, suspendPolicy, thread)
             {
                 _size = size;
                 _depth = depth;
+
+                // gather reference information for the thread
+                using (var threadHandle = environment.VirtualMachine.GetLocalReferenceForThread(nativeEnvironment, thread))
+                {
+                    JvmtiErrorHandler.ThrowOnFailure(environment.GetFrameLocation(threadHandle.Value, 0, out _lastMethod, out _lastLocation));
+                    JvmtiErrorHandler.ThrowOnFailure(environment.GetFrameCount(threadHandle.Value, out _stackDepth));
+                    if (_stackDepth > 1)
+                        JvmtiErrorHandler.ThrowOnFailure(environment.GetFrameLocation(threadHandle.Value, 1, out _parentMethod, out _parentLocation));
+                }
             }
 
-            public override bool ProcessEvent(ThreadId thread, TaggedReferenceTypeId @class, Location? location)
+            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
-                if (!base.ProcessEvent(thread, @class, location))
+                if (!base.ProcessEvent(environment, nativeEnvironment, thread, @class, location))
                     return false;
 
-                if (_size != StepSize.Minimum || _depth != StepDepth.Into)
-                    throw new NotImplementedException();
+                if (_depth == StepDepth.Into)
+                    return true;
 
-                return true;
+                using (var threadHandle = environment.VirtualMachine.GetLocalReferenceForThread(nativeEnvironment, thread))
+                {
+                    if (_depth == StepDepth.Over)
+                    {
+                        if (location.Value.Method != (MethodId)_lastMethod && location.Value.Method != (MethodId)_parentMethod)
+                            return false;
+                    }
+                    else if (_depth == StepDepth.Out)
+                    {
+                        if (location.Value.Method != (MethodId)_parentMethod)
+                            return false;
+                    }
+
+                    int stackDepth;
+                    JvmtiErrorHandler.ThrowOnFailure(environment.GetFrameCount(threadHandle.Value, out stackDepth));
+
+                    if (_depth == StepDepth.Over)
+                    {
+                        if (stackDepth > _stackDepth)
+                            return false;
+                    }
+                    else if (_depth == StepDepth.Out)
+                    {
+                        if (stackDepth >= _stackDepth)
+                            return false;
+                    }
+
+                    _stackDepth = stackDepth;
+                    return true;
+                }
             }
         }
     }

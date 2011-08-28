@@ -337,6 +337,7 @@
     <Compile Include="Debugger\Extensions\DebugProgramExtensions.cs" />
     <Compile Include="Debugger\Extensions\DebugThreadExtensions.cs" />
     <Compile Include="Debugger\Extensions\ConstGuidArrayExtensions.cs" />
+    <Compile Include="Debugger\Extensions\DISASSEMBLY_STREAM_FIELDSExtensions.cs" />
     <Compile Include="Debugger\Extensions\ServiceExtensions.cs" />
     <Compile Include="Debugger\Interop\IDebugProcessQueryProperties.cs" />
     <Compile Include="Debugger\Interop\IDebugProgramHost2.cs" />

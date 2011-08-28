@@ -624,7 +624,16 @@
 
         public Error GetMethodBytecodes(ReferenceTypeId referenceType, MethodId method, out byte[] bytecode)
         {
-            throw new NotImplementedException();
+            bytecode = null;
+
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            error = environment.GetBytecodes(method, out bytecode);
+            return GetStandardError(error);
         }
 
         public Error GetMethodIsObsolete(ReferenceTypeId referenceType, MethodId method, out bool result)
@@ -1164,7 +1173,15 @@
 
         public Error SetEvent(EventKind eventKind, SuspendPolicy suspendPolicy, EventRequestModifier[] modifiers, out RequestId requestId)
         {
-            return _eventProcessor.SetEvent(eventKind, suspendPolicy, modifiers, out requestId);
+            requestId = default(RequestId);
+
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            return _eventProcessor.SetEvent(environment, nativeEnvironment, eventKind, suspendPolicy, modifiers, out requestId);
         }
 
         public Error ClearEvent(EventKind eventKind, RequestId requestId)
@@ -1311,7 +1328,41 @@
 
         public Error GetThisObject(ThreadId thread, FrameId frame, out TaggedObjectId thisObject)
         {
-            throw new NotImplementedException();
+            thisObject = default(TaggedObjectId);
+
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            using (LocalThreadReferenceHolder threadHandle = VirtualMachine.GetLocalReferenceForThread(nativeEnvironment, thread))
+            {
+                if (!threadHandle.IsAlive)
+                    return Error.InvalidThread;
+
+                int depth = (int)frame.Handle;
+
+                jmethodID method;
+                jlocation location;
+                error = environment.GetFrameLocation(threadHandle.Value, depth, out method, out location);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
+
+                JvmAccessModifiers modifiers;
+                error = environment.GetMethodModifiers(method, out modifiers);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
+
+                if ((modifiers & JvmAccessModifiers.Static) != 0)
+                    return Error.None;
+
+                error = environment.GetLocalObject(nativeEnvironment, threadHandle.Value, depth, 0, out thisObject);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
+
+                return Error.None;
+            }
         }
 
         public Error PopFrames(ThreadId thread, FrameId frame)

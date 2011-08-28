@@ -2,16 +2,34 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Diagnostics.Contracts;
-    using AccessModifiers = Tvl.Java.DebugInterface.AccessModifiers;
-    using Tvl.Java.DebugInterface.Types;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
+    using System.Linq;
+    using Tvl.Java.DebugInterface.Types;
+    using AccessModifiers = Tvl.Java.DebugInterface.AccessModifiers;
+    using Path = System.IO.Path;
 
     internal abstract class ReferenceType : JavaType, IReferenceType
     {
         private readonly TaggedReferenceTypeId _taggedTypeId;
+
+        // cached information
+        private string _signature;
+        private string _genericSignature;
+        private AccessModifiers? _modifiers;
+        private string _sourceName;
+        private string _sourceDebugExtension;
+
+        private Field[] _fields;
+        private Field[] _allFields;
+        private Field[] _visibleFields;
+        private Location[] _lineLocations;
+        private Method[] _methods;
+        private Method[] _allMethods;
+        private Method[] _visibleMethods;
+
+        private ClassLoaderReference _classLoader;
+        private byte[] _constantPool;
 
         protected ReferenceType(VirtualMachine virtualMachine, TaggedReferenceTypeId taggedTypeId)
             : base(virtualMachine)
@@ -38,20 +56,37 @@
 
         public sealed override string GetSignature()
         {
-            string signature;
-            string genericSignature;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetSignature(out signature, out genericSignature, ReferenceTypeId));
-            return signature;
+            if (_signature == null)
+            {
+                string signature;
+                string genericSignature;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetSignature(out signature, out genericSignature, ReferenceTypeId));
+                _signature = signature;
+            }
+
+            return _signature;
         }
 
         #region IReferenceType Members
 
         public ReadOnlyCollection<IField> GetFields(bool includeInherited)
         {
-            DeclaredFieldData[] fieldData;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetFields(out fieldData, ReferenceTypeId));
-            Field[] fields = Array.ConvertAll(fieldData, field => VirtualMachine.GetMirrorOf(this, field));
-            return new ReadOnlyCollection<IField>(fields);
+            if ((includeInherited && _allFields == null) || (!includeInherited && _fields == null))
+            {
+                if (includeInherited)
+                    throw new NotImplementedException();
+
+                DeclaredFieldData[] fieldData;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetFields(out fieldData, ReferenceTypeId));
+                Field[] fields = Array.ConvertAll(fieldData, field => VirtualMachine.GetMirrorOf(this, field));
+
+                if (includeInherited)
+                    _allFields = fields;
+                else
+                    _fields = fields;
+            }
+
+            return new ReadOnlyCollection<IField>(includeInherited ? _allFields : _fields);
         }
 
         public ReadOnlyCollection<ILocation> GetLineLocations()
@@ -66,22 +101,39 @@
 
         public ReadOnlyCollection<IMethod> GetMethods(bool includeInherited)
         {
-            DeclaredMethodData[] methodData;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethods(out methodData, ReferenceTypeId));
-            Method[] methods = Array.ConvertAll(methodData, method => VirtualMachine.GetMirrorOf(this, method));
-            return new ReadOnlyCollection<IMethod>(methods);
+            if ((includeInherited && _allMethods == null) || (!includeInherited && _methods == null))
+            {
+                if (includeInherited)
+                    throw new NotImplementedException();
+
+                DeclaredMethodData[] methodData;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethods(out methodData, ReferenceTypeId));
+                Method[] methods = Array.ConvertAll(methodData, method => VirtualMachine.GetMirrorOf(this, method));
+
+                if (includeInherited)
+                    _allMethods = methods;
+                else
+                    _methods = methods;
+            }
+
+            return new ReadOnlyCollection<IMethod>(includeInherited ? _allMethods : _methods);
         }
 
         public ReadOnlyCollection<string> GetAvailableStrata()
         {
-            throw new NotImplementedException();
+            return new ReadOnlyCollection<string>(new[] { "Java" });
         }
 
         public IClassLoaderReference GetClassLoader()
         {
-            ClassLoaderId classLoader;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetClassLoader(out classLoader, ReferenceTypeId));
-            return VirtualMachine.GetMirrorOf(classLoader);
+            if (_classLoader == null)
+            {
+                ClassLoaderId classLoader;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetClassLoader(out classLoader, ReferenceTypeId));
+                _classLoader = VirtualMachine.GetMirrorOf(classLoader);
+            }
+
+            return _classLoader;
         }
 
         public IClassObjectReference GetClassObject()
@@ -120,10 +172,15 @@
 
         public string GetGenericSignature()
         {
-            string signature;
-            string genericSignature;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetSignature(out signature, out genericSignature, ReferenceTypeId));
-            return genericSignature;
+            if (_genericSignature == null)
+            {
+                string signature;
+                string genericSignature;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetSignature(out signature, out genericSignature, ReferenceTypeId));
+                _genericSignature = genericSignature;
+            }
+
+            return _genericSignature;
         }
 
         public IValue GetValue(IField field)
@@ -255,14 +312,26 @@
 
         public string GetSourceDebugExtension()
         {
-            throw new NotImplementedException();
+            if (_sourceDebugExtension == null)
+            {
+                string sourceDebugExtension;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetSourceDebugExtension(out sourceDebugExtension, ReferenceTypeId));
+                _sourceDebugExtension = sourceDebugExtension;
+            }
+
+            return _sourceDebugExtension;
         }
 
         public string GetSourceName()
         {
-            string sourceFile;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetSourceFile(out sourceFile, ReferenceTypeId));
-            return sourceFile;
+            if (_sourceName == null)
+            {
+                string sourceFile;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetSourceFile(out sourceFile, ReferenceTypeId));
+                _sourceName = sourceFile;
+            }
+
+            return _sourceName;
         }
 
         public ReadOnlyCollection<string> GetSourceNames(string stratum)
@@ -275,18 +344,41 @@
 
         public ReadOnlyCollection<string> GetSourcePaths(string stratum)
         {
-            // TODO: get actual source paths
-            return GetSourceNames(stratum);
+            if (stratum != "Java")
+                return new ReadOnlyCollection<string>(new string[0]);
+
+            if (_taggedTypeId.TypeTag == TypeTag.Class || _taggedTypeId.TypeTag == TypeTag.Interface)
+            {
+                string signature = GetSignature().Substring(1);
+                string folder = signature.Substring(0, signature.LastIndexOf('/')).Replace('/', Path.DirectorySeparatorChar);
+                List<string> paths = new List<string>(GetSourceNames(stratum).Select(i => Path.Combine(folder, i)));
+                return paths.AsReadOnly();
+            }
+            else
+            {
+                // TODO: get actual source paths
+                return GetSourceNames(stratum);
+            }
         }
 
         public ReadOnlyCollection<IField> GetVisibleFields()
         {
-            throw new NotImplementedException();
+            if (_visibleFields == null)
+            {
+                throw new NotImplementedException();
+            }
+
+            return new ReadOnlyCollection<IField>(_visibleFields);
         }
 
         public ReadOnlyCollection<IMethod> GetVisibleMethods()
         {
-            throw new NotImplementedException();
+            if (_visibleMethods == null)
+            {
+                throw new NotImplementedException();
+            }
+
+            return new ReadOnlyCollection<IMethod>(_visibleMethods);
         }
 
         #endregion
@@ -315,9 +407,14 @@
 
         public AccessModifiers GetModifiers()
         {
-            Types.AccessModifiers modifiers;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetModifiers(out modifiers, ReferenceTypeId));
-            return (AccessModifiers)modifiers;
+            if (_modifiers == null)
+            {
+                Types.AccessModifiers modifiers;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetModifiers(out modifiers, ReferenceTypeId));
+                _modifiers = (AccessModifiers)modifiers;
+            }
+
+            return _modifiers.Value;
         }
 
         #endregion

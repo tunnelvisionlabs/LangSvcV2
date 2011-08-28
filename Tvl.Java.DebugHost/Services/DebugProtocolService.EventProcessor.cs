@@ -177,7 +177,7 @@
                 _service.Environment.SetEventCallbacks(default(jvmtiEventCallbacks));
             }
 
-            public Error SetEvent(EventKind eventKind, SuspendPolicy suspendPolicy, EventRequestModifier[] modifiers, out RequestId requestId)
+            public Error SetEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, EventKind eventKind, SuspendPolicy suspendPolicy, EventRequestModifier[] modifiers, out RequestId requestId)
             {
                 requestId = default(RequestId);
 
@@ -200,7 +200,7 @@
                     }
 
                     requestId = new RequestId(_nextRequestId++);
-                    EventFilter filter = EventFilter.CreateFilter(requestId, suspendPolicy, modifiers);
+                    EventFilter filter = EventFilter.CreateFilter(environment, nativeEnvironment, requestId, suspendPolicy, modifiers);
                     requests.Add(requestId, filter);
                     if (requests.Count == 1)
                     {
@@ -393,7 +393,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.VirtualMachineStart);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(threadId, default(TaggedReferenceTypeId), default(Location?)))
+                    if (filter.ProcessEvent(environment, nativeEnvironment, threadId, default(TaggedReferenceTypeId), default(Location?)))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                         Callback.VirtualMachineStart(filter.SuspendPolicy, filter.RequestId, threadId);
@@ -481,7 +481,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.VirtualMachineDeath);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(default(ThreadId), default(TaggedReferenceTypeId), default(Location?)))
+                    if (filter.ProcessEvent(environment, nativeEnvironment, default(ThreadId), default(TaggedReferenceTypeId), default(Location?)))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, default(ThreadId));
                         Callback.VirtualMachineDeath(filter.SuspendPolicy, filter.RequestId);
@@ -526,7 +526,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.ThreadStart);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(threadId, default(TaggedReferenceTypeId), default(Location?)))
+                    if (filter.ProcessEvent(environment, nativeEnvironment, threadId, default(TaggedReferenceTypeId), default(Location?)))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                         Callback.ThreadStart(filter.SuspendPolicy, filter.RequestId, threadId);
@@ -561,7 +561,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.ThreadEnd);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(threadId, default(TaggedReferenceTypeId), default(Location?)))
+                    if (filter.ProcessEvent(environment, nativeEnvironment, threadId, default(TaggedReferenceTypeId), default(Location?)))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                         Callback.ThreadDeath(filter.SuspendPolicy, filter.RequestId, threadId);
@@ -676,7 +676,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.ClassPrepare);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(threadId, classId, default(Location?)))
+                    if (filter.ProcessEvent(environment, nativeEnvironment, threadId, classId, default(Location?)))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                         Callback.ClassPrepare(filter.SuspendPolicy, filter.RequestId, threadId, classId.TypeTag, classId.TypeId, signature, classStatus);
@@ -771,21 +771,20 @@
 
             private void HandleSingleStep(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID methodId, jlocation jlocation)
             {
-                if (!VirtualMachine.IsAgentThread.Value)
-                {
-                    // ignore events before VMInit
-                    if (AgentEventDispatcher == null)
-                        return;
+                //if (!VirtualMachine.IsAgentThread.Value)
+                //{
+                //    // ignore events before VMInit
+                //    if (AgentEventDispatcher == null)
+                //        return;
 
-                    // dispatch this call to an agent thread
-                    Action<jvmtiEnvHandle, JNIEnvHandle, jthread, jmethodID, jlocation> invokeMethod = HandleSingleStep;
-                    AgentEventDispatcher.Invoke(invokeMethod, env, jniEnv, threadHandle, methodId, jlocation);
-                    return;
-                }
+                //    // dispatch this call to an agent thread
+                //    Action<jvmtiEnvHandle, JNIEnvHandle, jthread, jmethodID, jlocation> invokeMethod = HandleSingleStep;
+                //    AgentEventDispatcher.Invoke(invokeMethod, env, jniEnv, threadHandle, methodId, jlocation);
+                //    return;
+                //}
 
                 JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(_service.VirtualMachine, env);
-                JniEnvironment nativeEnvironment;
-                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, true));
+                JniEnvironment nativeEnvironment = JniEnvironment.GetOrCreateInstance(jniEnv);
 
                 ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, true);
 
@@ -798,12 +797,32 @@
                 EventFilter[] filters = GetEventFilters(EventKind.SingleStep);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(threadId, default(TaggedReferenceTypeId), location))
+                    if (filter.ProcessEvent(environment, nativeEnvironment, threadId, default(TaggedReferenceTypeId), location))
                     {
-                        ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
-                        Callback.SingleStep(filter.SuspendPolicy, filter.RequestId, threadId, location);
+                        SendSingleStepEvent(environment, filter, threadId, location);
                     }
                 }
+            }
+
+            private void SendSingleStepEvent(JvmtiEnvironment environment, EventFilter filter, ThreadId threadId, Location location)
+            {
+                if (!VirtualMachine.IsAgentThread.Value)
+                {
+                    // ignore events before VMInit
+                    if (AgentEventDispatcher == null)
+                        return;
+
+                    // dispatch this call to an agent thread
+                    Action<JvmtiEnvironment, EventFilter, ThreadId, Location> invokeMethod = SendSingleStepEvent;
+                    AgentEventDispatcher.Invoke(invokeMethod, environment, filter, threadId, location);
+                    return;
+                }
+
+                JniEnvironment nativeEnvironment;
+                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, true));
+
+                ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
+                Callback.SingleStep(filter.SuspendPolicy, filter.RequestId, threadId, location);
             }
 
             private void HandleFramePop(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID methodId, bool wasPoppedByException)
@@ -859,7 +878,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.Breakpoint);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(threadId, default(TaggedReferenceTypeId), location))
+                    if (filter.ProcessEvent(environment, nativeEnvironment, threadId, default(TaggedReferenceTypeId), location))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                         Callback.Breakpoint(filter.SuspendPolicy, filter.RequestId, threadId, location);

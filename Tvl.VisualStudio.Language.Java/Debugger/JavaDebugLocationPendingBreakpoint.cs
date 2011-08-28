@@ -130,7 +130,8 @@
                 return AD7Constants.E_BP_DELETED;
             }
 
-            Task.Factory.StartNew(AsyncBindImpl).HandleNonCriticalExceptions();
+            //Task.Factory.StartNew(AsyncBindImpl).HandleNonCriticalExceptions();
+            AsyncBindImpl();
             return VSConstants.S_OK;
         }
 
@@ -183,19 +184,19 @@
                     BreakpointResolutionLocation location = new BreakpointResolutionLocationCode(codeContext);
                     string message = "The class is not yet loaded, or the location is not present in the debug symbols for this document.";
 
-                    DebugErrorBreakpointResolution resolution = new DebugErrorBreakpointResolution(program, thread, enum_BP_TYPE.BPT_CODE, location, enum_BP_ERROR_TYPE.BPET_GENERAL_ERROR, message);
+                    DebugErrorBreakpointResolution resolution = new DebugErrorBreakpointResolution(program, thread, enum_BP_TYPE.BPT_CODE, location, enum_BP_ERROR_TYPE.BPET_GENERAL_WARNING, message);
                     DebugErrorBreakpoint errorBreakpoint = new DebugErrorBreakpoint(this, resolution);
-                    //_errorBreakpoints.Add(errorBreakpoint);
+                    _errorBreakpoints.Add(errorBreakpoint);
 
                     DebugEvent debugEvent = new DebugBreakpointErrorEvent(enum_EVENTATTRIBUTES.EVENT_ASYNCHRONOUS, errorBreakpoint);
-                    //program.Callback.Event(DebugEngine, program.Process, program, null, debugEvent);
+                    program.Callback.Event(DebugEngine, program.Process, program, null, debugEvent);
                 }
             }
 
             foreach (var group in boundBreakpoints.GroupBy(i => i.Program))
             {
                 DebugEvent debugEvent = new DebugBreakpointBoundEvent(enum_EVENTATTRIBUTES.EVENT_ASYNCHRONOUS, this, new EnumDebugBoundBreakpoints(group));
-                //group.Key.Callback.Event(DebugEngine, group.Key.Process, group.Key, null, debugEvent);
+                group.Key.Callback.Event(DebugEngine, group.Key.Process, group.Key, null, debugEvent);
             }
         }
 
@@ -279,6 +280,7 @@
             if (_disabled == !enable)
                 return VSConstants.S_OK;
 
+            _disabled = !enable;
             foreach (var breakpoint in _boundBreakpoints)
                 breakpoint.Enable(fEnable);
 

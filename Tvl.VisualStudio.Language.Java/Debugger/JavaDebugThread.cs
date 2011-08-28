@@ -9,6 +9,7 @@
     using System.Collections.ObjectModel;
     using System.Collections.Generic;
     using Tvl.VisualStudio.Language.Java.Debugger.Collections;
+    using Tvl.Java.DebugInterface.Request;
 
     [ComVisible(true)]
     public class JavaDebugThread
@@ -22,13 +23,17 @@
         private readonly IThreadReference _thread;
         private readonly ThreadCategory _category;
 
+        private readonly List<IStepRequest> _stepRequests = new List<IStepRequest>();
+
         public JavaDebugThread(JavaDebugProgram program, IThreadReference thread, ThreadCategory category)
         {
             Contract.Requires<ArgumentNullException>(program != null, "program");
+            Contract.Requires<ArgumentNullException>(thread != null, "thread");
 
             _program = program;
             _thread = thread;
             _category = category;
+            CreateStepRequests();
         }
 
         public JavaDebugProgram Program
@@ -36,6 +41,90 @@
             get
             {
                 return _program;
+            }
+        }
+
+        public ReadOnlyCollection<IStepRequest> StepRequests
+        {
+            get
+            {
+                return _stepRequests.AsReadOnly();
+            }
+        }
+
+        public IStepRequest GetStepRequest(StepSize size, StepDepth depth)
+        {
+            int kindIndex;
+            switch (depth)
+            {
+            case StepDepth.Into:
+                kindIndex = 0;
+                break;
+
+            case StepDepth.Out:
+                kindIndex = 1;
+                break;
+
+            case StepDepth.Over:
+                kindIndex = 2;
+                break;
+
+            default:
+                throw new NotSupportedException();
+            }
+
+            int unitIndex;
+            switch (size)
+            {
+            case StepSize.Instruction:
+                unitIndex = 0;
+                break;
+
+            case StepSize.Line:
+                unitIndex = 1;
+                break;
+
+            case StepSize.Statement:
+                unitIndex = 2;
+                break;
+
+            default:
+                throw new NotSupportedException();
+            }
+
+            IStepRequest request = _stepRequests[kindIndex * 3 + unitIndex];
+            Contract.Assert(request.Size == size);
+            Contract.Assert(request.Depth == depth);
+            return request;
+        }
+
+        private void CreateStepRequests()
+        {
+            IVirtualMachine virtualMachine = _thread.GetVirtualMachine();
+            IEventRequestManager manager = virtualMachine.GetEventRequestManager();
+
+            /*
+             * THE ORDER OF THESE MUST MATCH THE LOOKUP IN GetStepRequest!
+             */
+
+            // step into
+            _stepRequests.Add(manager.CreateStepRequest(_thread, StepSize.Instruction, StepDepth.Into));
+            _stepRequests.Add(manager.CreateStepRequest(_thread, StepSize.Line, StepDepth.Into));
+            _stepRequests.Add(manager.CreateStepRequest(_thread, StepSize.Statement, StepDepth.Into));
+
+            // step out
+            _stepRequests.Add(manager.CreateStepRequest(_thread, StepSize.Instruction, StepDepth.Out));
+            _stepRequests.Add(manager.CreateStepRequest(_thread, StepSize.Line, StepDepth.Out));
+            _stepRequests.Add(manager.CreateStepRequest(_thread, StepSize.Statement, StepDepth.Out));
+
+            // step over
+            _stepRequests.Add(manager.CreateStepRequest(_thread, StepSize.Instruction, StepDepth.Over));
+            _stepRequests.Add(manager.CreateStepRequest(_thread, StepSize.Line, StepDepth.Over));
+            _stepRequests.Add(manager.CreateStepRequest(_thread, StepSize.Statement, StepDepth.Over));
+
+            foreach (var request in _stepRequests)
+            {
+                request.SuspendPolicy = SuspendPolicy.All;
             }
         }
 

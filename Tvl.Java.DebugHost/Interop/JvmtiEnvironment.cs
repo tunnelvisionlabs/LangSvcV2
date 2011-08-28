@@ -94,6 +94,19 @@
             return RawInterface.GetVersionNumber(this, out version);
         }
 
+        public jvmtiError GetCurrentThread(JniEnvironment nativeEnvironment, out ThreadId thread)
+        {
+            thread = default(ThreadId);
+
+            jthread threadPtr;
+            jvmtiError error = RawInterface.GetCurrentThread(this, out threadPtr);
+            if (error != jvmtiError.None)
+                return error;
+
+            thread = VirtualMachine.TrackLocalThreadReference(threadPtr, this, nativeEnvironment, true);
+            return jvmtiError.None;
+        }
+
         public jvmtiError GetAllThreads(JniEnvironment nativeEnvironment, out ThreadId[] threads)
         {
             threads = null;
@@ -607,6 +620,32 @@
             return RawInterface.GetMethodModifiers(this, (jmethodID)methodId, out modifiers);
         }
 
+        public jvmtiError GetBytecodes(MethodId methodId, out byte[] bytecode)
+        {
+            bytecode = null;
+
+            int bytecodeCount;
+            IntPtr bytecodePtr;
+            jvmtiError error = RawInterface.GetBytecodes(this, methodId, out bytecodeCount, out bytecodePtr);
+            if (error != jvmtiError.None)
+                return error;
+
+            try
+            {
+                if (bytecodeCount > 0)
+                {
+                    bytecode = new byte[bytecodeCount];
+                    Marshal.Copy(bytecodePtr, bytecode, 0, bytecodeCount);
+                }
+            }
+            finally
+            {
+                Deallocate(bytecodePtr);
+            }
+
+            return jvmtiError.None;
+        }
+
         public jvmtiError GetMethodDeclaringClass(JniEnvironment nativeEnvironment, MethodId methodId, out TaggedReferenceTypeId declaringClass)
         {
             declaringClass = default(TaggedReferenceTypeId);
@@ -771,6 +810,11 @@
 
                 return RawInterface.GetFrameCount(this, thread.Value, out frameCount);
             }
+        }
+
+        public jvmtiError GetFrameCount(jthread thread, out int frameCount)
+        {
+            return RawInterface.GetFrameCount(this, thread, out frameCount);
         }
 
         public jvmtiError GetFrameLocation(jthread thread, int depth, out jmethodID method, out jlocation location)

@@ -18,6 +18,7 @@
     using Tvl.Java.DebugInterface.Client.Events;
     using System.Diagnostics.Contracts;
     using Task = System.Threading.Tasks.Task;
+    using System.Collections.Concurrent;
 
     internal partial class VirtualMachine : IVirtualMachine
     {
@@ -30,6 +31,16 @@
         private DebugProtocol.IDebugProtocolService _protocolService;
 
         private bool _disposed;
+
+        private readonly ConcurrentDictionary<TaggedReferenceTypeId, ReferenceType> _referenceTypes = new ConcurrentDictionary<TaggedReferenceTypeId, ReferenceType>();
+
+        private readonly Dictionary<ReferenceTypeId, List<Field>> _fields =
+            new Dictionary<ReferenceTypeId, List<Field>>();
+
+        private readonly Dictionary<ReferenceTypeId, List<Method>> _methods =
+            new Dictionary<ReferenceTypeId, List<Method>>();
+
+        private readonly Dictionary<string, IType> _types = new Dictionary<string, IType>();
 
         public VirtualMachine()
         {
@@ -429,7 +440,7 @@
 
         public string GetDefaultStratum()
         {
-            throw new NotImplementedException();
+            return "Java";
         }
 
         public long[] GetInstanceCounts(IEnumerable<IReferenceType> referenceTypes)
@@ -521,21 +532,7 @@
 
         internal ReferenceType GetMirrorOf(TypeTag typeTag, ReferenceTypeId typeId)
         {
-            switch (typeTag)
-            {
-            case TypeTag.Class:
-                return new ClassType(this, (ClassId)typeId);
-
-            case TypeTag.Interface:
-                return new InterfaceType(this, (InterfaceId)typeId);
-
-            case TypeTag.Array:
-                return new ArrayType(this, (ArrayTypeId)typeId);
-
-            case TypeTag.Invalid:
-            default:
-                throw new DebuggerArgumentException("Invalid type tag.");
-            }
+            return GetMirrorOf(new TaggedReferenceTypeId(typeTag, typeId));
         }
 
         internal ObjectReference GetMirrorOf(TaggedObjectId @object)
@@ -585,7 +582,26 @@
 
         internal ReferenceType GetMirrorOf(TaggedReferenceTypeId type)
         {
-            return GetMirrorOf(type.TypeTag, type.TypeId);
+            return _referenceTypes.GetOrAdd(type, CreateReferenceTypeMirror);
+        }
+
+        private ReferenceType CreateReferenceTypeMirror(TaggedReferenceTypeId type)
+        {
+            switch (type.TypeTag)
+            {
+            case TypeTag.Class:
+                return new ClassType(this, (ClassId)type.TypeId);
+
+            case TypeTag.Interface:
+                return new InterfaceType(this, (InterfaceId)type.TypeId);
+
+            case TypeTag.Array:
+                return new ArrayType(this, (ArrayTypeId)type.TypeId);
+
+            case TypeTag.Invalid:
+            default:
+                throw new DebuggerArgumentException("Invalid type tag.");
+            }
         }
 
         internal Value GetMirrorOf(Types.Value value)
@@ -665,12 +681,46 @@
 
         internal Field GetMirrorOf(ReferenceType declaringType, DeclaredFieldData fieldData)
         {
-            return new Field(this, declaringType, fieldData.Name, fieldData.Signature, fieldData.GenericSignature, (AccessModifiers)fieldData.Modifiers, fieldData.FieldId);
+            lock (_fields)
+            {
+                List<Field> fields;
+                if (!_fields.TryGetValue(declaringType.ReferenceTypeId, out fields))
+                {
+                    fields = new List<Field>();
+                    _fields[declaringType.ReferenceTypeId] = fields;
+                }
+
+                Field field = fields.SingleOrDefault(i => i.FieldId == fieldData.FieldId);
+                if (field == null)
+                {
+                    field = new Field(this, declaringType, fieldData.Name, fieldData.Signature, fieldData.GenericSignature, (AccessModifiers)fieldData.Modifiers, fieldData.FieldId);
+                    fields.Add(field);
+                }
+
+                return field;
+            }
         }
 
         internal Method GetMirrorOf(ReferenceType declaringType, DeclaredMethodData methodData)
         {
-            return new Method(this, declaringType, methodData.Name, methodData.Signature, methodData.GenericSignature, (AccessModifiers)methodData.Modifiers, methodData.MethodId);
+            lock (_methods)
+            {
+                List<Method> methods;
+                if (!_methods.TryGetValue(declaringType.ReferenceTypeId, out methods))
+                {
+                    methods = new List<Method>();
+                    _methods[declaringType.ReferenceTypeId] = methods;
+                }
+
+                Method method = methods.SingleOrDefault(i => i.MethodId == methodData.MethodId);
+                if (method == null)
+                {
+                    method = new Method(this, declaringType, methodData.Name, methodData.Signature, methodData.GenericSignature, (AccessModifiers)methodData.Modifiers, methodData.MethodId);
+                    methods.Add(method);
+                }
+
+                return method;
+            }
         }
 
         internal Method GetMirrorOf(ReferenceType declaringType, MethodId methodId)

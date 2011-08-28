@@ -19,6 +19,14 @@
             _stackFrame = stackFrame;
         }
 
+        public JavaDebugStackFrame StackFrame
+        {
+            get
+            {
+                return _stackFrame;
+            }
+        }
+
         public int GetName(out string pbstrName)
         {
             return _stackFrame.GetName(out pbstrName);

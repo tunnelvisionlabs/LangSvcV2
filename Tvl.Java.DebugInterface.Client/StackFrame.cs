@@ -109,15 +109,13 @@
 
         public ILocalVariable GetVisibleVariableByName(string name)
         {
-            throw new NotImplementedException();
+            return GetVisibleVariables().SingleOrDefault(i => i.GetName() == name);
         }
 
         public ReadOnlyCollection<ILocalVariable> GetVisibleVariables()
         {
-            Types.VariableData[] slots;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodVariableTable(out slots, _location.Method.DeclaringType.ReferenceTypeId, _location.Method.MethodId));
-            List<Types.VariableData> visible = new List<Types.VariableData>(slots.Where(i => (long)i.CodeIndex <= _location.CodeIndex && _location.CodeIndex < (long)i.CodeIndex + i.Length));
-            return visible.ConvertAll(i => (ILocalVariable)VirtualMachine.GetMirrorOf(_location.Method, i)).AsReadOnly();
+            List<ILocalVariable> visible = new List<ILocalVariable>(GetLocation().GetMethod().GetVariables().Where(i => i.GetIsVisible(this)));
+            return visible.AsReadOnly();
         }
 
         #endregion

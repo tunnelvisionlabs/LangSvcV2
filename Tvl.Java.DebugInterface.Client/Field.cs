@@ -12,6 +12,8 @@
     {
         private readonly FieldId _fieldId;
 
+        private IType _fieldType;
+
         internal Field(VirtualMachine virtualMachine, ReferenceType declaringType, string name, string signature, string genericSignature, AccessModifiers modifiers, FieldId fieldId)
             : base(virtualMachine, declaringType, name, signature, genericSignature, modifiers)
         {
@@ -31,7 +33,7 @@
 
         public bool GetIsEnumConstant()
         {
-            throw new NotImplementedException();
+            return (GetModifiers() & AccessModifiers.Enum) != 0;
         }
 
         public bool GetIsTransient()
@@ -46,7 +48,16 @@
 
         public IType GetFieldType()
         {
-            return VirtualMachine.FindType(GetSignature());
+            if (_fieldType == null)
+            {
+                IType fieldType = VirtualMachine.FindType(GetSignature());
+                if (fieldType is UnloadedReferenceType)
+                    return fieldType;
+
+                _fieldType = fieldType;
+            }
+
+            return _fieldType;
         }
 
         public string GetFieldTypeName()
@@ -60,18 +71,22 @@
 
         public bool Equals(IField other)
         {
+            Field field = other as Field;
+            if (field == null)
+                return false;
 
-            throw new NotImplementedException();
+            return this.VirtualMachine.Equals(field.VirtualMachine)
+                && this.FieldId == field.FieldId;
         }
 
         public override bool Equals(object obj)
         {
-            throw new NotImplementedException();
+            return this.Equals(obj as Field);
         }
 
         public override int GetHashCode()
         {
-            throw new NotImplementedException();
+            return this.VirtualMachine.GetHashCode() ^ this.FieldId.GetHashCode();
         }
 
         #endregion

@@ -16,6 +16,14 @@
         private readonly ReadOnlyCollection<string> _argumentTypeNames;
         private readonly string _returnTypeName;
 
+        // cached items
+        private LocalVariable[] _variables;
+        private Location[] _lineLocations;
+        private IType[] _argumentTypes;
+        private bool? _obsolete;
+        private Location _location;
+        private byte[] _bytecode;
+
         internal Method(VirtualMachine virtualMachine, ReferenceType declaringType, string name, string signature, string genericSignature, AccessModifiers modifiers, MethodId methodId)
             : base(virtualMachine, declaringType, name, signature, genericSignature, modifiers)
         {
@@ -58,18 +66,21 @@
 
         public ReadOnlyCollection<ILocation> GetLineLocations()
         {
-            long startCodeIndex;
-            long endCodeIndex;
-            Types.LineNumberData[] lines;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodLineTable(out startCodeIndex, out endCodeIndex, out lines, DeclaringType.ReferenceTypeId, this.MethodId));
-
-            List<ILocation> locations = new List<ILocation>();
-            foreach (var line in lines)
+            if (_lineLocations == null)
             {
-                locations.Add(VirtualMachine.GetMirrorOf(this, line));
+                long startCodeIndex;
+                long endCodeIndex;
+                Types.LineNumberData[] lines;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodLineTable(out startCodeIndex, out endCodeIndex, out lines, DeclaringType.ReferenceTypeId, this.MethodId));
+
+                List<Location> locations = new List<Location>();
+                foreach (var line in lines)
+                    locations.Add(VirtualMachine.GetMirrorOf(this, line));
+
+                _lineLocations = locations.ToArray();
             }
 
-            return locations.AsReadOnly();
+            return new ReadOnlyCollection<ILocation>(_lineLocations);
         }
 
         public ReadOnlyCollection<ILocation> GetLineLocations(string stratum, string sourceName)
@@ -82,7 +93,8 @@
 
         public ReadOnlyCollection<ILocalVariable> GetArguments()
         {
-            throw new NotImplementedException();
+            List<ILocalVariable> arguments = new List<ILocalVariable>(GetVariables().Where(i => i.GetIsArgument()));
+            return arguments.AsReadOnly();
         }
 
         public ReadOnlyCollection<string> GetArgumentTypeNames()
@@ -92,14 +104,28 @@
 
         public ReadOnlyCollection<IType> GetArgumentTypes()
         {
-            throw new NotImplementedException();
+            if (_argumentTypes == null)
+            {
+                IType[] argumentTypes = GetArgumentTypeNames().Select(i => VirtualMachine.FindType(i)).ToArray();
+                if (argumentTypes.OfType<UnloadedReferenceType>().Any())
+                    return new ReadOnlyCollection<IType>(argumentTypes);
+
+                _argumentTypes = argumentTypes;
+            }
+
+            return new ReadOnlyCollection<IType>(_argumentTypes);
         }
 
         public byte[] GetBytecodes()
         {
-            byte[] result;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodBytecodes(out result, DeclaringType.ReferenceTypeId, MethodId));
-            return result;
+            if (_bytecode == null)
+            {
+                byte[] result;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodBytecodes(out result, DeclaringType.ReferenceTypeId, MethodId));
+                _bytecode = result;
+            }
+
+            return _bytecode;
         }
 
         public bool GetIsAbstract()
@@ -124,9 +150,14 @@
 
         public bool GetIsObsolete()
         {
-            bool result;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodIsObsolete(out result, DeclaringType.ReferenceTypeId, MethodId));
-            return result;
+            if (_obsolete == null)
+            {
+                bool result;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodIsObsolete(out result, DeclaringType.ReferenceTypeId, MethodId));
+                _obsolete = result;
+            }
+
+            return _obsolete.Value;
         }
 
         public bool GetIsStaticInitializer()
@@ -162,20 +193,7 @@
             if (Path.GetFileName(sourceName) != Path.GetFileName(DeclaringType.GetSourceName()))
                 return new ReadOnlyCollection<ILocation>(new ILocation[0]);
 
-            long startCodeIndex;
-            long endCodeIndex;
-            Types.LineNumberData[] lines;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodLineTable(out startCodeIndex, out endCodeIndex, out lines, DeclaringType.ReferenceTypeId, this.MethodId));
-
-            List<ILocation> locations = new List<ILocation>();
-            foreach (var line in lines)
-            {
-                if (line.LineNumber != lineNumber)
-                    continue;
-
-                locations.Add(VirtualMachine.GetMirrorOf(this, line));
-            }
-
+            List<ILocation> locations = new List<ILocation>(GetLineLocations().Where(i => i.GetLineNumber() == lineNumber));
             return locations.AsReadOnly();
         }
 
@@ -191,18 +209,21 @@
 
         public ReadOnlyCollection<ILocalVariable> GetVariables()
         {
-            Types.VariableData[] slots;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodVariableTable(out slots, DeclaringType.ReferenceTypeId, MethodId));
-            LocalVariable[] variables = Array.ConvertAll(slots, i => VirtualMachine.GetMirrorOf(this, i));
-            return new ReadOnlyCollection<ILocalVariable>(variables);
+            if (_variables == null)
+            {
+                Types.VariableData[] slots;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodVariableTable(out slots, DeclaringType.ReferenceTypeId, MethodId));
+                LocalVariable[] variables = Array.ConvertAll(slots, i => VirtualMachine.GetMirrorOf(this, i));
+                _variables = variables;
+            }
+
+            return new ReadOnlyCollection<ILocalVariable>(_variables);
         }
 
         public ReadOnlyCollection<ILocalVariable> GetVariablesByName(string name)
         {
-            Types.VariableData[] slots;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodVariableTable(out slots, DeclaringType.ReferenceTypeId, MethodId));
-            List<ILocalVariable> variables = new List<ILocalVariable>(slots.Where(i => i.Name == name).Select(i => VirtualMachine.GetMirrorOf(this, i)));
-            return variables.AsReadOnly();
+            List<ILocalVariable> namedVariables = new List<ILocalVariable>(GetVariables().Where(i => i.GetName() == name));
+            return namedVariables.AsReadOnly();
         }
 
         #endregion
@@ -211,11 +232,7 @@
 
         public ILocation GetLocation()
         {
-            long startCodeIndex;
-            long endCodeIndex;
-            Types.LineNumberData[] lines;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodLineTable(out startCodeIndex, out endCodeIndex, out lines, DeclaringType.ReferenceTypeId, this.MethodId));
-            return VirtualMachine.GetMirrorOf(this, lines[0]);
+            return GetLineLocations().First();
         }
 
         #endregion

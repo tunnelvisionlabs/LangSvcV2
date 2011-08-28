@@ -101,7 +101,12 @@
 
         public int CauseBreak()
         {
-            throw new NotImplementedException();
+            foreach (var program in Programs)
+            {
+                ErrorHandler.ThrowOnFailure(program.CauseBreak());
+            }
+
+            return VSConstants.S_OK;
         }
 
         public int ContinueFromSynchronousEvent(IDebugEvent2 pEvent)
