@@ -26,6 +26,9 @@
         {
             get
             {
+                if (_nativeEnvironment == null)
+                    return false;
+
                 return !_nativeEnvironment.IsSameObject(Value, jclass.Null);
             }
         }
