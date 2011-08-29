@@ -403,75 +403,43 @@
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="Error" nillable="true" type="tns:Error" />
-  <xs:complexType name="ThreadId">
-    <xs:annotation>
-      <xs:appinfo>
-        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
-      </xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="Handle" type="xs:long" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ThreadId" nillable="true" type="tns:ThreadId" />
-  <xs:complexType name="ArrayOfThreadId">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="ThreadId" type="tns:ThreadId" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfThreadId" nillable="true" type="tns:ArrayOfThreadId" />
-  <xs:complexType name="ClassId">
-    <xs:annotation>
-      <xs:appinfo>
-        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
-      </xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="Handle" type="xs:long" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ClassId" nillable="true" type="tns:ClassId" />
-  <xs:complexType name="MethodId">
-    <xs:annotation>
-      <xs:appinfo>
-        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
-      </xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="Handle" type="xs:long" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="MethodId" nillable="true" type="tns:MethodId" />
-  <xs:simpleType name="InvokeOptions">
-    <xs:list>
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="None">
-            <xs:annotation>
-              <xs:appinfo>
-                <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">0</EnumerationValue>
-              </xs:appinfo>
-            </xs:annotation>
-          </xs:enumeration>
-          <xs:enumeration value="SingleThreaded">
-            <xs:annotation>
-              <xs:appinfo>
-                <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">1</EnumerationValue>
-              </xs:appinfo>
-            </xs:annotation>
-          </xs:enumeration>
-          <xs:enumeration value="NonVirtual">
-            <xs:annotation>
-              <xs:appinfo>
-                <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">2</EnumerationValue>
-              </xs:appinfo>
-            </xs:annotation>
-          </xs:enumeration>
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:list>
+  <xs:simpleType name="TypeTag">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Invalid" />
+      <xs:enumeration value="Class" />
+      <xs:enumeration value="Interface" />
+      <xs:enumeration value="Array" />
+    </xs:restriction>
   </xs:simpleType>
-  <xs:element name="InvokeOptions" nillable="true" type="tns:InvokeOptions" />
+  <xs:element name="TypeTag" nillable="true" type="tns:TypeTag" />
+  <xs:complexType name="ReferenceTypeId">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Handle" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ReferenceTypeId" nillable="true" type="tns:ReferenceTypeId" />
+  <xs:complexType name="ArrayOfFieldId">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="FieldId" type="tns:FieldId" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfFieldId" nillable="true" type="tns:ArrayOfFieldId" />
+  <xs:complexType name="FieldId">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Handle" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="FieldId" nillable="true" type="tns:FieldId" />
   <xs:complexType name="ArrayOfValue">
     <xs:sequence>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="Value" type="tns:Value" />
@@ -608,6 +576,75 @@
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="Tag" nillable="true" type="tns:Tag" />
+  <xs:complexType name="ThreadId">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Handle" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ThreadId" nillable="true" type="tns:ThreadId" />
+  <xs:complexType name="ArrayOfThreadId">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="ThreadId" type="tns:ThreadId" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfThreadId" nillable="true" type="tns:ArrayOfThreadId" />
+  <xs:complexType name="ClassId">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Handle" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ClassId" nillable="true" type="tns:ClassId" />
+  <xs:complexType name="MethodId">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Handle" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="MethodId" nillable="true" type="tns:MethodId" />
+  <xs:simpleType name="InvokeOptions">
+    <xs:list>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="None">
+            <xs:annotation>
+              <xs:appinfo>
+                <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">0</EnumerationValue>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="SingleThreaded">
+            <xs:annotation>
+              <xs:appinfo>
+                <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">1</EnumerationValue>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="NonVirtual">
+            <xs:annotation>
+              <xs:appinfo>
+                <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">2</EnumerationValue>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:list>
+  </xs:simpleType>
+  <xs:element name="InvokeOptions" nillable="true" type="tns:InvokeOptions" />
   <xs:complexType name="TaggedObjectId">
     <xs:annotation>
       <xs:appinfo>
@@ -691,15 +728,6 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="Location" nillable="true" type="tns:Location" />
-  <xs:simpleType name="TypeTag">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Invalid" />
-      <xs:enumeration value="Class" />
-      <xs:enumeration value="Interface" />
-      <xs:enumeration value="Array" />
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:element name="TypeTag" nillable="true" type="tns:TypeTag" />
   <xs:complexType name="ArrayOfTaggedObjectId">
     <xs:sequence>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="TaggedObjectId" type="tns:TaggedObjectId" />
@@ -752,17 +780,6 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="TaggedReferenceTypeId" nillable="true" type="tns:TaggedReferenceTypeId" />
-  <xs:complexType name="ReferenceTypeId">
-    <xs:annotation>
-      <xs:appinfo>
-        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
-      </xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="Handle" type="xs:long" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ReferenceTypeId" nillable="true" type="tns:ReferenceTypeId" />
   <xs:simpleType name="EventKind">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Invalid" />
@@ -889,17 +906,6 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="EventRequestModifier" nillable="true" type="tns:EventRequestModifier" />
-  <xs:complexType name="FieldId">
-    <xs:annotation>
-      <xs:appinfo>
-        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
-      </xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="Handle" type="xs:long" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="FieldId" nillable="true" type="tns:FieldId" />
   <xs:simpleType name="ModifierKind">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Invalid" />
@@ -928,8 +934,9 @@
   <xs:element name="StepDepth" nillable="true" type="tns:StepDepth" />
   <xs:simpleType name="StepSize">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Minimum" />
+      <xs:enumeration value="Instruction" />
       <xs:enumeration value="Line" />
+      <xs:enumeration value="Statement" />
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="StepSize" nillable="true" type="tns:StepSize" />
@@ -1442,7 +1449,21 @@
               </xs:appinfo>
             </xs:annotation>
           </xs:enumeration>
+          <xs:enumeration value="Bridge">
+            <xs:annotation>
+              <xs:appinfo>
+                <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">64</EnumerationValue>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:enumeration>
           <xs:enumeration value="Transient">
+            <xs:annotation>
+              <xs:appinfo>
+                <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">128</EnumerationValue>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="VarArgs">
             <xs:annotation>
               <xs:appinfo>
                 <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">128</EnumerationValue>
@@ -1474,6 +1495,27 @@
             <xs:annotation>
               <xs:appinfo>
                 <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">2048</EnumerationValue>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="Synthetic">
+            <xs:annotation>
+              <xs:appinfo>
+                <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">4096</EnumerationValue>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="Annotation">
+            <xs:annotation>
+              <xs:appinfo>
+                <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">8192</EnumerationValue>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="Enum">
+            <xs:annotation>
+              <xs:appinfo>
+                <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">16384</EnumerationValue>
               </xs:appinfo>
             </xs:annotation>
           </xs:enumeration>
@@ -1524,12 +1566,6 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="DeclaredMethodData" nillable="true" type="tns:DeclaredMethodData" />
-  <xs:complexType name="ArrayOfFieldId">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="FieldId" type="tns:FieldId" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfFieldId" nillable="true" type="tns:ArrayOfFieldId" />
   <xs:complexType name="ArrayOfInterfaceId">
     <xs:sequence>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="InterfaceId" type="tns:InterfaceId" />

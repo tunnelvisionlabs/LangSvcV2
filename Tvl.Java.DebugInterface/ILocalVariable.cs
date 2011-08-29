@@ -27,6 +27,13 @@
         bool GetIsVisible(IStackFrame frame);
 
         /// <summary>
+        /// Determines whether this variable can be accessed from the given <see cref="ILocation"/>.
+        /// </summary>
+        bool GetIsVisible(ILocation location);
+
+        int GetSlot();
+
+        /// <summary>
         /// Gets the name of the local variable.
         /// </summary>
         string GetName();

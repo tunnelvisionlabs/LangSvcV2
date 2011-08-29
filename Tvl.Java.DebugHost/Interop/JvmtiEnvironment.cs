@@ -43,7 +43,8 @@
                     | jvmtiCapabilities.CapabilityFlags1.CanGenerateExceptionEvents
                     | jvmtiCapabilities.CapabilityFlags1.CanGenerateBreakpointEvents
                     | jvmtiCapabilities.CapabilityFlags1.CanGetBytecodes
-                    | jvmtiCapabilities.CapabilityFlags1.CanSuspend
+                    | jvmtiCapabilities.CapabilityFlags1.CanSuspend,
+                    jvmtiCapabilities.CapabilityFlags2.CanGetConstantPool
                     );
             JvmtiErrorHandler.ThrowOnFailure(RawInterface.AddCapabilities(this, ref capabilities));
 
@@ -352,6 +353,62 @@
 
                 modifiers = (AccessModifiers)modifiersPtr;
                 return jvmtiError.None;
+            }
+        }
+
+        public jvmtiError GetClassVersionNumbers(jclass classHandle, out int minorVersion, out int majorVersion)
+        {
+            return RawInterface.GetClassVersionNumbers(this, classHandle, out minorVersion, out majorVersion);
+        }
+
+        public jvmtiError GetConstantPool(jclass classHandle, out int constantPoolCount, out byte[] data)
+        {
+            data = null;
+
+            int constantPoolByteCount;
+            IntPtr constantPoolBytesPtr;
+            jvmtiError error = RawInterface.GetConstantPool(this, classHandle, out constantPoolCount, out constantPoolByteCount, out constantPoolBytesPtr);
+            if (error != jvmtiError.None)
+                return error;
+
+            try
+            {
+                data = new byte[constantPoolByteCount];
+                Marshal.Copy(constantPoolBytesPtr, data, 0, constantPoolByteCount);
+                return jvmtiError.None;
+            }
+            finally
+            {
+                Deallocate(constantPoolBytesPtr);
+            }
+        }
+
+        public jvmtiError GetConstantPool(jclass classHandle, out ConstantPoolEntry[] entries)
+        {
+            entries = null;
+
+            int constantPoolCount;
+            int constantPoolByteCount;
+            IntPtr constantPoolBytesPtr;
+            jvmtiError error = RawInterface.GetConstantPool(this, classHandle, out constantPoolCount, out constantPoolByteCount, out constantPoolBytesPtr);
+            if (error != jvmtiError.None)
+                return error;
+
+            try
+            {
+                List<ConstantPoolEntry> entryList = new List<ConstantPoolEntry>();
+                IntPtr currentPosition = constantPoolBytesPtr;
+                for (int i = 0; i < constantPoolCount; i++)
+                {
+                    entryList.Add(ConstantPoolEntry.FromMemory(ref currentPosition));
+                }
+
+                entries = entryList.ToArray();
+                return jvmtiError.None;
+            }
+            finally
+            {
+                Deallocate(constantPoolBytesPtr);
             }
         }
 

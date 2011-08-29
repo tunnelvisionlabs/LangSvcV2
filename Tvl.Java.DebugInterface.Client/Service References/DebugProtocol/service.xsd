@@ -3,83 +3,131 @@
   <xs:import namespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" />
   <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
   <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
-  <xs:element name="GetObjectMonitorInfo">
+  <xs:element name="GetObjectReferenceType">
     <xs:complexType>
       <xs:sequence>
         <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q1:ObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+  <xs:element name="GetObjectReferenceTypeResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetObjectReferenceTypeResult" type="q2:Error" />
+        <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeTag" type="q3:TypeTag" />
+        <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeId" type="q4:ReferenceTypeId" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetObjectValues">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q5:ObjectId" />
+        <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="fields" nillable="true" type="q6:ArrayOfFieldId" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetObjectValuesResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q7="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetObjectValuesResult" type="q7:Error" />
+        <xs:element xmlns:q8="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q8:ArrayOfValue" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SetObjectValues">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q9="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q9:ObjectId" />
+        <xs:element xmlns:q10="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="fields" nillable="true" type="q10:ArrayOfFieldId" />
+        <xs:element xmlns:q11="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q11:ArrayOfValue" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SetObjectValuesResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q12="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SetObjectValuesResult" type="q12:Error" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetObjectMonitorInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q13="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q13:ObjectId" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
   <xs:element name="GetObjectMonitorInfoResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetObjectMonitorInfoResult" type="q2:Error" />
-        <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="owner" type="q3:ThreadId" />
+        <xs:element xmlns:q14="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetObjectMonitorInfoResult" type="q14:Error" />
+        <xs:element xmlns:q15="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="owner" type="q15:ThreadId" />
         <xs:element minOccurs="0" name="entryCount" type="xs:int" />
-        <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="waiters" nillable="true" type="q4:ArrayOfThreadId" />
+        <xs:element xmlns:q16="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="waiters" nillable="true" type="q16:ArrayOfThreadId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="InvokeObjectMethod">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q5:ObjectId" />
-        <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q6:ThreadId" />
-        <xs:element xmlns:q7="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="class" type="q7:ClassId" />
-        <xs:element xmlns:q8="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="method" type="q8:MethodId" />
-        <xs:element xmlns:q9="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="options" type="q9:InvokeOptions" />
-        <xs:element xmlns:q10="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="arguments" nillable="true" type="q10:ArrayOfValue" />
+        <xs:element xmlns:q17="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q17:ObjectId" />
+        <xs:element xmlns:q18="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q18:ThreadId" />
+        <xs:element xmlns:q19="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="class" type="q19:ClassId" />
+        <xs:element xmlns:q20="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="method" type="q20:MethodId" />
+        <xs:element xmlns:q21="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="options" type="q21:InvokeOptions" />
+        <xs:element xmlns:q22="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="arguments" nillable="true" type="q22:ArrayOfValue" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="InvokeObjectMethodResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q11="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="InvokeObjectMethodResult" type="q11:Error" />
-        <xs:element xmlns:q12="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="returnValue" type="q12:Value" />
-        <xs:element xmlns:q13="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thrownException" type="q13:TaggedObjectId" />
+        <xs:element xmlns:q23="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="InvokeObjectMethodResult" type="q23:Error" />
+        <xs:element xmlns:q24="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="returnValue" type="q24:Value" />
+        <xs:element xmlns:q25="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thrownException" type="q25:TaggedObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="DisableObjectCollection">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q14="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q14:ObjectId" />
+        <xs:element xmlns:q26="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q26:ObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="DisableObjectCollectionResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q15="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="DisableObjectCollectionResult" type="q15:Error" />
+        <xs:element xmlns:q27="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="DisableObjectCollectionResult" type="q27:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="EnableObjectCollection">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q16="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q16:ObjectId" />
+        <xs:element xmlns:q28="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q28:ObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="EnableObjectCollectionResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q17="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="EnableObjectCollectionResult" type="q17:Error" />
+        <xs:element xmlns:q29="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="EnableObjectCollectionResult" type="q29:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetIsObjectCollected">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q18="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q18:ObjectId" />
+        <xs:element xmlns:q30="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q30:ObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetIsObjectCollectedResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q19="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetIsObjectCollectedResult" type="q19:Error" />
+        <xs:element xmlns:q31="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetIsObjectCollectedResult" type="q31:Error" />
         <xs:element minOccurs="0" name="result" type="xs:boolean" />
       </xs:sequence>
     </xs:complexType>
@@ -87,14 +135,14 @@
   <xs:element name="GetStringValue">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q20="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="stringObject" type="q20:ObjectId" />
+        <xs:element xmlns:q32="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="stringObject" type="q32:ObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetStringValueResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q21="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetStringValueResult" type="q21:Error" />
+        <xs:element xmlns:q33="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetStringValueResult" type="q33:Error" />
         <xs:element minOccurs="0" name="stringValue" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -102,14 +150,14 @@
   <xs:element name="GetThreadName">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q22="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q22:ThreadId" />
+        <xs:element xmlns:q34="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q34:ThreadId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadNameResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q23="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadNameResult" type="q23:Error" />
+        <xs:element xmlns:q35="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadNameResult" type="q35:Error" />
         <xs:element minOccurs="0" name="name" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -117,66 +165,66 @@
   <xs:element name="SuspendThread">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q24="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q24:ThreadId" />
+        <xs:element xmlns:q36="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q36:ThreadId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SuspendThreadResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q25="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SuspendThreadResult" type="q25:Error" />
+        <xs:element xmlns:q37="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SuspendThreadResult" type="q37:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ResumeThread">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q26="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q26:ThreadId" />
+        <xs:element xmlns:q38="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q38:ThreadId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ResumeThreadResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q27="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="ResumeThreadResult" type="q27:Error" />
+        <xs:element xmlns:q39="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="ResumeThreadResult" type="q39:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadStatus">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q28="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q28:ThreadId" />
+        <xs:element xmlns:q40="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q40:ThreadId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadStatusResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q29="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadStatusResult" type="q29:Error" />
-        <xs:element xmlns:q30="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="threadStatus" type="q30:ThreadStatus" />
-        <xs:element xmlns:q31="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendStatus" type="q31:SuspendStatus" />
+        <xs:element xmlns:q41="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadStatusResult" type="q41:Error" />
+        <xs:element xmlns:q42="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="threadStatus" type="q42:ThreadStatus" />
+        <xs:element xmlns:q43="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendStatus" type="q43:SuspendStatus" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadGroup">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q32="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q32:ThreadId" />
+        <xs:element xmlns:q44="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q44:ThreadId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadGroupResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q33="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadGroupResult" type="q33:Error" />
-        <xs:element xmlns:q34="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="threadGroup" type="q34:ThreadGroupId" />
+        <xs:element xmlns:q45="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadGroupResult" type="q45:Error" />
+        <xs:element xmlns:q46="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="threadGroup" type="q46:ThreadGroupId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadFrames">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q35="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q35:ThreadId" />
+        <xs:element xmlns:q47="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q47:ThreadId" />
         <xs:element minOccurs="0" name="startFrame" type="xs:int" />
         <xs:element minOccurs="0" name="length" type="xs:int" />
       </xs:sequence>
@@ -185,22 +233,22 @@
   <xs:element name="GetThreadFramesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q36="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadFramesResult" type="q36:Error" />
-        <xs:element xmlns:q37="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="frames" nillable="true" type="q37:ArrayOfFrameLocationData" />
+        <xs:element xmlns:q48="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadFramesResult" type="q48:Error" />
+        <xs:element xmlns:q49="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="frames" nillable="true" type="q49:ArrayOfFrameLocationData" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadFrameCount">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q38="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q38:ThreadId" />
+        <xs:element xmlns:q50="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q50:ThreadId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadFrameCountResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q39="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadFrameCountResult" type="q39:Error" />
+        <xs:element xmlns:q51="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadFrameCountResult" type="q51:Error" />
         <xs:element minOccurs="0" name="frameCount" type="xs:int" />
       </xs:sequence>
     </xs:complexType>
@@ -208,73 +256,73 @@
   <xs:element name="GetThreadOwnedMonitors">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q40="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q40:ThreadId" />
+        <xs:element xmlns:q52="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q52:ThreadId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadOwnedMonitorsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q41="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadOwnedMonitorsResult" type="q41:Error" />
-        <xs:element xmlns:q42="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="monitors" nillable="true" type="q42:ArrayOfTaggedObjectId" />
+        <xs:element xmlns:q53="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadOwnedMonitorsResult" type="q53:Error" />
+        <xs:element xmlns:q54="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="monitors" nillable="true" type="q54:ArrayOfTaggedObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadCurrentContendedMonitor">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q43="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q43:ThreadId" />
+        <xs:element xmlns:q55="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q55:ThreadId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadCurrentContendedMonitorResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q44="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadCurrentContendedMonitorResult" type="q44:Error" />
-        <xs:element xmlns:q45="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="monitor" type="q45:TaggedObjectId" />
+        <xs:element xmlns:q56="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadCurrentContendedMonitorResult" type="q56:Error" />
+        <xs:element xmlns:q57="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="monitor" type="q57:TaggedObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="StopThread">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q46="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q46:ThreadId" />
-        <xs:element xmlns:q47="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="throwable" type="q47:ObjectId" />
+        <xs:element xmlns:q58="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q58:ThreadId" />
+        <xs:element xmlns:q59="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="throwable" type="q59:ObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="StopThreadResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q48="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="StopThreadResult" type="q48:Error" />
+        <xs:element xmlns:q60="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="StopThreadResult" type="q60:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="InterruptThread">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q49="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q49:ThreadId" />
+        <xs:element xmlns:q61="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q61:ThreadId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="InterruptThreadResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q50="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="InterruptThreadResult" type="q50:Error" />
+        <xs:element xmlns:q62="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="InterruptThreadResult" type="q62:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadSuspendCount">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q51="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q51:ThreadId" />
+        <xs:element xmlns:q63="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q63:ThreadId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadSuspendCountResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q52="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadSuspendCountResult" type="q52:Error" />
+        <xs:element xmlns:q64="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadSuspendCountResult" type="q64:Error" />
         <xs:element minOccurs="0" name="suspendCount" type="xs:int" />
       </xs:sequence>
     </xs:complexType>
@@ -282,14 +330,14 @@
   <xs:element name="GetThreadGroupName">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q53="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="group" type="q53:ThreadGroupId" />
+        <xs:element xmlns:q65="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="group" type="q65:ThreadGroupId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadGroupNameResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q54="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadGroupNameResult" type="q54:Error" />
+        <xs:element xmlns:q66="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadGroupNameResult" type="q66:Error" />
         <xs:element minOccurs="0" name="groupName" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -297,45 +345,45 @@
   <xs:element name="GetThreadGroupParent">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q55="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="group" type="q55:ThreadGroupId" />
+        <xs:element xmlns:q67="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="group" type="q67:ThreadGroupId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadGroupParentResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q56="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadGroupParentResult" type="q56:Error" />
-        <xs:element xmlns:q57="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="parentGroup" type="q57:ThreadGroupId" />
+        <xs:element xmlns:q68="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadGroupParentResult" type="q68:Error" />
+        <xs:element xmlns:q69="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="parentGroup" type="q69:ThreadGroupId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadGroupChildren">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q58="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="group" type="q58:ThreadGroupId" />
+        <xs:element xmlns:q70="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="group" type="q70:ThreadGroupId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThreadGroupChildrenResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q59="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadGroupChildrenResult" type="q59:Error" />
-        <xs:element xmlns:q60="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="childThreads" nillable="true" type="q60:ArrayOfThreadId" />
-        <xs:element xmlns:q61="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="childGroups" nillable="true" type="q61:ArrayOfThreadGroupId" />
+        <xs:element xmlns:q71="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThreadGroupChildrenResult" type="q71:Error" />
+        <xs:element xmlns:q72="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="childThreads" nillable="true" type="q72:ArrayOfThreadId" />
+        <xs:element xmlns:q73="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="childGroups" nillable="true" type="q73:ArrayOfThreadGroupId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetArrayLength">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q62="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="arrayObject" type="q62:ArrayId" />
+        <xs:element xmlns:q74="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="arrayObject" type="q74:ArrayId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetArrayLengthResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q63="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetArrayLengthResult" type="q63:Error" />
+        <xs:element xmlns:q75="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetArrayLengthResult" type="q75:Error" />
         <xs:element minOccurs="0" name="arrayLength" type="xs:int" />
       </xs:sequence>
     </xs:complexType>
@@ -343,7 +391,7 @@
   <xs:element name="GetArrayValues">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q64="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="arrayObject" type="q64:ArrayId" />
+        <xs:element xmlns:q76="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="arrayObject" type="q76:ArrayId" />
         <xs:element minOccurs="0" name="firstIndex" type="xs:int" />
         <xs:element minOccurs="0" name="length" type="xs:int" />
       </xs:sequence>
@@ -352,72 +400,72 @@
   <xs:element name="GetArrayValuesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q65="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetArrayValuesResult" type="q65:Error" />
-        <xs:element xmlns:q66="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q66:ArrayOfValue" />
+        <xs:element xmlns:q77="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetArrayValuesResult" type="q77:Error" />
+        <xs:element xmlns:q78="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q78:ArrayOfValue" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetArrayValues">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q67="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="arrayObject" type="q67:ArrayId" />
+        <xs:element xmlns:q79="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="arrayObject" type="q79:ArrayId" />
         <xs:element minOccurs="0" name="firstIndex" type="xs:int" />
         <xs:element minOccurs="0" name="length" type="xs:int" />
-        <xs:element xmlns:q68="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q68:ArrayOfValue" />
+        <xs:element xmlns:q80="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q80:ArrayOfValue" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetArrayValuesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q69="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SetArrayValuesResult" type="q69:Error" />
+        <xs:element xmlns:q81="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SetArrayValuesResult" type="q81:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassLoaderVisibleClasses">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q70="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classLoaderObject" type="q70:ClassLoaderId" />
+        <xs:element xmlns:q82="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classLoaderObject" type="q82:ClassLoaderId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassLoaderVisibleClassesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q71="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetClassLoaderVisibleClassesResult" type="q71:Error" />
-        <xs:element xmlns:q72="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classes" nillable="true" type="q72:ArrayOfTaggedReferenceTypeId" />
+        <xs:element xmlns:q83="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetClassLoaderVisibleClassesResult" type="q83:Error" />
+        <xs:element xmlns:q84="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classes" nillable="true" type="q84:ArrayOfTaggedReferenceTypeId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetEvent">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q73="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="eventKind" type="q73:EventKind" />
-        <xs:element xmlns:q74="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q74:SuspendPolicy" />
-        <xs:element xmlns:q75="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="modifiers" nillable="true" type="q75:ArrayOfEventRequestModifier" />
+        <xs:element xmlns:q85="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="eventKind" type="q85:EventKind" />
+        <xs:element xmlns:q86="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q86:SuspendPolicy" />
+        <xs:element xmlns:q87="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="modifiers" nillable="true" type="q87:ArrayOfEventRequestModifier" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetEventResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q76="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SetEventResult" type="q76:Error" />
-        <xs:element xmlns:q77="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q77:RequestId" />
+        <xs:element xmlns:q88="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SetEventResult" type="q88:Error" />
+        <xs:element xmlns:q89="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q89:RequestId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ClearEvent">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q78="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="eventKind" type="q78:EventKind" />
-        <xs:element xmlns:q79="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q79:RequestId" />
+        <xs:element xmlns:q90="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="eventKind" type="q90:EventKind" />
+        <xs:element xmlns:q91="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q91:RequestId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ClearEventResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q80="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="ClearEventResult" type="q80:Error" />
+        <xs:element xmlns:q92="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="ClearEventResult" type="q92:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -429,88 +477,88 @@
   <xs:element name="ClearAllBreakpointsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q81="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="ClearAllBreakpointsResult" type="q81:Error" />
+        <xs:element xmlns:q93="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="ClearAllBreakpointsResult" type="q93:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetValues">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q82="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q82:ThreadId" />
-        <xs:element xmlns:q83="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="frame" type="q83:FrameId" />
-        <xs:element xmlns:q84="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="slots" nillable="true" type="q84:ArrayOfint" />
+        <xs:element xmlns:q94="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q94:ThreadId" />
+        <xs:element xmlns:q95="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="frame" type="q95:FrameId" />
+        <xs:element xmlns:q96="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="slots" nillable="true" type="q96:ArrayOfint" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetValuesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q85="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetValuesResult" type="q85:Error" />
-        <xs:element xmlns:q86="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q86:ArrayOfValue" />
+        <xs:element xmlns:q97="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetValuesResult" type="q97:Error" />
+        <xs:element xmlns:q98="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q98:ArrayOfValue" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetValues">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q87="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q87:ThreadId" />
-        <xs:element xmlns:q88="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="frame" type="q88:FrameId" />
-        <xs:element xmlns:q89="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="slots" nillable="true" type="q89:ArrayOfint" />
-        <xs:element xmlns:q90="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q90:ArrayOfValue" />
+        <xs:element xmlns:q99="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q99:ThreadId" />
+        <xs:element xmlns:q100="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="frame" type="q100:FrameId" />
+        <xs:element xmlns:q101="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="slots" nillable="true" type="q101:ArrayOfint" />
+        <xs:element xmlns:q102="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q102:ArrayOfValue" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetValuesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q91="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SetValuesResult" type="q91:Error" />
+        <xs:element xmlns:q103="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SetValuesResult" type="q103:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThisObject">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q92="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q92:ThreadId" />
-        <xs:element xmlns:q93="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="frame" type="q93:FrameId" />
+        <xs:element xmlns:q104="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q104:ThreadId" />
+        <xs:element xmlns:q105="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="frame" type="q105:FrameId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetThisObjectResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q94="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThisObjectResult" type="q94:Error" />
-        <xs:element xmlns:q95="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thisObject" type="q95:TaggedObjectId" />
+        <xs:element xmlns:q106="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetThisObjectResult" type="q106:Error" />
+        <xs:element xmlns:q107="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thisObject" type="q107:TaggedObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="PopFrames">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q96="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q96:ThreadId" />
-        <xs:element xmlns:q97="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="frame" type="q97:FrameId" />
+        <xs:element xmlns:q108="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q108:ThreadId" />
+        <xs:element xmlns:q109="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="frame" type="q109:FrameId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="PopFramesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q98="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="PopFramesResult" type="q98:Error" />
+        <xs:element xmlns:q110="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="PopFramesResult" type="q110:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetReflectedType">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q99="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classObject" type="q99:ClassObjectId" />
+        <xs:element xmlns:q111="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classObject" type="q111:ClassObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetReflectedTypeResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q100="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetReflectedTypeResult" type="q100:Error" />
-        <xs:element xmlns:q101="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeTag" type="q101:TypeTag" />
-        <xs:element xmlns:q102="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeId" type="q102:ReferenceTypeId" />
+        <xs:element xmlns:q112="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetReflectedTypeResult" type="q112:Error" />
+        <xs:element xmlns:q113="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeTag" type="q113:TypeTag" />
+        <xs:element xmlns:q114="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeId" type="q114:ReferenceTypeId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -522,7 +570,7 @@
   <xs:element name="AttachResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q103="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="AttachResult" type="q103:Error" />
+        <xs:element xmlns:q115="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="AttachResult" type="q115:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -534,7 +582,7 @@
   <xs:element name="GetVersionResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q104="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetVersionResult" type="q104:Error" />
+        <xs:element xmlns:q116="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetVersionResult" type="q116:Error" />
         <xs:element minOccurs="0" name="description" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="majorVersion" type="xs:int" />
         <xs:element minOccurs="0" name="minorVersion" type="xs:int" />
@@ -553,8 +601,8 @@
   <xs:element name="GetClassesBySignatureResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q105="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetClassesBySignatureResult" type="q105:Error" />
-        <xs:element xmlns:q106="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classes" nillable="true" type="q106:ArrayOfReferenceTypeData" />
+        <xs:element xmlns:q117="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetClassesBySignatureResult" type="q117:Error" />
+        <xs:element xmlns:q118="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classes" nillable="true" type="q118:ArrayOfReferenceTypeData" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -566,8 +614,8 @@
   <xs:element name="GetAllClassesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q107="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetAllClassesResult" type="q107:Error" />
-        <xs:element xmlns:q108="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classes" nillable="true" type="q108:ArrayOfReferenceTypeData" />
+        <xs:element xmlns:q119="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetAllClassesResult" type="q119:Error" />
+        <xs:element xmlns:q120="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classes" nillable="true" type="q120:ArrayOfReferenceTypeData" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -579,8 +627,8 @@
   <xs:element name="GetAllThreadsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q109="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetAllThreadsResult" type="q109:Error" />
-        <xs:element xmlns:q110="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="threads" nillable="true" type="q110:ArrayOfThreadId" />
+        <xs:element xmlns:q121="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetAllThreadsResult" type="q121:Error" />
+        <xs:element xmlns:q122="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="threads" nillable="true" type="q122:ArrayOfThreadId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -592,8 +640,8 @@
   <xs:element name="GetTopLevelThreadGroupsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q111="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetTopLevelThreadGroupsResult" type="q111:Error" />
-        <xs:element xmlns:q112="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="groups" nillable="true" type="q112:ArrayOfThreadGroupId" />
+        <xs:element xmlns:q123="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetTopLevelThreadGroupsResult" type="q123:Error" />
+        <xs:element xmlns:q124="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="groups" nillable="true" type="q124:ArrayOfThreadGroupId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -605,7 +653,7 @@
   <xs:element name="DisposeResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q113="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="DisposeResult" type="q113:Error" />
+        <xs:element xmlns:q125="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="DisposeResult" type="q125:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -617,7 +665,7 @@
   <xs:element name="SuspendResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q114="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SuspendResult" type="q114:Error" />
+        <xs:element xmlns:q126="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SuspendResult" type="q126:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -629,7 +677,7 @@
   <xs:element name="ResumeResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q115="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="ResumeResult" type="q115:Error" />
+        <xs:element xmlns:q127="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="ResumeResult" type="q127:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -643,7 +691,7 @@
   <xs:element name="ExitResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q116="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="ExitResult" type="q116:Error" />
+        <xs:element xmlns:q128="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="ExitResult" type="q128:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -657,8 +705,8 @@
   <xs:element name="CreateStringResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q117="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="CreateStringResult" type="q117:Error" />
-        <xs:element xmlns:q118="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="stringObject" type="q118:StringId" />
+        <xs:element xmlns:q129="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="CreateStringResult" type="q129:Error" />
+        <xs:element xmlns:q130="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="stringObject" type="q130:StringId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -670,8 +718,8 @@
   <xs:element name="GetCapabilitiesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q119="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetCapabilitiesResult" type="q119:Error" />
-        <xs:element xmlns:q120="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="capabilities" type="q120:Capabilities" />
+        <xs:element xmlns:q131="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetCapabilitiesResult" type="q131:Error" />
+        <xs:element xmlns:q132="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="capabilities" type="q132:Capabilities" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -683,24 +731,24 @@
   <xs:element name="GetClassPathsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q121="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetClassPathsResult" type="q121:Error" />
+        <xs:element xmlns:q133="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetClassPathsResult" type="q133:Error" />
         <xs:element minOccurs="0" name="baseDirectory" nillable="true" type="xs:string" />
-        <xs:element xmlns:q122="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="classPaths" nillable="true" type="q122:ArrayOfstring" />
-        <xs:element xmlns:q123="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="bootClassPaths" nillable="true" type="q123:ArrayOfstring" />
+        <xs:element xmlns:q134="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="classPaths" nillable="true" type="q134:ArrayOfstring" />
+        <xs:element xmlns:q135="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="bootClassPaths" nillable="true" type="q135:ArrayOfstring" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="DisposeObjects">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q124="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requests" nillable="true" type="q124:ArrayOfObjectReferenceCountData" />
+        <xs:element xmlns:q136="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requests" nillable="true" type="q136:ArrayOfObjectReferenceCountData" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="DisposeObjectsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q125="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="DisposeObjectsResult" type="q125:Error" />
+        <xs:element xmlns:q137="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="DisposeObjectsResult" type="q137:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -712,7 +760,7 @@
   <xs:element name="HoldEventsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q126="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="HoldEventsResult" type="q126:Error" />
+        <xs:element xmlns:q138="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="HoldEventsResult" type="q138:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -724,21 +772,21 @@
   <xs:element name="ReleaseEventsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q127="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="ReleaseEventsResult" type="q127:Error" />
+        <xs:element xmlns:q139="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="ReleaseEventsResult" type="q139:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="RedefineClasses">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q128="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="definitions" nillable="true" type="q128:ArrayOfClassDefinitionData" />
+        <xs:element xmlns:q140="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="definitions" nillable="true" type="q140:ArrayOfClassDefinitionData" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="RedefineClassesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q129="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="RedefineClassesResult" type="q129:Error" />
+        <xs:element xmlns:q141="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="RedefineClassesResult" type="q141:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -752,21 +800,21 @@
   <xs:element name="SetDefaultStratumResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q130="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SetDefaultStratumResult" type="q130:Error" />
+        <xs:element xmlns:q142="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SetDefaultStratumResult" type="q142:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetSignature">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q131="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q131:ReferenceTypeId" />
+        <xs:element xmlns:q143="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q143:ReferenceTypeId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetSignatureResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q132="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetSignatureResult" type="q132:Error" />
+        <xs:element xmlns:q144="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetSignatureResult" type="q144:Error" />
         <xs:element minOccurs="0" name="signature" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="genericSignature" nillable="true" type="xs:string" />
       </xs:sequence>
@@ -775,90 +823,90 @@
   <xs:element name="GetClassLoader">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q133="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q133:ReferenceTypeId" />
+        <xs:element xmlns:q145="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q145:ReferenceTypeId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassLoaderResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q134="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetClassLoaderResult" type="q134:Error" />
-        <xs:element xmlns:q135="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classLoader" type="q135:ClassLoaderId" />
+        <xs:element xmlns:q146="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetClassLoaderResult" type="q146:Error" />
+        <xs:element xmlns:q147="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classLoader" type="q147:ClassLoaderId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetModifiers">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q136="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q136:ReferenceTypeId" />
+        <xs:element xmlns:q148="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q148:ReferenceTypeId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetModifiersResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q137="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetModifiersResult" type="q137:Error" />
-        <xs:element xmlns:q138="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="modifiers" type="q138:AccessModifiers" />
+        <xs:element xmlns:q149="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetModifiersResult" type="q149:Error" />
+        <xs:element xmlns:q150="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="modifiers" type="q150:AccessModifiers" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetFields">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q139="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q139:ReferenceTypeId" />
+        <xs:element xmlns:q151="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q151:ReferenceTypeId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetFieldsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q140="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetFieldsResult" type="q140:Error" />
-        <xs:element xmlns:q141="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="fields" nillable="true" type="q141:ArrayOfDeclaredFieldData" />
+        <xs:element xmlns:q152="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetFieldsResult" type="q152:Error" />
+        <xs:element xmlns:q153="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="fields" nillable="true" type="q153:ArrayOfDeclaredFieldData" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetMethods">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q142="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q142:ReferenceTypeId" />
+        <xs:element xmlns:q154="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q154:ReferenceTypeId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetMethodsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q143="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetMethodsResult" type="q143:Error" />
-        <xs:element xmlns:q144="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="methods" nillable="true" type="q144:ArrayOfDeclaredMethodData" />
+        <xs:element xmlns:q155="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetMethodsResult" type="q155:Error" />
+        <xs:element xmlns:q156="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="methods" nillable="true" type="q156:ArrayOfDeclaredMethodData" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetReferenceTypeValues">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q145="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q145:ReferenceTypeId" />
-        <xs:element xmlns:q146="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="fields" nillable="true" type="q146:ArrayOfFieldId" />
+        <xs:element xmlns:q157="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q157:ReferenceTypeId" />
+        <xs:element xmlns:q158="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="fields" nillable="true" type="q158:ArrayOfFieldId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetReferenceTypeValuesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q147="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetReferenceTypeValuesResult" type="q147:Error" />
-        <xs:element xmlns:q148="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q148:ArrayOfValue" />
+        <xs:element xmlns:q159="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetReferenceTypeValuesResult" type="q159:Error" />
+        <xs:element xmlns:q160="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q160:ArrayOfValue" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetSourceFile">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q149="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q149:ReferenceTypeId" />
+        <xs:element xmlns:q161="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q161:ReferenceTypeId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetSourceFileResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q150="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetSourceFileResult" type="q150:Error" />
+        <xs:element xmlns:q162="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetSourceFileResult" type="q162:Error" />
         <xs:element minOccurs="0" name="sourceFile" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -866,153 +914,201 @@
   <xs:element name="GetNestedTypes">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q151="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q151:ReferenceTypeId" />
+        <xs:element xmlns:q163="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q163:ReferenceTypeId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetNestedTypesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q152="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetNestedTypesResult" type="q152:Error" />
-        <xs:element xmlns:q153="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classes" nillable="true" type="q153:ArrayOfTaggedReferenceTypeId" />
+        <xs:element xmlns:q164="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetNestedTypesResult" type="q164:Error" />
+        <xs:element xmlns:q165="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classes" nillable="true" type="q165:ArrayOfTaggedReferenceTypeId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetReferenceTypeStatus">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q154="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q154:ReferenceTypeId" />
+        <xs:element xmlns:q166="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q166:ReferenceTypeId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetReferenceTypeStatusResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q155="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetReferenceTypeStatusResult" type="q155:Error" />
-        <xs:element xmlns:q156="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="status" type="q156:ClassStatus" />
+        <xs:element xmlns:q167="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetReferenceTypeStatusResult" type="q167:Error" />
+        <xs:element xmlns:q168="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="status" type="q168:ClassStatus" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetInterfaces">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q157="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q157:ReferenceTypeId" />
+        <xs:element xmlns:q169="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q169:ReferenceTypeId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetInterfacesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q158="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetInterfacesResult" type="q158:Error" />
-        <xs:element xmlns:q159="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="interfaces" nillable="true" type="q159:ArrayOfInterfaceId" />
+        <xs:element xmlns:q170="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetInterfacesResult" type="q170:Error" />
+        <xs:element xmlns:q171="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="interfaces" nillable="true" type="q171:ArrayOfInterfaceId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassObject">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q160="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q160:ReferenceTypeId" />
+        <xs:element xmlns:q172="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q172:ReferenceTypeId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetClassObjectResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q161="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetClassObjectResult" type="q161:Error" />
-        <xs:element xmlns:q162="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classObject" type="q162:ClassObjectId" />
+        <xs:element xmlns:q173="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetClassObjectResult" type="q173:Error" />
+        <xs:element xmlns:q174="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="classObject" type="q174:ClassObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetSourceDebugExtension">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q163="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q163:ReferenceTypeId" />
+        <xs:element xmlns:q175="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q175:ReferenceTypeId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetSourceDebugExtensionResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q164="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetSourceDebugExtensionResult" type="q164:Error" />
+        <xs:element xmlns:q176="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetSourceDebugExtensionResult" type="q176:Error" />
         <xs:element minOccurs="0" name="extension" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetInstances">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q177="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q177:ReferenceTypeId" />
+        <xs:element minOccurs="0" name="maxInstances" type="xs:int" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetInstancesResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q178="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetInstancesResult" type="q178:Error" />
+        <xs:element xmlns:q179="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="instances" nillable="true" type="q179:ArrayOfTaggedObjectId" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetClassFileVersion">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q180="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q180:ReferenceTypeId" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetClassFileVersionResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q181="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetClassFileVersionResult" type="q181:Error" />
+        <xs:element minOccurs="0" name="majorVersion" type="xs:int" />
+        <xs:element minOccurs="0" name="minorVersion" type="xs:int" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetConstantPool">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q182="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q182:ReferenceTypeId" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetConstantPoolResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q183="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetConstantPoolResult" type="q183:Error" />
+        <xs:element minOccurs="0" name="constantPoolCount" type="xs:int" />
+        <xs:element minOccurs="0" name="data" nillable="true" type="xs:base64Binary" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetSuperclass">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q165="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="class" type="q165:ClassId" />
+        <xs:element xmlns:q184="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="class" type="q184:ClassId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetSuperclassResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q166="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetSuperclassResult" type="q166:Error" />
-        <xs:element xmlns:q167="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="superclass" type="q167:ClassId" />
+        <xs:element xmlns:q185="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetSuperclassResult" type="q185:Error" />
+        <xs:element xmlns:q186="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="superclass" type="q186:ClassId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetClassValues">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q168="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="class" type="q168:ClassId" />
-        <xs:element xmlns:q169="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="fields" nillable="true" type="q169:ArrayOfFieldId" />
-        <xs:element xmlns:q170="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q170:ArrayOfValue" />
+        <xs:element xmlns:q187="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="class" type="q187:ClassId" />
+        <xs:element xmlns:q188="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="fields" nillable="true" type="q188:ArrayOfFieldId" />
+        <xs:element xmlns:q189="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q189:ArrayOfValue" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetClassValuesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q171="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SetClassValuesResult" type="q171:Error" />
+        <xs:element xmlns:q190="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SetClassValuesResult" type="q190:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="InvokeClassMethod">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q172="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="class" type="q172:ClassId" />
-        <xs:element xmlns:q173="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q173:ThreadId" />
-        <xs:element xmlns:q174="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="method" type="q174:MethodId" />
-        <xs:element xmlns:q175="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="options" type="q175:InvokeOptions" />
-        <xs:element xmlns:q176="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="arguments" nillable="true" type="q176:ArrayOfValue" />
+        <xs:element xmlns:q191="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="class" type="q191:ClassId" />
+        <xs:element xmlns:q192="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q192:ThreadId" />
+        <xs:element xmlns:q193="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="method" type="q193:MethodId" />
+        <xs:element xmlns:q194="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="options" type="q194:InvokeOptions" />
+        <xs:element xmlns:q195="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="arguments" nillable="true" type="q195:ArrayOfValue" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="InvokeClassMethodResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q177="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="InvokeClassMethodResult" type="q177:Error" />
-        <xs:element xmlns:q178="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="returnValue" type="q178:Value" />
-        <xs:element xmlns:q179="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thrownException" type="q179:TaggedObjectId" />
+        <xs:element xmlns:q196="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="InvokeClassMethodResult" type="q196:Error" />
+        <xs:element xmlns:q197="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="returnValue" type="q197:Value" />
+        <xs:element xmlns:q198="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thrownException" type="q198:TaggedObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="CreateClassInstance">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q180="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="class" type="q180:ClassId" />
-        <xs:element xmlns:q181="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q181:ThreadId" />
-        <xs:element xmlns:q182="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="method" type="q182:MethodId" />
-        <xs:element xmlns:q183="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="options" type="q183:InvokeOptions" />
-        <xs:element xmlns:q184="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="arguments" nillable="true" type="q184:ArrayOfValue" />
+        <xs:element xmlns:q199="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="class" type="q199:ClassId" />
+        <xs:element xmlns:q200="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q200:ThreadId" />
+        <xs:element xmlns:q201="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="method" type="q201:MethodId" />
+        <xs:element xmlns:q202="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="options" type="q202:InvokeOptions" />
+        <xs:element xmlns:q203="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="arguments" nillable="true" type="q203:ArrayOfValue" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="CreateClassInstanceResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q185="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="CreateClassInstanceResult" type="q185:Error" />
-        <xs:element xmlns:q186="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="newObject" type="q186:TaggedObjectId" />
-        <xs:element xmlns:q187="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thrownException" type="q187:TaggedObjectId" />
+        <xs:element xmlns:q204="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="CreateClassInstanceResult" type="q204:Error" />
+        <xs:element xmlns:q205="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="newObject" type="q205:TaggedObjectId" />
+        <xs:element xmlns:q206="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thrownException" type="q206:TaggedObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="CreateArrayInstance">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q188="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="arrayType" type="q188:ArrayTypeId" />
+        <xs:element xmlns:q207="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="arrayType" type="q207:ArrayTypeId" />
         <xs:element minOccurs="0" name="length" type="xs:int" />
       </xs:sequence>
     </xs:complexType>
@@ -1020,57 +1116,57 @@
   <xs:element name="CreateArrayInstanceResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q189="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="CreateArrayInstanceResult" type="q189:Error" />
-        <xs:element xmlns:q190="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="newArray" type="q190:TaggedObjectId" />
+        <xs:element xmlns:q208="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="CreateArrayInstanceResult" type="q208:Error" />
+        <xs:element xmlns:q209="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="newArray" type="q209:TaggedObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetMethodLineTable">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q191="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q191:ReferenceTypeId" />
-        <xs:element xmlns:q192="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="method" type="q192:MethodId" />
+        <xs:element xmlns:q210="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q210:ReferenceTypeId" />
+        <xs:element xmlns:q211="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="method" type="q211:MethodId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetMethodLineTableResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q193="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetMethodLineTableResult" type="q193:Error" />
+        <xs:element xmlns:q212="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetMethodLineTableResult" type="q212:Error" />
         <xs:element minOccurs="0" name="start" type="xs:long" />
         <xs:element minOccurs="0" name="end" type="xs:long" />
-        <xs:element xmlns:q194="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="lines" nillable="true" type="q194:ArrayOfLineNumberData" />
+        <xs:element xmlns:q213="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="lines" nillable="true" type="q213:ArrayOfLineNumberData" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetMethodVariableTable">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q195="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q195:ReferenceTypeId" />
-        <xs:element xmlns:q196="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="method" type="q196:MethodId" />
+        <xs:element xmlns:q214="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q214:ReferenceTypeId" />
+        <xs:element xmlns:q215="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="method" type="q215:MethodId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetMethodVariableTableResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q197="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetMethodVariableTableResult" type="q197:Error" />
-        <xs:element xmlns:q198="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="slots" nillable="true" type="q198:ArrayOfVariableData" />
+        <xs:element xmlns:q216="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetMethodVariableTableResult" type="q216:Error" />
+        <xs:element xmlns:q217="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="slots" nillable="true" type="q217:ArrayOfVariableData" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetMethodBytecodes">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q199="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q199:ReferenceTypeId" />
-        <xs:element xmlns:q200="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="method" type="q200:MethodId" />
+        <xs:element xmlns:q218="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q218:ReferenceTypeId" />
+        <xs:element xmlns:q219="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="method" type="q219:MethodId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetMethodBytecodesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q201="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetMethodBytecodesResult" type="q201:Error" />
+        <xs:element xmlns:q220="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetMethodBytecodesResult" type="q220:Error" />
         <xs:element minOccurs="0" name="bytecode" nillable="true" type="xs:base64Binary" />
       </xs:sequence>
     </xs:complexType>
@@ -1078,159 +1174,111 @@
   <xs:element name="GetMethodIsObsolete">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q202="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q202:ReferenceTypeId" />
-        <xs:element xmlns:q203="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="method" type="q203:MethodId" />
+        <xs:element xmlns:q221="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="referenceType" type="q221:ReferenceTypeId" />
+        <xs:element xmlns:q222="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="method" type="q222:MethodId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetMethodIsObsoleteResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q204="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetMethodIsObsoleteResult" type="q204:Error" />
+        <xs:element xmlns:q223="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetMethodIsObsoleteResult" type="q223:Error" />
         <xs:element minOccurs="0" name="result" type="xs:boolean" />
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="GetObjectReferenceType">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element xmlns:q205="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q205:ObjectId" />
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="GetObjectReferenceTypeResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element xmlns:q206="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetObjectReferenceTypeResult" type="q206:Error" />
-        <xs:element xmlns:q207="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeTag" type="q207:TypeTag" />
-        <xs:element xmlns:q208="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeId" type="q208:ReferenceTypeId" />
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="GetObjectValues">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element xmlns:q209="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q209:ObjectId" />
-        <xs:element xmlns:q210="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="fields" nillable="true" type="q210:ArrayOfFieldId" />
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="GetObjectValuesResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element xmlns:q211="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="GetObjectValuesResult" type="q211:Error" />
-        <xs:element xmlns:q212="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q212:ArrayOfValue" />
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="SetObjectValues">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element xmlns:q213="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q213:ObjectId" />
-        <xs:element xmlns:q214="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="fields" nillable="true" type="q214:ArrayOfFieldId" />
-        <xs:element xmlns:q215="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="values" nillable="true" type="q215:ArrayOfValue" />
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="SetObjectValuesResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element xmlns:q216="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="SetObjectValuesResult" type="q216:Error" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="VirtualMachineStart">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q217="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q217:SuspendPolicy" />
-        <xs:element xmlns:q218="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q218:RequestId" />
-        <xs:element xmlns:q219="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q219:ThreadId" />
+        <xs:element xmlns:q224="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q224:SuspendPolicy" />
+        <xs:element xmlns:q225="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q225:RequestId" />
+        <xs:element xmlns:q226="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q226:ThreadId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SingleStep">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q220="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q220:SuspendPolicy" />
-        <xs:element xmlns:q221="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q221:RequestId" />
-        <xs:element xmlns:q222="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q222:ThreadId" />
-        <xs:element xmlns:q223="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q223:Location" />
+        <xs:element xmlns:q227="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q227:SuspendPolicy" />
+        <xs:element xmlns:q228="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q228:RequestId" />
+        <xs:element xmlns:q229="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q229:ThreadId" />
+        <xs:element xmlns:q230="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q230:Location" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="Breakpoint">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q224="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q224:SuspendPolicy" />
-        <xs:element xmlns:q225="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q225:RequestId" />
-        <xs:element xmlns:q226="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q226:ThreadId" />
-        <xs:element xmlns:q227="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q227:Location" />
+        <xs:element xmlns:q231="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q231:SuspendPolicy" />
+        <xs:element xmlns:q232="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q232:RequestId" />
+        <xs:element xmlns:q233="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q233:ThreadId" />
+        <xs:element xmlns:q234="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q234:Location" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="MethodEntry">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q228="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q228:SuspendPolicy" />
-        <xs:element xmlns:q229="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q229:RequestId" />
-        <xs:element xmlns:q230="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q230:ThreadId" />
-        <xs:element xmlns:q231="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q231:Location" />
+        <xs:element xmlns:q235="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q235:SuspendPolicy" />
+        <xs:element xmlns:q236="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q236:RequestId" />
+        <xs:element xmlns:q237="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q237:ThreadId" />
+        <xs:element xmlns:q238="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q238:Location" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="MethodExit">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q232="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q232:SuspendPolicy" />
-        <xs:element xmlns:q233="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q233:RequestId" />
-        <xs:element xmlns:q234="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q234:ThreadId" />
-        <xs:element xmlns:q235="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q235:Location" />
-        <xs:element xmlns:q236="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="returnValue" type="q236:Value" />
+        <xs:element xmlns:q239="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q239:SuspendPolicy" />
+        <xs:element xmlns:q240="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q240:RequestId" />
+        <xs:element xmlns:q241="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q241:ThreadId" />
+        <xs:element xmlns:q242="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q242:Location" />
+        <xs:element xmlns:q243="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="returnValue" type="q243:Value" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="MonitorContendedEnter">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q237="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q237:SuspendPolicy" />
-        <xs:element xmlns:q238="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q238:RequestId" />
-        <xs:element xmlns:q239="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q239:ThreadId" />
-        <xs:element xmlns:q240="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q240:TaggedObjectId" />
-        <xs:element xmlns:q241="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q241:Location" />
+        <xs:element xmlns:q244="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q244:SuspendPolicy" />
+        <xs:element xmlns:q245="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q245:RequestId" />
+        <xs:element xmlns:q246="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q246:ThreadId" />
+        <xs:element xmlns:q247="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q247:TaggedObjectId" />
+        <xs:element xmlns:q248="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q248:Location" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="MonitorContendedEntered">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q242="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q242:SuspendPolicy" />
-        <xs:element xmlns:q243="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q243:RequestId" />
-        <xs:element xmlns:q244="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q244:ThreadId" />
-        <xs:element xmlns:q245="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q245:TaggedObjectId" />
-        <xs:element xmlns:q246="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q246:Location" />
+        <xs:element xmlns:q249="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q249:SuspendPolicy" />
+        <xs:element xmlns:q250="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q250:RequestId" />
+        <xs:element xmlns:q251="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q251:ThreadId" />
+        <xs:element xmlns:q252="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q252:TaggedObjectId" />
+        <xs:element xmlns:q253="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q253:Location" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="MonitorContendedWait">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q247="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q247:SuspendPolicy" />
-        <xs:element xmlns:q248="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q248:RequestId" />
-        <xs:element xmlns:q249="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q249:ThreadId" />
-        <xs:element xmlns:q250="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q250:TaggedObjectId" />
-        <xs:element xmlns:q251="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q251:Location" />
-        <xs:element xmlns:q252="http://schemas.microsoft.com/2003/10/Serialization/" minOccurs="0" name="timeout" type="q252:duration" />
+        <xs:element xmlns:q254="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q254:SuspendPolicy" />
+        <xs:element xmlns:q255="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q255:RequestId" />
+        <xs:element xmlns:q256="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q256:ThreadId" />
+        <xs:element xmlns:q257="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q257:TaggedObjectId" />
+        <xs:element xmlns:q258="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q258:Location" />
+        <xs:element xmlns:q259="http://schemas.microsoft.com/2003/10/Serialization/" minOccurs="0" name="timeout" type="q259:duration" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="MonitorContendedWaited">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q253="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q253:SuspendPolicy" />
-        <xs:element xmlns:q254="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q254:RequestId" />
-        <xs:element xmlns:q255="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q255:ThreadId" />
-        <xs:element xmlns:q256="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q256:TaggedObjectId" />
-        <xs:element xmlns:q257="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q257:Location" />
+        <xs:element xmlns:q260="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q260:SuspendPolicy" />
+        <xs:element xmlns:q261="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q261:RequestId" />
+        <xs:element xmlns:q262="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q262:ThreadId" />
+        <xs:element xmlns:q263="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q263:TaggedObjectId" />
+        <xs:element xmlns:q264="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q264:Location" />
         <xs:element minOccurs="0" name="timedOut" type="xs:boolean" />
       </xs:sequence>
     </xs:complexType>
@@ -1238,51 +1286,51 @@
   <xs:element name="Exception">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q258="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q258:SuspendPolicy" />
-        <xs:element xmlns:q259="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q259:RequestId" />
-        <xs:element xmlns:q260="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q260:ThreadId" />
-        <xs:element xmlns:q261="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q261:Location" />
-        <xs:element xmlns:q262="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="exception" type="q262:TaggedObjectId" />
-        <xs:element xmlns:q263="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="catchLocation" type="q263:Location" />
+        <xs:element xmlns:q265="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q265:SuspendPolicy" />
+        <xs:element xmlns:q266="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q266:RequestId" />
+        <xs:element xmlns:q267="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q267:ThreadId" />
+        <xs:element xmlns:q268="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q268:Location" />
+        <xs:element xmlns:q269="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="exception" type="q269:TaggedObjectId" />
+        <xs:element xmlns:q270="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="catchLocation" type="q270:Location" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ThreadStart">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q264="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q264:SuspendPolicy" />
-        <xs:element xmlns:q265="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q265:RequestId" />
-        <xs:element xmlns:q266="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q266:ThreadId" />
+        <xs:element xmlns:q271="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q271:SuspendPolicy" />
+        <xs:element xmlns:q272="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q272:RequestId" />
+        <xs:element xmlns:q273="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q273:ThreadId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ThreadDeath">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q267="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q267:SuspendPolicy" />
-        <xs:element xmlns:q268="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q268:RequestId" />
-        <xs:element xmlns:q269="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q269:ThreadId" />
+        <xs:element xmlns:q274="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q274:SuspendPolicy" />
+        <xs:element xmlns:q275="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q275:RequestId" />
+        <xs:element xmlns:q276="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q276:ThreadId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ClassPrepare">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q270="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q270:SuspendPolicy" />
-        <xs:element xmlns:q271="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q271:RequestId" />
-        <xs:element xmlns:q272="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q272:ThreadId" />
-        <xs:element xmlns:q273="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeTag" type="q273:TypeTag" />
-        <xs:element xmlns:q274="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeId" type="q274:ReferenceTypeId" />
+        <xs:element xmlns:q277="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q277:SuspendPolicy" />
+        <xs:element xmlns:q278="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q278:RequestId" />
+        <xs:element xmlns:q279="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q279:ThreadId" />
+        <xs:element xmlns:q280="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeTag" type="q280:TypeTag" />
+        <xs:element xmlns:q281="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeId" type="q281:ReferenceTypeId" />
         <xs:element minOccurs="0" name="signature" nillable="true" type="xs:string" />
-        <xs:element xmlns:q275="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="status" type="q275:ClassStatus" />
+        <xs:element xmlns:q282="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="status" type="q282:ClassStatus" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ClassUnload">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q276="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q276:SuspendPolicy" />
-        <xs:element xmlns:q277="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q277:RequestId" />
+        <xs:element xmlns:q283="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q283:SuspendPolicy" />
+        <xs:element xmlns:q284="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q284:RequestId" />
         <xs:element minOccurs="0" name="signature" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -1290,37 +1338,37 @@
   <xs:element name="FieldAccess">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q278="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q278:SuspendPolicy" />
-        <xs:element xmlns:q279="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q279:RequestId" />
-        <xs:element xmlns:q280="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q280:ThreadId" />
-        <xs:element xmlns:q281="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q281:Location" />
-        <xs:element xmlns:q282="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeTag" type="q282:TypeTag" />
-        <xs:element xmlns:q283="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeId" type="q283:ReferenceTypeId" />
-        <xs:element xmlns:q284="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="field" type="q284:FieldId" />
-        <xs:element xmlns:q285="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q285:TaggedObjectId" />
+        <xs:element xmlns:q285="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q285:SuspendPolicy" />
+        <xs:element xmlns:q286="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q286:RequestId" />
+        <xs:element xmlns:q287="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q287:ThreadId" />
+        <xs:element xmlns:q288="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q288:Location" />
+        <xs:element xmlns:q289="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeTag" type="q289:TypeTag" />
+        <xs:element xmlns:q290="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeId" type="q290:ReferenceTypeId" />
+        <xs:element xmlns:q291="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="field" type="q291:FieldId" />
+        <xs:element xmlns:q292="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q292:TaggedObjectId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="FieldModification">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q286="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q286:SuspendPolicy" />
-        <xs:element xmlns:q287="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q287:RequestId" />
-        <xs:element xmlns:q288="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q288:ThreadId" />
-        <xs:element xmlns:q289="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q289:Location" />
-        <xs:element xmlns:q290="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeTag" type="q290:TypeTag" />
-        <xs:element xmlns:q291="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeId" type="q291:ReferenceTypeId" />
-        <xs:element xmlns:q292="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="field" type="q292:FieldId" />
-        <xs:element xmlns:q293="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q293:TaggedObjectId" />
-        <xs:element xmlns:q294="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="newValue" type="q294:Value" />
+        <xs:element xmlns:q293="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q293:SuspendPolicy" />
+        <xs:element xmlns:q294="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q294:RequestId" />
+        <xs:element xmlns:q295="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="thread" type="q295:ThreadId" />
+        <xs:element xmlns:q296="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="location" type="q296:Location" />
+        <xs:element xmlns:q297="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeTag" type="q297:TypeTag" />
+        <xs:element xmlns:q298="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="typeId" type="q298:ReferenceTypeId" />
+        <xs:element xmlns:q299="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="field" type="q299:FieldId" />
+        <xs:element xmlns:q300="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="object" type="q300:TaggedObjectId" />
+        <xs:element xmlns:q301="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="newValue" type="q301:Value" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="VirtualMachineDeath">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q295="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q295:SuspendPolicy" />
-        <xs:element xmlns:q296="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q296:RequestId" />
+        <xs:element xmlns:q302="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="suspendPolicy" type="q302:SuspendPolicy" />
+        <xs:element xmlns:q303="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" minOccurs="0" name="requestId" type="q303:RequestId" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

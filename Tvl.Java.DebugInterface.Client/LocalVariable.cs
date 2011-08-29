@@ -59,6 +59,21 @@
             return _variableData.CodeIndex <= codeIndex && codeIndex < _variableData.CodeIndex + _variableData.Length;
         }
 
+        public bool GetIsVisible(ILocation location)
+        {
+            Location currentLocation = location as Location;
+            if (currentLocation == null)
+                throw new VirtualMachineMismatchException();
+
+            ulong codeIndex = (uint)currentLocation.CodeIndex;
+            return _variableData.CodeIndex <= codeIndex && codeIndex < _variableData.CodeIndex + _variableData.Length;
+        }
+
+        public int GetSlot()
+        {
+            return _variableData.Slot;
+        }
+
         public string GetName()
         {
             return _variableData.Name;

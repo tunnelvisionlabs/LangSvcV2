@@ -269,6 +269,12 @@
   <ItemGroup>
     <Compile Include="BraceMatchingTaggerProvider.cs" />
     <Compile Include="Debugger\AD7Constants.cs" />
+    <Compile Include="Debugger\Analysis\JavaArrayType.cs" />
+    <Compile Include="Debugger\Analysis\JavaFlowControl.cs" />
+    <Compile Include="Debugger\Analysis\JavaInstruction.cs" />
+    <Compile Include="Debugger\Analysis\JavaOpCode.cs" />
+    <Compile Include="Debugger\Analysis\JavaOperandType.cs" />
+    <Compile Include="Debugger\Analysis\JavaStackBehavior.cs" />
     <Compile Include="Debugger\BreakpointLocation.cs" />
     <Compile Include="Debugger\BreakpointLocationCodeAddress.cs" />
     <Compile Include="Debugger\BreakpointLocationCodeContext.cs" />

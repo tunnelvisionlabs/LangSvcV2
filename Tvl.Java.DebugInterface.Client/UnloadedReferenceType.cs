@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
+    using ConstantPoolEntry = Tvl.Java.DebugInterface.Types.ConstantPoolEntry;
 
     internal class UnloadedReferenceType : JavaType, IReferenceType
     {
@@ -66,7 +67,7 @@
             throw new ClassNotLoadedException(GetName());
         }
 
-        public byte[] GetConstantPool()
+        public ReadOnlyCollection<ConstantPoolEntry> GetConstantPool()
         {
             throw new ClassNotLoadedException(GetName());
         }

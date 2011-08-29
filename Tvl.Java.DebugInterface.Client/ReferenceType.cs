@@ -20,6 +20,7 @@
         private string _sourceName;
         private string _sourceDebugExtension;
 
+        private ConstantPoolEntry[] _constantPool;
         private Field[] _fields;
         private Field[] _allFields;
         private Field[] _visibleFields;
@@ -29,7 +30,6 @@
         private Method[] _visibleMethods;
 
         private ClassLoaderReference _classLoader;
-        private byte[] _constantPool;
 
         protected ReferenceType(VirtualMachine virtualMachine, TaggedReferenceTypeId taggedTypeId)
             : base(virtualMachine)
@@ -143,14 +143,30 @@
             return VirtualMachine.GetMirrorOf(classObject);
         }
 
-        public byte[] GetConstantPool()
+        public ReadOnlyCollection<ConstantPoolEntry> GetConstantPool()
         {
-            throw new NotImplementedException();
+            if (_constantPool == null)
+            {
+                int constantPoolCount;
+                byte[] data;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetConstantPool(out constantPoolCount, out data, this.ReferenceTypeId));
+
+                List<ConstantPoolEntry> entryList = new List<ConstantPoolEntry>();
+                int currentPosition = 0;
+                for (int i = 0; i < constantPoolCount - 1; i++)
+                {
+                    entryList.Add(ConstantPoolEntry.FromBytes(data, ref currentPosition));
+                }
+
+                _constantPool = entryList.ToArray();
+            }
+
+            return new ReadOnlyCollection<ConstantPoolEntry>(_constantPool);
         }
 
         public int GetConstantPoolCount()
         {
-            throw new NotImplementedException();
+            return GetConstantPool().Count;
         }
 
         public string GetDefaultStratum()

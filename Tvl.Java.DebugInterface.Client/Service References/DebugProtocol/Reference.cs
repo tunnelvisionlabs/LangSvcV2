@@ -15,6 +15,15 @@ namespace Tvl.Java.DebugInterface.Client.DebugProtocol {
     [System.ServiceModel.ServiceContractAttribute(ConfigurationName="DebugProtocol.IDebugProtocolService", CallbackContract=typeof(Tvl.Java.DebugInterface.Client.DebugProtocol.IDebugProtocolServiceCallback), SessionMode=System.ServiceModel.SessionMode.Required)]
     public interface IDebugProtocolService {
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetObjectReferenceType", ReplyAction="http://tempuri.org/IDebugProtocolService/GetObjectReferenceTypeResponse")]
+        Tvl.Java.DebugInterface.Types.Error GetObjectReferenceType(out Tvl.Java.DebugInterface.Types.TypeTag typeTag, out Tvl.Java.DebugInterface.Types.ReferenceTypeId typeId, Tvl.Java.DebugInterface.Types.ObjectId @object);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetObjectValues", ReplyAction="http://tempuri.org/IDebugProtocolService/GetObjectValuesResponse")]
+        Tvl.Java.DebugInterface.Types.Error GetObjectValues(out Tvl.Java.DebugInterface.Types.Value[] values, Tvl.Java.DebugInterface.Types.ObjectId @object, Tvl.Java.DebugInterface.Types.FieldId[] fields);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/SetObjectValues", ReplyAction="http://tempuri.org/IDebugProtocolService/SetObjectValuesResponse")]
+        Tvl.Java.DebugInterface.Types.Error SetObjectValues(Tvl.Java.DebugInterface.Types.ObjectId @object, Tvl.Java.DebugInterface.Types.FieldId[] fields, Tvl.Java.DebugInterface.Types.Value[] values);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetObjectMonitorInfo", ReplyAction="http://tempuri.org/IDebugProtocolService/GetObjectMonitorInfoResponse")]
         Tvl.Java.DebugInterface.Types.Error GetObjectMonitorInfo(out Tvl.Java.DebugInterface.Types.ThreadId owner, out int entryCount, out Tvl.Java.DebugInterface.Types.ThreadId[] waiters, Tvl.Java.DebugInterface.Types.ObjectId @object);
         
@@ -205,6 +214,15 @@ namespace Tvl.Java.DebugInterface.Client.DebugProtocol {
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetSourceDebugExtension", ReplyAction="http://tempuri.org/IDebugProtocolService/GetSourceDebugExtensionResponse")]
         Tvl.Java.DebugInterface.Types.Error GetSourceDebugExtension(out string extension, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetInstances", ReplyAction="http://tempuri.org/IDebugProtocolService/GetInstancesResponse")]
+        Tvl.Java.DebugInterface.Types.Error GetInstances(out Tvl.Java.DebugInterface.Types.TaggedObjectId[] instances, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType, int maxInstances);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetClassFileVersion", ReplyAction="http://tempuri.org/IDebugProtocolService/GetClassFileVersionResponse")]
+        Tvl.Java.DebugInterface.Types.Error GetClassFileVersion(out int majorVersion, out int minorVersion, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetConstantPool", ReplyAction="http://tempuri.org/IDebugProtocolService/GetConstantPoolResponse")]
+        Tvl.Java.DebugInterface.Types.Error GetConstantPool(out int constantPoolCount, out byte[] data, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetSuperclass", ReplyAction="http://tempuri.org/IDebugProtocolService/GetSuperclassResponse")]
         Tvl.Java.DebugInterface.Types.Error GetSuperclass(out Tvl.Java.DebugInterface.Types.ClassId superclass, Tvl.Java.DebugInterface.Types.ClassId @class);
         
@@ -231,15 +249,6 @@ namespace Tvl.Java.DebugInterface.Client.DebugProtocol {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetMethodIsObsolete", ReplyAction="http://tempuri.org/IDebugProtocolService/GetMethodIsObsoleteResponse")]
         Tvl.Java.DebugInterface.Types.Error GetMethodIsObsolete(out bool result, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType, Tvl.Java.DebugInterface.Types.MethodId method);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetObjectReferenceType", ReplyAction="http://tempuri.org/IDebugProtocolService/GetObjectReferenceTypeResponse")]
-        Tvl.Java.DebugInterface.Types.Error GetObjectReferenceType(out Tvl.Java.DebugInterface.Types.TypeTag typeTag, out Tvl.Java.DebugInterface.Types.ReferenceTypeId typeId, Tvl.Java.DebugInterface.Types.ObjectId @object);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetObjectValues", ReplyAction="http://tempuri.org/IDebugProtocolService/GetObjectValuesResponse")]
-        Tvl.Java.DebugInterface.Types.Error GetObjectValues(out Tvl.Java.DebugInterface.Types.Value[] values, Tvl.Java.DebugInterface.Types.ObjectId @object, Tvl.Java.DebugInterface.Types.FieldId[] fields);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/SetObjectValues", ReplyAction="http://tempuri.org/IDebugProtocolService/SetObjectValuesResponse")]
-        Tvl.Java.DebugInterface.Types.Error SetObjectValues(Tvl.Java.DebugInterface.Types.ObjectId @object, Tvl.Java.DebugInterface.Types.FieldId[] fields, Tvl.Java.DebugInterface.Types.Value[] values);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -323,6 +332,18 @@ namespace Tvl.Java.DebugInterface.Client.DebugProtocol {
         
         public DebugProtocolServiceClient(System.ServiceModel.InstanceContext callbackInstance, System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) : 
                 base(callbackInstance, binding, remoteAddress) {
+        }
+        
+        public Tvl.Java.DebugInterface.Types.Error GetObjectReferenceType(out Tvl.Java.DebugInterface.Types.TypeTag typeTag, out Tvl.Java.DebugInterface.Types.ReferenceTypeId typeId, Tvl.Java.DebugInterface.Types.ObjectId @object) {
+            return base.Channel.GetObjectReferenceType(out typeTag, out typeId, @object);
+        }
+        
+        public Tvl.Java.DebugInterface.Types.Error GetObjectValues(out Tvl.Java.DebugInterface.Types.Value[] values, Tvl.Java.DebugInterface.Types.ObjectId @object, Tvl.Java.DebugInterface.Types.FieldId[] fields) {
+            return base.Channel.GetObjectValues(out values, @object, fields);
+        }
+        
+        public Tvl.Java.DebugInterface.Types.Error SetObjectValues(Tvl.Java.DebugInterface.Types.ObjectId @object, Tvl.Java.DebugInterface.Types.FieldId[] fields, Tvl.Java.DebugInterface.Types.Value[] values) {
+            return base.Channel.SetObjectValues(@object, fields, values);
         }
         
         public Tvl.Java.DebugInterface.Types.Error GetObjectMonitorInfo(out Tvl.Java.DebugInterface.Types.ThreadId owner, out int entryCount, out Tvl.Java.DebugInterface.Types.ThreadId[] waiters, Tvl.Java.DebugInterface.Types.ObjectId @object) {
@@ -577,6 +598,18 @@ namespace Tvl.Java.DebugInterface.Client.DebugProtocol {
             return base.Channel.GetSourceDebugExtension(out extension, referenceType);
         }
         
+        public Tvl.Java.DebugInterface.Types.Error GetInstances(out Tvl.Java.DebugInterface.Types.TaggedObjectId[] instances, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType, int maxInstances) {
+            return base.Channel.GetInstances(out instances, referenceType, maxInstances);
+        }
+        
+        public Tvl.Java.DebugInterface.Types.Error GetClassFileVersion(out int majorVersion, out int minorVersion, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType) {
+            return base.Channel.GetClassFileVersion(out majorVersion, out minorVersion, referenceType);
+        }
+        
+        public Tvl.Java.DebugInterface.Types.Error GetConstantPool(out int constantPoolCount, out byte[] data, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType) {
+            return base.Channel.GetConstantPool(out constantPoolCount, out data, referenceType);
+        }
+        
         public Tvl.Java.DebugInterface.Types.Error GetSuperclass(out Tvl.Java.DebugInterface.Types.ClassId superclass, Tvl.Java.DebugInterface.Types.ClassId @class) {
             return base.Channel.GetSuperclass(out superclass, @class);
         }
@@ -611,18 +644,6 @@ namespace Tvl.Java.DebugInterface.Client.DebugProtocol {
         
         public Tvl.Java.DebugInterface.Types.Error GetMethodIsObsolete(out bool result, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType, Tvl.Java.DebugInterface.Types.MethodId method) {
             return base.Channel.GetMethodIsObsolete(out result, referenceType, method);
-        }
-        
-        public Tvl.Java.DebugInterface.Types.Error GetObjectReferenceType(out Tvl.Java.DebugInterface.Types.TypeTag typeTag, out Tvl.Java.DebugInterface.Types.ReferenceTypeId typeId, Tvl.Java.DebugInterface.Types.ObjectId @object) {
-            return base.Channel.GetObjectReferenceType(out typeTag, out typeId, @object);
-        }
-        
-        public Tvl.Java.DebugInterface.Types.Error GetObjectValues(out Tvl.Java.DebugInterface.Types.Value[] values, Tvl.Java.DebugInterface.Types.ObjectId @object, Tvl.Java.DebugInterface.Types.FieldId[] fields) {
-            return base.Channel.GetObjectValues(out values, @object, fields);
-        }
-        
-        public Tvl.Java.DebugInterface.Types.Error SetObjectValues(Tvl.Java.DebugInterface.Types.ObjectId @object, Tvl.Java.DebugInterface.Types.FieldId[] fields, Tvl.Java.DebugInterface.Types.Value[] values) {
-            return base.Channel.SetObjectValues(@object, fields, values);
         }
     }
 }

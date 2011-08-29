@@ -47,6 +47,7 @@
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -80,6 +81,7 @@
     <CodeContractsRuntimeCheckingLevel>ReleaseRequires</CodeContractsRuntimeCheckingLevel>
     <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -107,6 +109,19 @@
     <Compile Include="ClassLoaderId.cs" />
     <Compile Include="ClassObjectId.cs" />
     <Compile Include="ClassStatus.cs" />
+    <Compile Include="ConstantClass.cs" />
+    <Compile Include="ConstantDouble.cs" />
+    <Compile Include="ConstantFieldReference.cs" />
+    <Compile Include="ConstantFloat.cs" />
+    <Compile Include="ConstantInteger.cs" />
+    <Compile Include="ConstantLong.cs" />
+    <Compile Include="ConstantNameAndType.cs" />
+    <Compile Include="ConstantPoolEntry.cs" />
+    <Compile Include="ConstantString.cs" />
+    <Compile Include="ConstantType.cs" />
+    <Compile Include="ConstantMethodReference.cs" />
+    <Compile Include="ConstantInterfaceMethodReference.cs" />
+    <Compile Include="ConstantUtf8.cs" />
     <Compile Include="DeclaredFieldData.cs" />
     <Compile Include="DeclaredMethodData.cs" />
     <Compile Include="Error.cs" />
@@ -120,6 +135,7 @@
     <Compile Include="LineNumberData.cs" />
     <Compile Include="Location.cs" />
     <Compile Include="MethodId.cs" />
+    <Compile Include="ModifiedUtf8Encoding.cs" />
     <Compile Include="ModifierKind.cs" />
     <Compile Include="ObjectId.cs" />
     <Compile Include="ObjectReferenceCountData.cs" />

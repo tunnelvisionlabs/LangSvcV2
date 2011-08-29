@@ -102,6 +102,15 @@
         [OperationContract]
         Error GetSourceDebugExtension(ReferenceTypeId referenceType, out string extension);
 
+        [OperationContract]
+        Error GetInstances(ReferenceTypeId referenceType, int maxInstances, out TaggedObjectId[] instances);
+
+        [OperationContract]
+        Error GetClassFileVersion(ReferenceTypeId referenceType, out int majorVersion, out int minorVersion);
+
+        [OperationContract]
+        Error GetConstantPool(ReferenceTypeId referenceType, out int constantPoolCount, out byte[] data);
+
         #endregion
 
         #region ClassType command set

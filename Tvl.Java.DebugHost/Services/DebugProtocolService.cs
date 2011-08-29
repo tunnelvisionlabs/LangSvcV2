@@ -556,6 +556,49 @@
             throw new NotImplementedException();
         }
 
+        public Error GetInstances(ReferenceTypeId referenceType, int maxInstances, out TaggedObjectId[] instances)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Error GetClassFileVersion(ReferenceTypeId referenceType, out int majorVersion, out int minorVersion)
+        {
+            majorVersion = 0;
+            minorVersion = 0;
+
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
+            {
+                error = environment.GetClassVersionNumbers(classHandle.Value, out minorVersion, out majorVersion);
+                return GetStandardError(error);
+            }
+        }
+
+        public Error GetConstantPool(ReferenceTypeId referenceType, out int constantPoolCount, out byte[] data)
+        {
+            constantPoolCount = 0;
+            data = null;
+
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
+            {
+                error = environment.GetConstantPool(classHandle.Value, out constantPoolCount, out data);
+                return GetStandardError(error);
+            }
+
+            throw new NotImplementedException();
+        }
+
         public Error GetSuperclass(ClassId @class, out ClassId superclass)
         {
             throw new NotImplementedException();

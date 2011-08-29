@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using ConstantPoolEntry = Tvl.Java.DebugInterface.Types.ConstantPoolEntry;
 
     /// <summary>
     /// The type of an object in a target VM.
@@ -50,7 +51,7 @@
         /// Returns the raw bytes of the constant pool in the format of the constant_pool item
         /// of the Class File Format in the Java Virtual Machine Specification.
         /// </summary>
-        byte[] GetConstantPool();
+        ReadOnlyCollection<ConstantPoolEntry> GetConstantPool();
 
         /// <summary>
         /// Returns the number of entries in the constant pool plus one.
