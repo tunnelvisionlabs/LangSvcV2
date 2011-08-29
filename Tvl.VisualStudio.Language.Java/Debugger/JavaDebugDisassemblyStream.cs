@@ -10,18 +10,21 @@
     using Microsoft.VisualStudio;
     using Tvl.VisualStudio.Language.Java.Debugger.Extensions;
     using Tvl.Java.DebugInterface;
-    using Tvl.VisualStudio.Language.Java.Debugger.Analysis;
+    using Tvl.Java.DebugInterface.Types.Analysis;
     using System.Collections.ObjectModel;
     using Tvl.Java.DebugInterface.Types;
+    using Tvl.Extensions;
+    using Tvl.Collections;
 
     [ComVisible(true)]
     public class JavaDebugDisassemblyStream : IDebugDisassemblyStream2
     {
         private readonly JavaDebugCodeContext _executionContext;
         private readonly byte[] _bytecode;
-        private readonly int[] _instructionOffsets;
+        private readonly DisassembledMethod _disassembledMethod;
+        private readonly ImmutableList<int?> _evaluationStackDepths;
 
-        private long _currentInstructionIndex;
+        private int _currentInstructionIndex;
 
         public JavaDebugDisassemblyStream(JavaDebugCodeContext executionContext)
         {
@@ -29,19 +32,8 @@
 
             _executionContext = executionContext;
             _bytecode = _executionContext.Location.GetMethod().GetBytecodes();
-
-            List<int> instructionOffsets = new List<int>();
-            for (int i = 0; i < _bytecode.Length; /*increment in loop*/)
-            {
-                instructionOffsets.Add(i);
-                int currentSize = JavaInstruction.InstructionLookup[_bytecode[i]].Size;
-                if (currentSize == 0)
-                    throw new NotImplementedException("Need to implement special support for variable-length instructions.");
-
-                i += currentSize;
-            }
-
-            _instructionOffsets = instructionOffsets.ToArray();
+            _disassembledMethod = BytecodeDisassembler.Disassemble(_bytecode);
+            _evaluationStackDepths = BytecodeDisassembler.GetEvaluationStackDepths(_disassembledMethod, executionContext.Location.GetDeclaringType().GetConstantPool());
         }
 
         #region IDebugDisassemblyStream2 Members
@@ -98,7 +90,7 @@
 
         public int GetCurrentLocation(out ulong puCodeLocationId)
         {
-            puCodeLocationId = (ulong)_executionContext.Location.GetCodeIndex();
+            puCodeLocationId = (ulong)_disassembledMethod.Instructions[_currentInstructionIndex].Offset;
             return VSConstants.S_OK;
         }
 
@@ -141,7 +133,7 @@
                 return AD7Constants.S_GETSIZE_NO_SIZE;
             }
 
-            pnSize = (uint)_instructionOffsets.Length;
+            pnSize = (uint)_disassembledMethod.Instructions.Count;
             return VSConstants.S_OK;
         }
 
@@ -164,7 +156,7 @@
         {
             pdwInstructionsRead = 0;
 
-            uint actualInstructions = Math.Min(dwInstructions, (uint)(_instructionOffsets.Length - _currentInstructionIndex));
+            uint actualInstructions = Math.Min(dwInstructions, (uint)(_disassembledMethod.Instructions.Count - _currentInstructionIndex));
 
             if (prgDisassembly == null || prgDisassembly.Length < dwInstructions)
                 return VSConstants.E_INVALIDARG;
@@ -173,27 +165,28 @@
             ReadOnlyCollection<ConstantPoolEntry> constantPool = _executionContext.Location.GetDeclaringType().GetConstantPool();
 
             int addressFieldWidth = 1;
-            while (10 * addressFieldWidth <= _instructionOffsets.Length)
-                addressFieldWidth++;
-
-            for (long i = 0; i < actualInstructions; i++)
+            int addressFieldRange = 10 * addressFieldWidth;
+            while (addressFieldRange <= _bytecode.Length)
             {
-                int instructionStart = _instructionOffsets[_currentInstructionIndex + i];
-                int instructionLength = _bytecode.Length - instructionStart;
-                if (_currentInstructionIndex + i < _instructionOffsets.Length - 1)
-                    instructionLength = _instructionOffsets[_currentInstructionIndex + i + 1] - instructionStart;
+                addressFieldWidth++;
+                addressFieldRange *= 10;
+            }
 
-                JavaInstruction instruction = JavaInstruction.InstructionLookup[_bytecode[instructionStart]];
+            for (int i = 0; i < actualInstructions; i++)
+            {
+                JavaInstruction instruction = _disassembledMethod.Instructions[_currentInstructionIndex + i];
+                int instructionStart = instruction.Offset;
+                int instructionSize = instruction.Size;
 
                 if (dwFields.GetAddress())
                 {
-                    prgDisassembly[i].bstrAddress = string.Format("{0," + 4 + "}", instructionStart);
+                    prgDisassembly[i].bstrAddress = string.Format("{0," + addressFieldWidth + "}", instructionStart);
                     prgDisassembly[i].dwFields |= enum_DISASSEMBLY_STREAM_FIELDS.DSF_ADDRESS;
                 }
 
                 if (dwFields.GetCodeBytes())
                 {
-                    prgDisassembly[i].bstrCodeBytes = string.Join(" ", _bytecode.Skip(instructionStart).Take(instructionLength).Select(x => x.ToString("X2")));
+                    prgDisassembly[i].bstrCodeBytes = string.Join(" ", _bytecode.Skip(instructionStart).Take(instructionSize).Select(x => x.ToString("X2")));
                     prgDisassembly[i].dwFields |= enum_DISASSEMBLY_STREAM_FIELDS.DSF_CODEBYTES;
                 }
 
@@ -205,7 +198,7 @@
 
                 if (dwFields.GetOpCode())
                 {
-                    prgDisassembly[i].bstrOpcode = instruction.Name ?? "???";
+                    prgDisassembly[i].bstrOpcode = string.Format("[{0}]{1}", _evaluationStackDepths[_currentInstructionIndex + i], instruction.OpCode.Name ?? "???");
                     prgDisassembly[i].dwFields |= enum_DISASSEMBLY_STREAM_FIELDS.DSF_OPCODE;
                 }
 
@@ -214,25 +207,22 @@
                     prgDisassembly[i].dwFields |= enum_DISASSEMBLY_STREAM_FIELDS.DSF_OPERANDS;
 
                     // operand 0
-                    switch (instruction.OperandType)
+                    switch (instruction.OpCode.OperandType)
                     {
                     case JavaOperandType.InlineI1:
-                        prgDisassembly[i].bstrOperands = _bytecode[instructionStart + 1].ToString();
+                        prgDisassembly[i].bstrOperands = instruction.Operands.InlineSByte.ToString();
                         break;
 
                     case JavaOperandType.InlineI2:
-                        prgDisassembly[i].bstrOperands = ((_bytecode[instructionStart + 1] << 8) + _bytecode[instructionStart + 2]).ToString();
+                        prgDisassembly[i].bstrOperands = instruction.Operands.InlineInt16.ToString();
                         break;
 
                     case JavaOperandType.InlineShortBranchTarget:
-                        prgDisassembly[i].bstrOperands = (instructionStart + (short)(_bytecode[instructionStart + 1] << 8) + _bytecode[instructionStart + 2]).ToString();
-                        break;
-
                     case JavaOperandType.InlineBranchTarget:
-                        prgDisassembly[i].bstrOperands = (instructionStart + (int)(_bytecode[instructionStart + 1] << 24) + (_bytecode[instructionStart + 2] << 16) + (_bytecode[instructionStart + 3] << 8) + _bytecode[instructionStart + 4]).ToString();
+                        prgDisassembly[i].bstrOperands = (instructionStart + instruction.Operands.Operand1).ToString();
                         break;
 
-                    case JavaOperandType.InlineSwitch:
+                    case JavaOperandType.InlineLookupSwitch:
                         prgDisassembly[i].bstrOperands = "Switch?";
                         break;
 
@@ -240,29 +230,23 @@
                         prgDisassembly[i].bstrOperands = "TableSwitch?";
                         break;
 
-                    case JavaOperandType.InlineShortConst:
-                        prgDisassembly[i].bstrOperands = "#" + _bytecode[instructionStart + 1].ToString();
-                        break;
-
-                    case JavaOperandType.InlineConst:
-                        prgDisassembly[i].bstrOperands = "#" + ((_bytecode[instructionStart + 1] << 8) + _bytecode[instructionStart + 2]).ToString();
-                        break;
-
                     case JavaOperandType.InlineVar:
                     case JavaOperandType.InlineVar_I1:
-                        prgDisassembly[i].bstrOperands = "#" + _bytecode[instructionStart + 1].ToString();
+                        prgDisassembly[i].bstrOperands = "#" + instruction.Operands.VariableSlot.ToString();
                         break;
 
+                    case JavaOperandType.InlineShortConst:
+                    case JavaOperandType.InlineConst:
                     case JavaOperandType.InlineField:
                     case JavaOperandType.InlineMethod:
-                    case JavaOperandType.InlineMethod_I1_0:
+                    case JavaOperandType.InlineMethod_U1_0:
                     case JavaOperandType.InlineType:
-                    case JavaOperandType.InlineType_I1:
-                        prgDisassembly[i].bstrOperands = "#" + ((_bytecode[instructionStart + 1] << 8) + _bytecode[instructionStart + 2]).ToString();
+                    case JavaOperandType.InlineType_U1:
+                        prgDisassembly[i].bstrOperands = "#" + instruction.Operands.ConstantPoolIndex.ToString();
                         break;
 
                     case JavaOperandType.InlineArrayType:
-                        prgDisassembly[i].bstrOperands = "T_" + ((JavaArrayType)_bytecode[instructionStart + 1]).ToString().ToUpperInvariant();
+                        prgDisassembly[i].bstrOperands = "T_" + instruction.Operands.ArrayType.ToString().ToUpperInvariant();
                         break;
 
                     default:
@@ -271,15 +255,18 @@
                     }
 
                     // operand 1
-                    switch (instruction.OperandType)
+                    switch (instruction.OpCode.OperandType)
                     {
                     case JavaOperandType.InlineVar_I1:
-                        prgDisassembly[i].bstrOperands += " " + _bytecode[instructionStart + 2].ToString();
+                        prgDisassembly[i].bstrOperands += " " + instruction.Operands.Increment.ToString();
                         break;
 
-                    case JavaOperandType.InlineMethod_I1_0:
-                    case JavaOperandType.InlineType_I1:
-                        prgDisassembly[i].bstrOperands += " " + _bytecode[instructionStart + 3].ToString();
+                    case JavaOperandType.InlineMethod_U1_0:
+                        prgDisassembly[i].bstrOperands += " " + instruction.Operands.Operand2.ToString();
+                        break;
+
+                    case JavaOperandType.InlineType_U1:
+                        prgDisassembly[i].bstrOperands += " " + instruction.Operands.Dimensions.ToString();
                         break;
 
                     default:
@@ -287,7 +274,7 @@
                     }
 
                     // operand 2
-                    if (instruction.OperandType == JavaOperandType.InlineMethod_I1_0)
+                    if (instruction.OpCode.OperandType == JavaOperandType.InlineMethod_U1_0)
                     {
                         prgDisassembly[i].bstrOperands += " 0";
                     }
@@ -317,9 +304,9 @@
 
                 if (dwFields.GetSymbol())
                 {
-                    switch (instruction.OperandType)
+                    switch (instruction.OpCode.OperandType)
                     {
-                    case JavaOperandType.InlineSwitch:
+                    case JavaOperandType.InlineLookupSwitch:
                         prgDisassembly[i].bstrSymbol = "// switch";
                         break;
 
@@ -329,27 +316,15 @@
 
                     case JavaOperandType.InlineShortConst:
                     case JavaOperandType.InlineConst:
+                    case JavaOperandType.InlineField:
+                    case JavaOperandType.InlineMethod:
+                    case JavaOperandType.InlineMethod_U1_0:
+                    case JavaOperandType.InlineType:
+                    case JavaOperandType.InlineType_U1:
                         {
-                            int index = _bytecode[instructionStart + 1];
-                            if (instruction.OperandType == JavaOperandType.InlineConst)
-                                index = ((index << 8) + _bytecode[instructionStart + 2]);
-
+                            int index = instruction.Operands.ConstantPoolIndex;
                             var entry = constantPool[index - 1];
-                            switch (entry.Type)
-                            {
-                            case ConstantType.Integer:
-                            case ConstantType.Float:
-                            case ConstantType.Long:
-                            case ConstantType.Double:
-                            case ConstantType.String:
-                                prgDisassembly[i].bstrSymbol = "// " + entry.ToString(constantPool);
-                                break;
-
-                            default:
-                                prgDisassembly[i].bstrSymbol = "// unknown const";
-                                break;
-                            }
-
+                            prgDisassembly[i].bstrSymbol = "// " + entry.ToString(constantPool);
                             break;
                         }
 
@@ -358,7 +333,7 @@
                         {
                             int localIndex = _bytecode[instructionStart + 1];
                             int testLocation = instructionStart;
-                            if (instruction.StackBehaviorPop != JavaStackBehavior.Pop0)
+                            if (instruction.OpCode.StackBehaviorPop != JavaStackBehavior.Pop0)
                             {
                                 // this is a store instruction - the variable might not be visible until the following instruction
                                 testLocation += instruction.Size;
@@ -376,73 +351,61 @@
                             break;
                         }
 
-                    case JavaOperandType.InlineField:
-                    case JavaOperandType.InlineMethod:
-                    case JavaOperandType.InlineMethod_I1_0:
-                    case JavaOperandType.InlineType:
-                    case JavaOperandType.InlineType_I1:
-                        {
-                            int index = (_bytecode[instructionStart + 1] << 8) + _bytecode[instructionStart + 2];
-                            ConstantPoolEntry entry = constantPool[index - 1];
-                            prgDisassembly[i].bstrSymbol = "// " + entry.ToString(constantPool);
-                            break;
-                        }
-
                     case JavaOperandType.InlineNone:
                         {
                             int? localIndex = null;
 
-                            switch (instruction.OpCode)
+                            switch (instruction.OpCode.OpCode)
                             {
-                            case JavaOpCode.Aload_0:
-                            case JavaOpCode.Astore_0:
-                            case JavaOpCode.Dload_0:
-                            case JavaOpCode.Dstore_0:
-                            case JavaOpCode.Fload_0:
-                            case JavaOpCode.Fstore_0:
-                            case JavaOpCode.Iload_0:
-                            case JavaOpCode.Istore_0:
-                            case JavaOpCode.Lload_0:
-                            case JavaOpCode.Lstore_0:
+                            case JavaOpCodeTag.Aload_0:
+                            case JavaOpCodeTag.Astore_0:
+                            case JavaOpCodeTag.Dload_0:
+                            case JavaOpCodeTag.Dstore_0:
+                            case JavaOpCodeTag.Fload_0:
+                            case JavaOpCodeTag.Fstore_0:
+                            case JavaOpCodeTag.Iload_0:
+                            case JavaOpCodeTag.Istore_0:
+                            case JavaOpCodeTag.Lload_0:
+                            case JavaOpCodeTag.Lstore_0:
                                 localIndex = 0;
                                 break;
 
-                            case JavaOpCode.Aload_1:
-                            case JavaOpCode.Astore_1:
-                            case JavaOpCode.Dload_1:
-                            case JavaOpCode.Dstore_1:
-                            case JavaOpCode.Fload_1:
-                            case JavaOpCode.Fstore_1:
-                            case JavaOpCode.Iload_1:
-                            case JavaOpCode.Istore_1:
-                            case JavaOpCode.Lload_1:
-                            case JavaOpCode.Lstore_1:
+                            case JavaOpCodeTag.Aload_1:
+                            case JavaOpCodeTag.Astore_1:
+                            case JavaOpCodeTag.Dload_1:
+                            case JavaOpCodeTag.Dstore_1:
+                            case JavaOpCodeTag.Fload_1:
+                            case JavaOpCodeTag.Fstore_1:
+                            case JavaOpCodeTag.Iload_1:
+                            case JavaOpCodeTag.Istore_1:
+                            case JavaOpCodeTag.Lload_1:
+                            case JavaOpCodeTag.Lstore_1:
                                 localIndex = 1;
                                 break;
 
-                            case JavaOpCode.Aload_2:
-                            case JavaOpCode.Astore_2:
-                            case JavaOpCode.Dload_2:
-                            case JavaOpCode.Dstore_2:
-                            case JavaOpCode.Fload_2:
-                            case JavaOpCode.Fstore_2:
-                            case JavaOpCode.Iload_2:
-                            case JavaOpCode.Istore_2:
-                            case JavaOpCode.Lload_2:
-                            case JavaOpCode.Lstore_2:
+                            case JavaOpCodeTag.Aload_2:
+                            case JavaOpCodeTag.Astore_2:
+                            case JavaOpCodeTag.Dload_2:
+                            case JavaOpCodeTag.Dstore_2:
+                            case JavaOpCodeTag.Fload_2:
+                            case JavaOpCodeTag.Fstore_2:
+                            case JavaOpCodeTag.Iload_2:
+                            case JavaOpCodeTag.Istore_2:
+                            case JavaOpCodeTag.Lload_2:
+                            case JavaOpCodeTag.Lstore_2:
                                 localIndex = 2;
                                 break;
 
-                            case JavaOpCode.Aload_3:
-                            case JavaOpCode.Astore_3:
-                            case JavaOpCode.Dload_3:
-                            case JavaOpCode.Dstore_3:
-                            case JavaOpCode.Fload_3:
-                            case JavaOpCode.Fstore_3:
-                            case JavaOpCode.Iload_3:
-                            case JavaOpCode.Istore_3:
-                            case JavaOpCode.Lload_3:
-                            case JavaOpCode.Lstore_3:
+                            case JavaOpCodeTag.Aload_3:
+                            case JavaOpCodeTag.Astore_3:
+                            case JavaOpCodeTag.Dload_3:
+                            case JavaOpCodeTag.Dstore_3:
+                            case JavaOpCodeTag.Fload_3:
+                            case JavaOpCodeTag.Fstore_3:
+                            case JavaOpCodeTag.Iload_3:
+                            case JavaOpCodeTag.Istore_3:
+                            case JavaOpCodeTag.Lload_3:
+                            case JavaOpCodeTag.Lstore_3:
                                 localIndex = 3;
                                 break;
                             }
@@ -450,7 +413,7 @@
                             if (localIndex.HasValue)
                             {
                                 int testLocation = instructionStart;
-                                if (instruction.StackBehaviorPop != JavaStackBehavior.Pop0)
+                                if (instruction.OpCode.StackBehaviorPop != JavaStackBehavior.Pop0)
                                 {
                                     // this is a store instruction - the variable might not be visible until the following instruction
                                     testLocation += instruction.Size;
@@ -478,7 +441,7 @@
                 }
             }
 
-            _currentInstructionIndex += actualInstructions;
+            _currentInstructionIndex += (int)actualInstructions;
             pdwInstructionsRead = actualInstructions;
             return actualInstructions == dwInstructions ? VSConstants.S_OK : VSConstants.S_FALSE;
         }
@@ -528,7 +491,7 @@
                 goto case enum_SEEK_START.SEEK_START_CODELOCID;
 
             case enum_SEEK_START.SEEK_START_CODELOCID:
-                _currentInstructionIndex = Array.IndexOf(_instructionOffsets, (int)uCodeLocationId);
+                _currentInstructionIndex = _disassembledMethod.Instructions.FindIndex(i => i.Offset == (int)uCodeLocationId);
                 if (_currentInstructionIndex < 0)
                     throw new ArgumentException();
 
@@ -538,19 +501,19 @@
                 break;
 
             case enum_SEEK_START.SEEK_START_END:
-                _currentInstructionIndex = _instructionOffsets.Length;
+                _currentInstructionIndex = _disassembledMethod.Instructions.Count;
                 break;
 
             default:
                 throw new ArgumentException("Invalid seek start location.");
             }
 
-            _currentInstructionIndex += iInstructions;
-            if (_currentInstructionIndex >= 0 && _currentInstructionIndex <= _instructionOffsets.Length)
+            _currentInstructionIndex += (int)iInstructions;
+            if (_currentInstructionIndex >= 0 && _currentInstructionIndex <= _disassembledMethod.Instructions.Count)
                 return VSConstants.S_OK;
 
             _currentInstructionIndex = Math.Max(0, _currentInstructionIndex);
-            _currentInstructionIndex = Math.Min(_instructionOffsets.Length, _currentInstructionIndex);
+            _currentInstructionIndex = Math.Min(_disassembledMethod.Instructions.Count, _currentInstructionIndex);
             return VSConstants.S_FALSE;
         }
 

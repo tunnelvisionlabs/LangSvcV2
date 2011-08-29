@@ -181,7 +181,6 @@
     </Compile>
     <Compile Include="ShortType.cs" />
     <Compile Include="ShortValue.cs" />
-    <Compile Include="SignatureHelper.cs" />
     <Compile Include="StackFrame.cs" />
     <Compile Include="StringReference.cs" />
     <Compile Include="ThreadGroupReference.cs" />

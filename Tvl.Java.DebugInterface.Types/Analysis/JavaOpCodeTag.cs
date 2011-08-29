@@ -1,6 +1,6 @@
-﻿namespace Tvl.VisualStudio.Language.Java.Debugger.Analysis
+﻿namespace Tvl.Java.DebugInterface.Types.Analysis
 {
-    public enum JavaOpCode : byte
+    public enum JavaOpCodeTag : byte
     {
         Aaload = 0x32,
         Aastore = 0x53,

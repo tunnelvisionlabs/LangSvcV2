@@ -4,7 +4,7 @@
     using System.Runtime.Serialization;
 
     [DataContract]
-    public class ConstantFieldReference : ConstantPoolEntry
+    public class ConstantFieldReference : ConstantPoolEntry, IConstantMemberReference
     {
         [DataMember]
         private readonly ushort _classIndex;

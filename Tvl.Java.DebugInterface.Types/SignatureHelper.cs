@@ -1,13 +1,12 @@
-﻿namespace Tvl.Java.DebugInterface.Client
+﻿namespace Tvl.Java.DebugInterface.Types
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Text.RegularExpressions;
     using System.Diagnostics.Contracts;
+    using System.Linq;
+    using System.Text.RegularExpressions;
 
-    internal static class SignatureHelper
+    public static class SignatureHelper
     {
         private const string ArgFormat = @"(?:\[*(?:[ZBCDFIJSV]|L[a-zA-Z0-9_$/]+;))";
         private static readonly Regex SignatureFormat =
@@ -15,22 +14,15 @@
                 @"^\((?<ARG>" + ArgFormat + @")*\)(?<RET>" + ArgFormat + @")$",
                 RegexOptions.Compiled);
 
-        public static void ParseMethodSignature(string signature, out List<string> argumentTypeNames, out string returnTypeName)
+        public static void ParseMethodSignature(string signature, out List<string> argumentTypeSignatures, out string returnTypeSignature)
         {
-            argumentTypeNames = new List<string>();
+            argumentTypeSignatures = new List<string>();
 
             Match match = SignatureFormat.Match(signature);
             foreach (var arg in match.Groups["ARG"].Captures.Cast<Capture>())
-                argumentTypeNames.Add(arg.Value);
+                argumentTypeSignatures.Add(arg.Value);
 
-            returnTypeName = match.Groups["RET"].Value;
-
-            for (int i = 0; i < argumentTypeNames.Count; i++)
-            {
-                argumentTypeNames[i] = DecodeTypeName(argumentTypeNames[i]);
-            }
-
-            returnTypeName = DecodeTypeName(returnTypeName);
+            returnTypeSignature = match.Groups["RET"].Value;
         }
 
         public static string DecodeTypeName(string signature)

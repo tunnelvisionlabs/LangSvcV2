@@ -2,18 +2,19 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using MethodId = Tvl.Java.DebugInterface.Types.MethodId;
-    using System.Diagnostics.Contracts;
     using System.Collections.ObjectModel;
-    using System.Text.RegularExpressions;
+    using System.Diagnostics.Contracts;
+    using System.Linq;
+    using MethodId = Tvl.Java.DebugInterface.Types.MethodId;
     using Path = System.IO.Path;
+    using SignatureHelper = Tvl.Java.DebugInterface.Types.SignatureHelper;
 
     internal sealed class Method : TypeComponent, IMethod
     {
         private readonly MethodId _methodId;
+        private readonly ReadOnlyCollection<string> _argumentTypeSignatures;
         private readonly ReadOnlyCollection<string> _argumentTypeNames;
+        private readonly string _returnTypeSignature;
         private readonly string _returnTypeName;
 
         // cached items
@@ -30,12 +31,14 @@
             Contract.Requires(virtualMachine != null);
             _methodId = methodId;
 
-            List<string> argumentTypeNames;
-            string returnTypeName;
-            SignatureHelper.ParseMethodSignature(signature, out argumentTypeNames, out returnTypeName);
+            List<string> argumentTypeSignatures;
+            string returnTypeSignature;
+            SignatureHelper.ParseMethodSignature(signature, out argumentTypeSignatures, out returnTypeSignature);
 
-            _argumentTypeNames = argumentTypeNames.AsReadOnly();
-            _returnTypeName = returnTypeName;
+            _argumentTypeSignatures = argumentTypeSignatures.AsReadOnly();
+            _argumentTypeNames = argumentTypeSignatures.Select(SignatureHelper.DecodeTypeName).ToList().AsReadOnly();
+            _returnTypeSignature = returnTypeSignature;
+            _returnTypeName = SignatureHelper.DecodeTypeName(_returnTypeSignature);
         }
 
         public MethodId MethodId
@@ -106,7 +109,7 @@
         {
             if (_argumentTypes == null)
             {
-                IType[] argumentTypes = GetArgumentTypeNames().Select(i => VirtualMachine.FindType(i)).ToArray();
+                IType[] argumentTypes = _argumentTypeSignatures.Select(i => VirtualMachine.FindType(i)).ToArray();
                 if (argumentTypes.OfType<UnloadedReferenceType>().Any())
                     return new ReadOnlyCollection<IType>(argumentTypes);
 
@@ -199,7 +202,7 @@
 
         public IType GetReturnType()
         {
-            return VirtualMachine.FindType(GetReturnTypeName());
+            return VirtualMachine.FindType(_returnTypeSignature);
         }
 
         public string GetReturnTypeName()

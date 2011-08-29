@@ -1,10 +1,8 @@
 ﻿namespace Tvl.Java.DebugInterface.Client
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Diagnostics.Contracts;
+    using SignatureHelper = Tvl.Java.DebugInterface.Types.SignatureHelper;
 
     internal sealed class LocalVariable : Mirror, ILocalVariable
     {

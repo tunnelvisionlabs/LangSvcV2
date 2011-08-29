@@ -101,6 +101,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccessModifiers.cs" />
+    <Compile Include="Analysis\BytecodeDisassembler.cs" />
+    <Compile Include="Analysis\DisassembledMethod.cs" />
+    <Compile Include="Analysis\JavaArrayType.cs" />
+    <Compile Include="Analysis\JavaFlowControl.cs" />
+    <Compile Include="Analysis\JavaInstruction.cs" />
+    <Compile Include="Analysis\JavaOpCode.cs" />
+    <Compile Include="Analysis\JavaOpCodeTag.cs" />
+    <Compile Include="Analysis\JavaOperandData.cs" />
+    <Compile Include="Analysis\JavaOperandType.cs" />
+    <Compile Include="Analysis\JavaStackBehavior.cs" />
+    <Compile Include="Analysis\LookupSwitchData.cs" />
+    <Compile Include="Analysis\SwitchData.cs" />
+    <Compile Include="Analysis\TableSwitchData.cs" />
     <Compile Include="ArrayId.cs" />
     <Compile Include="ArrayTypeId.cs" />
     <Compile Include="Capabilities.cs" />
@@ -122,6 +135,7 @@
     <Compile Include="ConstantMethodReference.cs" />
     <Compile Include="ConstantInterfaceMethodReference.cs" />
     <Compile Include="ConstantUtf8.cs" />
+    <Compile Include="IConstantMemberReference.cs" />
     <Compile Include="DeclaredFieldData.cs" />
     <Compile Include="DeclaredMethodData.cs" />
     <Compile Include="Error.cs" />
@@ -143,6 +157,7 @@
     <Compile Include="ReferenceTypeData.cs" />
     <Compile Include="ReferenceTypeId.cs" />
     <Compile Include="RequestId.cs" />
+    <Compile Include="SignatureHelper.cs" />
     <Compile Include="StepDepth.cs" />
     <Compile Include="StepSize.cs" />
     <Compile Include="StringId.cs" />
@@ -163,6 +178,12 @@
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
+      <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
+      <Name>Tvl.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

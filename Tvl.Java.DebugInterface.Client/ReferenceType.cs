@@ -91,7 +91,10 @@
 
         public ReadOnlyCollection<ILocation> GetLineLocations()
         {
-            throw new NotImplementedException();
+            string stratum = GetDefaultStratum();
+            IEnumerable<string> sourceNames = GetSourceNames(stratum);
+            ILocation[] locations = sourceNames.SelectMany(i => GetLineLocations(stratum, i)).ToArray();
+            return new ReadOnlyCollection<ILocation>(locations);
         }
 
         public ReadOnlyCollection<ILocation> GetLineLocations(string stratum, string sourceName)

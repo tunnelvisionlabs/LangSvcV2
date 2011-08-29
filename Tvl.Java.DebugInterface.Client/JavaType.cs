@@ -1,6 +1,7 @@
 ﻿namespace Tvl.Java.DebugInterface.Client
 {
     using System.Diagnostics.Contracts;
+    using Tvl.Java.DebugInterface.Types;
 
     internal abstract class JavaType : Mirror, IType
     {

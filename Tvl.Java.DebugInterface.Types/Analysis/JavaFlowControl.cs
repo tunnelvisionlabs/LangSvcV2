@@ -1,4 +1,4 @@
-﻿namespace Tvl.VisualStudio.Language.Java.Debugger.Analysis
+﻿namespace Tvl.Java.DebugInterface.Types.Analysis
 {
     public enum JavaFlowControl
     {

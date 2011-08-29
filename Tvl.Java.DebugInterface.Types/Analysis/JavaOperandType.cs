@@ -1,4 +1,4 @@
-﻿namespace Tvl.VisualStudio.Language.Java.Debugger.Analysis
+﻿namespace Tvl.Java.DebugInterface.Types.Analysis
 {
     public enum JavaOperandType
     {
@@ -10,7 +10,7 @@
         InlineShortBranchTarget,
         InlineBranchTarget,
 
-        InlineSwitch,
+        InlineLookupSwitch,
         InlineTableSwitch,
 
         InlineShortConst,
@@ -23,7 +23,7 @@
         InlineArrayType,
 
         InlineVar_I1,
-        InlineMethod_I1_0,
-        InlineType_I1,
+        InlineMethod_U1_0,
+        InlineType_U1,
     }
 }
