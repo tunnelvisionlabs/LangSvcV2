@@ -172,6 +172,10 @@
             ReadOnlyCollection<ILocalVariable> localVariables = _executionContext.Location.GetMethod().GetVariables();
             ReadOnlyCollection<ConstantPoolEntry> constantPool = _executionContext.Location.GetDeclaringType().GetConstantPool();
 
+            int addressFieldWidth = 1;
+            while (10 * addressFieldWidth <= _instructionOffsets.Length)
+                addressFieldWidth++;
+
             for (long i = 0; i < actualInstructions; i++)
             {
                 int instructionStart = _instructionOffsets[_currentInstructionIndex + i];
