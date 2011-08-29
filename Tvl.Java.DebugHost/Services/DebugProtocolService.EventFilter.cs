@@ -1,5 +1,6 @@
 ﻿namespace Tvl.Java.DebugHost.Services
 {
+    using Tvl.Extensions;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -8,18 +9,34 @@
     using System.Diagnostics.Contracts;
     using System.Collections.ObjectModel;
     using Tvl.Java.DebugHost.Interop;
+    using Tvl.Collections;
+    using Tvl.Java.DebugInterface.Types.Analysis;
 
     partial class DebugProtocolService
     {
-        public abstract class EventFilter
+        internal abstract class EventFilter
         {
+            private readonly EventKind _internalEventKind;
             private readonly RequestId _requestId;
             private readonly SuspendPolicy _suspendPolicy;
+            private readonly ImmutableList<EventRequestModifier> _modifiers;
 
-            public EventFilter(RequestId requestId, SuspendPolicy suspendPolicy)
+            public EventFilter(EventKind internalEventKind, RequestId requestId, SuspendPolicy suspendPolicy, IEnumerable<EventRequestModifier> modifiers)
             {
+                Contract.Requires<ArgumentNullException>(modifiers != null, "modifiers");
+
+                _internalEventKind = internalEventKind;
                 _requestId = requestId;
                 _suspendPolicy = suspendPolicy;
+                _modifiers = new ImmutableList<EventRequestModifier>(modifiers);
+            }
+
+            public EventKind InternalEventKind
+            {
+                get
+                {
+                    return _internalEventKind;
+                }
             }
 
             public RequestId RequestId
@@ -38,29 +55,37 @@
                 }
             }
 
-            public abstract bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, ThreadId thread, TaggedReferenceTypeId @class, Location? location);
-
-            public static EventFilter CreateFilter(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, RequestId requestId, SuspendPolicy suspendPolicy, EventRequestModifier[] modifiers)
+            public ImmutableList<EventRequestModifier> Modifiers
             {
-                if (modifiers.Length == 0)
-                    return new PassThroughEventFilter(requestId, suspendPolicy);
+                get
+                {
+                    return _modifiers;
+                }
+            }
 
-                EventFilter[] elements = Array.ConvertAll(modifiers, modifier => CreateFilter(environment, nativeEnvironment, requestId, suspendPolicy, modifier));
+            public abstract bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, EventProcessor processor, ThreadId thread, TaggedReferenceTypeId @class, Location? location);
+
+            public static EventFilter CreateFilter(EventKind internalEventKind, JvmtiEnvironment environment, JniEnvironment nativeEnvironment, RequestId requestId, SuspendPolicy suspendPolicy, ImmutableList<EventRequestModifier> modifiers)
+            {
+                if (modifiers.Count == 0)
+                    return new PassThroughEventFilter(internalEventKind, requestId, suspendPolicy, modifiers);
+
+                EventFilter[] elements = modifiers.Select(modifier => CreateFilter(internalEventKind, environment, nativeEnvironment, requestId, suspendPolicy, modifiers, modifier)).ToArray();
                 if (elements.Length == 1)
                     return elements[0];
 
-                return new AggregateEventFilter(requestId, suspendPolicy, elements);
+                return new AggregateEventFilter(internalEventKind, requestId, suspendPolicy, modifiers, elements);
             }
 
-            public static EventFilter CreateFilter(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, RequestId requestId, SuspendPolicy suspendPolicy, EventRequestModifier modifier)
+            private static EventFilter CreateFilter(EventKind internalEventKind, JvmtiEnvironment environment, JniEnvironment nativeEnvironment, RequestId requestId, SuspendPolicy suspendPolicy, ImmutableList<EventRequestModifier> modifiers, EventRequestModifier modifier)
             {
                 switch (modifier.Kind)
                 {
                 case ModifierKind.Count:
-                    return new CountEventFilter(requestId, suspendPolicy, modifier.Count);
+                    return new CountEventFilter(internalEventKind, requestId, suspendPolicy, modifiers, modifier.Count);
 
                 case ModifierKind.ThreadFilter:
-                    return new ThreadEventFilter(requestId, suspendPolicy, modifier.Thread);
+                    return new ThreadEventFilter(internalEventKind, requestId, suspendPolicy, modifiers, modifier.Thread);
 
                 case ModifierKind.ClassTypeFilter:
                     throw new NotImplementedException();
@@ -72,7 +97,7 @@
                     throw new NotImplementedException();
 
                 case ModifierKind.LocationFilter:
-                    return new LocationEventFilter(requestId, suspendPolicy, modifier.Location);
+                    return new LocationEventFilter(internalEventKind, requestId, suspendPolicy, modifiers, modifier.Location);
 
                 case ModifierKind.ExceptionFilter:
                     throw new NotImplementedException();
@@ -81,7 +106,7 @@
                     throw new NotImplementedException();
 
                 case ModifierKind.Step:
-                    return new StepEventFilter(environment, nativeEnvironment, requestId, suspendPolicy, modifier.Thread, modifier.StepSize, modifier.StepDepth);
+                    return new StepEventFilter(internalEventKind, requestId, suspendPolicy, modifiers, modifier.Thread, environment, nativeEnvironment, modifier.StepSize, modifier.StepDepth);
 
                 case ModifierKind.InstanceFilter:
                     throw new NotImplementedException();
@@ -99,25 +124,25 @@
             }
         }
 
-        public sealed class PassThroughEventFilter : EventFilter
+        internal sealed class PassThroughEventFilter : EventFilter
         {
-            public PassThroughEventFilter(RequestId requestId, SuspendPolicy suspendPolicy)
-                : base(requestId, suspendPolicy)
+            public PassThroughEventFilter(EventKind internalEventKind, RequestId requestId, SuspendPolicy suspendPolicy, IEnumerable<EventRequestModifier> modifiers)
+                : base(internalEventKind, requestId, suspendPolicy, modifiers)
             {
             }
 
-            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
+            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, EventProcessor processor, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
                 return true;
             }
         }
 
-        public sealed class AggregateEventFilter : EventFilter
+        internal sealed class AggregateEventFilter : EventFilter
         {
             private readonly EventFilter[] _filters;
 
-            public AggregateEventFilter(RequestId requestId, SuspendPolicy suspendPolicy, IEnumerable<EventFilter> filters)
-                : base(requestId, suspendPolicy)
+            public AggregateEventFilter(EventKind internalEventKind, RequestId requestId, SuspendPolicy suspendPolicy, IEnumerable<EventRequestModifier> modifiers, IEnumerable<EventFilter> filters)
+                : base(internalEventKind, requestId, suspendPolicy, modifiers)
             {
                 Contract.Requires<ArgumentNullException>(filters != null, "filters");
                 _filters = filters.ToArray();
@@ -131,11 +156,11 @@
                 }
             }
 
-            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
+            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, EventProcessor processor, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
                 foreach (EventFilter filter in _filters)
                 {
-                    if (!filter.ProcessEvent(environment, nativeEnvironment, thread, @class, location))
+                    if (!filter.ProcessEvent(environment, nativeEnvironment, processor, thread, @class, location))
                         return false;
                 }
 
@@ -143,19 +168,19 @@
             }
         }
 
-        public sealed class CountEventFilter : EventFilter
+        internal sealed class CountEventFilter : EventFilter
         {
             private readonly int _count;
 
             private int _current;
 
-            public CountEventFilter(RequestId requestId, SuspendPolicy suspendPolicy, int count)
-                : base(requestId, suspendPolicy)
+            public CountEventFilter(EventKind internalEventKind, RequestId requestId, SuspendPolicy suspendPolicy, IEnumerable<EventRequestModifier> modifiers, int count)
+                : base(internalEventKind, requestId, suspendPolicy, modifiers)
             {
                 _count = count;
             }
 
-            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
+            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, EventProcessor processor, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
                 _current++;
                 if (_current == _count)
@@ -168,29 +193,29 @@
             }
         }
 
-        public class ThreadEventFilter : EventFilter
+        internal class ThreadEventFilter : EventFilter
         {
             private readonly ThreadId _thread;
 
-            public ThreadEventFilter(RequestId requestId, SuspendPolicy suspendPolicy, ThreadId thread)
-                : base(requestId, suspendPolicy)
+            public ThreadEventFilter(EventKind internalEventKind, RequestId requestId, SuspendPolicy suspendPolicy, IEnumerable<EventRequestModifier> modifiers, ThreadId thread)
+                : base(internalEventKind, requestId, suspendPolicy, modifiers)
             {
                 _thread = thread;
             }
 
-            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
+            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, EventProcessor processor, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
                 return _thread == default(ThreadId)
                     || _thread == thread;
             }
         }
 
-        public sealed class LocationEventFilter : EventFilter
+        internal sealed class LocationEventFilter : EventFilter
         {
             private readonly Location _location;
 
-            public LocationEventFilter(RequestId requestId, SuspendPolicy suspendPolicy, Location location)
-                : base(requestId, suspendPolicy)
+            public LocationEventFilter(EventKind internalEventKind, RequestId requestId, SuspendPolicy suspendPolicy, IEnumerable<EventRequestModifier> modifiers, Location location)
+                : base(internalEventKind, requestId, suspendPolicy, modifiers)
             {
                 _location = location;
             }
@@ -203,7 +228,7 @@
                 }
             }
 
-            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
+            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, EventProcessor processor, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
                 if (!location.HasValue)
                     return false;
@@ -214,22 +239,24 @@
             }
         }
 
-        public sealed class StepEventFilter : ThreadEventFilter
+        internal sealed class StepEventFilter : ThreadEventFilter
         {
             private readonly StepSize _size;
             private readonly StepDepth _depth;
 
             // used for step over
+            private bool _hasMethodInfo;
             private jmethodID _lastMethod;
             private jlocation _lastLocation;
             private int _stackDepth;
+            private bool _convertedToFramePop;
 
-            // used for step out
-            private jmethodID _parentMethod;
-            private jlocation _parentLocation;
+            private DisassembledMethod _disassembledMethod;
+            private ConstantPoolEntry[] _constantPool;
+            private ImmutableList<int?> _evaluationStackDepths;
 
-            public StepEventFilter(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, RequestId requestId, SuspendPolicy suspendPolicy, ThreadId thread, StepSize size, StepDepth depth)
-                : base(requestId, suspendPolicy, thread)
+            public StepEventFilter(EventKind internalEventKind, RequestId requestId, SuspendPolicy suspendPolicy, IEnumerable<EventRequestModifier> modifiers, ThreadId thread, JvmtiEnvironment environment, JniEnvironment nativeEnvironment, StepSize size, StepDepth depth)
+                : base(internalEventKind, requestId, suspendPolicy, modifiers, thread)
             {
                 _size = size;
                 _depth = depth;
@@ -237,46 +264,99 @@
                 // gather reference information for the thread
                 using (var threadHandle = environment.VirtualMachine.GetLocalReferenceForThread(nativeEnvironment, thread))
                 {
-                    JvmtiErrorHandler.ThrowOnFailure(environment.GetFrameLocation(threadHandle.Value, 0, out _lastMethod, out _lastLocation));
-                    JvmtiErrorHandler.ThrowOnFailure(environment.GetFrameCount(threadHandle.Value, out _stackDepth));
-                    if (_stackDepth > 1)
-                        JvmtiErrorHandler.ThrowOnFailure(environment.GetFrameLocation(threadHandle.Value, 1, out _parentMethod, out _parentLocation));
+                    if (threadHandle.IsAlive)
+                    {
+                        jvmtiError error = environment.GetFrameLocation(threadHandle.Value, 0, out _lastMethod, out _lastLocation);
+                        if (error == jvmtiError.None)
+                            error = environment.GetFrameCount(threadHandle.Value, out _stackDepth);
+
+                        if (error == jvmtiError.None)
+                            _hasMethodInfo = true;
+
+                        if (error == jvmtiError.None && size == StepSize.Statement && (depth == StepDepth.Over || depth == StepDepth.Into))
+                        {
+                            byte[] bytecode;
+                            JvmtiErrorHandler.ThrowOnFailure(environment.GetBytecodes(_lastMethod, out bytecode));
+                            _disassembledMethod = BytecodeDisassembler.Disassemble(bytecode);
+
+                            TaggedReferenceTypeId declaringClass;
+                            JvmtiErrorHandler.ThrowOnFailure(environment.GetMethodDeclaringClass(nativeEnvironment, _lastMethod, out declaringClass));
+                            using (var classHandle = environment.VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, declaringClass.TypeId))
+                            {
+                                int constantPoolCount;
+                                byte[] data;
+                                JvmtiErrorHandler.ThrowOnFailure(environment.GetConstantPool(classHandle.Value, out constantPoolCount, out data));
+
+                                List<ConstantPoolEntry> entryList = new List<ConstantPoolEntry>();
+                                int currentPosition = 0;
+                                for (int i = 0; i < constantPoolCount - 1; i++)
+                                    entryList.Add(ConstantPoolEntry.FromBytes(data, ref currentPosition));
+
+                                _constantPool = entryList.ToArray();
+
+                                _evaluationStackDepths = BytecodeDisassembler.GetEvaluationStackDepths(_disassembledMethod, new ReadOnlyCollection<ConstantPoolEntry>(_constantPool));
+                            }
+                        }
+                    }
                 }
             }
 
-            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
+            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, EventProcessor processor, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
-                if (!base.ProcessEvent(environment, nativeEnvironment, thread, @class, location))
+                if (!base.ProcessEvent(environment, nativeEnvironment, processor, thread, @class, location))
                     return false;
 
-                if (_depth == StepDepth.Into)
+                // Step Out is implemented with Frame Pop events set at the correct depth
+                if (_depth == StepDepth.Out)
                     return true;
 
                 using (var threadHandle = environment.VirtualMachine.GetLocalReferenceForThread(nativeEnvironment, thread))
                 {
-                    if (_depth == StepDepth.Over)
-                    {
-                        if (location.Value.Method != (MethodId)_lastMethod && location.Value.Method != (MethodId)_parentMethod)
-                            return false;
-                    }
-                    else if (_depth == StepDepth.Out)
-                    {
-                        if (location.Value.Method != (MethodId)_parentMethod)
-                            return false;
-                    }
-
                     int stackDepth;
                     JvmtiErrorHandler.ThrowOnFailure(environment.GetFrameCount(threadHandle.Value, out stackDepth));
 
-                    if (_depth == StepDepth.Over)
+                    if (_depth == StepDepth.Over && _hasMethodInfo && stackDepth > _stackDepth)
                     {
-                        if (stackDepth > _stackDepth)
+                        if (_depth == StepDepth.Into)
+                            return true;
+
+                        if (!_convertedToFramePop)
+                        {
+                            /*
+                             * change this to a Frame Pop event if we're not in a native frame
+                             */
+
+                            bool native;
+                            JvmtiErrorHandler.ThrowOnFailure(environment.IsMethodNative(location.Value.Method, out native));
+                            if (!native)
+                            {
+                                // remove the single step event
+                                JvmtiErrorHandler.ThrowOnFailure((jvmtiError)processor.ClearEventInternal(EventKind.SingleStep, this.RequestId));
+                                // set an actual step filter to respond when the thread arrives back in this frame
+                                JvmtiErrorHandler.ThrowOnFailure((jvmtiError)processor.SetEventInternal(environment, nativeEnvironment, EventKind.FramePop, this));
+                                _convertedToFramePop = true;
+                            }
+
                             return false;
+                        }
+                        else
+                        {
+                            _convertedToFramePop = false;
+                            return true;
+                        }
                     }
-                    else if (_depth == StepDepth.Out)
+                    else if (stackDepth == _stackDepth && _size == StepSize.Statement && _disassembledMethod != null)
                     {
-                        if (stackDepth >= _stackDepth)
+                        int instructionIndex = _disassembledMethod.Instructions.FindIndex(i => (uint)i.Offset == location.Value.Index);
+                        if (instructionIndex >= 0 && _evaluationStackDepths != null && (_evaluationStackDepths[instructionIndex] ?? 0) != 0)
+                        {
                             return false;
+                        }
+                        else if (instructionIndex >= 0 && _disassembledMethod.Instructions[instructionIndex].OpCode.FlowControl == JavaFlowControl.Branch)
+                        {
+                            // follow branch instructions before stopping
+                            return false;
+                        }
                     }
 
                     _stackDepth = stackDepth;

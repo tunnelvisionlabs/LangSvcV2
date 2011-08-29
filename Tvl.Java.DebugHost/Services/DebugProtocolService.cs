@@ -8,6 +8,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.ExceptionServices;
+    using Tvl.Collections;
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Reentrant, IncludeExceptionDetailInFaults = true)]
     public partial class DebugProtocolService : IDebugProtocolService
@@ -1224,7 +1225,7 @@
             if (error != jvmtiError.None)
                 return GetStandardError(error);
 
-            return _eventProcessor.SetEvent(environment, nativeEnvironment, eventKind, suspendPolicy, modifiers, out requestId);
+            return _eventProcessor.SetEvent(environment, nativeEnvironment, eventKind, suspendPolicy, new ImmutableList<EventRequestModifier>(modifiers), false, out requestId);
         }
 
         public Error ClearEvent(EventKind eventKind, RequestId requestId)

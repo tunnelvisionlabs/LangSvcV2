@@ -42,6 +42,7 @@
                     | jvmtiCapabilities.CapabilityFlags1.CanGenerateSingleStepEvents
                     | jvmtiCapabilities.CapabilityFlags1.CanGenerateExceptionEvents
                     | jvmtiCapabilities.CapabilityFlags1.CanGenerateBreakpointEvents
+                    | jvmtiCapabilities.CapabilityFlags1.CanGenerateFramePopEvents
                     | jvmtiCapabilities.CapabilityFlags1.CanGetBytecodes
                     | jvmtiCapabilities.CapabilityFlags1.CanSuspend,
                     jvmtiCapabilities.CapabilityFlags2.CanGetConstantPool
@@ -675,6 +676,19 @@
         public jvmtiError GetMethodModifiers(MethodId methodId, out JvmAccessModifiers modifiers)
         {
             return RawInterface.GetMethodModifiers(this, (jmethodID)methodId, out modifiers);
+        }
+
+        public jvmtiError IsMethodNative(MethodId methodId, out bool result)
+        {
+            result = false;
+
+            byte native;
+            jvmtiError error = RawInterface.IsMethodNative(this, methodId, out native);
+            if (error != jvmtiError.None)
+                return error;
+
+            result = native != 0;
+            return jvmtiError.None;
         }
 
         public jvmtiError GetBytecodes(MethodId methodId, out byte[] bytecode)

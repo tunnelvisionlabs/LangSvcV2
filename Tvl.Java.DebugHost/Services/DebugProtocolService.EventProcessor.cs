@@ -1,5 +1,6 @@
 ﻿namespace Tvl.Java.DebugHost.Services
 {
+    using Interlocked = System.Threading.Interlocked;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -10,10 +11,15 @@
     using Marshal = System.Runtime.InteropServices.Marshal;
     using System.Windows.Threading;
     using ManualResetEventSlim = System.Threading.ManualResetEventSlim;
+    using MessageBox = System.Windows.Forms.MessageBox;
+    using MessageBoxButtons = System.Windows.Forms.MessageBoxButtons;
+    using MessageBoxDefaultButton = System.Windows.Forms.MessageBoxDefaultButton;
+    using MessageBoxIcon = System.Windows.Forms.MessageBoxIcon;
+    using Tvl.Collections;
 
     partial class DebugProtocolService
     {
-        private class EventProcessor
+        internal class EventProcessor
         {
             private readonly DebugProtocolService _service;
             private readonly jvmtiEventCallbacks _eventCallbacks;
@@ -177,17 +183,85 @@
                 _service.Environment.SetEventCallbacks(default(jvmtiEventCallbacks));
             }
 
-            public Error SetEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, EventKind eventKind, SuspendPolicy suspendPolicy, EventRequestModifier[] modifiers, out RequestId requestId)
+            public Error SetEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, EventKind eventKind, SuspendPolicy suspendPolicy, ImmutableList<EventRequestModifier> modifiers, bool internalRequest, out RequestId requestId)
             {
+                Contract.Requires<ArgumentNullException>(modifiers != null, "modifiers");
+
                 requestId = default(RequestId);
 
+                EventKind internalEventKind = eventKind;
+
                 EventRequestModifier locationModifier = default(EventRequestModifier);
-                if (eventKind == EventKind.Breakpoint)
+                EventRequestModifier stepModifier = default(EventRequestModifier);
+
+                switch (eventKind)
                 {
+                case EventKind.Breakpoint:
                     // we're going to need the location modifier to set the breakpoint
-                    locationModifier = modifiers.FirstOrDefault(i => i.Kind == ModifierKind.LocationFilter);
-                    if (locationModifier.Kind != ModifierKind.LocationFilter)
+                    if (modifiers.Count == 0 || modifiers[0].Kind != ModifierKind.LocationFilter)
                         return Error.IllegalArgument;
+
+                    locationModifier = modifiers[0];
+                    break;
+
+                case EventKind.SingleStep:
+                    // the first modifier contains the step properties
+                    if (modifiers.Count == 0 || modifiers[0].Kind != ModifierKind.Step)
+                        return Error.IllegalArgument;
+
+                    stepModifier = modifiers[0];
+                    if (stepModifier.StepDepth == StepDepth.Out)
+                    {
+                        // we want to attach the filter as a frame pop request instead of a step request
+                        eventKind = EventKind.FramePop;
+                        internalEventKind = EventKind.SingleStep;
+                    }
+
+                    break;
+
+                default:
+                    break;
+                }
+
+                requestId = new RequestId(Interlocked.Increment(ref _nextRequestId));
+                if (internalRequest)
+                    requestId = new RequestId(-requestId.Id);
+
+                EventFilter filter = EventFilter.CreateFilter(internalEventKind, environment, nativeEnvironment, requestId, suspendPolicy, modifiers);
+                return SetEventInternal(environment, nativeEnvironment, eventKind, filter);
+            }
+
+            public Error SetEventInternal(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, EventKind eventKind, EventFilter filter)
+            {
+                EventRequestModifier locationModifier = default(EventRequestModifier);
+                EventRequestModifier stepModifier = default(EventRequestModifier);
+
+                switch (eventKind)
+                {
+                case EventKind.Breakpoint:
+                    // we're going to need the location modifier to set the breakpoint
+                    if (filter.Modifiers.Count == 0 || filter.Modifiers[0].Kind != ModifierKind.LocationFilter)
+                        return Error.IllegalArgument;
+
+                    locationModifier = filter.Modifiers[0];
+                    break;
+
+                case EventKind.SingleStep:
+                    // the first modifier contains the step properties
+                    if (filter.Modifiers.Count == 0 || filter.Modifiers[0].Kind != ModifierKind.Step)
+                        return Error.IllegalArgument;
+
+                    stepModifier = filter.Modifiers[0];
+                    break;
+
+                case EventKind.FramePop:
+                    if (filter.InternalEventKind == EventKind.SingleStep)
+                        goto case EventKind.SingleStep;
+
+                    break;
+
+                default:
+                    break;
                 }
 
                 lock (_eventRequests)
@@ -199,9 +273,7 @@
                         _eventRequests.Add(eventKind, requests);
                     }
 
-                    requestId = new RequestId(_nextRequestId++);
-                    EventFilter filter = EventFilter.CreateFilter(environment, nativeEnvironment, requestId, suspendPolicy, modifiers);
-                    requests.Add(requestId, filter);
+                    requests.Add(filter.RequestId, filter);
                     if (requests.Count == 1)
                     {
                         JvmEventType? eventToEnable = GetJvmEventType(eventKind);
@@ -213,14 +285,38 @@
                     }
                 }
 
-                if (eventKind == EventKind.Breakpoint)
+                switch (eventKind)
                 {
-                    Contract.Assert(locationModifier.Kind == ModifierKind.LocationFilter);
-                    jmethodID methodId = locationModifier.Location.Method;
-                    jlocation location = new jlocation((long)locationModifier.Location.Index);
-                    jvmtiError error = Environment.SetBreakpoint(methodId, location);
-                    if (error != jvmtiError.None)
-                        return GetStandardError(error);
+                case EventKind.Breakpoint:
+                    {
+                        Contract.Assert(locationModifier.Kind == ModifierKind.LocationFilter);
+                        jmethodID methodId = locationModifier.Location.Method;
+                        jlocation location = new jlocation((long)locationModifier.Location.Index);
+                        jvmtiError error = Environment.SetBreakpoint(methodId, location);
+                        if (error != jvmtiError.None)
+                            return GetStandardError(error);
+
+                        break;
+                    }
+
+                case EventKind.FramePop:
+                    if (filter.InternalEventKind == EventKind.SingleStep)
+                    {
+                        using (var thread = VirtualMachine.GetLocalReferenceForThread(nativeEnvironment, stepModifier.Thread))
+                        {
+                            if (!thread.IsAlive)
+                                return Error.InvalidThread;
+
+                            jvmtiError error = environment.RawInterface.NotifyFramePop(environment, thread.Value, 0);
+                            if (error != jvmtiError.None)
+                                return GetStandardError(error);
+                        }
+                    }
+
+                    break;
+
+                default:
+                    break;
                 }
 
                 return Error.None;
@@ -228,6 +324,25 @@
 
             public Error ClearEvent(EventKind eventKind, RequestId requestId)
             {
+                if (eventKind == EventKind.SingleStep)
+                {
+                    // this event might also be registered as a frame pop event with the same request ID
+                    Error error = ClearEventInternal(EventKind.FramePop, requestId);
+                    if (error != Error.None)
+                        return error;
+                }
+
+                return ClearEventInternal(eventKind, requestId);
+            }
+
+            public Error ClearEventInternal(EventKind eventKind, RequestId requestId)
+            {
+                if (eventKind == EventKind.SingleStep)
+                {
+                    // this event might also be registered as a frame pop event with the same request ID
+                    ClearEventInternal(EventKind.FramePop, requestId);
+                }
+
                 lock (_eventRequests)
                 {
                     Dictionary<RequestId, EventFilter> requests;
@@ -393,7 +508,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.VirtualMachineStart);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(environment, nativeEnvironment, threadId, default(TaggedReferenceTypeId), default(Location?)))
+                    if (filter.ProcessEvent(environment, nativeEnvironment, this, threadId, default(TaggedReferenceTypeId), default(Location?)))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                         Callback.VirtualMachineStart(filter.SuspendPolicy, filter.RequestId, threadId);
@@ -481,7 +596,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.VirtualMachineDeath);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(environment, nativeEnvironment, default(ThreadId), default(TaggedReferenceTypeId), default(Location?)))
+                    if (filter.ProcessEvent(environment, nativeEnvironment, this, default(ThreadId), default(TaggedReferenceTypeId), default(Location?)))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, default(ThreadId));
                         Callback.VirtualMachineDeath(filter.SuspendPolicy, filter.RequestId);
@@ -526,7 +641,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.ThreadStart);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(environment, nativeEnvironment, threadId, default(TaggedReferenceTypeId), default(Location?)))
+                    if (filter.ProcessEvent(environment, nativeEnvironment, this, threadId, default(TaggedReferenceTypeId), default(Location?)))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                         Callback.ThreadStart(filter.SuspendPolicy, filter.RequestId, threadId);
@@ -561,7 +676,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.ThreadEnd);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(environment, nativeEnvironment, threadId, default(TaggedReferenceTypeId), default(Location?)))
+                    if (filter.ProcessEvent(environment, nativeEnvironment, this, threadId, default(TaggedReferenceTypeId), default(Location?)))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                         Callback.ThreadDeath(filter.SuspendPolicy, filter.RequestId, threadId);
@@ -676,7 +791,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.ClassPrepare);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(environment, nativeEnvironment, threadId, classId, default(Location?)))
+                    if (filter.ProcessEvent(environment, nativeEnvironment, this, threadId, classId, default(Location?)))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                         Callback.ClassPrepare(filter.SuspendPolicy, filter.RequestId, threadId, classId.TypeTag, classId.TypeId, signature, classStatus);
@@ -771,18 +886,6 @@
 
             private void HandleSingleStep(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID methodId, jlocation jlocation)
             {
-                //if (!VirtualMachine.IsAgentThread.Value)
-                //{
-                //    // ignore events before VMInit
-                //    if (AgentEventDispatcher == null)
-                //        return;
-
-                //    // dispatch this call to an agent thread
-                //    Action<jvmtiEnvHandle, JNIEnvHandle, jthread, jmethodID, jlocation> invokeMethod = HandleSingleStep;
-                //    AgentEventDispatcher.Invoke(invokeMethod, env, jniEnv, threadHandle, methodId, jlocation);
-                //    return;
-                //}
-
                 JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(_service.VirtualMachine, env);
                 JniEnvironment nativeEnvironment = JniEnvironment.GetOrCreateInstance(jniEnv);
 
@@ -797,7 +900,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.SingleStep);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(environment, nativeEnvironment, threadId, default(TaggedReferenceTypeId), location))
+                    if (filter.ProcessEvent(environment, nativeEnvironment, this, threadId, default(TaggedReferenceTypeId), location))
                     {
                         SendSingleStepEvent(environment, filter, threadId, location);
                     }
@@ -827,6 +930,50 @@
 
             private void HandleFramePop(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID methodId, bool wasPoppedByException)
             {
+                try
+                {
+                    JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(_service.VirtualMachine, env);
+                    JniEnvironment nativeEnvironment = JniEnvironment.GetOrCreateInstance(jniEnv);
+
+                    TaggedReferenceTypeId declaringClass;
+                    MethodId method = new MethodId(methodId.Handle);
+                    jlocation jlocation;
+                    JvmtiErrorHandler.ThrowOnFailure(environment.GetFrameLocation(threadHandle, 1, out methodId, out jlocation));
+                    ulong index = (ulong)jlocation.Value;
+                    JvmtiErrorHandler.ThrowOnFailure(environment.GetMethodDeclaringClass(nativeEnvironment, method, out declaringClass));
+                    Location location = new Location(declaringClass, method, index);
+
+                    ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, true);
+
+                    EventFilter[] filters = GetEventFilters(EventKind.FramePop);
+                    foreach (var filter in filters)
+                    {
+                        if (filter.ProcessEvent(environment, nativeEnvironment, this, threadId, default(TaggedReferenceTypeId), location))
+                        {
+                            if (filter.InternalEventKind == EventKind.SingleStep)
+                            {
+                                // remove the frame pop event
+                                JvmtiErrorHandler.ThrowOnFailure((jvmtiError)ClearEventInternal(EventKind.FramePop, filter.RequestId));
+                                // set an actual step filter to respond when the thread arrives in the parent frame
+                                JvmtiErrorHandler.ThrowOnFailure((jvmtiError)SetEventInternal(environment, nativeEnvironment, EventKind.SingleStep, filter));
+                            }
+                            else
+                            {
+                                SendFramePopEvent(environment, filter, threadId, location, wasPoppedByException);
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    string caption = "Exception while handling a frame pop event";
+                    System.Windows.Forms.MessageBox.Show(e.Message + System.Environment.NewLine + System.Environment.NewLine + e.StackTrace, caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                    throw;
+                }
+            }
+
+            private void SendFramePopEvent(JvmtiEnvironment environment, EventFilter filter, ThreadId threadId, Location location, bool wasPoppedByException)
+            {
                 if (!VirtualMachine.IsAgentThread.Value)
                 {
                     // ignore events before VMInit
@@ -834,19 +981,19 @@
                         return;
 
                     // dispatch this call to an agent thread
-                    Action<jvmtiEnvHandle, JNIEnvHandle, jthread, jmethodID, bool> method = HandleFramePop;
-                    AgentEventDispatcher.Invoke(method, env, jniEnv, threadHandle, methodId, wasPoppedByException);
+                    Action<JvmtiEnvironment, EventFilter, ThreadId, Location, bool> invokeMethod = SendFramePopEvent;
+                    AgentEventDispatcher.Invoke(invokeMethod, environment, filter, threadId, location, wasPoppedByException);
                     return;
                 }
 
-                //JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-                //JvmThreadReference thread = JvmThreadReference.FromHandle(environment, jniEnv, threadHandle, true);
-                //JvmMethod method = new JvmMethod(environment, methodId);
+                JniEnvironment nativeEnvironment;
+                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, true));
 
-                //foreach (var processor in _processors)
-                //{
-                //    processor.HandleFramePop(environment, thread, method, wasPoppedByException);
-                //}
+                if (filter.InternalEventKind == EventKind.SingleStep)
+                {
+                    ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
+                    Callback.SingleStep(filter.SuspendPolicy, filter.RequestId, threadId, location);
+                }
             }
 
             private void HandleBreakpoint(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID methodId, jlocation jlocation)
@@ -878,7 +1025,7 @@
                 EventFilter[] filters = GetEventFilters(EventKind.Breakpoint);
                 foreach (var filter in filters)
                 {
-                    if (filter.ProcessEvent(environment, nativeEnvironment, threadId, default(TaggedReferenceTypeId), location))
+                    if (filter.ProcessEvent(environment, nativeEnvironment, this, threadId, default(TaggedReferenceTypeId), location))
                     {
                         ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                         Callback.Breakpoint(filter.SuspendPolicy, filter.RequestId, threadId, location);

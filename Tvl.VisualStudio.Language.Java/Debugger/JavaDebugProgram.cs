@@ -716,8 +716,6 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
                     return;
                 }
             }
-
-            throw new NotImplementedException();
         }
 
         private void HandleBreakpoint(object sender, ThreadLocationEventArgs e)
