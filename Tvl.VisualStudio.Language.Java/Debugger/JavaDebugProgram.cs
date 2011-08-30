@@ -668,7 +668,7 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
                 JavaDebugThread thread = new JavaDebugThread(this, threads[i], mainThread ? ThreadCategory.Main : ThreadCategory.Worker);
                 lock (this._threads)
                 {
-                    this._threads[threads[i].GetUniqueId()] = thread;
+                    this._threads.Add(threads[i].GetUniqueId(), thread);
                 }
 
                 debugEvent = new DebugThreadCreateEvent(enum_EVENTATTRIBUTES.EVENT_ASYNCHRONOUS);
@@ -789,10 +789,30 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
         private void HandleThreadStart(object sender, ThreadEventArgs e)
         {
+            // nothing to do if this thread is already started
+            if (this._threads.ContainsKey(e.Thread.GetUniqueId()))
+            {
+                switch (e.SuspendPolicy)
+                {
+                case SuspendPolicy.All:
+                    Task.Factory.StartNew(e.VirtualMachine.Resume).HandleNonCriticalExceptions();
+                    break;
+
+                case SuspendPolicy.EventThread:
+                    Task.Factory.StartNew(e.Thread.Resume).HandleNonCriticalExceptions();
+                    break;
+
+                case SuspendPolicy.None:
+                    break;
+                }
+
+                return;
+            }
+
             JavaDebugThread thread = new JavaDebugThread(this, e.Thread, ThreadCategory.Worker);
             lock (this._threads)
             {
-                this._threads[e.Thread.GetUniqueId()] = thread;
+                this._threads.Add(e.Thread.GetUniqueId(), thread);
             }
 
             DebugEvent debugEvent = new DebugThreadCreateEvent(GetAttributesForEvent(e));
