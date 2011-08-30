@@ -298,6 +298,9 @@
                 if (method.GetIsNative())
                     continue;
 
+                if (method.GetIsAbstract())
+                    continue;
+
                 locations.AddRange(method.GetLocationsOfLine(stratum, sourceName, lineNumber));
             }
 
