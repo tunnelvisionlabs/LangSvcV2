@@ -338,7 +338,8 @@
                     break;
 
                 case JavaFlowControl.Throw:
-                    throw new NotImplementedException();
+                    // 'catch' blocks are handled separately
+                    break;
 
                 case JavaFlowControl.Meta:
                     throw new NotImplementedException();
