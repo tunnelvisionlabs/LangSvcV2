@@ -77,23 +77,29 @@
             foreach (var path in validPaths)
             {
                 TextSpan range = RequestLocation.DocumentPosition.GetRange();
-                ReadOnlyCollection<ILocation> locations = type.GetLocationsOfLine(range.iStartLine + 1);
-                ILocation bindLocation = locations.OrderBy(i => i.GetCodeIndex()).FirstOrDefault();
-                if (bindLocation != null)
+                try
                 {
-                    IEventRequestManager eventRequestManager = virtualMachine.GetEventRequestManager();
+                    ReadOnlyCollection<ILocation> locations = type.GetLocationsOfLine(range.iStartLine + 1);
+                    ILocation bindLocation = locations.OrderBy(i => i.GetCodeIndex()).FirstOrDefault();
+                    if (bindLocation != null)
+                    {
+                        IEventRequestManager eventRequestManager = virtualMachine.GetEventRequestManager();
 
-                    IBreakpointRequest eventRequest = eventRequestManager.CreateBreakpointRequest(bindLocation);
-                    eventRequest.SuspendPolicy = SuspendPolicy.All;
+                        IBreakpointRequest eventRequest = eventRequestManager.CreateBreakpointRequest(bindLocation);
+                        eventRequest.SuspendPolicy = SuspendPolicy.All;
 
-                    JavaDebugCodeContext codeContext = new JavaDebugCodeContext(program, bindLocation);
-                    BreakpointResolutionLocationCode location = new BreakpointResolutionLocationCode(codeContext);
-                    DebugBreakpointResolution resolution = new DebugBreakpointResolution(program, thread, enum_BP_TYPE.BPT_CODE, location);
-                    JavaDebugBoundBreakpoint boundBreakpoint = new JavaDebugBoundBreakpoint(this, program, eventRequest, resolution);
-                    if (!_disabled)
-                        boundBreakpoint.Enable(1);
+                        JavaDebugCodeContext codeContext = new JavaDebugCodeContext(program, bindLocation);
+                        BreakpointResolutionLocationCode location = new BreakpointResolutionLocationCode(codeContext);
+                        DebugBreakpointResolution resolution = new DebugBreakpointResolution(program, thread, enum_BP_TYPE.BPT_CODE, location);
+                        JavaDebugBoundBreakpoint boundBreakpoint = new JavaDebugBoundBreakpoint(this, program, eventRequest, resolution);
+                        if (!_disabled)
+                            boundBreakpoint.Enable(1);
 
-                    boundBreakpoints.Add(boundBreakpoint);
+                        boundBreakpoints.Add(boundBreakpoint);
+                    }
+                }
+                catch (MissingInformationException)
+                {
                 }
             }
 
