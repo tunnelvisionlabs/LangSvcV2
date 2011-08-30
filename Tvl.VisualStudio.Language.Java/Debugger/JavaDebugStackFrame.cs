@@ -328,24 +328,36 @@
 
                     ReadOnlyCollection<string> argumentTypeNames = method.GetArgumentTypeNames();
                     ReadOnlyCollection<ILocalVariable> arguments = null;
-                    for (int i = 0; i < argumentTypeNames.Count; i++)
+                    int firstArgument = method.GetIsStatic() ? 0 : 1;
+                    for (int i = firstArgument; i < argumentTypeNames.Count; i++)
                     {
                         List<string> argumentParts = new List<string>();
 
-                        if (argsArgumentTypes)
-                            argumentParts.Add(argumentTypeNames[i]);
+                        if (funcNameArgumentTypes)
+                        {
+                            string argumentType = argumentTypeNames[i];
+                            if (argumentType.Substring(0, argumentType.LastIndexOf('.') + 1) == "java.lang.")
+                                argumentType = argumentType.Substring("java.lang.".Length);
 
-                        //if (argsArgumentNames)
-                        //{
-                        //    arguments = arguments ?? method.GetArguments();
-                        //    argumentParts.Add(arguments[i].GetName());
-                        //}
+                            argumentParts.Add(argumentType);
+                        }
 
-                        if (i > 0)
+                        if (funcNameArgumentNames)
+                        {
+                            arguments = arguments ?? method.GetArguments();
+                            argumentParts.Add(arguments[i].GetName());
+                        }
+
+                        if (i > firstArgument)
                             frameInfo.m_bstrFuncName += ", ";
 
                         frameInfo.m_bstrFuncName += string.Join(" ", argumentParts);
                     }
+
+                    if (funcNameArgumentNames)
+                        frameInfo.m_dwValidFields |= enum_FRAMEINFO_FLAGS.FIF_ARGS_NAMES;
+                    if (funcNameArgumentTypes)
+                        frameInfo.m_dwValidFields |= enum_FRAMEINFO_FLAGS.FIF_FUNCNAME_ARGS_TYPES;
 
                     frameInfo.m_bstrFuncName += ")";
                 }
