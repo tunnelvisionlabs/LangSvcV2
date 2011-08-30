@@ -127,7 +127,7 @@
                 break;
 
             case Error.AbsentInformation:
-                break;
+                throw new MissingInformationException();
 
             case Error.InvalidEventType:
                 break;
