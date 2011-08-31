@@ -1,6 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Project.PropertyPages
 {
     using System;
+    using CommandLineBuilder = Microsoft.Build.Utilities.CommandLineBuilder;
     using Path = System.IO.Path;
 
     public partial class JavaDebugPropertyPagePanel : JavaPropertyPagePanel
@@ -14,6 +15,7 @@
             : base(parentPropertyPage)
         {
             InitializeComponent();
+            UpdateStates();
             RefreshCommandLine();
         }
 
@@ -25,29 +27,82 @@
             }
         }
 
-        public string ProjectFolder
+        public StartAction StartAction
         {
             get
             {
-                return txtStartupExe.RootFolder;
+                if (btnStartClass.Checked)
+                    return StartAction.Class;
+                else if (btnStartProgram.Checked)
+                    return StartAction.Program;
+                else if (btnStartBrowser.Checked)
+                    return StartAction.Browser;
+                else
+                    return StartAction.Unknown;
             }
 
             set
             {
-                txtStartupExe.RootFolder = value;
+                switch (value)
+                {
+                case StartAction.Class:
+                    btnStartClass.Checked = true;
+                    break;
+
+                case StartAction.Program:
+                    btnStartProgram.Checked = true;
+                    break;
+
+                case StartAction.Browser:
+                    btnStartBrowser.Checked = true;
+                    break;
+
+                case StartAction.Unknown:
+                default:
+                    btnStartClass.Checked = false;
+                    btnStartProgram.Checked = false;
+                    btnStartBrowser.Checked = false;
+                    break;
+                }
             }
         }
 
-        public string StartExecutable
+        public string StartClass
         {
             get
             {
-                return txtStartupExe.Text;
+                return txtStartClass.Text;
             }
 
             set
             {
-                txtStartupExe.Text = value;
+                txtStartClass.Text = value;
+            }
+        }
+
+        public string StartProgram
+        {
+            get
+            {
+                return txtStartProgram.Text;
+            }
+
+            set
+            {
+                txtStartProgram.Text = value;
+            }
+        }
+
+        public string StartBrowserUrl
+        {
+            get
+            {
+                return txtStartBrowser.Text;
+            }
+
+            set
+            {
+                txtStartBrowser.Text = value;
             }
         }
 
@@ -64,59 +119,111 @@
             }
         }
 
-        public string FullExecutablePath
+        public string WorkingDirectory
         {
             get
             {
-                string ucc = StartExecutable;
-                if (string.IsNullOrEmpty(ucc))
-                    return string.Empty;
+                return txtWorkingDirectory.Text;
+            }
 
-                try
-                {
-                    string fullucc = ucc;
-                    if (!Path.IsPathRooted(fullucc) && ParentPropertyPage.ProjectManager != null)
-                        fullucc = Path.Combine(ParentPropertyPage.ProjectManager.ProjectFolder, ucc);
-
-                    return Path.GetFullPath(fullucc);
-                }
-                catch (ArgumentException)
-                {
-                    return string.Empty;
-                }
+            set
+            {
+                txtWorkingDirectory.Text = value;
             }
         }
 
-        public string CommandLine
+        public bool UseRemoteMachine
         {
             get
             {
-                string line = string.Empty;
-                string fullpath = FullExecutablePath;
-                if (string.IsNullOrEmpty(fullpath))
-                    fullpath = StartExecutable;
+                return chkUseRemoteMachine.Checked;
+            }
 
-                line = "\"" + fullpath + "\"";
+            set
+            {
+                chkUseRemoteMachine.Checked = value;
+            }
+        }
 
-                if (!string.IsNullOrEmpty(ExtraArguments))
-                    line += " " + ExtraArguments;
+        public string RemoteMachineName
+        {
+            get
+            {
+                return txtRemoteMachine.Text;
+            }
 
-                return line;
+            set
+            {
+                txtRemoteMachine.Text = value;
+            }
+        }
+
+        public string VirtualMachineArguments
+        {
+            get
+            {
+                return txtJvmArguments.Text;
+            }
+
+            set
+            {
+                txtJvmArguments.Text = value;
             }
         }
 
         private void RefreshCommandLine()
         {
-            txtCommandLine.Text = CommandLine;
+            CommandLineBuilder commandLine = new CommandLineBuilder();
+
+            if (!string.IsNullOrEmpty(VirtualMachineArguments))
+                commandLine.AppendTextUnquoted(VirtualMachineArguments);
+
+            switch (StartAction)
+            {
+            case StartAction.Class:
+                commandLine.AppendFileNameIfNotNull(JavaProjectPackage.FindJavaPath(false));
+
+                if (!string.IsNullOrEmpty(StartClass))
+                    commandLine.AppendFileNameIfNotNull(StartClass);
+
+                break;
+
+            case StartAction.Program:
+            case StartAction.Browser:
+                throw new NotSupportedException();
+
+            case StartAction.Unknown:
+            default:
+                break;
+            }
+
+            if (!string.IsNullOrEmpty(ExtraArguments))
+                commandLine.AppendTextUnquoted(ExtraArguments);
+
+            txtCommandLine.Text = commandLine.ToString();
         }
 
-        private void HandleStartupExeTextChanged(object sender, EventArgs e)
+        private void UpdateStates()
+        {
+            // some options are not supported right now
+            btnStartProgram.Enabled = false;
+            txtStartProgram.Enabled = false;
+            btnStartBrowser.Enabled = false;
+            txtStartBrowser.Enabled = false;
+            chkUseRemoteMachine.Enabled = false;
+            txtRemoteMachine.Enabled = false;
+
+            txtStartClass.Enabled = btnStartClass.Checked;
+        }
+
+        private void HandleStateAffectingChange(object sender, EventArgs e)
         {
             ParentPropertyPage.IsDirty = true;
+            UpdateStates();
             RefreshCommandLine();
         }
 
-        private void HandleExtraOptionsTextChanged(object sender, EventArgs e)
+        private void HandleCommandLineAffectingChange(object sender, EventArgs e)
         {
             ParentPropertyPage.IsDirty = true;
             RefreshCommandLine();

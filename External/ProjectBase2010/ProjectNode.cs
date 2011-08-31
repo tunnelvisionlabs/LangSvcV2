@@ -37,6 +37,7 @@ using MSBuildExecution = Microsoft.Build.Execution;
 using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
 using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
 using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+using System.Diagnostics.Contracts;
 
 namespace Microsoft.VisualStudio.Project
 {
@@ -979,7 +980,7 @@ namespace Microsoft.VisualStudio.Project
         /// <summary>
         /// Defines the build engine that is used to build the project file.
         /// </summary>
-        internal MSBuild.ProjectCollection BuildEngine
+        public MSBuild.ProjectCollection BuildEngine
         {
             get
             {
@@ -1210,7 +1211,7 @@ namespace Microsoft.VisualStudio.Project
             {
                 if (folderMap != null &&
                     folderMap.Count > 0 &&
-                    String.Equals(buildItem.ItemType, ProjectFileConstants.Folder, StringComparison.OrdinalIgnoreCase))
+                    IsFolderItem(buildItem))
                 {
                     string relativePath = buildItem.EvaluatedInclude;
                     if (Path.IsPathRooted(relativePath)) // if not the relative path, make it relative
@@ -1504,7 +1505,7 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         /// <param name="buildItem">BuildItem to be checked.</param>
         /// <returns>Returns true if the buildItem is a file item, false otherwise.</returns>
-        private static bool IsFileItem(MSBuild.ProjectItem buildItem)
+        public virtual bool IsFileItem(MSBuild.ProjectItem buildItem)
         {
             if (buildItem == null)
             {
@@ -1524,24 +1525,20 @@ namespace Microsoft.VisualStudio.Project
             {
                 isFileItem = true;
             }
-            else if (String.Equals(buildItem.ItemType, "Config", StringComparison.OrdinalIgnoreCase))
-            {
-                isFileItem = true;
-            }
-            else if (String.Equals(buildItem.ItemType, "ConfigTemplate", StringComparison.OrdinalIgnoreCase))
-            {
-                isFileItem = true;
-            }
-            else if (String.Equals(buildItem.ItemType, "Localization", StringComparison.OrdinalIgnoreCase))
-            {
-                isFileItem = true;
-            }
-            else if (String.Equals(buildItem.ItemType, "None", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(buildItem.ItemType, ProjectFileConstants.None, StringComparison.OrdinalIgnoreCase))
             {
                 isFileItem = true;
             }
 
             return isFileItem;
+        }
+
+        public virtual bool IsFolderItem(MSBuild.ProjectItem buildItem)
+        {
+            if (string.Equals(buildItem.ItemType, ProjectFileConstants.Folder, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return false;
         }
 
         /// <summary>
@@ -3131,7 +3128,7 @@ namespace Microsoft.VisualStudio.Project
                 // folder does not exist yet...
                 // We could be in the process of loading so see if msbuild knows about it
                 ProjectElement item = null;
-                foreach (MSBuild.ProjectItem folder in buildProject.GetItems(ProjectFileConstants.Folder))
+                foreach (MSBuild.ProjectItem folder in buildProject.Items.Where(IsFolderItem))
                 {
                     if (String.Equals(folder.EvaluatedInclude.TrimEnd('\\'), path.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase))
                     {
@@ -3915,27 +3912,55 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>A Projectelement describing the newly added file.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "ToMs")]
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ms")]
-        protected internal virtual ProjectElement AddFileToMsBuild(string file)
+        protected internal ProjectElement AddFileToMsBuild(string file)
         {
+            Contract.Requires<ArgumentNullException>(file != null, "file");
+            Contract.Requires<ArgumentException>(!String.IsNullOrEmpty(file));
+            Contract.Ensures(Contract.Result<ProjectElement>() != null);
+
+            string itemPath = PackageUtilities.MakeRelativeIfRooted(file, this.BaseURI);
+            Contract.Assert(!Path.IsPathRooted(itemPath), "Cannot add item with full path.");
+
             ProjectElement newItem;
+
+            if (this.IsCodeFile(itemPath))
+            {
+                newItem = AddFileToMsBuild(file, ProjectFileConstants.Compile, ProjectFileAttributeValue.Code);
+            }
+            else if (this.IsEmbeddedResource(itemPath))
+            {
+                newItem = AddFileToMsBuild(file, ProjectFileConstants.EmbeddedResource, null);
+            }
+            else
+            {
+                newItem = AddFileToMsBuild(file, ProjectFileConstants.Content, ProjectFileConstants.Content);
+            }
+
+            return newItem;
+        }
+
+
+        /// <summary>
+        /// Adds a file to the msbuild project.
+        /// </summary>
+        /// <param name="file">The file to be added.</param>
+        /// <returns>A Projectelement describing the newly added file.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "ToMs")]
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ms")]
+        protected internal virtual ProjectElement AddFileToMsBuild(string file, string itemType, string subType)
+        {
+            Contract.Requires<ArgumentNullException>(file != null, "file");
+            Contract.Requires<ArgumentNullException>(itemType != null, "itemType");
+            Contract.Requires<ArgumentException>(!String.IsNullOrEmpty(file));
+            Contract.Requires<ArgumentException>(!String.IsNullOrEmpty(itemType));
+            Contract.Ensures(Contract.Result<ProjectElement>() != null);
 
             string itemPath = PackageUtilities.MakeRelativeIfRooted(file, this.BaseURI);
             Debug.Assert(!Path.IsPathRooted(itemPath), "Cannot add item with full path.");
 
-            if (this.IsCodeFile(itemPath))
-            {
-                newItem = this.CreateMsBuildFileItem(itemPath, ProjectFileConstants.Compile);
-                newItem.SetMetadata(ProjectFileConstants.SubType, ProjectFileAttributeValue.Code);
-            }
-            else if (this.IsEmbeddedResource(itemPath))
-            {
-                newItem = this.CreateMsBuildFileItem(itemPath, ProjectFileConstants.EmbeddedResource);
-            }
-            else
-            {
-                newItem = this.CreateMsBuildFileItem(itemPath, ProjectFileConstants.Content);
-                newItem.SetMetadata(ProjectFileConstants.SubType, ProjectFileConstants.Content);
-            }
+            ProjectElement newItem = this.CreateMsBuildFileItem(itemPath, itemType);
+            if (!string.IsNullOrEmpty(subType))
+                newItem.SetMetadata(ProjectFileConstants.SubType, subType);
 
             return newItem;
         }
@@ -3947,14 +3972,34 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>A Projectelement describing the newly added folder.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "ToMs")]
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ms")]
-        protected virtual ProjectElement AddFolderToMsBuild(string folder)
+        protected ProjectElement AddFolderToMsBuild(string folder)
         {
-            ProjectElement newItem;
+            Contract.Requires(folder != null);
+            Contract.Requires(!string.IsNullOrEmpty(folder));
+            Contract.Ensures(Contract.Result<ProjectElement>() != null);
+
+            return AddFolderToMsBuild(folder, ProjectFileConstants.Folder);
+        }
+
+        /// <summary>
+        /// Adds a folder to the msbuild project.
+        /// </summary>
+        /// <param name="folder">The folder to be added.</param>
+        /// <returns>A Projectelement describing the newly added folder.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "ToMs")]
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ms")]
+        protected virtual ProjectElement AddFolderToMsBuild(string folder, string itemType)
+        {
+            Contract.Requires<ArgumentNullException>(folder != null, "folder");
+            Contract.Requires<ArgumentNullException>(itemType != null, "itemType");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(folder));
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(itemType));
+            Contract.Ensures(Contract.Result<ProjectElement>() != null);
 
             string itemPath = PackageUtilities.MakeRelativeIfRooted(folder, this.BaseURI);
-            Debug.Assert(!Path.IsPathRooted(itemPath), "Cannot add item with full path.");
+            Contract.Assert(!Path.IsPathRooted(itemPath), "Cannot add item with full path.");
 
-            newItem = this.CreateMsBuildFileItem(itemPath, ProjectFileConstants.Folder);
+            ProjectElement newItem = this.CreateMsBuildFileItem(itemPath, ProjectFileConstants.Folder);
 
             return newItem;
         }
@@ -4235,7 +4280,7 @@ namespace Microsoft.VisualStudio.Project
         protected internal virtual void ProcessFolders()
         {
             // Process Folders (useful to persist empty folder)
-            foreach (MSBuild.ProjectItem folder in this.buildProject.GetItems(ProjectFileConstants.Folder))
+            foreach (MSBuild.ProjectItem folder in this.buildProject.Items.Where(IsFolderItem).ToArray())
             {
                 string strPath = folder.EvaluatedInclude;
 

@@ -12,6 +12,7 @@
     using Microsoft.VisualStudio.Project;
     using Microsoft.VisualStudio.Shell.Interop;
 
+    [ComVisible(true)]
     public abstract class JavaPropertyPage : IPropertyPage
     {
         private const int Win32SwHide = 0;

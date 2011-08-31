@@ -16,6 +16,12 @@
             IsNonMemberItem = false;
         }
 
+        protected override NodeProperties CreatePropertiesObject()
+        {
+            ISingleFileGenerator generator = this.CreateSingleFileGenerator();
+            return generator == null ? (NodeProperties)new JavaFileNodeProperties(this) : new JavaSingleFileGeneratorNodeProperties(this);
+        }
+
         protected override int QueryStatusOnNode(Guid cmdGroup, uint cmd, IntPtr pCmdText, ref QueryStatusResult result)
         {
             if (cmdGroup == VsMenus.guidStandardCommandSet2K)

@@ -2,14 +2,18 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Text;
-    using Microsoft.Build.Utilities;
-    using Microsoft.Build.Tasks;
-    using Microsoft.Build.Framework;
     using System.Text.RegularExpressions;
+    using Microsoft.Build.Framework;
+    using Microsoft.Build.Tasks;
+    using Microsoft.Build.Utilities;
+    using Microsoft.Win32;
+    using Directory = System.IO.Directory;
+    using File = System.IO.File;
     using Path = System.IO.Path;
-    using System.Diagnostics.Contracts;
+    using SecurityException = System.Security.SecurityException;
 
     public class Javac : ToolTask
     {
@@ -18,21 +22,7 @@
 
         public Javac()
         {
-            ShowDeprecation = false;
-            NoWarnings = false;
             Verbose = false;
-        }
-
-        public bool ShowDeprecation
-        {
-            get;
-            set;
-        }
-
-        public bool NoWarnings
-        {
-            get;
-            set;
         }
 
         public bool Verbose
@@ -47,12 +37,6 @@
             set;
         }
 
-        public string Encoding
-        {
-            get;
-            set;
-        }
-
         public string SourceRelease
         {
             get;
@@ -60,6 +44,42 @@
         }
 
         public string TargetRelease
+        {
+            get;
+            set;
+        }
+
+        public string Encoding
+        {
+            get;
+            set;
+        }
+
+        public string DebugSymbols
+        {
+            get;
+            set;
+        }
+
+        public string SpecificDebugSymbols
+        {
+            get;
+            set;
+        }
+
+        public bool ShowWarnings
+        {
+            get;
+            set;
+        }
+
+        public bool ShowAllWarnings
+        {
+            get;
+            set;
+        }
+
+        public string BuildArgs
         {
             get;
             set;
@@ -116,7 +136,10 @@
 
         protected override string GenerateFullPathToTool()
         {
-            return @"C:\Program Files (x86)\Java\jdk1.6.0_26\bin\javac.exe";
+            if (File.Exists(ToolPath))
+                return Path.GetFullPath(ToolPath);
+
+            return FindJavacPath();
         }
 
         protected override string GenerateCommandLineCommands()
@@ -139,18 +162,54 @@
 
         protected void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
         {
-            if (ShowDeprecation)
-                commandLine.AppendSwitch("-deprecation");
-            if (NoWarnings)
-                commandLine.AppendSwitch("-nowarn");
-
+            // the -verbose flag must be included or there's no way to figure out what the output files are
             commandLine.AppendSwitch("-verbose");
-            commandLine.AppendSwitchIfNotNull("-encoding ", Encoding);
-            commandLine.AppendSwitch("-g");
-            commandLine.AppendSwitchIfNotNull("-source ", SourceRelease);
-            commandLine.AppendSwitchIfNotNull("-target ", TargetRelease);
-            commandLine.AppendSwitchIfNotNull("-d ", OutputPath);
-            commandLine.AppendSwitch("-Xlint:unchecked");
+
+            if (!string.IsNullOrEmpty(Encoding))
+                commandLine.AppendSwitchIfNotNull("-encoding ", Encoding);
+
+            switch (DebugSymbols)
+            {
+            case "All":
+                commandLine.AppendSwitch("-g");break;
+
+            case "None":
+                commandLine.AppendSwitch("-g:none");break;
+
+            case "Specific":
+                if (!string.IsNullOrEmpty(SpecificDebugSymbols))
+                    commandLine.AppendSwitchIfNotNull("-g:", SpecificDebugSymbols);
+                else
+                    commandLine.AppendSwitch("-g:none");
+
+                break;
+
+            case "Default":
+            default:
+                break;
+            }
+
+            if (!string.IsNullOrEmpty(SourceRelease) && !string.Equals(SourceRelease, "Default", StringComparison.OrdinalIgnoreCase))
+                commandLine.AppendSwitchIfNotNull("-source ", SourceRelease);
+            if (!string.IsNullOrEmpty(TargetRelease) && !string.Equals(TargetRelease, "Default", StringComparison.OrdinalIgnoreCase))
+                commandLine.AppendSwitchIfNotNull("-target ", TargetRelease);
+
+            if (!string.IsNullOrEmpty(OutputPath))
+                commandLine.AppendSwitchIfNotNull("-d ", OutputPath);
+
+            if (!ShowWarnings)
+            {
+                commandLine.AppendSwitch("-nowarn");
+            }
+            else if (ShowAllWarnings)
+            {
+                commandLine.AppendSwitch("-Xlint");
+                commandLine.AppendSwitch("-deprecation");
+            }
+
+            if (!string.IsNullOrEmpty(BuildArgs))
+                commandLine.AppendTextUnquoted(BuildArgs);
+
             commandLine.AppendSwitchIfNotNull("-classpath ", ClassPath, ";");
 
             commandLine.AppendFileNamesIfNotNull(Sources, " ");
@@ -243,6 +302,51 @@
             else if (!singleLine.StartsWith("[") || !singleLine.EndsWith("]"))
             {
                 base.LogEventsFromTextOutput(singleLine, messageImportance);
+            }
+        }
+
+        private static string FindJavacPath()
+        {
+            string javac = FindJavacPath(@"SOFTWARE\JavaSoft\Java Development Kit");
+            if (javac == null)
+                javac = FindJavacPath(@"SOFTWARE\Wow6432Node\JavaSoft\Java Development Kit");
+
+            return javac;
+        }
+
+        private static string FindJavacPath(string registryRoot)
+        {
+            try
+            {
+                using (RegistryKey jdk = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\JavaSoft\Java Development Kit", RegistryKeyPermissionCheck.ReadSubTree))
+                {
+                    if (jdk == null)
+                        return null;
+
+                    string currentVersion = jdk.GetValue("CurrentVersion") as string;
+                    if (currentVersion == null)
+                        return null;
+
+                    using (RegistryKey jdkVersion = jdk.OpenSubKey(currentVersion, RegistryKeyPermissionCheck.ReadSubTree))
+                    {
+                        if (jdkVersion == null)
+                            return null;
+
+                        string javaHome = jdkVersion.GetValue("JavaHome") as string;
+                        if (!Directory.Exists(javaHome))
+                            return null;
+
+                        string javac = Path.Combine(javaHome, "bin", "javac.exe");
+                        if (!File.Exists(javac))
+                            return null;
+
+                        return javac;
+                    }
+                }
+            }
+            catch (SecurityException)
+            {
+                return null;
             }
         }
     }

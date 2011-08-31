@@ -59,6 +59,15 @@
             label2.TabIndex = 0;
             label2.Text = "Post-build event command line:";
             // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new System.Drawing.Point(41, 301);
+            label3.Name = "label3";
+            label3.Size = new System.Drawing.Size(126, 13);
+            label3.TabIndex = 0;
+            label3.Text = "Run the post-build event:";
+            // 
             // txtPreBuildCommandLine
             // 
             this.txtPreBuildCommandLine.Location = new System.Drawing.Point(44, 30);
@@ -67,6 +76,7 @@
             this.txtPreBuildCommandLine.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtPreBuildCommandLine.Size = new System.Drawing.Size(395, 84);
             this.txtPreBuildCommandLine.TabIndex = 1;
+            this.txtPreBuildCommandLine.WordWrap = false;
             this.txtPreBuildCommandLine.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // btnEditPreBuild
@@ -87,6 +97,7 @@
             this.txtPostBuildCommandLine.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtPostBuildCommandLine.Size = new System.Drawing.Size(395, 84);
             this.txtPostBuildCommandLine.TabIndex = 1;
+            this.txtPostBuildCommandLine.WordWrap = false;
             this.txtPostBuildCommandLine.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
             // btnEditPostBuild
@@ -98,15 +109,6 @@
             this.btnEditPostBuild.TabIndex = 2;
             this.btnEditPostBuild.Text = "Edit Post-build ...";
             this.btnEditPostBuild.UseVisualStyleBackColor = true;
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(41, 301);
-            label3.Name = "label3";
-            label3.Size = new System.Drawing.Size(126, 13);
-            label3.TabIndex = 0;
-            label3.Text = "Run the post-build event:";
             // 
             // cmbRunPostBuildWhen
             // 

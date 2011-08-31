@@ -13,6 +13,7 @@
     using FileAttributes = System.IO.FileAttributes;
     using FileInfo = System.IO.FileInfo;
     using Marshal = System.Runtime.InteropServices.Marshal;
+    using MSBuild = Microsoft.Build.Evaluation;
     using OAVSProject = Microsoft.VisualStudio.Project.Automation.OAVSProject;
     using Path = System.IO.Path;
     using Project = Microsoft.Build.Evaluation.Project;
@@ -27,6 +28,7 @@
         private readonly JavaBuildOptions _sharedBuildOptions;
         private Project _userBuildProject;
         private VSLangProj.VSProject _vsProject;
+        private ImageHandler _extendedImageHandler;
 
         public JavaProjectNode()
         {
@@ -95,6 +97,22 @@
             }
         }
 
+        /// <summary>
+        /// Gets an ImageHandler for the project node.
+        /// </summary>
+        public ImageHandler ExtendedImageHandler
+        {
+            get
+            {
+                if (_extendedImageHandler == null)
+                {
+                    _extendedImageHandler = new ImageHandler(typeof(JavaProjectNode).Assembly.GetManifestResourceStream("Tvl.VisualStudio.Language.Java.Project.Resources.imagelis.bmp"));
+                }
+
+                return _extendedImageHandler;
+            }
+        }
+
         protected internal VSLangProj.VSProject VSProject
         {
             get
@@ -104,6 +122,22 @@
 
                 return _vsProject;
             }
+        }
+
+        public override int Save(string fileToBeSaved, int remember, uint formatIndex)
+        {
+            int result = base.Save(fileToBeSaved, remember, formatIndex);
+            if (result == VSConstants.S_OK && _userBuildProject != null)
+                _userBuildProject.Save(UserFileName);
+
+            return result;
+        }
+
+        public override void SetConfiguration(string config)
+        {
+            base.SetConfiguration(config);
+            if (_userBuildProject != null)
+                _userBuildProject.SetGlobalProperty(ProjectFileConstants.Configuration, config);
         }
 
         internal static void SetConfigurationProperty(ProjectConfig config, string propertyName, string propertyValue, Project buildProject)
@@ -210,6 +244,7 @@
         protected override bool FilterItemTypeToBeAddedToHierarchy(string itemType)
         {
             return string.Equals(itemType, JavaProjectFileConstants.SourceFolder, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(itemType, JavaProjectFileConstants.TestSourceFolder, StringComparison.OrdinalIgnoreCase)
                 || base.FilterItemTypeToBeAddedToHierarchy(itemType);
         }
 
@@ -261,17 +296,26 @@
             return false;
         }
 
+        public override bool IsFolderItem(MSBuild.ProjectItem buildItem)
+        {
+            if (string.Equals(buildItem.ItemType, JavaProjectFileConstants.SourceFolder, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (string.Equals(buildItem.ItemType, JavaProjectFileConstants.TestSourceFolder, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return base.IsFolderItem(buildItem);
+        }
+
         public void CreateUserBuildProject()
         {
-            if (File.Exists(UserFileName))
+            if (!File.Exists(UserFileName))
             {
-                _userBuildProject = new Project(UserFileName);
+                Project userBuildProject = new Project();
+                userBuildProject.Save(UserFileName);
             }
-            else
-            {
-                _userBuildProject = new Project();
-                _userBuildProject.Save(UserFileName);
-            }
+
+            _userBuildProject = BuildEngine.LoadProject(UserFileName);
         }
 
         public void SetProjectProperty(string propertyName, string propertyValue, string condition)
@@ -341,6 +385,14 @@
             }
 
             return service;
+        }
+
+        public enum ExtendedImageName
+        {
+            SourceFolder = 0,
+            OpenSourceFolder = 1,
+            TestSourceFolder = 0,
+            OpenTestSourceFolder = 1,
         }
     }
 }

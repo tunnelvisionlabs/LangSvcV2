@@ -1,19 +1,27 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Project.PropertyPages
 {
     using System;
+    using Microsoft.Win32;
+    using CommandLineBuilder = Microsoft.Build.Utilities.CommandLineBuilder;
+    using Directory = System.IO.Directory;
+    using File = System.IO.File;
     using Path = System.IO.Path;
+    using SecurityException = System.Security.SecurityException;
 
     public partial class JavaBuildPropertyPagePanel : JavaPropertyPagePanel
     {
+        private static string _javac;
+
         public JavaBuildPropertyPagePanel()
-            : this( null )
+            : this(null)
         {
         }
 
-        public JavaBuildPropertyPagePanel( JavaPropertyPage parentPropertyPage )
-            : base( parentPropertyPage )
+        public JavaBuildPropertyPagePanel(JavaPropertyPage parentPropertyPage)
+            : base(parentPropertyPage)
         {
             InitializeComponent();
+            UpdateStates();
             RefreshCommandLine();
         }
 
@@ -25,16 +33,183 @@
             }
         }
 
-        public bool DebugMode
+        public string SourceRelease
         {
             get
             {
-                return chkDebugBuild.Checked;
+                return (cmbSourceRelease.SelectedItem ?? "").ToString();
             }
 
             set
             {
-                chkDebugBuild.Checked = value;
+                if (string.IsNullOrEmpty(value))
+                    value = "Default";
+
+                cmbSourceRelease.SelectedItem = value;
+            }
+        }
+
+        public string TargetRelease
+        {
+            get
+            {
+                return (cmbTargetRelease.SelectedItem ?? "").ToString();
+            }
+
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    value = "Default";
+
+                cmbTargetRelease.SelectedItem = value;
+            }
+        }
+
+        public string Encoding
+        {
+            get
+            {
+                return txtEncoding.Text;
+            }
+
+            set
+            {
+                txtEncoding.Text = value ?? string.Empty;
+            }
+        }
+
+        public DebuggingInformation DebuggingInformation
+        {
+            get
+            {
+                if (btnDebugInfoAll.Checked)
+                    return DebuggingInformation.All;
+                else if (btnDebugInfoNone.Checked)
+                    return DebuggingInformation.None;
+                else if (btnDebugInfoSpecific.Checked)
+                    return DebuggingInformation.Specific;
+                else
+                    return DebuggingInformation.Default;
+            }
+
+            set
+            {
+                switch (value)
+                {
+                case DebuggingInformation.All:
+                    btnDebugInfoAll.Checked = true;
+                    break;
+
+                case DebuggingInformation.None:
+                    btnDebugInfoNone.Checked = true;
+                    break;
+
+                case DebuggingInformation.Specific:
+                    btnDebugInfoSpecific.Checked = true;
+                    break;
+
+                case DebuggingInformation.Default:
+                default:
+                    btnDebugInfoDefault.Checked = true;
+                    break;
+                }
+            }
+        }
+
+        public string SpecificDebuggingInformation
+        {
+            get
+            {
+                return txtSpecificDebugInfo.Text;
+            }
+
+            set
+            {
+                txtSpecificDebugInfo.Text = value ?? string.Empty;
+            }
+        }
+
+        public bool ShowWarnings
+        {
+            get
+            {
+                return chkShowWarnings.Checked;
+            }
+
+            set
+            {
+                chkShowWarnings.Checked = value;
+            }
+        }
+
+        public bool ShowAllWarnings
+        {
+            get
+            {
+                return chkAllWarnings.Checked;
+            }
+
+            set
+            {
+                chkAllWarnings.Checked = value;
+            }
+        }
+
+        public WarningsAsErrors WarningsAsErrors
+        {
+            get
+            {
+                if (btnWarnAsErrorSpecific.Checked)
+                    return WarningsAsErrors.Specific;
+                else if (btnWarnAsErrorAll.Checked)
+                    return WarningsAsErrors.All;
+                else
+                    return WarningsAsErrors.None;
+            }
+
+            set
+            {
+                switch (value)
+                {
+                case WarningsAsErrors.All:
+                    btnWarnAsErrorAll.Checked = true;
+                    break;
+
+                case WarningsAsErrors.Specific:
+                    btnWarnAsErrorSpecific.Checked = true;
+                    break;
+
+                case WarningsAsErrors.None:
+                default:
+                    btnWarnAsErrorNone.Checked = true;
+                    break;
+                }
+            }
+        }
+
+        public string SpecificWarningsAsErrors
+        {
+            get
+            {
+                return txtSpecificWarningsAsErrors.Text;
+            }
+
+            set
+            {
+                txtSpecificWarningsAsErrors.Text = value ?? string.Empty;
+            }
+        }
+
+        public string OutputPath
+        {
+            get
+            {
+                return txtOutputPath.Text;
+            }
+
+            set
+            {
+                txtOutputPath.Text = value;
             }
         }
 
@@ -47,57 +222,105 @@
 
             set
             {
-                txtBuildExtraOptions.Text = value;
+                txtBuildExtraOptions.Text = value ?? string.Empty;
             }
         }
 
         internal void RefreshCommandLine()
         {
-            string line = string.Empty;
-            string ucc = null;
-            if (ParentPropertyPage.ProjectManager != null && ParentPropertyPage.ProjectManager.SharedBuildOptions.General != null)
-                ucc = ParentPropertyPage.ProjectManager.SharedBuildOptions.General.JavacPath;
-            if (ucc == null)
-                ucc = ParentPropertyPage.GetConfigProperty(JavaConfigConstants.JavacPath, ProjectPropertyStorage.ProjectFile);
+            CommandLineBuilder commandLine = new CommandLineBuilder();
 
-            string fullucc = ucc;
+            string javacPath = null;
+            if (ParentPropertyPage.ProjectManager != null && ParentPropertyPage.ProjectManager.SharedBuildOptions.General != null)
+                javacPath = ParentPropertyPage.ProjectManager.SharedBuildOptions.General.JavacPath;
+            if (javacPath == null)
+                javacPath = ParentPropertyPage.GetConfigProperty(JavaConfigConstants.JavacPath, ProjectPropertyStorage.ProjectFile);
+
+            string fullucc = javacPath;
             try
             {
-                if (!Path.IsPathRooted(fullucc) && ParentPropertyPage.ProjectManager != null)
+                if (!string.IsNullOrEmpty(fullucc) && !Path.IsPathRooted(fullucc) && ParentPropertyPage.ProjectManager != null)
                 {
-                    fullucc = Path.Combine(ParentPropertyPage.ProjectManager.ProjectFolder, ucc);
+                    fullucc = Path.Combine(ParentPropertyPage.ProjectManager.ProjectFolder, javacPath);
                 }
             }
             catch (ArgumentException)
             {
-                fullucc = ucc;
+                fullucc = javacPath;
             }
 
-            line = "\"" + ucc + "\" make";
-            if (DebugMode)
-                line += " -debug";
+            if (string.IsNullOrEmpty(fullucc))
+            {
+                fullucc = JavaProjectPackage.FindJavacPath(true);
+            }
+
+            commandLine.AppendFileNameIfNotNull(fullucc);
+
+            if (!string.IsNullOrEmpty(Encoding))
+                commandLine.AppendSwitchIfNotNull("-encoding ", Encoding);
+
+            switch (DebuggingInformation)
+            {
+            case DebuggingInformation.All:
+                commandLine.AppendSwitch("-g");
+                break;
+
+            case DebuggingInformation.Specific:
+                if (!string.IsNullOrEmpty(SpecificDebuggingInformation))
+                    commandLine.AppendSwitchIfNotNull("-g:", SpecificDebuggingInformation);
+                else
+                    commandLine.AppendSwitch("-g:none");
+
+                break;
+
+            case DebuggingInformation.None:
+                commandLine.AppendSwitch("-g:none");
+                break;
+
+            case DebuggingInformation.Default:
+            default:
+                break;
+            }
+
+            if (!string.IsNullOrEmpty(SourceRelease) && !string.Equals(SourceRelease, "Default", StringComparison.OrdinalIgnoreCase))
+                commandLine.AppendSwitchIfNotNull("-source ", SourceRelease);
+            if (!string.IsNullOrEmpty(TargetRelease) && !string.Equals(TargetRelease, "Default", StringComparison.OrdinalIgnoreCase))
+                commandLine.AppendSwitchIfNotNull("-target ", TargetRelease);
+
+            if (!string.IsNullOrEmpty(OutputPath))
+                commandLine.AppendSwitchIfNotNull("-d ", OutputPath);
+
+            if (!ShowWarnings)
+            {
+                commandLine.AppendSwitch("-nowarn");
+            }
+            else if (ShowAllWarnings)
+            {
+                commandLine.AppendSwitch("-Xlint");
+                commandLine.AppendSwitch("-deprecation");
+            }
+
             if (!string.IsNullOrEmpty(ExtraArguments))
-                line += " " + ExtraArguments;
+                commandLine.AppendTextUnquoted(ExtraArguments);
 
-            txtBuildCommandLine.Text = line;
+            txtBuildCommandLine.Text = commandLine.ToString();
         }
 
-        // Build debug scripts
-        private void checkBox1_CheckedChanged( object sender, EventArgs e )
+        private void UpdateStates()
+        {
+            chkAllWarnings.Enabled = chkShowWarnings.Checked;
+            txtSpecificDebugInfo.Enabled = btnDebugInfoSpecific.Checked;
+            txtSpecificWarningsAsErrors.Enabled = btnWarnAsErrorSpecific.Checked;
+        }
+
+        private void HandleStateAffectingChange(object sender, EventArgs e)
         {
             ParentPropertyPage.IsDirty = true;
+            UpdateStates();
             RefreshCommandLine();
         }
 
-        // Include unpublished
-        private void checkBox2_CheckedChanged( object sender, EventArgs e )
-        {
-            ParentPropertyPage.IsDirty = true;
-            RefreshCommandLine();
-        }
-
-        // Additional options
-        private void textBox2_TextChanged( object sender, EventArgs e )
+        private void HandleCommandLineAffectingChange(object sender, EventArgs e)
         {
             ParentPropertyPage.IsDirty = true;
             RefreshCommandLine();

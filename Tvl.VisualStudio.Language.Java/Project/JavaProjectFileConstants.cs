@@ -5,5 +5,6 @@
         public const int UnspecifiedValue = -1;
 
         public const string SourceFolder = "SourceFolder";
+        public const string TestSourceFolder = "TestSourceFolder";
     }
 }

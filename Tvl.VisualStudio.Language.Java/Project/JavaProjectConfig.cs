@@ -1,5 +1,6 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Project
 {
+    using Path = System.IO.Path;
     using System;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Project;
@@ -15,6 +16,7 @@
     using SVsShellDebugger = Microsoft.VisualStudio.Shell.Interop.SVsShellDebugger;
     using IVsUIShell = Microsoft.VisualStudio.Shell.Interop.IVsUIShell;
     using SVsUIShell = Microsoft.VisualStudio.Shell.Interop.SVsUIShell;
+    using CommandLineBuilder = Microsoft.Build.Utilities.CommandLineBuilder;
 
     public class JavaProjectConfig : ProjectConfig
     {
@@ -94,21 +96,58 @@
         {
             DebugTargetInfo info = new DebugTargetInfo();
 
-            List<string> arguments = new List<string>();
-            arguments.Add(@"-agentpath:C:\dev\SimpleC\Tvl.Java.DebugHost\bin\Debug\Tvl.Java.DebugHostWrapper.dll");
-            //arguments.Add(@"-verbose:jni");
-            //arguments.Add(@"-cp");
-            //arguments.Add(@"C:\dev\JavaProjectTest\JavaProject\out\Debug");
-            arguments.Add("tvl.school.ee382v.a3.problem1.program1");
-            //arguments.Add(GetConfigurationProperty("OutputPath", true));
-            //arguments.Add(GetConfigurationProperty(JavaConfigConstants.DebugStartClass, false, ProjectPropertyStorage.UserFile));
-            //arguments.Add(GetConfigurationProperty(JavaConfigConstants.DebugExtraArgs, false, ProjectPropertyStorage.UserFile));
+            CommandLineBuilder commandLine = new CommandLineBuilder();
 
-            info.Arguments = string.Join(" ", arguments);
+            string agentPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(typeof(JavaProjectConfig).Assembly.Location), "Tvl.Java.DebugHostWrapper.dll"));
+            commandLine.AppendSwitchIfNotNull("-agentpath:", agentPath);
 
-            info.Executable = @"C:\Program Files (x86)\Java\jdk1.6.0_26\bin\java.exe";
+            switch (GetConfigurationProperty(JavaConfigConstants.DebugStartAction, false, ProjectPropertyStorage.UserFile))
+            {
+            case "Class":
+                string jvmArguments = GetConfigurationProperty(JavaConfigConstants.DebugJvmArguments, false, ProjectPropertyStorage.UserFile);
+                if (!string.IsNullOrEmpty(jvmArguments))
+                    commandLine.AppendTextUnquoted(jvmArguments);
+
+                string startupObject = GetConfigurationProperty(JavaConfigConstants.DebugStartClass, false, ProjectPropertyStorage.UserFile);
+                if (!string.IsNullOrEmpty(startupObject))
+                    commandLine.AppendFileNameIfNotNull(startupObject);
+
+                break;
+
+            default:
+                throw new NotImplementedException();
+            }
+
+            string debugArgs = GetConfigurationProperty(JavaConfigConstants.DebugExtraArgs, false, ProjectPropertyStorage.UserFile);
+            if (!string.IsNullOrEmpty(debugArgs))
+                commandLine.AppendTextUnquoted(debugArgs);
+
+            string workingDirectory = GetConfigurationProperty(JavaConfigConstants.DebugWorkingDirectory, false, ProjectPropertyStorage.UserFile);
+            if (string.IsNullOrEmpty(workingDirectory))
+                workingDirectory = GetConfigurationProperty(JavaConfigConstants.OutputPath, false, ProjectPropertyStorage.ProjectFile);
+
+            if (!Path.IsPathRooted(workingDirectory))
+            {
+                workingDirectory = Path.GetFullPath(Path.Combine(this.ProjectManager.ProjectFolder, workingDirectory));
+            }
+
+            //List<string> arguments = new List<string>();
+            //arguments.Add(@"-agentpath:C:\dev\SimpleC\Tvl.Java.DebugHost\bin\Debug\Tvl.Java.DebugHostWrapper.dll");
+            ////arguments.Add(@"-verbose:jni");
+            ////arguments.Add(@"-cp");
+            ////arguments.Add(@"C:\dev\JavaProjectTest\JavaProject\out\Debug");
+            //arguments.Add("tvl.school.ee382v.a3.problem1.program1");
+            ////arguments.Add(GetConfigurationProperty("OutputPath", true));
+            ////arguments.Add(GetConfigurationProperty(JavaConfigConstants.DebugStartClass, false, ProjectPropertyStorage.UserFile));
+            ////arguments.Add(GetConfigurationProperty(JavaConfigConstants.DebugExtraArgs, false, ProjectPropertyStorage.UserFile));
+
+            //info.Arguments = string.Join(" ", arguments);
+
+            info.Arguments = commandLine.ToString();
+
+            info.Executable = JavaProjectPackage.FindJavaPath(false);
             //info.CurrentDirectory = GetConfigurationProperty("WorkingDirectory", false, ProjectPropertyStorage.UserFile);
-            info.CurrentDirectory = @"C:\dev\JavaProjectTest\JavaProject\out\Debug";
+            info.CurrentDirectory = workingDirectory;
             info.SendToOutputWindow = false;
             info.DebugEngines = new Guid[]
                 {

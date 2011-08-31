@@ -99,6 +99,8 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Microsoft.Build" />
+    <Reference Include="Microsoft.Build.Framework" />
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PublicAssemblies\Microsoft.VisualStudio.ComponentModelHost.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
@@ -441,12 +443,16 @@
     <Compile Include="Project\JavaBuildOptions.cs" />
     <Compile Include="Project\JavaConfigConstants.cs" />
     <Compile Include="Project\JavaFileNode.cs" />
+    <Compile Include="Project\JavaFileNodeProperties.cs" />
     <Compile Include="Project\JavaFolderNode.cs" />
+    <Compile Include="Project\JavaFolderNodeProperties.cs" />
     <Compile Include="Project\JavaProjectConstants.cs" />
     <Compile Include="Project\JavaProjectFactory.cs" />
     <Compile Include="Project\JavaProjectFileConstants.cs" />
     <Compile Include="Project\JavaProjectNode.cs" />
     <Compile Include="Project\JavaProjectPackage.cs" />
+    <Compile Include="Project\JavaSingleFileGeneratorNodeProperties.cs" />
+    <Compile Include="Project\PropertyPages\DebuggingInformation.cs" />
     <Compile Include="Project\PropertyPages\JavaBuildEventsPropertyPage.cs" />
     <Compile Include="Project\PropertyPages\JavaBuildEventsPropertyPagePanel.cs">
       <SubType>UserControl</SubType>
@@ -485,6 +491,8 @@
     </Compile>
     <Compile Include="Project\ProjectPropertyStorage.cs" />
     <Compile Include="Project\PropertyPages\PropertyPageArgumentException.cs" />
+    <Compile Include="Project\PropertyPages\StartAction.cs" />
+    <Compile Include="Project\PropertyPages\WarningsAsErrors.cs" />
     <Compile Include="Service References\JvmDebugSessionService\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -624,6 +632,7 @@
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
+    <EmbeddedResource Include="Project\Resources\imagelis.bmp" />
     <Content Include="VSIXProject_large.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -726,6 +735,16 @@
     <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
       <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
       <Name>Tvl.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.Java.DebugHostWrapper\Tvl.Java.DebugHostWrapper.vcxproj">
+      <Project>{538F6A87-53C9-4F02-B154-2A6925715C1C}</Project>
+      <Name>Tvl.Java.DebugHostWrapper</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.Java.DebugHost\Tvl.Java.DebugHost.csproj">
+      <Project>{833550B8-B651-4FFB-B3AE-BF572AC4A18C}</Project>
+      <Name>Tvl.Java.DebugHost</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.Java.DebugInterface.Client\Tvl.Java.DebugInterface.Client.csproj">
       <Project>{4BB229A4-3259-49E9-B05B-A4C0F3496CA6}</Project>

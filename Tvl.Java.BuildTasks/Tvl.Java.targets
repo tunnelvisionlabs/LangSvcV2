@@ -33,6 +33,17 @@ Copyright (C) Sam Harwell. All rights reserved.
     <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!-- Default property values -->
+    <SourceRelease Condition="'$(SourceRelease)'==''">Default</SourceRelease>
+    <TargetRelease Condition="'$(TargetRelease)'==''">Default</TargetRelease>
+    <DebugSymbols Condition="'$(DebugSymbols)'==''">Default</DebugSymbols>
+    <ShowWarnings Condition="'$(ShowWarnings)'==''">True</ShowWarnings>
+    <ShowAllWarnings Condition="'$(ShowAllWarnings)'==''">True</ShowAllWarnings>
+    <TreatWarningsAsErrors Condition="'$(TreatWarningsAsErrors)'==''">None</TreatWarningsAsErrors>
+    <OutputPath Condition="'$(OutputPath)'==''">bin\$(Configuration)\</OutputPath>
+  </PropertyGroup>
+
   <!--
     The CreateManifestResourceNames target create the manifest resource names from the .RESX
     files.
@@ -228,11 +239,15 @@ Copyright (C) Sam Harwell. All rights reserved.
            Sources="@(Compile)"
            ToolExe="$(JavacToolExe)"
            ToolPath="$(JavacToolPath)"
-           NoWarnings="$(NoWarnings)"
            Encoding="%(Compile.Encoding)"
            SourceRelease="$(SourceRelease)"
            TargetRelease="$(TargetRelease)"
            OutputPath="$(OutputPath)"
+           DebugSymbols="$(DebugSymbols)"
+           SpecificDebugSymbols="$(SpecificDebugSymbols)"
+           ShowWarnings="$(ShowWarnings)"
+           ShowAllWarnings="$(ShowAllWarnings)"
+           BuildArgs="$(BuildArgs)"
                >
 
       <Output TaskParameter="GeneratedClassFiles" ItemName="FileWrites" />
