@@ -672,11 +672,15 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
             _isLoaded = true;
 
+            JavaDebugThread mainThread = null;
             ReadOnlyCollection<IThreadReference> threads = VirtualMachine.GetAllThreads();
             for (int i = 0; i < threads.Count; i++)
             {
-                bool mainThread = threads[i].Equals(e.Thread);
-                JavaDebugThread thread = new JavaDebugThread(this, threads[i], mainThread ? ThreadCategory.Main : ThreadCategory.Worker);
+                bool isMainThread = threads[i].Equals(e.Thread);
+                JavaDebugThread thread = new JavaDebugThread(this, threads[i], isMainThread ? ThreadCategory.Main : ThreadCategory.Worker);
+                if (isMainThread)
+                    mainThread = thread;
+
                 lock (this._threads)
                 {
                     this._threads.Add(threads[i].GetUniqueId(), thread);
@@ -686,6 +690,19 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 #if !HIDE_THREADS
                 Callback.Event(DebugEngine, Process, this, thread, debugEvent);
 #endif
+            }
+
+            if (DebugEngine.VirtualizedBreakpoints.Count > 0)
+            {
+                ReadOnlyCollection<IReferenceType> classes = VirtualMachine.GetAllClasses();
+                foreach (var type in classes)
+                {
+                    if (!type.GetIsPrepared())
+                        continue;
+
+                    ReadOnlyCollection<string> sourceFiles = type.GetSourcePaths(type.GetDefaultStratum());
+                    DebugEngine.BindVirtualizedBreakpoints(this, mainThread, type, sourceFiles);
+                }
             }
 
             debugEvent = new DebugEntryPointEvent(GetAttributesForEvent(e));
