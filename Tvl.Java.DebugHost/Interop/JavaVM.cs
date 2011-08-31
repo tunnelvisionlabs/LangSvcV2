@@ -415,22 +415,22 @@
             JvmtiErrorHandler.ThrowOnFailure(environment.RawInterface.GetObjectHashCode(environment, thread, out hashCode));
 
             ThreadId threadId = new ThreadId(hashCode);
-            if (!_threads.ContainsKey(threadId))
+            lock (_threads)
             {
-                jweak weak = jniEnvironment.NewWeakGlobalReference(thread);
-                bool added = false;
-                lock (_threads)
+                if (!_threads.ContainsKey(threadId))
                 {
+                    jweak weak = jniEnvironment.NewWeakGlobalReference(thread);
+                    bool added = false;
                     if (!_threads.ContainsKey(threadId))
                     {
                         _threads.Add(threadId, new jthread(weak.Handle));
                         added = true;
                     }
-                }
 
-                if (!added)
-                {
-                    jniEnvironment.DeleteWeakGlobalReference(weak);
+                    if (!added)
+                    {
+                        jniEnvironment.DeleteWeakGlobalReference(weak);
+                    }
                 }
             }
 
@@ -541,7 +541,11 @@
 
                 tag = (uniqueTag << 8) | (uint)objectKind;
                 JvmtiErrorHandler.ThrowOnFailure(environment.SetTag(@object, tag));
-                _objects.Add(new ObjectId(tag), nativeEnvironment.NewWeakGlobalReference(@object));
+
+                lock (_objects)
+                {
+                    _objects.Add(new ObjectId(tag), nativeEnvironment.NewWeakGlobalReference(@object));
+                }
             }
 
             if (freeLocalReference)
@@ -576,22 +580,22 @@
 
             ReferenceTypeId typeId = new ReferenceTypeId(hashCode);
             TaggedReferenceTypeId taggedTypeId = new TaggedReferenceTypeId(typeTag, typeId);
-            if (!_classes.ContainsKey(typeId))
+            lock (_classes)
             {
-                jweak weak = nativeEnvironment.NewWeakGlobalReference(classHandle);
-                bool added = false;
-                lock (_threads)
+                if (!_classes.ContainsKey(typeId))
                 {
+                    jweak weak = nativeEnvironment.NewWeakGlobalReference(classHandle);
+                    bool added = false;
                     if (!_classes.ContainsKey(typeId))
                     {
                         _classes.Add(typeId, new jclass(weak.Handle));
                         added = true;
                     }
-                }
 
-                if (!added)
-                {
-                    nativeEnvironment.DeleteWeakGlobalReference(weak);
+                    if (!added)
+                    {
+                        nativeEnvironment.DeleteWeakGlobalReference(weak);
+                    }
                 }
             }
 
