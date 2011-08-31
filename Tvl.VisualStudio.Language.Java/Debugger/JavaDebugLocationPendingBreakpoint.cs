@@ -152,6 +152,9 @@
             IEnumerable<JavaDebugProgram> programs = DebugEngine.Programs.ToArray();
             foreach (var program in programs)
             {
+                if (!program.IsLoaded)
+                    continue;
+
                 IVirtualMachine virtualMachine = program.VirtualMachine;
                 ReadOnlyCollection<IReferenceType> classes = virtualMachine.GetAllClasses();
                 foreach (var @class in classes)

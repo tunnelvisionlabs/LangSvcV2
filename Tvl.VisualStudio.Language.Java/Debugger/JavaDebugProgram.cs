@@ -49,6 +49,7 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
         private IVirtualMachine _virtualMachine;
         private IStepRequest _causeBreakRequest;
+        private bool _isLoaded;
 
         private readonly Dictionary<long, JavaDebugThread> _threads = new Dictionary<long, JavaDebugThread>();
 
@@ -88,6 +89,14 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
             get
             {
                 return _virtualMachine;
+            }
+        }
+
+        internal bool IsLoaded
+        {
+            get
+            {
+                return _isLoaded;
             }
         }
 
@@ -660,6 +669,8 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
             DebugEvent debugEvent = new DebugLoadCompleteEvent(enum_EVENTATTRIBUTES.EVENT_ASYNC_STOP);
             SetEventProperties(debugEvent, e);
             Callback.Event(DebugEngine, Process, this, null, debugEvent);
+
+            _isLoaded = true;
 
             ReadOnlyCollection<IThreadReference> threads = VirtualMachine.GetAllThreads();
             for (int i = 0; i < threads.Count; i++)
