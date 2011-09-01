@@ -13,6 +13,8 @@
         {
             Contract.Requires(virtualMachine != null);
             Contract.Requires<ArgumentNullException>(field != null, "field");
+
+            _field = field;
         }
 
         public IField Field
