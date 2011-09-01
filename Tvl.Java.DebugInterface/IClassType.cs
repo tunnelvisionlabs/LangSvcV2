@@ -1,19 +1,21 @@
 ﻿namespace Tvl.Java.DebugInterface
 {
-    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// A mirror of a class in the target VM. A ClassType is a refinement of ReferenceType that applies to true
     /// classes in the JLS sense of the definition (not an interface, not an array type). Any ObjectReference
     /// that mirrors an instance of such a class will have a ClassType as its type.
     /// </summary>
+    [ContractClass(typeof(Contracts.IClassTypeContracts))]
     public interface IClassType : IReferenceType
     {
         /// <summary>
         /// Gets the interfaces implemented by this class.
         /// </summary>
         /// <param name="includeInherited">If true, this method will include interfaces directly and indirectly implemented by this class.</param>
-        IList<IInterfaceType> GetInterfaces(bool includeInherited);
+        ReadOnlyCollection<IInterfaceType> GetInterfaces(bool includeInherited);
 
         /// <summary>
         /// Returns a the single non-abstract Method visible from this class that has the given name and signature.
@@ -43,7 +45,7 @@
         /// <summary>
         /// Gets the currently loaded, direct subclasses of this class.
         /// </summary>
-        IList<IClassType> GetSubclasses();
+        ReadOnlyCollection<IClassType> GetSubclasses();
 
         /// <summary>
         /// Gets the superclass of this class.

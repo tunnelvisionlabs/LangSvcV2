@@ -1,5 +1,7 @@
 ﻿namespace Tvl.Java.DebugInterface
 {
+    using System.Diagnostics.Contracts;
+
     /// <summary>
     /// A proxy used by a debugger to examine or manipulate some entity in another virtual machine.
     /// </summary>
@@ -19,16 +21,19 @@
     /// in a List) will throw <see cref="VirtualMachineMismatchException"/> if the mirrors are from different
     /// virtual machines.
     /// </remarks>
+    [ContractClass(typeof(Contracts.IMirrorContracts))]
     public interface IMirror
     {
         /// <summary>
         /// Gets the <see cref="IVirtualMachine"/> to which this mirror belongs.
         /// </summary>
+        [Pure]
         IVirtualMachine GetVirtualMachine();
 
         /// <summary>
         /// Returns a string describing this mirror.
         /// </summary>
+        [Pure]
         string ToString();
     }
 }

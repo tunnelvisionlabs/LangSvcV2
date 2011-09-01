@@ -5,6 +5,7 @@
     /// <summary>
     /// An entity declared within a user defined type (class or interface).
     /// </summary>
+    [ContractClass(typeof(Contracts.ITypeComponentContracts))]
     public interface ITypeComponent : IMirror, IAccessible
     {
         /// <summary>

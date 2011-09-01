@@ -1,11 +1,13 @@
 ﻿namespace Tvl.Java.DebugInterface
 {
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// A thread object from the target VM. A ThreadReference is an <see cref="IObjectReference"/>
     /// with additional access to thread-specific information from the target VM.
     /// </summary>
+    [ContractClass(typeof(Contracts.IThreadReferenceContracts))]
     public interface IThreadReference : IObjectReference
     {
         /// <summary>
@@ -26,6 +28,7 @@
         /// <summary>
         /// Returns the number of stack frames in the thread's current call stack.
         /// </summary>
+        [Pure]
         int GetFrameCount();
 
         /// <summary>

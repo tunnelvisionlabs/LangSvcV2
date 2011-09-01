@@ -1,6 +1,9 @@
 ﻿namespace Tvl.Java.DebugInterface.Request
 {
-    public interface IInstanceFilter
+    using System.Diagnostics.Contracts;
+
+    [ContractClass(typeof(Contracts.IInstanceFilterContracts))]
+    public interface IInstanceFilter : IMirror
     {
         void AddInstanceFilter(IObjectReference instance);
     }

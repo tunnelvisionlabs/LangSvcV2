@@ -1,12 +1,14 @@
 ﻿namespace Tvl.Java.DebugInterface
 {
     using System;
+    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// A point within the executing code of the target VM. Locations are used to identify the current position
     /// of a suspended thread (analogous to an instruction pointer or program counter register in native programs).
     /// They are also used to identify the position at which to set a breakpoint.
     /// </summary>
+    [ContractClass(typeof(Contracts.ILocationContracts))]
     public interface ILocation : IMirror, IComparable<ILocation>, IEquatable<ILocation>
     {
         /// <summary>

@@ -1,9 +1,12 @@
 ﻿namespace Tvl.Java.DebugInterface
 {
+    using System.Diagnostics.Contracts;
+
     /// <summary>
     /// The value assigned to a field or variable of primitive type in a target VM. Each primitive
     /// value is accessed through a subinterface of this interface.
     /// </summary>
+    [ContractClass(typeof(Contracts.IPrimitiveValueContracts))]
     public interface IPrimitiveValue : IValue
     {
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿namespace Tvl.Java.DebugInterface
 {
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// A class loader object from the target VM. A <see cref="IClassLoaderReference"/> is an
@@ -8,6 +9,7 @@
     /// from the target VM. Instances of <see cref="IClassLoaderReference"/> are obtained through
     /// calls to <see cref="IReferenceType.GetClassLoader()"/>.
     /// </summary>
+    [ContractClass(typeof(Contracts.IClassLoaderReferenceContracts))]
     public interface IClassLoaderReference : IObjectReference
     {
         /// <summary>

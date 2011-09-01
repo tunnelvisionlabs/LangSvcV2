@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// An object that currently exists in the target VM. An IObjectReference mirrors only the object
@@ -10,6 +11,7 @@
     /// it is currently assigned. An IObjectReference can have 0 or more references from field(s) and/or
     /// variable(s).
     /// </summary>
+    [ContractClass(typeof(Contracts.IObjectReferenceContracts))]
     public interface IObjectReference : IValue, IEquatable<IObjectReference>
     {
         /// <summary>

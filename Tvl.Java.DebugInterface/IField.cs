@@ -1,11 +1,13 @@
 ﻿namespace Tvl.Java.DebugInterface
 {
     using System;
+    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// A class or instance variable in the target VM. See <see cref="ITypeComponent"/> for
     /// general information about Field and Method mirrors.
     /// </summary>
+    [ContractClass(typeof(Contracts.IFieldContracts))]
     public interface IField : ITypeComponent, IEquatable<IField>
     {
         /// <summary>

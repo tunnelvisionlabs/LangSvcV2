@@ -8,6 +8,7 @@
     using Tvl.Java.DebugInterface.Types;
     using System.Diagnostics.Contracts;
     using AccessModifiers = Tvl.Java.DebugInterface.AccessModifiers;
+    using System.Collections.ObjectModel;
 
     internal sealed class ClassType : ReferenceType, IClassType
     {
@@ -17,7 +18,7 @@
             Contract.Requires(virtualMachine != null);
         }
 
-        public IList<IInterfaceType> GetInterfaces(bool includeInherited)
+        public ReadOnlyCollection<IInterfaceType> GetInterfaces(bool includeInherited)
         {
             throw new NotImplementedException();
         }
@@ -47,7 +48,7 @@
             throw new NotImplementedException();
         }
 
-        public IList<IClassType> GetSubclasses()
+        public ReadOnlyCollection<IClassType> GetSubclasses()
         {
             throw new NotImplementedException();
         }

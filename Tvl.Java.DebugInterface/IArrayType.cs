@@ -1,8 +1,11 @@
 ﻿namespace Tvl.Java.DebugInterface
 {
+    using System.Diagnostics.Contracts;
+
     /// <summary>
     /// Provides access to the class of an array and the type of its components in the target VM.
     /// </summary>
+    [ContractClass(typeof(Contracts.IArrayTypeContracts))]
     public interface IArrayType : IReferenceType
     {
         /// <summary>

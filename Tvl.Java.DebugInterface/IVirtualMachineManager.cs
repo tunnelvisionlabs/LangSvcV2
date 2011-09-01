@@ -1,11 +1,13 @@
 ﻿namespace Tvl.Java.DebugInterface
 {
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
     using Tvl.Java.DebugInterface.Connect;
 
     /// <summary>
     /// A manager of connections to target virtual machines.
     /// </summary>
+    [ContractClass(typeof(Contracts.IVirtualMachineManagerContracts))]
     public interface IVirtualMachineManager
     {
         /// <summary>

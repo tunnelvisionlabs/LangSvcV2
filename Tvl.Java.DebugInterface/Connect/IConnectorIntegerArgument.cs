@@ -1,5 +1,8 @@
 ﻿namespace Tvl.Java.DebugInterface.Connect
 {
+    using System.Diagnostics.Contracts;
+
+    [ContractClass(typeof(Contracts.IConnectorIntegerArgumentContracts))]
     public interface IConnectorIntegerArgument : IConnectorArgument
     {
         /// <summary>

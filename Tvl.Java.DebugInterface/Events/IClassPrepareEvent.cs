@@ -1,9 +1,10 @@
 ﻿namespace Tvl.Java.DebugInterface.Events
 {
-    public interface IClassPrepareEvent : IEvent
+    using System.Diagnostics.Contracts;
+
+    [ContractClass(typeof(Contracts.IClassPrepareEventContracts))]
+    public interface IClassPrepareEvent : IThreadEvent
     {
         IReferenceType GetReferenceType();
-
-        IThreadReference GetThread();
     }
 }

@@ -3,12 +3,14 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
     using Tvl.Java.DebugInterface.Events;
     using Tvl.Java.DebugInterface.Request;
 
     /// <summary>
     /// A virtual machine targeted for debugging.
     /// </summary>
+    [ContractClass(typeof(Contracts.IVirtualMachineContracts))]
     public interface IVirtualMachine : IDisposable, IMirror
     {
         /// <summary>

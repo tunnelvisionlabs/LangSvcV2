@@ -3,11 +3,13 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
     using ConstantPoolEntry = Tvl.Java.DebugInterface.Types.ConstantPoolEntry;
 
     /// <summary>
     /// The type of an object in a target VM.
     /// </summary>
+    [ContractClass(typeof(Contracts.IReferenceTypeContracts))]
     public interface IReferenceType : IType, IAccessible, IEquatable<IReferenceType>
     {
         /// <summary>

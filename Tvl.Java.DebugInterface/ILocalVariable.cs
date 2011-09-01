@@ -1,6 +1,7 @@
 ﻿namespace Tvl.Java.DebugInterface
 {
     using System;
+    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// A local variable in the target VM. Each variable declared within a <see cref="IMethod"/> has its own
@@ -8,6 +9,7 @@
     /// LocalVariable objects. LocalVariables can be used alone to retrieve static information about their
     /// declaration, or can be used in conjunction with a <see cref="IStackFrame"/> to set and get values.
     /// </summary>
+    [ContractClass(typeof(Contracts.ILocalVariableContracts))]
     public interface ILocalVariable : IMirror, IEquatable<ILocalVariable>
     {
         /// <summary>

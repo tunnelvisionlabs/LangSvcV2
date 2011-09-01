@@ -1,11 +1,13 @@
 ﻿namespace Tvl.Java.DebugInterface
 {
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// A thread group object from the target VM. A IThreadGroupReference is an <see cref="IObjectReference"/>
     /// with additional access to threadgroup-specific information from the target VM.
     /// </summary>
+    [ContractClass(typeof(Contracts.IThreadGroupReferenceContracts))]
     public interface IThreadGroupReference : IObjectReference
     {
         /// <summary>

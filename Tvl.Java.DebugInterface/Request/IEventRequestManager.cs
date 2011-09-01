@@ -2,7 +2,9 @@
 {
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
 
+    [ContractClass(typeof(Contracts.IEventRequestManagerContracts))]
     public interface IEventRequestManager : IMirror
     {
         ReadOnlyCollection<IAccessWatchpointRequest> GetAccessWatchpointRequests();

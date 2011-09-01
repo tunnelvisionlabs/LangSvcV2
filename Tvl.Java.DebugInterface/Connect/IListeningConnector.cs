@@ -1,10 +1,12 @@
 ﻿namespace Tvl.Java.DebugInterface.Connect
 {
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// A connector which listens for a connection initiated by a target VM.
     /// </summary>
+    [ContractClass(typeof(Contracts.IListeningConnectorContracts))]
     public interface IListeningConnector : IConnector
     {
         /// <summary>

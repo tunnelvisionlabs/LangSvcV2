@@ -1,6 +1,7 @@
 ﻿namespace Tvl.Java.DebugInterface
 {
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// Provides access to an array object and its components in the target VM. Each array component is mirrored
@@ -8,6 +9,7 @@
     /// of objects instead of arrays for consistency with the rest of the API and for interoperability with other
     /// APIs.
     /// </summary>
+    [ContractClass(typeof(Contracts.IArrayReferenceContracts))]
     public interface IArrayReference : IObjectReference
     {
         /// <summary>
@@ -28,6 +30,7 @@
         /// <summary>
         /// Returns the number of components in this array.
         /// </summary>
+        [Pure]
         int GetLength();
 
         /// <summary>

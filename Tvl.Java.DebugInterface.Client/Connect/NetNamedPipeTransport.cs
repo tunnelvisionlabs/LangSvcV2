@@ -4,9 +4,12 @@
 
     internal sealed class NetNamedPipeTransport : ITransport
     {
-        public string GetName()
+        public string Name
         {
-            return "WCF Named Pipe Transport";
+            get
+            {
+                return "WCF Named Pipe Transport";
+            }
         }
     }
 }

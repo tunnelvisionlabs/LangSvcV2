@@ -1,10 +1,12 @@
 ﻿namespace Tvl.Java.DebugInterface
 {
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// A virtual machine which searches for classes through paths.
     /// </summary>
+    [ContractClass(typeof(Contracts.IPathSearchingVirtualMachineContracts))]
     public interface IPathSearchingVirtualMachine : IVirtualMachine
     {
         /// <summary>

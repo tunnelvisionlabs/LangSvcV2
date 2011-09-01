@@ -1,6 +1,7 @@
 ﻿namespace Tvl.Java.DebugInterface.Connect
 {
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// A method of connection between a debugger and a target VM.
@@ -11,6 +12,7 @@
     /// which controls its operation. The arguments are stored as a dictionary, keyed by a string. Each
     /// implementation defines the string argument keys it accepts.
     /// </remarks>
+    [ContractClass(typeof(Contracts.IConnectorContracts))]
     public interface IConnector
     {
         /// <summary>

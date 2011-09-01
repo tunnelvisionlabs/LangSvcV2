@@ -2,10 +2,12 @@
 {
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// The state of one method invocation on a thread's call stack.
     /// </summary>
+    [ContractClass(typeof(Contracts.IStackFrameContracts))]
     public interface IStackFrame : IMirror, ILocatable
     {
         /// <summary>

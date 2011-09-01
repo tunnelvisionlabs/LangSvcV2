@@ -1,8 +1,11 @@
 ﻿namespace Tvl.Java.DebugInterface
 {
+    using System.Diagnostics.Contracts;
+
     /// <summary>
     /// Information about a monitor owned by a thread.
     /// </summary>
+    [ContractClass(typeof(Contracts.IMonitorInfoContracts))]
     public interface IMonitorInfo : IMirror
     {
         /// <summary>

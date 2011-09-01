@@ -1,8 +1,11 @@
 ﻿namespace Tvl.Java.DebugInterface
 {
+    using System.Diagnostics.Contracts;
+
     /// <summary>
     /// A mirror that has a <see cref="ILocation"/>.
     /// </summary>
+    [ContractClass(typeof(Contracts.ILocatableContracts))]
     public interface ILocatable
     {
         /// <summary>

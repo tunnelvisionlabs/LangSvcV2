@@ -1,6 +1,9 @@
 ﻿namespace Tvl.Java.DebugInterface.Request
 {
-    public interface IThreadFilter
+    using System.Diagnostics.Contracts;
+
+    [ContractClass(typeof(Contracts.IThreadFilterContracts))]
+    public interface IThreadFilter : IMirror
     {
         void AddThreadFilter(IThreadReference thread);
     }

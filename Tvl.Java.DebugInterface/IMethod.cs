@@ -2,11 +2,14 @@
 {
     using System;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
+
 
     /// <summary>
     /// A static or instance method in the target VM. See <see cref="ITypeComponent"/> for
     /// general information about Field and Method mirrors.
     /// </summary>
+    [ContractClass(typeof(Contracts.IMethodContracts))]
     public interface IMethod : ITypeComponent, ILocatable, IEquatable<IMethod>
     {
         /// <summary>

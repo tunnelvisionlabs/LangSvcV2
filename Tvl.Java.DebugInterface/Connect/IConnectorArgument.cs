@@ -1,8 +1,11 @@
 ﻿namespace Tvl.Java.DebugInterface.Connect
 {
+    using System.Diagnostics.Contracts;
+
     /// <summary>
     /// Specification for and value of a <see cref="IConnector"/> argument.
     /// </summary>
+    [ContractClass(typeof(Contracts.IConnectorArgumentContracts))]
     public interface IConnectorArgument
     {
         /// <summary>
