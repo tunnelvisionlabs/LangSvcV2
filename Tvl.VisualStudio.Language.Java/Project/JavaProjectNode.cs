@@ -391,8 +391,8 @@
         {
             SourceFolder = 0,
             OpenSourceFolder = 1,
-            TestSourceFolder = 0,
-            OpenTestSourceFolder = 1,
+            TestSourceFolder = 2,
+            OpenTestSourceFolder = 3,
         }
     }
 }
