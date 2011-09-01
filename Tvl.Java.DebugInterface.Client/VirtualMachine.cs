@@ -25,6 +25,7 @@
         private readonly PrimitiveTypes _primitiveTypes;
         private readonly EventQueue _eventQueue;
         private readonly EventRequestManager _eventRequestManager;
+        private readonly string[] _sourcePaths;
 
         private EventWaitHandle _ipcHandle;
         private DebugSession.IJvmDebugSessionService _sessionService;
@@ -42,11 +43,14 @@
 
         private readonly Dictionary<string, IType> _types = new Dictionary<string, IType>();
 
-        public VirtualMachine()
+        public VirtualMachine(string[] sourcePaths)
         {
+            Contract.Requires<ArgumentNullException>(sourcePaths != null, "sourcePaths");
+
             _primitiveTypes = new PrimitiveTypes(this);
             _eventRequestManager = new EventRequestManager(this);
             _eventQueue = new EventQueue(this);
+            _sourcePaths = sourcePaths;
         }
 
         public event EventHandler AttachComplete;
@@ -75,11 +79,19 @@
             }
         }
 
-        public IDebugProtocolService ProtocolService
+        internal IDebugProtocolService ProtocolService
         {
             get
             {
                 return _protocolService;
+            }
+        }
+
+        internal ReadOnlyCollection<string> SourcePaths
+        {
+            get
+            {
+                return new ReadOnlyCollection<string>(_sourcePaths);
             }
         }
 
@@ -91,9 +103,9 @@
             }
         }
 
-        internal static VirtualMachine BeginAttachToProcess(int processId)
+        internal static VirtualMachine BeginAttachToProcess(int processId, string[] sourcePaths)
         {
-            VirtualMachine virtualMachine = new VirtualMachine();
+            VirtualMachine virtualMachine = new VirtualMachine(sourcePaths);
             virtualMachine._ipcHandle = new EventWaitHandle(false, EventResetMode.ManualReset, string.Format("JavaDebuggerInitHandle{0}", processId));
 
             Task initializeTask = Task.Factory.StartNew(virtualMachine.InitializeServicesAfterProcessStarts).HandleNonCriticalExceptions();

@@ -113,9 +113,20 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
             Dictionary<string, IConnectorArgument> arguments = new Dictionary<string, IConnectorArgument>();
 
             string argumentName = "pid";
-            IConnectorIntegerArgument defaultArgument = (IConnectorIntegerArgument)connector.DefaultArguments["pid"];
+            IConnectorIntegerArgument defaultArgument = (IConnectorIntegerArgument)connector.DefaultArguments[argumentName];
             IConnectorIntegerArgument argument = new ConnectorIntegerArgument(defaultArgument, (int)_process.GetPhysicalProcessId().dwProcessId);
             arguments.Add(argumentName, argument);
+
+            argumentName = "sourcePaths";
+            IConnectorStringArgument defaultPathsArgument = (IConnectorStringArgument)connector.DefaultArguments[argumentName];
+#warning TODO: pull these paths from the solution or something
+            string[] sourcePaths =
+                {
+                    @"C:\dev\jdksrc",
+                    @"C:\dev\stringtemplate_main\antlr\antlr3-main\tool\src\main\java",
+                };
+            IConnectorStringArgument stringArgument = new ConnectorStringArgument(defaultPathsArgument, string.Join(";", sourcePaths));
+            arguments.Add(argumentName, stringArgument);
 
             connector.AttachComplete += HandleAttachComplete;
             _virtualMachine = connector.Attach(arguments);

@@ -7,6 +7,7 @@
     using System.Linq;
     using Tvl.Java.DebugInterface.Types;
     using AccessModifiers = Tvl.Java.DebugInterface.AccessModifiers;
+    using File = System.IO.File;
     using Path = System.IO.Path;
 
     internal abstract class ReferenceType : JavaType, IReferenceType
@@ -372,8 +373,20 @@
             if (_taggedTypeId.TypeTag == TypeTag.Class || _taggedTypeId.TypeTag == TypeTag.Interface)
             {
                 string signature = GetSignature().Substring(1);
-                string folder = signature.Substring(0, signature.LastIndexOf('/')).Replace('/', Path.DirectorySeparatorChar);
-                List<string> paths = new List<string>(GetSourceNames(stratum).Select(i => Path.Combine(folder, i)));
+                string relativeFolder = signature.Substring(0, signature.LastIndexOf('/')).Replace('/', Path.DirectorySeparatorChar);
+
+                List<string> paths = new List<string>(GetSourceNames(stratum).Select(i => Path.Combine(relativeFolder, i)));
+                for (int i = paths.Count - 1; i >= 0; i--)
+                {
+                    string path = paths[i];
+                    List<string> qualifiedPaths = VirtualMachine.SourcePaths.Select(j => Path.Combine(j, path)).Where(File.Exists).ToList();
+                    if (qualifiedPaths.Count > 0)
+                    {
+                        paths.RemoveAt(i);
+                        paths.InsertRange(i, qualifiedPaths);
+                    }
+                }
+
                 return paths.AsReadOnly();
             }
             else

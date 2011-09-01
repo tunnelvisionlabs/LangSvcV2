@@ -16,6 +16,7 @@
         public LocalDebuggingAttachingConnector()
         {
             _defaultArguments.Add("pid", new ConnectorIntegerArgument("pid", "Process ID", "The system process ID of the process to attach to.", true, 0, 0, int.MaxValue));
+            _defaultArguments.Add("sourcePaths", new ConnectorStringArgument("sourcePaths", "Source Paths", "A semicolon-delimited list of root paths containing source code for the program.", true, string.Empty));
         }
 
         public event EventHandler AttachComplete;
@@ -25,8 +26,9 @@
         public IVirtualMachine Attach(IEnumerable<KeyValuePair<string, IConnectorArgument>> arguments)
         {
             var pid = (IConnectorIntegerArgument)arguments.Single(i => i.Key == "pid").Value;
+            var sourcePaths = (IConnectorStringArgument)arguments.SingleOrDefault(i => i.Key == "sourcePaths").Value;
 
-            VirtualMachine virtualMachine = VirtualMachine.BeginAttachToProcess(pid.Value);
+            VirtualMachine virtualMachine = VirtualMachine.BeginAttachToProcess(pid.Value, sourcePaths.StringValue.Split(';'));
             virtualMachine.AttachComplete += OnAttachComplete;
             return virtualMachine;
         }

@@ -112,6 +112,7 @@
     <Compile Include="ClassType.cs" />
     <Compile Include="Connect\ConnectorArgument.cs" />
     <Compile Include="Connect\ConnectorIntegerArgument.cs" />
+    <Compile Include="Connect\ConnectorStringArgument.cs" />
     <Compile Include="Connect\LocalDebuggingAttachingConnector.cs" />
     <Compile Include="Connect\NetNamedPipeTransport.cs" />
     <Compile Include="DebugErrorHandler.cs" />
