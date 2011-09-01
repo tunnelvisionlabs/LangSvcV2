@@ -18,21 +18,25 @@
 
         [Category("Advanced")]
         [DisplayName("Build Action")]
-        [DefaultValue("None")]
-        public virtual string BuildAction
+        [DefaultValue(FolderBuildAction.Folder)]
+        public virtual FolderBuildAction BuildAction
         {
             get
             {
                 string value = this.Node.ItemNode.ItemName;
                 if (string.IsNullOrEmpty(value))
-                    return "None";
+                    return FolderBuildAction.Folder;
 
-                return value;
+                FolderBuildAction result;
+                if (!Enum.TryParse(value, out result))
+                    result = FolderBuildAction.Folder;
+
+                return result;
             }
 
             set
             {
-                this.Node.ItemNode.ItemName = value;
+                this.Node.ItemNode.ItemName = value.ToString();
             }
         }
     }
