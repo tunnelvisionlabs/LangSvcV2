@@ -208,14 +208,43 @@
             }
 
             if (!string.IsNullOrEmpty(BuildArgs))
+            {
+                commandLine.AppendTextUnquoted(" ");
                 commandLine.AppendTextUnquoted(BuildArgs);
+            }
+
+            // reference paths
+            List<string> referencePaths = new List<string>();
+            foreach (var reference in (References ?? Enumerable.Empty<ITaskItem>()))
+            {
+                string path = GetReferencePath(reference);
+                if (!string.IsNullOrEmpty(path))
+                    referencePaths.Add(path);
+            }
+
+            if (referencePaths.Count > 0)
+            {
+                commandLine.AppendSwitchIfNotNull("-cp ", referencePaths.ToArray(), ";");
+            }
 
             commandLine.AppendSwitchIfNotNull("-classpath ", ClassPath, ";");
 
             commandLine.AppendFileNamesIfNotNull(Sources, " ");
         }
 
-        private static readonly Regex CompileMessageFormat = new Regex(@"^(?<File>[\w\\/\.]+):(?<Line>[0-9]+):(?<Warning> warning:)? (?:\[(?<Category>\w+)\] )?(?<Message>.*)$", RegexOptions.Compiled);
+        private string GetReferencePath(ITaskItem reference)
+        {
+            string path = reference.ItemSpec;
+            if (File.Exists(reference.ItemSpec) && Path.GetExtension(reference.ItemSpec).Equals(".jar", StringComparison.OrdinalIgnoreCase))
+                return path;
+
+            if (Directory.Exists(Path.GetDirectoryName(reference.ItemSpec)))
+                return Path.GetDirectoryName(reference.ItemSpec);
+
+            return null;
+        }
+
+        private static readonly Regex CompileMessageFormat = new Regex(@"^(?<File>[\w\\/\.\-_\:]+):(?<Line>[0-9]+):(?<Warning> warning:)? (?:\[(?<Category>\w+)\] )?(?<Message>.*)$", RegexOptions.Compiled);
 
         protected override void LogEventsFromTextOutput(string singleLine, MessageImportance messageImportance)
         {
