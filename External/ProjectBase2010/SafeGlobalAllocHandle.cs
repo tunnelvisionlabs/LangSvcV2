@@ -11,6 +11,11 @@
             SetHandle(handle);
         }
 
+        private SafeGlobalAllocHandle()
+            : base(true)
+        {
+        }
+
         protected override bool ReleaseHandle()
         {
             UnsafeNativeMethods.GlobalFree(handle);
