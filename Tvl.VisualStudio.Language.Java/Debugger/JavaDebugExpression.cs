@@ -84,6 +84,9 @@
             case Java2Lexer.IDENTIFIER:
                 if (_expression.ChildCount == 0)
                 {
+                    if (!_context.StackFrame.StackFrame.GetHasVariableInfo())
+                        return null;
+
                     ILocalVariable variable = _context.StackFrame.StackFrame.GetVisibleVariableByName(_expression.Text);
                     if (variable != null)
                     {

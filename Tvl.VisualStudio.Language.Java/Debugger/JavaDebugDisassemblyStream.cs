@@ -161,7 +161,8 @@
             if (prgDisassembly == null || prgDisassembly.Length < dwInstructions)
                 return VSConstants.E_INVALIDARG;
 
-            ReadOnlyCollection<ILocalVariable> localVariables = _executionContext.Location.GetMethod().GetVariables();
+            IMethod method = _executionContext.Location.GetMethod();
+            ReadOnlyCollection<ILocalVariable> localVariables = method.GetHasVariableInfo() ? method.GetVariables() : new ReadOnlyCollection<ILocalVariable>(new ILocalVariable[0]);
             ReadOnlyCollection<ConstantPoolEntry> constantPool = _executionContext.Location.GetDeclaringType().GetConstantPool();
 
             int addressFieldWidth = 1;
