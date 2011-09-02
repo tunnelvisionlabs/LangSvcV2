@@ -98,7 +98,7 @@
                 }
             }
 
-            private JavaVM VirtualMachine
+            internal JavaVM VirtualMachine
             {
                 get
                 {
@@ -490,6 +490,7 @@
                         throw new InvalidOperationException();
 
                     nativeEnvironment = JniEnvironment.GetOrCreateInstance(jniEnv);
+                    VirtualMachine.HandleVMInit(environment, nativeEnvironment, threadHandle);
                     InitializeAgentThread(environment, nativeEnvironment);
                 }
 
@@ -501,7 +502,7 @@
                     return;
                 }
 
-                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, true));
+                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
                 ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, true);
 
                 bool sent = false;
@@ -591,7 +592,7 @@
                 JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(_service.VirtualMachine, env);
 
                 JniEnvironment nativeEnvironment;
-                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, true));
+                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
 
                 EventFilter[] filters = GetEventFilters(EventKind.VirtualMachineDeath);
                 foreach (var filter in filters)
@@ -635,7 +636,7 @@
             {
                 JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(_service.VirtualMachine, env);
                 JniEnvironment nativeEnvironment;
-                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, true));
+                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
 
                 ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, true);
                 EventFilter[] filters = GetEventFilters(EventKind.ThreadStart);
@@ -671,7 +672,7 @@
             {
                 JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(_service.VirtualMachine, env);
                 JniEnvironment nativeEnvironment;
-                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, true));
+                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
                 ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, false);
                 EventFilter[] filters = GetEventFilters(EventKind.ThreadEnd);
                 foreach (var filter in filters)
@@ -712,31 +713,11 @@
 
             private void HandleClassLoad(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jclass classHandle)
             {
-                if (!VirtualMachine.IsAgentThread.Value)
-                {
-                    // ignore events before VMInit
-                    if (AgentEventDispatcher == null)
-                        return;
+                //JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(_service.VirtualMachine, env);
+                //JniEnvironment nativeEnvironment;
+                //JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
 
-                    // dispatch this call to an agent thread
-                    Action<jvmtiEnvHandle, JNIEnvHandle, jthread, jclass> method = HandleClassLoad;
-                    AgentEventDispatcher.Invoke(method, env, jniEnv, threadHandle, classHandle);
-                    return;
-                }
-
-#if false
-                ThreadId threadId = GetObjectId(ref threadHandle);
-                ClassId classId = GetObjectId(ref classHandle);
-                EventFilter[] filters = GetEventFilters(EventKind.ClassLoad);
-                foreach (var filter in filters)
-                {
-                    if (filter.ProcessEvent(threadId, classId))
-                    {
-                        ApplySuspendPolicy(filter.SuspendPolicy, threadId);
-                        Callback.ClassLoad(filter.SuspendPolicy, filter.RequestId, threadId);
-                    }
-                }
-#endif
+                //VirtualMachine.HandleClassLoad(environment, nativeEnvironment, classHandle);
             }
 
             private void HandleClassPrepare(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jclass classHandle)
@@ -755,7 +736,7 @@
 
                 JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(_service.VirtualMachine, env);
                 JniEnvironment nativeEnvironment;
-                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, true));
+                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
 
                 string signature;
                 IntPtr signaturePtr;
@@ -815,23 +796,40 @@
 
             private void HandleException(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID methodId, jlocation jlocation, jobject exceptionHandle, jmethodID catchMethodId, jlocation catchjLocation)
             {
-                if (!VirtualMachine.IsAgentThread.Value)
-                {
-                    // ignore events before VMInit
-                    if (AgentEventDispatcher == null)
-                        return;
-
-                    // dispatch this call to an agent thread
-                    Action<jvmtiEnvHandle, JNIEnvHandle, jthread, jmethodID, jlocation, jobject, jmethodID, jlocation> method = HandleException;
-                    AgentEventDispatcher.Invoke(method, env, jniEnv, threadHandle, methodId, jlocation, exceptionHandle, catchMethodId, catchjLocation);
+                // don't send exception events from an agent thread
+                if (VirtualMachine.IsAgentThread.Value)
                     return;
-                }
 
                 JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(_service.VirtualMachine, env);
+                JniEnvironment nativeEnvironment;
+                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
 
-                //Location location = new Location();
-                //Location catchLocation = new Location();
-                throw new NotImplementedException();
+                TaggedReferenceTypeId declaringClass;
+                MethodId method = new MethodId(methodId.Handle);
+                ulong index = (ulong)jlocation.Value;
+                JvmtiErrorHandler.ThrowOnFailure(environment.GetMethodDeclaringClass(nativeEnvironment, method, out declaringClass));
+                Location location = new Location(declaringClass, method, index);
+
+                method = new MethodId(catchMethodId.Handle);
+                index = (ulong)catchjLocation.Value;
+                JvmtiErrorHandler.ThrowOnFailure(environment.GetMethodDeclaringClass(nativeEnvironment, method, out declaringClass));
+                Location catchLocation = new Location(declaringClass, method, index);
+
+                TaggedObjectId exceptionId = VirtualMachine.TrackLocalObjectReference(exceptionHandle, environment, nativeEnvironment, true);
+
+                ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, true);
+                EventFilter[] filters = GetEventFilters(EventKind.Exception);
+                foreach (var filter in filters)
+                {
+                    if (filter.ProcessEvent(environment, nativeEnvironment, this, threadId, default(TaggedReferenceTypeId), location))
+                    {
+                        SendExceptionEvent(environment, filter, threadId, location, exceptionId, catchLocation);
+                    }
+                }
+
+                ////Location location = new Location();
+                ////Location catchLocation = new Location();
+                //throw new NotImplementedException();
 
 #if false
                 ThreadId threadId = GetObjectId(ref threadHandle);
@@ -857,6 +855,27 @@
                 //{
                 //    processor.HandleException(environment, thread, location, exception, catchLocation);
                 //}
+            }
+
+            private void SendExceptionEvent(JvmtiEnvironment environment, EventFilter filter, ThreadId threadId, Location location, TaggedObjectId exceptionId, Location catchLocation)
+            {
+                if (!VirtualMachine.IsAgentThread.Value)
+                {
+                    // ignore events before VMInit
+                    if (AgentEventDispatcher == null)
+                        return;
+
+                    // dispatch this call to an agent thread
+                    Action<JvmtiEnvironment, EventFilter, ThreadId, Location, TaggedObjectId, Location> invokeMethod = SendExceptionEvent;
+                    AgentEventDispatcher.Invoke(invokeMethod, environment, filter, threadId, location, exceptionId, catchLocation);
+                    return;
+                }
+
+                JniEnvironment nativeEnvironment;
+                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
+
+                ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
+                Callback.Exception(filter.SuspendPolicy, filter.RequestId, threadId, location, exceptionId, catchLocation);
             }
 
             private void HandleExceptionCatch(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID methodId, jlocation jlocation, jobject exceptionHandle)
@@ -922,7 +941,7 @@
                 }
 
                 JniEnvironment nativeEnvironment;
-                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, true));
+                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
 
                 ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
                 Callback.SingleStep(filter.SuspendPolicy, filter.RequestId, threadId, location);
@@ -987,7 +1006,7 @@
                 }
 
                 JniEnvironment nativeEnvironment;
-                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, true));
+                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
 
                 if (filter.InternalEventKind == EventKind.SingleStep)
                 {
@@ -1012,7 +1031,7 @@
 
                 JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(_service.VirtualMachine, env);
                 JniEnvironment nativeEnvironment;
-                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, true));
+                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
 
                 ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, true);
 

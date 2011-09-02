@@ -109,6 +109,11 @@
             return jvmtiError.None;
         }
 
+        internal jvmtiError GetThreadInfo(jthread thread, out jvmtiThreadInfo threadInfo)
+        {
+            return RawInterface.GetThreadInfo(this, thread, out threadInfo);
+        }
+
         public jvmtiError GetAllThreads(JniEnvironment nativeEnvironment, out ThreadId[] threads)
         {
             threads = null;
@@ -411,6 +416,11 @@
             {
                 Deallocate(constantPoolBytesPtr);
             }
+        }
+
+        public jvmtiError GetClassLoader(jclass @class, out jobject classLoader)
+        {
+            return RawInterface.GetClassLoader(this, @class, out classLoader);
         }
 
         public jvmtiError GetClassFields(JniEnvironment nativeEnvironment, ReferenceTypeId declaringType, out FieldId[] fields)
@@ -936,6 +946,11 @@
         public jvmtiError GetLocalDouble(jthread thread, int depth, int slot, out double value)
         {
             return RawInterface.GetLocalDouble(this, thread, depth, slot, out value);
+        }
+
+        public jvmtiError GetLocalObject(jthread thread, int depth, int slot, out jobject value)
+        {
+            return RawInterface.GetLocalObject(this, thread, depth, slot, out value);
         }
 
         public jvmtiError GetLocalObject(JniEnvironment nativeEnvironment, jthread thread, int depth, int slot, out TaggedObjectId value)

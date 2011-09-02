@@ -81,6 +81,11 @@
             return RawInterface.GetObjectClass(this, @object);
         }
 
+        public jclass GetSuperclass(jclass @class)
+        {
+            return RawInterface.GetSuperclass(this, @class);
+        }
+
         public bool IsInstanceOf(jobject @object, jclass @class)
         {
             byte result = RawInterface.IsInstanceOf(this, @object, @class);
@@ -138,9 +143,27 @@
             RawInterface.ExceptionClear(this);
         }
 
+        public int GetStringUTFLength(jobject stringHandle)
+        {
+            return RawInterface.GetStringUTFLength(this, stringHandle);
+        }
+
+        public void GetStringUTFRegion(jobject stringHandle, int start, int length, byte[] buffer)
+        {
+            RawInterface.GetStringUTFRegion(this, stringHandle, start, length, buffer);
+        }
+
         public int GetArrayLength(jobject arrayHandle)
         {
             return RawInterface.GetArrayLength(this, arrayHandle);
+        }
+
+        public jobject NewString(string value)
+        {
+            if (value == null)
+                return jobject.Null;
+
+            return RawInterface.NewString(this, value, value.Length);
         }
 
         public jobject NewObject(jclass @class, jmethodID ctorMethodId, params jvalue[] args)

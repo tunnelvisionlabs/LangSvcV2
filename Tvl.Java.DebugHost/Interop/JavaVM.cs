@@ -78,6 +78,46 @@
             }
         }
 
+        internal jclass StringClass
+        {
+            get
+            {
+                return _stringClass;
+            }
+        }
+
+        internal jclass ThreadClass
+        {
+            get
+            {
+                return _threadClass;
+            }
+        }
+
+        internal jclass ThreadGroupClass
+        {
+            get
+            {
+                return _threadGroupClass;
+            }
+        }
+
+        internal jclass ClassClass
+        {
+            get
+            {
+                return _classClass;
+            }
+        }
+
+        internal jclass ClassLoaderClass
+        {
+            get
+            {
+                return _classLoaderClass;
+            }
+        }
+
         internal ConcurrentDictionary<ThreadId, int> SuspendCounts
         {
             get
@@ -502,7 +542,7 @@
                  */
 
                 // check for array
-                jclass objectClass = nativeEnvironment.RawInterface.GetObjectClass(nativeEnvironment, @object);
+                jclass objectClass = nativeEnvironment.GetObjectClass(@object);
                 nativeEnvironment.ExceptionClear();
                 try
                 {
@@ -514,21 +554,15 @@
                     }
                     else
                     {
-                        InitializeGlobalClassHandle(nativeEnvironment, ref _stringClass, "java/lang/String");
-                        InitializeGlobalClassHandle(nativeEnvironment, ref _threadClass, "java/lang/Thread");
-                        InitializeGlobalClassHandle(nativeEnvironment, ref _threadGroupClass, "java/lang/ThreadGroup");
-                        InitializeGlobalClassHandle(nativeEnvironment, ref _classClass, "java/lang/Class");
-                        InitializeGlobalClassHandle(nativeEnvironment, ref _classLoaderClass, "java/lang/ClassLoader");
-
-                        if (nativeEnvironment.IsInstanceOf(@object, _stringClass))
+                        if (_stringClass != jclass.Null && nativeEnvironment.IsInstanceOf(@object, _stringClass))
                             objectKind = Tag.String;
-                        else if (nativeEnvironment.IsInstanceOf(@object, _threadClass))
+                        else if (_threadClass != jclass.Null && nativeEnvironment.IsInstanceOf(@object, _threadClass))
                             objectKind = Tag.Thread;
-                        else if (nativeEnvironment.IsInstanceOf(@object, _threadGroupClass))
+                        else if (_threadGroupClass != jclass.Null && nativeEnvironment.IsInstanceOf(@object, _threadGroupClass))
                             objectKind = Tag.ThreadGroup;
-                        else if (nativeEnvironment.IsInstanceOf(@object, _classClass))
+                        else if (_classClass != jclass.Null && nativeEnvironment.IsInstanceOf(@object, _classClass))
                             objectKind = Tag.ClassObject;
-                        else if (nativeEnvironment.IsInstanceOf(@object, _classLoaderClass))
+                        else if (_classLoaderClass != jclass.Null && nativeEnvironment.IsInstanceOf(@object, _classLoaderClass))
                             objectKind = Tag.ClassLoader;
                         else
                             objectKind = Tag.Object;
@@ -555,15 +589,62 @@
             return new TaggedObjectId(objectKind, new ObjectId(tag));
         }
 
-        private static void InitializeGlobalClassHandle(JniEnvironment nativeEnvironment, ref jclass classHandle, string className)
+        internal void HandleVMInit(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, jthread thread)
         {
-            Contract.Requires<ArgumentNullException>(nativeEnvironment != null, "nativeEnvironment");
-            if (nativeEnvironment.IsSameObject(classHandle, jclass.Null))
+            jclass threadClass = nativeEnvironment.GetObjectClass(thread);
+            nativeEnvironment.ExceptionClear();
+            _threadClass = FindBaseClass(environment, nativeEnvironment, threadClass, "Ljava/lang/Thread;");
+
             {
-                jclass local = nativeEnvironment.FindClass(className);
-                classHandle = (jclass)nativeEnvironment.NewGlobalReference(local);
-                nativeEnvironment.DeleteLocalReference(local);
+                jclass classClass = nativeEnvironment.GetObjectClass(threadClass);
+                nativeEnvironment.ExceptionClear();
+                _classClass = FindBaseClass(environment, nativeEnvironment, classClass, "Ljava/lang/Class;");
+                nativeEnvironment.DeleteLocalReference(classClass);
             }
+
+            {
+                jvmtiThreadInfo threadInfo;
+                JvmtiErrorHandler.ThrowOnFailure(environment.GetThreadInfo(thread, out threadInfo));
+                jclass threadGroupClass = nativeEnvironment.GetObjectClass(threadInfo._threadGroup);
+                _threadGroupClass = FindBaseClass(environment, nativeEnvironment, threadGroupClass, "Ljava/lang/ThreadGroup;");
+
+                jclass classLoaderClass = nativeEnvironment.GetObjectClass(threadInfo._contextClassLoader);
+                nativeEnvironment.ExceptionClear();
+                _classLoaderClass = FindBaseClass(environment, nativeEnvironment, classLoaderClass, "Ljava/lang/ClassLoader;");
+                nativeEnvironment.DeleteLocalReference(classLoaderClass);
+
+                nativeEnvironment.DeleteLocalReference(threadGroupClass);
+                nativeEnvironment.DeleteLocalReference(threadInfo._contextClassLoader);
+                nativeEnvironment.DeleteLocalReference(threadInfo._threadGroup);
+                environment.Deallocate(threadInfo._name);
+            }
+
+            nativeEnvironment.DeleteLocalReference(threadClass);
+
+            jobject stringObject = nativeEnvironment.NewString(string.Empty);
+            jclass stringClass = nativeEnvironment.GetObjectClass(stringObject);
+            _stringClass = FindBaseClass(environment, nativeEnvironment, stringClass, "Ljava/lang/String;");
+            nativeEnvironment.DeleteLocalReference(stringObject);
+            nativeEnvironment.DeleteLocalReference(stringClass);
+        }
+
+        internal jclass FindBaseClass(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, jclass classHandle, string signature)
+        {
+            string currentSignature;
+            string genericSignature;
+            JvmtiErrorHandler.ThrowOnFailure(environment.GetClassSignature(classHandle, out currentSignature, out genericSignature));
+            if (currentSignature == signature)
+            {
+                return (jclass)nativeEnvironment.NewGlobalReference(classHandle);
+            }
+
+            jclass superClass = nativeEnvironment.GetSuperclass(classHandle);
+            if (superClass == jclass.Null)
+                return jclass.Null;
+
+            jclass result = FindBaseClass(environment, nativeEnvironment, superClass, signature);
+            nativeEnvironment.DeleteLocalReference(superClass);
+            return result;
         }
 
         internal TaggedReferenceTypeId TrackLocalClassReference(jclass classHandle, JvmtiEnvironment environment, JniEnvironment nativeEnvironment, bool freeLocalReference)
