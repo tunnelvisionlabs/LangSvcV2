@@ -10,11 +10,16 @@
     {
         #region IStackFrame Members
 
+        public bool GetHasVariableInfo()
+        {
+            throw new NotImplementedException();
+        }
+
         public ReadOnlyCollection<IValue> GetArgumentValues()
         {
             Contract.Ensures(Contract.Result<ReadOnlyCollection<IValue>>() != null);
 #if CONTRACTS_FORALL
-            Contract.Ensures(Contract.ForAll(Contract.Result<ReadOnlyCollection<IValue>>(), value => value != null && this.GetVirtualMachine().Equals(value.GetVirtualMachine())));
+            Contract.Ensures(Contract.ForAll(Contract.Result<ReadOnlyCollection<IValue>>(), value => value == null || this.GetVirtualMachine().Equals(value.GetVirtualMachine())));
 #endif
 
             throw new NotImplementedException();
@@ -24,8 +29,7 @@
         {
             Contract.Requires<ArgumentNullException>(variable != null, "variable");
             Contract.Requires<VirtualMachineMismatchException>(this.GetVirtualMachine().Equals(variable.GetVirtualMachine()));
-            Contract.Ensures(Contract.Result<IValue>() != null);
-            Contract.Ensures(this.GetVirtualMachine().Equals(Contract.Result<IValue>().GetVirtualMachine()));
+            Contract.Ensures(Contract.Result<IValue>() == null || this.GetVirtualMachine().Equals(Contract.Result<IValue>().GetVirtualMachine()));
 
             throw new NotImplementedException();
         }
@@ -39,7 +43,7 @@
 #endif
             Contract.Ensures(Contract.Result<IDictionary<ILocalVariable, IValue>>() != null);
 #if CONTRACTS_FORALL
-            Contract.Ensures(Contract.ForAll(Contract.Result<IDictionary<ILocalVariable, IValue>>(), pair => pair.Key != null && this.GetVirtualMachine().Equals(pair.Key.GetVirtualMachine()) && pair.Value != null && this.GetVirtualMachine().Equals(pair.Value.GetVirtualMachine())));
+            Contract.Ensures(Contract.ForAll(Contract.Result<IDictionary<ILocalVariable, IValue>>(), pair => pair.Key != null && this.GetVirtualMachine().Equals(pair.Key.GetVirtualMachine()) && (pair.Value == null || this.GetVirtualMachine().Equals(pair.Value.GetVirtualMachine()))));
 #endif
 
             throw new NotImplementedException();
@@ -48,9 +52,8 @@
         public void SetValue(ILocalVariable variable, IValue value)
         {
             Contract.Requires<ArgumentNullException>(variable != null, "variable");
-            Contract.Requires<ArgumentNullException>(value != null, "value");
             Contract.Requires<VirtualMachineMismatchException>(this.GetVirtualMachine().Equals(variable.GetVirtualMachine()));
-            Contract.Requires<VirtualMachineMismatchException>(this.GetVirtualMachine().Equals(value.GetVirtualMachine()));
+            Contract.Requires<VirtualMachineMismatchException>(value == null || this.GetVirtualMachine().Equals(value.GetVirtualMachine()));
 
             throw new NotImplementedException();
         }

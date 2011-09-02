@@ -26,8 +26,7 @@
 
         public IValue GetCurrentValue()
         {
-            Contract.Ensures(Contract.Result<IValue>() != null);
-            Contract.Ensures(this.GetVirtualMachine().Equals(Contract.Result<IValue>()));
+            Contract.Ensures(Contract.Result<IValue>() == null || this.GetVirtualMachine().Equals(Contract.Result<IValue>()));
 
             throw new NotImplementedException();
         }

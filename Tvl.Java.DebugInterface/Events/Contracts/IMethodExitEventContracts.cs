@@ -18,8 +18,7 @@
 
         public IValue GetReturnValue()
         {
-            Contract.Ensures(Contract.Result<IValue>() != null);
-            Contract.Ensures(this.GetVirtualMachine().Equals(Contract.Result<IValue>().GetVirtualMachine()));
+            Contract.Ensures(Contract.Result<IValue>() == null || this.GetVirtualMachine().Equals(Contract.Result<IValue>().GetVirtualMachine()));
 
             throw new NotImplementedException();
         }

@@ -108,6 +108,11 @@
             throw new NotImplementedException();
         }
 
+        public bool GetHasVariableInfo()
+        {
+            throw new NotImplementedException();
+        }
+
         public ILocation GetLocationOfCodeIndex(long codeIndex)
         {
             Contract.Requires<ArgumentOutOfRangeException>(codeIndex >= 0);

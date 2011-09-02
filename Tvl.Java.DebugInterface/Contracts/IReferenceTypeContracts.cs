@@ -127,8 +127,7 @@
         {
             Contract.Requires<ArgumentNullException>(field != null, "field");
             Contract.Requires<VirtualMachineMismatchException>(this.GetVirtualMachine().Equals(field.GetVirtualMachine()));
-            Contract.Ensures(Contract.Result<IValue>() != null);
-            Contract.Ensures(this.GetVirtualMachine().Equals(Contract.Result<IValue>().GetVirtualMachine()));
+            Contract.Ensures(Contract.Result<IValue>() == null || this.GetVirtualMachine().Equals(Contract.Result<IValue>().GetVirtualMachine()));
 
             throw new NotImplementedException();
         }
@@ -141,8 +140,8 @@
 #endif
             Contract.Ensures(Contract.Result<IDictionary<IField, IValue>>() != null);
 #if CONTRACTS_FORALL
-            Contract.Ensures(Contract.ForAll(Contract.Result<IDictionary<IField, IValue>>(), pair => pair.Key != null && pair.Value != null));
-            Contract.Ensures(Contract.ForAll(Contract.Result<IDictionary<IField, IValue>>(), pair => this.GetVirtualMachine().Equals(pair.Key.GetVirtualMachine()) && this.GetVirtualMachine().Equals(pair.Value.GetVirtualMachine())));
+            Contract.Ensures(Contract.ForAll(Contract.Result<IDictionary<IField, IValue>>(), pair => pair.Key != null));
+            Contract.Ensures(Contract.ForAll(Contract.Result<IDictionary<IField, IValue>>(), pair => this.GetVirtualMachine().Equals(pair.Key.GetVirtualMachine()) && (pair.Value == null || this.GetVirtualMachine().Equals(pair.Value.GetVirtualMachine()))));
 #endif
 
             throw new NotImplementedException();

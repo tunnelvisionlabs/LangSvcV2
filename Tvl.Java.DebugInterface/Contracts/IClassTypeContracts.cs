@@ -37,10 +37,9 @@
             Contract.Requires<VirtualMachineMismatchException>(thread == null || this.GetVirtualMachine().Equals(thread.GetVirtualMachine()));
             Contract.Requires<VirtualMachineMismatchException>(method.GetVirtualMachine().Equals(this.GetVirtualMachine()));
 #if CONTRACTS_FORALL
-            Contract.Requires<VirtualMachineMismatchException>(arguments == null || Contract.ForAll(arguments, argument => this.GetVirtualMachine().Equals(argument.GetVirtualMachine())));
+            Contract.Requires<VirtualMachineMismatchException>(arguments == null || Contract.ForAll(arguments, argument => argument == null || this.GetVirtualMachine().Equals(argument.GetVirtualMachine())));
 #endif
-            Contract.Ensures(Contract.Result<IValue>() != null);
-            Contract.Ensures(this.GetVirtualMachine().Equals(Contract.Result<IValue>().GetVirtualMachine()));
+            Contract.Ensures(Contract.Result<IValue>() == null || this.GetVirtualMachine().Equals(Contract.Result<IValue>().GetVirtualMachine()));
 
             throw new NotImplementedException();
         }
@@ -56,7 +55,7 @@
             Contract.Requires<VirtualMachineMismatchException>(thread == null || this.GetVirtualMachine().Equals(thread.GetVirtualMachine()));
             Contract.Requires<VirtualMachineMismatchException>(method.GetVirtualMachine().Equals(this.GetVirtualMachine()));
 #if CONTRACTS_FORALL
-            Contract.Requires<VirtualMachineMismatchException>(arguments == null || Contract.ForAll(arguments, argument => this.GetVirtualMachine().Equals(argument.GetVirtualMachine())));
+            Contract.Requires<VirtualMachineMismatchException>(arguments == null || Contract.ForAll(arguments, argument => argument == null || this.GetVirtualMachine().Equals(argument.GetVirtualMachine())));
 #endif
             Contract.Ensures(Contract.Result<IObjectReference>() != null);
             Contract.Ensures(this.GetVirtualMachine().Equals(Contract.Result<IObjectReference>().GetVirtualMachine()));
@@ -67,9 +66,8 @@
         public void SetValue(IField field, IValue value)
         {
             Contract.Requires<ArgumentNullException>(field != null, "field");
-            Contract.Requires<ArgumentNullException>(value != null, "value");
             Contract.Requires<VirtualMachineMismatchException>(this.GetVirtualMachine().Equals(field.GetVirtualMachine()));
-            Contract.Requires<VirtualMachineMismatchException>(this.GetVirtualMachine().Equals(value.GetVirtualMachine()));
+            Contract.Requires<VirtualMachineMismatchException>(value == null || this.GetVirtualMachine().Equals(value.GetVirtualMachine()));
 
             throw new NotImplementedException();
         }

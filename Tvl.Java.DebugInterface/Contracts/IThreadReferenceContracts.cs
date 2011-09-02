@@ -55,7 +55,7 @@
         {
             Contract.Requires<ArgumentOutOfRangeException>(start >= 0);
             Contract.Requires<ArgumentOutOfRangeException>(length >= 0);
-            Contract.Requires<ArgumentException>(start < GetFrameCount() - length);
+            Contract.Requires<ArgumentException>(start <= GetFrameCount() - length);
             Contract.Ensures(Contract.Result<ReadOnlyCollection<IStackFrame>>() != null);
 #if CONTRACTS_FORALL
             Contract.Ensures(Contract.ForAll(Contract.Result<ReadOnlyCollection<IStackFrame>>(), frame => frame != null && this.GetVirtualMachine().Equals(frame.GetVirtualMachine())));
