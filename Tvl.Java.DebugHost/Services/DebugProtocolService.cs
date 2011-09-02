@@ -1,14 +1,14 @@
 ﻿namespace Tvl.Java.DebugHost.Services
 {
     using System;
-    using System.ServiceModel;
-    using Tvl.Java.DebugInterface.Types;
-    using Tvl.Java.DebugHost.Interop;
-    using System.Diagnostics.Contracts;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Runtime.ExceptionServices;
+    using System.ServiceModel;
     using Tvl.Collections;
+    using Tvl.Java.DebugHost.Interop;
+    using Tvl.Java.DebugInterface.Types;
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Reentrant, IncludeExceptionDetailInFaults = true)]
     public partial class DebugProtocolService : IDebugProtocolService
@@ -833,10 +833,21 @@
             throw new NotImplementedException();
         }
 
-        public Error GetIsObjectCollected(ObjectId @object, out bool result)
+        public Error GetIsObjectCollected(ObjectId objectId, out bool result)
         {
+            result = false;
 
-            throw new NotImplementedException();
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            using (var objectHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, objectId))
+            {
+                result = !objectHandle.IsAlive;
+                return Error.None;
+            }
         }
 
         public Error GetStringValue(ObjectId stringObject, out string stringValue)
@@ -849,7 +860,19 @@
             if (error != jvmtiError.None)
                 return GetStandardError(error);
 
-            throw new NotImplementedException();
+            using (var stringHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, stringObject))
+            {
+                if (!stringHandle.IsAlive)
+                    return Error.InvalidString;
+
+                int length = nativeEnvironment.GetStringUTFLength(stringHandle.Value);
+                byte[] buffer = new byte[length + 1];
+                nativeEnvironment.GetStringUTFRegion(stringHandle.Value, 0, length, buffer);
+                nativeEnvironment.ExceptionClear();
+                stringValue = ModifiedUTF8Encoding.GetString(buffer, 0, length);
+            }
+
+            return Error.None;
         }
 
         public Error GetThreadName(ThreadId threadId, out string name)
