@@ -312,7 +312,7 @@
     <Compile Include="Debugger\Events\DebugEntryPointEvent.cs" />
     <Compile Include="Debugger\Events\DebugErrorEvent.cs" />
     <Compile Include="Debugger\Events\DebugEvent.cs" />
-    <Compile Include="Debugger\Events\DebugExceptionEvent.cs" />
+    <Compile Include="Debugger\Events\JavaDebugExceptionEvent.cs" />
     <Compile Include="Debugger\Events\DebugExpressionEvaluationCompleteEvent.cs" />
     <Compile Include="Debugger\Events\DebugInterceptExceptionCompleteEvent.cs" />
     <Compile Include="Debugger\Events\DebugLoadCompleteEvent.cs" />
