@@ -31,6 +31,9 @@ Copyright (C) Sam Harwell. All rights reserved.
     <Language>Java</Language>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <AllowedReferenceAssemblyFileExtensions Condition=" '$(AllowedReferenceAssemblyFileExtensions)' == '' ">
+      .jar
+    </AllowedReferenceAssemblyFileExtensions>
   </PropertyGroup>
 
   <PropertyGroup>
