@@ -101,12 +101,16 @@
             string agentPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(typeof(JavaProjectConfig).Assembly.Location), "Tvl.Java.DebugHostWrapper.dll"));
             commandLine.AppendSwitchIfNotNull("-agentpath:", agentPath);
 
+            string agentArguments = GetConfigurationProperty(JavaConfigConstants.DebugAgentArguments, false, ProjectPropertyStorage.UserFile);
+            if (!string.IsNullOrEmpty(agentArguments))
+                commandLine.AppendTextUnquoted("=" + agentArguments);
+
             switch (GetConfigurationProperty(JavaConfigConstants.DebugStartAction, false, ProjectPropertyStorage.UserFile))
             {
             case "Class":
                 string jvmArguments = GetConfigurationProperty(JavaConfigConstants.DebugJvmArguments, false, ProjectPropertyStorage.UserFile);
                 if (!string.IsNullOrEmpty(jvmArguments))
-                    commandLine.AppendTextUnquoted(jvmArguments);
+                    commandLine.AppendTextUnquoted(" " + jvmArguments);
 
                 string startupObject = GetConfigurationProperty(JavaConfigConstants.DebugStartClass, false, ProjectPropertyStorage.UserFile);
                 if (!string.IsNullOrEmpty(startupObject))
@@ -120,7 +124,7 @@
 
             string debugArgs = GetConfigurationProperty(JavaConfigConstants.DebugExtraArgs, false, ProjectPropertyStorage.UserFile);
             if (!string.IsNullOrEmpty(debugArgs))
-                commandLine.AppendTextUnquoted(debugArgs);
+                commandLine.AppendTextUnquoted(" " + debugArgs);
 
             string workingDirectory = GetConfigurationProperty(JavaConfigConstants.DebugWorkingDirectory, false, ProjectPropertyStorage.UserFile);
             if (string.IsNullOrEmpty(workingDirectory))

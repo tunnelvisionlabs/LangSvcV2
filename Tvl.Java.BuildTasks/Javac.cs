@@ -208,10 +208,7 @@
             }
 
             if (!string.IsNullOrEmpty(BuildArgs))
-            {
-                commandLine.AppendTextUnquoted(" ");
-                commandLine.AppendTextUnquoted(BuildArgs);
-            }
+                commandLine.AppendTextUnquoted(" " + BuildArgs);
 
             // reference paths
             List<string> referencePaths = new List<string>();

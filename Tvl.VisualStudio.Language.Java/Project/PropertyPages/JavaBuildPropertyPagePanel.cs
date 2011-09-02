@@ -301,7 +301,7 @@
             }
 
             if (!string.IsNullOrEmpty(ExtraArguments))
-                commandLine.AppendTextUnquoted(ExtraArguments);
+                commandLine.AppendTextUnquoted(" " + ExtraArguments);
 
             txtBuildCommandLine.Text = commandLine.ToString();
         }

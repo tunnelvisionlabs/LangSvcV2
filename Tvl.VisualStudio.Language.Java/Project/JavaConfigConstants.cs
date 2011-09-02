@@ -49,5 +49,6 @@
         public const string DebugUseRemoteMachine = "UseRemoteMachine";
         public const string DebugRemoteMachineName = "RemoteMachineName";
         public const string DebugJvmArguments = "DebugJvmArguments";
+        public const string DebugAgentArguments = "DebugAgentArguments";
     }
 }

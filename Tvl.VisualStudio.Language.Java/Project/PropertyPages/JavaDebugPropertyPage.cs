@@ -45,6 +45,7 @@
             PropertyPagePanel.RemoteMachineName = GetConfigProperty(JavaConfigConstants.DebugRemoteMachineName, ProjectPropertyStorage.UserFile);
 
             PropertyPagePanel.VirtualMachineArguments = GetConfigProperty(JavaConfigConstants.DebugJvmArguments, ProjectPropertyStorage.UserFile);
+            PropertyPagePanel.AgentArguments = GetConfigProperty(JavaConfigConstants.DebugAgentArguments, ProjectPropertyStorage.UserFile);
         }
 
         protected override bool ApplyChanges()
@@ -60,6 +61,7 @@
             SetConfigProperty(JavaConfigConstants.DebugRemoteMachineName, PropertyPagePanel.RemoteMachineName, ProjectPropertyStorage.UserFile);
 
             SetConfigProperty(JavaConfigConstants.DebugJvmArguments, PropertyPagePanel.VirtualMachineArguments, ProjectPropertyStorage.UserFile);
+            SetConfigProperty(JavaConfigConstants.DebugAgentArguments, PropertyPagePanel.AgentArguments, ProjectPropertyStorage.UserFile);
 
             return true;
         }

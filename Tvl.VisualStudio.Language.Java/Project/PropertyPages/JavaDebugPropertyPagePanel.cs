@@ -171,17 +171,34 @@
             }
         }
 
+        public string AgentArguments
+        {
+            get
+            {
+                return txtAgentArguments.Text;
+            }
+
+            set
+            {
+                txtAgentArguments.Text = value;
+            }
+        }
+
         private void RefreshCommandLine()
         {
             CommandLineBuilder commandLine = new CommandLineBuilder();
-
-            if (!string.IsNullOrEmpty(VirtualMachineArguments))
-                commandLine.AppendTextUnquoted(VirtualMachineArguments);
 
             switch (StartAction)
             {
             case StartAction.Class:
                 commandLine.AppendFileNameIfNotNull(JavaProjectPackage.FindJavaPath(false));
+
+                commandLine.AppendSwitch("-agentpath:{AgentPath}");
+                if (!string.IsNullOrEmpty(AgentArguments))
+                    commandLine.AppendTextUnquoted("=" + AgentArguments);
+
+                if (!string.IsNullOrEmpty(VirtualMachineArguments))
+                    commandLine.AppendTextUnquoted(" " + VirtualMachineArguments);
 
                 if (!string.IsNullOrEmpty(StartClass))
                     commandLine.AppendFileNameIfNotNull(StartClass);
@@ -198,7 +215,7 @@
             }
 
             if (!string.IsNullOrEmpty(ExtraArguments))
-                commandLine.AppendTextUnquoted(ExtraArguments);
+                commandLine.AppendTextUnquoted(" " + ExtraArguments);
 
             txtCommandLine.Text = commandLine.ToString();
         }
