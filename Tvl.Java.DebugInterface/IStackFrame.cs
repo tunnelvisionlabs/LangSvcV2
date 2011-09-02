@@ -10,6 +10,8 @@
     [ContractClass(typeof(Contracts.IStackFrameContracts))]
     public interface IStackFrame : IMirror, ILocatable
     {
+        bool GetHasVariableInfo();
+
         /// <summary>
         /// Returns the values of all arguments in this frame.
         /// </summary>

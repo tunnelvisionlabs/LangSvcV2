@@ -52,6 +52,11 @@
 
         #region IStackFrame Members
 
+        public bool GetHasVariableInfo()
+        {
+            return _location.Method.GetHasVariableInfo();
+        }
+
         public ReadOnlyCollection<IValue> GetArgumentValues()
         {
             ILocalVariable[] arguments = GetLocation().GetMethod().GetArguments().ToArray();

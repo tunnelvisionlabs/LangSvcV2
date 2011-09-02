@@ -82,6 +82,8 @@
         /// </summary>
         bool GetIsVarArgs();
 
+        bool GetHasVariableInfo();
+
         /// <summary>
         /// Returns a <see cref="ILocation"/> for the given code index.
         /// </summary>

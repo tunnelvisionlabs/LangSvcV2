@@ -18,6 +18,7 @@
         private readonly string _returnTypeName;
 
         // cached items
+        private bool? _hasVariableInfo;
         private LocalVariable[] _variables;
         private Location[] _lineLocations;
         private IType[] _argumentTypes;
@@ -178,6 +179,12 @@
             return (GetModifiers() & AccessModifiers.VarArgs) != 0;
         }
 
+        public bool GetHasVariableInfo()
+        {
+            CacheVariableInfo();
+            return _hasVariableInfo ?? false;
+        }
+
         public ILocation GetLocationOfCodeIndex(long codeIndex)
         {
             return new Location(VirtualMachine, this, codeIndex);
@@ -212,13 +219,9 @@
 
         public ReadOnlyCollection<ILocalVariable> GetVariables()
         {
-            if (_variables == null)
-            {
-                Types.VariableData[] slots;
-                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodVariableTable(out slots, DeclaringType.ReferenceTypeId, MethodId));
-                LocalVariable[] variables = Array.ConvertAll(slots, i => VirtualMachine.GetMirrorOf(this, i));
-                _variables = variables;
-            }
+            CacheVariableInfo();
+            if (!GetHasVariableInfo())
+                throw new MissingInformationException("Local variable information is not available for the current method.");
 
             return new ReadOnlyCollection<ILocalVariable>(_variables);
         }
@@ -263,5 +266,23 @@
         }
 
         #endregion
+
+        private void CacheVariableInfo()
+        {
+            if (_hasVariableInfo.HasValue)
+                return;
+
+            Types.VariableData[] slots;
+            Types.Error error = VirtualMachine.ProtocolService.GetMethodVariableTable(out slots, DeclaringType.ReferenceTypeId, MethodId);
+            if (error != Types.Error.None)
+            {
+                _hasVariableInfo = false;
+                return;
+            }
+
+            LocalVariable[] variables = Array.ConvertAll(slots, i => VirtualMachine.GetMirrorOf(this, i));
+            _variables = variables;
+            _hasVariableInfo = true;
+        }
     }
 }
