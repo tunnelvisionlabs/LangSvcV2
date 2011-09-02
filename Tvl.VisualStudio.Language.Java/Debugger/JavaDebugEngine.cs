@@ -122,8 +122,11 @@
             IPropertyOwner propertyOwner = pEvent as IPropertyOwner;
             if (propertyOwner != null)
             {
+                bool manualResume;
+                propertyOwner.Properties.TryGetProperty("ManualResume", out manualResume);
+
                 SuspendPolicy suspendPolicy;
-                if (propertyOwner.Properties.TryGetProperty(typeof(SuspendPolicy), out suspendPolicy))
+                if (!manualResume && propertyOwner.Properties.TryGetProperty(typeof(SuspendPolicy), out suspendPolicy))
                 {
                     switch (suspendPolicy)
                     {
@@ -318,7 +321,7 @@
             Contract.Requires<ArgumentNullException>(sourcePaths != null, "sourcePaths");
 
             var breakpoints = VirtualizedBreakpoints.ToArray();
-            foreach (var breakpoint in VirtualizedBreakpoints)
+            foreach (var breakpoint in breakpoints)
             {
                 breakpoint.Bind(program, thread, type, sourcePaths);
             }

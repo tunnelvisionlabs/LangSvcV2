@@ -135,6 +135,7 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
             if (events != null)
             {
                 events.VirtualMachineStart += HandleVirtualMachineStart;
+                events.VirtualMachineDeath += HandleVirtualMachineDeath;
                 events.SingleStep += HandleSingleStep;
                 events.Breakpoint += HandleBreakpoint;
                 events.MethodEntry += HandleMethodEntry;
@@ -673,12 +674,16 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
             classPrepareRequest.SuspendPolicy = SuspendPolicy.EventThread;
             classPrepareRequest.IsEnabled = true;
 
+            var exceptionRequest = requestManager.CreateExceptionRequest(null, true, true);
+            exceptionRequest.SuspendPolicy = SuspendPolicy.EventThread;
+            exceptionRequest.IsEnabled = true;
+
             var virtualMachineDeathRequest = requestManager.CreateVirtualMachineDeathRequest();
             virtualMachineDeathRequest.SuspendPolicy = SuspendPolicy.All;
             virtualMachineDeathRequest.IsEnabled = true;
 
             DebugEvent debugEvent = new DebugLoadCompleteEvent(enum_EVENTATTRIBUTES.EVENT_ASYNC_STOP);
-            SetEventProperties(debugEvent, e);
+            SetEventProperties(debugEvent, e, false);
             Callback.Event(DebugEngine, Process, this, null, debugEvent);
 
             _isLoaded = true;
@@ -717,8 +722,15 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
             }
 
             debugEvent = new DebugEntryPointEvent(GetAttributesForEvent(e));
-            SetEventProperties(debugEvent, e);
+            SetEventProperties(debugEvent, e, false);
             Callback.Event(DebugEngine, Process, this, _threads[e.Thread.GetUniqueId()], debugEvent);
+        }
+
+        private void HandleVirtualMachineDeath(object sender, VirtualMachineEventArgs e)
+        {
+            DebugEvent debugEvent = new DebugProgramDestroyEvent(GetAttributesForEvent(e), 0);
+            SetEventProperties(debugEvent, e, false);
+            Callback.Event(DebugEngine, Process, this, null, debugEvent);
         }
 
         private void HandleSingleStep(object sender, ThreadLocationEventArgs e)
@@ -738,7 +750,7 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
                 _causeBreakRequest.IsEnabled = false;
 
                 DebugEvent debugEvent = new DebugBreakEvent(GetAttributesForEvent(e));
-                SetEventProperties(debugEvent, e);
+                SetEventProperties(debugEvent, e, false);
                 Callback.Event(DebugEngine, Process, this, thread, debugEvent);
                 return;
             }
@@ -750,7 +762,7 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
                 {
                     e.Request.IsEnabled = false;
                     DebugEvent debugEvent = new DebugStepCompleteEvent(GetAttributesForEvent(e));
-                    SetEventProperties(debugEvent, e);
+                    SetEventProperties(debugEvent, e, false);
                     Callback.Event(DebugEngine, Process, this, thread, debugEvent);
                     return;
                 }
@@ -773,6 +785,12 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
                 }
             }
 
+            if (breakpoints.Count == 0)
+            {
+                ManualContinueFromEvent(e);
+                return;
+            }
+
             JavaDebugThread thread;
             lock (_threads)
             {
@@ -780,15 +798,8 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
             }
 
             DebugEvent debugEvent = new DebugBreakpointEvent(GetAttributesForEvent(e), new EnumDebugBoundBreakpoints(breakpoints));
-            SetEventProperties(debugEvent, e);
-            if (breakpoints.Count > 0)
-            {
-                Callback.Event(DebugEngine, Process, this, thread, debugEvent);
-            }
-            else if ((debugEvent.Attributes & enum_EVENTATTRIBUTES.EVENT_SYNCHRONOUS) != 0)
-            {
-                DebugEngine.ContinueFromSynchronousEvent(debugEvent);
-            }
+            SetEventProperties(debugEvent, e, false);
+            Callback.Event(DebugEngine, Process, this, thread, debugEvent);
         }
 
         private void HandleMethodEntry(object sender, ThreadLocationEventArgs e)
@@ -823,7 +834,29 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
         private void HandleException(object sender, ExceptionEventArgs e)
         {
-            throw new NotImplementedException();
+            JavaDebugThread thread;
+
+            lock (_threads)
+            {
+                this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
+            }
+
+            //DebugEvent debugEvent = new DebugExceptionEvent(GetAttributesForEvent(e), this, e.Exception);
+
+            string message;
+            string messageFormat = "A first chance exception of type '{0}' occurred in {1}.{2}\n";
+            string type = e.Exception.GetReferenceType().GetName();
+            IMethod method = e.Thread.GetFrame(0).GetLocation().GetMethod();
+            string locationClass = method.GetDeclaringType().GetName();
+            string locationMethod = method.GetName();
+            message = string.Format(messageFormat, type, locationClass, locationMethod);
+            //string message = "A first chance exception occurred\n";
+
+            DebugEvent debugEvent = new DebugOutputStringEvent(GetAttributesForEvent(e), message);
+            SetEventProperties(debugEvent, e, true);
+            Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+
+            ManualContinueFromEvent(e);
         }
 
         private void HandleThreadStart(object sender, ThreadEventArgs e)
@@ -855,13 +888,12 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
             }
 
             DebugEvent debugEvent = new DebugThreadCreateEvent(GetAttributesForEvent(e));
-            SetEventProperties(debugEvent, e);
-#if HIDE_THREADS
-            if ((debugEvent.Attributes & enum_EVENTATTRIBUTES.EVENT_SYNCHRONOUS) != 0)
-                DebugEngine.ContinueFromSynchronousEvent(debugEvent);
-#else
+            SetEventProperties(debugEvent, e, true);
+#if !HIDE_THREADS
             Callback.Event(DebugEngine, Process, this, thread, debugEvent);
 #endif
+
+            ManualContinueFromEvent(e);
         }
 
         private void HandleThreadDeath(object sender, ThreadEventArgs e)
@@ -875,7 +907,7 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
             //string name = thread.GetName();
             DebugEvent debugEvent = new DebugThreadDestroyEvent(GetAttributesForEvent(e), 0);
-            SetEventProperties(debugEvent, e);
+            SetEventProperties(debugEvent, e, false);
 #if !HIDE_THREADS
             Callback.Event(DebugEngine, Process, this, thread, debugEvent);
 #endif
@@ -891,21 +923,20 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
             ReadOnlyCollection<string> sourceFiles = e.Type.GetSourcePaths(e.Type.GetDefaultStratum());
             DebugEngine.BindVirtualizedBreakpoints(this, _threads[e.Thread.GetUniqueId()], e.Type, sourceFiles);
 
-            switch (e.SuspendPolicy)
+            JavaDebugThread thread;
+            lock (_threads)
             {
-            case SuspendPolicy.All:
-                IVirtualMachine virtualMachine = e.VirtualMachine;
-                Task.Factory.StartNew(virtualMachine.Resume).HandleNonCriticalExceptions();
-                break;
-
-            case SuspendPolicy.EventThread:
-                IThreadReference thread = e.Thread;
-                Task.Factory.StartNew(thread.Resume).HandleNonCriticalExceptions();
-                break;
-
-            case SuspendPolicy.None:
-                break;
+                this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
             }
+
+            // The format of the message created by the .NET debugger is this:
+            // 'devenv.exe' (Managed (v4.0.30319)): Loaded 'C:\Windows\Microsoft.Net\assembly\GAC_MSIL\Microsoft.VisualStudio.Windows.Forms\v4.0_10.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.Windows.Forms.dll'
+            string message = string.Format("'{0}' ({1}): Loaded '{2}'\n", Process.GetName(enum_GETNAME_TYPE.GN_BASENAME), Java.Constants.JavaLanguageName, e.Type.GetName());
+            DebugEvent outputEvent = new DebugOutputStringEvent(GetAttributesForEvent(e), message);
+            SetEventProperties(outputEvent, e, true);
+            Callback.Event(DebugEngine, Process, this, thread, outputEvent);
+
+            ManualContinueFromEvent(e);
         }
 
         private void HandleClassUnload(object sender, ClassUnloadEventArgs e)
@@ -923,6 +954,25 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
             throw new NotImplementedException();
         }
 
+        private void ManualContinueFromEvent(ThreadEventArgs e)
+        {
+            switch (e.SuspendPolicy)
+            {
+            case SuspendPolicy.All:
+                IVirtualMachine virtualMachine = e.VirtualMachine;
+                Task.Factory.StartNew(virtualMachine.Resume).HandleNonCriticalExceptions();
+                break;
+
+            case SuspendPolicy.EventThread:
+                IThreadReference threadReference = e.Thread;
+                Task.Factory.StartNew(threadReference.Resume).HandleNonCriticalExceptions();
+                break;
+
+            case SuspendPolicy.None:
+                break;
+            }
+        }
+
         private static enum_EVENTATTRIBUTES GetAttributesForEvent(VirtualMachineEventArgs e)
         {
             enum_EVENTATTRIBUTES attributes = 0;
@@ -937,23 +987,24 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
             return attributes;
         }
 
-        private static void SetEventProperties(DebugEvent debugEvent, VirtualMachineEventArgs e)
+        private static void SetEventProperties(DebugEvent debugEvent, VirtualMachineEventArgs e, bool manualResume)
         {
-            SetEventProperties(debugEvent, e.Request, e.SuspendPolicy, e.VirtualMachine, default(IThreadReference));
+            SetEventProperties(debugEvent, e.Request, e.SuspendPolicy, e.VirtualMachine, default(IThreadReference), manualResume);
         }
 
-        private static void SetEventProperties(DebugEvent debugEvent, ThreadEventArgs e)
+        private static void SetEventProperties(DebugEvent debugEvent, ThreadEventArgs e, bool manualResume)
         {
-            SetEventProperties(debugEvent, e.Request, e.SuspendPolicy, e.VirtualMachine, e.Thread);
+            SetEventProperties(debugEvent, e.Request, e.SuspendPolicy, e.VirtualMachine, e.Thread, manualResume);
         }
 
-        private static void SetEventProperties(DebugEvent debugEvent, IEventRequest request, SuspendPolicy suspendPolicy, IVirtualMachine virtualMachine, IThreadReference thread)
+        private static void SetEventProperties(DebugEvent debugEvent, IEventRequest request, SuspendPolicy suspendPolicy, IVirtualMachine virtualMachine, IThreadReference thread, bool manualResume)
         {
             Contract.Requires<ArgumentNullException>(debugEvent != null, "debugEvent");
             debugEvent.Properties.AddProperty(typeof(IEventRequest), request);
             debugEvent.Properties.AddProperty(typeof(SuspendPolicy), suspendPolicy);
             debugEvent.Properties.AddProperty(typeof(IVirtualMachine), virtualMachine);
             debugEvent.Properties.AddProperty(typeof(IThreadReference), thread);
+            debugEvent.Properties.AddProperty("ManualResume", manualResume);
         }
     }
 }
