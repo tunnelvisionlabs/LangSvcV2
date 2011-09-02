@@ -8,6 +8,16 @@
     [DataContract]
     public abstract class ConstantPoolEntry
     {
+        private static readonly ConstantPoolEntry _reserved = new ReservedEntry();
+
+        public static ConstantPoolEntry Reserved
+        {
+            get
+            {
+                return _reserved;
+            }
+        }
+
         public abstract ConstantType Type
         {
             get;
@@ -229,5 +239,21 @@
         }
 
         public abstract string ToString(ReadOnlyCollection<ConstantPoolEntry> constantPool);
+
+        private class ReservedEntry : ConstantPoolEntry
+        {
+            public override ConstantType Type
+            {
+                get
+                {
+                    return ConstantType.Invalid;
+                }
+            }
+
+            public override string ToString(ReadOnlyCollection<ConstantPoolEntry> constantPool)
+            {
+                return "Reserved";
+            }
+        }
     }
 }

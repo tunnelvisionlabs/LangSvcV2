@@ -160,6 +160,18 @@
                 for (int i = 0; i < constantPoolCount - 1; i++)
                 {
                     entryList.Add(ConstantPoolEntry.FromBytes(data, ref currentPosition));
+                    switch (entryList.Last().Type)
+                    {
+                    case ConstantType.Double:
+                    case ConstantType.Long:
+                        // these entries take 2 slots
+                        entryList.Add(ConstantPoolEntry.Reserved);
+                        i++;
+                        break;
+
+                    default:
+                        break;
+                    }
                 }
 
                 _constantPool = entryList.ToArray();

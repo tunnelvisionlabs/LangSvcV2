@@ -100,7 +100,7 @@
                     return new LocationEventFilter(internalEventKind, requestId, suspendPolicy, modifiers, modifier.Location);
 
                 case ModifierKind.ExceptionFilter:
-                    throw new NotImplementedException();
+                    return new ExceptionEventFilter(internalEventKind, requestId, suspendPolicy, modifiers, modifier.ExceptionOrNull, modifier.Caught, modifier.Uncaught);
 
                 case ModifierKind.FieldFilter:
                     throw new NotImplementedException();
@@ -239,6 +239,26 @@
             }
         }
 
+        internal sealed class ExceptionEventFilter : EventFilter
+        {
+            private readonly ReferenceTypeId _exceptionType;
+            private readonly bool _caught;
+            private readonly bool _uncaught;
+
+            public ExceptionEventFilter(EventKind internalEventKind, RequestId requestId, SuspendPolicy suspendPolicy, IEnumerable<EventRequestModifier> modifiers, ReferenceTypeId exceptionType, bool caught, bool uncaught)
+                : base(internalEventKind, requestId, suspendPolicy, modifiers)
+            {
+                _exceptionType = exceptionType;
+                _caught = caught;
+                _uncaught = uncaught;
+            }
+
+            public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, EventProcessor processor, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
+            {
+                return true;
+            }
+        }
+
         internal sealed class StepEventFilter : ThreadEventFilter
         {
             private readonly StepSize _size;
@@ -290,7 +310,21 @@
                                 List<ConstantPoolEntry> entryList = new List<ConstantPoolEntry>();
                                 int currentPosition = 0;
                                 for (int i = 0; i < constantPoolCount - 1; i++)
+                                {
                                     entryList.Add(ConstantPoolEntry.FromBytes(data, ref currentPosition));
+                                    switch (entryList.Last().Type)
+                                    {
+                                    case ConstantType.Double:
+                                    case ConstantType.Long:
+                                        // these entries take 2 slots
+                                        entryList.Add(ConstantPoolEntry.Reserved);
+                                        i++;
+                                        break;
+
+                                    default:
+                                        break;
+                                    }
+                                }
 
                                 _constantPool = entryList.ToArray();
 
@@ -315,20 +349,12 @@
                     int stackDepth;
                     JvmtiErrorHandler.ThrowOnFailure(environment.GetFrameCount(threadHandle.Value, out stackDepth));
 
-                    if (_depth == StepDepth.Over && _hasMethodInfo && stackDepth > _stackDepth)
+                    if (_hasMethodInfo && stackDepth > _stackDepth)
                     {
-                        if (_depth == StepDepth.Into)
-                            return true;
-
-                        if (!_convertedToFramePop)
+                        bool convertToFramePop;
+                        if (!_convertedToFramePop && location.HasValue && ShouldSkipCurrentMethod(processor.VirtualMachine, environment, nativeEnvironment, threadHandle.Value, stackDepth, location.Value, out convertToFramePop))
                         {
-                            /*
-                             * change this to a Frame Pop event if we're not in a native frame
-                             */
-
-                            bool native;
-                            JvmtiErrorHandler.ThrowOnFailure(environment.IsMethodNative(location.Value.Method, out native));
-                            if (!native)
+                            if (convertToFramePop)
                             {
                                 // remove the single step event
                                 JvmtiErrorHandler.ThrowOnFailure((jvmtiError)processor.ClearEventInternal(EventKind.SingleStep, this.RequestId));
@@ -361,6 +387,66 @@
 
                     _stackDepth = stackDepth;
                     return true;
+                }
+            }
+
+            private bool ShouldSkipCurrentMethod(JavaVM virtualMachine, JvmtiEnvironment environment, JniEnvironment nativeEnvironment, jthread thread, int stackDepth, Location location, out bool convertToFramePop)
+            {
+                Contract.Assert(_depth == StepDepth.Into || _depth == StepDepth.Over);
+
+                convertToFramePop = false;
+
+                if (!_hasMethodInfo || stackDepth <= _stackDepth)
+                    return false;
+
+                /*
+                 * change this to a Frame Pop event if we're not in a native frame
+                 */
+                bool native;
+                jvmtiError error = environment.IsMethodNative(location.Method, out native);
+                if (error != jvmtiError.None)
+                    return false;
+
+                convertToFramePop = !native;
+
+                if (_depth == StepDepth.Over || native)
+                    return true;
+
+                JvmAccessModifiers modifiers;
+                error = environment.GetMethodModifiers(location.Method, out modifiers);
+                if (error != jvmtiError.None || ((modifiers & JvmAccessModifiers.Static) != 0))
+                    return false;
+
+                jobject thisObject;
+                error = environment.GetLocalObject(thread, 0, 0, out thisObject);
+                if (error != jvmtiError.None)
+                    return false;
+
+                try
+                {
+                    bool classLoader = nativeEnvironment.IsInstanceOf(thisObject, virtualMachine.ClassLoaderClass);
+                    nativeEnvironment.ExceptionClear();
+                    if (!classLoader)
+                        return false;
+
+                    string name;
+                    string signature;
+                    string genericSignature;
+                    error = environment.GetMethodName(location.Method, out name, out signature, out genericSignature);
+                    if (error != jvmtiError.None)
+                        return false;
+
+                    if (name == "loadClass" && signature == "(Ljava/lang/String;)Ljava/lang/Class;")
+                        return true;
+
+                    if (name == "checkPackageAccess" && signature == "(Ljava/lang/Class;Ljava/security/ProtectionDomain;)V")
+                        return true;
+
+                    return false;
+                }
+                finally
+                {
+                    nativeEnvironment.DeleteLocalReference(thisObject);
                 }
             }
         }
