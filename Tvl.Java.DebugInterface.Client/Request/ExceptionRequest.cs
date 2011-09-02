@@ -17,6 +17,7 @@
             _exceptionType = exceptionType;
             _notifyWhenCaught = notifyWhenCaught;
             _notifyWhenUncaught = notifyWhenUncaught;
+            Modifiers.Add(Types.EventRequestModifier.ExceptionFilter(exceptionType != null ? exceptionType.ReferenceTypeId : default(Types.ReferenceTypeId), notifyWhenCaught, notifyWhenUncaught));
         }
 
         public IReferenceType Exception

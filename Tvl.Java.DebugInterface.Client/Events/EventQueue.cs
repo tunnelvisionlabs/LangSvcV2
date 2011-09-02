@@ -1,11 +1,8 @@
 ﻿namespace Tvl.Java.DebugInterface.Client.Events
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Tvl.Java.DebugInterface.Events;
     using System.Diagnostics.Contracts;
+    using Tvl.Java.DebugInterface.Events;
 
     internal sealed class EventQueue : Mirror, IEventQueue, IVirtualMachineEvents
     {
@@ -16,6 +13,8 @@
         }
 
         public event EventHandler<ThreadEventArgs> VirtualMachineStart;
+
+        public event EventHandler<VirtualMachineEventArgs> VirtualMachineDeath;
 
         public event EventHandler<ThreadLocationEventArgs> SingleStep;
 
@@ -60,6 +59,13 @@
         internal void OnVirtualMachineStart(ThreadEventArgs e)
         {
             var t = VirtualMachineStart;
+            if (t != null)
+                t(this, e);
+        }
+
+        internal void OnVirtualMachineDeath(VirtualMachineEventArgs e)
+        {
+            var t = VirtualMachineDeath;
             if (t != null)
                 t(this, e);
         }

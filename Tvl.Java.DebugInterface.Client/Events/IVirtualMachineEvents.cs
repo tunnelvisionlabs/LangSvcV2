@@ -1,13 +1,12 @@
 ﻿namespace Tvl.Java.DebugInterface.Client.Events
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
 
     public interface IVirtualMachineEvents
     {
         event EventHandler<ThreadEventArgs> VirtualMachineStart;
+
+        event EventHandler<VirtualMachineEventArgs> VirtualMachineDeath;
 
         event EventHandler<ThreadLocationEventArgs> SingleStep;
 

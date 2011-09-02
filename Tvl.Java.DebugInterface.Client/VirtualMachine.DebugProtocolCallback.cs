@@ -91,9 +91,15 @@
                 throw new NotImplementedException();
             }
 
-            public void Exception(Types.SuspendPolicy suspendPolicy, RequestId requestId, ThreadId thread, Types.Location location, TaggedObjectId exception, Types.Location catchLocation)
+            public void Exception(Types.SuspendPolicy suspendPolicy, RequestId requestId, ThreadId threadId, Types.Location location, TaggedObjectId exception, Types.Location catchLocation)
             {
-                throw new NotImplementedException();
+                EventRequest request = VirtualMachine.EventRequestManager.GetEventRequest(EventKind.Exception, requestId);
+                ThreadReference thread = VirtualMachine.GetMirrorOf(threadId);
+                Location loc = VirtualMachine.GetMirrorOf(location);
+                ObjectReference exceptionReference = VirtualMachine.GetMirrorOf(exception);
+                Location catchLoc = VirtualMachine.GetMirrorOf(catchLocation);
+                ExceptionEventArgs e = new ExceptionEventArgs(VirtualMachine, (SuspendPolicy)suspendPolicy, request, thread, loc, exceptionReference, catchLoc);
+                VirtualMachine.EventQueue.OnException(e);
             }
 
             public void ThreadStart(Types.SuspendPolicy suspendPolicy, RequestId requestId, ThreadId threadId)
@@ -138,7 +144,9 @@
 
             public void VirtualMachineDeath(Types.SuspendPolicy suspendPolicy, RequestId requestId)
             {
-                throw new NotImplementedException();
+                EventRequest request = VirtualMachine.EventRequestManager.GetEventRequest(EventKind.ClassPrepare, requestId);
+                VirtualMachineEventArgs e = new VirtualMachineEventArgs(VirtualMachine, (SuspendPolicy)suspendPolicy, request);
+                VirtualMachine.EventQueue.OnVirtualMachineDeath(e);
             }
         }
     }
