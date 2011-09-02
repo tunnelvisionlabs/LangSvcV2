@@ -42,7 +42,7 @@
 
         public IStackFrame GetFrame(int index)
         {
-            throw new NotImplementedException();
+            return GetFrames(index, 1)[0];
         }
 
         public int GetFrameCount()
