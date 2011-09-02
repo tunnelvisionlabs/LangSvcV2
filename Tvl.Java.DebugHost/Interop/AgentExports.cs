@@ -1,24 +1,23 @@
 ﻿namespace Tvl.Java.DebugHost.Interop
 {
-    using Thread = System.Threading.Thread;
-    using MessageBoxDefaultButton = System.Windows.Forms.MessageBoxDefaultButton;
-    using MessageBoxIcon = System.Windows.Forms.MessageBoxIcon;
-    using System.Runtime.InteropServices;
-    using IntPtr = System.IntPtr;
-    using System.ServiceModel;
-    using Tvl.Java.DebugHost.Services;
-    using System.ServiceModel.Description;
-    using System.ServiceModel.Channels;
-    using WaitHandle = System.Threading.WaitHandle;
     using System;
-    using ManualResetEventSlim=System.Threading.ManualResetEventSlim;
-    using Process = System.Diagnostics.Process;
-    using EventWaitHandle = System.Threading.EventWaitHandle;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.ServiceModel;
+    using System.ServiceModel.Channels;
+    using Tvl.Java.DebugHost.Services;
     using AppDomain = System.AppDomain;
+    using EventWaitHandle = System.Threading.EventWaitHandle;
     using FirstChanceExceptionEventArgs = System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs;
+    using IntPtr = System.IntPtr;
+    using ManualResetEventSlim = System.Threading.ManualResetEventSlim;
     using MessageBox = System.Windows.Forms.MessageBox;
     using MessageBoxButtons = System.Windows.Forms.MessageBoxButtons;
-    using System.Collections.Generic;
+    using MessageBoxDefaultButton = System.Windows.Forms.MessageBoxDefaultButton;
+    using MessageBoxIcon = System.Windows.Forms.MessageBoxIcon;
+    using Process = System.Diagnostics.Process;
+    using Thread = System.Threading.Thread;
+    using WaitHandle = System.Threading.WaitHandle;
 
     public static class AgentExports
     {
@@ -54,9 +53,15 @@
 
             JavaVM vm = JavaVM.GetOrCreateInstance(new JavaVMHandle(vmPtr));
 
-            string options = null;
+            string optionsString = null;
             if (optionsPtr != IntPtr.Zero)
-                options = ModifiedUTF8Encoding.GetString((byte*)optionsPtr);
+                optionsString = ModifiedUTF8Encoding.GetString((byte*)optionsPtr);
+
+            string[] options = new string[0];
+            if (optionsString != null)
+            {
+                options = optionsString.Split(',', ';');
+            }
 
 #if false
             // quick test
@@ -68,11 +73,12 @@
 #endif
 
 
-#if false
-            AppDomain.CurrentDomain.FirstChanceException += HandleFirstChanceException;
-            AppDomain.CurrentDomain.UnhandledException += HandleUnhandledException;
-            AppDomain.CurrentDomain.ProcessExit += HandleProcessExit;
-#endif
+            if (options.Contains("ShowAgentExceptions", StringComparer.OrdinalIgnoreCase))
+            {
+                AppDomain.CurrentDomain.FirstChanceException += HandleFirstChanceException;
+                AppDomain.CurrentDomain.UnhandledException += HandleUnhandledException;
+                //AppDomain.CurrentDomain.ProcessExit += HandleProcessExit;
+            }
 
             List<WaitHandle> waitHandles = new List<WaitHandle>();
             Binding binding;
