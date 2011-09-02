@@ -1,9 +1,11 @@
 ﻿namespace Tvl.Java.DebugInterface.Types
 {
     using System.Collections.ObjectModel;
+    using System.Diagnostics;
     using System.Runtime.Serialization;
 
     [DataContract]
+    [DebuggerDisplay("Constant Class: Name #{NameIndex}")]
     public sealed class ConstantClass : ConstantPoolEntry
     {
         [DataMember]

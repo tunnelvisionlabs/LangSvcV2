@@ -1,9 +1,11 @@
 ﻿namespace Tvl.Java.DebugInterface.Types
 {
     using System.Collections.ObjectModel;
+    using System.Diagnostics;
     using System.Runtime.Serialization;
 
     [DataContract]
+    [DebuggerDisplay("Constant Interface Method: Class #{ClassIndex}, Name and Type #{NameAndTypeIndex}")]
     public class ConstantInterfaceMethodReference : ConstantPoolEntry, IConstantMemberReference
     {
         [DataMember]

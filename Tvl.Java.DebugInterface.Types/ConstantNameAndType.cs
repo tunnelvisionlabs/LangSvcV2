@@ -2,8 +2,10 @@
 {
     using System.Collections.ObjectModel;
     using System.Runtime.Serialization;
+    using System.Diagnostics;
 
     [DataContract]
+    [DebuggerDisplay("Constant Name and Type: Name #{NameIndex}, Descriptor #{DescriptorIndex}")]
     public class ConstantNameAndType : ConstantPoolEntry
     {
         [DataMember]

@@ -1,9 +1,11 @@
 ﻿namespace Tvl.Java.DebugInterface.Types
 {
     using System.Collections.ObjectModel;
+    using System.Diagnostics;
     using System.Runtime.Serialization;
 
     [DataContract]
+    [DebuggerDisplay("Constant Long: {Value}")]
     public class ConstantLong : ConstantPoolEntry
     {
         [DataMember]

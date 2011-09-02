@@ -2,8 +2,10 @@
 {
     using System.Collections.ObjectModel;
     using System.Runtime.Serialization;
+    using System.Diagnostics;
 
     [DataContract]
+    [DebuggerDisplay("Constant Method: Class #{ClassIndex}, Name and Type #{NameAndTypeIndex}")]
     public class ConstantMethodReference : ConstantPoolEntry, IConstantMemberReference
     {
         [DataMember]

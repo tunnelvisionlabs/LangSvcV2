@@ -4,8 +4,10 @@
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Runtime.Serialization;
+    using System.Diagnostics;
 
     [DataContract]
+    [DebuggerDisplay("Constant UTF8: {Value}")]
     public class ConstantUtf8 : ConstantPoolEntry
     {
         [DataMember]

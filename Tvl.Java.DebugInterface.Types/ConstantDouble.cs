@@ -1,9 +1,11 @@
 ﻿namespace Tvl.Java.DebugInterface.Types
 {
-    using System.Runtime.Serialization;
     using System.Collections.ObjectModel;
+    using System.Diagnostics;
+    using System.Runtime.Serialization;
 
     [DataContract]
+    [DebuggerDisplay("Constant Double: {Value}")]
     public class ConstantDouble : ConstantPoolEntry
     {
         [DataMember]
