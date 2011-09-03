@@ -25,6 +25,9 @@
 
         private readonly List<IStepRequest> _stepRequests = new List<IStepRequest>();
 
+        private IMethod _getIdMethod;
+        private IMethod _getPriorityMethod;
+
         public JavaDebugThread(JavaDebugProgram program, IThreadReference thread, ThreadCategory category)
         {
             Contract.Requires<ArgumentNullException>(program != null, "program");
@@ -177,9 +180,17 @@
 
         public int GetThreadId(out uint pdwThreadId)
         {
-            IClassType type = (IClassType)_thread.GetReferenceType();
-            IMethod method = type.GetConcreteMethod("getId", "()J");
-            using (var result = _thread.InvokeMethod(null, method, InvokeOptions.None))
+            if (_getIdMethod == null)
+            {
+                IClassType type = (IClassType)_thread.GetReferenceType();
+                _getIdMethod = type.GetConcreteMethod("getId", "()J");
+            }
+
+            pdwThreadId = 0;
+            if (_getIdMethod == null)
+                return VSConstants.E_FAIL;
+
+            using (var result = _thread.InvokeMethod(null, _getIdMethod, InvokeOptions.None))
             {
                 pdwThreadId = (uint)((ILongValue)result.Value).GetValue();
                 return VSConstants.S_OK;
@@ -188,9 +199,17 @@
 
         public int GetThreadPriorityId(out int priorityId)
         {
-            IClassType type = (IClassType)_thread.GetReferenceType();
-            IMethod method = type.GetConcreteMethod("getPriority", "()I");
-            using (var result = _thread.InvokeMethod(null, method, InvokeOptions.None))
+            if (_getPriorityMethod == null)
+            {
+                IClassType type = (IClassType)_thread.GetReferenceType();
+                _getPriorityMethod = type.GetConcreteMethod("getPriority", "()I");
+            }
+
+            priorityId = 0;
+            if (_getPriorityMethod == null)
+                return VSConstants.E_FAIL;
+
+            using (var result = _thread.InvokeMethod(null, _getPriorityMethod, InvokeOptions.None))
             {
                 priorityId = ((IIntegerValue)result.Value).GetValue();
                 return VSConstants.S_OK;
