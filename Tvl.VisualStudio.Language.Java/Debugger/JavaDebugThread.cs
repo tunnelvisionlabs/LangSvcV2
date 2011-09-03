@@ -177,7 +177,68 @@
 
         public int GetThreadId(out uint pdwThreadId)
         {
-            pdwThreadId = (uint)_thread.GetUniqueId();
+            IClassType type = (IClassType)_thread.GetReferenceType();
+            IMethod method = type.GetConcreteMethod("getId", "()J");
+            using (var result = _thread.InvokeMethod(null, method, InvokeOptions.None))
+            {
+                pdwThreadId = (uint)((ILongValue)result.Value).GetValue();
+                return VSConstants.S_OK;
+            }
+        }
+
+        public int GetThreadPriorityId(out int priorityId)
+        {
+            IClassType type = (IClassType)_thread.GetReferenceType();
+            IMethod method = type.GetConcreteMethod("getPriority", "()I");
+            using (var result = _thread.InvokeMethod(null, method, InvokeOptions.None))
+            {
+                priorityId = ((IIntegerValue)result.Value).GetValue();
+                return VSConstants.S_OK;
+            }
+        }
+
+        public int GetThreadPriority(out string priority)
+        {
+            priority = null;
+
+            int priorityId;
+            int hr = GetThreadPriorityId(out priorityId);
+            if (ErrorHandler.Failed(hr))
+                return hr;
+
+            switch (priorityId)
+            {
+            case 1:
+                priority = "Lowest";
+                break;
+
+            case 2:
+            case 3:
+            case 4:
+                priority = "Lower";
+                break;
+
+            case 5:
+                priority = "Normal";
+                break;
+
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+                priority = "Higher";
+                break;
+
+            case 10:
+                priority = "Highest";
+                break;
+
+            default:
+                priority = "Unknown";
+                break;
+            }
+
+            priority += " (" + priorityId + ")";
             return VSConstants.S_OK;
         }
 
@@ -192,8 +253,8 @@
 
             if ((dwFields & enum_THREADPROPERTY_FIELDS.TPF_ID) != 0)
             {
-                ptp[0].dwFields |= enum_THREADPROPERTY_FIELDS.TPF_ID;
-                ptp[0].dwThreadId = (uint)_thread.GetUniqueId();
+                if (ErrorHandler.Succeeded(GetThreadId(out ptp[0].dwThreadId)))
+                    ptp[0].dwFields |= enum_THREADPROPERTY_FIELDS.TPF_ID;
             }
 
             if ((dwFields & enum_THREADPROPERTY_FIELDS.TPF_LOCATION) != 0)
@@ -210,8 +271,8 @@
 
             if ((dwFields & enum_THREADPROPERTY_FIELDS.TPF_PRIORITY) != 0)
             {
-                ptp[0].dwFields |= enum_THREADPROPERTY_FIELDS.TPF_PRIORITY;
-                ptp[0].bstrPriority = "Unknown";
+                if (ErrorHandler.Succeeded(GetThreadPriority(out ptp[0].bstrPriority)))
+                    ptp[0].dwFields |= enum_THREADPROPERTY_FIELDS.TPF_PRIORITY;
             }
 
             ThreadStatus status = _thread.GetStatus();
@@ -355,10 +416,10 @@
             ptp[0].dwFields = 0;
 
             // thread ID
-            if ((fields & enum_THREADPROPERTY_FIELDS100.TPF100_ID) != 0)
+            if ((dwFields & (uint)enum_THREADPROPERTY_FIELDS100.TPF100_ID) != 0)
             {
-                ptp[0].dwFields |= (uint)enum_THREADPROPERTY_FIELDS100.TPF100_ID;
-                ptp[0].dwThreadId = (uint)_thread.GetUniqueId();
+                if (ErrorHandler.Succeeded(GetThreadId(out ptp[0].dwThreadId)))
+                    ptp[0].dwFields |= (uint)enum_THREADPROPERTY_FIELDS100.TPF100_ID;
             }
 
             // thread location
@@ -392,15 +453,15 @@
             // thread priority (string)
             if ((fields & enum_THREADPROPERTY_FIELDS100.TPF100_PRIORITY) != 0)
             {
-                ptp[0].dwFields |= (uint)enum_THREADPROPERTY_FIELDS100.TPF100_PRIORITY;
-                ptp[0].bstrPriority = "Unknown";
+                if (ErrorHandler.Succeeded(GetThreadPriority(out ptp[0].bstrPriority)))
+                    ptp[0].dwFields |= (uint)enum_THREADPROPERTY_FIELDS100.TPF100_PRIORITY;
             }
 
             // thread priority (id)
             if ((fields & enum_THREADPROPERTY_FIELDS100.TPF100_PRIORITY_ID) != 0)
             {
-                ptp[0].dwFields |= (uint)enum_THREADPROPERTY_FIELDS100.TPF100_PRIORITY_ID;
-                ptp[0].priorityId = 0;
+                if (ErrorHandler.Succeeded(GetThreadPriorityId(out ptp[0].priorityId)))
+                    ptp[0].dwFields |= (uint)enum_THREADPROPERTY_FIELDS100.TPF100_PRIORITY_ID;
             }
 
 
