@@ -1,10 +1,11 @@
 ﻿namespace Tvl.Java.DebugInterface.Types
 {
+    using System;
     using System.Runtime.Serialization;
     using BitConverter = System.BitConverter;
 
     [DataContract]
-    public struct Value
+    public struct Value : IEquatable<Value>
     {
         [DataMember(IsRequired = true)]
         public Tag Tag;
@@ -61,6 +62,35 @@
         public static implicit operator Value(TaggedObjectId value)
         {
             return new Value(value.Tag, value.ObjectId.Handle);
+        }
+
+        public static bool operator ==(Value x, Value y)
+        {
+            return x.Equals(y);
+        }
+
+        public static bool operator !=(Value x, Value y)
+        {
+            return !x.Equals(y);
+        }
+
+        public bool Equals(Value other)
+        {
+            return this.Tag == other.Tag
+                && this.Data == other.Data;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Value))
+                return false;
+
+            return this.Equals((Value)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Tag.GetHashCode() ^ Data.GetHashCode();
         }
     }
 }

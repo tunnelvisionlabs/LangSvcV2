@@ -32,12 +32,12 @@
             throw new NotImplementedException();
         }
 
-        public IArrayReference CreateInstance(int length)
+        public IStrongValueHandle<IArrayReference> CreateInstance(int length)
         {
             Contract.Requires<ArgumentOutOfRangeException>(length >= 0);
-            Contract.Ensures(Contract.Result<IArrayReference>() != null);
-            Contract.Ensures(this.GetVirtualMachine().Equals(Contract.Result<IArrayReference>().GetVirtualMachine()));
-            Contract.Ensures(Contract.Result<IArrayReference>().GetLength() >= 0);
+            Contract.Ensures(Contract.Result<IStrongValueHandle<IArrayReference>>() != null);
+            Contract.Ensures(this.GetVirtualMachine().Equals(Contract.Result<IStrongValueHandle<IArrayReference>>().GetVirtualMachine()));
+            Contract.Ensures(Contract.Result<IStrongValueHandle<IArrayReference>>().Value.GetLength() >= 0);
 
             throw new NotImplementedException();
         }

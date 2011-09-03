@@ -1,6 +1,7 @@
 ﻿namespace Tvl.Java.DebugInterface.Client
 {
     using System;
+    using System.Linq;
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using Tvl.Java.DebugInterface.Types;
@@ -24,7 +25,7 @@
             }
         }
 
-        internal override Types.Value ToNetworkValue()
+        protected override Types.Value ToNetworkValueImpl()
         {
             return new Types.Value(Tag.Array, ObjectId.Handle);
         }
@@ -67,7 +68,9 @@
 
         public void SetValues(int index, IValue[] values, int sourceIndex, int length)
         {
-            throw new NotImplementedException();
+            Types.Value[] converted = values.Cast<Value>().Skip(sourceIndex).Take(length).Select(Value.ToNetworkValue).ToArray();
+            Contract.Assert(converted.Length == length);
+            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.SetArrayValues(ArrayId, index, converted));
         }
 
         public void SetValues(IValue[] values)

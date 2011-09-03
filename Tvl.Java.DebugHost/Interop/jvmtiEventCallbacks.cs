@@ -60,7 +60,7 @@ namespace Tvl.Java.DebugHost.Interop
         public delegate void jvmtiEventThreadEnd(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread thread);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate void jvmtiEventClassFileLoadHook(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jclass classBeingRedefined, jobject loader, ModifiedUTF8StringData name, jobject protectionDomain, int classDataLength, IntPtr classData, ref int newClassDataLength, ref IntPtr newClassData);
+        public delegate void jvmtiEventClassFileLoadHook(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jclass classBeingRedefined, jobject loader, IntPtr name, jobject protectionDomain, int classDataLength, IntPtr classData, ref int newClassDataLength, ref IntPtr newClassData);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void jvmtiEventClassLoad(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread thread, jclass @class);
@@ -108,7 +108,7 @@ namespace Tvl.Java.DebugHost.Interop
         public delegate void jvmtiEventCompiledMethodUnload(jvmtiEnvHandle env, jmethodID method, IntPtr codeAddress);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate void jvmtiEventDynamicCodeGenerated(jvmtiEnvHandle env, ModifiedUTF8StringData name, IntPtr address, int length);
+        public delegate void jvmtiEventDynamicCodeGenerated(jvmtiEnvHandle env, IntPtr name, IntPtr address, int length);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void jvmtiEventDataDumpRequest(jvmtiEnvHandle env);
@@ -126,7 +126,7 @@ namespace Tvl.Java.DebugHost.Interop
         public delegate void jvmtiEventMonitorContendedEntered(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread thread, jobject @object);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate void jvmtiEventResourceExhausted(jvmtiEnvHandle env, JNIEnvHandle jniEnv, JvmResourceExhaustedFlags flags, IntPtr reserved, ModifiedUTF8StringData description);
+        public delegate void jvmtiEventResourceExhausted(jvmtiEnvHandle env, JNIEnvHandle jniEnv, JvmResourceExhaustedFlags flags, IntPtr reserved, IntPtr description);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void jvmtiEventGarbageCollectionStart(jvmtiEnvHandle env);

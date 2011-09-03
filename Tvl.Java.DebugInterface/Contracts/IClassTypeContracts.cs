@@ -31,7 +31,7 @@
             throw new NotImplementedException();
         }
 
-        public IValue InvokeMethod(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
+        public IStrongValueHandle<IValue> InvokeMethod(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
         {
             Contract.Requires<ArgumentNullException>(method != null, "method");
             Contract.Requires<VirtualMachineMismatchException>(thread == null || this.GetVirtualMachine().Equals(thread.GetVirtualMachine()));
@@ -39,7 +39,7 @@
 #if CONTRACTS_FORALL
             Contract.Requires<VirtualMachineMismatchException>(arguments == null || Contract.ForAll(arguments, argument => argument == null || this.GetVirtualMachine().Equals(argument.GetVirtualMachine())));
 #endif
-            Contract.Ensures(Contract.Result<IValue>() == null || this.GetVirtualMachine().Equals(Contract.Result<IValue>().GetVirtualMachine()));
+            Contract.Ensures(Contract.Result<IStrongValueHandle<IValue>>() == null || this.GetVirtualMachine().Equals(Contract.Result<IStrongValueHandle<IValue>>().GetVirtualMachine()));
 
             throw new NotImplementedException();
         }
@@ -49,7 +49,7 @@
             throw new NotImplementedException();
         }
 
-        public IObjectReference CreateInstance(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
+        public IStrongValueHandle<IObjectReference> CreateInstance(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
         {
             Contract.Requires<ArgumentNullException>(method != null, "method");
             Contract.Requires<VirtualMachineMismatchException>(thread == null || this.GetVirtualMachine().Equals(thread.GetVirtualMachine()));
@@ -57,8 +57,8 @@
 #if CONTRACTS_FORALL
             Contract.Requires<VirtualMachineMismatchException>(arguments == null || Contract.ForAll(arguments, argument => argument == null || this.GetVirtualMachine().Equals(argument.GetVirtualMachine())));
 #endif
-            Contract.Ensures(Contract.Result<IObjectReference>() != null);
-            Contract.Ensures(this.GetVirtualMachine().Equals(Contract.Result<IObjectReference>().GetVirtualMachine()));
+            Contract.Ensures(Contract.Result<IStrongValueHandle<IObjectReference>>() != null);
+            Contract.Ensures(this.GetVirtualMachine().Equals(Contract.Result<IStrongValueHandle<IObjectReference>>().GetVirtualMachine()));
 
             throw new NotImplementedException();
         }

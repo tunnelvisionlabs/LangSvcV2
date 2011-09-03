@@ -393,7 +393,7 @@ namespace Tvl.Java.DebugHost.Interop
         public delegate jvmtiError SetNativeMethodPrefix(jvmtiEnvHandle env, ModifiedUTF8StringData prefix);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate jvmtiError SetNativeMethodPrefixes(jvmtiEnvHandle env, int prefixCount, [MarshalAs(UnmanagedType.LPArray)]ModifiedUTF8StringData[] prefixes);
+        public delegate jvmtiError SetNativeMethodPrefixes(jvmtiEnvHandle env, int prefixCount, [MarshalAs(UnmanagedType.LPArray)]IntPtr[] prefixes);
 
         #endregion
 

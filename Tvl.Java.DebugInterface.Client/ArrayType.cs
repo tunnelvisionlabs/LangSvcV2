@@ -1,11 +1,7 @@
 ﻿namespace Tvl.Java.DebugInterface.Client
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Tvl.Java.DebugInterface.Types;
     using System.Diagnostics.Contracts;
+    using Tvl.Java.DebugInterface.Types;
 
     internal sealed class ArrayType : ReferenceType, IArrayType
     {
@@ -30,9 +26,11 @@
             return SignatureHelper.DecodeTypeName(GetSignature().Substring(1));
         }
 
-        public IArrayReference CreateInstance(int length)
+        public IStrongValueHandle<IArrayReference> CreateInstance(int length)
         {
-            throw new NotImplementedException();
+            TaggedObjectId newArray;
+            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.CreateArrayInstance(out newArray, (ArrayTypeId)ReferenceTypeId, length));
+            return new StrongValueHandle<ArrayReference>((ArrayReference)VirtualMachine.GetMirrorOf(newArray));
         }
     }
 }

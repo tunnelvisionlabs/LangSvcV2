@@ -25,7 +25,7 @@
         /// <summary>
         /// Invokes the specified static Method in the target VM.
         /// </summary>
-        IValue InvokeMethod(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments);
+        IStrongValueHandle<IValue> InvokeMethod(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments);
 
         /// <summary>
         /// Determine if this class was declared as an enum.
@@ -35,7 +35,7 @@
         /// <summary>
         /// Constructs a new instance of this type, using the given constructor Method in the target VM.
         /// </summary>
-        IObjectReference CreateInstance(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments);
+        IStrongValueHandle<IObjectReference> CreateInstance(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments);
 
         /// <summary>
         /// Assigns a value to a static field.

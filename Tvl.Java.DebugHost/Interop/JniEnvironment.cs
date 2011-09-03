@@ -97,6 +97,11 @@
             RawInterface.ExceptionClear(this);
         }
 
+        public jthrowable ExceptionOccurred()
+        {
+            return RawInterface.ExceptionOccurred(this);
+        }
+
         public bool IsSameObject(jobject x, jobject y)
         {
             byte result = RawInterface.IsSameObject(this, x, y);
@@ -266,6 +271,141 @@
             return RawInterface.GetObjectField(this, objectHandle, fieldId);
         }
 
+        internal bool CallStaticBooleanMethodA(jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallStaticBooleanMethodA(this, classHandle, methodId, args) != 0;
+        }
+
+        internal byte CallStaticByteMethodA(jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallStaticByteMethodA(this, classHandle, methodId, args);
+        }
+
+        internal char CallStaticCharMethodA(jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallStaticCharMethodA(this, classHandle, methodId, args);
+        }
+
+        internal double CallStaticDoubleMethodA(jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallStaticDoubleMethodA(this, classHandle, methodId, args);
+        }
+
+        internal float CallStaticFloatMethodA(jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallStaticFloatMethodA(this, classHandle, methodId, args);
+        }
+
+        internal int CallStaticIntMethodA(jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallStaticIntMethodA(this, classHandle, methodId, args);
+        }
+
+        internal long CallStaticLongMethodA(jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallStaticLongMethodA(this, classHandle, methodId, args);
+        }
+
+        internal short CallStaticShortMethodA(jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallStaticShortMethodA(this, classHandle, methodId, args);
+        }
+
+        internal jobject CallStaticObjectMethodA(jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallStaticObjectMethodA(this, classHandle, methodId, args);
+        }
+
+        internal bool CallBooleanMethodA(jobject instanceHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallBooleanMethodA(this, instanceHandle, methodId, args) != 0;
+        }
+
+        internal byte CallByteMethodA(jobject instanceHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallByteMethodA(this, instanceHandle, methodId, args);
+        }
+
+        internal char CallCharMethodA(jobject instanceHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallCharMethodA(this, instanceHandle, methodId, args);
+        }
+
+        internal double CallDoubleMethodA(jobject instanceHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallDoubleMethodA(this, instanceHandle, methodId, args);
+        }
+
+        internal float CallFloatMethodA(jobject instanceHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallFloatMethodA(this, instanceHandle, methodId, args);
+        }
+
+        internal int CallIntMethodA(jobject instanceHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallIntMethodA(this, instanceHandle, methodId, args);
+        }
+
+        internal long CallLongMethodA(jobject instanceHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallLongMethodA(this, instanceHandle, methodId, args);
+        }
+
+        internal short CallShortMethodA(jobject instanceHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallShortMethodA(this, instanceHandle, methodId, args);
+        }
+
+        internal jobject CallObjectMethodA(jobject instanceHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallObjectMethodA(this, instanceHandle, methodId, args);
+        }
+
+        internal bool CallNonvirtualBooleanMethodA(jobject instanceHandle, jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallNonvirtualBooleanMethodA(this, instanceHandle, classHandle, methodId, args) != 0;
+        }
+
+        internal byte CallNonvirtualByteMethodA(jobject instanceHandle, jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallNonvirtualByteMethodA(this, instanceHandle, classHandle, methodId, args);
+        }
+
+        internal char CallNonvirtualCharMethodA(jobject instanceHandle, jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallNonvirtualCharMethodA(this, instanceHandle, classHandle, methodId, args);
+        }
+
+        internal double CallNonvirtualDoubleMethodA(jobject instanceHandle, jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallNonvirtualDoubleMethodA(this, instanceHandle, classHandle, methodId, args);
+        }
+
+        internal float CallNonvirtualFloatMethodA(jobject instanceHandle, jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallNonvirtualFloatMethodA(this, instanceHandle, classHandle, methodId, args);
+        }
+
+        internal int CallNonvirtualIntMethodA(jobject instanceHandle, jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallNonvirtualIntMethodA(this, instanceHandle, classHandle, methodId, args);
+        }
+
+        internal long CallNonvirtualLongMethodA(jobject instanceHandle, jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallNonvirtualLongMethodA(this, instanceHandle, classHandle, methodId, args);
+        }
+
+        internal short CallNonvirtualShortMethodA(jobject instanceHandle, jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallNonvirtualShortMethodA(this, instanceHandle, classHandle, methodId, args);
+        }
+
+        internal jobject CallNonvirtualObjectMethodA(jobject instanceHandle, jclass classHandle, jmethodID methodId, params jvalue[] args)
+        {
+            return RawInterface.CallNonvirtualObjectMethodA(this, instanceHandle, classHandle, methodId, args);
+        }
+
         internal void GetBooleanArrayRegion(jobject arrayHandle, int start, int len, bool[] buf)
         {
             RawInterface.GetBooleanArrayRegion(this, arrayHandle, start, len, buf);
@@ -309,6 +449,51 @@
         internal jobject GetObjectArrayElement(jobject arrayHandle, int index)
         {
             return RawInterface.GetObjectArrayElement(this, arrayHandle, index);
+        }
+
+        internal jobject NewBooleanArray(int length)
+        {
+            return RawInterface.NewBooleanArray(this, length);
+        }
+
+        internal jobject NewByteArray(int length)
+        {
+            return RawInterface.NewByteArray(this, length);
+        }
+
+        internal jobject NewCharArray(int length)
+        {
+            return RawInterface.NewCharArray(this, length);
+        }
+
+        internal jobject NewDoubleArray(int length)
+        {
+            return RawInterface.NewDoubleArray(this, length);
+        }
+
+        internal jobject NewFloatArray(int length)
+        {
+            return RawInterface.NewFloatArray(this, length);
+        }
+
+        internal jobject NewIntegerArray(int length)
+        {
+            return RawInterface.NewIntArray(this, length);
+        }
+
+        internal jobject NewLongArray(int length)
+        {
+            return RawInterface.NewLongArray(this, length);
+        }
+
+        internal jobject NewShortArray(int length)
+        {
+            return RawInterface.NewShortArray(this, length);
+        }
+
+        internal jobject NewObjectArray(int length, jclass elementType, jobject initialElement)
+        {
+            return RawInterface.NewObjectArray(this, length, elementType, initialElement);
         }
     }
 }

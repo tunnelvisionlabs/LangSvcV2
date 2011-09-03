@@ -42,7 +42,7 @@
         /// <summary>
         /// Invokes the specified <see cref="IMethod"/> on this object in the target VM.
         /// </summary>
-        IValue InvokeMethod(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments);
+        IStrongValueHandle<IValue> InvokeMethod(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments);
 
         /// <summary>
         /// Determines if this object has been garbage collected in the target VM.

@@ -1,10 +1,10 @@
 ﻿namespace Tvl.Java.DebugInterface.Types
 {
-    using System.Runtime.Serialization;
     using System;
+    using System.Runtime.Serialization;
 
     [DataContract]
-    public struct InterfaceId
+    public struct InterfaceId : IEquatable<InterfaceId>
     {
         [DataMember(IsRequired = true)]
         public long Handle;
@@ -24,12 +24,43 @@
             return new InterfaceId(referenceType.Handle);
         }
 
-        public static explicit operator InterfaceId(TaggedReferenceTypeId referenceType)
+        public static explicit operator InterfaceId(TaggedReferenceTypeId @object)
         {
-            if (referenceType.TypeTag != TypeTag.Interface)
+            if (@object == default(TaggedReferenceTypeId))
+                return default(InterfaceId);
+
+            if (@object.TypeTag != TypeTag.Array)
                 throw new ArgumentException();
 
-            return new InterfaceId(referenceType.TypeId.Handle);
+            return new InterfaceId(@object.TypeId.Handle);
+        }
+
+        public static bool operator ==(InterfaceId x, InterfaceId y)
+        {
+            return x.Handle == y.Handle;
+        }
+
+        public static bool operator !=(InterfaceId x, InterfaceId y)
+        {
+            return x.Handle != y.Handle;
+        }
+
+        public bool Equals(InterfaceId other)
+        {
+            return this.Handle == other.Handle;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is InterfaceId))
+                return false;
+
+            return this.Handle == ((InterfaceId)obj).Handle;
+        }
+
+        public override int GetHashCode()
+        {
+            return Handle.GetHashCode();
         }
     }
 }

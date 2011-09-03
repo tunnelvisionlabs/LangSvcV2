@@ -488,7 +488,21 @@
             {
                 jweak weak;
                 if (!_objects.TryGetValue(objectId, out weak))
-                    return jvmtiError.InvalidObject;
+                {
+                    jthread thread;
+                    if (!_threads.TryGetValue((ThreadId)objectId, out thread))
+                    {
+                        jclass @class;
+                        if (!_classes.TryGetValue((ReferenceTypeId)objectId, out @class))
+                            return jvmtiError.InvalidObject;
+
+                        @object = @class;
+                        return jvmtiError.None;
+                    }
+
+                    @object = thread;
+                    return jvmtiError.None;
+                }
 
                 @object = new jobject(weak.Handle);
                 return jvmtiError.None;
@@ -649,6 +663,9 @@
 
         internal TaggedReferenceTypeId TrackLocalClassReference(jclass classHandle, JvmtiEnvironment environment, JniEnvironment nativeEnvironment, bool freeLocalReference)
         {
+            if (classHandle == jclass.Null)
+                return default(TaggedReferenceTypeId);
+
             bool isArrayClass;
             JvmtiErrorHandler.ThrowOnFailure(environment.IsArrayClass(classHandle, out isArrayClass));
             bool isInterface;
@@ -657,7 +674,7 @@
             TypeTag typeTag = isArrayClass ? TypeTag.Array : (isInterface ? TypeTag.Interface : TypeTag.Class);
 
             int hashCode;
-            JvmtiErrorHandler.ThrowOnFailure(environment.RawInterface.GetObjectHashCode(environment, classHandle, out hashCode));
+            JvmtiErrorHandler.ThrowOnFailure(environment.GetObjectHashCode(classHandle, out hashCode));
 
             ReferenceTypeId typeId = new ReferenceTypeId(hashCode);
             TaggedReferenceTypeId taggedTypeId = new TaggedReferenceTypeId(typeTag, typeId);
@@ -684,6 +701,69 @@
                 nativeEnvironment.DeleteLocalReference(classHandle);
 
             return taggedTypeId;
+        }
+
+        private readonly ConcurrentDictionary<long, Tuple<jobject, int>> _globalReferences = new ConcurrentDictionary<long, Tuple<jobject, int>>();
+
+        internal jvmtiError AddGlobalReference(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, jobject obj)
+        {
+            long tag;
+            jvmtiError error = environment.GetTag(obj, out tag);
+            if (error != jvmtiError.None)
+                return error;
+
+            if (tag == 0)
+                return jvmtiError.IllegalArgument;
+
+            _globalReferences.AddOrUpdate(tag,
+                t =>
+                {
+                    return Tuple.Create(nativeEnvironment.NewGlobalReference(obj), 1);
+                },
+                (t, v) =>
+                {
+                    if (v.Item2 == 0)
+                        return Tuple.Create(nativeEnvironment.NewGlobalReference(obj), 1);
+                    else
+                        return Tuple.Create(v.Item1, v.Item2 + 1);
+                });
+
+            return jvmtiError.None;
+        }
+
+        internal jvmtiError RemoveGlobalReference(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, jobject obj)
+        {
+            long tag;
+            jvmtiError error = environment.GetTag(obj, out tag);
+            if (error != jvmtiError.None)
+                return error;
+
+            if (tag == 0)
+                return jvmtiError.IllegalArgument;
+
+            var result = _globalReferences.AddOrUpdate(tag,
+                t =>
+                {
+                    return Tuple.Create(jobject.Null, 0);
+                },
+                (t, v) =>
+                {
+                    if (v.Item2 == 0)
+                    {
+                        return Tuple.Create(jobject.Null, 0);
+                    }
+                    else if (v.Item2 == 1)
+                    {
+                        nativeEnvironment.DeleteGlobalReference(v.Item1);
+                        return Tuple.Create(jobject.Null, 0);
+                    }
+                    else
+                    {
+                        return Tuple.Create(v.Item1, v.Item2 - 1);
+                    }
+                });
+
+            return jvmtiError.None;
         }
 
         #endregion

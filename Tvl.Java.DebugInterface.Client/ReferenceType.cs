@@ -412,7 +412,18 @@
         {
             if (_visibleFields == null)
             {
-                throw new NotImplementedException();
+                HashSet<Field> visibleFields = new HashSet<Field>(TypeComponentNameAndSignatureEqualityComparer.Default);
+
+                ClassType classType = this as ClassType;
+                if (classType == null)
+                    throw new NotImplementedException();
+
+                for (/*classType = this*/; classType != null; classType = (ClassType)classType.GetSuperclass())
+                {
+                    visibleFields.UnionWith(classType.GetMethods(false).Cast<Field>());
+                }
+
+                _visibleFields = visibleFields.ToArray();
             }
 
             return new ReadOnlyCollection<IField>(_visibleFields);
@@ -422,7 +433,18 @@
         {
             if (_visibleMethods == null)
             {
-                throw new NotImplementedException();
+                HashSet<Method> visibleMethods = new HashSet<Method>(TypeComponentNameAndSignatureEqualityComparer.Default);
+
+                ClassType classType = this as ClassType;
+                if (classType == null)
+                    throw new NotImplementedException();
+
+                for (/*classType = this*/; classType != null; classType = (ClassType)classType.GetSuperclass())
+                {
+                    visibleMethods.UnionWith(classType.GetMethods(false).Cast<Method>());
+                }
+
+                _visibleMethods = visibleMethods.ToArray();
             }
 
             return new ReadOnlyCollection<IMethod>(_visibleMethods);

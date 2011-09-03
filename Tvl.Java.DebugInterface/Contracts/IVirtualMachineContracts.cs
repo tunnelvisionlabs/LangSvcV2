@@ -272,9 +272,9 @@
             throw new NotImplementedException();
         }
 
-        public IStringReference GetMirrorOf(string value)
+        public IStrongValueHandle<IStringReference> GetMirrorOf(string value)
         {
-            Contract.Ensures(Contract.Result<IStringReference>() == null || this.GetVirtualMachine().Equals(Contract.Result<IStringReference>().GetVirtualMachine()));
+            Contract.Ensures(Contract.Result<IStrongValueHandle<IStringReference>>() == null || this.GetVirtualMachine().Equals(Contract.Result<IStrongValueHandle<IStringReference>>().GetVirtualMachine()));
 
             throw new NotImplementedException();
         }

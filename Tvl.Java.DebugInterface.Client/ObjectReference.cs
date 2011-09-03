@@ -2,11 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Collections.ObjectModel;
-    using Tvl.Java.DebugInterface.Types;
     using System.Diagnostics.Contracts;
+    using System.Linq;
+    using Tvl.Java.DebugInterface.Types;
     using InvokeOptions = Tvl.Java.DebugInterface.InvokeOptions;
 
     internal class ObjectReference : Value, IObjectReference
@@ -37,7 +36,7 @@
             return GetReferenceType();
         }
 
-        internal override Types.Value ToNetworkValue()
+        protected override Types.Value ToNetworkValueImpl()
         {
             return new Types.Value(Tag.Object, ObjectId.Handle);
         }
@@ -106,9 +105,18 @@
             return result;
         }
 
-        public IValue InvokeMethod(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
+        public IStrongValueHandle<IValue> InvokeMethod(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
         {
-            throw new NotImplementedException();
+            Types.Value returnValue;
+            TaggedObjectId thrownException;
+            ThreadId threadId = (thread != null) ? ((ThreadReference)thread).ThreadId : default(ThreadId);
+            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.InvokeObjectMethod(out returnValue, out thrownException, ObjectId, threadId, (ClassId)((Method)method).DeclaringType.TaggedReferenceTypeId, ((Method)method).MethodId, (Types.InvokeOptions)options, arguments.Cast<Value>().Select(Value.ToNetworkValue).ToArray()));
+            if (thrownException != default(TaggedObjectId))
+            {
+                throw new NotImplementedException();
+            }
+
+            return new StrongValueHandle<Value>(VirtualMachine.GetMirrorOf(returnValue));
         }
 
         public bool GetIsCollected()
@@ -142,7 +150,9 @@
 
         public void SetValue(IField field, IValue value)
         {
-            throw new NotImplementedException();
+            FieldId[] fields = { ((Field)field).FieldId };
+            Types.Value[] values = { Value.ToNetworkValue((Value)value) };
+            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.SetObjectValues(ObjectId, fields, values));
         }
 
         public long GetUniqueId()

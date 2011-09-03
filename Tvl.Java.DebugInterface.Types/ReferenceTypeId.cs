@@ -14,6 +14,22 @@
             Handle = handle;
         }
 
+        public static explicit operator ReferenceTypeId(ObjectId objectId)
+        {
+            return new ReferenceTypeId(objectId.Handle);
+        }
+
+        public static explicit operator ReferenceTypeId(TaggedObjectId objectId)
+        {
+            if (objectId == default(TaggedObjectId))
+                return default(ReferenceTypeId);
+
+            if (objectId.Tag != Tag.ClassObject)
+                throw new ArgumentException();
+
+            return new ReferenceTypeId(objectId.ObjectId.Handle);
+        }
+
         public static bool operator ==(ReferenceTypeId x, ReferenceTypeId y)
         {
             return x.Handle == y.Handle;

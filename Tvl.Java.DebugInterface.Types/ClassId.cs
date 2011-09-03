@@ -24,6 +24,17 @@
             return new ClassId(referenceType.Handle);
         }
 
+        public static explicit operator ClassId(TaggedReferenceTypeId referenceType)
+        {
+            if (referenceType == default(TaggedReferenceTypeId))
+                return default(ClassId);
+
+            if (referenceType.TypeTag != TypeTag.Class)
+                throw new ArgumentException();
+
+            return new ClassId(referenceType.TypeId.Handle);
+        }
+
         public static bool operator ==(ClassId x, ClassId y)
         {
             return x.Handle == y.Handle;

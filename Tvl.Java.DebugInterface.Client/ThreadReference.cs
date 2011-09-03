@@ -25,7 +25,7 @@
             }
         }
 
-        internal override Types.Value ToNetworkValue()
+        protected override Types.Value ToNetworkValueImpl()
         {
             return new Types.Value(Tag.Thread, ObjectId.Handle);
         }

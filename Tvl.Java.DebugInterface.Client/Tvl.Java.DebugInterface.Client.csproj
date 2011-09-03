@@ -143,6 +143,7 @@
     <Compile Include="LongType.cs" />
     <Compile Include="LongValue.cs" />
     <Compile Include="Method.cs" />
+    <Compile Include="TypeComponentNameAndSignatureEqualityComparer.cs" />
     <Compile Include="Mirror.cs" />
     <Compile Include="ObjectReference.cs" />
     <Compile Include="PrimitiveType.cs" />
@@ -184,6 +185,7 @@
     <Compile Include="ShortValue.cs" />
     <Compile Include="StackFrame.cs" />
     <Compile Include="StringReference.cs" />
+    <Compile Include="StrongValueHandle`1.cs" />
     <Compile Include="ThreadGroupReference.cs" />
     <Compile Include="ThreadReference.cs" />
     <Compile Include="TypeComponent.cs" />

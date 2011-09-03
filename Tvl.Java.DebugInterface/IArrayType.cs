@@ -26,6 +26,6 @@
         /// <summary>
         /// Creates a new instance of this array class in the target VM.
         /// </summary>
-        IArrayReference CreateInstance(int length);
+        IStrongValueHandle<IArrayReference> CreateInstance(int length);
     }
 }

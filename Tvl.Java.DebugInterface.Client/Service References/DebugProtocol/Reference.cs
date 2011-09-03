@@ -95,7 +95,7 @@ namespace Tvl.Java.DebugInterface.Client.DebugProtocol {
         Tvl.Java.DebugInterface.Types.Error GetArrayValues(out Tvl.Java.DebugInterface.Types.Value[] values, Tvl.Java.DebugInterface.Types.ArrayId arrayObject, int firstIndex, int length);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/SetArrayValues", ReplyAction="http://tempuri.org/IDebugProtocolService/SetArrayValuesResponse")]
-        Tvl.Java.DebugInterface.Types.Error SetArrayValues(Tvl.Java.DebugInterface.Types.ArrayId arrayObject, int firstIndex, int length, Tvl.Java.DebugInterface.Types.Value[] values);
+        Tvl.Java.DebugInterface.Types.Error SetArrayValues(Tvl.Java.DebugInterface.Types.ArrayId arrayObject, int firstIndex, Tvl.Java.DebugInterface.Types.Value[] values);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetClassLoaderVisibleClasses", ReplyAction="http://tempuri.org/IDebugProtocolService/GetClassLoaderVisibleClassesResponse")]
         Tvl.Java.DebugInterface.Types.Error GetClassLoaderVisibleClasses(out Tvl.Java.DebugInterface.Types.TaggedReferenceTypeId[] classes, Tvl.Java.DebugInterface.Types.ClassLoaderId classLoaderObject);
@@ -438,8 +438,8 @@ namespace Tvl.Java.DebugInterface.Client.DebugProtocol {
             return base.Channel.GetArrayValues(out values, arrayObject, firstIndex, length);
         }
         
-        public Tvl.Java.DebugInterface.Types.Error SetArrayValues(Tvl.Java.DebugInterface.Types.ArrayId arrayObject, int firstIndex, int length, Tvl.Java.DebugInterface.Types.Value[] values) {
-            return base.Channel.SetArrayValues(arrayObject, firstIndex, length, values);
+        public Tvl.Java.DebugInterface.Types.Error SetArrayValues(Tvl.Java.DebugInterface.Types.ArrayId arrayObject, int firstIndex, Tvl.Java.DebugInterface.Types.Value[] values) {
+            return base.Channel.SetArrayValues(arrayObject, firstIndex, values);
         }
         
         public Tvl.Java.DebugInterface.Types.Error GetClassLoaderVisibleClasses(out Tvl.Java.DebugInterface.Types.TaggedReferenceTypeId[] classes, Tvl.Java.DebugInterface.Types.ClassLoaderId classLoaderObject) {

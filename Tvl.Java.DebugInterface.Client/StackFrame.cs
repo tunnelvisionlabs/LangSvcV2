@@ -96,7 +96,7 @@
                 throw new VirtualMachineMismatchException();
 
             int[] slots = { localVariable.Slot };
-            Types.Value[] values = { trueValue.ToNetworkValue() };
+            Types.Value[] values = { Value.ToNetworkValue(trueValue) };
             DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.SetValues(_thread.ThreadId, _frameId, slots, values));
         }
 

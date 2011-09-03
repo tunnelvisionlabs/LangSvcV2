@@ -19,6 +19,11 @@ namespace Tvl.Java.DebugHost.Interop
             }
         }
 
+        public static implicit operator jobject(jthrowable throwable)
+        {
+            return new jobject(throwable.Handle);
+        }
+
         public static bool operator ==(jthrowable x, jthrowable y)
         {
             return x._handle == y._handle;

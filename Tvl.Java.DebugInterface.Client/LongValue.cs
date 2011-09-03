@@ -23,7 +23,7 @@
             return VirtualMachine.PrimitiveTypes.Long;
         }
 
-        internal override Types.Value ToNetworkValue()
+        protected override Types.Value ToNetworkValueImpl()
         {
             return (Types.Value)_value;
         }

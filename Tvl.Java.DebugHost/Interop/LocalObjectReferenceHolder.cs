@@ -29,7 +29,7 @@
                 if (_nativeEnvironment == null)
                     return false;
 
-                return !_nativeEnvironment.IsSameObject(Value, jthread.Null);
+                return !_nativeEnvironment.IsSameObject(Value, jobject.Null);
             }
         }
 

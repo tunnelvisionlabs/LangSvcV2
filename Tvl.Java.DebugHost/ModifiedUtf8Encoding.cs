@@ -105,9 +105,9 @@
             return builder.ToString();
         }
 
-        public static byte[] GetBytes(string s)
+        public static byte[] GetBytes(string s, bool nullTerminated = true)
         {
-            List<byte> bytes = new List<byte>(s.Length);
+            List<byte> bytes = new List<byte>(s.Length + 1);
             for (int i = 0; i < s.Length; i++)
             {
                 char c = s[i];
@@ -127,6 +127,9 @@
                     bytes.Add((byte)(0x80 | (c & 0x3F)));
                 }
             }
+
+            if (nullTerminated)
+                bytes.Add(0);
 
             return bytes.ToArray();
         }

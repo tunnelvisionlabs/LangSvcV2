@@ -9,6 +9,7 @@
     using Tvl.Collections;
     using Tvl.Java.DebugHost.Interop;
     using Tvl.Java.DebugInterface.Types;
+    using System.Collections.ObjectModel;
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Reentrant, IncludeExceptionDetailInFaults = true)]
     public partial class DebugProtocolService : IDebugProtocolService
@@ -89,15 +90,27 @@
 
         public Error GetVersion(out string description, out int majorVersion, out int minorVersion, out string vmVersion, out string vmName)
         {
-            description = "java something...";
+            description = "Java Debug Protocol Service";
             majorVersion = 1;
             minorVersion = 0;
+            vmVersion = null;
+            vmName = null;
 
-            throw new NotImplementedException();
-            //_rawInterface.GetSystemProperty(
-            //vmVersion = environment.GetSystemProperty("java.version");
-            //vmName = environment.GetSystemProperty("java.vm.name");
-            //return Error.NONE;
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            error = Environment.GetSystemProperty("java.version", out vmVersion);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            error = Environment.GetSystemProperty("java.vm.name", out vmName);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            return Error.None;
         }
 
         public Error GetClassesBySignature(string signature, out ReferenceTypeData[] classes)
@@ -229,7 +242,8 @@
             if (error != jvmtiError.None)
                 return GetStandardError(error);
 
-            throw new NotImplementedException();
+            error = Environment.DisposeEnvironment();
+            return GetStandardError(error);
         }
 
         public Error CreateString(string value, out StringId stringObject)
@@ -242,11 +256,12 @@
             if (error != jvmtiError.None)
                 return GetStandardError(error);
 
-            //jobject obj = nativeEnvironment.NewString(value);
-            //nativeEnvironment.ExceptionClear();
-            //stringObject = VirtualMachine.TrackLocalObjectReference(obj, environment, true);
-
-            throw new NotImplementedException();
+            jobject obj = nativeEnvironment.NewString(value);
+            nativeEnvironment.ExceptionClear();
+            stringObject = (StringId)VirtualMachine.TrackLocalObjectReference(obj, environment, nativeEnvironment, false);
+            VirtualMachine.AddGlobalReference(environment, nativeEnvironment, obj);
+            nativeEnvironment.DeleteLocalReference(obj);
+            return Error.None;
         }
 
         public Error GetCapabilities(out Capabilities capabilities)
@@ -301,7 +316,24 @@
 
         public Error GetClassLoader(ReferenceTypeId referenceType, out ClassLoaderId classLoader)
         {
-            throw new NotImplementedException();
+            classLoader = default(ClassLoaderId);
+
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            using (var @class = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
+            {
+                jobject classLoaderObject;
+                error = Environment.GetClassLoader(@class.Value, out classLoaderObject);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
+
+                classLoader = (ClassLoaderId)VirtualMachine.TrackLocalObjectReference(classLoaderObject, environment, nativeEnvironment, true);
+                return Error.None;
+            }
         }
 
         public Error GetModifiers(ReferenceTypeId referenceType, out AccessModifiers modifiers)
@@ -554,7 +586,19 @@
 
         public Error GetSourceDebugExtension(ReferenceTypeId referenceType, out string extension)
         {
-            throw new NotImplementedException();
+            extension = null;
+
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
+            {
+                error = environment.GetSourceDebugExtension(classHandle.Value, out extension);
+                return GetStandardError(error);
+            }
         }
 
         public Error GetInstances(ReferenceTypeId referenceType, int maxInstances, out TaggedObjectId[] instances)
@@ -600,9 +644,26 @@
             throw new NotImplementedException();
         }
 
-        public Error GetSuperclass(ClassId @class, out ClassId superclass)
+        public Error GetSuperclass(ClassId classId, out ClassId superclass)
         {
-            throw new NotImplementedException();
+            superclass = default(ClassId);
+
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, classId))
+            {
+                if (!classHandle.IsAlive)
+                    return Error.InvalidClass;
+
+                jclass superclassHandle = nativeEnvironment.GetSuperclass(classHandle.Value);
+                nativeEnvironment.ExceptionClear();
+                superclass = (ClassId)VirtualMachine.TrackLocalClassReference(superclassHandle, environment, nativeEnvironment, true);
+                return Error.None;
+            }
         }
 
         public Error SetClassValues(ClassId @class, FieldId[] fields, Value[] values)
@@ -612,7 +673,127 @@
 
         public Error InvokeClassMethod(ClassId @class, ThreadId thread, MethodId method, InvokeOptions options, Value[] arguments, out Value returnValue, out TaggedObjectId thrownException)
         {
-            throw new NotImplementedException();
+            returnValue = default(Value);
+            thrownException = default(TaggedObjectId);
+
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            string name;
+            string signature;
+            string genericSignature;
+            error = environment.GetMethodName(method, out name, out signature, out genericSignature);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            if (thread != default(ThreadId))
+                throw new NotImplementedException();
+
+            List<string> argumentTypeSignatures;
+            string returnTypeSignature;
+            SignatureHelper.ParseMethodSignature(signature, out argumentTypeSignatures, out returnTypeSignature);
+
+            using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, @class))
+            {
+                // don't do argument conversion if the signature is invalid
+                switch (returnTypeSignature[0])
+                {
+                case 'Z':
+                case 'B':
+                case 'C':
+                case 'D':
+                case 'F':
+                case 'I':
+                case 'J':
+                case 'S':
+                case '[':
+                case 'L':
+                    break;
+
+                case 'V':
+                default:
+                    return Error.InvalidMethodid;
+                }
+
+                jvalue[] args = arguments.Select(value => new jvalue(VirtualMachine, environment, nativeEnvironment, value)).ToArray();
+
+                switch (returnTypeSignature[0])
+                {
+                case 'Z':
+                    returnValue = nativeEnvironment.CallStaticBooleanMethodA(classHandle.Value, method, args);
+                    break;
+
+                case 'B':
+                    returnValue = nativeEnvironment.CallStaticByteMethodA(classHandle.Value, method, args);
+                    break;
+
+                case 'C':
+                    returnValue = nativeEnvironment.CallStaticCharMethodA(classHandle.Value, method, args);
+                    break;
+
+                case 'D':
+                    returnValue = nativeEnvironment.CallStaticDoubleMethodA(classHandle.Value, method, args);
+                    break;
+
+                case 'F':
+                    returnValue = nativeEnvironment.CallStaticFloatMethodA(classHandle.Value, method, args);
+                    break;
+
+                case 'I':
+                    returnValue = nativeEnvironment.CallStaticIntMethodA(classHandle.Value, method, args);
+                    break;
+
+                case 'J':
+                    returnValue = nativeEnvironment.CallStaticLongMethodA(classHandle.Value, method, args);
+                    break;
+
+                case 'S':
+                    returnValue = nativeEnvironment.CallStaticShortMethodA(classHandle.Value, method, args);
+                    break;
+
+                case '[':
+                case 'L':
+                    jobject result = nativeEnvironment.CallStaticObjectMethodA(classHandle.Value, method, args);
+                    returnValue = VirtualMachine.TrackLocalObjectReference(result, environment, nativeEnvironment, false);
+                    VirtualMachine.AddGlobalReference(environment, nativeEnvironment, result);
+                    nativeEnvironment.DeleteLocalReference(result);
+                    break;
+
+                case 'V':
+                default:
+                    Contract.Assert(false, "not reachable");
+                    break;
+                }
+
+                if (nativeEnvironment.ExceptionOccurred() != jthrowable.Null)
+                {
+                    throw new NotImplementedException();
+                }
+
+                for (int i = 0; i < arguments.Length; i++)
+                {
+                    switch (arguments[i].Tag)
+                    {
+                    case Tag.Array:
+                    case Tag.Object:
+                    case Tag.String:
+                    case Tag.Thread:
+                    case Tag.ThreadGroup:
+                    case Tag.ClassLoader:
+                    case Tag.ClassObject:
+                        nativeEnvironment.DeleteLocalReference(args[i].ObjectValue);
+                        break;
+
+                    default:
+                        break;
+                    }
+                }
+
+                return Error.None;
+            }
         }
 
         public Error CreateClassInstance(ClassId @class, ThreadId thread, MethodId method, InvokeOptions options, Value[] arguments, out TaggedObjectId newObject, out TaggedObjectId thrownException)
@@ -622,7 +803,76 @@
 
         public Error CreateArrayInstance(ArrayTypeId arrayType, int length, out TaggedObjectId newArray)
         {
-            throw new NotImplementedException();
+            newArray = default(TaggedObjectId);
+
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            using (var arrayTypeHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, arrayType))
+            {
+                string signature;
+                string genericSignature;
+                error = environment.GetClassSignature(arrayTypeHandle.Value, out signature, out genericSignature);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
+
+                jobject array;
+                switch (signature[1])
+                {
+                case 'Z':
+                    array = nativeEnvironment.NewBooleanArray(length);
+                    break;
+
+                case 'B':
+                    array = nativeEnvironment.NewByteArray(length);
+                    break;
+
+                case 'C':
+                    array = nativeEnvironment.NewCharArray(length);
+                    break;
+
+                case 'D':
+                    array = nativeEnvironment.NewDoubleArray(length);
+                    break;
+
+                case 'F':
+                    array = nativeEnvironment.NewFloatArray(length);
+                    break;
+
+                case 'I':
+                    array = nativeEnvironment.NewIntegerArray(length);
+                    break;
+
+                case 'J':
+                    array = nativeEnvironment.NewLongArray(length);
+                    break;
+
+                case 'S':
+                    array = nativeEnvironment.NewShortArray(length);
+                    break;
+
+                case '[':
+                case 'L':
+                    throw new NotImplementedException();
+                    //array = nativeEnvironment.NewObjectArray(length, elementType, jobject.Null);
+                    //break;
+
+                case 'V':
+                default:
+                    throw new FormatException();
+                }
+
+                if (array == jobject.Null)
+                    throw new NotImplementedException();
+
+                newArray = VirtualMachine.TrackLocalObjectReference(array, environment, nativeEnvironment, false);
+                VirtualMachine.AddGlobalReference(environment, nativeEnvironment, array);
+                nativeEnvironment.DeleteLocalReference(array);
+                return Error.None;
+            }
         }
 
         public Error GetMethodLineTable(ReferenceTypeId referenceType, MethodId methodId, out long start, out long end, out LineNumberData[] lines)
@@ -818,23 +1068,211 @@
             throw new NotImplementedException();
         }
 
-        public Error InvokeObjectMethod(ObjectId @object, ThreadId thread, ClassId @class, MethodId method, InvokeOptions options, Value[] arguments, out Value returnValue, out TaggedObjectId thrownException)
+        public Error InvokeObjectMethod(ObjectId objectId, ThreadId thread, ClassId @class, MethodId method, InvokeOptions options, Value[] arguments, out Value returnValue, out TaggedObjectId thrownException)
         {
-            throw new NotImplementedException();
+            returnValue = default(Value);
+            thrownException = default(TaggedObjectId);
+
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            string name;
+            string signature;
+            string genericSignature;
+            error = environment.GetMethodName(method, out name, out signature, out genericSignature);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            if (thread != default(ThreadId))
+                throw new NotImplementedException();
+
+            List<string> argumentTypeSignatures;
+            string returnTypeSignature;
+            SignatureHelper.ParseMethodSignature(signature, out argumentTypeSignatures, out returnTypeSignature);
+
+            using (var instanceHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, objectId))
+            {
+                using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, @class))
+                {
+                    // don't do argument conversion if the signature is invalid
+                    switch (returnTypeSignature[0])
+                    {
+                    case 'Z':
+                    case 'B':
+                    case 'C':
+                    case 'D':
+                    case 'F':
+                    case 'I':
+                    case 'J':
+                    case 'S':
+                    case '[':
+                    case 'L':
+                        break;
+
+                    case 'V':
+                    default:
+                        return Error.InvalidMethodid;
+                    }
+
+                    jvalue[] args = arguments.Select(value => new jvalue(VirtualMachine, environment, nativeEnvironment, value)).ToArray();
+
+                    bool nonVirtual = (options & InvokeOptions.NonVirtual) != 0;
+
+                    switch (returnTypeSignature[0])
+                    {
+                    case 'Z':
+                        if (!nonVirtual)
+                            returnValue = nativeEnvironment.CallBooleanMethodA(instanceHandle.Value, method, args);
+                        else
+                            returnValue = nativeEnvironment.CallNonvirtualBooleanMethodA(instanceHandle.Value, classHandle.Value, method, args);
+
+                        break;
+
+                    case 'B':
+                        if (!nonVirtual)
+                            returnValue = nativeEnvironment.CallByteMethodA(instanceHandle.Value, method, args);
+                        else
+                            returnValue = nativeEnvironment.CallNonvirtualByteMethodA(instanceHandle.Value, classHandle.Value, method, args);
+
+                        break;
+
+                    case 'C':
+                        if (!nonVirtual)
+                            returnValue = nativeEnvironment.CallCharMethodA(instanceHandle.Value, method, args);
+                        else
+                            returnValue = nativeEnvironment.CallNonvirtualCharMethodA(instanceHandle.Value, classHandle.Value, method, args);
+
+                        break;
+
+                    case 'D':
+                        if (!nonVirtual)
+                            returnValue = nativeEnvironment.CallDoubleMethodA(instanceHandle.Value, method, args);
+                        else
+                            returnValue = nativeEnvironment.CallNonvirtualDoubleMethodA(instanceHandle.Value, classHandle.Value, method, args);
+
+                        break;
+
+                    case 'F':
+                        if (!nonVirtual)
+                            returnValue = nativeEnvironment.CallFloatMethodA(instanceHandle.Value, method, args);
+                        else
+                            returnValue = nativeEnvironment.CallNonvirtualFloatMethodA(instanceHandle.Value, classHandle.Value, method, args);
+
+                        break;
+
+                    case 'I':
+                        if (!nonVirtual)
+                            returnValue = nativeEnvironment.CallIntMethodA(instanceHandle.Value, method, args);
+                        else
+                            returnValue = nativeEnvironment.CallNonvirtualIntMethodA(instanceHandle.Value, classHandle.Value, method, args);
+
+                        break;
+
+                    case 'J':
+                        if (!nonVirtual)
+                            returnValue = nativeEnvironment.CallLongMethodA(instanceHandle.Value, method, args);
+                        else
+                            returnValue = nativeEnvironment.CallNonvirtualLongMethodA(instanceHandle.Value, classHandle.Value, method, args);
+
+                        break;
+
+                    case 'S':
+                        if (!nonVirtual)
+                            returnValue = nativeEnvironment.CallShortMethodA(instanceHandle.Value, method, args);
+                        else
+                            returnValue = nativeEnvironment.CallNonvirtualShortMethodA(instanceHandle.Value, classHandle.Value, method, args);
+
+                        break;
+
+                    case '[':
+                    case 'L':
+                        jobject result;
+                        if (!nonVirtual)
+                            result = nativeEnvironment.CallObjectMethodA(instanceHandle.Value, method, args);
+                        else
+                            result = nativeEnvironment.CallNonvirtualObjectMethodA(instanceHandle.Value, classHandle.Value, method, args);
+
+                        returnValue = VirtualMachine.TrackLocalObjectReference(result, environment, nativeEnvironment, false);
+                        VirtualMachine.AddGlobalReference(environment, nativeEnvironment, result);
+                        nativeEnvironment.DeleteLocalReference(result);
+                        break;
+
+                    case 'V':
+                    default:
+                        Contract.Assert(false, "not reachable");
+                        break;
+                    }
+
+                    if (nativeEnvironment.ExceptionOccurred() != jthrowable.Null)
+                    {
+                        throw new NotImplementedException();
+                    }
+
+                    for (int i = 0; i < arguments.Length; i++)
+                    {
+                        switch (arguments[i].Tag)
+                        {
+                        case Tag.Array:
+                        case Tag.Object:
+                        case Tag.String:
+                        case Tag.Thread:
+                        case Tag.ThreadGroup:
+                        case Tag.ClassLoader:
+                        case Tag.ClassObject:
+                            nativeEnvironment.DeleteLocalReference(args[i].ObjectValue);
+                            break;
+
+                        default:
+                            break;
+                        }
+                    }
+
+                    return Error.None;
+                }
+            }
         }
 
-        public Error DisableObjectCollection(ObjectId @object)
+        public Error DisableObjectCollection(ObjectId objectId)
         {
-            throw new NotImplementedException();
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            using (var objectHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, objectId))
+            {
+                error = VirtualMachine.AddGlobalReference(environment, nativeEnvironment, objectHandle.Value);
+                return GetStandardError(error);
+            }
         }
 
-        public Error EnableObjectCollection(ObjectId @object)
+        public Error EnableObjectCollection(ObjectId objectId)
         {
-            throw new NotImplementedException();
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            using (var objectHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, objectId))
+            {
+                error = VirtualMachine.RemoveGlobalReference(environment, nativeEnvironment, objectHandle.Value);
+                return GetStandardError(error);
+            }
         }
 
         public Error GetIsObjectCollected(ObjectId objectId, out bool result)
         {
+            if (objectId == default(ObjectId))
+            {
+                result = true;
+                return Error.None;
+            }
+
             result = false;
 
             JniEnvironment nativeEnvironment;
@@ -967,9 +1405,31 @@
             }
         }
 
-        public Error GetThreadGroup(ThreadId thread, out ThreadGroupId threadGroup)
+        public Error GetThreadGroup(ThreadId threadId, out ThreadGroupId threadGroup)
         {
-            throw new NotImplementedException();
+            threadGroup = default(ThreadGroupId);
+
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            using (var thread = VirtualMachine.GetLocalReferenceForThread(nativeEnvironment, threadId))
+            {
+                if (!thread.IsAlive)
+                    return Error.InvalidThread;
+
+                jvmtiThreadInfo threadInfo;
+                error = environment.GetThreadInfo(thread.Value, out threadInfo);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
+
+                threadGroup = (ThreadGroupId)VirtualMachine.TrackLocalObjectReference(threadInfo._threadGroup, environment, nativeEnvironment, true);
+                nativeEnvironment.DeleteLocalReference(threadInfo._contextClassLoader);
+                environment.Deallocate(threadInfo._name);
+                return Error.None;
+            }
         }
 
         public Error GetThreadFrames(ThreadId threadId, int startFrame, int length, out FrameLocationData[] frames)
@@ -1228,7 +1688,7 @@
             }
         }
 
-        public Error SetArrayValues(ArrayId arrayObject, int firstIndex, int length, Value[] values)
+        public Error SetArrayValues(ArrayId arrayObject, int firstIndex, Value[] values)
         {
             throw new NotImplementedException();
         }

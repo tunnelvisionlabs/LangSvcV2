@@ -96,6 +96,56 @@
             return RawInterface.GetVersionNumber(this, out version);
         }
 
+        public jvmtiError GetSystemProperty(string name, out string value)
+        {
+            value = null;
+
+            using (ModifiedUTF8StringData property = new ModifiedUTF8StringData(name))
+            {
+                IntPtr valuePtr;
+                jvmtiError error = RawInterface.GetSystemProperty(this, property, out valuePtr);
+                if (error != jvmtiError.None)
+                    return error;
+
+                unsafe
+                {
+                    if (valuePtr != IntPtr.Zero)
+                    {
+                        value = ModifiedUTF8Encoding.GetString((byte*)valuePtr);
+                        Deallocate(valuePtr);
+                    }
+                }
+
+                return jvmtiError.None;
+            }
+        }
+
+        public jvmtiError GetSourceDebugExtension(jclass classHandle, out string extension)
+        {
+            extension = null;
+
+            IntPtr sourceDebugExtensionPtr;
+            jvmtiError error = RawInterface.GetSourceDebugExtension(this, classHandle, out sourceDebugExtensionPtr);
+            if (error != jvmtiError.None)
+                return error;
+
+            if (sourceDebugExtensionPtr != IntPtr.Zero)
+            {
+                unsafe
+                {
+                    extension = ModifiedUTF8Encoding.GetString((byte*)sourceDebugExtensionPtr);
+                    Deallocate(sourceDebugExtensionPtr);
+                }
+            }
+
+            return jvmtiError.None;
+        }
+
+        public jvmtiError DisposeEnvironment()
+        {
+            return RawInterface.DisposeEnvironment(this);
+        }
+
         public jvmtiError GetCurrentThread(JniEnvironment nativeEnvironment, out ThreadId thread)
         {
             thread = default(ThreadId);
@@ -559,6 +609,11 @@
             jvmtiError error = RawInterface.IsInterface(this, classHandle, out isInterface);
             result = isInterface != 0;
             return error;
+        }
+
+        public jvmtiError GetObjectHashCode(jobject obj, out int result)
+        {
+            return RawInterface.GetObjectHashCode(this, obj, out result);
         }
 
         public jvmtiError GetImplementedInterfaces(JniEnvironment nativeEnvironment, jclass classHandle, out TaggedReferenceTypeId[] interfaces)

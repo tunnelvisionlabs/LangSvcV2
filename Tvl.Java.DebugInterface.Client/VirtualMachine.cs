@@ -500,11 +500,14 @@
             return new ShortValue(this, value);
         }
 
-        public StringReference GetMirrorOf(string value)
+        public StrongValueHandle<StringReference> GetMirrorOf(string value)
         {
+            if (value == null)
+                return null;
+
             StringId stringObject;
             DebugErrorHandler.ThrowOnFailure(ProtocolService.CreateString(out stringObject, value));
-            return GetMirrorOf(stringObject);
+            return new StrongValueHandle<StringReference>(GetMirrorOf(stringObject));
         }
 
         public VoidValue GetMirrorOfVoid()
@@ -514,46 +517,73 @@
 
         internal ArrayReference GetMirrorOf(ArrayId array)
         {
+            if (array == default(ArrayId))
+                return null;
+
             return new ArrayReference(this, array);
         }
 
         internal StringReference GetMirrorOf(StringId @string)
         {
+            if (@string == default(StringId))
+                return null;
+
             return new StringReference(this, @string);
         }
 
         internal ThreadReference GetMirrorOf(ThreadId thread)
         {
+            if (thread == default(ThreadId))
+                return null;
+
             return new ThreadReference(this, thread);
         }
 
         internal ThreadGroupReference GetMirrorOf(ThreadGroupId threadGroup)
         {
+            if (threadGroup == default(ThreadGroupId))
+                return null;
+
             return new ThreadGroupReference(this, threadGroup);
         }
 
         internal ClassLoaderReference GetMirrorOf(ClassLoaderId classLoader)
         {
+            if (classLoader == default(ClassLoaderId))
+                return null;
+
             return new ClassLoaderReference(this, classLoader);
         }
 
         internal ClassObjectReference GetMirrorOf(ClassObjectId classObject)
         {
+            if (classObject == default(ClassObjectId))
+                return null;
+
             return new ClassObjectReference(this, classObject);
         }
 
         internal ReferenceType GetMirrorOf(TypeTag typeTag, ReferenceTypeId typeId)
         {
+            if (typeTag == default(TypeTag) && typeId == default(ReferenceTypeId))
+                return null;
+
             return GetMirrorOf(new TaggedReferenceTypeId(typeTag, typeId));
         }
 
         internal ObjectReference GetMirrorOf(TaggedObjectId @object)
         {
+            if (@object == default(TaggedObjectId))
+                return null;
+
             return GetMirrorOf(@object.Tag, @object.ObjectId);
         }
 
         internal ObjectReference GetMirrorOf(Tag tag, ObjectId objectId)
         {
+            if (tag == default(Tag) && objectId == default(ObjectId))
+                return null;
+
             switch (tag)
             {
             case Tag.Array:
@@ -592,13 +622,43 @@
             }
         }
 
+        internal ArrayType GetMirrorOf(ArrayTypeId arrayTypeId)
+        {
+            if (arrayTypeId == default(ArrayTypeId))
+                return null;
+
+            return new ArrayType(this, arrayTypeId);
+        }
+
+        internal InterfaceType GetMirrorOf(InterfaceId interfaceId)
+        {
+            if (interfaceId == default(InterfaceId))
+                return null;
+
+            return new InterfaceType(this, interfaceId);
+        }
+
+        internal ClassType GetMirrorOf(ClassId classId)
+        {
+            if (classId == default(ClassId))
+                return null;
+
+            return new ClassType(this, classId);
+        }
+
         internal ReferenceType GetMirrorOf(TaggedReferenceTypeId type)
         {
+            if (type == default(TaggedReferenceTypeId))
+                return null;
+
             return _referenceTypes.GetOrAdd(type, CreateReferenceTypeMirror);
         }
 
         private ReferenceType CreateReferenceTypeMirror(TaggedReferenceTypeId type)
         {
+            if (type == default(TaggedReferenceTypeId))
+                return null;
+
             switch (type.TypeTag)
             {
             case TypeTag.Class:
@@ -810,7 +870,7 @@
             return GetMirrorOf(value);
         }
 
-        IStringReference IVirtualMachine.GetMirrorOf(string value)
+        IStrongValueHandle<IStringReference> IVirtualMachine.GetMirrorOf(string value)
         {
             return GetMirrorOf(value);
         }

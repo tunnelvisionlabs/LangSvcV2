@@ -257,7 +257,7 @@
         Error GetArrayValues(ArrayId arrayObject, int firstIndex, int length, out Value[] values);
 
         [OperationContract]
-        Error SetArrayValues(ArrayId arrayObject, int firstIndex, int length, Value[] values);
+        Error SetArrayValues(ArrayId arrayObject, int firstIndex, Value[] values);
 
         #endregion
 

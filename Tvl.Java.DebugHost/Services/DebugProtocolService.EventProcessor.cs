@@ -685,7 +685,7 @@
                 }
             }
 
-            private void HandleClassFileLoadHook(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jclass classBeingRedefinedHandle, jobject loaderHandle, ModifiedUTF8StringData name, jobject protectionDomainHandle, int classDataLength, IntPtr classData, ref int newClassDataLength, ref IntPtr newClassData)
+            private void HandleClassFileLoadHook(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jclass classBeingRedefinedHandle, jobject loaderHandle, IntPtr name, jobject protectionDomainHandle, int classDataLength, IntPtr classData, ref int newClassDataLength, ref IntPtr newClassData)
             {
                 if (!VirtualMachine.IsAgentThread.Value)
                 {
@@ -1226,7 +1226,7 @@
                 //}
             }
 
-            private void HandleDynamicCodeGenerated(jvmtiEnvHandle env, ModifiedUTF8StringData name, IntPtr address, int length)
+            private void HandleDynamicCodeGenerated(jvmtiEnvHandle env, IntPtr name, IntPtr address, int length)
             {
                 if (!VirtualMachine.IsAgentThread.Value)
                 {
@@ -1235,7 +1235,7 @@
                         return;
 
                     // dispatch this call to an agent thread
-                    Action<jvmtiEnvHandle, ModifiedUTF8StringData, IntPtr, int> method = HandleDynamicCodeGenerated;
+                    Action<jvmtiEnvHandle, IntPtr, IntPtr, int> method = HandleDynamicCodeGenerated;
                     AgentEventDispatcher.Invoke(method, env, name, address, length);
                     return;
                 }
@@ -1366,7 +1366,7 @@
                 //}
             }
 
-            private void HandleResourceExhausted(jvmtiEnvHandle env, JNIEnvHandle jniEnv, JvmResourceExhaustedFlags flags, IntPtr reserved, ModifiedUTF8StringData description)
+            private void HandleResourceExhausted(jvmtiEnvHandle env, JNIEnvHandle jniEnv, JvmResourceExhaustedFlags flags, IntPtr reserved, IntPtr description)
             {
                 if (!VirtualMachine.IsAgentThread.Value)
                 {
@@ -1375,7 +1375,7 @@
                         return;
 
                     // dispatch this call to an agent thread
-                    Action<jvmtiEnvHandle, JNIEnvHandle, JvmResourceExhaustedFlags, IntPtr, ModifiedUTF8StringData> method = HandleResourceExhausted;
+                    Action<jvmtiEnvHandle, JNIEnvHandle, JvmResourceExhaustedFlags, IntPtr, IntPtr> method = HandleResourceExhausted;
                     AgentEventDispatcher.Invoke(method, env, jniEnv, flags, reserved, description);
                     return;
                 }

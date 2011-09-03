@@ -37,7 +37,7 @@
             return _componentTypeName;
         }
 
-        public IArrayReference CreateInstance(int length)
+        public IStrongValueHandle<IArrayReference> CreateInstance(int length)
         {
             throw new ClassNotLoadedException(GetName());
         }

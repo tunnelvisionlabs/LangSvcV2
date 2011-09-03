@@ -10,8 +10,16 @@
             Contract.Requires(virtualMachine != null);
         }
 
+        public static Types.Value ToNetworkValue(Value value)
+        {
+            if (value == null)
+                return default(Types.Value);
+
+            return value.ToNetworkValueImpl();
+        }
+
         public abstract IType GetValueType();
 
-        internal abstract Types.Value ToNetworkValue();
+        protected abstract Types.Value ToNetworkValueImpl();
     }
 }

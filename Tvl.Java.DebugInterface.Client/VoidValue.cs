@@ -15,7 +15,7 @@
             return VirtualMachine.PrimitiveTypes.Void;
         }
 
-        internal override Types.Value ToNetworkValue()
+        protected override Types.Value ToNetworkValueImpl()
         {
             return new Types.Value(Types.Tag.Void, 0);
         }

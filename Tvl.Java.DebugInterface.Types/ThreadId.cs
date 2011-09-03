@@ -24,6 +24,17 @@
             return new ThreadId(@object.Handle);
         }
 
+        public static explicit operator ThreadId(TaggedObjectId @object)
+        {
+            if (@object == default(TaggedObjectId))
+                return default(ThreadId);
+
+            if (@object.Tag != Tag.Thread)
+                throw new ArgumentException();
+
+            return new ThreadId(@object.ObjectId.Handle);
+        }
+
         public static bool operator ==(ThreadId x, ThreadId y)
         {
             return x.Handle == y.Handle;

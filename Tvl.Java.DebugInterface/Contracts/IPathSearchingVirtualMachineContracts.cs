@@ -1,6 +1,7 @@
 ﻿namespace Tvl.Java.DebugInterface.Contracts
 {
     using System;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
 
@@ -195,7 +196,7 @@
             throw new NotImplementedException();
         }
 
-        public long[] GetInstanceCounts(System.Collections.Generic.IEnumerable<IReferenceType> referenceTypes)
+        public long[] GetInstanceCounts(IEnumerable<IReferenceType> referenceTypes)
         {
             throw new NotImplementedException();
         }
@@ -240,7 +241,7 @@
             throw new NotImplementedException();
         }
 
-        public IStringReference GetMirrorOf(string value)
+        public IStrongValueHandle<IStringReference> GetMirrorOf(string value)
         {
             throw new NotImplementedException();
         }
@@ -255,7 +256,7 @@
             throw new NotImplementedException();
         }
 
-        public void RedefineClasses(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<IReferenceType, byte[]>> classes)
+        public void RedefineClasses(IEnumerable<KeyValuePair<IReferenceType, byte[]>> classes)
         {
             throw new NotImplementedException();
         }

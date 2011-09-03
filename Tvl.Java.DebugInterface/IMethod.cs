@@ -82,6 +82,9 @@
         /// </summary>
         bool GetIsVarArgs();
 
+        /// <summary>
+        /// Determine if local variable information is available for this method.
+        /// </summary>
         bool GetHasVariableInfo();
 
         /// <summary>

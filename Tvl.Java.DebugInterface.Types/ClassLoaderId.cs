@@ -24,6 +24,17 @@
             return new ClassLoaderId(@object.Handle);
         }
 
+        public static explicit operator ClassLoaderId(TaggedObjectId @object)
+        {
+            if (@object == default(TaggedObjectId))
+                return default(ClassLoaderId);
+
+            if (@object.Tag != Tag.ClassLoader)
+                throw new ArgumentException();
+
+            return new ClassLoaderId(@object.ObjectId.Handle);
+        }
+
         public static bool operator ==(ClassLoaderId x, ClassLoaderId y)
         {
             return x.Handle == y.Handle;

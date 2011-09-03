@@ -2,6 +2,8 @@
 {
     using System;
     using System.Diagnostics.Contracts;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
 
     [ContractClassFor(typeof(IStringReference))]
     internal abstract class IStringReferenceContracts : IStringReference
@@ -39,12 +41,12 @@
             throw new NotImplementedException();
         }
 
-        public System.Collections.Generic.IDictionary<IField, IValue> GetValues(System.Collections.Generic.IEnumerable<IField> fields)
+        public IDictionary<IField, IValue> GetValues(IEnumerable<IField> fields)
         {
             throw new NotImplementedException();
         }
 
-        public IValue InvokeMethod(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
+        public IStrongValueHandle<IValue> InvokeMethod(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
         {
             throw new NotImplementedException();
         }
@@ -64,7 +66,7 @@
             throw new NotImplementedException();
         }
 
-        public System.Collections.ObjectModel.ReadOnlyCollection<IObjectReference> GetReferringObjects(long maxReferrers)
+        public ReadOnlyCollection<IObjectReference> GetReferringObjects(long maxReferrers)
         {
             throw new NotImplementedException();
         }
@@ -79,7 +81,7 @@
             throw new NotImplementedException();
         }
 
-        public System.Collections.ObjectModel.ReadOnlyCollection<IThreadReference> GetWaitingThreads()
+        public ReadOnlyCollection<IThreadReference> GetWaitingThreads()
         {
             throw new NotImplementedException();
         }

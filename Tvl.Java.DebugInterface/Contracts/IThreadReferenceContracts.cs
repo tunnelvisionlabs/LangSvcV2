@@ -181,7 +181,7 @@
             throw new NotImplementedException();
         }
 
-        public IValue InvokeMethod(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
+        public IStrongValueHandle<IValue> InvokeMethod(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
         {
             throw new NotImplementedException();
         }

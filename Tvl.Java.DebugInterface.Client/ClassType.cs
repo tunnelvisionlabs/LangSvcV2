@@ -1,14 +1,12 @@
 ﻿namespace Tvl.Java.DebugInterface.Client
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using InvokeOptions = Tvl.Java.DebugInterface.InvokeOptions;
-    using Tvl.Java.DebugInterface.Types;
-    using System.Diagnostics.Contracts;
-    using AccessModifiers = Tvl.Java.DebugInterface.AccessModifiers;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
+    using Tvl.Java.DebugInterface.Types;
+    using AccessModifiers = Tvl.Java.DebugInterface.AccessModifiers;
+    using InvokeOptions = Tvl.Java.DebugInterface.InvokeOptions;
+    using System.Linq;
 
     internal sealed class ClassType : ReferenceType, IClassType
     {
@@ -18,6 +16,14 @@
             Contract.Requires(virtualMachine != null);
         }
 
+        public ClassId ClassId
+        {
+            get
+            {
+                return (ClassId)base.ReferenceTypeId;
+            }
+        }
+
         public ReadOnlyCollection<IInterfaceType> GetInterfaces(bool includeInherited)
         {
             throw new NotImplementedException();
@@ -25,12 +31,21 @@
 
         public IMethod GetConcreteMethod(string name, string signature)
         {
-            throw new NotImplementedException();
+            var visibleMethods = GetVisibleMethods();
+            return visibleMethods.SingleOrDefault(method => method.GetName() == name && method.GetSignature() == signature);
         }
 
-        public IValue InvokeMethod(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
+        public IStrongValueHandle<IValue> InvokeMethod(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
         {
-            throw new NotImplementedException();
+            Types.Value returnValue;
+            TaggedObjectId thrownException;
+            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.InvokeClassMethod(out returnValue, out thrownException, ClassId, ((ThreadReference)thread).ThreadId, ((Method)method).MethodId, (Types.InvokeOptions)options, arguments.Cast<Value>().Select(Value.ToNetworkValue).ToArray()));
+            if (thrownException != default(TaggedObjectId))
+            {
+                throw new NotImplementedException();
+            }
+
+            return new StrongValueHandle<Value>(VirtualMachine.GetMirrorOf(returnValue));
         }
 
         public bool GetIsEnum()
@@ -38,14 +53,24 @@
             return (GetModifiers() & AccessModifiers.Enum) != 0;
         }
 
-        public IObjectReference CreateInstance(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
+        public IStrongValueHandle<IObjectReference> CreateInstance(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
         {
-            throw new NotImplementedException();
+            TaggedObjectId returnValue;
+            TaggedObjectId thrownException;
+            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.CreateClassInstance(out returnValue, out thrownException, ClassId, ((ThreadReference)thread).ThreadId, ((Method)method).MethodId, (Types.InvokeOptions)options, arguments.Cast<Value>().Select(Value.ToNetworkValue).ToArray()));
+            if (thrownException != default(TaggedObjectId))
+            {
+                throw new NotImplementedException();
+            }
+
+            return new StrongValueHandle<ObjectReference>(VirtualMachine.GetMirrorOf(returnValue));
         }
 
         public void SetValue(IField field, IValue value)
         {
-            throw new NotImplementedException();
+            FieldId[] fields = { ((Field)field).FieldId };
+            Types.Value[] values = { Value.ToNetworkValue((Value)value) };
+            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.SetClassValues(ClassId, fields, values));
         }
 
         public ReadOnlyCollection<IClassType> GetSubclasses()
@@ -55,7 +80,9 @@
 
         public IClassType GetSuperclass()
         {
-            throw new NotImplementedException();
+            ClassId superclass;
+            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetSuperclass(out superclass, ClassId));
+            return VirtualMachine.GetMirrorOf(superclass);
         }
     }
 }

@@ -149,6 +149,7 @@
     <Compile Include="Contracts\IShortValueContracts.cs" />
     <Compile Include="Contracts\IStackFrameContracts.cs" />
     <Compile Include="Contracts\IStringReferenceContracts.cs" />
+    <Compile Include="Contracts\IStrongValueHandleContracts`1.cs" />
     <Compile Include="Contracts\IThreadGroupReferenceContracts.cs" />
     <Compile Include="Contracts\IThreadReferenceContracts.cs" />
     <Compile Include="Contracts\ITypeComponentContracts.cs" />
@@ -227,6 +228,7 @@
     <Compile Include="InvalidTypeException.cs" />
     <Compile Include="InvocationException.cs" />
     <Compile Include="InvokeOptions.cs" />
+    <Compile Include="IStrongValueHandle`1.cs" />
     <Compile Include="MissingInformationException.cs" />
     <Compile Include="NativeMethodException.cs" />
     <Compile Include="ObjectCollectionException.cs" />

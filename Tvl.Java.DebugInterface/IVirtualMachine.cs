@@ -216,7 +216,7 @@
         /// <summary>
         /// Creates a string in this virtual machine.
         /// </summary>
-        IStringReference GetMirrorOf(string value);
+        IStrongValueHandle<IStringReference> GetMirrorOf(string value);
 
         /// <summary>
         /// Creates a <see cref="IVoidValue"/>.
