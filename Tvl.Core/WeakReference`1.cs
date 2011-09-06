@@ -17,7 +17,7 @@
         {
         }
 
-        public WeakReference(SerializationInfo info, StreamingContext context)
+        protected WeakReference(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

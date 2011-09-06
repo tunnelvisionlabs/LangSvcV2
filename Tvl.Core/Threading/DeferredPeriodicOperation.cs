@@ -54,12 +54,6 @@
             private set;
         }
 
-        public bool IsDisposing
-        {
-            get;
-            private set;
-        }
-
         public void Defer()
         {
             _lastDefer = DateTimeOffset.Now;
@@ -73,23 +67,13 @@
 
         public void Dispose()
         {
-            bool wasdisposing = IsDisposing;
-            IsDisposing = true;
-            try
-            {
-                Dispose(true);
-            }
-            finally
-            {
-                IsDisposing = wasdisposing;
-            }
-
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!IsDisposed)
+            if (disposing && !IsDisposed)
             {
                 _timer.Dispose();
                 _action = null;
