@@ -1897,9 +1897,79 @@
             throw new NotImplementedException();
         }
 
-        public Error GetReflectedType(ClassObjectId classObject, out TypeTag typeTag, out ReferenceTypeId typeId)
+        public Error GetReflectedType(ClassObjectId classObjectId, out TypeTag typeTag, out ReferenceTypeId typeId)
         {
-            throw new NotImplementedException();
+            typeTag = default(TypeTag);
+            typeId = default(ReferenceTypeId);
+
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            TaggedReferenceTypeId[] classes;
+            error = environment.GetLoadedClasses(nativeEnvironment, out classes);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            jmethodID getNameMethod = nativeEnvironment.GetMethodId(VirtualMachine.ClassClass, "getName", "()Ljava/lang/String;");
+            nativeEnvironment.ExceptionClear();
+
+            using (var classObject = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, classObjectId))
+            {
+                if (!classObject.IsAlive)
+                    return Error.InvalidObject;
+
+                jobject nameObject = nativeEnvironment.CallObjectMethodA(classObject.Value, getNameMethod);
+                int length = nativeEnvironment.GetStringUTFLength(nameObject);
+                byte[] buffer = new byte[length + 1];
+                nativeEnvironment.GetStringUTFRegion(nameObject, 0, length, buffer);
+                nativeEnvironment.ExceptionClear();
+                string name = ModifiedUTF8Encoding.GetString(buffer, 0, length);
+                nativeEnvironment.DeleteLocalReference(nameObject);
+
+                string signature;
+
+                switch (name)
+                {
+                case "boolean":
+                case "byte":
+                case "char":
+                case "double":
+                case "float":
+                case "int":
+                case "long":
+                case "short":
+                case "void":
+                    return Error.IllegalArgument;
+
+                default:
+                    signature = name.Replace('.', '/');
+                    if (name[0] != '[')
+                        signature = 'L' + signature + ';';
+
+                    break;
+                }
+
+                foreach (var loadedTypeId in classes)
+                {
+                    using (var loadedType = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, loadedTypeId.TypeId))
+                    {
+                        string loadedTypeSignature;
+                        string loadedTypeGenericSignature;
+                        error = environment.GetClassSignature(loadedType.Value, out loadedTypeSignature, out loadedTypeGenericSignature);
+                        if (error == jvmtiError.None && loadedTypeSignature == signature)
+                        {
+                            typeTag = loadedTypeId.TypeTag;
+                            typeId = loadedTypeId.TypeId;
+                            return Error.None;
+                        }
+                    }
+                }
+            }
+
+            return Error.InvalidClass;
         }
 
         private jvmtiError GetEnvironment(out JvmtiEnvironment environment, out JniEnvironment nativeEnvironment)

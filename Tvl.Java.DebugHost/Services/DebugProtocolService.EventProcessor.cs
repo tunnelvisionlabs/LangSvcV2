@@ -722,18 +722,7 @@
 
             private void HandleClassPrepare(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jclass classHandle)
             {
-                if (!VirtualMachine.IsAgentThread.Value)
-                {
-                    // ignore events before VMInit
-                    if (AgentEventDispatcher == null)
-                        return;
-
-                    // dispatch this call to an agent thread
-                    Action<jvmtiEnvHandle, JNIEnvHandle, jthread, jclass> method = HandleClassPrepare;
-                    AgentEventDispatcher.Invoke(method, env, jniEnv, threadHandle, classHandle);
-                    return;
-                }
-
+                bool preventSuspend = VirtualMachine.IsAgentThread.Value;
                 JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(_service.VirtualMachine, env);
                 JniEnvironment nativeEnvironment;
                 JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
@@ -774,10 +763,33 @@
                 {
                     if (filter.ProcessEvent(environment, nativeEnvironment, this, threadId, classId, default(Location?)))
                     {
-                        ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
-                        Callback.ClassPrepare(filter.SuspendPolicy, filter.RequestId, threadId, classId.TypeTag, classId.TypeId, signature, classStatus);
+                        SendClassPrepareEvent(environment, filter, threadId, classId, signature, classStatus, preventSuspend);
                     }
                 }
+            }
+
+            private void SendClassPrepareEvent(JvmtiEnvironment environment, EventFilter filter, ThreadId threadId, TaggedReferenceTypeId classId, string signature, ClassStatus classStatus, bool preventSuspend)
+            {
+                if (!VirtualMachine.IsAgentThread.Value)
+                {
+                    // ignore events before VMInit
+                    if (AgentEventDispatcher == null)
+                        return;
+
+                    // dispatch this call to an agent thread
+                    Action<JvmtiEnvironment, EventFilter, ThreadId, TaggedReferenceTypeId, string, ClassStatus, bool> method = SendClassPrepareEvent;
+                    AgentEventDispatcher.Invoke(method, environment, filter, threadId, classId, signature, classStatus, preventSuspend);
+                    return;
+                }
+
+                JniEnvironment nativeEnvironment;
+                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, true));
+
+                SuspendPolicy suspendPolicy = preventSuspend ? SuspendPolicy.None : filter.SuspendPolicy;
+                if (!preventSuspend)
+                    ApplySuspendPolicy(environment, nativeEnvironment, filter.SuspendPolicy, threadId);
+
+                Callback.ClassPrepare(suspendPolicy, filter.RequestId, threadId, classId.TypeTag, classId.TypeId, signature, classStatus);
             }
 
             private void HandleVMStart(jvmtiEnvHandle env, JNIEnvHandle jniEnv)
