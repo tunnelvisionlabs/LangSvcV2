@@ -33,14 +33,13 @@
         {
             if (includeInherited && _allInterfaces == null)
             {
-                List<InterfaceType> allInterfaces = new List<InterfaceType>(GetInterfaces(false).Cast<InterfaceType>());
+                List<InterfaceType> allInterfaces = new List<InterfaceType>();
 
-                //HashSet<ReferenceType> inheritedTypes = new HashSet<ReferenceType>();
-                //GetInheritedTypes(this, inheritedTypes);
-                //allInterfaces.AddRange(inheritedTypes.SelectMany(type => type.GetInterfaces(false)).Cast<InterfaceType>());
+                HashSet<ReferenceType> inheritedTypes = new HashSet<ReferenceType>();
+                GetInheritedTypes(this, inheritedTypes);
+                allInterfaces.AddRange(inheritedTypes.OfType<InterfaceType>());
 
-                //_allInterfaces = allInterfaces.ToArray();
-                throw new NotImplementedException();
+                _allInterfaces = allInterfaces.ToArray();
             }
             else if (!includeInherited && _interfaces == null)
             {
