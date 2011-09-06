@@ -29,6 +29,7 @@
         private Method[] _methods;
         private Method[] _allMethods;
         private Method[] _visibleMethods;
+        private Version _version;
 
         private ClassLoaderReference _classLoader;
 
@@ -72,19 +73,22 @@
 
         public ReadOnlyCollection<IField> GetFields(bool includeInherited)
         {
-            if ((includeInherited && _allFields == null) || (!includeInherited && _fields == null))
+            if (includeInherited && _allFields == null)
             {
-                if (includeInherited)
-                    throw new NotImplementedException();
+                List<Field> allFields = new List<Field>(GetFields(false).Cast<Field>());
 
+                HashSet<ReferenceType> inheritedTypes = new HashSet<ReferenceType>();
+                GetInheritedTypes(this, inheritedTypes);
+                allFields.AddRange(inheritedTypes.SelectMany(type => type.GetFields(false)).Cast<Field>());
+
+                _allFields = allFields.ToArray();
+            }
+            else if (!includeInherited && _fields == null)
+            {
                 DeclaredFieldData[] fieldData;
                 DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetFields(out fieldData, ReferenceTypeId));
                 Field[] fields = Array.ConvertAll(fieldData, field => VirtualMachine.GetMirrorOf(this, field));
-
-                if (includeInherited)
-                    _allFields = fields;
-                else
-                    _fields = fields;
+                _fields = fields;
             }
 
             return new ReadOnlyCollection<IField>(includeInherited ? _allFields : _fields);
@@ -105,22 +109,52 @@
 
         public ReadOnlyCollection<IMethod> GetMethods(bool includeInherited)
         {
-            if ((includeInherited && _allMethods == null) || (!includeInherited && _methods == null))
+            if (includeInherited && _allMethods == null)
             {
-                if (includeInherited)
-                    throw new NotImplementedException();
+                List<Method> allMethods = new List<Method>(GetMethods(false).Cast<Method>());
 
+                HashSet<ReferenceType> inheritedTypes = new HashSet<ReferenceType>();
+                GetInheritedTypes(this, inheritedTypes);
+                allMethods.AddRange(inheritedTypes.SelectMany(type => type.GetMethods(false)).Cast<Method>());
+
+                _allMethods = allMethods.ToArray();
+            }
+            else if (!includeInherited && _methods == null)
+            {
                 DeclaredMethodData[] methodData;
                 DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethods(out methodData, ReferenceTypeId));
                 Method[] methods = Array.ConvertAll(methodData, method => VirtualMachine.GetMirrorOf(this, method));
-
-                if (includeInherited)
-                    _allMethods = methods;
-                else
-                    _methods = methods;
+                _methods = methods;
             }
 
             return new ReadOnlyCollection<IMethod>(includeInherited ? _allMethods : _methods);
+        }
+
+        protected static void GetInheritedTypes(ReferenceType type, HashSet<ReferenceType> inheritedTypes)
+        {
+            List<ReferenceType> immediateBases = new List<ReferenceType>();
+
+            ClassType classtype = type as ClassType;
+            if (classtype != null)
+            {
+                ClassType basetype = (ClassType)classtype.GetSuperclass();
+                if (basetype != null)
+                    immediateBases.Add(basetype);
+
+                immediateBases.AddRange(classtype.GetInterfaces(false).Cast<ReferenceType>());
+            }
+
+            InterfaceType interfacetype = type as InterfaceType;
+            if (interfacetype != null)
+            {
+                immediateBases.AddRange(interfacetype.GetSuperInterfaces().Cast<ReferenceType>());
+            }
+
+            foreach (var baseType in immediateBases)
+            {
+                if (inheritedTypes.Add(baseType))
+                    GetInheritedTypes(baseType, inheritedTypes);
+            }
         }
 
         public ReadOnlyCollection<string> GetAvailableStrata()
@@ -199,7 +233,7 @@
 
         public IField GetFieldByName(string fieldName)
         {
-            throw new NotImplementedException();
+            return GetVisibleFields().SingleOrDefault(i => i.GetName() == fieldName);
         }
 
         public string GetGenericSignature()
@@ -322,22 +356,37 @@
 
         public int GetMajorVersion()
         {
-            throw new NotImplementedException();
+            return GetVersion().Major;
         }
 
         public int GetMinorVersion()
         {
-            throw new NotImplementedException();
+            return GetVersion().Minor;
+        }
+
+        private Version GetVersion()
+        {
+            if (_version == null)
+            {
+                int majorVersion;
+                int minorVersion;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetClassFileVersion(out majorVersion, out minorVersion, this.ReferenceTypeId));
+                _version = new Version(majorVersion, minorVersion);
+            }
+
+            return _version;
         }
 
         public ReadOnlyCollection<IMethod> GetMethodsByName(string name)
         {
-            throw new NotImplementedException();
+            List<IMethod> methods = new List<IMethod>(GetVisibleMethods().Where(i => i.GetName() == name));
+            return methods.AsReadOnly();
         }
 
         public ReadOnlyCollection<IMethod> GetMethodsByName(string name, string signature)
         {
-            throw new NotImplementedException();
+            List<IMethod> methods = new List<IMethod>(GetVisibleMethods().Where(i => i.GetName() == name && i.GetSignature() == signature));
+            return methods.AsReadOnly();
         }
 
         public ReadOnlyCollection<IReferenceType> GetNestedTypes()
@@ -412,42 +461,81 @@
         {
             if (_visibleFields == null)
             {
-                HashSet<Field> visibleFields = new HashSet<Field>(TypeComponentNameAndSignatureEqualityComparer.Default);
+                List<Field> visibleFields = new List<Field>(GetFields(false).Cast<Field>());
+                List<Field> inheritedVisibleFields = new List<Field>();
 
-                ClassType classType = this as ClassType;
-                if (classType == null)
-                    throw new NotImplementedException();
-
-                for (/*classType = this*/; classType != null; classType = (ClassType)classType.GetSuperclass())
+                List<ReferenceType> immediateBases = GetImmediateBaseTypes();
+                foreach (var baseType in immediateBases)
                 {
-                    visibleFields.UnionWith(classType.GetMethods(false).Cast<Field>());
+                    inheritedVisibleFields.AddRange(baseType.GetVisibleFields().Cast<Field>());
                 }
 
+                inheritedVisibleFields.RemoveAll(i => i.GetIsPrivate());
+                inheritedVisibleFields.RemoveAll(i => visibleFields.Any(j => i.GetName() == j.GetName()));
+                // handle inheriting multiple ambiguous fields
+                visibleFields.AddRange(inheritedVisibleFields.GroupBy(i => i.GetName()).SelectMany(i => i.Count() == 1 ? i : Enumerable.Empty<Field>()));
                 _visibleFields = visibleFields.ToArray();
             }
 
             return new ReadOnlyCollection<IField>(_visibleFields);
+
+            //if (_visibleFields == null)
+            //{
+            //    HashSet<Field> visibleFields = new HashSet<Field>(TypeComponentNameAndSignatureEqualityComparer.Default);
+
+            //    ClassType classType = this as ClassType;
+            //    if (classType == null)
+            //        throw new NotImplementedException();
+
+            //    for (/*classType = this*/; classType != null; classType = (ClassType)classType.GetSuperclass())
+            //    {
+            //        visibleFields.UnionWith(classType.GetFields(false).Cast<Field>());
+            //    }
+
+            //    _visibleFields = visibleFields.ToArray();
+            //}
+
+            //return new ReadOnlyCollection<IField>(_visibleFields);
         }
 
         public ReadOnlyCollection<IMethod> GetVisibleMethods()
         {
             if (_visibleMethods == null)
             {
-                HashSet<Method> visibleMethods = new HashSet<Method>(TypeComponentNameAndSignatureEqualityComparer.Default);
+                List<Method> visibleMethods = new List<Method>(GetMethods(false).Cast<Method>());
+                List<Method> inheritedVisibleMethods = new List<Method>();
 
-                ClassType classType = this as ClassType;
-                if (classType == null)
-                    throw new NotImplementedException();
-
-                for (/*classType = this*/; classType != null; classType = (ClassType)classType.GetSuperclass())
+                List<ReferenceType> immediateBases = GetImmediateBaseTypes();
+                foreach (var baseType in immediateBases)
                 {
-                    visibleMethods.UnionWith(classType.GetMethods(false).Cast<Method>());
+                    inheritedVisibleMethods.AddRange(baseType.GetVisibleMethods().Cast<Method>());
                 }
 
+                inheritedVisibleMethods.RemoveAll(i => i.GetIsPrivate());
+                inheritedVisibleMethods.RemoveAll(i => visibleMethods.Any(j => i.GetName() == j.GetName() && i.GetSignature() == j.GetSignature() && i.GetIsStatic() == j.GetIsStatic()));
+                visibleMethods.AddRange(inheritedVisibleMethods);
                 _visibleMethods = visibleMethods.ToArray();
             }
 
             return new ReadOnlyCollection<IMethod>(_visibleMethods);
+
+            //if (_visibleMethods == null)
+            //{
+            //    HashSet<Method> visibleMethods = new HashSet<Method>(TypeComponentNameAndSignatureEqualityComparer.Default);
+
+            //    ClassType classType = this as ClassType;
+            //    if (classType == null)
+            //        throw new NotImplementedException();
+
+            //    for (/*classType = this*/; classType != null; classType = (ClassType)classType.GetSuperclass())
+            //    {
+            //        visibleMethods.UnionWith(classType.GetMethods(false).Cast<Method>());
+            //    }
+
+            //    _visibleMethods = visibleMethods.ToArray();
+            //}
+
+            //return new ReadOnlyCollection<IMethod>(_visibleMethods);
         }
 
         #endregion
@@ -511,5 +599,28 @@
         }
 
         #endregion
+
+        private List<ReferenceType> GetImmediateBaseTypes()
+        {
+            List<ReferenceType> immediateBases = new List<ReferenceType>();
+
+            ClassType classtype = this as ClassType;
+            if (classtype != null)
+            {
+                ClassType basetype = (ClassType)classtype.GetSuperclass();
+                if (basetype != null)
+                    immediateBases.Add(basetype);
+
+                immediateBases.AddRange(classtype.GetInterfaces(false).Cast<ReferenceType>());
+            }
+
+            InterfaceType interfacetype = this as InterfaceType;
+            if (interfacetype != null)
+            {
+                immediateBases.AddRange(interfacetype.GetSuperInterfaces().Cast<ReferenceType>());
+            }
+
+            return immediateBases;
+        }
     }
 }

@@ -424,7 +424,7 @@
 
         public ReadOnlyCollection<IReferenceType> GetClassesByName(string className)
         {
-            throw new NotImplementedException();
+            return new ReadOnlyCollection<IReferenceType>(GetAllClasses().Where(i => string.Equals(i.GetName(), className, StringComparison.Ordinal)).ToArray());
         }
 
         public string GetDescription()

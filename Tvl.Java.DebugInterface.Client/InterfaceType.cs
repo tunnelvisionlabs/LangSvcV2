@@ -10,6 +10,9 @@
 
     internal sealed class InterfaceType : ReferenceType, IInterfaceType
     {
+        // cached data
+        private InterfaceType[] _superInterfaces;
+
         internal InterfaceType(VirtualMachine virtualMachine, InterfaceId typeId)
             : base(virtualMachine, new TaggedReferenceTypeId(TypeTag.Interface, typeId))
         {
@@ -28,7 +31,15 @@
 
         public ReadOnlyCollection<IInterfaceType> GetSuperInterfaces()
         {
-            throw new NotImplementedException();
+            if (_superInterfaces == null)
+            {
+                InterfaceId[] interfaceIds;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetInterfaces(out interfaceIds, ReferenceTypeId));
+                InterfaceType[] interfaces = Array.ConvertAll(interfaceIds, VirtualMachine.GetMirrorOf);
+                _superInterfaces = interfaces;
+            }
+
+            return new ReadOnlyCollection<IInterfaceType>(_superInterfaces);
         }
     }
 }

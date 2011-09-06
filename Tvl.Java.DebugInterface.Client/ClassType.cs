@@ -1,15 +1,20 @@
 ﻿namespace Tvl.Java.DebugInterface.Client
 {
     using System;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
+    using System.Linq;
     using Tvl.Java.DebugInterface.Types;
     using AccessModifiers = Tvl.Java.DebugInterface.AccessModifiers;
     using InvokeOptions = Tvl.Java.DebugInterface.InvokeOptions;
-    using System.Linq;
 
     internal sealed class ClassType : ReferenceType, IClassType
     {
+        // cached data
+        private InterfaceType[] _allInterfaces;
+        private InterfaceType[] _interfaces;
+
         internal ClassType(VirtualMachine virtualMachine, ClassId typeId)
             : base(virtualMachine, new TaggedReferenceTypeId(TypeTag.Class, typeId))
         {
@@ -26,7 +31,26 @@
 
         public ReadOnlyCollection<IInterfaceType> GetInterfaces(bool includeInherited)
         {
-            throw new NotImplementedException();
+            if (includeInherited && _allInterfaces == null)
+            {
+                List<InterfaceType> allInterfaces = new List<InterfaceType>(GetInterfaces(false).Cast<InterfaceType>());
+
+                //HashSet<ReferenceType> inheritedTypes = new HashSet<ReferenceType>();
+                //GetInheritedTypes(this, inheritedTypes);
+                //allInterfaces.AddRange(inheritedTypes.SelectMany(type => type.GetInterfaces(false)).Cast<InterfaceType>());
+
+                //_allInterfaces = allInterfaces.ToArray();
+                throw new NotImplementedException();
+            }
+            else if (!includeInherited && _interfaces == null)
+            {
+                InterfaceId[] interfaceIds;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetInterfaces(out interfaceIds, ReferenceTypeId));
+                InterfaceType[] interfaces = Array.ConvertAll(interfaceIds, VirtualMachine.GetMirrorOf);
+                _interfaces = interfaces;
+            }
+
+            return new ReadOnlyCollection<IInterfaceType>(includeInherited ? _allInterfaces : _interfaces);
         }
 
         public IMethod GetConcreteMethod(string name, string signature)
@@ -39,7 +63,8 @@
         {
             Types.Value returnValue;
             TaggedObjectId thrownException;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.InvokeClassMethod(out returnValue, out thrownException, ClassId, ((ThreadReference)thread).ThreadId, ((Method)method).MethodId, (Types.InvokeOptions)options, arguments.Cast<Value>().Select(Value.ToNetworkValue).ToArray()));
+            ThreadId threadId = (thread != null) ? ((ThreadReference)thread).ThreadId : default(ThreadId);
+            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.InvokeClassMethod(out returnValue, out thrownException, ClassId, threadId, ((Method)method).MethodId, (Types.InvokeOptions)options, arguments.Cast<Value>().Select(Value.ToNetworkValue).ToArray()));
             if (thrownException != default(TaggedObjectId))
             {
                 throw new NotImplementedException();
