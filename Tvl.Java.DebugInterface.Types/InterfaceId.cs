@@ -29,7 +29,7 @@
             if (@object == default(TaggedReferenceTypeId))
                 return default(InterfaceId);
 
-            if (@object.TypeTag != TypeTag.Array)
+            if (@object.TypeTag != TypeTag.Interface)
                 throw new ArgumentException();
 
             return new InterfaceId(@object.TypeId.Handle);

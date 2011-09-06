@@ -112,8 +112,7 @@
         {
             Contract.Requires<ArgumentNullException>(fieldName != null, "fieldName");
             Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(fieldName));
-            Contract.Ensures(Contract.Result<IField>() != null);
-            Contract.Ensures(this.GetVirtualMachine().Equals(Contract.Result<IField>().GetVirtualMachine()));
+            Contract.Ensures(Contract.Result<IField>() == null || this.GetVirtualMachine().Equals(Contract.Result<IField>().GetVirtualMachine()));
 
             throw new NotImplementedException();
         }
