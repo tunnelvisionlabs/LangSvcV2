@@ -56,7 +56,7 @@
         public IMethod GetConcreteMethod(string name, string signature)
         {
             var visibleMethods = GetVisibleMethods();
-            return visibleMethods.SingleOrDefault(method => method.GetName() == name && method.GetSignature() == signature);
+            return visibleMethods.SingleOrDefault(method => (method.GetDeclaringType() is IClassType) && method.GetName() == name && method.GetSignature() == signature);
         }
 
         public IStrongValueHandle<IValue> InvokeMethod(IThreadReference thread, IMethod method, InvokeOptions options, params IValue[] arguments)
