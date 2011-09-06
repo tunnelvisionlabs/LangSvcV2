@@ -521,7 +521,15 @@ expression returns [EvaluatedExpression value]
 	|	^('?' cond=expression trueValue=expression ':' falseValue=expression)	{$value = EvaluateTernary($cond.value, $trueValue.value, $falseValue.value);}
 	|	^(binaryOperator left=expression right=expression)						{$value = EvaluateBinary($binaryOperator.start, $left.value, $right.value);}
 	|	^(unaryOperator expr=expression)										{$value = EvaluateUnary($unaryOperator.start, $expr.value);}
-	|	^(SELECTOR expression selector)											{throw new NotImplementedException();}
+	|	^(	SELECTOR expr=expression
+			// inlined the 'selector' rule:
+			(	^('.' IDENTIFIER a=arguments?)									{$value = EvaluateCall(EvaluateMethod($expr.value, $IDENTIFIER, $a.values), $a.values);}
+			|	^('.' 'this')													{throw new NotImplementedException();}
+			|	^('.' 'super' superSuffix)										{throw new NotImplementedException();}
+			|	innerCreator													{throw new NotImplementedException();}
+			|	^('[' index=expression ']')										{$value = GetArrayElement($expr.value, $index.value);}
+			)
+		)
 	|	^('instanceof' expr=expression type)									{$value = EvaluateInstanceOf($expr.value, $type.evaluatedType);}
 	|	castExpression															{$value = $castExpression.value;}
 	|	primary																	{$value = $primary.value;}
@@ -556,7 +564,7 @@ unaryOperator
 	;
 
 castExpression returns [EvaluatedExpression value]
-	:	^(EXPLICIT_CAST type expression)
+	:	^(EXPLICIT_CAST type expression)								{$value = CastExpression($expression.value, $type.evaluatedType);}
 	;
 
 primary returns [EvaluatedExpression value]

@@ -1,33 +1,33 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
-    using Antlr.Runtime.Tree;
     using System.Diagnostics.Contracts;
-    using Tvl.Extensions;
+    using System.Runtime.InteropServices;
     using System.Threading.Tasks;
+    using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio;
-    using Tvl.VisualStudio.Language.Java.Debugger.Extensions;
+    using Microsoft.VisualStudio.Debugger.Interop;
+    using Tvl.Extensions;
     using Tvl.VisualStudio.Language.Java.Debugger.Events;
-    using Tvl.Java.DebugInterface;
+    using Tvl.VisualStudio.Language.Java.Debugger.Extensions;
 
     [ComVisible(true)]
     public class JavaDebugExpression : IDebugExpression2
     {
         private readonly JavaDebugExpressionContext _context;
         private readonly CommonTree _expression;
+        private readonly string _expressionText;
 
-        public JavaDebugExpression(JavaDebugExpressionContext context, CommonTree expression)
+        public JavaDebugExpression(JavaDebugExpressionContext context, CommonTree expression, string expressionText)
         {
             Contract.Requires<ArgumentNullException>(context != null, "context");
             Contract.Requires<ArgumentNullException>(expression != null, "expression");
+            Contract.Requires<ArgumentNullException>(expressionText != null, "expressionText");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(expressionText));
 
             _context = context;
             _expression = expression;
+            _expressionText = expressionText;
         }
 
         #region IDebugExpression2 Members
@@ -82,6 +82,19 @@
             ITreeNodeStream input = new CommonTreeNodeStream(_expression);
             DebugExpressionEvaluatorWalker walker = new DebugExpressionEvaluatorWalker(input, _context.StackFrame.StackFrame);
             EvaluatedExpression evaluatedExpression = walker.standaloneExpression();
+
+            // make sure the Name and FullName of the evaluated expression match what the user typed
+            evaluatedExpression = new EvaluatedExpression(
+                _expressionText,
+                _expressionText,
+                evaluatedExpression.Referencer,
+                evaluatedExpression.Field,
+                evaluatedExpression.Method,
+                evaluatedExpression.Value,
+                evaluatedExpression.ValueType,
+                evaluatedExpression.StrongReference,
+                evaluatedExpression.HasSideEffects);
+
             return new JavaDebugProperty(null, evaluatedExpression);
         }
 

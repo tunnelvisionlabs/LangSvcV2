@@ -67,7 +67,7 @@
                 var expressionParser = new Java2Parser(expressionTokens);
                 IAstRuleReturnScope<CommonTree> result = expressionParser.standaloneExpression();
 
-                ppExpr = new JavaDebugExpression(this, result.Tree);
+                ppExpr = new JavaDebugExpression(this, result.Tree, pszCode);
                 pbstrError = null;
                 pichError = 0;
                 return VSConstants.S_OK;

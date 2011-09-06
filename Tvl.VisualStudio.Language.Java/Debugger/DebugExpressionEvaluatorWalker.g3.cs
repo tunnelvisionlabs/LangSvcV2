@@ -1,15 +1,15 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger
 {
-    using NumberStyles = System.Globalization.NumberStyles;
-    using CultureInfo = System.Globalization.CultureInfo;
     using System;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr.Runtime.Tree;
     using Tvl.Java.DebugInterface;
+    using CultureInfo = System.Globalization.CultureInfo;
+    using NumberStyles = System.Globalization.NumberStyles;
     using SignatureHelper = Tvl.Java.DebugInterface.Types.SignatureHelper;
-    using System.Collections.Generic;
 
     partial class DebugExpressionEvaluatorWalker
     {
@@ -179,6 +179,85 @@
             throw new NotImplementedException();
         }
 
+#if false
+        private EvaluatedExpression GetMethod(EvaluatedExpression value, string name, ICollection<IValue> arguments)
+        {
+            Contract.Requires<ArgumentNullException>(value != null, "value");
+            Contract.Requires<ArgumentNullException>(name != null, "name");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(name));
+
+            IReferenceType declaringType = value.ValueType as IReferenceType;
+            if (declaringType == null)
+                throw new InvalidOperationException();
+
+            List<IMethod> methods = declaringType.GetMethodsByName(name).Where(i => i.GetDeclaringType() is IClassType).ToList();
+            if (methods.Count > 0)
+                methods.RemoveAll(i => i.GetArgumentTypeNames().Count != arguments.Count);
+
+            if (methods.Count == 0)
+                throw new InvalidOperationException("Evaluation failed.");
+
+            if (methods.Count > 1)
+            {
+                throw new NotImplementedException("Resolution by full signature is not yet implemented.");
+            }
+
+            IMethod method = methods[0];
+
+            IObjectReference referencer = null;
+            if (!method.GetIsStatic())
+            {
+                referencer = value.Value as IObjectReference;
+                if (referencer == null)
+                    throw new InvalidOperationException();
+            }
+
+            string fullName = string.Format("({0}).{1}", value.FullName, name);
+            bool hasSideEffects = (value != null && value.HasSideEffects);
+            return new EvaluatedExpression(fullName, fullName, referencer, method, hasSideEffects);
+
+            //IMethod method = methods[0];
+            //if (method != null)
+            //{
+            //    string fullName = string.Format("({0}).{1}", value.FullName, name);
+            //    if (method.GetIsStatic())
+            //    {
+            //        return new EvaluatedExpression(name, fullName, null, method, declaringType.GetValue(method), value.HasSideEffects);
+            //    }
+            //    else
+            //    {
+            //        IObjectReference objectReference = value.Value as IObjectReference;
+            //        if (objectReference == null)
+            //            throw new InvalidOperationException("Evaluation failed (todo: distinguish between null pointer and instance method referenced as a static method).");
+
+            //        return new EvaluatedExpression(name, fullName, objectReference, method, objectReference.GetValue(method), value.HasSideEffects);
+            //    }
+            //}
+
+            //throw new NotImplementedException();
+        }
+#endif
+
+        private EvaluatedExpression CastExpression(EvaluatedExpression expression, IType targetType)
+        {
+            throw new NotImplementedException();
+            //return new EvaluatedExpression(
+            //    expression.Name,
+            //    expression.FullName,
+            //    expression.Referencer,
+            //    expression.Field,
+            //    expression.Method,
+            //    expression.Value,
+            //    targetType,
+            //    expression.StrongReference,
+            //    expression.HasSideEffects);
+        }
+
+        private EvaluatedExpression GetArrayElement(EvaluatedExpression array, EvaluatedExpression index)
+        {
+            throw new NotImplementedException();
+        }
+
         private EvaluatedExpression EvaluateUnary(CommonTree op, EvaluatedExpression expression)
         {
             Contract.Requires<ArgumentNullException>(op != null, "op");
@@ -305,9 +384,66 @@
             return context;
         }
 
+        public EvaluatedExpression EvaluateMethod(EvaluatedExpression expression, CommonTree methodName, ICollection<EvaluatedExpression> arguments)
+        {
+            Contract.Requires<ArgumentNullException>(expression != null, "expression");
+            Contract.Requires<ArgumentNullException>(methodName != null, "methodName");
+            Contract.Requires<ArgumentNullException>(arguments != null, "arguments");
+            Contract.Ensures(Contract.Result<EvaluatedExpression>() != null);
+            Contract.Ensures(Contract.Result<EvaluatedExpression>().Method != null);
+
+            IReferenceType referenceType = expression.ValueType as IReferenceType;
+            if (referenceType == null)
+                throw new InvalidOperationException();
+
+            List<IMethod> methods = referenceType.GetMethodsByName(methodName.Text).ToList();
+            if (referenceType is IClassType)
+                methods.RemoveAll(i => !(i.GetDeclaringType() is IClassType));
+
+            if (methods.Count > 0)
+                methods.RemoveAll(i => i.GetArgumentTypeNames().Count != arguments.Count);
+
+            if (methods.Count == 0)
+                throw new InvalidOperationException("Evaluation failed.");
+
+            if (methods.Count > 1)
+            {
+                throw new NotImplementedException("Resolution by full signature is not yet implemented.");
+            }
+
+            IMethod method = methods[0];
+
+            IObjectReference referencer = null;
+            if (!method.GetIsStatic())
+            {
+                referencer = expression.Value as IObjectReference;
+                if (referencer == null)
+                    throw new InvalidOperationException();
+
+                if (method.GetDeclaringType() is IInterfaceType)
+                {
+                    IClassType concreteType = referencer.GetReferenceType() as IClassType;
+                    if (concreteType == null)
+                        throw new InvalidOperationException();
+
+                    method = concreteType.GetConcreteMethod(method.GetName(), method.GetSignature());
+                    if (method == null)
+                        throw new InvalidOperationException();
+                }
+            }
+
+            string fullName = string.Format("({0}).{1}", expression.FullName, methodName);
+
+            bool hasSideEffects = (expression != null && expression.HasSideEffects);
+            return new EvaluatedExpression(fullName, fullName, referencer, method, hasSideEffects);
+
+            throw new NotImplementedException();
+        }
+
         public EvaluatedExpression EvaluateMethod(ICollection<CommonTree> parts, ICollection<EvaluatedExpression> arguments)
         {
             Contract.Requires<ArgumentNullException>(parts != null, "parts");
+            Contract.Requires<ArgumentNullException>(arguments != null, "arguments");
             Contract.Requires<ArgumentException>(parts.Count > 0);
             Contract.Ensures(Contract.Result<EvaluatedExpression>() != null);
             Contract.Ensures(Contract.Result<EvaluatedExpression>().Method != null);
@@ -317,42 +453,7 @@
             partsList.RemoveAt(partsList.Count - 1);
 
             EvaluatedExpression instance = EvaluateTypeOrObject(partsList);
-
-            if (instance != null)
-            {
-                IReferenceType referenceType = instance.ValueType as IReferenceType;
-                if (referenceType == null)
-                    throw new InvalidOperationException();
-
-                List<IMethod> methods = referenceType.GetMethodsByName(methodName.Text).Where(i => i.GetDeclaringType() is IClassType).ToList();
-                if (methods.Count > 0)
-                    methods.RemoveAll(i => i.GetArgumentTypeNames().Count != arguments.Count);
-
-                if (methods.Count == 0)
-                    throw new InvalidOperationException("Evaluation failed.");
-
-                if (methods.Count > 1)
-                {
-                    throw new NotImplementedException("Resolution by full signature is not yet implemented.");
-                }
-
-                IMethod method = methods[0];
-
-                IObjectReference referencer = null;
-                if (!method.GetIsStatic())
-                {
-                    referencer = instance.Value as IObjectReference;
-                    if (referencer == null)
-                        throw new InvalidOperationException();
-                }
-
-                string fullName = string.Join(".", parts.Select(i => i.Text));
-
-                bool hasSideEffects = (instance != null && instance.HasSideEffects);
-                return new EvaluatedExpression(fullName, fullName, referencer, method, hasSideEffects);
-            }
-
-            throw new NotImplementedException();
+            return EvaluateMethod(instance, methodName, arguments);
         }
 
         public EvaluatedExpression EvaluateCall(EvaluatedExpression obj, List<EvaluatedExpression> arguments)
