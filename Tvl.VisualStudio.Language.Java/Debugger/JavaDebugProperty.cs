@@ -16,41 +16,63 @@
     public class JavaDebugProperty : IDebugProperty3, IDebugProperty2
     {
         private readonly IDebugProperty2 _parent;
-        private readonly string _name;
-        private readonly string _fullName;
-        private readonly IField _field;
+        private readonly EvaluatedExpression _evaluatedExpression;
 
-        /* The property could be a java.lang.Object property even if the value it hold is a java.lang.String
-         * (or any other object type). _propertyType is the type of this property and is assignable from
-         * _value.GetValueType().
-         */
-        private readonly IType _propertyType;
-        private readonly IValue _value;
+        private JavaDebugProperty _mostDerivedProperty;
+        private JavaDebugProperty _superProperty;
 
-        public JavaDebugProperty(IDebugProperty2 parent, string name, string fullName, IType propertyType, IValue value, IField field = null)
+        public JavaDebugProperty(IDebugProperty2 parent, string name, string fullName, IType propertyType, IValue value, bool hasSideEffects, IField field = null, IMethod method = null)
         {
             Contract.Requires<ArgumentNullException>(name != null, "name");
             Contract.Requires<ArgumentNullException>(fullName != null, "fullName");
             Contract.Requires<ArgumentNullException>(propertyType != null, "propertyType");
 
+            IObjectReference referencer = null;
+            IType valueType = propertyType;
+            bool strongReference = false;
+            _evaluatedExpression = new EvaluatedExpression(name, fullName, referencer, field, method, value, valueType, strongReference, hasSideEffects);
+        }
+
+        public JavaDebugProperty(IDebugProperty2 parent, EvaluatedExpression evaluatedExpression)
+        {
+            Contract.Requires<ArgumentNullException>(evaluatedExpression != null, "evaluatedExpression");
+
             _parent = parent;
-            _name = name;
-            _fullName = fullName;
-            _propertyType = propertyType;
-            _value = value;
-            _field = field;
+            _evaluatedExpression = evaluatedExpression;
+        }
+
+        private JavaDebugProperty(JavaDebugProperty parent, string name, IType type)
+        {
+            Contract.Requires<ArgumentNullException>(parent != null, "parent");
+            Contract.Requires<ArgumentNullException>(name != null, "name");
+            Contract.Requires<ArgumentNullException>(type != null, "type");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(name));
+
+            _parent = parent;
+            _evaluatedExpression = new EvaluatedExpression(
+                name,
+                parent._evaluatedExpression.FullName,
+                parent._evaluatedExpression.Referencer,
+                parent._evaluatedExpression.Field,
+                parent._evaluatedExpression.Method,
+                parent._evaluatedExpression.Value,
+                type,
+                parent._evaluatedExpression.StrongReference,
+                parent._evaluatedExpression.HasSideEffects);
         }
 
         #region IDebugProperty2 Members
 
         public int EnumChildren(enum_DEBUGPROP_INFO_FLAGS dwFields, uint dwRadix, ref Guid guidFilter, enum_DBG_ATTRIB_FLAGS dwAttribFilter, string pszNameFilter, uint dwTimeout, out IEnumDebugPropertyInfo2 ppEnum)
         {
-            IObjectReference objectReference = _value as IObjectReference;
-            if (objectReference == null)
+            IObjectReference objectReference = _evaluatedExpression.Value as IObjectReference;
+            IReferenceType referenceType = _evaluatedExpression.ValueType as IReferenceType;
+            if (objectReference == null || referenceType == null)
             {
                 ppEnum = new EnumDebugPropertyInfo(Enumerable.Empty<DEBUG_PROPERTY_INFO>());
                 return VSConstants.S_OK;
             }
+
 
             ppEnum = null;
 
@@ -68,10 +90,10 @@
             List<DEBUG_PROPERTY_INFO> properties = new List<DEBUG_PROPERTY_INFO>();
             DEBUG_PROPERTY_INFO[] propertyInfo = new DEBUG_PROPERTY_INFO[1];
 
-            IArrayReference arrayReference = _value as IArrayReference;
-            if (arrayReference != null)
+            IArrayType arrayType = _evaluatedExpression.ValueType as IArrayType;
+            if (arrayType != null)
             {
-                IArrayType arrayType = (IArrayType)arrayReference.GetReferenceType();
+                IArrayReference arrayReference = (IArrayReference)_evaluatedExpression.Value;
                 IType componentType = arrayType.GetComponentType();
 
                 ReadOnlyCollection<IValue> values = null;
@@ -87,7 +109,7 @@
                         string name = "[" + i + "]";
                         IType propertyType = componentType;
                         IValue value = values[i];
-                        JavaDebugProperty property = new JavaDebugProperty(this, name, this._fullName + name, propertyType, value);
+                        JavaDebugProperty property = new JavaDebugProperty(this, name, _evaluatedExpression.FullName + name, propertyType, value, _evaluatedExpression.HasSideEffects);
                         int hr = property.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo);
                         if (ErrorHandler.Failed(hr))
                             return hr;
@@ -99,7 +121,7 @@
                     {
                         if (getFullName)
                         {
-                            propertyInfo[0].bstrFullName = this._fullName + "[" + i + "]";
+                            propertyInfo[0].bstrFullName = _evaluatedExpression.FullName + "[" + i + "]";
                             propertyInfo[0].dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_FULLNAME;
                         }
 
@@ -119,6 +141,9 @@
                         {
                             propertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_VALUE_AUTOEXPANDED;
                             propertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_VALUE_READONLY;
+                            if (_evaluatedExpression.HasSideEffects)
+                                propertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_VALUE_SIDE_EFFECT;
+
                             propertyInfo[0].dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_ATTRIB;
 #if false
                             bool expandable;
@@ -170,9 +195,40 @@
             }
             else
             {
-                IReferenceType objectType = objectReference.GetReferenceType();
-                ReadOnlyCollection<IField> fields = objectType.GetFields(false);
+                ReadOnlyCollection<IField> fields = referenceType.GetFields(false);
                 List<IField> staticFields = new List<IField>(fields.Where(i => i.GetIsStatic()));
+
+                bool useMostDerived = (this._evaluatedExpression.Name[0] != '[') && _evaluatedExpression.Value != null && !_evaluatedExpression.Value.GetValueType().Equals(referenceType);
+                if (useMostDerived)
+                {
+                    if (_mostDerivedProperty == null)
+                        _mostDerivedProperty = new JavaDebugProperty(this, string.Format("[{0}]", _evaluatedExpression.Value.GetValueType().GetName()), _evaluatedExpression.Value.GetValueType());
+
+                    propertyInfo[0] = default(DEBUG_PROPERTY_INFO);
+                    ErrorHandler.ThrowOnFailure(_mostDerivedProperty.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo));
+                    properties.Add(propertyInfo[0]);
+                }
+
+                bool useSuper = false;
+                if (!useMostDerived)
+                {
+                    IClassType valueType = _evaluatedExpression.ValueType as IClassType;
+                    if (valueType != null)
+                    {
+                        IClassType superClass = valueType.GetSuperclass();
+                        useSuper = superClass != null && superClass.GetName() != "java.lang.Object";
+
+                        if (useSuper)
+                        {
+                            if (_superProperty == null)
+                                _superProperty = new JavaDebugProperty(this, "[super]", superClass);
+
+                            propertyInfo[0] = default(DEBUG_PROPERTY_INFO);
+                            ErrorHandler.ThrowOnFailure(_superProperty.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo));
+                            properties.Add(propertyInfo[0]);
+                        }
+                    }
+                }
 
                 foreach (var field in fields)
                 {
@@ -189,7 +245,7 @@
                             string name = field.GetName();
                             IType propertyType = field.GetFieldType();
                             IValue value = objectReference.GetValue(field);
-                            property = new JavaDebugProperty(this, name, this._fullName + "." + name, propertyType, value, field);
+                            property = new JavaDebugProperty(this, name, _evaluatedExpression.FullName + "." + name, propertyType, value, _evaluatedExpression.HasSideEffects, field);
                             ErrorHandler.ThrowOnFailure(property.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo));
                         }
                         catch (Exception e)
@@ -200,7 +256,7 @@
                             string name = field.GetName();
                             IType propertyType = field.GetFieldType();
                             IValue value = field.GetVirtualMachine().GetMirrorOf(0);
-                            property = new JavaDebugProperty(this, name, this._fullName + "." + name, propertyType, value, field);
+                            property = new JavaDebugProperty(this, name, _evaluatedExpression.FullName + "." + name, propertyType, value, _evaluatedExpression.HasSideEffects, field);
                             ErrorHandler.ThrowOnFailure(property.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo));
                         }
                     }
@@ -208,7 +264,7 @@
                     {
                         if (getFullName)
                         {
-                            propertyInfo[0].bstrFullName = this._fullName + "." + field.GetName();
+                            propertyInfo[0].bstrFullName = _evaluatedExpression.FullName + "." + field.GetName();
                             propertyInfo[0].dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_FULLNAME;
                         }
 
@@ -292,7 +348,7 @@
                 {
                     propertyInfo[0] = default(DEBUG_PROPERTY_INFO);
 
-                    JavaDebugStaticMembersPseudoProperty property = new JavaDebugStaticMembersPseudoProperty(this, objectType, staticFields);
+                    JavaDebugStaticMembersPseudoProperty property = new JavaDebugStaticMembersPseudoProperty(this, referenceType, staticFields);
                     ErrorHandler.ThrowOnFailure(property.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo));
                     properties.Add(propertyInfo[0]);
                 }
@@ -315,19 +371,19 @@
         public int GetDerivedMostProperty(out IDebugProperty2 ppDerivedMost)
         {
             ppDerivedMost = null;
-            if (_value == null)
+            if (_evaluatedExpression.Value == null)
                 return AD7Constants.S_GETDERIVEDMOST_NO_DERIVED_MOST;
 
-            IReferenceType propertyReferenceType = _propertyType as IReferenceType;
-            IReferenceType valueReferenceType = _value.GetValueType() as IReferenceType;
+            IReferenceType propertyReferenceType = _evaluatedExpression.ValueType as IReferenceType;
+            IReferenceType valueReferenceType = _evaluatedExpression.Value.GetValueType() as IReferenceType;
             if (propertyReferenceType == null || valueReferenceType == null)
                 return AD7Constants.S_GETDERIVEDMOST_NO_DERIVED_MOST;
 
             if (valueReferenceType.Equals(propertyReferenceType))
                 return AD7Constants.S_GETDERIVEDMOST_NO_DERIVED_MOST;
 
-            string castName = string.Format("({0})({1})", valueReferenceType.GetName(), _fullName);
-            ppDerivedMost = new JavaDebugProperty(this, _name, castName, valueReferenceType, _value, _field);
+            string castName = string.Format("({0})({1})", valueReferenceType.GetName(), _evaluatedExpression.FullName);
+            ppDerivedMost = new JavaDebugProperty(this, _evaluatedExpression.Name, castName, valueReferenceType, _evaluatedExpression.Value, _evaluatedExpression.HasSideEffects, _evaluatedExpression.Field);
             return VSConstants.S_OK;
         }
 
@@ -415,90 +471,93 @@
 
             if (getFullName)
             {
-                pPropertyInfo[0].bstrFullName = _fullName;
+                pPropertyInfo[0].bstrFullName = _evaluatedExpression.FullName;
                 pPropertyInfo[0].dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_FULLNAME;
             }
 
             if (getName)
             {
-                pPropertyInfo[0].bstrName = _name;
+                pPropertyInfo[0].bstrName = _evaluatedExpression.Name;
                 pPropertyInfo[0].dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_NAME;
             }
 
             if (getType)
             {
-                pPropertyInfo[0].bstrType = _propertyType.GetName();
+                pPropertyInfo[0].bstrType = _evaluatedExpression.ValueType.GetName();
+                if (_evaluatedExpression.Value != null && !_evaluatedExpression.Value.GetValueType().Equals(_evaluatedExpression.ValueType))
+                    pPropertyInfo[0].bstrType += " {" + _evaluatedExpression.Value.GetValueType().GetName() + "}";
+
                 pPropertyInfo[0].dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_TYPE;
             }
 
             if (getValue)
             {
-                if (_value == null)
+                if (_evaluatedExpression.Value == null)
                 {
                     pPropertyInfo[0].bstrValue = "null";
                 }
-                if (_value is IVoidValue)
+                if (_evaluatedExpression.Value is IVoidValue)
                 {
                     pPropertyInfo[0].bstrValue = "The expression has been evaluated and has no value.";
                 }
-                else if (_value is IPrimitiveValue)
+                else if (_evaluatedExpression.Value is IPrimitiveValue)
                 {
-                    IBooleanValue booleanValue = _value as IBooleanValue;
+                    IBooleanValue booleanValue = _evaluatedExpression.Value as IBooleanValue;
                     if (booleanValue != null)
                     {
-                        pPropertyInfo[0].bstrValue = booleanValue.GetValue().ToString();
+                        pPropertyInfo[0].bstrValue = booleanValue.GetValue().ToString().ToLowerInvariant();
                         pPropertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_VALUE_BOOLEAN;
                         if (booleanValue.GetValue())
                             pPropertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_VALUE_BOOLEAN_TRUE;
                     }
 
-                    IByteValue byteValue = _value as IByteValue;
+                    IByteValue byteValue = _evaluatedExpression.Value as IByteValue;
                     if (byteValue != null)
                         pPropertyInfo[0].bstrValue = byteValue.GetValue().ToString();
 
-                    ICharValue charValue = _value as ICharValue;
+                    ICharValue charValue = _evaluatedExpression.Value as ICharValue;
                     if (charValue != null)
                         pPropertyInfo[0].bstrValue = charValue.GetValue().ToString();
 
-                    IShortValue shortValue = _value as IShortValue;
+                    IShortValue shortValue = _evaluatedExpression.Value as IShortValue;
                     if (shortValue != null)
                         pPropertyInfo[0].bstrValue = shortValue.GetValue().ToString();
 
-                    IIntegerValue integerValue = _value as IIntegerValue;
+                    IIntegerValue integerValue = _evaluatedExpression.Value as IIntegerValue;
                     if (integerValue != null)
                         pPropertyInfo[0].bstrValue = integerValue.GetValue().ToString();
 
-                    ILongValue longValue = _value as ILongValue;
+                    ILongValue longValue = _evaluatedExpression.Value as ILongValue;
                     if (longValue != null)
                         pPropertyInfo[0].bstrValue = longValue.GetValue().ToString();
 
-                    IFloatValue floatValue = _value as IFloatValue;
+                    IFloatValue floatValue = _evaluatedExpression.Value as IFloatValue;
                     if (floatValue != null)
                         pPropertyInfo[0].bstrValue = floatValue.GetValue().ToString();
 
-                    IDoubleValue doubleValue = _value as IDoubleValue;
+                    IDoubleValue doubleValue = _evaluatedExpression.Value as IDoubleValue;
                     if (doubleValue != null)
                         pPropertyInfo[0].bstrValue = doubleValue.GetValue().ToString();
                 }
-                else if (_value is IArrayReference)
+                else if (_evaluatedExpression.Value is IArrayReference)
                 {
-                    IArrayReference arrayReference = _value as IArrayReference;
+                    IArrayReference arrayReference = _evaluatedExpression.Value as IArrayReference;
                     int length = arrayReference.GetLength();
                     IArrayType arrayType = (IArrayType)arrayReference.GetReferenceType();
                     pPropertyInfo[0].bstrValue = string.Format("{{{0}[{1}]}}", arrayType.GetComponentTypeName(), length);
                     if (length > 0)
                         pPropertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_OBJ_IS_EXPANDABLE;
                 }
-                else if (_value is IObjectReference)
+                else if (_evaluatedExpression.Value is IObjectReference)
                 {
-                    IStringReference stringReference = _value as IStringReference;
+                    IStringReference stringReference = _evaluatedExpression.Value as IStringReference;
                     if (stringReference != null)
                     {
                         pPropertyInfo[0].bstrValue = EscapeSpecialCharacters(stringReference.GetValue(), 120);
                     }
                     else
                     {
-                        IObjectReference objectReference = _value as IObjectReference;
+                        IObjectReference objectReference = _evaluatedExpression.Value as IObjectReference;
                         if (objectReference != null)
                         {
                             pPropertyInfo[0].bstrValue = "{" + objectReference.GetReferenceType().GetName() + "}";
@@ -517,13 +576,13 @@
 
             if (getAttributes)
             {
-                if (_field != null)
+                if (_evaluatedExpression.Field != null)
                 {
-                    if (_field.GetIsPrivate())
+                    if (_evaluatedExpression.Field.GetIsPrivate())
                         pPropertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_PRIVATE;
-                    if (_field.GetIsProtected())
+                    if (_evaluatedExpression.Field.GetIsProtected())
                         pPropertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_PROTECTED;
-                    if (_field.GetIsPublic())
+                    if (_evaluatedExpression.Field.GetIsPublic())
                         pPropertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_PUBLIC;
                 }
 
@@ -590,7 +649,7 @@
             if (cropped)
                 value = value.Substring(0, maxLength) + "...";
 
-            value = value.Replace("\r", "\\r").Replace("\t", "\\t").Replace("\n", "\\n").Replace("\"", "\\\"");
+            value = value.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\t", "\\t").Replace("\n", "\\n").Replace("\"", "\\\"");
             if (cropped)
                 value = '"' + value;
             else

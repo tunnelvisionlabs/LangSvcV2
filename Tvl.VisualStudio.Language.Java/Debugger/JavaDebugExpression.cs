@@ -79,37 +79,10 @@
 
         private IDebugProperty2 EvaluateImpl(enum_EVALFLAGS flags)
         {
-            switch (_expression.Type)
-            {
-            case Java2Lexer.IDENTIFIER:
-                if (_expression.ChildCount == 0)
-                {
-                    if (!_context.StackFrame.StackFrame.GetHasVariableInfo())
-                        return null;
-
-                    ILocalVariable variable = _context.StackFrame.StackFrame.GetVisibleVariableByName(_expression.Text);
-                    if (variable != null)
-                    {
-                        IValue value = _context.StackFrame.StackFrame.GetValue(variable);
-                        return new JavaDebugProperty(null, _expression.Text, _expression.Text, variable.GetLocalType(), value);
-                    }
-
-                    // next up, check for a visible field
-                    throw new NotImplementedException();
-                }
-
-                // this is not just an identifier?
-                throw new NotImplementedException();
-
-            case Java2Lexer.THIS:
-                {
-                    IObjectReference value = _context.StackFrame.StackFrame.GetThisObject();
-                    IType propertyType = _context.StackFrame.StackFrame.GetLocation().GetDeclaringType();
-                    return new JavaDebugProperty(null, _expression.Text, _expression.Text, propertyType, value);
-                }
-            }
-
-            return null;
+            ITreeNodeStream input = new CommonTreeNodeStream(_expression);
+            DebugExpressionEvaluatorWalker walker = new DebugExpressionEvaluatorWalker(input, _context.StackFrame.StackFrame);
+            EvaluatedExpression evaluatedExpression = walker.standaloneExpression();
+            return new JavaDebugProperty(null, evaluatedExpression);
         }
 
         private void SendEvaluationCompleteEvent(Task<IDebugProperty2> task, IDebugEventCallback2 callback)

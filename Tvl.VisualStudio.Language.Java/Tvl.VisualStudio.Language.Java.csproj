@@ -300,6 +300,10 @@
     <Compile Include="Debugger\Collections\EnumDebugPropertyInfo.cs" />
     <Compile Include="Debugger\Collections\EnumDebugReferenceInfo.cs" />
     <Compile Include="Debugger\Collections\EnumDebugThreads.cs" />
+    <Compile Include="Debugger\DebugExpressionEvaluatorWalker.g3.cs">
+      <DependentUpon>DebugExpressionEvaluatorWalker.g3</DependentUpon>
+    </Compile>
+    <Compile Include="Debugger\EvaluatedExpression.cs" />
     <Compile Include="Debugger\Events\DebugActivateDocumentEvent.cs" />
     <Compile Include="Debugger\Events\DebugBeforeSymbolSearchEvent.cs" />
     <Compile Include="Debugger\Events\DebugBreakEvent.cs" />
@@ -370,6 +374,9 @@
     <Compile Include="Debugger\JavaDebugModule.cs" />
     <Compile Include="Debugger\JavaDebugPendingBreakpoint.cs" />
     <None Include="app.config" />
+    <Antlr3 Include="Debugger\DebugExpressionEvaluatorWalker.g3">
+      <Generator>MSBuild:Compile</Generator>
+    </Antlr3>
     <None Include="Debugger\JavaDebugProcess.cs" />
     <None Include="Debugger\JavaDebugPort.cs" />
     <None Include="Debugger\JavaDebugPortSupplier.cs" />

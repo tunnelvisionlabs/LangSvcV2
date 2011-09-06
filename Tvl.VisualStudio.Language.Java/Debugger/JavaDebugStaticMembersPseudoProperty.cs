@@ -73,7 +73,7 @@
                         string name = field.GetName();
                         IType propertyType = field.GetFieldType();
                         IValue value = _referenceType.GetValue(field);
-                        property = new JavaDebugProperty(this, name, typeName + "." + name, propertyType, value, field);
+                        property = new JavaDebugProperty(this, name, typeName + "." + name, propertyType, value, false, field);
                         ErrorHandler.ThrowOnFailure(property.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo));
                     }
                     catch (Exception e)
@@ -84,7 +84,7 @@
                         string name = field.GetName();
                         IType propertyType = field.GetFieldType();
                         IValue value = field.GetVirtualMachine().GetMirrorOf(0);
-                        property = new JavaDebugProperty(this, name, typeName + "." + name, propertyType, value, field);
+                        property = new JavaDebugProperty(this, name, typeName + "." + name, propertyType, value, false, field);
                         ErrorHandler.ThrowOnFailure(property.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo));
                     }
                 }

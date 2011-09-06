@@ -920,14 +920,15 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
         private void HandleClassPrepare(object sender, ClassPrepareEventArgs e)
         {
-            ReadOnlyCollection<string> sourceFiles = e.Type.GetSourcePaths(e.Type.GetDefaultStratum());
-            DebugEngine.BindVirtualizedBreakpoints(this, _threads[e.Thread.GetUniqueId()], e.Type, sourceFiles);
-
             JavaDebugThread thread;
+
             lock (_threads)
             {
                 this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
             }
+
+            ReadOnlyCollection<string> sourceFiles = e.Type.GetSourcePaths(e.Type.GetDefaultStratum());
+            DebugEngine.BindVirtualizedBreakpoints(this, thread, e.Type, sourceFiles);
 
             // The format of the message created by the .NET debugger is this:
             // 'devenv.exe' (Managed (v4.0.30319)): Loaded 'C:\Windows\Microsoft.Net\assembly\GAC_MSIL\Microsoft.VisualStudio.Windows.Forms\v4.0_10.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.Windows.Forms.dll'

@@ -100,7 +100,7 @@
                     string name = local.GetName();
                     IType propertyType = local.GetLocalType();
                     IValue value = _stackFrame.GetValue(local);
-                    JavaDebugProperty property = new JavaDebugProperty(_debugProperty, name, name, propertyType, value);
+                    JavaDebugProperty property = new JavaDebugProperty(_debugProperty, name, name, propertyType, value, false);
                     int hr = property.GetPropertyInfo(dwFields, nRadix, dwTimeout, null, 0, propertyInfo);
                     if (ErrorHandler.Failed(hr))
                         return hr;
