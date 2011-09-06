@@ -15,11 +15,22 @@
     [ComVisible(true)]
     public class JavaDebugProperty : IDebugProperty3, IDebugProperty2
     {
+        private static readonly ICollection<string> _collectionInterfaces =
+            new List<string>()
+            {
+                "java.util.Collection",
+                "java.util.Map",
+            };
+
         private readonly IDebugProperty2 _parent;
         private readonly EvaluatedExpression _evaluatedExpression;
 
+        private bool _useRawValues;
+        private bool _preventMostDerived;
+
         private JavaDebugProperty _mostDerivedProperty;
         private JavaDebugProperty _superProperty;
+        private JavaDebugProperty _rawValuesProperty;
 
         public JavaDebugProperty(IDebugProperty2 parent, string name, string fullName, IType propertyType, IValue value, bool hasSideEffects, IField field = null, IMethod method = null)
         {
@@ -59,6 +70,28 @@
                 type,
                 parent._evaluatedExpression.StrongReference,
                 parent._evaluatedExpression.HasSideEffects);
+
+            _useRawValues = parent._useRawValues;
+            _preventMostDerived = parent._preventMostDerived;
+        }
+
+        private JavaDebugProperty(JavaDebugProperty parent, string name)
+        {
+            Contract.Requires<ArgumentNullException>(parent != null, "parent");
+            Contract.Requires<ArgumentNullException>(name != null, "name");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(name));
+
+            _parent = parent;
+            _evaluatedExpression = new EvaluatedExpression(
+                name,
+                parent._evaluatedExpression.FullName,
+                parent._evaluatedExpression.Referencer,
+                parent._evaluatedExpression.Field,
+                parent._evaluatedExpression.Method,
+                parent._evaluatedExpression.Value,
+                parent._evaluatedExpression.ValueType,
+                parent._evaluatedExpression.StrongReference,
+                parent._evaluatedExpression.HasSideEffects);
         }
 
         #region IDebugProperty2 Members
@@ -72,7 +105,6 @@
                 ppEnum = new EnumDebugPropertyInfo(Enumerable.Empty<DEBUG_PROPERTY_INFO>());
                 return VSConstants.S_OK;
             }
-
 
             ppEnum = null;
 
@@ -90,25 +122,33 @@
             List<DEBUG_PROPERTY_INFO> properties = new List<DEBUG_PROPERTY_INFO>();
             DEBUG_PROPERTY_INFO[] propertyInfo = new DEBUG_PROPERTY_INFO[1];
 
-            IArrayType arrayType = _evaluatedExpression.ValueType as IArrayType;
-            if (arrayType != null)
+            bool isCollection = false;
+            int collectionSize = 0;
+            bool haveCollectionValues = false;
+            ReadOnlyCollection<IValue> collectionValues = null;
+            IType componentType = null;
+
+            if (!_useRawValues)
             {
-                IArrayReference arrayReference = (IArrayReference)_evaluatedExpression.Value;
-                IType componentType = arrayType.GetComponentType();
+                isCollection = TryGetCollectionSize(objectReference, out collectionSize);
 
-                ReadOnlyCollection<IValue> values = null;
-                if (getValue || getProperty)
-                    values = arrayReference.GetValues();
+                if (isCollection && (getValue || getProperty))
+                {
+                    haveCollectionValues = TryGetCollectionValues(objectReference, out collectionValues, out componentType);
+                }
+            }
 
-                for (int i = 0; i < arrayReference.GetLength(); i++)
+            if (isCollection)
+            {
+                for (int i = 0; i < collectionSize; i++)
                 {
                     propertyInfo[0] = default(DEBUG_PROPERTY_INFO);
 
-                    if (getValue || getProperty)
+                    if (haveCollectionValues)
                     {
                         string name = "[" + i + "]";
                         IType propertyType = componentType;
-                        IValue value = values[i];
+                        IValue value = collectionValues[i];
                         JavaDebugProperty property = new JavaDebugProperty(this, name, _evaluatedExpression.FullName + name, propertyType, value, _evaluatedExpression.HasSideEffects);
                         int hr = property.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo);
                         if (ErrorHandler.Failed(hr))
@@ -145,52 +185,24 @@
                                 propertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_VALUE_SIDE_EFFECT;
 
                             propertyInfo[0].dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_ATTRIB;
-#if false
-                            bool expandable;
-                            bool hasId;
-                            bool canHaveId;
-                            bool readOnly;
-                            bool error;
-                            bool sideEffect;
-                            bool overloadedContainer;
-                            bool boolean;
-                            bool booleanTrue;
-                            bool invalid;
-                            bool notAThing;
-                            bool autoExpanded;
-                            bool timeout;
-                            bool rawString;
-                            bool customViewer;
-
-                            bool accessNone;
-                            bool accessPrivate;
-                            bool accessProtected;
-                            bool accessPublic;
-
-                            bool storageNone;
-                            bool storageGlobal;
-                            bool storageStatic;
-                            bool storageRegister;
-
-                            bool noModifiers;
-                            bool @virtual;
-                            bool constant;
-                            bool synchronized;
-                            bool @volatile;
-
-                            bool dataField;
-                            bool method;
-                            bool property;
-                            bool @class;
-                            bool baseClass;
-                            bool @interface;
-                            bool innerClass;
-                            bool mostDerived;
-
-                            bool multiCustomViewers;
-#endif
                         }
                     }
+                }
+
+                bool useRawValues = referenceType is IClassType;
+                if (useRawValues)
+                {
+                    if (_rawValuesProperty == null)
+                    {
+                        _rawValuesProperty = new JavaDebugProperty(this, "Raw Values")
+                            {
+                                _useRawValues = true
+                            };
+                    }
+
+                    propertyInfo[0] = default(DEBUG_PROPERTY_INFO);
+                    ErrorHandler.ThrowOnFailure(_rawValuesProperty.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo));
+                    properties.Add(propertyInfo[0]);
                 }
             }
             else
@@ -198,11 +210,16 @@
                 ReadOnlyCollection<IField> fields = referenceType.GetFields(false);
                 List<IField> staticFields = new List<IField>(fields.Where(i => i.GetIsStatic()));
 
-                bool useMostDerived = (this._evaluatedExpression.Name[0] != '[') && _evaluatedExpression.Value != null && !_evaluatedExpression.Value.GetValueType().Equals(referenceType);
+                bool useMostDerived = !_preventMostDerived && _evaluatedExpression.Value != null && !_evaluatedExpression.Value.GetValueType().Equals(referenceType);
                 if (useMostDerived)
                 {
                     if (_mostDerivedProperty == null)
-                        _mostDerivedProperty = new JavaDebugProperty(this, string.Format("[{0}]", _evaluatedExpression.Value.GetValueType().GetName()), _evaluatedExpression.Value.GetValueType());
+                    {
+                        _mostDerivedProperty = new JavaDebugProperty(this, string.Format("[{0}]", _evaluatedExpression.Value.GetValueType().GetName()), _evaluatedExpression.Value.GetValueType())
+                            {
+                                _preventMostDerived = true
+                            };
+                    }
 
                     propertyInfo[0] = default(DEBUG_PROPERTY_INFO);
                     ErrorHandler.ThrowOnFailure(_mostDerivedProperty.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo));
@@ -221,7 +238,12 @@
                         if (useSuper)
                         {
                             if (_superProperty == null)
-                                _superProperty = new JavaDebugProperty(this, "[super]", superClass);
+                            {
+                                _superProperty = new JavaDebugProperty(this, "[super]", superClass)
+                                    {
+                                        _preventMostDerived = true
+                                    };
+                            }
 
                             propertyInfo[0] = default(DEBUG_PROPERTY_INFO);
                             ErrorHandler.ThrowOnFailure(_superProperty.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo));
@@ -517,7 +539,9 @@
 
                     ICharValue charValue = _evaluatedExpression.Value as ICharValue;
                     if (charValue != null)
-                        pPropertyInfo[0].bstrValue = charValue.GetValue().ToString();
+                    {
+                        pPropertyInfo[0].bstrValue = EscapeSpecialCharacters(charValue.GetValue().ToString(), 10, '\'');
+                    }
 
                     IShortValue shortValue = _evaluatedExpression.Value as IShortValue;
                     if (shortValue != null)
@@ -553,15 +577,44 @@
                     IStringReference stringReference = _evaluatedExpression.Value as IStringReference;
                     if (stringReference != null)
                     {
-                        pPropertyInfo[0].bstrValue = EscapeSpecialCharacters(stringReference.GetValue(), 120);
+                        pPropertyInfo[0].bstrValue = EscapeSpecialCharacters(stringReference.GetValue(), 120, '"');
                     }
                     else
                     {
                         IObjectReference objectReference = _evaluatedExpression.Value as IObjectReference;
                         if (objectReference != null)
                         {
-                            pPropertyInfo[0].bstrValue = "{" + objectReference.GetReferenceType().GetName() + "}";
-                            pPropertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_OBJ_IS_EXPANDABLE;
+                            int collectionSize;
+                            if (TryGetCollectionSize(objectReference, out collectionSize))
+                            {
+                                pPropertyInfo[0].bstrValue = string.Format("{{size() = {0}}}", collectionSize);
+                                pPropertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_OBJ_IS_EXPANDABLE;
+                            }
+                            else
+                            {
+                                string displayValue = null;
+                                IClassType classType = objectReference.GetReferenceType() as IClassType;
+                                if (noToString || classType == null)
+                                {
+                                    displayValue = objectReference.GetReferenceType().GetName();
+                                }
+                                else
+                                {
+                                    IMethod method = classType.GetConcreteMethod("toString", "()Ljava/lang/String;");
+                                    using (IStrongValueHandle<IValue> result = objectReference.InvokeMethod(null, method, InvokeOptions.None))
+                                    {
+                                        if (result != null)
+                                        {
+                                            stringReference = result.Value as IStringReference;
+                                            if (stringReference != null)
+                                                displayValue = stringReference.GetValue();
+                                        }
+                                    }
+                                }
+
+                                pPropertyInfo[0].bstrValue = "{" + displayValue + "}";
+                                pPropertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_OBJ_IS_EXPANDABLE;
+                            }
                         }
                         else
                         {
@@ -643,17 +696,108 @@
             return VSConstants.S_OK;
         }
 
-        private static string EscapeSpecialCharacters(string value, int maxLength)
+        private static bool TryGetCollectionSize(IObjectReference objectReference, out int size)
+        {
+            size = 0;
+
+            IArrayReference arrayReference = objectReference as IArrayReference;
+            if (arrayReference != null)
+            {
+                size = arrayReference.GetLength();
+                return true;
+            }
+
+            IClassType classType = objectReference.GetReferenceType() as IClassType;
+            if (classType == null)
+                return false;
+
+            ReadOnlyCollection<IInterfaceType> interfaces = classType.GetInterfaces(true);
+            if (interfaces.Any(i => _collectionInterfaces.Contains(i.GetName())))
+            {
+                IMethod sizeMethod = classType.GetConcreteMethod("size", "()I");
+                using (IStrongValueHandle<IValue> result = objectReference.InvokeMethod(null, sizeMethod, InvokeOptions.None))
+                {
+                    if (result == null)
+                        return false;
+
+                    IIntegerValue integerValue = result.Value as IIntegerValue;
+                    if (integerValue != null)
+                    {
+                        size = integerValue.GetValue();
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static bool TryGetCollectionValues(IObjectReference objectReference, out ReadOnlyCollection<IValue> values, out IType elementType)
+        {
+            IArrayReference arrayReference = objectReference as IArrayReference;
+            if (arrayReference == null)
+            {
+                int size;
+                if (TryGetCollectionSize(objectReference, out size))
+                {
+                    IClassType classType = objectReference.GetReferenceType() as IClassType;
+                    if (classType != null)
+                    {
+                        IObjectReference collectionObject = null;
+
+                        ReadOnlyCollection<IInterfaceType> interfaces = classType.GetInterfaces(true);
+                        if (interfaces.Any(i => i.GetName() == "java.util.Collection"))
+                        {
+                            collectionObject = objectReference;
+                        }
+                        else if (interfaces.Any(i => i.GetName() == "java.util.Map"))
+                        {
+                            IMethod entrySetMethod = classType.GetConcreteMethod("entrySet", "()Ljava/util/Set;");
+                            IStrongValueHandle<IValue> result = objectReference.InvokeMethod(null, entrySetMethod, InvokeOptions.None);
+                            if (result != null)
+                                collectionObject = result.Value as IObjectReference;
+                        }
+
+                        if (collectionObject != null)
+                        {
+                            IClassType collectionObjectType = collectionObject.GetReferenceType() as IClassType;
+                            if (collectionObjectType != null)
+                            {
+                                IMethod toArrayMethod = collectionObjectType.GetConcreteMethod("toArray", "()[Ljava/lang/Object;");
+                                IStrongValueHandle<IValue> result = collectionObject.InvokeMethod(null, toArrayMethod, InvokeOptions.None);
+                                if (result != null)
+                                    arrayReference = result.Value as IArrayReference;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (arrayReference != null)
+            {
+                values = arrayReference.GetValues();
+                IArrayType arrayType = (IArrayType)arrayReference.GetReferenceType();
+                elementType = arrayType.GetComponentType();
+                return true;
+            }
+
+            values = null;
+            elementType = null;
+            return false;
+        }
+
+        private static string EscapeSpecialCharacters(string value, int maxLength, char quoteCharacter)
         {
             bool cropped = value.Length > maxLength;
             if (cropped)
                 value = value.Substring(0, maxLength) + "...";
 
-            value = value.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\t", "\\t").Replace("\n", "\\n").Replace("\"", "\\\"");
+            // TODO: handle all escape characters
+            value = value.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\t", "\\t").Replace("\n", "\\n").Replace(quoteCharacter.ToString(), "\\" + quoteCharacter);
             if (cropped)
-                value = '"' + value;
+                value = quoteCharacter + value;
             else
-                value = '"' + value + '"';
+                value = quoteCharacter + value + quoteCharacter;
 
             return value;
         }
