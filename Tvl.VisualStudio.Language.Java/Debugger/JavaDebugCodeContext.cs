@@ -169,7 +169,7 @@
             if (getFunction)
             {
                 // The function name where the context is located
-                pinfo[0].bstrFunction = _location.GetMethod().GetName();
+                pinfo[0].bstrFunction = string.Format("{0}.{1}({2})", _location.GetDeclaringType().GetName(), _location.GetMethod().GetName(), string.Join(", ", _location.GetMethod().GetArgumentTypeNames()));
                 pinfo[0].dwFields |= enum_CONTEXT_INFO_FIELDS.CIF_FUNCTION;
             }
 
