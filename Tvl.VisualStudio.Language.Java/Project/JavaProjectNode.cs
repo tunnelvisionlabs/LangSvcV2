@@ -7,6 +7,7 @@
     using System.Text;
     using Microsoft.VisualStudio.Project;
 
+    using __VSHPROPID = Microsoft.VisualStudio.Shell.Interop.__VSHPROPID;
     using CultureInfo = System.Globalization.CultureInfo;
     using DirectoryInfo = System.IO.DirectoryInfo;
     using File = System.IO.File;
@@ -18,6 +19,7 @@
     using Path = System.IO.Path;
     using Project = Microsoft.Build.Evaluation.Project;
     using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+    using VSCOMPONENTSELECTORTABINIT = Microsoft.VisualStudio.Shell.Interop.VSCOMPONENTSELECTORTABINIT;
     using VSConstants = Microsoft.VisualStudio.VSConstants;
 
     [ComVisible(true)]
@@ -194,6 +196,45 @@
             }
 
             newGroup.AddProperty(propertyName, propertyValue);
+        }
+
+        protected override string GetComponentSelectorBrowseFilters()
+        {
+            return "Java Archive Files (*.jar)\0*.jar\0";
+        }
+
+        protected override List<VSCOMPONENTSELECTORTABINIT> GetComponentSelectorTabList()
+        {
+            // no .NET or COM assemblies
+            return new List<VSCOMPONENTSELECTORTABINIT>()
+                {
+                    //new VSCOMPONENTSELECTORTABINIT {
+                    //    guidTab = VSConstants.GUID_COMPlusPage,
+                    //    varTabInitInfo = GetComponentPickerDirectories(),
+                    //},
+                    //new VSCOMPONENTSELECTORTABINIT {
+                    //    guidTab = VSConstants.GUID_COMClassicPage,
+                    //},
+                    new VSCOMPONENTSELECTORTABINIT {
+                        // Tell the Add Reference dialog to call hierarchies GetProperty with the following
+                        // propID to enablefiltering out ourself from the Project to Project reference
+                        varTabInitInfo = (int)__VSHPROPID.VSHPROPID_ShowProjInSolutionPage,
+                        guidTab = VSConstants.GUID_SolutionPage,
+                    },
+                    // Add the Browse for file page            
+                    new VSCOMPONENTSELECTORTABINIT {
+                        varTabInitInfo = 0,
+                        guidTab = VSConstants.GUID_BrowseFilePage,
+                    },
+                    // Add the Maven packages page
+                    new VSCOMPONENTSELECTORTABINIT {
+                        varTabInitInfo = 0,
+                        guidTab = JavaProjectConstants.MavenComponentSelectorGuid,
+                    },
+                    new VSCOMPONENTSELECTORTABINIT {
+                        guidTab = GUID_MruPage,
+                    },
+                };
         }
 
         private static string Escape(string unescapedString)

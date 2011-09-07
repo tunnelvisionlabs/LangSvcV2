@@ -502,6 +502,12 @@
       <DependentUpon>JavaPropertyPagePanel.cs</DependentUpon>
     </Compile>
     <Compile Include="Project\ProjectPropertyStorage.cs" />
+    <Compile Include="Project\PropertyPages\MavenComponentSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Project\PropertyPages\MavenComponentSelector.Designer.cs">
+      <DependentUpon>MavenComponentSelector.cs</DependentUpon>
+    </Compile>
     <Compile Include="Project\PropertyPages\PropertyPageArgumentException.cs" />
     <Compile Include="Project\PropertyPages\StartAction.cs" />
     <Compile Include="Project\PropertyPages\WarningsAsErrors.cs" />

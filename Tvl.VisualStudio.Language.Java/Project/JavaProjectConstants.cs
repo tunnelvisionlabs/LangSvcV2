@@ -27,5 +27,9 @@
 
         public const string JavaDebugPropertyPageGuidString = "9CFF1FD3-FFF7-4A96-AB40-4921BC9A95EC";
         public static readonly Guid JavaDebugPropertyPageGuid = new Guid("{" + JavaDebugPropertyPageGuidString + "}");
+
+        // Component selector pages
+        public const string MavenComponentSelectorGuidString = "9EECD938-1C70-4A5A-9179-95CDC5A42877";
+        public static readonly Guid MavenComponentSelectorGuid = new Guid("{" + MavenComponentSelectorGuidString + "}");
     }
 }
