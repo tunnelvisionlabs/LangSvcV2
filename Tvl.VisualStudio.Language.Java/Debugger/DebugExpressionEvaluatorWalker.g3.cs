@@ -179,89 +179,82 @@
             throw new NotImplementedException();
         }
 
-#if false
-        private EvaluatedExpression GetMethod(EvaluatedExpression value, string name, ICollection<IValue> arguments)
-        {
-            Contract.Requires<ArgumentNullException>(value != null, "value");
-            Contract.Requires<ArgumentNullException>(name != null, "name");
-            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(name));
-
-            IReferenceType declaringType = value.ValueType as IReferenceType;
-            if (declaringType == null)
-                throw new InvalidOperationException();
-
-            List<IMethod> methods = declaringType.GetMethodsByName(name).Where(i => i.GetDeclaringType() is IClassType).ToList();
-            if (methods.Count > 0)
-                methods.RemoveAll(i => i.GetArgumentTypeNames().Count != arguments.Count);
-
-            if (methods.Count == 0)
-                throw new InvalidOperationException("Evaluation failed.");
-
-            if (methods.Count > 1)
-            {
-                throw new NotImplementedException("Resolution by full signature is not yet implemented.");
-            }
-
-            IMethod method = methods[0];
-
-            IObjectReference referencer = null;
-            if (!method.GetIsStatic())
-            {
-                referencer = value.Value as IObjectReference;
-                if (referencer == null)
-                    throw new InvalidOperationException();
-            }
-
-            string fullName = string.Format("({0}).{1}", value.FullName, name);
-            bool hasSideEffects = (value != null && value.HasSideEffects);
-            return new EvaluatedExpression(fullName, fullName, referencer, method, hasSideEffects);
-
-            //IMethod method = methods[0];
-            //if (method != null)
-            //{
-            //    string fullName = string.Format("({0}).{1}", value.FullName, name);
-            //    if (method.GetIsStatic())
-            //    {
-            //        return new EvaluatedExpression(name, fullName, null, method, declaringType.GetValue(method), value.HasSideEffects);
-            //    }
-            //    else
-            //    {
-            //        IObjectReference objectReference = value.Value as IObjectReference;
-            //        if (objectReference == null)
-            //            throw new InvalidOperationException("Evaluation failed (todo: distinguish between null pointer and instance method referenced as a static method).");
-
-            //        return new EvaluatedExpression(name, fullName, objectReference, method, objectReference.GetValue(method), value.HasSideEffects);
-            //    }
-            //}
-
-            //throw new NotImplementedException();
-        }
-#endif
-
         private EvaluatedExpression CastExpression(EvaluatedExpression expression, IType targetType)
         {
+            Contract.Requires<ArgumentNullException>(expression != null, "expression");
+            Contract.Requires<ArgumentNullException>(targetType != null, "targetType");
+            Contract.Ensures(Contract.Result<EvaluatedExpression>() != null);
+
             throw new NotImplementedException();
-            //return new EvaluatedExpression(
-            //    expression.Name,
-            //    expression.FullName,
-            //    expression.Referencer,
-            //    expression.Field,
-            //    expression.Method,
-            //    expression.Value,
-            //    targetType,
-            //    expression.StrongReference,
-            //    expression.HasSideEffects);
         }
 
         private EvaluatedExpression GetArrayElement(EvaluatedExpression array, EvaluatedExpression index)
         {
-            throw new NotImplementedException();
+            Contract.Requires<ArgumentNullException>(array != null, "array");
+            Contract.Requires<ArgumentNullException>(index != null, "index");
+            Contract.Ensures(Contract.Result<EvaluatedExpression>() != null);
+
+            IArrayReference arrayReference = array.Value as IArrayReference;
+            if (arrayReference == null)
+                throw new InvalidOperationException();
+
+            long indexValue;
+            if (TryGetIntegralValue(index.Value, out indexValue))
+            {
+                string name = string.Format("[{0}]", indexValue);
+                string fullName = string.Format("({0})[{1}]", array.FullName, index.FullName);
+                ILocalVariable localVariable = array.LocalVariable;
+                IObjectReference referencer = array.Value as IObjectReference;
+                IField field = array.Field;
+                IMethod method = null;
+                IValue value = arrayReference.GetValue((int)indexValue);
+                IType valueType = ((IArrayType)arrayReference.GetReferenceType()).GetComponentType();
+                bool strongReference = false;
+                return new EvaluatedExpression(name, fullName, localVariable, referencer, field, method, (int)indexValue, value, valueType, strongReference, array.HasSideEffects || index.HasSideEffects);
+            }
+
+            throw new InvalidOperationException();
+        }
+
+        private bool TryGetIntegralValue(IValue value, out long result)
+        {
+            ILongValue longValue = value as ILongValue;
+            if (longValue != null)
+            {
+                result = longValue.GetValue();
+                return true;
+            }
+
+            IIntegerValue integerValue = value as IIntegerValue;
+            if (integerValue != null)
+            {
+                result = integerValue.GetValue();
+                return true;
+            }
+
+            IShortValue shortValue = value as IShortValue;
+            if (shortValue != null)
+            {
+                result = shortValue.GetValue();
+                return true;
+            }
+
+            IByteValue byteValue = value as IByteValue;
+            if (byteValue != null)
+            {
+                result = byteValue.GetValue();
+                return true;
+            }
+
+            result = 0;
+            return false;
         }
 
         private EvaluatedExpression EvaluateUnary(CommonTree op, EvaluatedExpression expression)
         {
             Contract.Requires<ArgumentNullException>(op != null, "op");
             Contract.Requires<ArgumentNullException>(expression != null, "expression");
+            Contract.Ensures(Contract.Result<EvaluatedExpression>() != null);
 
             switch (op.Type)
             {
@@ -291,11 +284,86 @@
             throw new NotImplementedException();
         }
 
+        //private bool IsPrimitiveNumericValue(EvaluatedExpression expression)
+        //{
+        //    Contract.Requires<ArgumentNullException>(expression != null, "expression");
+
+        //    IPrimitiveValue primitiveValue = expression.Value as IPrimitiveValue;
+        //    if (primitiveValue == null)
+        //        return false;
+
+
+        //}
+
         private EvaluatedExpression EvaluateBinary(CommonTree op, EvaluatedExpression left, EvaluatedExpression right)
         {
             Contract.Requires<ArgumentNullException>(op != null, "op");
             Contract.Requires<ArgumentNullException>(left != null, "left");
             Contract.Requires<ArgumentNullException>(right != null, "right");
+            Contract.Ensures(Contract.Result<EvaluatedExpression>() != null);
+
+            switch (op.Type)
+            {
+            case BARBAR:
+                throw new NotImplementedException();
+
+            case AMPAMP:
+                throw new NotImplementedException();
+
+            case BAR:
+                throw new NotImplementedException();
+
+            case CARET:
+                throw new NotImplementedException();
+
+            case AMP:
+                throw new NotImplementedException();
+
+            case EQEQ:
+                throw new NotImplementedException();
+
+            case BANGEQ:
+                throw new NotImplementedException();
+
+            case LE:
+                throw new NotImplementedException();
+
+            case GE:
+                throw new NotImplementedException();
+
+            case LT:
+                throw new NotImplementedException();
+
+            case GT:
+                throw new NotImplementedException();
+
+            case LSHIFT:
+                throw new NotImplementedException();
+
+            case URSHIFT:
+                throw new NotImplementedException();
+
+            case RSHIFT:
+                throw new NotImplementedException();
+
+            case PLUS:
+                throw new NotImplementedException();
+
+            case SUB:
+                throw new NotImplementedException();
+
+            case STAR:
+                throw new NotImplementedException();
+
+            case SLASH:
+                throw new NotImplementedException();
+
+            case PERCENT:
+                throw new NotImplementedException();
+
+            default:
+                throw new ArgumentException();
+            }
 
             throw new NotImplementedException();
         }
@@ -305,14 +373,22 @@
             Contract.Requires<ArgumentNullException>(condition != null, "condition");
             Contract.Requires<ArgumentNullException>(valueIfTrue != null, "valueIfTrue");
             Contract.Requires<ArgumentNullException>(valueIfFalse != null, "valueIfFalse");
+            Contract.Ensures(Contract.Result<EvaluatedExpression>() != null);
 
+            IBooleanValue booleanValue = condition.Value as IBooleanValue;
+            if (booleanValue == null)
+                throw new InvalidOperationException();
+
+            // can't return the original values or it could accidentally become an lvalue
             throw new NotImplementedException();
+            //return booleanValue.GetValue() ? valueIfTrue : valueIfFalse;
         }
 
         private EvaluatedExpression EvaluateInstanceOf(EvaluatedExpression expression, IType type)
         {
             Contract.Requires<ArgumentNullException>(expression != null, "expression");
             Contract.Requires<ArgumentNullException>(type != null, "type");
+            Contract.Ensures(Contract.Result<EvaluatedExpression>() != null);
 
             throw new NotImplementedException();
         }
@@ -321,6 +397,7 @@
         {
             Contract.Requires<ArgumentNullException>(parts != null, "parts");
             Contract.Requires<ArgumentException>(parts.Count > 0);
+            Contract.Ensures(Contract.Result<EvaluatedExpression>() != null);
 
             throw new NotImplementedException();
         }
@@ -328,6 +405,7 @@
         public EvaluatedExpression EvaluateTypeOrObject(List<CommonTree> parts)
         {
             Contract.Requires<ArgumentNullException>(parts != null, "parts");
+            Contract.Ensures(Contract.Result<EvaluatedExpression>() != null);
 
             if (parts.Count == 0)
             {
