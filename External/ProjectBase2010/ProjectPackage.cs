@@ -16,6 +16,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
+using ObjectExtenders = EnvDTE.ObjectExtenders;
 
 namespace Microsoft.VisualStudio.Project
 {
@@ -31,6 +32,10 @@ namespace Microsoft.VisualStudio.Project
 		/// This is the place to register all the solution listeners.
 		/// </summary>
 		private List<SolutionListener> solutionListeners = new List<SolutionListener>();
+
+        private SingleFileGeneratorNodeExtenderProvider _singleFileGeneratorNodeExtenderProvider;
+        private int _singleFileGeneratorNodeExtenderCookie;
+
 		#endregion
 
 		#region properties
@@ -64,6 +69,13 @@ namespace Microsoft.VisualStudio.Project
 			{
 				solutionListener.Init();
 			}
+
+            ObjectExtenders objectExtenders = (ObjectExtenders)GetService(typeof(ObjectExtenders));
+            _singleFileGeneratorNodeExtenderProvider = new SingleFileGeneratorNodeExtenderProvider();
+            string extenderCatId = typeof(FileNodeProperties).GUID.ToString("B");
+            string extenderName = SingleFileGeneratorNodeExtenderProvider.Name;
+            string localizedName = extenderName;
+            _singleFileGeneratorNodeExtenderCookie = objectExtenders.RegisterExtenderProvider(extenderCatId, extenderName, _singleFileGeneratorNodeExtenderProvider, localizedName);
 		}
 
 		protected override void Dispose(bool disposing)
@@ -73,6 +85,9 @@ namespace Microsoft.VisualStudio.Project
 			{
 				if(disposing)
 				{
+                    ObjectExtenders objectExtenders = (ObjectExtenders)GetService(typeof(ObjectExtenders));
+                    objectExtenders.UnregisterExtenderProvider(_singleFileGeneratorNodeExtenderCookie);
+
 					foreach(SolutionListener solutionListener in this.solutionListeners)
 					{
 						solutionListener.Dispose();

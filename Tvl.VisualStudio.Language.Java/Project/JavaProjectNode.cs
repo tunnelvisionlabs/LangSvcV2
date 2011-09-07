@@ -37,6 +37,8 @@
             _sharedBuildOptions = new JavaBuildOptions();
             CanProjectDeleteItems = true;
             OleServiceProvider.AddService(typeof(VSLangProj.VSProject), HandleCreateService, false);
+
+            AddCATIDMapping(typeof(JavaFileNodeProperties), typeof(FileNodeProperties).GUID);
         }
 
         public JavaBuildOptions SharedBuildOptions

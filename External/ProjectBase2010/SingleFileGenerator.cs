@@ -99,7 +99,7 @@ namespace Microsoft.VisualStudio.Project
 				throw new ArgumentNullException("fileNode");
 			}
 
-			SingleFileGeneratorNodeProperties nodeproperties = fileNode.NodeProperties as SingleFileGeneratorNodeProperties;
+			SingleFileGeneratorNodeExtenderProperties nodeproperties = fileNode.NodeProperties.Extender(SingleFileGeneratorNodeExtenderProvider.Name) as SingleFileGeneratorNodeExtenderProperties;
 			if(nodeproperties == null)
 			{
 				throw new InvalidOperationException();

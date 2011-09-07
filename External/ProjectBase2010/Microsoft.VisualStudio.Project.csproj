@@ -331,6 +331,8 @@
     <Compile Include="EnumFORMATETC.cs" />
     <Compile Include="EnumSTATDATA.cs" />
     <Compile Include="DragDropHelper.cs" />
+    <Compile Include="SingleFileGeneratorNodeExtenderProperties.cs" />
+    <Compile Include="SingleFileGeneratorNodeExtenderProvider.cs" />
     <Compile Include="tagTYMED.cs" />
     <Compile Include="tagDVASPECT.cs" />
     <Compile Include="DataCacheEntry.cs" />
@@ -350,7 +352,6 @@
     <Compile Include="ReferenceNodeProperties.cs" />
     <Compile Include="FolderNodeProperties.cs" />
     <Compile Include="ProjectNodeProperties.cs" />
-    <Compile Include="SingleFileGeneratorNodeProperties.cs" />
     <Compile Include="DependentFileNodeProperties.cs" />
     <Compile Include="FileNodeProperties.cs" />
     <Compile Include="OleServiceProvider.ServiceCreatorCallback.cs" />

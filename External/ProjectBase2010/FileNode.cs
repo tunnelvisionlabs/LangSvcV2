@@ -244,9 +244,7 @@ namespace Microsoft.VisualStudio.Project
         #region overridden methods
         protected override NodeProperties CreatePropertiesObject()
         {
-            ISingleFileGenerator generator = this.CreateSingleFileGenerator();
-
-            return generator == null ? new FileNodeProperties(this) : new SingleFileGeneratorNodeProperties(this);
+            return new FileNodeProperties(this);
         }
 
         public override object GetIconHandle(bool open)
@@ -610,7 +608,7 @@ namespace Microsoft.VisualStudio.Project
                 }
                 if((VsCommands2K)cmd == VsCommands2K.RUNCUSTOMTOOL)
                 {
-                    if(string.IsNullOrEmpty(this.ItemNode.GetMetadata(ProjectFileConstants.DependentUpon)) && (this.NodeProperties is SingleFileGeneratorNodeProperties))
+                    if(string.IsNullOrEmpty(this.ItemNode.GetMetadata(ProjectFileConstants.DependentUpon)) && (this.NodeProperties.Extender(SingleFileGeneratorNodeExtenderProvider.Name) != null))
                     {
                         result |= QueryStatusResult.SUPPORTED | QueryStatusResult.ENABLED;
                         return VSConstants.S_OK;
@@ -976,7 +974,7 @@ namespace Microsoft.VisualStudio.Project
         /// factory method for creating single file generators.
         /// </summary>
         /// <returns></returns>
-        protected virtual ISingleFileGenerator CreateSingleFileGenerator()
+        public virtual ISingleFileGenerator CreateSingleFileGenerator()
         {
             return new SingleFileGenerator(this.ProjectManager);
         }

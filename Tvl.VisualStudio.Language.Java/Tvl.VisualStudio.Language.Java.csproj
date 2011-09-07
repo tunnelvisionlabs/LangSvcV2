@@ -460,7 +460,6 @@
     <Compile Include="Project\JavaProjectFileConstants.cs" />
     <Compile Include="Project\JavaProjectNode.cs" />
     <Compile Include="Project\JavaProjectPackage.cs" />
-    <Compile Include="Project\JavaSingleFileGeneratorNodeProperties.cs" />
     <Compile Include="Project\PropertyPages\DebuggingInformation.cs" />
     <Compile Include="Project\PropertyPages\JavaBuildEventsPropertyPage.cs" />
     <Compile Include="Project\PropertyPages\JavaBuildEventsPropertyPagePanel.cs">
