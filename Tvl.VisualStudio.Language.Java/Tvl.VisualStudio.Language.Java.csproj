@@ -348,7 +348,6 @@
     <Compile Include="Debugger\Extensions\DebugThreadExtensions.cs" />
     <Compile Include="Debugger\Extensions\ConstGuidArrayExtensions.cs" />
     <Compile Include="Debugger\Extensions\DISASSEMBLY_STREAM_FIELDSExtensions.cs" />
-    <Compile Include="Debugger\Extensions\ServiceExtensions.cs" />
     <Compile Include="Debugger\Interop\IDebugProcessQueryProperties.cs" />
     <Compile Include="Debugger\Interop\IDebugProgramHost2.cs" />
     <Compile Include="Debugger\Interop\IDebugQueryEngine2.cs" />
@@ -373,7 +372,6 @@
     <Compile Include="Debugger\JavaDebugMemoryContext.cs" />
     <Compile Include="Debugger\JavaDebugModule.cs" />
     <Compile Include="Debugger\JavaDebugPendingBreakpoint.cs" />
-    <None Include="app.config" />
     <Antlr3 Include="Debugger\DebugExpressionEvaluatorWalker.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
@@ -389,7 +387,6 @@
     <Compile Include="Debugger\JavaDebugThread.cs" />
     <Compile Include="Debugger\Events\DebugThreadCreateEvent.cs" />
     <Compile Include="Debugger\JavaDebugStaticMembersPseudoProperty.cs" />
-    <Compile Include="Debugger\JvmtiErrorHandler.cs" />
     <Compile Include="Debugger\ThreadCategory.cs" />
     <Compile Include="Experimental\BraceLevelTracker.cs" />
     <Compile Include="Experimental\ClassAnchorTracker.cs" />
@@ -511,21 +508,6 @@
     <Compile Include="Project\PropertyPages\PropertyPageArgumentException.cs" />
     <Compile Include="Project\PropertyPages\StartAction.cs" />
     <Compile Include="Project\PropertyPages\WarningsAsErrors.cs" />
-    <Compile Include="Service References\JvmDebugSessionService\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Compile>
-    <Compile Include="Service References\JvmEventsService\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Compile>
-    <Compile Include="Service References\JvmToolsService\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Compile>
     <Compile Include="SourceData\CodeArrayType.cs" />
     <Compile Include="SourceData\CodeClass.cs" />
     <Compile Include="SourceData\CodeElement.cs">
@@ -612,44 +594,6 @@
     <Compile Include="Text.Language\LanguageElementManager.cs" />
     <Compile Include="Text.Language\LanguageElementManagerService.cs" />
     <Compile Include="Text.Language\LanguageElementsChangedEventArgs.cs" />
-    <None Include="Service References\JvmDebugSessionService\service.wsdl" />
-    <None Include="Service References\JvmDebugSessionService\service.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\JvmEventsService\service.wsdl" />
-    <None Include="Service References\JvmEventsService\service.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\JvmEventsService\service1.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\JvmEventsService\Tvl.Java.DebugHost.Services.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\JvmEventsService\Tvl.Java.DebugHost.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\JvmToolsService\Arrays.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\JvmToolsService\configuration91.svcinfo" />
-    <None Include="Service References\JvmToolsService\configuration.svcinfo" />
-    <None Include="Service References\JvmToolsService\Reference.svcmap">
-      <Generator>WCF Proxy Generator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
-    <None Include="Service References\JvmEventsService\configuration91.svcinfo" />
-    <None Include="Service References\JvmEventsService\configuration.svcinfo" />
-    <None Include="Service References\JvmEventsService\Reference.svcmap">
-      <Generator>WCF Proxy Generator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
-    <None Include="Service References\JvmDebugSessionService\configuration91.svcinfo" />
-    <None Include="Service References\JvmDebugSessionService\configuration.svcinfo" />
-    <None Include="Service References\JvmDebugSessionService\Reference.svcmap">
-      <Generator>WCF Proxy Generator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
     <EmbeddedResource Include="Project\Resources\imagelis.bmp" />
     <Content Include="VSIXProject_large.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -674,67 +618,6 @@
     <Antlr3 Include="SourceData\ExpressionEvaluatorWalker.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
-    <None Include="Service References\JvmToolsService\service.wsdl" />
-    <None Include="Service References\JvmToolsService\service.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\JvmToolsService\service1.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.Java.DebugHost.Interop.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.Java.DebugHost.Services.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.Java.DebugHost.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmAccessModifiers.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmClassRemoteHandle.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmFieldRemoteHandle.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmLineNumberEntry.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmLocalVariableEntry.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmMethodRemoteHandle.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmObjectRemoteHandle.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmRemoteLocation.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmRemoteStackInfo.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmThreadGroupRemoteHandle.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmThreadRemoteHandle.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.JvmThreadRemoteInfo.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiClassStatus.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiError.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\JvmToolsService\Tvl.VisualStudio.Language.Java.JvmToolsService.jvmtiThreadState.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
     <None Include="Text\Tagger`1.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -828,14 +711,6 @@
       <LogicalName>VSPackage.resources</LogicalName>
       <MergeWithCTO>true</MergeWithCTO>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadataStorage Include="Service References\JvmDebugSessionService\" />
-    <WCFMetadataStorage Include="Service References\JvmEventsService\" />
-    <WCFMetadataStorage Include="Service References\JvmToolsService\" />
   </ItemGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
