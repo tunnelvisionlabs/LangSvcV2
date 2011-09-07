@@ -126,6 +126,54 @@
             }
         }
 
+        internal void UpdateFolderBuildAction(JavaFolderNode folderNode, FolderBuildAction buildAction)
+        {
+            string existingBuildAction = folderNode.ItemNode.ItemName;
+            if (string.IsNullOrEmpty(existingBuildAction))
+                existingBuildAction = FolderBuildAction.Folder.ToString();
+
+            if (string.Equals(existingBuildAction, buildAction.ToString()))
+                return;
+
+            if (buildAction == FolderBuildAction.Folder && !folderNode.ItemNode.IsVirtual && folderNode.ItemNode.Item.DirectMetadataCount == 0)
+            {
+                // remove <Folder /> elements from the project as long as they don't have any direct metadata (xml child elements)
+                ProjectElement updatedElement = new ProjectElement(this, null, true);
+                updatedElement.Rename(folderNode.ItemNode.Item.EvaluatedInclude);
+                updatedElement.SetMetadata(ProjectFileConstants.Name, folderNode.ItemNode.Item.EvaluatedInclude);
+
+                ProjectElement oldElement = folderNode.ItemNode;
+                folderNode.ItemNode = updatedElement;
+
+                oldElement.RemoveFromProjectFile();
+            }
+            else if (!folderNode.ItemNode.IsVirtual)
+            {
+                folderNode.ItemNode.ItemName = buildAction.ToString();
+                return;
+            }
+            else
+            {
+                ProjectElement updatedElement = AddFolderToMsBuild(folderNode.VirtualNodeName, buildAction.ToString());
+                folderNode.ItemNode = updatedElement;
+            }
+        }
+
+        protected override ProjectElement AddFolderToMsBuild(string folder, string itemType)
+        {
+            if (itemType == ProjectFileConstants.Folder)
+            {
+                ProjectElement folderElement = new ProjectElement(this, null, true);
+                folderElement.Rename(folder);
+                folderElement.SetMetadata(ProjectFileConstants.Name, folder);
+                return folderElement;
+            }
+            else
+            {
+                return base.AddFolderToMsBuild(folder, itemType);
+            }
+        }
+
         public override int Save(string fileToBeSaved, int remember, uint formatIndex)
         {
             int result = base.Save(fileToBeSaved, remember, formatIndex);

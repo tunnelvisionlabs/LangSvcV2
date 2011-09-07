@@ -1,19 +1,18 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Project
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Project;
     using System.ComponentModel;
+    using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio.Project;
 
     [ComVisible(true)]
     public class JavaFolderNodeProperties : FolderNodeProperties
     {
-        public JavaFolderNodeProperties(HierarchyNode node)
+        public JavaFolderNodeProperties(JavaFolderNode node)
             : base(node)
         {
+            Contract.Requires(node != null);
         }
 
         [Category("Advanced")]
@@ -36,7 +35,8 @@
 
             set
             {
-                this.Node.ItemNode.ItemName = value.ToString();
+                JavaProjectNode projectNode = (JavaProjectNode)this.Node.ProjectManager;
+                projectNode.UpdateFolderBuildAction((JavaFolderNode)this.Node, value);
             }
         }
     }

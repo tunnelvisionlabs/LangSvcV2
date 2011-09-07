@@ -69,7 +69,7 @@ namespace Microsoft.VisualStudio.Project
             }
         }
 
-        internal MSBuild.ProjectItem Item
+        public MSBuild.ProjectItem Item
         {
             get
             {
@@ -77,7 +77,7 @@ namespace Microsoft.VisualStudio.Project
             }
         }
 
-        internal bool IsVirtual
+        public bool IsVirtual
         {
             get
             {
@@ -92,7 +92,7 @@ namespace Microsoft.VisualStudio.Project
         /// Only have internal constructors as the only one who should be creating
         /// such object is the project itself (see Project.CreateFileNode()).
         /// </summary>
-        internal ProjectElement(ProjectNode project, string itemPath, string itemType)
+        public ProjectElement(ProjectNode project, string itemPath, string itemType)
         {
             if(project == null)
             {
@@ -129,7 +129,7 @@ namespace Microsoft.VisualStudio.Project
         /// <param name="project">Project that owns this item</param>
         /// <param name="existingItem">an MSBuild.ProjectItem; can be null if virtualFolder is true</param>
         /// <param name="virtualFolder">Is this item virtual (such as reference folder)</param>
-        internal ProjectElement(ProjectNode project, MSBuild.ProjectItem existingItem, bool virtualFolder)
+        public ProjectElement(ProjectNode project, MSBuild.ProjectItem existingItem, bool virtualFolder)
         {
             if(project == null)
                 throw new ArgumentNullException("project");
