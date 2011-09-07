@@ -1,17 +1,13 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Project
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
+    using System.ComponentModel;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio.Project;
-    using System.ComponentModel;
 
     [ComVisible(true)]
     public class JavaFileNodeProperties : FileNodeProperties
     {
-        public JavaFileNodeProperties(HierarchyNode node)
+        public JavaFileNodeProperties(JavaFileNode node)
             : base(node)
         {
         }
@@ -27,6 +23,24 @@
             set
             {
                 base.BuildAction = value;
+            }
+        }
+
+        public override CopyToOutputDirectoryBehavior CopyToOutputDirectory
+        {
+            get
+            {
+                return base.CopyToOutputDirectory;
+            }
+
+            set
+            {
+                if (Node.ItemNode.IsVirtual && value != CopyToOutputDirectoryBehavior.DoNotCopy)
+                {
+                    Node.ItemNode = Node.ProjectManager.AddFileToMsBuild(Node.VirtualNodeName, ProjectFileConstants.Content, null);
+                }
+
+                base.CopyToOutputDirectory = value;
             }
         }
     }
