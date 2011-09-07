@@ -264,6 +264,10 @@
     <Compile Include="CommandOptions.cs" />
     <Compile Include="CommandStatus.cs" />
     <Compile Include="CommandType.cs" />
+    <Compile Include="ComponentSelectorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ComponentSelectorData.cs" />
     <Compile Include="Contracts\IActiveViewTrackerServiceContracts.cs" />
     <Compile Include="Contracts\IMonitorSelectionServiceContracts.cs" />
     <Compile Include="Contracts\IOpenedViewTrackerServiceContracts.cs" />
@@ -295,6 +299,8 @@
     <Compile Include="PredefinedTaskSchedulers.cs" />
     <Compile Include="PriorityCommandFilter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertySheetPageFlags.cs" />
+    <Compile Include="ProvideComponentSelectorTabAttribute.cs" />
     <Compile Include="ProvideDebugEngineAttribute.cs" />
     <Compile Include="ProvideDebuggerExceptionAttribute.cs" />
     <Compile Include="WpfToolWindowPane.cs" />

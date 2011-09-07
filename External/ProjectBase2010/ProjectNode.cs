@@ -164,7 +164,7 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         protected internal const string PerUserFileExtension = ".user";
      
-		private Guid GUID_MruPage = new Guid("{19B97F03-9594-4c1c-BE28-25FF030113B3}");
+		protected Guid GUID_MruPage = new Guid("{19B97F03-9594-4c1c-BE28-25FF030113B3}");
 		
 		#endregion
 
@@ -172,11 +172,11 @@ namespace Microsoft.VisualStudio.Project
 
         private static readonly FrameworkName DefaultTargetFrameworkMoniker = new FrameworkName(".NETFramework", new Version(4, 0));
 
-		private static Guid addComponentLastActiveTab = VSConstants.GUID_SolutionPage;
+		protected static Guid addComponentLastActiveTab = VSConstants.GUID_SolutionPage;
 
-		private static uint addComponentDialogSizeX = 0;
+		protected static uint addComponentDialogSizeX = 0;
 
-		private static uint addComponentDialogSizeY = 0;
+		protected static uint addComponentDialogSizeY = 0;
 
 		/// <summary>
         /// List of output groups names and their associated target
@@ -2240,30 +2240,7 @@ namespace Microsoft.VisualStudio.Project
 
             IVsComponentSelectorDlg4 componentDialog;
             string strBrowseLocations = Path.GetDirectoryName(this.BaseURI.Uri.LocalPath);
-			var tabInitList = new List<VSCOMPONENTSELECTORTABINIT>()
-			{
-				new VSCOMPONENTSELECTORTABINIT {
-					guidTab = VSConstants.GUID_COMPlusPage,
-					varTabInitInfo = GetComponentPickerDirectories(),
-				},
-                new VSCOMPONENTSELECTORTABINIT {
-                    guidTab = VSConstants.GUID_COMClassicPage,
-                },
-				new VSCOMPONENTSELECTORTABINIT {
-		            // Tell the Add Reference dialog to call hierarchies GetProperty with the following
-		            // propID to enablefiltering out ourself from the Project to Project reference
-					varTabInitInfo = (int)__VSHPROPID.VSHPROPID_ShowProjInSolutionPage,
-					guidTab = VSConstants.GUID_SolutionPage,
-				},
-	            // Add the Browse for file page            
-				new VSCOMPONENTSELECTORTABINIT {
-					varTabInitInfo = 0,
-					guidTab = VSConstants.GUID_BrowseFilePage,
-				},
-				new VSCOMPONENTSELECTORTABINIT {
-				    guidTab = GUID_MruPage,
-				},
-			};
+            var tabInitList = GetComponentSelectorTabList();
 			tabInitList.ForEach(tab => tab.dwSize = (uint)Marshal.SizeOf(typeof(VSCOMPONENTSELECTORTABINIT)));
 
             componentDialog = this.GetService(typeof(IVsComponentSelectorDlg)) as IVsComponentSelectorDlg4;
@@ -2275,7 +2252,7 @@ namespace Microsoft.VisualStudio.Project
                     // Let the project know not to show itself in the Add Project Reference Dialog page
                     this.ShowProjectInSolutionPage = false;
                     // call the container to open the add reference dialog.
-                    string browseFilters = "Component Files (*.exe;*.dll)\0*.exe;*.dll\0";
+                    string browseFilters = GetComponentSelectorBrowseFilters();
                     ErrorHandler.ThrowOnFailure(componentDialog.ComponentSelectorDlg5(
                         (System.UInt32)(__VSCOMPSELFLAGS.VSCOMSEL_MultiSelectMode | __VSCOMPSELFLAGS.VSCOMSEL_IgnoreMachineName),
                         (IVsComponentUser)this,
@@ -2304,6 +2281,39 @@ namespace Microsoft.VisualStudio.Project
                 this.ShowProjectInSolutionPage = true;
             }
             return VSConstants.S_OK;
+        }
+
+        protected virtual string GetComponentSelectorBrowseFilters()
+        {
+            return "Component Files (*.exe;*.dll)\0*.exe;*.dll\0";
+        }
+
+        protected virtual List<VSCOMPONENTSELECTORTABINIT> GetComponentSelectorTabList()
+        {
+            return new List<VSCOMPONENTSELECTORTABINIT>()
+			{
+				new VSCOMPONENTSELECTORTABINIT {
+					guidTab = VSConstants.GUID_COMPlusPage,
+					varTabInitInfo = GetComponentPickerDirectories(),
+				},
+                new VSCOMPONENTSELECTORTABINIT {
+                    guidTab = VSConstants.GUID_COMClassicPage,
+                },
+				new VSCOMPONENTSELECTORTABINIT {
+		            // Tell the Add Reference dialog to call hierarchies GetProperty with the following
+		            // propID to enablefiltering out ourself from the Project to Project reference
+					varTabInitInfo = (int)__VSHPROPID.VSHPROPID_ShowProjInSolutionPage,
+					guidTab = VSConstants.GUID_SolutionPage,
+				},
+	            // Add the Browse for file page            
+				new VSCOMPONENTSELECTORTABINIT {
+					varTabInitInfo = 0,
+					guidTab = VSConstants.GUID_BrowseFilePage,
+				},
+				new VSCOMPONENTSELECTORTABINIT {
+				    guidTab = GUID_MruPage,
+				},
+			};
         }
 
         /// <summary>
@@ -7019,7 +7029,7 @@ namespace Microsoft.VisualStudio.Project
             this.buildInProcess = false;
         }
 
-		private string GetComponentPickerDirectories()
+		protected virtual string GetComponentPickerDirectories()
 		{
 			IVsComponentEnumeratorFactory4 enumFactory = this.site.GetService(typeof(SCompEnumService)) as IVsComponentEnumeratorFactory4;
 			if (enumFactory == null)
