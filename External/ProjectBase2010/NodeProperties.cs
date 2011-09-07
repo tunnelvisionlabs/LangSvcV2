@@ -311,6 +311,7 @@ namespace Microsoft.VisualStudio.Project
 		[SRCategoryAttribute(SR.Advanced)]
 		[LocDisplayName(SR.BuildAction)]
 		[SRDescriptionAttribute(SR.BuildActionDescription)]
+        [DefaultValue(BuildAction.None)]
 		public virtual BuildAction BuildAction
 		{
 			get
@@ -331,7 +332,7 @@ namespace Microsoft.VisualStudio.Project
 		[SRCategoryAttribute(SR.Misc)]
 		[LocDisplayName(SR.FileName)]
 		[SRDescriptionAttribute(SR.FileNameDescription)]
-		public string FileName
+		public virtual string FileName
 		{
 			get
 			{
@@ -343,10 +344,37 @@ namespace Microsoft.VisualStudio.Project
 			}
 		}
 
+        [SRCategory(SR.Advanced)]
+        [LocDisplayName(SR.CopyToOutputDirectory)]
+        [SRDescription(SR.CopyToOutputDirectoryDescription)]
+        [DefaultValue(CopyToOutputDirectoryBehavior.DoNotCopy)]
+        public virtual CopyToOutputDirectoryBehavior CopyToOutputDirectory
+        {
+            get
+            {
+                if (this.Node.ItemNode.IsVirtual)
+                    return CopyToOutputDirectoryBehavior.DoNotCopy;
+
+                string metadata = this.Node.ItemNode.GetMetadata(ProjectFileConstants.CopyToOutputDirectory);
+                if (string.IsNullOrEmpty(metadata))
+                    return CopyToOutputDirectoryBehavior.DoNotCopy;
+
+                return (CopyToOutputDirectoryBehavior)Enum.Parse(typeof(CopyToOutputDirectoryBehavior), metadata);
+            }
+
+            set
+            {
+                if (this.Node.ItemNode.Item != null)
+                {
+                    this.Node.ItemNode.SetMetadata(ProjectFileConstants.CopyToOutputDirectory, value.ToString());
+                }
+            }
+        }
+
 		[SRCategoryAttribute(SR.Misc)]
 		[LocDisplayName(SR.FullPath)]
 		[SRDescriptionAttribute(SR.FullPathDescription)]
-		public string FullPath
+		public virtual string FullPath
 		{
 			get
 			{
@@ -356,7 +384,7 @@ namespace Microsoft.VisualStudio.Project
 
 		#region non-browsable properties - used for automation only
 		[Browsable(false)]
-		public string Extension
+		public virtual string Extension
 		{
 			get
 			{

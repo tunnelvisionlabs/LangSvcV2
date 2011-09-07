@@ -63,6 +63,7 @@ namespace Microsoft.VisualStudio.Project
 		internal const string AddReferenceDialogTitle = "AddReferenceDialogTitle";
 		internal const string AddToNullProjectError = "AddToNullProjectError";
 		internal const string Advanced = "Advanced";
+		internal const string Always = "Always";
 		internal const string AssemblyReferenceAlreadyExists = "AssemblyReferenceAlreadyExists";
 		internal const string AttributeLoad = "AttributeLoad";
 		internal const string BuildAction = "BuildAction";
@@ -80,6 +81,8 @@ namespace Microsoft.VisualStudio.Project
 		internal const string Content = "Content";
 		internal const string CopyToLocal = "CopyToLocal";
 		internal const string CopyToLocalDescription = "CopyToLocalDescription";
+		internal const string CopyToOutputDirectory = "CopyToOutputDirectory";
+		internal const string CopyToOutputDirectoryDescription = "CopyToOutputDirectoryDescription";
         internal const string EmbedInteropTypes = "EmbedInteropTypes";
         internal const string EmbedInteropTypesDescription = "EmbedInteropTypesDescription";
 		internal const string CustomTool = "CustomTool";
@@ -96,6 +99,7 @@ namespace Microsoft.VisualStudio.Project
 		internal const string Detailed = "Detailed";
 		internal const string Diagnostic = "Diagnostic";
 		internal const string DirectoryExistError = "DirectoryExistError";
+		internal const string DoNotCopy = "DoNotCopy";
 		internal const string EditorViewError = "EditorViewError";
 		internal const string EmbeddedResource = "EmbeddedResource";
 		internal const string Error = "Error";
@@ -144,6 +148,7 @@ namespace Microsoft.VisualStudio.Project
 		internal const string ParameterMustBeAValidItemId = "ParameterMustBeAValidItemId";
 		internal const string ParameterCannotBeNullOrEmpty = "ParameterCannotBeNullOrEmpty";
 		internal const string PathTooLong = "PathTooLong";
+		internal const string PreserveNewest = "PreserveNewest";
 		internal const string ProjectContainsCircularReferences = "ProjectContainsCircularReferences";
 		internal const string Program = "Program";
 		internal const string Project = "Project";

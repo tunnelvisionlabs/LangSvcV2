@@ -107,6 +107,7 @@ namespace Microsoft.VisualStudio.Project
 		public const string Page = "Page";
 		public const string Resource = "Resource";
 		public const string None = "None";
+		public const string CopyToOutputDirectory = "CopyToOutputDirectory";
 	}
 
 	public static class ProjectFileAttributeValue

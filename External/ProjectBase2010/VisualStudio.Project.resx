@@ -124,6 +124,10 @@
     <value>Advanced</value>
     <comment>Project Property Page Caption</comment>
   </data>
+  <data name="Always" xml:space="preserve">
+    <value>Copy always</value>
+    <comment>Copy to output directory behavior</comment>
+  </data>
   <data name="ReferenceAlreadyExists" xml:space="preserve">
     <value>A reference to component '{0}' cannot be added. A reference to the component already exists in the project.</value>
     <comment>ReferenceAlreadyExists error message</comment>
@@ -173,6 +177,13 @@
   <data name="CopyToLocalDescription" xml:space="preserve">
     <value>Indicates whether the reference will be copied to the output directory.</value>
   </data>
+  <data name="CopyToOutputDirectory" xml:space="preserve">
+    <value>Copy to Output Directory</value>
+    <comment>File property</comment>
+  </data>
+  <data name="CopyToOutputDirectoryDescription" xml:space="preserve">
+    <value>Indicates whether the file will be copied to the output directory.</value>
+  </data>
   <data name="EmbedInteropTypes" xml:space="preserve">
     <value>Embed Interop Types</value>
   </data>
@@ -187,6 +198,10 @@
   </data>
   <data name="DirectoryExistError" xml:space="preserve">
     <value>Directory already exists</value>
+  </data>
+  <data name="DoNotCopy" xml:space="preserve">
+    <value>Do not copy</value>
+    <comment>Copy to output directory behavior</comment>
   </data>
   <data name="EditorViewError" xml:space="preserve">
     <value>Error opening specified view '{0}' using editor '{1}'</value>
@@ -289,6 +304,10 @@
   </data>
   <data name="PasteFailed" xml:space="preserve">
     <value>Item is not available or corrupted and thus cannot be pasted.</value>
+  </data>
+  <data name="PreserveNewest" xml:space="preserve">
+    <value>Copy if newer</value>
+    <comment>Copy to output directory behavior</comment>
   </data>
   <data name="Program" xml:space="preserve">
     <value>Program</value>
