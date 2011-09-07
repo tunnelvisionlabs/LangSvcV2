@@ -278,8 +278,8 @@
 
             if ((dwFields & enum_THREADPROPERTY_FIELDS.TPF_LOCATION) != 0)
             {
-                ptp[0].dwFields |= enum_THREADPROPERTY_FIELDS.TPF_LOCATION;
-                ptp[0].bstrLocation = "Unknown";
+                if (TryGetLocation(out ptp[0].bstrLocation))
+                    ptp[0].dwFields |= enum_THREADPROPERTY_FIELDS.TPF_LOCATION;
             }
 
             if ((dwFields & enum_THREADPROPERTY_FIELDS.TPF_NAME) != 0)
@@ -438,14 +438,17 @@
             if ((dwFields & (uint)enum_THREADPROPERTY_FIELDS100.TPF100_ID) != 0)
             {
                 if (ErrorHandler.Succeeded(GetThreadId(out ptp[0].dwThreadId)))
+                {
+                    ptp[0].dwManagedThreadId = ptp[0].dwThreadId;
                     ptp[0].dwFields |= (uint)enum_THREADPROPERTY_FIELDS100.TPF100_ID;
+                }
             }
 
             // thread location
             if ((fields & enum_THREADPROPERTY_FIELDS100.TPF100_LOCATION) != 0)
             {
-                ptp[0].dwFields |= (uint)enum_THREADPROPERTY_FIELDS100.TPF100_LOCATION;
-                ptp[0].bstrLocation = "Unknown";
+                if (TryGetLocation(out ptp[0].bstrLocation))
+                    ptp[0].dwFields |= (uint)enum_THREADPROPERTY_FIELDS100.TPF100_LOCATION;
             }
 
             // name
@@ -514,12 +517,14 @@
                 ptp[0].dwSuspendCount = (uint)suspendCount;
             }
 
+#if false
             // affinity
             if ((fields & enum_THREADPROPERTY_FIELDS100.TPF100_AFFINITY) != 0)
             {
                 ptp[0].dwFields |= (uint)enum_THREADPROPERTY_FIELDS100.TPF100_AFFINITY;
                 ptp[0].AffinityMask = ~0UL;
             }
+#endif
 
             // category
             if ((fields & enum_THREADPROPERTY_FIELDS100.TPF100_CATEGORY) != 0)
@@ -530,8 +535,6 @@
 
 
             return VSConstants.S_OK;
-
-            throw new NotImplementedException();
         }
 
         public int SetThreadDisplayName(string bstrDisplayName)
@@ -549,5 +552,39 @@
         }
 
         #endregion
+
+        private bool TryGetLocation(out string location)
+        {
+            location = null;
+
+            int frameCount = _thread.GetFrameCount();
+            for (int i = 0; i < frameCount; i++)
+            {
+                IStackFrame frame = _thread.GetFrame(i);
+                IMethod method = frame.GetLocation().GetMethod();
+                if (method.GetIsNative())
+                    continue;
+
+                JavaDebugStackFrame stackFrame = new JavaDebugStackFrame(this, frame);
+                FRAMEINFO[] frameInfo = new FRAMEINFO[1];
+                int result = stackFrame.GetInfo(
+                    enum_FRAMEINFO_FLAGS.FIF_FUNCNAME
+                    | enum_FRAMEINFO_FLAGS.FIF_FUNCNAME_ARGS
+                    | enum_FRAMEINFO_FLAGS.FIF_FUNCNAME_ARGS_NAMES
+                    | enum_FRAMEINFO_FLAGS.FIF_FUNCNAME_ARGS_TYPES
+                    | enum_FRAMEINFO_FLAGS.FIF_FUNCNAME_OFFSET
+                    | enum_FRAMEINFO_FLAGS.FIF_FUNCNAME_LINES,
+                    10,
+                    frameInfo);
+                if (ErrorHandler.Failed(result))
+                    return false;
+
+                location = frameInfo[0].m_bstrFuncName;
+                return true;
+            }
+
+            location = null;
+            return false;
+        }
     }
 }
