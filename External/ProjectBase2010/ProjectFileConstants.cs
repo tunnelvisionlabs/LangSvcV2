@@ -15,27 +15,6 @@ using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
 namespace Microsoft.VisualStudio.Project
 {
 	/// <summary>
-	/// Defines the constant strings for various msbuild targets
-	/// </summary>
-	[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ms")]
-	public static class MsBuildTarget
-	{
-		public const string ResolveProjectReferences = "ResolveProjectReferences";
-		public const string ResolveAssemblyReferences = "ResolveAssemblyReferences";
-		public const string ResolveComReferences = "ResolveComReferences";
-		public const string Build = "Build";
-		public const string Rebuild = "ReBuild";
-		public const string Clean = "Clean";
-	}
-
-	[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ms")]
-	public static class MsBuildGeneratedItemType
-	{
-		public const string ReferenceCopyLocalPaths = "ReferenceCopyLocalPaths";
-		public const string ComReferenceWrappers = "ComReferenceWrappers";
-	}
-
-	/// <summary>
 	/// Defines the constant strings used with project files.
 	/// </summary>
 	[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "COM")]
@@ -109,36 +88,4 @@ namespace Microsoft.VisualStudio.Project
 		public const string None = "None";
 		public const string CopyToOutputDirectory = "CopyToOutputDirectory";
 	}
-
-	public static class ProjectFileAttributeValue
-	{
-		public const string Code = "Code";
-		public const string Form = "Form";
-		public const string Component = "Component";
-		public const string Designer = "Designer";
-		public const string UserControl = "UserControl";
-	}
-
-	public static class ProjectFileValues
-	{
-		internal const string AnyCPU = "AnyCPU";
-	}
-
-	public enum WrapperToolAttributeValue
-	{
-		Primary,
-		TlbImp
-	}
-
-	/// <summary>
-	/// A set of constants that specify the default sort order for different types of hierarchy nodes.
-	/// </summary>
-	public static class DefaultSortOrderNode
-	{
-		public const int HierarchyNode = 1000;
-		public const int FolderNode = 500;
-		public const int NestedProjectNode = 200;
-		public const int ReferenceContainerNode = 300;
-	}
-
 }

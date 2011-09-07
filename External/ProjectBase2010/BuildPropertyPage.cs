@@ -18,14 +18,6 @@ using Microsoft.VisualStudio;
 namespace Microsoft.VisualStudio.Project
 {
 	/// <summary>
-	/// Enumerated list of the properties shown on the build property page
-	/// </summary>
-	public enum BuildPropertyPageTag
-	{
-		OutputPath
-	}
-
-	/// <summary>
 	/// Defines the properties on the build property page and the logic the binds the properties to project data (load and save)
 	/// </summary>
 	[CLSCompliant(false), ComVisible(true), Guid("9B3DEA40-7F29-4a17-87A4-00EE08E8241E")]

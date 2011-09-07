@@ -15,16 +15,6 @@ using System.Runtime.InteropServices;
 namespace Microsoft.VisualStudio.Project
 {
 	/// <summary>
-	/// Defines the config dependent properties exposed through automation
-	/// </summary>
-	[ComVisible(true)]
-	[Guid("21f73a8f-91d7-4085-9d4f-c48ee235ee5b")]
-	public interface IProjectConfigProperties
-	{
-		string OutputPath { get; set; }
-	}
-
-	/// <summary>
 	/// Implements the configuration dependent properties interface
 	/// </summary>
 	[CLSCompliant(false), ComVisible(true)]

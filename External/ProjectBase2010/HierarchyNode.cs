@@ -37,7 +37,7 @@ namespace Microsoft.VisualStudio.Project
 	/// can itself be a hierarchy.  
 	/// </summary>
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling"), CLSCompliant(false), ComVisible(true)]
-	public abstract class HierarchyNode :
+	public abstract partial class HierarchyNode :
 		IVsUIHierarchy,
 		IVsPersistHierarchyItem2,
 		Microsoft.VisualStudio.OLE.Interop.IOleCommandTarget,
@@ -48,19 +48,6 @@ namespace Microsoft.VisualStudio.Project
 		IDisposable
 	//, IVsBuildStatusCallback 
 	{
-		#region nested types
-		/// <summary>
-		/// DropEffect as defined in oleidl.h
-		/// </summary>
-		public enum DropEffect
-		{
-			None,
-			Copy = 1,
-			Move = 2,
-			Link = 4
-		};
-		#endregion
-
 		#region Events
 		internal event EventHandler<HierarchyNodeEventArgs> OnChildAdded
 		{

@@ -21,58 +21,8 @@ namespace Microsoft.VisualStudio.Project
 	/// <summary>
 	/// This object is in charge of reloading nodes that have file monikers that can be listened to changes
 	/// </summary>
-	public class FileChangeManager : IVsFileChangeEvents
+	public partial class FileChangeManager : IVsFileChangeEvents
 	{
-		#region nested objects
-		/// <summary>
-		/// Defines a data structure that can link a item moniker to the item and its file change cookie.
-		/// </summary>
-		private struct ObservedItemInfo
-		{
-			/// <summary>
-			/// Defines the id of the item that is to be reloaded.
-			/// </summary>
-			private uint itemID;
-
-			/// <summary>
-			/// Defines the file change cookie that is returned when listening on file changes on the nested project item.
-			/// </summary>
-			private uint fileChangeCookie;
-
-			/// <summary>
-			/// Defines the nested project item that is to be reloaded.
-			/// </summary>
-			internal uint ItemID
-			{
-				get
-				{
-					return this.itemID;
-				}
-
-				set
-				{
-					this.itemID = value;
-				}
-			}
-
-			/// <summary>
-			/// Defines the file change cookie that is returned when listenning on file changes on the nested project item.
-			/// </summary>
-			internal uint FileChangeCookie
-			{
-				get
-				{
-					return this.fileChangeCookie;
-				}
-
-				set
-				{
-					this.fileChangeCookie = value;
-				}
-			}
-		}
-		#endregion
-
 		#region Fields
 		/// <summary>
 		/// Event that is raised when one of the observed file names have changed on disk.

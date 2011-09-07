@@ -16,37 +16,6 @@ using System.Globalization;
 
 namespace Microsoft.VisualStudio.Project
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
-	public sealed class LocDisplayNameAttribute : DisplayNameAttribute
-	{
-		#region fields
-		string name;
-		#endregion
-
-		#region ctors
-		public LocDisplayNameAttribute(string name)
-		{
-			this.name = name;
-		}
-		#endregion
-
-		#region properties
-		public override string DisplayName
-		{
-			get
-			{
-				string result = SR.GetString(this.name, CultureInfo.CurrentUICulture);
-				if(result == null)
-				{
-					Debug.Assert(false, "String resource '" + this.name + "' is missing");
-					result = this.name;
-				}
-				return result;
-			}
-		}
-		#endregion
-	}
-
 	/// <summary>
 	/// Defines a type converter.
 	/// </summary>

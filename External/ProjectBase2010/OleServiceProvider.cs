@@ -17,72 +17,8 @@ using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
 namespace Microsoft.VisualStudio.Project
 {
-	public class OleServiceProvider : IOleServiceProvider, IDisposable
+	public partial class OleServiceProvider : IOleServiceProvider, IDisposable
 	{
-		#region Public Types
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
-		public delegate object ServiceCreatorCallback(Type serviceType);
-		#endregion
-
-		#region Private Types
-		private class ServiceData : IDisposable
-		{
-			private Type serviceType;
-			private object instance;
-			private ServiceCreatorCallback creator;
-			private bool shouldDispose;
-			public ServiceData(Type serviceType, object instance, ServiceCreatorCallback callback, bool shouldDispose)
-			{
-				if(null == serviceType)
-				{
-					throw new ArgumentNullException("serviceType");
-				}
-
-				if((null == instance) && (null == callback))
-				{
-					throw new ArgumentNullException("instance");
-				}
-
-				this.serviceType = serviceType;
-				this.instance = instance;
-				this.creator = callback;
-				this.shouldDispose = shouldDispose;
-			}
-
-			public object ServiceInstance
-			{
-				get
-				{
-					if(null == instance)
-					{
-						instance = creator(serviceType);
-					}
-					return instance;
-				}
-			}
-
-			public Guid Guid
-			{
-				get { return serviceType.GUID; }
-			}
-
-			public void Dispose()
-			{
-				if((shouldDispose) && (null != instance))
-				{
-					IDisposable disp = instance as IDisposable;
-					if(null != disp)
-					{
-						disp.Dispose();
-					}
-					instance = null;
-				}
-				creator = null;
-				GC.SuppressFinalize(this);
-			}
-		}
-		#endregion
-
 		#region fields
 
 		private Dictionary<Guid, ServiceData> services = new Dictionary<Guid, ServiceData>();
