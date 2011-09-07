@@ -3842,7 +3842,7 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>A Projectelement describing the newly added file.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "ToMs")]
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ms")]
-        protected internal ProjectElement AddFileToMsBuild(string file)
+        public ProjectElement AddFileToMsBuild(string file)
         {
             Contract.Requires<ArgumentNullException>(file != null, "file");
             Contract.Requires<ArgumentException>(!String.IsNullOrEmpty(file));
@@ -3877,7 +3877,7 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>A Projectelement describing the newly added file.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "ToMs")]
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Ms")]
-        protected internal virtual ProjectElement AddFileToMsBuild(string file, string itemType, string subType)
+        public virtual ProjectElement AddFileToMsBuild(string file, string itemType, string subType)
         {
             Contract.Requires<ArgumentNullException>(file != null, "file");
             Contract.Requires<ArgumentNullException>(itemType != null, "itemType");

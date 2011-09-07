@@ -116,7 +116,7 @@ namespace Microsoft.VisualStudio.Project
 		#endregion
 
 		#region ctors
-		public FileNodeProperties(HierarchyNode node)
+		public FileNodeProperties(FileNode node)
 			: base(node)
 		{
 		}
