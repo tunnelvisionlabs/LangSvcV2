@@ -6,5 +6,6 @@
         UserInterface = 1,
         Main = 2,
         RemoteProcedureCall = 3,
+        Unknown = 4,
     }
 }
