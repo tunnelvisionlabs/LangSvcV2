@@ -4009,7 +4009,7 @@ namespace Microsoft.VisualStudio.Project
             string itemPath = PackageUtilities.MakeRelativeIfRooted(folder, this.BaseURI);
             Contract.Assert(!Path.IsPathRooted(itemPath), "Cannot add item with full path.");
 
-            ProjectElement newItem = this.CreateMsBuildFileItem(itemPath, ProjectFileConstants.Folder);
+            ProjectElement newItem = this.CreateMsBuildFileItem(itemPath, itemType);
 
             return newItem;
         }
