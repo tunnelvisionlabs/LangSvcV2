@@ -86,8 +86,8 @@
                                 }
                                 else
                                 {
-                                    Span ruleSpan = value.Key.GetSpan(triggerPoint.Value.Snapshot);
-                                    if (ruleSpan.Contains(triggerPoint.Value.Position))
+                                    SnapshotPoint ruleSeek = value.Value.GetPoint(triggerPoint.Value.Snapshot);
+                                    if (span2.Contains(ruleSeek))
                                         return;
 
                                     builder.Append(value.Key.GetText(span2.Snapshot));
