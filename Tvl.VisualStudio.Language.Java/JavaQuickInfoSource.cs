@@ -131,6 +131,9 @@
             }
 
             IToken triggerToken = tokens.LT(-1);
+            if (triggerToken == null)
+                return;
+
             switch (triggerToken.Type)
             {
             // symbol references
