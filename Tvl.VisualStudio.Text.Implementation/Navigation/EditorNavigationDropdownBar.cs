@@ -61,7 +61,10 @@
             this._editorNavigationTypeRegistryService = editorNavigationTypeRegistryService;
             this._currentTextView = editorAdaptersFactory.GetWpfTextView(codeWindow.GetLastActiveView());
             this._dispatcher = this._currentTextView.VisualElement.Dispatcher;
-            this._imageList = new ImageList();
+            this._imageList = new ImageList()
+                {
+                    ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit
+                };
 
             _navigationControls =
                 this._sources
