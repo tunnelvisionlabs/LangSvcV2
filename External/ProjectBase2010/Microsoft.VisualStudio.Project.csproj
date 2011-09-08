@@ -323,6 +323,8 @@
     <Compile Include="ComReferenceProperties.cs" />
     <Compile Include="ConnectionPoint`1.cs" />
     <Compile Include="BuildPropertyPageTag.cs" />
+    <Compile Include="EnumConnectionPoints`1.cs" />
+    <Compile Include="EnumConnections.cs" />
     <Compile Include="PropertyPageTypeConverterAttribute.cs" />
     <Compile Include="LocDisplayNameAttribute.cs" />
     <Compile Include="ProjectConfigProperties.cs" />
@@ -472,6 +474,12 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\imagelis.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Tvl.Core\Tvl.Core.csproj">
+      <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
+      <Name>Tvl.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
