@@ -7,14 +7,20 @@
     public class WeakReference<T> : WeakReference
         where T : class
     {
+        private readonly int _hashCode;
+
         public WeakReference(T target)
             : base(target)
         {
+            if (target != null)
+                _hashCode = target.GetHashCode() ^ 0xCCCC;
         }
 
         public WeakReference(T target, bool trackResurrection)
             : base(target, trackResurrection)
         {
+            if (target != null)
+                _hashCode = target.GetHashCode() ^ 0xCCCC;
         }
 
         protected WeakReference(SerializationInfo info, StreamingContext context)
@@ -41,10 +47,47 @@
             {
                 return (T)base.Target;
             }
+
             set
             {
                 base.Target = value;
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            WeakReference other = obj as WeakReference;
+            if (object.ReferenceEquals(other, null))
+                return false;
+
+            if (object.ReferenceEquals(this, other))
+                return true;
+
+            object target = null;
+            object otherTarget = null;
+            try
+            {
+                target = this.Target;
+                otherTarget = other.Target;
+            }
+            catch (InvalidOperationException)
+            {
+            }
+
+            if (target == null || otherTarget == null)
+                return false;
+
+            return object.Equals(target, otherTarget);
+        }
+
+        public override int GetHashCode()
+        {
+            return _hashCode;
+        }
+
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
         }
     }
 }
