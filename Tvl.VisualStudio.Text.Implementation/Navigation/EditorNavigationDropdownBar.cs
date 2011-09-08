@@ -1,29 +1,30 @@
 ﻿namespace Tvl.VisualStudio.Text.Navigation
 {
-    using FormatConvertedBitmap = System.Windows.Media.Imaging.FormatConvertedBitmap;
-    using PixelFormats = System.Windows.Media.PixelFormats;
-    using PixelFormat = System.Drawing.Imaging.PixelFormat;
-    using Bitmap = System.Drawing.Bitmap;
-    using BitmapSource = System.Windows.Media.Imaging.BitmapSource;
-    using Keyboard = System.Windows.Input.Keyboard;
-    using IConnectionPoint = Microsoft.VisualStudio.OLE.Interop.IConnectionPoint;
-    using IConnectionPointContainer = Microsoft.VisualStudio.OLE.Interop.IConnectionPointContainer;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.TextManager.Interop;
+    using Tvl.VisualStudio.Shell.Extensions;
+
+    using Bitmap = System.Drawing.Bitmap;
+    using BitmapSource = System.Windows.Media.Imaging.BitmapSource;
     using Dispatcher = System.Windows.Threading.Dispatcher;
+    using FormatConvertedBitmap = System.Windows.Media.Imaging.FormatConvertedBitmap;
+    using IConnectionPoint = Microsoft.VisualStudio.OLE.Interop.IConnectionPoint;
+    using IConnectionPointContainer = Microsoft.VisualStudio.OLE.Interop.IConnectionPointContainer;
+    using ImageList = System.Windows.Forms.ImageList;
+    using ImageSource = System.Windows.Media.ImageSource;
+    using Keyboard = System.Windows.Input.Keyboard;
+    using PixelFormat = System.Drawing.Imaging.PixelFormat;
+    using PixelFormats = System.Windows.Media.PixelFormats;
     using SpanTrackingMode = Microsoft.VisualStudio.Text.SpanTrackingMode;
     using Thread = System.Threading.Thread;
     using WeakEvents = Tvl.Events.WeakEvents;
-    using Microsoft.VisualStudio.Editor;
-    using Tvl.VisualStudio.Shell.Extensions;
-    using ImageList = System.Windows.Forms.ImageList;
-    using ImageSource = System.Windows.Media.ImageSource;
 
     [ComVisible(true)]
     public class EditorNavigationDropdownBar : IEditorNavigationDropdownBarClient, IVsDropdownBarClient, IVsDropdownBarClientEx, IVsCodeWindowEvents, IVsTextViewEvents
@@ -71,7 +72,7 @@
                 .SelectMany(source => source.GetNavigationTypes())
                 .Distinct()
                 //.OrderBy(...)
-                .Select(type => Tuple.Create(type, default(List<IEditorNavigationTarget>)))
+                .Select(type => Tuple.Create(type, new List<IEditorNavigationTarget>()))
                 .ToArray();
 
             _selectedItem = new IEditorNavigationTarget[_navigationControls.Length];
@@ -80,24 +81,6 @@
             {
                 return;
             }
-
-            _navigationControls = Array.ConvertAll(_navigationControls,
-                pair =>
-                {
-                    //EditorNavigationComboBox comboBox =
-                    //    new EditorNavigationComboBox()
-                    //    {
-                    //        Cursor = Cursors.Arrow,
-                    //        ToolTip = new ToolTip()
-                    //        {
-                    //            Content = pair.Item1.Definition.DisplayName
-                    //        }
-                    //    };
-
-                    //comboBox.DropDownOpened += OnDropDownOpened;
-                    //comboBox.SelectionChanged += OnSelectionChanged;
-                    return Tuple.Create(pair.Item1, new List<IEditorNavigationTarget>());
-                });
 
             IConnectionPointContainer connectionPointContainer = codeWindow as IConnectionPointContainer;
             if (connectionPointContainer != null)
