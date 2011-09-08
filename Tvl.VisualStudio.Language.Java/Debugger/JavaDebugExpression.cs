@@ -39,7 +39,9 @@
 
         public int EvaluateAsync(enum_EVALFLAGS dwFlags, IDebugEventCallback2 pExprCallback)
         {
-            IDebugEventCallback2 callback = pExprCallback;
+            // don't use pExprCallback!
+
+            IDebugEventCallback2 callback = _context.StackFrame.Thread.Program.Callback;
             Task evaluateTask = Task.Factory.StartNew(() => EvaluateImpl(dwFlags)).HandleNonCriticalExceptions().ContinueWith(task => SendEvaluationCompleteEvent(task, callback), TaskContinuationOptions.OnlyOnRanToCompletion).HandleNonCriticalExceptions();
             return VSConstants.S_OK;
         }
@@ -87,9 +89,11 @@
             evaluatedExpression = new EvaluatedExpression(
                 _expressionText,
                 _expressionText,
+                evaluatedExpression.LocalVariable,
                 evaluatedExpression.Referencer,
                 evaluatedExpression.Field,
                 evaluatedExpression.Method,
+                evaluatedExpression.Index,
                 evaluatedExpression.Value,
                 evaluatedExpression.ValueType,
                 evaluatedExpression.StrongReference,

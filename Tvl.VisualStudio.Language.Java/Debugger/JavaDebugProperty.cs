@@ -41,7 +41,7 @@
             IObjectReference referencer = null;
             IType valueType = propertyType;
             bool strongReference = false;
-            _evaluatedExpression = new EvaluatedExpression(name, fullName, referencer, field, method, value, valueType, strongReference, hasSideEffects);
+            _evaluatedExpression = new EvaluatedExpression(name, fullName, default(ILocalVariable), referencer, field, method, default(int?), value, valueType, strongReference, hasSideEffects);
         }
 
         public JavaDebugProperty(IDebugProperty2 parent, EvaluatedExpression evaluatedExpression)
@@ -63,9 +63,11 @@
             _evaluatedExpression = new EvaluatedExpression(
                 name,
                 parent._evaluatedExpression.FullName,
+                parent._evaluatedExpression.LocalVariable,
                 parent._evaluatedExpression.Referencer,
                 parent._evaluatedExpression.Field,
                 parent._evaluatedExpression.Method,
+                parent._evaluatedExpression.Index,
                 parent._evaluatedExpression.Value,
                 type,
                 parent._evaluatedExpression.StrongReference,
@@ -85,9 +87,11 @@
             _evaluatedExpression = new EvaluatedExpression(
                 name,
                 parent._evaluatedExpression.FullName,
+                parent._evaluatedExpression.LocalVariable,
                 parent._evaluatedExpression.Referencer,
                 parent._evaluatedExpression.Field,
                 parent._evaluatedExpression.Method,
+                parent._evaluatedExpression.Index,
                 parent._evaluatedExpression.Value,
                 parent._evaluatedExpression.ValueType,
                 parent._evaluatedExpression.StrongReference,

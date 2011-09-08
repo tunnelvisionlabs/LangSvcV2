@@ -132,6 +132,20 @@
             Contract.Requires<ArgumentNullException>(name != null, "name");
             Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(name));
 
+            IArrayReference arrayValue = value.Value as IArrayReference;
+            if (arrayValue != null)
+            {
+                if (name == "length")
+                {
+                    string fullName = string.Format("({0}).{1}", value.FullName, name);
+                    return new EvaluatedExpression(name, fullName, _stackFrame.GetVirtualMachine().GetMirrorOf(arrayValue.GetLength()), value.HasSideEffects);
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+            }
+
             IReferenceType declaringType = value.ValueType as IReferenceType;
             if (declaringType == null)
                 throw new InvalidOperationException();
@@ -256,20 +270,100 @@
             Contract.Requires<ArgumentNullException>(expression != null, "expression");
             Contract.Ensures(Contract.Result<EvaluatedExpression>() != null);
 
+            string operatorText;
+            IValue newValue;
+
             switch (op.Type)
             {
             case POSITIVE:
-                // this doesn't change anything as long as the value is a supported (primitive numeric) type
-                throw new NotImplementedException();
+                {
+                    operatorText = "+";
+
+                    long result;
+                    if (TryGetIntegralValue(expression.Value, out result))
+                    {
+                        if (expression.Value is ILongValue)
+                            newValue = _stackFrame.GetVirtualMachine().GetMirrorOf(result);
+                        else
+                            newValue = _stackFrame.GetVirtualMachine().GetMirrorOf((int)result);
+
+                        break;
+                    }
+
+                    IFloatValue floatValue = expression.Value as IFloatValue;
+                    if (floatValue != null)
+                    {
+                        newValue = _stackFrame.GetVirtualMachine().GetMirrorOf(floatValue.GetValue());
+                        break;
+                    }
+
+                    IDoubleValue doubleValue = expression.Value as IDoubleValue;
+                    if (doubleValue != null)
+                    {
+                        newValue = _stackFrame.GetVirtualMachine().GetMirrorOf(doubleValue.GetValue());
+                        break;
+                    }
+
+                    throw new NotImplementedException();
+                }
 
             case NEGATE:
-                throw new NotImplementedException();
+                {
+                    operatorText = "-";
+
+                    long result;
+                    if (TryGetIntegralValue(expression.Value, out result))
+                    {
+                        if (expression.Value is ILongValue)
+                            newValue = _stackFrame.GetVirtualMachine().GetMirrorOf(-result);
+                        else
+                            newValue = _stackFrame.GetVirtualMachine().GetMirrorOf(-(int)result);
+
+                        break;
+                    }
+
+                    IFloatValue floatValue = expression.Value as IFloatValue;
+                    if (floatValue != null)
+                    {
+                        newValue = _stackFrame.GetVirtualMachine().GetMirrorOf(-floatValue.GetValue());
+                        break;
+                    }
+
+                    IDoubleValue doubleValue = expression.Value as IDoubleValue;
+                    if (doubleValue != null)
+                    {
+                        newValue = _stackFrame.GetVirtualMachine().GetMirrorOf(-doubleValue.GetValue());
+                        break;
+                    }
+
+                    throw new InvalidOperationException();
+                }
 
             case TILDE:
-                throw new NotImplementedException();
+                {
+                    long result;
+                    if (!TryGetIntegralValue(expression.Value, out result))
+                        throw new InvalidOperationException();
+
+                    operatorText = "~";
+                    if (expression.Value is ILongValue)
+                        newValue = _stackFrame.GetVirtualMachine().GetMirrorOf(~result);
+                    else
+                        newValue = _stackFrame.GetVirtualMachine().GetMirrorOf(~(int)result);
+
+                    break;
+                }
 
             case BANG:
-                throw new NotImplementedException();
+                {
+                    IBooleanValue booleanValue = expression.Value as IBooleanValue;
+                    if (booleanValue == null)
+                        throw new InvalidOperationException();
+
+                    operatorText = "!";
+                    newValue = _stackFrame.GetVirtualMachine().GetMirrorOf(!booleanValue.GetValue());
+                    break;
+                }
 
             case PREINC:
             case PREDEC:
@@ -281,7 +375,8 @@
                 throw new ArgumentException("Invalid unary operator.");
             }
 
-            throw new NotImplementedException();
+            string name = string.Format("{0}({1})", operatorText, expression.FullName);
+            return new EvaluatedExpression(name, name, newValue, expression.HasSideEffects);
         }
 
         //private bool IsPrimitiveNumericValue(EvaluatedExpression expression)
@@ -402,7 +497,7 @@
             throw new NotImplementedException();
         }
 
-        public EvaluatedExpression EvaluateTypeOrObject(List<CommonTree> parts)
+        public EvaluatedExpression EvaluateTypeOrObject(IList<CommonTree> parts)
         {
             Contract.Requires<ArgumentNullException>(parts != null, "parts");
             Contract.Ensures(Contract.Result<EvaluatedExpression>() != null);
@@ -462,7 +557,7 @@
             return context;
         }
 
-        public EvaluatedExpression EvaluateMethod(EvaluatedExpression expression, CommonTree methodName, ICollection<EvaluatedExpression> arguments)
+        public EvaluatedExpression EvaluateMethod(EvaluatedExpression expression, CommonTree methodName, IList<EvaluatedExpression> arguments)
         {
             Contract.Requires<ArgumentNullException>(expression != null, "expression");
             Contract.Requires<ArgumentNullException>(methodName != null, "methodName");
@@ -486,7 +581,26 @@
 
             if (methods.Count > 1)
             {
-                throw new NotImplementedException("Resolution by full signature is not yet implemented.");
+                methods.RemoveAll(
+                    m =>
+                    {
+                        ReadOnlyCollection<IType> argumentTypes = m.GetArgumentTypes();
+                        for (int i = 0; i < arguments.Count; i++)
+                        {
+                            if (!IsAssignableFrom(argumentTypes[0], arguments[i].ValueType))
+                                return true;
+                        }
+
+                        return false;
+                    });
+            }
+
+            if (methods.Count > 1)
+            {
+                if (arguments.Any(i => i.ValueType is IPrimitiveType) || methods.Any(i => i.GetArgumentTypes().Any(j => j is IPrimitiveType)))
+                    throw new NotImplementedException("Auto boxing/unboxing is not yet implemented.");
+
+                throw new InvalidOperationException("Ambiguous match?");
             }
 
             IMethod method = methods[0];
@@ -514,11 +628,60 @@
 
             bool hasSideEffects = (expression != null && expression.HasSideEffects);
             return new EvaluatedExpression(fullName, fullName, referencer, method, hasSideEffects);
-
-            throw new NotImplementedException();
         }
 
-        public EvaluatedExpression EvaluateMethod(ICollection<CommonTree> parts, ICollection<EvaluatedExpression> arguments)
+        private bool IsAssignableFrom(IType targetType, IType sourceType)
+        {
+            Contract.Requires<ArgumentNullException>(targetType != null, "targetType");
+            Contract.Requires<ArgumentNullException>(sourceType != null, "sourceType");
+
+            if (targetType.Equals(sourceType))
+                return true;
+
+            // primitive types must match exactly or fails
+            if (targetType is IPrimitiveType || sourceType is IPrimitiveType)
+                return false;
+
+            IReferenceType sourceReferenceType = sourceType as IReferenceType;
+            if (sourceType == null)
+                throw new NotSupportedException();
+
+            HashSet<IReferenceType> types = new HashSet<IReferenceType>() { sourceReferenceType };
+            GetInheritedTypes(sourceReferenceType, types);
+            return types.Contains(targetType);
+        }
+
+        protected static void GetInheritedTypes(IReferenceType type, HashSet<IReferenceType> inheritedTypes)
+        {
+            Contract.Requires<ArgumentNullException>(type != null, "type");
+            Contract.Requires<ArgumentNullException>(inheritedTypes != null, "inheritedTypes");
+
+            List<IReferenceType> immediateBases = new List<IReferenceType>();
+
+            IClassType classtype = type as IClassType;
+            if (classtype != null)
+            {
+                IClassType basetype = classtype.GetSuperclass();
+                if (basetype != null)
+                    immediateBases.Add(basetype);
+
+                immediateBases.AddRange(classtype.GetInterfaces(false));
+            }
+
+            IInterfaceType interfacetype = type as IInterfaceType;
+            if (interfacetype != null)
+            {
+                immediateBases.AddRange(interfacetype.GetSuperInterfaces());
+            }
+
+            foreach (var baseType in immediateBases)
+            {
+                if (inheritedTypes.Add(baseType))
+                    GetInheritedTypes(baseType, inheritedTypes);
+            }
+        }
+
+        public EvaluatedExpression EvaluateMethod(ICollection<CommonTree> parts, IList<EvaluatedExpression> arguments)
         {
             Contract.Requires<ArgumentNullException>(parts != null, "parts");
             Contract.Requires<ArgumentNullException>(arguments != null, "arguments");

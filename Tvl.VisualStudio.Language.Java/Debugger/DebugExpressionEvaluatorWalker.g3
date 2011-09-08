@@ -569,31 +569,20 @@ castExpression returns [EvaluatedExpression value]
 
 primary returns [EvaluatedExpression value]
 	:	parExpression
-	|	^(	QID qualifiedIdBody
-			// inlined identifierSuffix:
-			(	^('.' ('[' ']')+ 'class')								{throw new NotImplementedException();}
-			|	(^('[' i=expression ']'))+								{throw new NotImplementedException();}
-			|	a=arguments												{$value = EvaluateCall(EvaluateMethod($qualifiedIdBody.parts, $a.values), $a.values);}
-			|	^('.' 'class')											{throw new NotImplementedException();}
-			|	^('.' nonWildcardTypeArguments IDENTIFIER a=arguments)	{throw new NotImplementedException();}
-			|	^('.' 'this')											{throw new NotImplementedException();}
-			|	^('.' 'super' a=arguments)								{throw new NotImplementedException();}
-			|	innerCreator											{throw new NotImplementedException();}
-			|	/* no identifier suffix */								{throw new NotImplementedException();}
-			)
-		)
-	|	^(	'super' superSuffix							{throw new NotImplementedException();}
-		)
-	|	literal											{$value = $literal.value;}
-	|	creator											{$value = $creator.value;}
+	|	^(QID qualifiedIdBody identifierSuffix[$qualifiedIdBody.parts])	{$value = $identifierSuffix.value;}
+	|	^('super' superSuffix)									{throw new NotImplementedException();}
+	|	literal													{$value = $literal.value;}
+	|	creator													{$value = $creator.value;}
 	|	^(	'.'
-			primitiveType								{$value = FindClass($primitiveType.signature);}
-			(	'[' ']'									{$value = GetArrayClass($value);}
+			primitiveType										{$value = FindClass($primitiveType.signature);}
+			(	'[' ']'											{$value = GetArrayClass($value);}
 			)*
 			'class')
-	|	^('.' 'void' 'class')							{$value = FindClass("V");}
-	|	IDENTIFIER										{$value = GetValueInScope($IDENTIFIER.text);}
-	|	'this'											{$value = GetThisObject();}
+	|	^('.' 'void' 'class')									{$value = FindClass("V");}
+	|	^(IDENTIFIER identifierSuffix[new[\] {$IDENTIFIER}])	{$value = $identifierSuffix.value;}
+	|	^(THIS identifierSuffix[new[\] {$THIS}])				{$value = $identifierSuffix.value;}
+	|	IDENTIFIER												{$value = GetValueInScope($IDENTIFIER.text);}
+	|	'this'													{$value = GetThisObject();}
 	;
 
 qualifiedIdBody returns [List<CommonTree> parts]
@@ -608,16 +597,19 @@ superSuffix
 	;
 
 /* The 'identifierSuffix' rule is now inlined in the 'primary' rule */
-//identifierSuffix
-//	:	^('.' ('[' ']')+ 'class')
-//	|	(^('[' expression ']'))+
-//	|	arguments
-//	|	^('.' 'class')
-//	|	^('.' nonWildcardTypeArguments IDENTIFIER arguments)
-//	|	^('.' 'this')
-//	|	^('.' 'super' arguments)
-//	|	innerCreator
-//	;
+identifierSuffix[IList<CommonTree> parts] returns [EvaluatedExpression value]
+	:	^('.' ('[' ']')+ 'class')								{throw new NotImplementedException();}
+	|	(	{$value = EvaluateTypeOrObject($parts);}
+			^('[' i=expression ']')								{$value = GetArrayElement($value, $i.value);}
+		)+
+	|	a=arguments												{$value = EvaluateCall(EvaluateMethod($parts, $a.values), $a.values);}
+	|	^('.' 'class')											{throw new NotImplementedException();}
+	|	^('.' nonWildcardTypeArguments IDENTIFIER a=arguments)	{throw new NotImplementedException();}
+	|	^('.' 'this')											{throw new NotImplementedException();}
+	|	^('.' 'super' a=arguments)								{throw new NotImplementedException();}
+	|	innerCreator											{throw new NotImplementedException();}
+	|	/* no identifier suffix */								{$value = EvaluateTypeOrObject($parts);}
+	;
 
 selector
 	:	^('.' IDENTIFIER arguments?)

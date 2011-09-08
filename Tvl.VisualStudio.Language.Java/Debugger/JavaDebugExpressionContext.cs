@@ -55,7 +55,8 @@
                 throw new ArgumentNullException("pszCode");
             if (pszCode.Length == 0)
                 throw new ArgumentException();
-            if (dwFlags != enum_PARSEFLAGS.PARSE_EXPRESSION)
+            // dwFlags=0 in the Immediate window
+            if (dwFlags != enum_PARSEFLAGS.PARSE_EXPRESSION && dwFlags != 0)
                 throw new NotImplementedException();
 
             try
