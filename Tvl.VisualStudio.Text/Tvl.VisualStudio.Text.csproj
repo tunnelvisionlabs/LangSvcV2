@@ -273,6 +273,8 @@
     <Compile Include="LineCommentFormat.cs" />
     <Compile Include="Navigation\EditorNavigationTarget.cs" />
     <Compile Include="Navigation\EditorNavigationTypeDefinition.cs" />
+    <Compile Include="Navigation\IEditorNavigationDropdownBarClient.cs" />
+    <Compile Include="Navigation\IEditorNavigationDropdownBarFactoryService.cs" />
     <Compile Include="Navigation\IEditorNavigationSource.cs" />
     <Compile Include="Navigation\IEditorNavigationSourceAggregator.cs" />
     <Compile Include="Navigation\IEditorNavigationSourceAggregatorFactoryService.cs" />

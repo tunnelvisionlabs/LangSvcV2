@@ -1,5 +1,6 @@
 ﻿namespace Tvl.VisualStudio.Text.Navigation.Implementation
 {
+    using IVsDropdownBarManager = Microsoft.VisualStudio.TextManager.Interop.IVsDropdownBarManager;
     using Tvl.VisualStudio.Text.Navigation;
     using System.Linq;
     using System.ComponentModel.Composition;
@@ -10,6 +11,10 @@
     using Tvl.VisualStudio.Text.Tagging;
     using System;
     using System.Collections.Generic;
+    using Microsoft.VisualStudio.Editor;
+    using Tvl.VisualStudio.Shell.Extensions;
+    using IVsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
+    using IVsTextBuffer = Microsoft.VisualStudio.TextManager.Interop.IVsTextBuffer;
 
     [Export(typeof(IWpfTextViewMarginProvider))]
     [MarginContainer(PredefinedMarginNames.Top)]
@@ -47,8 +52,32 @@
             set;
         }
 
+        [Import]
+        private IVsEditorAdaptersFactoryService EditorAdaptersFactoryService
+        {
+            get;
+            set;
+        }
+
         public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer)
         {
+            /* If a language service is registered for this content type, then the CodeWindowManager will
+             * support the standard editor navigation margin.
+             */
+            IVsTextBuffer textBufferAdapter = EditorAdaptersFactoryService.GetBufferAdapter(wpfTextViewHost.TextView.TextBuffer);
+            if (textBufferAdapter != null)
+            {
+                Guid? languageService = textBufferAdapter.GetLanguageServiceID();
+                if (languageService.HasValue)
+                    return null;
+            }
+
+            //var viewAdapter = EditorAdaptersFactoryService.GetViewAdapter(wpfTextViewHost.TextView);
+            //var codeWindow = viewAdapter.GetCodeWindow();
+            //var dropdownBarManager = codeWindow as IVsDropdownBarManager;
+            //if (dropdownBarManager != null && dropdownBarManager.GetDropdownBarClient() != null)
+            //    return null;
+
             var providers = NavigationSourceProviders.Where(provider => provider.Metadata.ContentTypes.Any(contentType => wpfTextViewHost.TextView.TextBuffer.ContentType.IsOfType(contentType)));
 
             var sources =

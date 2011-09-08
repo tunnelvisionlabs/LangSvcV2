@@ -3,9 +3,12 @@
     using System;
     using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.TextManager.Interop;
     using Tvl.Events;
+    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Text.Navigation;
 
     public class CodeWindowManager : IVsCodeWindowManager
     {
@@ -91,14 +94,29 @@
 
         protected virtual bool TryCreateDropdownBarClient(out int comboBoxCount, out IVsDropdownBarClient client)
         {
-            comboBoxCount = 0;
-            client = null;
-            return false;
+            var componentModel = _serviceProvider.GetComponentModel();
+            var dropdownBarFactory = componentModel.DefaultExportProvider.GetExportedValueOrDefault<IEditorNavigationDropdownBarFactoryService>();
+            var editorAdaptersFactory = componentModel.DefaultExportProvider.GetExportedValueOrDefault<IVsEditorAdaptersFactoryService>();
+
+            editorAdaptersFactory.GetWpfTextView(_codeWindow.GetPrimaryView());
+            var dropdownBarClient = dropdownBarFactory.CreateEditorNavigationDropdownBar(CodeWindow, editorAdaptersFactory);
+
+            if (dropdownBarClient == null || dropdownBarClient.DropdownCount == 0)
+            {
+                comboBoxCount = 0;
+                client = null;
+                return false;
+            }
+
+            comboBoxCount = dropdownBarClient.DropdownCount;
+            client = dropdownBarClient;
+            return true;
         }
 
         protected virtual int AddDropdownBar(int comboBoxCount, IVsDropdownBarClient client)
         {
             Contract.Requires<ArgumentNullException>(client != null, "client");
+            Contract.Requires<ArgumentOutOfRangeException>(comboBoxCount > 0);
 
             IVsDropdownBarManager manager = CodeWindow as IVsDropdownBarManager;
             if (manager == null)

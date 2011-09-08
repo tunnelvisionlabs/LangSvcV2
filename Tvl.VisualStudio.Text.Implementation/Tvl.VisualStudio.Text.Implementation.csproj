@@ -270,6 +270,8 @@
     <Compile Include="Navigation\EditorNavigationComboBox.xaml.cs">
       <DependentUpon>EditorNavigationComboBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Navigation\EditorNavigationDropdownBar.cs" />
+    <Compile Include="Navigation\EditorNavigationDropdownBarFactoryService.cs" />
     <Compile Include="Navigation\EditorNavigationMargin.cs" />
     <Compile Include="Navigation\EditorNavigationMarginProvider.cs" />
     <Compile Include="Navigation\EditorNavigationSourceAggregator.cs" />
