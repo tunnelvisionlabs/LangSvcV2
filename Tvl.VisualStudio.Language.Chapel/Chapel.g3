@@ -1,0 +1,696 @@
+﻿grammar Chapel;
+
+options {
+    language=CSharp3;
+    TokenLabelType=CommonToken;
+    output=AST;
+    ASTLabelType=CommonTree;
+}
+
+@lexer::namespace{Tvl.VisualStudio.Language.Chapel}
+@parser::namespace{Tvl.VisualStudio.Language.Chapel}
+
+/*
+ * Parser Rules
+ */
+
+/*
+ *
+ * §7   T Y P E S
+ *
+ */
+
+typeSpecifier
+	:	primitiveType
+	|	enumType
+	|	localeType
+	|	structuredType
+	|	dataParallelType
+	|	synchronizationType
+	;
+
+typeDeclarationStatement
+	:	enumDeclarationStatement
+	|	classDeclarationStatement
+	|	recordDeclarationStatement
+	|	unionDeclarationStatement
+	|	typeAliasDeclarationStatement
+	;
+
+/*
+ * §7.1 Primitive Types
+ */
+
+primitiveType
+	:	'void'
+	|	'bool' primitiveTypeParameterPart?
+	|	'int' primitiveTypeParameterPart?
+	|	'uint' primitiveTypeParameterPart?
+	|	'real' primitiveTypeParameterPart?
+	|	'imag' primitiveTypeParameterPart?
+	|	'complex' primitiveTypeParameterPart?
+	|	'string'
+	;
+
+primitiveTypeParameterPart
+	:	'(' integerParameterExpression ')'
+	;
+
+integerParameterExpression
+	:	expression
+	;
+
+/*
+ * §7.1 Enumerated Types
+ */
+
+enumDeclarationStatement
+	:	'enum' IDENTIFIER '{' enumConstantList '}'
+	;
+
+enumConstantList
+	:	enumConstant (',' enumConstant)* ','?
+	;
+
+enumConstant
+	:	IDENTIFIER initPart?
+	;
+
+initPart
+	:	'=' expression
+	;
+
+enumType
+	:	IDENTIFIER
+	;
+
+/*
+ * §7.3 Locale Types
+ */
+
+localeType
+	:	'locale'
+	;
+
+/*
+ * §7.4 Structured Types
+ */
+
+structuredType
+	:	classType
+	|	recordType
+	|	unionType
+	|	tupleType
+	;
+
+/*
+ * §7.5 Data Parallel Types
+ */
+
+dataParallelType
+	:	rangeType
+	|	domainType
+	|	mappedDomainType
+	|	arrayType
+	|	indexType
+	;
+
+/*
+ * §7.6 Synchronization Types
+ */
+
+synchronizationType
+	:	syncType
+	|	singleType
+	;
+
+/*
+ * §7.7 Type Aliases
+ */
+
+typeAliasDeclarationStatement
+	:	'config'? 'type' typeAliasDeclarationList ';'
+	;
+
+typeAliasDeclarationList
+	:	typeAliasDeclaration (',' typeAliasDeclaration)*
+	;
+
+typeAliasDeclaration
+	:	IDENTIFIER ('=' typeSpecifier)?
+	;
+
+/*
+ *
+ * §8   V A R I A B L E S
+ *
+ */
+
+/*
+ * §8.1 Variable Declarations
+ */
+
+variableDeclarationStatement
+	:	'config'? variableKind variableDeclarationList ';'
+	;
+
+variableKind
+	:	'param'
+	|	'const'
+	|	'var'
+	;
+
+variableDeclarationList
+	:	variableDeclaration (',' variableDeclaration)*
+	;
+
+variableDeclaration
+	:	identifierList typePart? initializationPart
+	|	identifierList typePart
+	|	arrayAliasDeclaration
+	;
+
+typePart
+	:	':' typeSpecifier
+	;
+
+initializationPart
+	:	'=' expression
+	;
+
+identifierList
+	:	IDENTIFIER (',' IDENTIFIER)*
+	|	tupleGroupedIdentifierList (',' identifierList)?
+	;
+
+tupleGroupedIdentifierList
+	:	'(' identifierList ')'
+	;
+
+///*
+// *
+// * §10  E X P R E S S I O N S
+// *
+// */
+
+expression
+	:	IDENTIFIER
+	;
+
+//expression
+//	:	literalExpression
+//	|	variableExpression
+//	|	enumConstantExpression
+//	|	callExpression
+//	|	memberAccessExpression
+//	|	constructorCallExpression
+//	|	queryExpression
+//	|	castExpression
+//	|	lvalueExpression
+//	|	parenthesizedExpression
+//	|	unaryExpression
+//	|	binaryExpression
+//	|	letExpression
+//	|	ifExpression
+//	|	forExpression
+//	|	forallExpression
+//	|	reduceExpression
+//	|	scanExpression
+//	|	moduleAccessExpression
+//	|	tupleExpression
+//	|	tupleExpandExpression
+//	|	localeAccessExpression
+//	|	mappedDomainExpression
+//	;
+
+///*
+// * §10.1 Literal Expressions
+// */
+
+//literalExpression
+//	:	boolLiteral
+//	|	integerLiteral
+//	|	realLiteral
+//	|	imaginaryLiteral
+//	|	stringLiteral
+//	|	rangeLiteral
+//	|	domainLiteral
+//	;
+
+///*
+// * §10.2 Variable Expressions
+// */
+
+//variableExpression
+//	:	IDENTIFIER
+//	;
+
+///*
+// * §10.3 Enumeration Constant Expression
+// */
+
+//enumConstantExpression
+//	:	enumType '.' IDENTIFIER
+//	;
+
+///*
+// * §10.4 Parenthesized Expressions
+// */
+
+//parenthesizedExpression
+//	:	'(' expression ')'
+//	;
+
+///*
+// * §10.7 Member Access Expressions
+// */
+
+//memberAccessExpression
+//	:	fieldAccessExpression
+//	|	methodCallExpression
+//	;
+
+///*
+// * §10.8 The Query Expression
+// */
+
+//queryExpression
+//	:	'?' IDENTIFIER?
+//	;
+
+///*
+// * §10.9 Casts
+// */
+
+//castExpression
+//	:	expression ':' typeSpecifier
+//	;
+
+///*
+// * §10.10 LValue Expressions
+// */
+
+//lvalueExpression
+//	:	variableExpression
+//	|	memberAccessExpression
+//	|	callExpression
+//	;
+
+///*
+// * §10.11 Operator Expressions
+// */
+
+//operatorExpression
+//	:
+//	;
+
+//commaExpression
+//	:	flowExpression (',' flowExpression)*
+//	;
+
+//flowExpression
+//	:	applicationExpression // TODO: if, then, else, forall, do, [], for, do, sync, single
+//	;
+
+//applicationExpression
+//	:	forallExpression (('by' | '#') forallExpression)*
+//	;
+
+//forallExpression
+//	:	rangeExpression ('in' rangeExpression)*
+//	;
+
+//rangeExpression
+//	:	logicalOrExpression ('..' logicalOrExpression)*
+//	;
+
+//logicalOrExpression
+//	:	logicalAndExpression ('||' logicalAndExpression)*
+//	;
+
+//logicalAndExpression
+//	:	bitwiseOrExpression ('&&' bitwiseOrExpression)*
+//	;
+
+//bitwiseOrExpression
+//	:	bitwiseXorExpression ('|' bitwiseXorExpression)*
+//	;
+
+//bitwiseXorExpression
+//	:	bitwiseAndExpression ('^' bitwiseAndExpression)*
+//	;
+
+//bitwiseAndExpression
+//	:	equalityExpression ('&' equalityExpression)*
+//	;
+
+//equalityExpression
+//	:	comparisonExpression (('==' | '!=') comparisonExpression)*
+//	;
+
+//comparisonExpression
+//	:	shiftExpression (('<=' | '>=' | '<' | '>') shiftExpression)*
+//	;
+
+//shiftExpression
+//	:	additionExpression (('<<' | '>>') additionExpression)*
+//	;
+
+//additionExpression
+//	:	unaryNegationExpression (('+' | '-') unaryNegationExpression)*
+//	;
+
+//unaryNegationExpression
+//	:	('+' | '-')* multiplicationExpression
+//	;
+
+//multiplicationExpression
+//	:	unaryNotExpression (('*' | '/' | '%') unaryNotExpression)*
+//	;
+
+//unaryNotExpression
+//	:	('!' | '~')* mapExpression
+//	;
+
+//mapExpression
+//	:	exponentiationExpression
+//		(	('reduce' | 'scan' | 'dmapped')
+//			exponentiationExpression
+//		)*
+//	;
+
+//exponentiationExpression
+//	:	castExpression ('**' castExpression)*
+//	;
+
+//castExpression
+//	:	newExpression (':' newExpression)*
+//	;
+
+//primaryExpression
+//	:	atom
+//		(	'.' IDENTIFIER
+//		|	'(' arguments? ')'
+//		|	'[' arguments? ']'
+//		)*
+//	;
+
+/*
+ *
+ * §11  S T A T E M E N T S
+ *
+ */
+
+/*
+ * §11.1 Blocks
+ */
+
+blockStatement
+	:	'{' statements? '}'
+	;
+
+statements
+	:	statement+
+	;
+
+/*
+ *
+ * §12  M O D U L E S
+ *
+ */
+
+/*
+ * §12.1 Module Definitions
+ */
+
+moduleDeclarationStatement
+	:	'module' moduleIdentifier blockStatement
+	;
+
+moduleIdentifier
+	:	IDENTIFIER
+	;
+
+/*
+ * §12.4.1 Explicit naming
+ */
+
+moduleAccessExpression
+	:	moduleIdentifierList '.' IDENTIFIER
+	;
+
+moduleIdentifierList
+	:	moduleIdentifier ('.' moduleIdentifier)*
+	;
+
+/*
+ *
+ * §13  P R O C E D U R E S
+ *
+ */
+
+/*
+ * §13.1 Function Calls
+ */
+
+callExpression
+	:	expression '(' namedExpressionList ')'
+	|	expression '[' namedExpressionList ']'
+	|	parentheseslessFunctionIdentifier
+	;
+
+namedExpressionList
+	:	namedExpression (',' namedExpression)*
+	;
+
+namedExpression
+	:	expression
+	|	IDENTIFIER '=' expression
+	;
+
+parentheseslessFunctionIdentifier
+	:	IDENTIFIER
+	;
+
+/*
+ * §13.2 Procedure Definitions
+ */
+
+procedureDeclarationStatement
+	:	'proc' functionName argumentList? returnIntent? returnType? whereClause? functionBody
+	;
+
+functionName
+	:	IDENTIFIER
+	|	operatorName
+	;
+
+operatorName
+	:	'+' | '-' | '*' | '/' | '%' | '**' | '!' | '==' | '!=' | '<=' | '>=' | '<' | '>' | '<<' | '>>' | '&' | '|' | '^' | '~'
+	;
+
+argumentList
+	:	'(' formals? ')'
+	;
+
+formals
+	:	formal (',' formal)*
+	;
+
+formal
+	:	formalIntent? IDENTIFIER formalType? defaultExpression?
+	|	formalIntent? IDENTIFIER formalType? variableArgumentExpression
+	|	formalIntent? tupleGroupedIdentifierList formalType? defaultExpression?
+	|	formalIntent? tupleGroupedIdentifierList formalType? variableArgumentExpression
+	;
+
+formalType
+	:	':' typeSpecifier
+	|	':' '?' IDENTIFIER?
+	;
+
+defaultExpression
+	:	'=' expression
+	;
+
+variableArgumentExpression
+	:	'...' expression
+	|	'...' '?' IDENTIFIER?
+	|	'...'
+	;
+
+formalIntent
+	:	'in' | 'out' | 'inout' | 'param' | 'type'
+	;
+
+returnIntent
+	:	'var' | 'const' | 'param' | 'type'
+	;
+
+returnType
+	:	':' typeSpecifier
+	;
+
+whereClause
+	:	'where' expression
+	;
+
+functionBody
+	:	blockStatement
+	|	returnStatement
+	;
+
+/*
+ * §13.10 The Return Statement
+ */
+
+returnStatement
+	:	'return' expression? ';'
+	;
+
+/*
+ *
+ * §14  T U P L E S
+ *
+ */
+
+/*
+ * §14.1 Tuple Types
+ */
+
+tupleType
+	:	'(' typeSpecifier (',' typeSpecifier)+ ')'
+	;
+
+/*
+ * §14.2 Tuple Values
+ */
+
+tupleExpression
+	:	'(' expression (',' expression)+ ')'
+	;
+
+/*
+ *
+ * §15  C L A S S E S
+ *
+ */
+
+/*
+ * §15.1 Class Declarations
+ */
+
+classDeclarationStatement
+	:	'class' IDENTIFIER classInheritList? '{' classStatementList? '}'
+	;
+
+classInheritList
+	:	':' classTypeList
+	;
+
+classTypeList
+	:	classType (',' classType)*
+	;
+
+classStatementList
+	:	classStatement+
+	;
+
+classStatement
+	:	variableDeclarationStatement
+	|	methodDeclarationStatement
+	|	typeDeclarationStatement
+	|	emptyStatement
+	;
+
+/*
+ * §15.1.1 Class Types
+ */
+
+classType
+	:	IDENTIFIER ('(' namedExpressionList? ')')?
+	;
+
+/*
+ * §15.1.4 Class Methods
+ */
+
+methodDeclarationStatement
+	:	'proc' paramClause? typeBinding functionName argumentList? returnIntent? returnType? whereClause? functionBody
+	|	'iter' paramClause? typeBinding functionName argumentList? returnIntent? returnType? whereClause? functionBody
+	;
+
+/*
+ * §15.3.1 User-Defined Constructors
+ */
+
+constructorCallExpression
+	:	'new' className '(' argumentList ')'
+	;
+
+className
+	:	IDENTIFIER
+	;
+
+/*
+ * §15.4 Field Accesses
+ */
+
+fieldAccessExpression
+	:	receiverClause? IDENTIFIER
+	;
+
+receiverClause
+	:	expression '.'
+	;
+
+
+/*
+ *
+ * §16  R E C O R D S
+ *
+ */
+
+/*
+ *
+ * §17  U N I O N S
+ *
+ */
+
+/*
+ *
+ * §18  R A N G E S
+ *
+ */
+
+/*
+ *
+ * §19  D O M A I N S
+ *
+ */
+
+/*
+ *
+ * §20  A R R A Y S
+ *
+ */
+
+/*
+ *
+ * §21  I T E R A T O R S
+ *
+ */
+
+/*
+ *
+ * §22  G E N E R I C S
+ *
+ */
+
+/*
+ * Lexer Rules
+ */
+
+WS
+    :   ' '
+    ;
