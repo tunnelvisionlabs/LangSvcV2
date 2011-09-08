@@ -122,7 +122,8 @@
       SourceCodeFiles="@(Antlr3)"
       ContinueOnError="$(_IntellisenseOnlyCompile)"
       TokensFiles="@(AntlrTokens)"
-      AbstractGrammarFiles="@(AntlrAbstractGrammar)">
+      AbstractGrammarFiles="@(AntlrAbstractGrammar)"
+      LanguageSourceExtensions=".cs">
 
       <Output ItemName="AntlrGeneratedCodeFiles" TaskParameter="GeneratedCodeFiles" />
       <!--<Output ItemName="Compile" TaskParameter="GeneratedCodeFiles" />-->
