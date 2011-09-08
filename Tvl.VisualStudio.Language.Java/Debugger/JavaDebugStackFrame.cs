@@ -329,15 +329,9 @@
                     ReadOnlyCollection<string> argumentTypeNames = method.GetArgumentTypeNames();
 
                     ReadOnlyCollection<ILocalVariable> arguments = null;
-                    if (funcNameArgumentNames && !_nativeMethod)
+                    if (funcNameArgumentNames && !_nativeMethod && method.GetHasVariableInfo())
                     {
-                        try
-                        {
-                            arguments = method.GetArguments();
-                        }
-                        catch (MissingInformationException)
-                        {
-                        }
+                        arguments = method.GetArguments();
                     }
 
                     int firstArgument = method.GetIsStatic() ? 0 : 1;
