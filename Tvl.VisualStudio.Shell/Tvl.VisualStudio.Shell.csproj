@@ -276,11 +276,14 @@
     <Compile Include="Extensions\DebugTargetInfo.cs" />
     <Compile Include="Extensions\IConnectionPointContainerExtensions.cs" />
     <Compile Include="Extensions\IVsCmdNameMappingExtensions.cs" />
+    <Compile Include="Extensions\IVsCodeWindowExtensions.cs" />
     <Compile Include="Extensions\IVsDebuggerExtensions.cs" />
+    <Compile Include="Extensions\IVsDropdownBarManagerExtensions.cs" />
     <Compile Include="Extensions\IVsExpansionManagerExtensions.cs" />
     <Compile Include="Extensions\IVsHierarchyExtensions.cs" />
     <Compile Include="Extensions\IVsShellExtensions.cs" />
     <Compile Include="Extensions\IVsSolutionExtensions.cs" />
+    <Compile Include="Extensions\IVsTextBufferExtensions.cs" />
     <Compile Include="Extensions\IVsTextViewExtensions.cs" />
     <Compile Include="Extensions\IVsUIDataSourceExtensions.cs" />
     <Compile Include="Extensions\IVsUIShellExtensions.cs" />
