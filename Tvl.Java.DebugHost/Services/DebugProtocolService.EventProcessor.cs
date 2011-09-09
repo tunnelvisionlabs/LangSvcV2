@@ -116,65 +116,73 @@
 
             internal void Attach()
             {
-                JvmtiErrorHandler.ThrowOnFailure(Environment.SetEventCallbacks(_eventCallbacks));
+                VirtualMachine.InvokeOnJvmThread(AttachImpl);
+            }
 
-                jvmtiCapabilities capabilities;
-                JvmtiErrorHandler.ThrowOnFailure(Environment.GetCapabilities(out capabilities));
+            private void AttachImpl(jvmtiEnvHandle env)
+            {
+                JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(VirtualMachine, env);
 
-                JvmtiErrorHandler.ThrowOnFailure(Environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.VMStart));
-                JvmtiErrorHandler.ThrowOnFailure(Environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.VMInit));
-                JvmtiErrorHandler.ThrowOnFailure(Environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.VMDeath));
-                JvmtiErrorHandler.ThrowOnFailure(Environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ThreadStart));
-                JvmtiErrorHandler.ThrowOnFailure(Environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ThreadEnd));
-                JvmtiErrorHandler.ThrowOnFailure(Environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ClassLoad));
-                JvmtiErrorHandler.ThrowOnFailure(Environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ClassPrepare));
+                JvmtiErrorHandler.ThrowOnFailure(environment.SetEventCallbacks(_eventCallbacks));
+
+                JvmtiErrorHandler.ThrowOnFailure(environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.VMStart));
+                JvmtiErrorHandler.ThrowOnFailure(environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.VMInit));
+                JvmtiErrorHandler.ThrowOnFailure(environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.VMDeath));
+                JvmtiErrorHandler.ThrowOnFailure(environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ThreadStart));
+                JvmtiErrorHandler.ThrowOnFailure(environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ThreadEnd));
+                JvmtiErrorHandler.ThrowOnFailure(environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ClassLoad));
+                JvmtiErrorHandler.ThrowOnFailure(environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ClassPrepare));
+
 #if false
-            _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ClassFileLoadHook);
-            _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.DynamicCodeGenerated);
-            _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.DataDumpRequest);
-            _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ResourceExhausted);
-            //_environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.DataResetRequest);
+                jvmtiCapabilities capabilities;
+                JvmtiErrorHandler.ThrowOnFailure(environment.GetCapabilities(out capabilities));
 
-            if (capabilities.CanGenerateExceptionEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.Exception);
-            if (capabilities.CanGenerateExceptionEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ExceptionCatch);
-            if (capabilities.CanGenerateSingleStepEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.SingleStep);
-            if (capabilities.CanGenerateFramePopEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.FramePop);
-            if (capabilities.CanGenerateBreakpointEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.Breakpoint);
-            if (capabilities.CanGenerateFieldAccessEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.FieldAccess);
-            if (capabilities.CanGenerateFieldModificationEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.FieldModification);
-            if (capabilities.CanGenerateMethodEntryEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.MethodEntry);
-            if (capabilities.CanGenerateMethodExitEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.MethodExit);
-            if (capabilities.CanGenerateNativeMethodBindEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.NativeMethodBind);
-            if (capabilities.CanGenerateCompiledMethodLoadEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.CompiledMethodLoad);
-            if (capabilities.CanGenerateCompiledMethodLoadEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.CompiledMethodUnload);
-            if (capabilities.CanGenerateMonitorEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.MonitorWait);
-            if (capabilities.CanGenerateMonitorEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.MonitorWaited);
-            if (capabilities.CanGenerateMonitorEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.MonitorContendedEnter);
-            if (capabilities.CanGenerateMonitorEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.MonitorContendedEntered);
-            if (capabilities.CanGenerateGarbageCollectionEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.GarbageCollectionStart);
-            if (capabilities.CanGenerateGarbageCollectionEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.GarbageCollectionFinish);
-            if (capabilities.CanGenerateObjectFreeEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ObjectFree);
-            if (capabilities.CanGenerateVmObjectAllocEvents)
-                _environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.VMObjectAlloc);
+                environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ClassFileLoadHook);
+                environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.DynamicCodeGenerated);
+                environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.DataDumpRequest);
+                environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ResourceExhausted);
+                //environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.DataResetRequest);
+
+                if (capabilities.CanGenerateExceptionEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.Exception);
+                if (capabilities.CanGenerateExceptionEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ExceptionCatch);
+                if (capabilities.CanGenerateSingleStepEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.SingleStep);
+                if (capabilities.CanGenerateFramePopEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.FramePop);
+                if (capabilities.CanGenerateBreakpointEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.Breakpoint);
+                if (capabilities.CanGenerateFieldAccessEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.FieldAccess);
+                if (capabilities.CanGenerateFieldModificationEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.FieldModification);
+                if (capabilities.CanGenerateMethodEntryEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.MethodEntry);
+                if (capabilities.CanGenerateMethodExitEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.MethodExit);
+                if (capabilities.CanGenerateNativeMethodBindEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.NativeMethodBind);
+                if (capabilities.CanGenerateCompiledMethodLoadEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.CompiledMethodLoad);
+                if (capabilities.CanGenerateCompiledMethodLoadEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.CompiledMethodUnload);
+                if (capabilities.CanGenerateMonitorEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.MonitorWait);
+                if (capabilities.CanGenerateMonitorEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.MonitorWaited);
+                if (capabilities.CanGenerateMonitorEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.MonitorContendedEnter);
+                if (capabilities.CanGenerateMonitorEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.MonitorContendedEntered);
+                if (capabilities.CanGenerateGarbageCollectionEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.GarbageCollectionStart);
+                if (capabilities.CanGenerateGarbageCollectionEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.GarbageCollectionFinish);
+                if (capabilities.CanGenerateObjectFreeEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ObjectFree);
+                if (capabilities.CanGenerateVmObjectAllocEvents)
+                    environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.VMObjectAlloc);
 #endif
             }
 
@@ -280,7 +288,9 @@
 
                         if (eventToEnable != null)
                         {
-                            Environment.SetEventNotificationMode(JvmEventMode.Enable, eventToEnable.Value);
+                            jvmtiError error = Environment.SetEventNotificationMode(JvmEventMode.Enable, eventToEnable.Value);
+                            if (error != jvmtiError.None)
+                                return GetStandardError(error);
                         }
                     }
                 }
@@ -337,12 +347,6 @@
 
             public Error ClearEventInternal(EventKind eventKind, RequestId requestId)
             {
-                if (eventKind == EventKind.SingleStep)
-                {
-                    // this event might also be registered as a frame pop event with the same request ID
-                    ClearEventInternal(EventKind.FramePop, requestId);
-                }
-
                 lock (_eventRequests)
                 {
                     Dictionary<RequestId, EventFilter> requests;
@@ -359,7 +363,9 @@
                         JvmEventType? eventToDisable = GetJvmEventType(eventKind);
                         if (eventToDisable != null)
                         {
-                            Environment.SetEventNotificationMode(JvmEventMode.Disable, eventToDisable.Value);
+                            jvmtiError error = Environment.SetEventNotificationMode(JvmEventMode.Disable, eventToDisable.Value);
+                            if (error != jvmtiError.None)
+                                return GetStandardError(error);
                         }
                     }
 
@@ -503,7 +509,7 @@
                 }
 
                 JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
-                ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, true);
+                ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, false);
 
                 bool sent = false;
                 EventFilter[] filters = GetEventFilters(EventKind.VirtualMachineStart);
@@ -540,28 +546,20 @@
                 if (@class == jclass.Null)
                     throw new Exception("ERROR: JNI: Cannot find java/lang/Thread with FindClass.");
 
-                nativeEnvironment.ExceptionClear();
-
                 jmethodID method = nativeEnvironment.GetMethodId(@class, "<init>", "()V");
                 if (method == jmethodID.Null)
                     throw new Exception("Cannot find Thread constructor method.");
-
-                nativeEnvironment.ExceptionClear();
 
                 jthread result = (jthread)nativeEnvironment.NewObject(@class, method);
                 if (result == jthread.Null)
                     throw new Exception("Cannot create new Thread object");
 
-                nativeEnvironment.ExceptionClear();
-
                 jthread agentThread = (jthread)nativeEnvironment.NewGlobalReference(result);
                 if (result == jthread.Null)
                     throw new Exception("Cannot create a new global reference for the agent thread.");
 
-                nativeEnvironment.ExceptionClear();
                 // don't need to keep the local reference around
                 nativeEnvironment.DeleteLocalReference(result);
-                nativeEnvironment.ExceptionClear();
 
                 return agentThread;
             }
@@ -638,7 +636,7 @@
                 JniEnvironment nativeEnvironment;
                 JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
 
-                ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, true);
+                ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, false);
                 EventFilter[] filters = GetEventFilters(EventKind.ThreadStart);
                 foreach (var filter in filters)
                 {
@@ -724,8 +722,7 @@
             {
                 bool preventSuspend = VirtualMachine.IsAgentThread.Value;
                 JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(_service.VirtualMachine, env);
-                JniEnvironment nativeEnvironment;
-                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
+                JniEnvironment nativeEnvironment = JniEnvironment.GetOrCreateInstance(jniEnv);
 
                 string signature;
                 IntPtr signaturePtr;
@@ -756,8 +753,8 @@
                 if ((internalClassStatus & jvmtiClassStatus.Verified) != 0)
                     classStatus |= ClassStatus.Verified;
 
-                ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, true);
-                TaggedReferenceTypeId classId = VirtualMachine.TrackLocalClassReference(classHandle, environment, nativeEnvironment, true);
+                ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, false);
+                TaggedReferenceTypeId classId = VirtualMachine.TrackLocalClassReference(classHandle, environment, nativeEnvironment, false);
                 EventFilter[] filters = GetEventFilters(EventKind.ClassPrepare);
                 foreach (var filter in filters)
                 {
@@ -797,13 +794,6 @@
                 /**********************
                  * Note: there are no dispatchers available at this point.
                  */
-
-                //JvmEnvironment environment = JvmEnvironment.GetEnvironment(env);
-
-                //foreach (var processor in _processors)
-                //{
-                //    processor.HandleVMStart(environment);
-                //}
             }
 
             private void HandleException(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jmethodID methodId, jlocation jlocation, jobject exceptionHandle, jmethodID catchMethodId, jlocation catchjLocation)
@@ -813,8 +803,7 @@
                     return;
 
                 JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(_service.VirtualMachine, env);
-                JniEnvironment nativeEnvironment;
-                JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
+                JniEnvironment nativeEnvironment = JniEnvironment.GetOrCreateInstance(jniEnv);
 
                 TaggedReferenceTypeId declaringClass;
                 MethodId method = new MethodId(methodId.Handle);
@@ -827,9 +816,9 @@
                 JvmtiErrorHandler.ThrowOnFailure(environment.GetMethodDeclaringClass(nativeEnvironment, method, out declaringClass));
                 Location catchLocation = new Location(declaringClass, method, index);
 
-                TaggedObjectId exceptionId = VirtualMachine.TrackLocalObjectReference(exceptionHandle, environment, nativeEnvironment, true);
+                TaggedObjectId exceptionId = VirtualMachine.TrackLocalObjectReference(exceptionHandle, environment, nativeEnvironment, false);
 
-                ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, true);
+                ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, false);
                 EventFilter[] filters = GetEventFilters(EventKind.Exception);
                 foreach (var filter in filters)
                 {
@@ -920,7 +909,7 @@
                 JvmtiEnvironment environment = JvmtiEnvironment.GetOrCreateInstance(_service.VirtualMachine, env);
                 JniEnvironment nativeEnvironment = JniEnvironment.GetOrCreateInstance(jniEnv);
 
-                ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, true);
+                ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, false);
 
                 TaggedReferenceTypeId declaringClass;
                 MethodId method = new MethodId(methodId.Handle);
@@ -974,7 +963,7 @@
                     JvmtiErrorHandler.ThrowOnFailure(environment.GetMethodDeclaringClass(nativeEnvironment, method, out declaringClass));
                     Location location = new Location(declaringClass, method, index);
 
-                    ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, true);
+                    ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, false);
 
                     EventFilter[] filters = GetEventFilters(EventKind.FramePop);
                     foreach (var filter in filters)
@@ -1045,7 +1034,7 @@
                 JniEnvironment nativeEnvironment;
                 JniErrorHandler.ThrowOnFailure(VirtualMachine.AttachCurrentThreadAsDaemon(environment, out nativeEnvironment, false));
 
-                ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, true);
+                ThreadId threadId = VirtualMachine.TrackLocalThreadReference(threadHandle, environment, nativeEnvironment, false);
 
                 TaggedReferenceTypeId declaringClass;
                 MethodId method = new MethodId(methodId.Handle);

@@ -280,8 +280,11 @@
                 return;
             }
 
-            LocalVariable[] variables = Array.ConvertAll(slots, i => VirtualMachine.GetMirrorOf(this, i));
-            _variables = variables;
+            List<Types.VariableData> actualVariables = new List<Types.VariableData>(slots);
+            actualVariables.RemoveAll(i => i.Name.StartsWith("this$", StringComparison.Ordinal) || i.Name.Equals("this", StringComparison.Ordinal));
+
+            List<LocalVariable> variables = actualVariables.ConvertAll(i => VirtualMachine.GetMirrorOf(this, i));
+            _variables = variables.ToArray();
             _hasVariableInfo = true;
         }
     }

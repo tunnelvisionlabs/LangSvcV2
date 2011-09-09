@@ -1,15 +1,17 @@
-﻿namespace Tvl.VisualStudio.Language.Java.Debugger
+﻿//#define HIDE_THREADS
+
+namespace Tvl.VisualStudio.Language.Java.Debugger
 {
     using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
     using Tvl.Java.DebugInterface;
-    using System.Collections.ObjectModel;
-    using System.Collections.Generic;
-    using Tvl.VisualStudio.Language.Java.Debugger.Collections;
     using Tvl.Java.DebugInterface.Request;
+    using Tvl.VisualStudio.Language.Java.Debugger.Collections;
 
     [ComVisible(true)]
     public class JavaDebugThread
@@ -135,6 +137,10 @@
 
         public int CanSetNextStatement(IDebugStackFrame2 pStackFrame, IDebugCodeContext2 pCodeContext)
         {
+#if HIDE_THREADS
+            return VSConstants.S_FALSE;
+#endif
+
             JavaDebugStackFrame stackFrame = pStackFrame as JavaDebugStackFrame;
             JavaDebugCodeContext codeContext = pCodeContext as JavaDebugCodeContext;
             if (stackFrame == null || codeContext == null)
@@ -147,9 +153,10 @@
         public int EnumFrameInfo(enum_FRAMEINFO_FLAGS dwFieldSpec, uint nRadix, out IEnumDebugFrameInfo2 ppEnum)
         {
             ppEnum = null;
-
-            ReadOnlyCollection<IStackFrame> stackFrames = _thread.GetFrames();
             List<FRAMEINFO> frames = new List<FRAMEINFO>();
+
+#if !HIDE_THREADS
+            ReadOnlyCollection<IStackFrame> stackFrames = _thread.GetFrames();
 
             FRAMEINFO[] frameInfo = new FRAMEINFO[1];
             foreach (var stackFrame in stackFrames)
@@ -161,6 +168,7 @@
 
                 frames.Add(frameInfo[0]);
             }
+#endif
 
             ppEnum = new EnumDebugFrameInfo(frames);
             return VSConstants.S_OK;
@@ -168,7 +176,11 @@
 
         public int GetName(out string pbstrName)
         {
+#if HIDE_THREADS
+            pbstrName = "Unknown";
+#else
             pbstrName = _thread.GetName();
+#endif
             return VSConstants.S_OK;
         }
 
@@ -180,6 +192,11 @@
 
         public int GetThreadId(out uint pdwThreadId)
         {
+#if HIDE_THREADS
+            pdwThreadId = 0;
+            return VSConstants.S_OK;
+#endif
+
             if (_getIdMethod == null)
             {
                 IClassType type = (IClassType)_thread.GetReferenceType();
@@ -199,6 +216,11 @@
 
         public int GetThreadPriorityId(out int priorityId)
         {
+#if HIDE_THREADS
+            priorityId = 0;
+            return VSConstants.S_OK;
+#endif
+
             if (_getPriorityMethod == null)
             {
                 IClassType type = (IClassType)_thread.GetReferenceType();
@@ -294,6 +316,7 @@
                     ptp[0].dwFields |= enum_THREADPROPERTY_FIELDS.TPF_PRIORITY;
             }
 
+#if !HIDE_THREADS
             ThreadStatus status = _thread.GetStatus();
             int suspendCount = status != ThreadStatus.Zombie ? _thread.GetSuspendCount() : 0;
 
@@ -321,12 +344,19 @@
                 ptp[0].dwFields |= enum_THREADPROPERTY_FIELDS.TPF_SUSPENDCOUNT;
                 ptp[0].dwSuspendCount = (uint)suspendCount;
             }
+#endif
 
             return VSConstants.S_OK;
         }
 
         public int Resume(out uint pdwSuspendCount)
         {
+#if HIDE_THREADS
+            Tvl.Extensions.TaskExtensions.HandleNonCriticalExceptions(System.Threading.Tasks.Task.Factory.StartNew(_thread.Resume));
+            pdwSuspendCount = 0;
+            return VSConstants.S_OK;
+#endif
+
             _thread.Resume();
             pdwSuspendCount = (uint)_thread.GetSuspendCount();
             return VSConstants.S_OK;
@@ -344,6 +374,12 @@
 
         public int Suspend(out uint pdwSuspendCount)
         {
+#if HIDE_THREADS
+            Tvl.Extensions.TaskExtensions.HandleNonCriticalExceptions(System.Threading.Tasks.Task.Factory.StartNew(_thread.Suspend));
+            pdwSuspendCount = 1;
+            return VSConstants.S_OK;
+#endif
+
             _thread.Suspend();
             pdwSuspendCount = (uint)_thread.GetSuspendCount();
             return VSConstants.S_OK;
@@ -486,7 +522,7 @@
                     ptp[0].dwFields |= (uint)enum_THREADPROPERTY_FIELDS100.TPF100_PRIORITY_ID;
             }
 
-
+#if !HIDE_THREADS
             ThreadStatus status = _thread.GetStatus();
             int suspendCount = status != ThreadStatus.Zombie ? _thread.GetSuspendCount() : 0;
 
@@ -516,6 +552,7 @@
                 ptp[0].dwFields |= (uint)enum_THREADPROPERTY_FIELDS100.TPF100_SUSPENDCOUNT;
                 ptp[0].dwSuspendCount = (uint)suspendCount;
             }
+#endif
 
 #if false
             // affinity
@@ -532,7 +569,6 @@
                 ptp[0].dwFields |= (uint)enum_THREADPROPERTY_FIELDS100.TPF100_CATEGORY;
                 ptp[0].dwThreadCategory = (uint)_category;
             }
-
 
             return VSConstants.S_OK;
         }
@@ -555,8 +591,7 @@
 
         private bool TryGetLocation(out string location)
         {
-            location = null;
-
+#if !HIDE_THREADS
             int frameCount = _thread.GetFrameCount();
             for (int i = 0; i < frameCount; i++)
             {
@@ -577,11 +612,12 @@
                     10,
                     frameInfo);
                 if (ErrorHandler.Failed(result))
-                    return false;
+                    break;
 
                 location = frameInfo[0].m_bstrFuncName;
                 return true;
             }
+#endif
 
             location = null;
             return false;

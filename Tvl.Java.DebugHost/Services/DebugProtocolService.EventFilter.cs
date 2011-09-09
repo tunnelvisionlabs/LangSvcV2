@@ -268,8 +268,10 @@
             private bool _hasMethodInfo;
             private jmethodID _lastMethod;
             private jlocation _lastLocation;
+            private int? _lastLine;
             private int _stackDepth;
             private bool _convertedToFramePop;
+            private jmethodID _framePopMethod;
 
             private DisassembledMethod _disassembledMethod;
             private ConstantPoolEntry[] _constantPool;
@@ -278,6 +280,9 @@
             public StepEventFilter(EventKind internalEventKind, RequestId requestId, SuspendPolicy suspendPolicy, IEnumerable<EventRequestModifier> modifiers, ThreadId thread, JvmtiEnvironment environment, JniEnvironment nativeEnvironment, StepSize size, StepDepth depth)
                 : base(internalEventKind, requestId, suspendPolicy, modifiers, thread)
             {
+                if (size == StepSize.Statement && JavaVM.DisableStatementStepping)
+                    size = StepSize.Line;
+
                 _size = size;
                 _depth = depth;
 
@@ -292,6 +297,8 @@
 
                         if (error == jvmtiError.None)
                             _hasMethodInfo = true;
+
+                        UpdateLastLine(environment);
 
                         if (error == jvmtiError.None && size == StepSize.Statement && (depth == StepDepth.Over || depth == StepDepth.Into))
                         {
@@ -335,6 +342,22 @@
                 }
             }
 
+            private void UpdateLastLine(JvmtiEnvironment environment)
+            {
+                _lastLine = null;
+                if (!_hasMethodInfo)
+                    return;
+
+                LineNumberData[] lines;
+                jvmtiError error = environment.GetLineNumberTable(_lastMethod, out lines);
+                if (error != jvmtiError.None)
+                    return;
+
+                LineNumberData entry = lines.LastOrDefault(i => i.LineCodeIndex <= _lastLocation.Value);
+                if (entry.LineNumber != 0)
+                    _lastLine = entry.LineNumber;
+            }
+
             public override bool ProcessEvent(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, EventProcessor processor, ThreadId thread, TaggedReferenceTypeId @class, Location? location)
             {
                 if (!base.ProcessEvent(environment, nativeEnvironment, processor, thread, @class, location))
@@ -342,7 +365,16 @@
 
                 // Step Out is implemented with Frame Pop events set at the correct depth
                 if (_depth == StepDepth.Out)
+                {
+                    if (location.HasValue && !location.Value.Method.Equals(_lastMethod))
+                    {
+                        _lastLocation = new jlocation((long)location.Value.Index);
+                        _lastMethod = location.Value.Method;
+                        UpdateLastLine(environment);
+                    }
+
                     return true;
+                }
 
                 using (var threadHandle = environment.VirtualMachine.GetLocalReferenceForThread(nativeEnvironment, thread))
                 {
@@ -352,15 +384,17 @@
                     if (_hasMethodInfo && stackDepth > _stackDepth)
                     {
                         bool convertToFramePop;
-                        if (!_convertedToFramePop && location.HasValue && ShouldSkipCurrentMethod(processor.VirtualMachine, environment, nativeEnvironment, threadHandle.Value, stackDepth, location.Value, out convertToFramePop))
+                        if (location.HasValue && (!_convertedToFramePop || !_framePopMethod.Equals(location.Value.Method)) && ShouldSkipCurrentMethod(processor.VirtualMachine, environment, nativeEnvironment, threadHandle.Value, stackDepth, location.Value, out convertToFramePop))
                         {
                             if (convertToFramePop)
                             {
                                 // remove the single step event
+                                JvmtiErrorHandler.ThrowOnFailure((jvmtiError)processor.ClearEventInternal(EventKind.FramePop, this.RequestId));
                                 JvmtiErrorHandler.ThrowOnFailure((jvmtiError)processor.ClearEventInternal(EventKind.SingleStep, this.RequestId));
                                 // set an actual step filter to respond when the thread arrives back in this frame
                                 JvmtiErrorHandler.ThrowOnFailure((jvmtiError)processor.SetEventInternal(environment, nativeEnvironment, EventKind.FramePop, this));
                                 _convertedToFramePop = true;
+                                _framePopMethod = location.Value.Method;
                             }
 
                             return false;
@@ -371,18 +405,40 @@
                             return true;
                         }
                     }
-                    else if (stackDepth == _stackDepth && _size == StepSize.Statement && _disassembledMethod != null)
+                    else if (stackDepth == _stackDepth)
                     {
-                        int instructionIndex = _disassembledMethod.Instructions.FindIndex(i => (uint)i.Offset == location.Value.Index);
-                        if (instructionIndex >= 0 && _evaluationStackDepths != null && (_evaluationStackDepths[instructionIndex] ?? 0) != 0)
+                        if (_size == StepSize.Statement && _disassembledMethod != null)
                         {
-                            return false;
+                            int instructionIndex = _disassembledMethod.Instructions.FindIndex(i => (uint)i.Offset == location.Value.Index);
+                            if (instructionIndex >= 0 && _evaluationStackDepths != null && (_evaluationStackDepths[instructionIndex] ?? 0) != 0)
+                            {
+                                return false;
+                            }
+                            else if (instructionIndex >= 0 && _disassembledMethod.Instructions[instructionIndex].OpCode.FlowControl == JavaFlowControl.Branch)
+                            {
+                                // follow branch instructions before stopping
+                                return false;
+                            }
                         }
-                        else if (instructionIndex >= 0 && _disassembledMethod.Instructions[instructionIndex].OpCode.FlowControl == JavaFlowControl.Branch)
+                        else if (_lastLine != null)
                         {
-                            // follow branch instructions before stopping
-                            return false;
+                            // see if we're on the same line
+                            LineNumberData[] lines;
+                            jvmtiError error = environment.GetLineNumberTable(location.Value.Method, out lines);
+                            if (error == jvmtiError.None)
+                            {
+                                LineNumberData entry = lines.LastOrDefault(i => i.LineCodeIndex <= (long)location.Value.Index);
+                                if (entry.LineNumber == _lastLine)
+                                    return false;
+                            }
                         }
+                    }
+
+                    if (location.HasValue)
+                    {
+                        _lastLocation = new jlocation((long)location.Value.Index);
+                        _lastMethod = location.Value.Method;
+                        UpdateLastLine(environment);
                     }
 
                     _stackDepth = stackDepth;
@@ -396,7 +452,7 @@
 
                 convertToFramePop = false;
 
-                if (!_hasMethodInfo || stackDepth <= _stackDepth)
+                if (!_hasMethodInfo || stackDepth < _stackDepth || (stackDepth == _stackDepth && (location.Method.Equals(_lastMethod))))
                     return false;
 
                 /*
@@ -425,7 +481,6 @@
                 try
                 {
                     bool classLoader = nativeEnvironment.IsInstanceOf(thisObject, virtualMachine.ClassLoaderClass);
-                    nativeEnvironment.ExceptionClear();
                     if (!classLoader)
                         return false;
 

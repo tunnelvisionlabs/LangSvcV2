@@ -1,33 +1,39 @@
-﻿//#define HIDE_THREADS
-
-namespace Tvl.VisualStudio.Language.Java.Debugger
+﻿namespace Tvl.VisualStudio.Language.Java.Debugger
 {
-    using Tvl.Extensions;
-    using Task = System.Threading.Tasks.Task;
-    using Path = System.IO.Path;
+    using Interlocked = System.Threading.Interlocked;
+    using OAProject = Microsoft.VisualStudio.Project.Automation.OAProject;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Debugger.Interop;
+    using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
-    using Microsoft.VisualStudio;
-    using Tvl.VisualStudio.Language.Java.Debugger.Extensions;
-    using Microsoft.VisualStudio.Shell.Interop;
-    using Microsoft.VisualStudio.Shell;
-    using System.ServiceModel.Channels;
-    using System.ServiceModel;
-    using EventResetMode = System.Threading.EventResetMode;
-    using EventWaitHandle = System.Threading.EventWaitHandle;
-    using Tvl.VisualStudio.Language.Java.Debugger.Events;
-    using Tvl.VisualStudio.Language.Java.Debugger.Collections;
+    using System.Linq;
     using System.Runtime.InteropServices;
+    using System.ServiceModel;
+    using System.ServiceModel.Channels;
+    using System.Text;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Debugger.Interop;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+    using Tvl.Extensions;
     using Tvl.Java.DebugInterface;
     using Tvl.Java.DebugInterface.Client.Connect;
-    using Tvl.Java.DebugInterface.Connect;
     using Tvl.Java.DebugInterface.Client.Events;
+    using Tvl.Java.DebugInterface.Connect;
     using Tvl.Java.DebugInterface.Request;
-    using System.Collections.ObjectModel;
+    using Tvl.VisualStudio.Language.Java.Debugger.Collections;
+    using Tvl.VisualStudio.Language.Java.Debugger.Events;
+    using Tvl.VisualStudio.Language.Java.Debugger.Extensions;
+    using Tvl.VisualStudio.Shell.Extensions;
+
+    using Directory = System.IO.Directory;
+    using EventResetMode = System.Threading.EventResetMode;
+    using EventWaitHandle = System.Threading.EventWaitHandle;
+    using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+    using Path = System.IO.Path;
+    using Task = System.Threading.Tasks.Task;
+    using Tvl.VisualStudio.Language.Java.Project;
+    using MSBuild = Microsoft.Build.Evaluation;
 
     [ComVisible(true)]
     public partial class JavaDebugProgram
@@ -50,6 +56,9 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
         private IVirtualMachine _virtualMachine;
         private IStepRequest _causeBreakRequest;
         private bool _isLoaded;
+
+        private int _suspended;
+        private bool _inGetHostName;
 
         private readonly Dictionary<long, JavaDebugThread> _threads = new Dictionary<long, JavaDebugThread>();
 
@@ -119,12 +128,7 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
             argumentName = "sourcePaths";
             IConnectorStringArgument defaultPathsArgument = (IConnectorStringArgument)connector.DefaultArguments[argumentName];
-#warning TODO: pull these paths from the solution or something
-            string[] sourcePaths =
-                {
-                    @"C:\dev\jdksrc",
-                    @"C:\dev\stringtemplate_main\antlr\antlr3-main\tool\src\main\java",
-                };
+            List<string> sourcePaths = GetSourcePaths();
             IConnectorStringArgument stringArgument = new ConnectorStringArgument(defaultPathsArgument, string.Join(";", sourcePaths));
             arguments.Add(argumentName, stringArgument);
 
@@ -154,6 +158,42 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
             }
         }
 
+        private static List<string> GetSourcePaths()
+        {
+            List<string> sourcePaths = new List<string>();
+            //sourcePaths.Add(@"C:\dev\jrockitsrc");
+
+            var serviceProvider = (IServiceProvider)Package.GetGlobalService(typeof(IServiceProvider));
+            if (serviceProvider == null)
+                serviceProvider = new ServiceProvider((IOleServiceProvider)Package.GetGlobalService(typeof(IOleServiceProvider)));
+
+            var vsServiceProvider = serviceProvider.AsVsServiceProvider();
+
+            // TODO: make the JRE source directory part of the user project configuration since it varies with the VM in use
+            JavaLanguagePackage package = JavaLanguagePackage.Instance ?? vsServiceProvider.GetShell().LoadPackage<JavaLanguagePackage>();
+            if (package.IntellisenseOptions.ParseJreSource && Directory.Exists(package.IntellisenseOptions.JreSourcePath))
+                sourcePaths.Add(package.IntellisenseOptions.JreSourcePath);
+
+            IVsSolution solution = vsServiceProvider.GetSolution();
+
+            IVsHierarchy[] projectHierarchies = solution.GetProjectHierarchies(__VSENUMPROJFLAGS.EPF_ALLPROJECTS).ToArray();
+            object[] automationObjects = projectHierarchies.Select(i => i.GetExtensibilityObjectOrDefault(VSConstants.VSITEMID_ROOT)).ToArray();
+            JavaProjectNode[] projects = automationObjects.OfType<OAProject>().Select(i => i.Project).OfType<JavaProjectNode>().ToArray();
+            foreach (var project in projects)
+            {
+                List<MSBuild.ProjectItem> sourceFolders = new List<MSBuild.ProjectItem>();
+                sourceFolders.AddRange(project.BuildProject.GetItems(JavaProjectFileConstants.SourceFolder));
+                sourceFolders.AddRange(project.BuildProject.GetItems(JavaProjectFileConstants.TestSourceFolder));
+
+                foreach (var folder in sourceFolders)
+                {
+                    sourcePaths.Add(Path.Combine(project.ProjectFolder, folder.EvaluatedInclude));
+                }
+            }
+
+            return sourcePaths;
+        }
+
         private void HandleAttachComplete(object virtualMachine, EventArgs e)
         {
             _causeBreakRequest = VirtualMachine.GetEventRequestManager().CreateStepRequest(null, StepSize.Instruction, StepDepth.Into);
@@ -177,12 +217,14 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
         public int CanDetach()
         {
-            return VSConstants.S_OK;
+            return VSConstants.S_FALSE;
         }
 
         public int CauseBreak()
         {
-            Task.Factory.StartNew(() => _causeBreakRequest.IsEnabled = true).HandleNonCriticalExceptions();
+            if (_suspended == 0)
+                Task.Factory.StartNew(() => _causeBreakRequest.IsEnabled = true).HandleNonCriticalExceptions();
+
             return VSConstants.S_OK;
         }
 
@@ -272,14 +314,9 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
         public int EnumThreads(out IEnumDebugThreads2 ppEnum)
         {
-
             lock (_threads)
             {
-#if HIDE_THREADS
-                ppEnum = new EnumDebugThreads(Enumerable.Empty<IDebugThread2>());
-#else
                 ppEnum = new EnumDebugThreads(_threads.Values);
-#endif
             }
 
             return VSConstants.S_OK;
@@ -393,8 +430,14 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
             if (stepRequest == null)
                 throw new InvalidOperationException();
 
-            stepRequest.IsEnabled = true;
-            Task.Factory.StartNew(VirtualMachine.Resume).HandleNonCriticalExceptions();
+            Task.Factory.StartNew(() =>
+                {
+                    // make sure the global "Break All" step request is disabled
+                    this._causeBreakRequest.IsEnabled = false;
+                    stepRequest.IsEnabled = true;
+                    VirtualMachine.Resume();
+                }).HandleNonCriticalExceptions();
+
             return VSConstants.S_OK;
         }
 
@@ -449,6 +492,7 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
         /// </remarks>
         public int ExecuteOnThread(IDebugThread2 pThread)
         {
+            Task.Factory.StartNew(() => _causeBreakRequest.IsEnabled = false);
             return Continue(pThread);
         }
 
@@ -491,7 +535,8 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
         public int Stop()
         {
-            return CauseBreak();
+            // this message is coming from the managed code debugger, which halts this process anyway.
+            return VSConstants.S_OK;
         }
 
         /// <summary>
@@ -572,7 +617,21 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
         public int GetHostName(enum_GETHOSTNAME_TYPE dwHostNameType, out string pbstrHostName)
         {
-            return _process.GetName((enum_GETNAME_TYPE)dwHostNameType, out pbstrHostName);
+            if (_inGetHostName)
+            {
+                pbstrHostName = null;
+                return VSConstants.E_FAIL;
+            }
+
+            try
+            {
+                _inGetHostName = true;
+                return _process.GetName((enum_GETNAME_TYPE)dwHostNameType, out pbstrHostName);
+            }
+            finally
+            {
+                _inGetHostName = false;
+            }
         }
 
         public int GetHostPid(AD_PROCESS_ID[] pHostProcessId)
@@ -660,299 +719,486 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
         private void HandleVirtualMachineStart(object sender, ThreadEventArgs e)
         {
-            var requestManager = _virtualMachine.GetEventRequestManager();
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
 
-            var threadStartRequest = requestManager.CreateThreadStartRequest();
-            threadStartRequest.SuspendPolicy = SuspendPolicy.EventThread;
-            threadStartRequest.IsEnabled = true;
-
-            var threadDeathRequest = requestManager.CreateThreadDeathRequest();
-            threadDeathRequest.SuspendPolicy = SuspendPolicy.EventThread;
-            threadDeathRequest.IsEnabled = true;
-
-            var classPrepareRequest = requestManager.CreateClassPrepareRequest();
-            classPrepareRequest.SuspendPolicy = SuspendPolicy.EventThread;
-            classPrepareRequest.IsEnabled = true;
-
-            var exceptionRequest = requestManager.CreateExceptionRequest(null, true, true);
-            exceptionRequest.SuspendPolicy = SuspendPolicy.EventThread;
-            exceptionRequest.IsEnabled = true;
-
-            var virtualMachineDeathRequest = requestManager.CreateVirtualMachineDeathRequest();
-            virtualMachineDeathRequest.SuspendPolicy = SuspendPolicy.All;
-            virtualMachineDeathRequest.IsEnabled = true;
-
-            DebugEvent debugEvent = new DebugLoadCompleteEvent(enum_EVENTATTRIBUTES.EVENT_ASYNC_STOP);
-            SetEventProperties(debugEvent, e, false);
-            Callback.Event(DebugEngine, Process, this, null, debugEvent);
-
-            _isLoaded = true;
-
-            JavaDebugThread mainThread = null;
-            ReadOnlyCollection<IThreadReference> threads = VirtualMachine.GetAllThreads();
-            for (int i = 0; i < threads.Count; i++)
+            try
             {
-                bool isMainThread = threads[i].Equals(e.Thread);
-                JavaDebugThread thread = new JavaDebugThread(this, threads[i], isMainThread ? ThreadCategory.Main : ThreadCategory.Worker);
-                if (isMainThread)
-                    mainThread = thread;
+                var requestManager = _virtualMachine.GetEventRequestManager();
 
-                lock (this._threads)
+                var threadStartRequest = requestManager.CreateThreadStartRequest();
+                threadStartRequest.SuspendPolicy = SuspendPolicy.EventThread;
+                threadStartRequest.IsEnabled = true;
+
+                var threadDeathRequest = requestManager.CreateThreadDeathRequest();
+                threadDeathRequest.SuspendPolicy = SuspendPolicy.EventThread;
+                threadDeathRequest.IsEnabled = true;
+
+                var classPrepareRequest = requestManager.CreateClassPrepareRequest();
+                classPrepareRequest.SuspendPolicy = SuspendPolicy.EventThread;
+                classPrepareRequest.IsEnabled = true;
+
+                var exceptionRequest = requestManager.CreateExceptionRequest(null, true, true);
+                exceptionRequest.SuspendPolicy = SuspendPolicy.EventThread;
+                exceptionRequest.IsEnabled = true;
+
+                var virtualMachineDeathRequest = requestManager.CreateVirtualMachineDeathRequest();
+                virtualMachineDeathRequest.SuspendPolicy = SuspendPolicy.All;
+                virtualMachineDeathRequest.IsEnabled = true;
+
+                DebugEvent debugEvent = new DebugLoadCompleteEvent(enum_EVENTATTRIBUTES.EVENT_ASYNC_STOP);
+                SetEventProperties(debugEvent, e, false);
+                Callback.Event(DebugEngine, Process, this, null, debugEvent);
+
+                _isLoaded = true;
+
+                JavaDebugThread mainThread = null;
+                ReadOnlyCollection<IThreadReference> threads = VirtualMachine.GetAllThreads();
+                for (int i = 0; i < threads.Count; i++)
                 {
-                    this._threads.Add(threads[i].GetUniqueId(), thread);
+                    bool isMainThread = threads[i].Equals(e.Thread);
+                    JavaDebugThread thread = new JavaDebugThread(this, threads[i], isMainThread ? ThreadCategory.Main : ThreadCategory.Worker);
+                    if (isMainThread)
+                        mainThread = thread;
+
+                    lock (this._threads)
+                    {
+                        this._threads.Add(threads[i].GetUniqueId(), thread);
+                    }
+
+                    debugEvent = new DebugThreadCreateEvent(enum_EVENTATTRIBUTES.EVENT_ASYNCHRONOUS);
+                    Callback.Event(DebugEngine, Process, this, thread, debugEvent);
                 }
 
-                debugEvent = new DebugThreadCreateEvent(enum_EVENTATTRIBUTES.EVENT_ASYNCHRONOUS);
-#if !HIDE_THREADS
-                Callback.Event(DebugEngine, Process, this, thread, debugEvent);
-#endif
-            }
-
-            if (DebugEngine.VirtualizedBreakpoints.Count > 0)
-            {
-                ReadOnlyCollection<IReferenceType> classes = VirtualMachine.GetAllClasses();
-                foreach (var type in classes)
+                if (DebugEngine.VirtualizedBreakpoints.Count > 0)
                 {
-                    if (!type.GetIsPrepared())
-                        continue;
+                    ReadOnlyCollection<IReferenceType> classes = VirtualMachine.GetAllClasses();
+                    foreach (var type in classes)
+                    {
+                        if (!type.GetIsPrepared())
+                            continue;
 
-                    ReadOnlyCollection<string> sourceFiles = type.GetSourcePaths(type.GetDefaultStratum());
-                    DebugEngine.BindVirtualizedBreakpoints(this, mainThread, type, sourceFiles);
+                        ReadOnlyCollection<string> sourceFiles = type.GetSourcePaths(type.GetDefaultStratum());
+                        DebugEngine.BindVirtualizedBreakpoints(this, mainThread, type, sourceFiles);
+                    }
                 }
-            }
 
-            debugEvent = new DebugEntryPointEvent(GetAttributesForEvent(e));
-            SetEventProperties(debugEvent, e, false);
-            Callback.Event(DebugEngine, Process, this, _threads[e.Thread.GetUniqueId()], debugEvent);
+                JavaDebugThread thread2;
+                lock (_threads)
+                {
+                    this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread2);
+                }
+
+                debugEvent = new DebugEntryPointEvent(GetAttributesForEvent(e));
+                SetEventProperties(debugEvent, e, false);
+                Callback.Event(DebugEngine, Process, this, thread2, debugEvent);
+            }
+            finally
+            {
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
+            }
         }
 
         private void HandleVirtualMachineDeath(object sender, VirtualMachineEventArgs e)
         {
-            DebugEvent debugEvent = new DebugProgramDestroyEvent(GetAttributesForEvent(e), 0);
-            SetEventProperties(debugEvent, e, false);
-            Callback.Event(DebugEngine, Process, this, null, debugEvent);
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
+
+            try
+            {
+                DebugEvent debugEvent = new DebugProgramDestroyEvent(GetAttributesForEvent(e), 0);
+                SetEventProperties(debugEvent, e, false);
+                Callback.Event(DebugEngine, Process, this, null, debugEvent);
+            }
+            finally
+            {
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
+            }
         }
 
         private void HandleSingleStep(object sender, ThreadLocationEventArgs e)
         {
-            IStepRequest request = e.Request as IStepRequest;
-            if (request == null)
-                throw new ArgumentException();
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
 
-            JavaDebugThread thread;
-            lock (_threads)
+            try
             {
-                this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
-            }
+                IStepRequest request = e.Request as IStepRequest;
+                if (request == null)
+                    throw new ArgumentException();
 
-            if (e.Request == _causeBreakRequest)
-            {
-                _causeBreakRequest.IsEnabled = false;
-
-                DebugEvent debugEvent = new DebugBreakEvent(GetAttributesForEvent(e));
-                SetEventProperties(debugEvent, e, false);
-                Callback.Event(DebugEngine, Process, this, thread, debugEvent);
-                return;
-            }
-            else if (thread != null)
-            {
-                bool wasThreadStepRequest = thread.StepRequests.Contains(request);
-
-                if (wasThreadStepRequest)
+                JavaDebugThread thread;
+                lock (_threads)
                 {
-                    e.Request.IsEnabled = false;
-                    DebugEvent debugEvent = new DebugStepCompleteEvent(GetAttributesForEvent(e));
+                    this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
+                }
+
+                if (e.Request == _causeBreakRequest)
+                {
+                    _causeBreakRequest.IsEnabled = false;
+
+                    DebugEvent debugEvent = new DebugBreakEvent(GetAttributesForEvent(e));
                     SetEventProperties(debugEvent, e, false);
                     Callback.Event(DebugEngine, Process, this, thread, debugEvent);
                     return;
                 }
+                else if (thread != null)
+                {
+                    bool wasThreadStepRequest = thread.StepRequests.Contains(request);
+
+                    if (wasThreadStepRequest)
+                    {
+                        e.Request.IsEnabled = false;
+                        DebugEvent debugEvent = new DebugStepCompleteEvent(GetAttributesForEvent(e));
+                        SetEventProperties(debugEvent, e, false);
+                        Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+                        return;
+                    }
+                }
+            }
+            finally
+            {
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
             }
         }
 
         private void HandleBreakpoint(object sender, ThreadLocationEventArgs e)
         {
-            List<IDebugBoundBreakpoint2> breakpoints = new List<IDebugBoundBreakpoint2>();
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
 
-            foreach (var pending in DebugEngine.PendingBreakpoints)
+            try
             {
-                if (pending.GetState() != enum_PENDING_BP_STATE.PBPS_ENABLED)
-                    continue;
+                List<IDebugBoundBreakpoint2> breakpoints = new List<IDebugBoundBreakpoint2>();
 
-                foreach (var breakpoint in pending.EnumBoundBreakpoints().OfType<JavaDebugBoundBreakpoint>())
+                foreach (var pending in DebugEngine.PendingBreakpoints)
                 {
-                    if (breakpoint.EventRequest.Equals(e.Request) && breakpoint.GetState() == enum_BP_STATE.BPS_ENABLED)
-                        breakpoints.Add(breakpoint);
+                    if (pending.GetState() != enum_PENDING_BP_STATE.PBPS_ENABLED)
+                        continue;
+
+                    foreach (var breakpoint in pending.EnumBoundBreakpoints().OfType<JavaDebugBoundBreakpoint>())
+                    {
+                        if (breakpoint.EventRequest.Equals(e.Request) && breakpoint.GetState() == enum_BP_STATE.BPS_ENABLED)
+                            breakpoints.Add(breakpoint);
+                    }
                 }
-            }
 
-            if (breakpoints.Count == 0)
+                if (breakpoints.Count == 0)
+                {
+                    ManualContinueFromEvent(e);
+                    return;
+                }
+
+                JavaDebugThread thread;
+                lock (_threads)
+                {
+                    this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
+                }
+
+                DebugEvent debugEvent = new DebugBreakpointEvent(GetAttributesForEvent(e), new EnumDebugBoundBreakpoints(breakpoints));
+                SetEventProperties(debugEvent, e, false);
+                Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+            }
+            finally
             {
-                ManualContinueFromEvent(e);
-                return;
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
             }
-
-            JavaDebugThread thread;
-            lock (_threads)
-            {
-                this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
-            }
-
-            DebugEvent debugEvent = new DebugBreakpointEvent(GetAttributesForEvent(e), new EnumDebugBoundBreakpoints(breakpoints));
-            SetEventProperties(debugEvent, e, false);
-            Callback.Event(DebugEngine, Process, this, thread, debugEvent);
         }
 
         private void HandleMethodEntry(object sender, ThreadLocationEventArgs e)
         {
-            throw new NotImplementedException();
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
+
+            try
+            {
+                throw new NotImplementedException();
+            }
+            finally
+            {
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
+            }
         }
 
         private void HandleMethodExit(object sender, MethodExitEventArgs e)
         {
-            throw new NotImplementedException();
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
+
+            try
+            {
+                throw new NotImplementedException();
+            }
+            finally
+            {
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
+            }
         }
 
         private void HandleMonitorContendedEnter(object sender, MonitorEventArgs e)
         {
-            throw new NotImplementedException();
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
+
+            try
+            {
+                throw new NotImplementedException();
+            }
+            finally
+            {
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
+            }
         }
 
         private void HandleMonitorContendedEntered(object sender, MonitorEventArgs e)
         {
-            throw new NotImplementedException();
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
+
+            try
+            {
+                throw new NotImplementedException();
+            }
+            finally
+            {
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
+            }
         }
 
         private void HandleMonitorContendedWait(object sender, MonitorWaitEventArgs e)
         {
-            throw new NotImplementedException();
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
+
+            try
+            {
+                throw new NotImplementedException();
+            }
+            finally
+            {
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
+            }
         }
 
         private void HandleMonitorContendedWaited(object sender, MonitorWaitedEventArgs e)
         {
-            throw new NotImplementedException();
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
+
+            try
+            {
+                throw new NotImplementedException();
+            }
+            finally
+            {
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
+            }
         }
 
         private void HandleException(object sender, ExceptionEventArgs e)
         {
-            JavaDebugThread thread;
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
 
-            lock (_threads)
+            try
             {
-                this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
+                JavaDebugThread thread;
+
+                lock (_threads)
+                {
+                    this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
+                }
+
+                //DebugEvent debugEvent = new DebugExceptionEvent(GetAttributesForEvent(e), this, e.Exception);
+
+                string message;
+                string messageFormat = "A first chance exception of type '{0}' occurred in {1}.{2}\n";
+                string type = e.Exception.GetReferenceType().GetName();
+                IMethod method = e.Thread.GetFrame(0).GetLocation().GetMethod();
+                string locationClass = method.GetDeclaringType().GetName();
+                string locationMethod = method.GetName();
+                message = string.Format(messageFormat, type, locationClass, locationMethod);
+                //string message = "A first chance exception occurred\n";
+
+                DebugEvent debugEvent = new DebugOutputStringEvent(GetAttributesForEvent(e), message);
+                SetEventProperties(debugEvent, e, true);
+                Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+
+                ManualContinueFromEvent(e);
             }
-
-            //DebugEvent debugEvent = new DebugExceptionEvent(GetAttributesForEvent(e), this, e.Exception);
-
-            string message;
-            string messageFormat = "A first chance exception of type '{0}' occurred in {1}.{2}\n";
-            string type = e.Exception.GetReferenceType().GetName();
-            IMethod method = e.Thread.GetFrame(0).GetLocation().GetMethod();
-            string locationClass = method.GetDeclaringType().GetName();
-            string locationMethod = method.GetName();
-            message = string.Format(messageFormat, type, locationClass, locationMethod);
-            //string message = "A first chance exception occurred\n";
-
-            DebugEvent debugEvent = new DebugOutputStringEvent(GetAttributesForEvent(e), message);
-            SetEventProperties(debugEvent, e, true);
-            Callback.Event(DebugEngine, Process, this, thread, debugEvent);
-
-            ManualContinueFromEvent(e);
+            finally
+            {
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
+            }
         }
 
         private void HandleThreadStart(object sender, ThreadEventArgs e)
         {
-            // nothing to do if this thread is already started
-            if (this._threads.ContainsKey(e.Thread.GetUniqueId()))
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
+
+            try
             {
-                switch (e.SuspendPolicy)
+                // nothing to do if this thread is already started
+                if (this._threads.ContainsKey(e.Thread.GetUniqueId()))
                 {
-                case SuspendPolicy.All:
-                    Task.Factory.StartNew(e.VirtualMachine.Resume).HandleNonCriticalExceptions();
-                    break;
+                    switch (e.SuspendPolicy)
+                    {
+                    case SuspendPolicy.All:
+                        Task.Factory.StartNew(e.VirtualMachine.Resume).HandleNonCriticalExceptions();
+                        break;
 
-                case SuspendPolicy.EventThread:
-                    Task.Factory.StartNew(e.Thread.Resume).HandleNonCriticalExceptions();
-                    break;
+                    case SuspendPolicy.EventThread:
+                        Task.Factory.StartNew(e.Thread.Resume).HandleNonCriticalExceptions();
+                        break;
 
-                case SuspendPolicy.None:
-                    break;
+                    case SuspendPolicy.None:
+                        break;
+                    }
+
+                    return;
                 }
 
-                return;
-            }
+                JavaDebugThread thread = new JavaDebugThread(this, e.Thread, ThreadCategory.Worker);
+                lock (this._threads)
+                {
+                    this._threads.Add(e.Thread.GetUniqueId(), thread);
+                }
 
-            JavaDebugThread thread = new JavaDebugThread(this, e.Thread, ThreadCategory.Worker);
-            lock (this._threads)
+                DebugEvent debugEvent = new DebugThreadCreateEvent(GetAttributesForEvent(e));
+                SetEventProperties(debugEvent, e, true);
+                Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+
+                ManualContinueFromEvent(e);
+            }
+            finally
             {
-                this._threads.Add(e.Thread.GetUniqueId(), thread);
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
             }
-
-            DebugEvent debugEvent = new DebugThreadCreateEvent(GetAttributesForEvent(e));
-            SetEventProperties(debugEvent, e, true);
-#if !HIDE_THREADS
-            Callback.Event(DebugEngine, Process, this, thread, debugEvent);
-#endif
-
-            ManualContinueFromEvent(e);
         }
 
         private void HandleThreadDeath(object sender, ThreadEventArgs e)
         {
-            JavaDebugThread thread;
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
 
-            lock (_threads)
+            try
             {
-                this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
+                JavaDebugThread thread;
+
+                lock (_threads)
+                {
+                    this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
+                }
+
+                //string name = thread.GetName();
+                DebugEvent debugEvent = new DebugThreadDestroyEvent(GetAttributesForEvent(e), 0);
+                SetEventProperties(debugEvent, e, false);
+                Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+
+                lock (_threads)
+                {
+                    this._threads.Remove(e.Thread.GetUniqueId());
+                }
             }
-
-            //string name = thread.GetName();
-            DebugEvent debugEvent = new DebugThreadDestroyEvent(GetAttributesForEvent(e), 0);
-            SetEventProperties(debugEvent, e, false);
-#if !HIDE_THREADS
-            Callback.Event(DebugEngine, Process, this, thread, debugEvent);
-#endif
-
-            lock (_threads)
+            finally
             {
-                this._threads.Remove(e.Thread.GetUniqueId());
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
             }
         }
 
         private void HandleClassPrepare(object sender, ClassPrepareEventArgs e)
         {
-            JavaDebugThread thread;
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
 
-            lock (_threads)
+            try
             {
-                this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
+                JavaDebugThread thread;
+
+                lock (_threads)
+                {
+                    this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
+                }
+
+                ReadOnlyCollection<string> sourceFiles = e.Type.GetSourcePaths(e.Type.GetDefaultStratum());
+                DebugEngine.BindVirtualizedBreakpoints(this, thread, e.Type, sourceFiles);
+
+                // The format of the message created by the .NET debugger is this:
+                // 'devenv.exe' (Managed (v4.0.30319)): Loaded 'C:\Windows\Microsoft.Net\assembly\GAC_MSIL\Microsoft.VisualStudio.Windows.Forms\v4.0_10.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.Windows.Forms.dll'
+                string message = string.Format("'{0}' ({1}): Loaded '{2}'\n", Process.GetName(enum_GETNAME_TYPE.GN_BASENAME), Java.Constants.JavaLanguageName, e.Type.GetName());
+                DebugEvent outputEvent = new DebugOutputStringEvent(GetAttributesForEvent(e), message);
+                SetEventProperties(outputEvent, e, true);
+                Callback.Event(DebugEngine, Process, this, thread, outputEvent);
+
+                ManualContinueFromEvent(e);
             }
-
-            ReadOnlyCollection<string> sourceFiles = e.Type.GetSourcePaths(e.Type.GetDefaultStratum());
-            DebugEngine.BindVirtualizedBreakpoints(this, thread, e.Type, sourceFiles);
-
-            // The format of the message created by the .NET debugger is this:
-            // 'devenv.exe' (Managed (v4.0.30319)): Loaded 'C:\Windows\Microsoft.Net\assembly\GAC_MSIL\Microsoft.VisualStudio.Windows.Forms\v4.0_10.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.Windows.Forms.dll'
-            string message = string.Format("'{0}' ({1}): Loaded '{2}'\n", Process.GetName(enum_GETNAME_TYPE.GN_BASENAME), Java.Constants.JavaLanguageName, e.Type.GetName());
-            DebugEvent outputEvent = new DebugOutputStringEvent(GetAttributesForEvent(e), message);
-            SetEventProperties(outputEvent, e, true);
-            Callback.Event(DebugEngine, Process, this, thread, outputEvent);
-
-            ManualContinueFromEvent(e);
+            finally
+            {
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
+            }
         }
 
         private void HandleClassUnload(object sender, ClassUnloadEventArgs e)
         {
-            throw new NotImplementedException();
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
+
+            try
+            {
+                throw new NotImplementedException();
+            }
+            finally
+            {
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
+            }
         }
 
         private void HandleFieldAccess(object sender, FieldAccessEventArgs e)
         {
-            throw new NotImplementedException();
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
+
+            try
+            {
+                throw new NotImplementedException();
+            }
+            finally
+            {
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
+            }
         }
 
         private void HandleFieldModification(object sender, FieldModificationEventArgs e)
         {
-            throw new NotImplementedException();
+            if (e.SuspendPolicy == SuspendPolicy.All)
+                Interlocked.Increment(ref _suspended);
+
+            try
+            {
+                throw new NotImplementedException();
+            }
+            finally
+            {
+                if (e.SuspendPolicy == SuspendPolicy.All)
+                    Interlocked.Decrement(ref _suspended);
+            }
         }
 
         private void ManualContinueFromEvent(ThreadEventArgs e)

@@ -28,7 +28,6 @@
         private readonly string[] _sourcePaths;
 
         private EventWaitHandle _ipcHandle;
-        private DebugSession.IJvmDebugSessionService _sessionService;
         private DebugProtocol.IDebugProtocolService _protocolService;
 
         private bool _disposed;
@@ -121,10 +120,8 @@
                 _ipcHandle.Dispose();
                 _ipcHandle = null;
 
-                CreateSessionServiceClient();
                 CreateProtocolServiceClient();
-
-                _sessionService.Attach();
+                _protocolService.Attach();
 
                 OnAttachComplete(EventArgs.Empty);
             }
@@ -133,18 +130,6 @@
                 if (e.IsCritical())
                     throw;
             }
-        }
-
-        private void CreateSessionServiceClient()
-        {
-            var binding = new NetNamedPipeBinding(NetNamedPipeSecurityMode.None)
-            {
-                ReceiveTimeout = TimeSpan.MaxValue,
-                SendTimeout = TimeSpan.MaxValue
-            };
-
-            var remoteAddress = new EndpointAddress("net.pipe://localhost/Tvl.Java.DebugHost/JvmDebugSessionService/");
-            _sessionService = new DebugSession.JvmDebugSessionServiceClient(binding, remoteAddress);
         }
 
         private void CreateProtocolServiceClient()
@@ -159,7 +144,6 @@
             var callbackInstance = new InstanceContext(callback);
             var remoteAddress = new EndpointAddress("net.pipe://localhost/Tvl.Java.DebugHost/DebugProtocolService/");
             _protocolService = new DebugProtocol.DebugProtocolServiceClient(callbackInstance, binding, remoteAddress);
-            _protocolService.Attach();
         }
 
         #region IVirtualMachine Members

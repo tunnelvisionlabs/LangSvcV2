@@ -51,8 +51,6 @@
 
             jvmtiCapabilities newCapabilities;
             JvmtiErrorHandler.ThrowOnFailure(RawInterface.GetCapabilities(this, out newCapabilities));
-
-            return;
         }
 
         internal JavaVM VirtualMachine
@@ -234,7 +232,7 @@
             {
                 LocalThreadReferenceHolder thread;
                 errors[i] = VirtualMachine.GetLocalReferenceForThread(nativeEnvironment, threads[i], out thread);
-                if (errors[i] == jvmtiError.None && !nativeEnvironment.IsSameObject(thread.Value, jthread.Null))
+                if (errors[i] == jvmtiError.None && thread.IsAlive)
                 {
                     int suspendCount = VirtualMachine.SuspendCounts.AddOrUpdate(threads[i], 1, (existingId, existingValue) => existingValue + 1);
                     if (suspendCount == 1)
@@ -292,7 +290,7 @@
             {
                 LocalThreadReferenceHolder thread;
                 errors[i] = VirtualMachine.GetLocalReferenceForThread(nativeEnvironment, threads[i], out thread);
-                if (errors[i] == jvmtiError.None && !nativeEnvironment.IsSameObject(thread.Value, jthread.Null))
+                if (errors[i] == jvmtiError.None && thread.IsAlive)
                 {
                     int suspendCount = VirtualMachine.SuspendCounts.AddOrUpdate(threads[i], 0, (existingId, existingValue) => existingValue - 1);
                     if (suspendCount == 0)

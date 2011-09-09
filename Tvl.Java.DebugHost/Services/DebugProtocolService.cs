@@ -85,6 +85,7 @@
 
             _callback = OperationContext.Current.GetCallbackChannel<IDebugProcotolCallback>();
             _eventProcessor.Attach();
+            AgentExports.DebuggerAttachComplete.Set();
             return Error.None;
         }
 
@@ -257,7 +258,6 @@
                 return GetStandardError(error);
 
             jobject obj = nativeEnvironment.NewString(value);
-            nativeEnvironment.ExceptionClear();
             stringObject = (StringId)VirtualMachine.TrackLocalObjectReference(obj, environment, nativeEnvironment, false);
             VirtualMachine.AddGlobalReference(environment, nativeEnvironment, obj);
             nativeEnvironment.DeleteLocalReference(obj);
@@ -324,10 +324,13 @@
             if (error != jvmtiError.None)
                 return GetStandardError(error);
 
-            using (var @class = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
+            using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
             {
+                if (!classHandle.IsAlive)
+                    return Error.InvalidClass;
+
                 jobject classLoaderObject;
-                error = Environment.GetClassLoader(@class.Value, out classLoaderObject);
+                error = Environment.GetClassLoader(classHandle.Value, out classLoaderObject);
                 if (error != jvmtiError.None)
                     return GetStandardError(error);
 
@@ -367,6 +370,9 @@
 
             using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
             {
+                if (!classHandle.IsAlive)
+                    return Error.InvalidClass;
+
                 List<DeclaredFieldData> fieldsList = new List<DeclaredFieldData>();
                 foreach (var fieldId in fieldIds)
                 {
@@ -438,6 +444,9 @@
 
                 using (LocalClassReferenceHolder classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
                 {
+                    if (!classHandle.IsAlive)
+                        return Error.InvalidClass;
+
                     Value[] valuesArray = new Value[fields.Length];
                     for (int i = 0; i < valuesArray.Length; i++)
                     {
@@ -453,42 +462,34 @@
                         {
                         case 'Z':
                             valuesArray[i] = nativeEnvironment.GetStaticBooleanField(classHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
                             break;
 
                         case 'B':
                             valuesArray[i] = nativeEnvironment.GetStaticByteField(classHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
                             break;
 
                         case 'C':
                             valuesArray[i] = nativeEnvironment.GetStaticCharField(classHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
                             break;
 
                         case 'D':
                             valuesArray[i] = nativeEnvironment.GetStaticDoubleField(classHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
                             break;
 
                         case 'F':
                             valuesArray[i] = nativeEnvironment.GetStaticFloatField(classHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
                             break;
 
                         case 'I':
                             valuesArray[i] = nativeEnvironment.GetStaticIntField(classHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
                             break;
 
                         case 'J':
                             valuesArray[i] = nativeEnvironment.GetStaticLongField(classHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
                             break;
 
                         case 'S':
                             valuesArray[i] = nativeEnvironment.GetStaticShortField(classHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
                             break;
 
                         case 'V':
@@ -497,7 +498,6 @@
                         case '[':
                         case 'L':
                             jobject value = nativeEnvironment.GetStaticObjectField(classHandle.Value, fields[i]);
-                            nativeEnvironment.ExceptionClear();
                             valuesArray[i] = VirtualMachine.TrackLocalObjectReference(value, environment, nativeEnvironment, true);
                             break;
 
@@ -547,6 +547,9 @@
 
             using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
             {
+                if (!classHandle.IsAlive)
+                    return Error.InvalidClass;
+
                 jvmtiClassStatus classStatus;
                 error = environment.GetClassStatus(classHandle.Value, out classStatus);
                 if (error != jvmtiError.None)
@@ -569,6 +572,9 @@
 
             using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
             {
+                if (!classHandle.IsAlive)
+                    return Error.InvalidClass;
+
                 TaggedReferenceTypeId[] taggedInterfaces;
                 error = environment.GetImplementedInterfaces(nativeEnvironment, classHandle.Value, out taggedInterfaces);
                 if (error != jvmtiError.None)
@@ -596,6 +602,9 @@
 
             using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
             {
+                if (!classHandle.IsAlive)
+                    return Error.InvalidClass;
+
                 error = environment.GetSourceDebugExtension(classHandle.Value, out extension);
                 return GetStandardError(error);
             }
@@ -619,6 +628,9 @@
 
             using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
             {
+                if (!classHandle.IsAlive)
+                    return Error.InvalidClass;
+
                 error = environment.GetClassVersionNumbers(classHandle.Value, out minorVersion, out majorVersion);
                 return GetStandardError(error);
             }
@@ -637,6 +649,9 @@
 
             using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
             {
+                if (!classHandle.IsAlive)
+                    return Error.InvalidClass;
+
                 error = environment.GetConstantPool(classHandle.Value, out constantPoolCount, out data);
                 return GetStandardError(error);
             }
@@ -660,7 +675,6 @@
                     return Error.InvalidClass;
 
                 jclass superclassHandle = nativeEnvironment.GetSuperclass(classHandle.Value);
-                nativeEnvironment.ExceptionClear();
                 superclass = (ClassId)VirtualMachine.TrackLocalClassReference(superclassHandle, environment, nativeEnvironment, true);
                 return Error.None;
             }
@@ -698,6 +712,9 @@
 
             using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, @class))
             {
+                if (!classHandle.IsAlive)
+                    return Error.InvalidClass;
+
                 // don't do argument conversion if the signature is invalid
                 switch (returnTypeSignature[0])
                 {
@@ -813,6 +830,9 @@
 
             using (var arrayTypeHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, arrayType))
             {
+                if (!arrayTypeHandle.IsAlive)
+                    return Error.InvalidClass;
+
                 string signature;
                 string genericSignature;
                 error = environment.GetClassSignature(arrayTypeHandle.Value, out signature, out genericSignature);
@@ -948,7 +968,7 @@
 
             using (var objectHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, objectId))
             {
-                if (nativeEnvironment.IsSameObject(objectHandle.Value, jobject.Null))
+                if (!objectHandle.IsAlive)
                     return Error.InvalidObject;
 
                 jclass @class = nativeEnvironment.GetObjectClass(objectHandle.Value);
@@ -974,7 +994,7 @@
 
                 using (LocalObjectReferenceHolder objectHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, @object))
                 {
-                    if (nativeEnvironment.IsSameObject(objectHandle.Value, jobject.Null))
+                    if (!objectHandle.IsAlive)
                         return Error.InvalidObject;
 
                     Value[] valuesArray = new Value[fields.Length];
@@ -994,42 +1014,34 @@
                             {
                             case 'Z':
                                 valuesArray[i] = nativeEnvironment.GetBooleanField(objectHandle.Value, fields[i]);
-                                nativeEnvironment.ExceptionClear();
                                 break;
 
                             case 'B':
                                 valuesArray[i] = nativeEnvironment.GetByteField(objectHandle.Value, fields[i]);
-                                nativeEnvironment.ExceptionClear();
                                 break;
 
                             case 'C':
                                 valuesArray[i] = nativeEnvironment.GetCharField(objectHandle.Value, fields[i]);
-                                nativeEnvironment.ExceptionClear();
                                 break;
 
                             case 'D':
                                 valuesArray[i] = nativeEnvironment.GetDoubleField(objectHandle.Value, fields[i]);
-                                nativeEnvironment.ExceptionClear();
                                 break;
 
                             case 'F':
                                 valuesArray[i] = nativeEnvironment.GetFloatField(objectHandle.Value, fields[i]);
-                                nativeEnvironment.ExceptionClear();
                                 break;
 
                             case 'I':
                                 valuesArray[i] = nativeEnvironment.GetIntField(objectHandle.Value, fields[i]);
-                                nativeEnvironment.ExceptionClear();
                                 break;
 
                             case 'J':
                                 valuesArray[i] = nativeEnvironment.GetLongField(objectHandle.Value, fields[i]);
-                                nativeEnvironment.ExceptionClear();
                                 break;
 
                             case 'S':
                                 valuesArray[i] = nativeEnvironment.GetShortField(objectHandle.Value, fields[i]);
-                                nativeEnvironment.ExceptionClear();
                                 break;
 
                             case 'V':
@@ -1038,7 +1050,6 @@
                             case '[':
                             case 'L':
                                 jobject value = nativeEnvironment.GetObjectField(objectHandle.Value, fields[i]);
-                                nativeEnvironment.ExceptionClear();
                                 valuesArray[i] = VirtualMachine.TrackLocalObjectReference(value, environment, nativeEnvironment, true);
                                 break;
 
@@ -1095,8 +1106,14 @@
 
             using (var instanceHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, objectId))
             {
+                if (!instanceHandle.IsAlive)
+                    return Error.InvalidObject;
+
                 using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, @class))
                 {
+                    if (!classHandle.IsAlive)
+                        return Error.InvalidClass;
+
                     // don't do argument conversion if the signature is invalid
                     switch (returnTypeSignature[0])
                     {
@@ -1187,6 +1204,14 @@
 
                         break;
 
+                    case 'V':
+                        if (!nonVirtual)
+                            nativeEnvironment.CallVoidMethodA(instanceHandle.Value, method, args);
+                        else
+                            nativeEnvironment.CallNonvirtualVoidMethodA(instanceHandle.Value, classHandle.Value, method, args);
+
+                        break;
+
                     case '[':
                     case 'L':
                         jobject result;
@@ -1200,7 +1225,6 @@
                         nativeEnvironment.DeleteLocalReference(result);
                         break;
 
-                    case 'V':
                     default:
                         Contract.Assert(false, "not reachable");
                         break;
@@ -1245,6 +1269,9 @@
 
             using (var objectHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, objectId))
             {
+                if (!objectHandle.IsAlive)
+                    return Error.InvalidObject;
+
                 error = VirtualMachine.AddGlobalReference(environment, nativeEnvironment, objectHandle.Value);
                 return GetStandardError(error);
             }
@@ -1260,6 +1287,9 @@
 
             using (var objectHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, objectId))
             {
+                if (!objectHandle.IsAlive)
+                    return Error.InvalidObject;
+
                 error = VirtualMachine.RemoveGlobalReference(environment, nativeEnvironment, objectHandle.Value);
                 return GetStandardError(error);
             }
@@ -1306,7 +1336,6 @@
                 int length = nativeEnvironment.GetStringUTFLength(stringHandle.Value);
                 byte[] buffer = new byte[length + 1];
                 nativeEnvironment.GetStringUTFRegion(stringHandle.Value, 0, length, buffer);
-                nativeEnvironment.ExceptionClear();
                 stringValue = ModifiedUTF8Encoding.GetString(buffer, 0, length);
             }
 
@@ -1527,11 +1556,10 @@
 
             using (var arrayHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, arrayObject))
             {
-                if (nativeEnvironment.IsSameObject(arrayHandle.Value, jobject.Null))
+                if (!arrayHandle.IsAlive)
                     return Error.InvalidObject;
 
                 arrayLength = nativeEnvironment.GetArrayLength(arrayHandle.Value);
-                nativeEnvironment.ExceptionClear();
                 return Error.None;
             }
         }
@@ -1551,7 +1579,7 @@
 
                 using (LocalObjectReferenceHolder objectHandle = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, arrayObject))
                 {
-                    if (nativeEnvironment.IsSameObject(objectHandle.Value, jobject.Null))
+                    if (!objectHandle.IsAlive)
                         return Error.InvalidObject;
 
                     Value[] valuesArray = new Value[length];
@@ -1573,7 +1601,6 @@
                             {
                                 bool[] buffer = new bool[length];
                                 nativeEnvironment.GetBooleanArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                                nativeEnvironment.ExceptionClear();
                                 for (int i = 0; i < length; i++)
                                     valuesArray[i] = (Value)buffer[i];
 
@@ -1584,7 +1611,6 @@
                             {
                                 byte[] buffer = new byte[length];
                                 nativeEnvironment.GetByteArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                                nativeEnvironment.ExceptionClear();
                                 for (int i = 0; i < length; i++)
                                     valuesArray[i] = (Value)buffer[i];
 
@@ -1595,7 +1621,6 @@
                             {
                                 char[] buffer = new char[length];
                                 nativeEnvironment.GetCharArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                                nativeEnvironment.ExceptionClear();
                                 for (int i = 0; i < length; i++)
                                     valuesArray[i] = (Value)buffer[i];
 
@@ -1606,7 +1631,6 @@
                             {
                                 double[] buffer = new double[length];
                                 nativeEnvironment.GetDoubleArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                                nativeEnvironment.ExceptionClear();
                                 for (int i = 0; i < length; i++)
                                     valuesArray[i] = (Value)buffer[i];
 
@@ -1617,7 +1641,6 @@
                             {
                                 float[] buffer = new float[length];
                                 nativeEnvironment.GetFloatArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                                nativeEnvironment.ExceptionClear();
                                 for (int i = 0; i < length; i++)
                                     valuesArray[i] = (Value)buffer[i];
 
@@ -1628,7 +1651,6 @@
                             {
                                 int[] buffer = new int[length];
                                 nativeEnvironment.GetIntArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                                nativeEnvironment.ExceptionClear();
                                 for (int i = 0; i < length; i++)
                                     valuesArray[i] = (Value)buffer[i];
 
@@ -1639,7 +1661,6 @@
                             {
                                 long[] buffer = new long[length];
                                 nativeEnvironment.GetLongArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                                nativeEnvironment.ExceptionClear();
                                 for (int i = 0; i < length; i++)
                                     valuesArray[i] = (Value)buffer[i];
 
@@ -1650,7 +1671,6 @@
                             {
                                 short[] buffer = new short[length];
                                 nativeEnvironment.GetShortArrayRegion(objectHandle.Value, firstIndex, length, buffer);
-                                nativeEnvironment.ExceptionClear();
                                 for (int i = 0; i < length; i++)
                                     valuesArray[i] = (Value)buffer[i];
 
@@ -1666,7 +1686,6 @@
                                 for (int i = 0; i < length; i++)
                                 {
                                     jobject value = nativeEnvironment.GetObjectArrayElement(objectHandle.Value, firstIndex + i);
-                                    nativeEnvironment.ExceptionClear();
                                     valuesArray[i] = (Value)VirtualMachine.TrackLocalObjectReference(value, environment, nativeEnvironment, true);
                                 }
 
@@ -1914,7 +1933,6 @@
                 return GetStandardError(error);
 
             jmethodID getNameMethod = nativeEnvironment.GetMethodId(VirtualMachine.ClassClass, "getName", "()Ljava/lang/String;");
-            nativeEnvironment.ExceptionClear();
 
             using (var classObject = VirtualMachine.GetLocalReferenceForObject(nativeEnvironment, classObjectId))
             {
@@ -1925,7 +1943,6 @@
                 int length = nativeEnvironment.GetStringUTFLength(nameObject);
                 byte[] buffer = new byte[length + 1];
                 nativeEnvironment.GetStringUTFRegion(nameObject, 0, length, buffer);
-                nativeEnvironment.ExceptionClear();
                 string name = ModifiedUTF8Encoding.GetString(buffer, 0, length);
                 nativeEnvironment.DeleteLocalReference(nameObject);
 
@@ -1956,6 +1973,9 @@
                 {
                     using (var loadedType = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, loadedTypeId.TypeId))
                     {
+                        if (!loadedType.IsAlive)
+                            continue;
+
                         string loadedTypeSignature;
                         string loadedTypeGenericSignature;
                         error = environment.GetClassSignature(loadedType.Value, out loadedTypeSignature, out loadedTypeGenericSignature);

@@ -3,11 +3,15 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.ServiceModel;
     using System.ServiceModel.Channels;
     using Tvl.Java.DebugHost.Services;
+
     using AppDomain = System.AppDomain;
+    using DispatcherFrame = System.Windows.Threading.DispatcherFrame;
     using EventWaitHandle = System.Threading.EventWaitHandle;
+    using File = System.IO.File;
     using FirstChanceExceptionEventArgs = System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs;
     using IntPtr = System.IntPtr;
     using ManualResetEventSlim = System.Threading.ManualResetEventSlim;
@@ -15,6 +19,7 @@
     using MessageBoxButtons = System.Windows.Forms.MessageBoxButtons;
     using MessageBoxDefaultButton = System.Windows.Forms.MessageBoxDefaultButton;
     using MessageBoxIcon = System.Windows.Forms.MessageBoxIcon;
+    using Path = System.IO.Path;
     using Process = System.Diagnostics.Process;
     using Thread = System.Threading.Thread;
     using WaitHandle = System.Threading.WaitHandle;
@@ -72,12 +77,18 @@
             result.AsyncWaitHandle.WaitOne();
 #endif
 
+            AppDomain.CurrentDomain.AssemblyResolve += HandleAssemblyResolve;
 
             if (options.Contains("ShowAgentExceptions", StringComparer.OrdinalIgnoreCase))
             {
                 AppDomain.CurrentDomain.FirstChanceException += HandleFirstChanceException;
                 AppDomain.CurrentDomain.UnhandledException += HandleUnhandledException;
                 //AppDomain.CurrentDomain.ProcessExit += HandleProcessExit;
+            }
+
+            if (options.Contains("DisableStatementStepping", StringComparer.OrdinalIgnoreCase))
+            {
+                JavaVM.DisableStatementStepping = true;
             }
 
             List<WaitHandle> waitHandles = new List<WaitHandle>();
@@ -113,7 +124,6 @@
             _jvmToolsInterfaceHost.AddServiceEndpoint(typeof(IJvmToolsInterfaceService), binding, "net.pipe://localhost/Tvl.Java.DebugHost/JvmToolsInterfaceService/");
             IAsyncResult toolsInterfaceStartResult = _jvmToolsInterfaceHost.BeginOpen(null, null);
             waitHandles.Add(toolsInterfaceStartResult.AsyncWaitHandle);
-#endif
 
             /* IJvmDebugSessionService
              */
@@ -127,10 +137,12 @@
             _jvmDebugSessionHost.AddServiceEndpoint(typeof(IJvmDebugSessionService), binding, "net.pipe://localhost/Tvl.Java.DebugHost/JvmDebugSessionService/");
             IAsyncResult debugSessionStartResult = _jvmDebugSessionHost.BeginOpen(null, null);
             waitHandles.Add(debugSessionStartResult.AsyncWaitHandle);
+#endif
 
             /* IDebugProtocolService
              */
-            _debugProtocolHost = new ServiceHost(new DebugProtocolService(vm));
+            var debugProtocolService = new DebugProtocolService(vm);
+            _debugProtocolHost = new ServiceHost(debugProtocolService);
             binding = new NetNamedPipeBinding(NetNamedPipeSecurityMode.None)
             {
                 ReceiveTimeout = TimeSpan.MaxValue,
@@ -146,7 +158,12 @@
             WaitHandle.WaitAll(waitHandles.ToArray());
 
             EventWaitHandle.OpenExisting(string.Format("JavaDebuggerInitHandle{0}", Process.GetCurrentProcess().Id)).Set();
-            _debuggerAttachComplete.Wait();
+
+            Action waitAction = _debuggerAttachComplete.Wait;
+            IAsyncResult waitResult = waitAction.BeginInvoke(vm.HandleAsyncOperationComplete, null);
+            DispatcherFrame frame = new DispatcherFrame(true);
+            JvmtiEnvironment environment = debugProtocolService.Environment;
+            vm.PushDispatcherFrame(frame, environment, waitResult);
 
             return 0;
         }
@@ -176,6 +193,21 @@
         public static void OnUnload(IntPtr vmPtr)
         {
             _loaded = false;
+        }
+
+        private static Assembly HandleAssemblyResolve(object sender, ResolveEventArgs e)
+        {
+            if (e.RequestingAssembly.FullName.StartsWith("Tvl."))
+            {
+                AssemblyName name = new AssemblyName(e.Name);
+                string searchFolder = Path.GetDirectoryName(typeof(AgentExports).Assembly.Location);
+                string fileName = name.Name + ".dll";
+                string path = Path.Combine(searchFolder, fileName);
+                if (File.Exists(path))
+                    return Assembly.LoadFrom(path);
+            }
+
+            return null;
         }
 
         private static void HandleFirstChanceException(object sender, FirstChanceExceptionEventArgs e)

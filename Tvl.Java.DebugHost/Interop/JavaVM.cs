@@ -59,6 +59,12 @@
             _jniInvokeInterface = (JniInvokeInterface)Marshal.PtrToStructure(Marshal.ReadIntPtr(vmHandle.Handle), typeof(JniInvokeInterface));
         }
 
+        internal static bool DisableStatementStepping
+        {
+            get;
+            set;
+        }
+
         public JniInvokeInterface RawInterface
         {
             get
@@ -446,7 +452,7 @@
             return thread;
         }
 
-        internal ThreadId TrackLocalThreadReference(jthread thread, JvmtiEnvironment environment, JniEnvironment jniEnvironment, bool freeLocalReference)
+        internal ThreadId TrackLocalThreadReference(jthread thread, JvmtiEnvironment environment, JniEnvironment nativeEnvironment, bool freeLocalReference)
         {
             if (thread == jthread.Null)
                 return default(ThreadId);
@@ -459,7 +465,7 @@
             {
                 if (!_threads.ContainsKey(threadId))
                 {
-                    jweak weak = jniEnvironment.NewWeakGlobalReference(thread);
+                    jweak weak = nativeEnvironment.NewWeakGlobalReference(thread);
                     bool added = false;
                     if (!_threads.ContainsKey(threadId))
                     {
@@ -469,13 +475,13 @@
 
                     if (!added)
                     {
-                        jniEnvironment.DeleteWeakGlobalReference(weak);
+                        nativeEnvironment.DeleteWeakGlobalReference(weak);
                     }
                 }
             }
 
             if (freeLocalReference)
-                jniEnvironment.DeleteLocalReference(thread);
+                nativeEnvironment.DeleteLocalReference(thread);
 
             return threadId;
         }
@@ -534,7 +540,7 @@
 
         internal TaggedObjectId TrackLocalObjectReference(jobject @object, JvmtiEnvironment environment, JniEnvironment nativeEnvironment, bool freeLocalReference)
         {
-            if (nativeEnvironment.IsSameObject(@object, jobject.Null))
+            if (@object == jobject.Null)
                 return new TaggedObjectId(Tag.Object, new ObjectId(0));
 
             long tag;
@@ -557,7 +563,6 @@
 
                 // check for array
                 jclass objectClass = nativeEnvironment.GetObjectClass(@object);
-                nativeEnvironment.ExceptionClear();
                 try
                 {
                     bool isArray;
@@ -606,12 +611,10 @@
         internal void HandleVMInit(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, jthread thread)
         {
             jclass threadClass = nativeEnvironment.GetObjectClass(thread);
-            nativeEnvironment.ExceptionClear();
             _threadClass = FindBaseClass(environment, nativeEnvironment, threadClass, "Ljava/lang/Thread;");
 
             {
                 jclass classClass = nativeEnvironment.GetObjectClass(threadClass);
-                nativeEnvironment.ExceptionClear();
                 _classClass = FindBaseClass(environment, nativeEnvironment, classClass, "Ljava/lang/Class;");
                 nativeEnvironment.DeleteLocalReference(classClass);
             }
@@ -623,7 +626,6 @@
                 _threadGroupClass = FindBaseClass(environment, nativeEnvironment, threadGroupClass, "Ljava/lang/ThreadGroup;");
 
                 jclass classLoaderClass = nativeEnvironment.GetObjectClass(threadInfo._contextClassLoader);
-                nativeEnvironment.ExceptionClear();
                 _classLoaderClass = FindBaseClass(environment, nativeEnvironment, classLoaderClass, "Ljava/lang/ClassLoader;");
                 nativeEnvironment.DeleteLocalReference(classLoaderClass);
 

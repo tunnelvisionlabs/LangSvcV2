@@ -44,7 +44,11 @@
 
         public bool GetIsArgument()
         {
-            return Slot < Method.ArgumentTypeNames.Count;
+            int argumentSlots = Method.ArgumentTypeNames.Count;
+            if (!Method.GetIsStatic())
+                argumentSlots++;
+
+            return Slot < argumentSlots;
         }
 
         public bool GetIsVisible(IStackFrame frame)

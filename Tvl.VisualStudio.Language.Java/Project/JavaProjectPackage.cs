@@ -38,6 +38,12 @@
     [ProvideComponentSelectorTab(typeof(PropertyPages.MavenComponentSelector), typeof(JavaProjectPackage), "Maven")]
     public class JavaProjectPackage : ProjectPackage, IVsComponentSelectorProvider
     {
+#if false
+        private const string JdkRootName = "JavaSoft";
+#else
+        private const string JdkRootName = "JRockit";
+#endif
+
         private static string _javac64;
         private static string _javac32;
         private static string _java64;
@@ -67,8 +73,8 @@
                 string jdk64bitroot = null;
                 string jdk32bitroot = null;
 
-                string jdkroot = @"SOFTWARE\JavaSoft\Java Development Kit";
-                string jdkwowroot = @"SOFTWARE\Wow6432Node\JavaSoft\Java Development Kit";
+                string jdkroot = @"SOFTWARE\" + JdkRootName + @"\Java Development Kit";
+                string jdkwowroot = @"SOFTWARE\Wow6432Node\" + JdkRootName + @"\Java Development Kit";
                 if (Environment.Is64BitOperatingSystem)
                 {
                     jdk64bitroot = jdkroot;
@@ -98,10 +104,10 @@
                 string jre64bitroot = null;
                 string jre32bitroot = null;
 
-                string jreroot = @"SOFTWARE\JavaSoft\Java Development Kit";
-                string jrewowroot = @"SOFTWARE\Wow6432Node\JavaSoft\Java Development Kit";
-                //string jreroot = @"SOFTWARE\JavaSoft\Java Runtime Environment";
-                //string jrewowroot = @"SOFTWARE\Wow6432Node\JavaSoft\Java Runtime Environment";
+                string jreroot = @"SOFTWARE\" + JdkRootName + @"\Java Development Kit";
+                string jrewowroot = @"SOFTWARE\Wow6432Node\" + JdkRootName + @"\Java Development Kit";
+                //string jreroot = @"SOFTWARE\" + JdkRootName + @"\Java Runtime Environment";
+                //string jrewowroot = @"SOFTWARE\Wow6432Node\" + JdkRootName + @"\Java Runtime Environment";
                 if (Environment.Is64BitOperatingSystem)
                 {
                     jre64bitroot = jreroot;

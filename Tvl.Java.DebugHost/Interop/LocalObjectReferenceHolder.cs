@@ -1,6 +1,7 @@
 ﻿namespace Tvl.Java.DebugHost.Interop
 {
     using System;
+    using System.Diagnostics.Contracts;
 
     public struct LocalObjectReferenceHolder : IDisposable
     {
@@ -9,8 +10,9 @@
 
         public LocalObjectReferenceHolder(JniEnvironment nativeEnvironment, jobject reference)
         {
+            Contract.Requires<ArgumentNullException>(nativeEnvironment != null, "nativeEnvironment");
+
             _nativeEnvironment = nativeEnvironment;
-            _reference = reference;
             _reference = _nativeEnvironment.NewLocalReference(reference);
         }
 
@@ -26,10 +28,8 @@
         {
             get
             {
-                if (_nativeEnvironment == null)
-                    return false;
-
-                return !_nativeEnvironment.IsSameObject(Value, jobject.Null);
+                // per the spec of NewLocalReference
+                return Value != jobject.Null;
             }
         }
 

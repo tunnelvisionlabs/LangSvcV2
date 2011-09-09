@@ -91,6 +91,52 @@
 
             List<DEBUG_PROPERTY_INFO> properties = new List<DEBUG_PROPERTY_INFO>();
             DEBUG_PROPERTY_INFO[] propertyInfo = new DEBUG_PROPERTY_INFO[1];
+
+            if (!_nativeMethod && !_stackFrame.GetLocation().GetMethod().GetIsStatic())
+            {
+                // get the 'this' property
+                propertyInfo[0] = default(DEBUG_PROPERTY_INFO);
+
+                if (getValue || getProperty)
+                {
+                    string name = "this";
+                    IType propertyType = _stackFrame.GetLocation().GetDeclaringType();
+                    IValue value = _stackFrame.GetThisObject();
+                    JavaDebugProperty property = new JavaDebugProperty(_debugProperty, name, name, propertyType, value, false);
+                    int hr = property.GetPropertyInfo(dwFields, nRadix, dwTimeout, null, 0, propertyInfo);
+                    if (ErrorHandler.Failed(hr))
+                        return hr;
+
+                    properties.Add(propertyInfo[0]);
+                }
+                else
+                {
+                    if (getFullName)
+                    {
+                        propertyInfo[0].bstrFullName = "this";
+                        propertyInfo[0].dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_FULLNAME;
+                    }
+
+                    if (getName)
+                    {
+                        propertyInfo[0].bstrName = "this";
+                        propertyInfo[0].dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_NAME;
+                    }
+
+                    if (getType)
+                    {
+                        propertyInfo[0].bstrType = _stackFrame.GetLocation().GetDeclaringType().GetName();
+                        propertyInfo[0].dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_TYPE;
+                    }
+
+                    if (getAttributes)
+                    {
+                        propertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_VALUE_READONLY;
+                        propertyInfo[0].dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_ATTRIB;
+                    }
+                }
+            }
+
             foreach (var local in locals)
             {
                 propertyInfo[0] = default(DEBUG_PROPERTY_INFO);
@@ -334,8 +380,7 @@
                         arguments = method.GetArguments();
                     }
 
-                    int firstArgument = method.GetIsStatic() ? 0 : 1;
-                    for (int i = firstArgument; i < argumentTypeNames.Count; i++)
+                    for (int i = 0; i < argumentTypeNames.Count; i++)
                     {
                         List<string> argumentParts = new List<string>();
 
@@ -355,7 +400,7 @@
                             frameInfo.m_dwValidFields |= enum_FRAMEINFO_FLAGS.FIF_ARGS_NAMES;
                         }
 
-                        if (i > firstArgument)
+                        if (i > 0)
                             frameInfo.m_bstrFuncName += ", ";
 
                         frameInfo.m_bstrFuncName += string.Join(" ", argumentParts);

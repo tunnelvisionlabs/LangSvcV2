@@ -176,11 +176,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
-    <Compile Include="Service References\DebugSession\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Compile>
     <Compile Include="ShortType.cs" />
     <Compile Include="ShortValue.cs" />
     <Compile Include="StackFrame.cs" />
@@ -252,14 +247,9 @@
     <None Include="Service References\DebugProtocol\Tvl.Java.DebugInterface.Types.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\DebugSession\service.wsdl" />
-    <None Include="Service References\DebugSession\service.xsd">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadataStorage Include="Service References\DebugProtocol\" />
-    <WCFMetadataStorage Include="Service References\DebugSession\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Service References\DebugProtocol\configuration91.svcinfo" />
@@ -269,18 +259,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Service References\DebugProtocol\Reference.svcmap">
-      <Generator>WCF Proxy Generator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\DebugSession\configuration91.svcinfo" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\DebugSession\configuration.svcinfo" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\DebugSession\Reference.svcmap">
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>

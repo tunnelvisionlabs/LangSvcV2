@@ -157,6 +157,7 @@
                 {
                     typeof(JavaDebugEngine).GUID,
                     //VSConstants.DebugEnginesGuids.ManagedOnly_guid,
+                    //VSConstants.DebugEnginesGuids.NativeOnly_guid,
                 };
             info.PortSupplier = new Guid("{708C1ECA-FF48-11D2-904F-00C04FA302A1}");
             info.LaunchOperation = DEBUG_LAUNCH_OPERATION.DLO_CreateProcess;
