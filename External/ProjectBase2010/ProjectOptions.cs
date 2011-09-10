@@ -19,6 +19,8 @@ namespace Microsoft.VisualStudio.Project
 	{
 		public string Config { get; set; }
 
+		public string Platform { get; set; }
+
 		public ModuleKindFlags ModuleKind { get; set; }
 
 		public bool EmitManifest { get; set; }

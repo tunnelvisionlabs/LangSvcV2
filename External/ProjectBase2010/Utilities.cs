@@ -31,6 +31,7 @@ using Microsoft.Win32;
 using IServiceProvider = System.IServiceProvider;
 using MSBuild = Microsoft.Build.Evaluation;
 using VSRegistry = Microsoft.VisualStudio.Shell.VSRegistry;
+using System.Diagnostics.Contracts;
 
 namespace Microsoft.VisualStudio.Project
 {
@@ -393,10 +394,7 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>The name of the active configuartion.</returns>		
         internal static string GetActiveConfigurationName(EnvDTE.Project automationObject)
         {
-            if(automationObject == null)
-            {
-                throw new ArgumentNullException("automationObject");
-            }
+            Contract.Requires<ArgumentNullException>(automationObject != null, "automationObject");
 
             string currentConfigName = string.Empty;
             if(automationObject.ConfigurationManager != null)
@@ -407,8 +405,30 @@ namespace Microsoft.VisualStudio.Project
                     currentConfigName = activeConfig.ConfigurationName;
                 }
             }
-            return currentConfigName;
 
+            return currentConfigName;
+        }
+
+        /// <summary>
+        /// Gets the active configuration name.
+        /// </summary>
+        /// <param name="automationObject">The automation object.</param>
+        /// <returns>The name of the active configuartion.</returns>		
+        internal static string GetActivePlatformName(EnvDTE.Project automationObject)
+        {
+            Contract.Requires<ArgumentNullException>(automationObject != null, "automationObject");
+
+            string currentConfigName = string.Empty;
+            if (automationObject.ConfigurationManager != null)
+            {
+                EnvDTE.Configuration activeConfig = automationObject.ConfigurationManager.ActiveConfiguration;
+                if (activeConfig != null)
+                {
+                    currentConfigName = activeConfig.PlatformName;
+                }
+            }
+
+            return currentConfigName;
         }
 
 

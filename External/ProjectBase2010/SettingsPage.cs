@@ -358,9 +358,10 @@ namespace Microsoft.VisualStudio.Project
 
 							foreach(ProjectConfig config in configs)
 							{
-								if(!configsMap.ContainsKey(config.ConfigName))
+                                string key = string.Format("{0}|{1}", config.ConfigName, config.Platform);
+								if(!configsMap.ContainsKey(key))
 								{
-									configsMap.Add(config.ConfigName, config);
+									configsMap.Add(key, config);
 								}
 							}
 						}

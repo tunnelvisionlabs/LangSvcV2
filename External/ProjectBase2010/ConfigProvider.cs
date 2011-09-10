@@ -9,20 +9,6 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using MSBuild = Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
-
 /* This file provides a basefunctionallity for IVsCfgProvider2.
    Instead of using the IVsProjectCfgEventsHelper object we have our own little sink and call our own helper methods
    similiar to the interface. But there is no real benefit in inheriting from the interface in the first place. 
@@ -32,16 +18,31 @@ using Microsoft.Build.Construction;
 */
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+    using MSBuild = Microsoft.Build.Evaluation;
+    using Microsoft.Build.Construction;
+    using System.Diagnostics.Contracts;
+    using System.Linq;
+
     [CLSCompliant(false)]
     [ComVisible(true)]
     public class ConfigProvider : IVsCfgProvider2, IVsProjectCfgProvider, IVsExtensibleObject
     {
         #region fields
-        public const string configString = " '$(Configuration)' == '{0}' ";
         public const string AnyCPUPlatform = "Any CPU";
         public const string x86Platform = "x86";
 
-        private ProjectNode project;
+        private readonly ProjectNode project;
         private EventSinkCollection cfgEventSinks = new EventSinkCollection();
         private List<KeyValuePair<KeyValuePair<string, string>, string>> newCfgProps = new List<KeyValuePair<KeyValuePair<string, string>, string>>();
         private Dictionary<string, ProjectConfig> configurationsList = new Dictionary<string, ProjectConfig>();
@@ -63,13 +64,15 @@ namespace Microsoft.VisualStudio.Project
         /// they provide us with this data.
         /// Returns/sets the [(<propName, propCondition>) <propValue>] collection
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual List<KeyValuePair<KeyValuePair<string, string>, string>> NewConfigProperties
         {
             get
             {
                 return newCfgProps;
             }
+
             set
             {
                 newCfgProps = value;
@@ -81,33 +84,70 @@ namespace Microsoft.VisualStudio.Project
         #region ctors
         public ConfigProvider(ProjectNode manager)
         {
+            Contract.Requires<ArgumentNullException>(manager != null, "manager");
+
             this.project = manager;
         }
         #endregion
 
         #region methods
+
+        public virtual string GetConfigurationCondition(string configurationName)
+        {
+            Contract.Ensures(Contract.Result<string>() != null);
+
+            const string configString = " '$(Configuration)' == '{0}' ";
+            return string.Format(CultureInfo.InvariantCulture, configString, configurationName);
+        }
+
+        public virtual string GetPlatformCondition(string platformName)
+        {
+            Contract.Ensures(Contract.Result<string>() != null);
+
+            const string platformString = " '$(Platform)' == '{0}' ";
+            return string.Format(CultureInfo.InvariantCulture, platformString, GetPlatformPropertyFromPlatformName(platformName));
+        }
+
+        public virtual string GetConfigurationPlatformCondition(string configurationName, string platformName)
+        {
+            Contract.Ensures(Contract.Result<string>() != null);
+
+            const string configPlatformString = " '$(Configuration)|$(Platform)' == '{0}|{1}' ";
+            return string.Format(CultureInfo.InvariantCulture, configPlatformString, configurationName, GetPlatformPropertyFromPlatformName(platformName));
+        }
+
         /// <summary>
         /// Creates new Project Configuartion objects based on the configuration name.
         /// </summary>
         /// <param name="configName">The name of the configuration</param>
         /// <returns>An instance of a ProjectConfig object.</returns>
-        protected ProjectConfig GetProjectConfiguration(string configName)
+        protected ProjectConfig GetProjectConfiguration(string configName, string platform)
         {
+            Contract.Requires<ArgumentNullException>(configName != null, "configName");
+            Contract.Requires<ArgumentNullException>(platform != null, "platform");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(configName));
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(platform));
+
+            string key = string.Format("{0}|{1}", configName, platform);
+
             // if we already created it, return the cached one
-            if(configurationsList.ContainsKey(configName))
-            {
-                return configurationsList[configName];
-            }
+            ProjectConfig requestedConfiguration;
+            if (configurationsList.TryGetValue(key, out requestedConfiguration))
+                return requestedConfiguration;
 
-            ProjectConfig requestedConfiguration = CreateProjectConfiguration(configName);
-            configurationsList.Add(configName, requestedConfiguration);
-
+            requestedConfiguration = CreateProjectConfiguration(configName, platform);
+            configurationsList.Add(key, requestedConfiguration);
             return requestedConfiguration;
         }
 
-        protected virtual ProjectConfig CreateProjectConfiguration(string configName)
+        protected virtual ProjectConfig CreateProjectConfiguration(string configName, string platform)
         {
-            return new ProjectConfig(this.project, configName);
+            Contract.Requires<ArgumentNullException>(configName != null, "configName");
+            Contract.Requires<ArgumentNullException>(platform != null, "platform");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(configName));
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(platform));
+
+            return new ProjectConfig(this.project, configName, platform);
         }
 
         #endregion
@@ -121,10 +161,7 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code. </returns>
         public virtual int OpenProjectCfg(string projectCfgCanonicalName, out IVsProjectCfg projectCfg)
         {
-            if(projectCfgCanonicalName == null)
-            {
-                throw new ArgumentNullException("projectCfgCanonicalName");
-            }
+            Contract.Assert(!string.IsNullOrEmpty(projectCfgCanonicalName));
 
             projectCfg = null;
 
@@ -134,23 +171,22 @@ namespace Microsoft.VisualStudio.Project
                 return VSConstants.E_INVALIDARG;
             }
 
-
-            Debug.Assert(this.project != null && this.project.BuildProject != null);
+            Contract.Assert(this.project != null && this.project.BuildProject != null);
 
             string[] configs = GetPropertiesConditionedOn(ProjectFileConstants.Configuration);
+            string[] platforms = GetPlatformsFromProject();
 
-            foreach(string config in configs)
+            foreach (string config in configs)
             {
-                if(String.Equals(config, projectCfgCanonicalName, StringComparison.OrdinalIgnoreCase))
+                foreach (string platform in platforms)
                 {
-                    projectCfg = this.GetProjectConfiguration(config);
-                    if(projectCfg != null)
+                    if (string.Equals(string.Format("{0}|{1}", config, platform), projectCfgCanonicalName, StringComparison.OrdinalIgnoreCase))
                     {
-                        return VSConstants.S_OK;
-                    }
-                    else
-                    {
-                        return VSConstants.E_FAIL;
+                        projectCfg = this.GetProjectConfiguration(config, platform);
+                        if (projectCfg != null)
+                            return VSConstants.S_OK;
+                        else
+                            return VSConstants.E_FAIL;
                     }
                 }
             }
@@ -180,77 +216,11 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code. </returns>
         public virtual int AddCfgsOfCfgName(string name, string cloneName, int fPrivate)
         {
-            // We need to QE/QS the project file
-            if(!this.ProjectManager.QueryEditProjectFile(false))
+            string[] platforms = GetPlatformsFromProject();
+            foreach (var platform in platforms)
             {
-                throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
+                CreateConfiguration(name, platform, cloneName, !string.IsNullOrEmpty(cloneName) ? platform : null);
             }
-
-            // First create the condition that represent the configuration we want to clone
-            string condition = (cloneName == null ? String.Empty : String.Format(CultureInfo.InvariantCulture, configString, cloneName).Trim());
-
-            // Get all configs
-            List<ProjectPropertyGroupElement> configGroup = new List<ProjectPropertyGroupElement>(this.project.BuildProject.Xml.PropertyGroups);
-            ProjectPropertyGroupElement configToClone = null;
-
-            if(cloneName != null)
-            {
-                // Find the configuration to clone
-                foreach (ProjectPropertyGroupElement currentConfig in configGroup)
-                {
-                    // Only care about conditional property groups
-                    if(currentConfig.Condition == null || currentConfig.Condition.Length == 0)
-                        continue;
-
-                    // Skip if it isn't the group we want
-                    if(!String.Equals(currentConfig.Condition.Trim(), condition, StringComparison.OrdinalIgnoreCase))
-                        continue;
-
-                    configToClone = currentConfig;
-                }
-            }
-
-            ProjectPropertyGroupElement newConfig = null;
-            if(configToClone != null)
-            {
-                // Clone the configuration settings
-                newConfig = this.project.ClonePropertyGroup(configToClone);
-                //Will be added later with the new values to the path
-
-                foreach (ProjectPropertyElement property in newConfig.Properties)
-                {
-                    if (property.Name.Equals("OutputPath", StringComparison.OrdinalIgnoreCase))
-                    {
-                        property.Parent.RemoveChild(property);
-                    }
-                }
-            }
-            else
-            {
-                // no source to clone from, lets just create a new empty config
-                newConfig = this.project.BuildProject.Xml.AddPropertyGroup();
-                // Get the list of property name, condition value from the config provider
-                IList<KeyValuePair<KeyValuePair<string, string>, string>> propVals = this.NewConfigProperties;
-                foreach(KeyValuePair<KeyValuePair<string, string>, string> data in propVals)
-                {
-                    KeyValuePair<string, string> propData = data.Key;
-                    string value = data.Value;
-                    ProjectPropertyElement newProperty = newConfig.AddProperty(propData.Key, value);
-                    if(!String.IsNullOrEmpty(propData.Value))
-                        newProperty.Condition = propData.Value;
-                }
-            }
-
-
-            //add the output path
-            string outputBasePath = this.ProjectManager.OutputBaseRelativePath;
-            if(outputBasePath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
-                outputBasePath = Path.GetDirectoryName(outputBasePath);
-            newConfig.AddProperty("OutputPath", Path.Combine(outputBasePath, name) + Path.DirectorySeparatorChar.ToString());
-
-            // Set the condition that will define the new configuration
-            string newCondition = String.Format(CultureInfo.InvariantCulture, configString, name);
-            newConfig.Condition = newCondition;
 
             NotifyOnCfgNameAdded(name);
             return VSConstants.S_OK;
@@ -264,7 +234,14 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
         public virtual int AddCfgsOfPlatformName(string platformName, string clonePlatformName)
         {
-            return VSConstants.E_NOTIMPL;
+            string[] configurations = GetPropertiesConditionedOn(ProjectFileConstants.Configuration);
+            foreach (var configuration in configurations)
+            {
+                CreateConfiguration(configuration, platformName, !string.IsNullOrEmpty(clonePlatformName) ? configuration : null, clonePlatformName);
+            }
+
+            NotifyOnPlatformNameAdded(platformName);
+            return VSConstants.S_OK;
         }
 
         /// <summary>
@@ -274,51 +251,105 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code. </returns>
         public virtual int DeleteCfgsOfCfgName(string name)
         {
+            if (name == null)
+                throw new ArgumentNullException("name");
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentException();
+
             // We need to QE/QS the project file
             if(!this.ProjectManager.QueryEditProjectFile(false))
             {
                 throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
             }
 
-            if(name == null)
-            {
-                Debug.Fail(String.Format(CultureInfo.CurrentCulture, "Name of the configuration should not be null if you want to delete it from project: {0}", this.project.BuildProject.FullPath));
-                // The configuration " '$(Configuration)' ==  " does not exist, so technically the goal
-                // is achieved so return S_OK
-                return VSConstants.S_OK;
-            }
             // Verify that this config exist
             string[] configs = GetPropertiesConditionedOn(ProjectFileConstants.Configuration);
-            foreach(string config in configs)
+            if (!configs.Contains(name, StringComparer.OrdinalIgnoreCase))
+                return VSConstants.S_OK;
+
+            string[] platforms = GetPlatformsFromProject();
+
+            foreach (string config in configs)
             {
-                if(String.Equals(config, name, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(config, name, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                foreach (string platform in platforms)
                 {
                     // Create condition of config to remove
-                    string condition = String.Format(CultureInfo.InvariantCulture, configString, config);
+                    string configCondition = GetConfigurationCondition(config).Trim();
+                    string configPlatformCondition = GetConfigurationPlatformCondition(config, platform).Trim();
 
-                    foreach (ProjectPropertyGroupElement element in this.project.BuildProject.Xml.PropertyGroups)
+                    foreach (ProjectPropertyGroupElement element in this.project.BuildProject.Xml.PropertyGroups.ToArray())
                     {
-                        if(String.Equals(element.Condition, condition, StringComparison.OrdinalIgnoreCase))
+                        if (element.Condition == null)
+                            continue;
+
+                        if (string.Equals(element.Condition.Trim(), configCondition, StringComparison.OrdinalIgnoreCase)
+                            || string.Equals(element.Condition.Trim(), configPlatformCondition, StringComparison.OrdinalIgnoreCase))
                         {
                             element.Parent.RemoveChild(element);
                         }
                     }
-
-                    NotifyOnCfgNameDeleted(name);
                 }
             }
 
+            NotifyOnCfgNameDeleted(name);
             return VSConstants.S_OK;
         }
 
         /// <summary>
         /// Deletes a specified platform name. 
         /// </summary>
-        /// <param name="platName">The platform name to delet.</param>
+        /// <param name="platName">The platform name to delete.</param>
         /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
         public virtual int DeleteCfgsOfPlatformName(string platName)
         {
-            return VSConstants.E_NOTIMPL;
+            if (platName == null)
+                throw new ArgumentNullException("platName");
+            if (string.IsNullOrEmpty(platName))
+                throw new ArgumentException();
+
+            // We need to QE/QS the project file
+            if (!this.ProjectManager.QueryEditProjectFile(false))
+            {
+                throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
+            }
+
+            // Verify that this config exist
+            string[] platforms = GetPlatformsFromProject();
+            if (!platforms.Contains(platName, StringComparer.OrdinalIgnoreCase))
+                return VSConstants.S_OK;
+
+            string[] configs = GetPropertiesConditionedOn(ProjectFileConstants.Configuration);
+
+            foreach (string platform in platforms)
+            {
+                if (!string.Equals(platform, platName, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                foreach (string config in configs)
+                {
+                    // Create condition of config to remove
+                    string platformCondition = GetPlatformCondition(platform).Trim();
+                    string configPlatformCondition = GetConfigurationPlatformCondition(config, platform).Trim();
+
+                    foreach (ProjectPropertyGroupElement element in this.project.BuildProject.Xml.PropertyGroups.ToArray())
+                    {
+                        if (element.Condition == null)
+                            continue;
+
+                        if (string.Equals(element.Condition.Trim(), platformCondition, StringComparison.OrdinalIgnoreCase)
+                            || string.Equals(element.Condition.Trim(), configPlatformCondition, StringComparison.OrdinalIgnoreCase))
+                        {
+                            element.Parent.RemoveChild(element);
+                        }
+                    }
+                }
+            }
+
+            NotifyOnPlatformNameDeleted(platName);
+            return VSConstants.S_OK;
         }
 
         /// <summary>
@@ -366,7 +397,7 @@ namespace Microsoft.VisualStudio.Project
         public virtual int GetCfgOfName(string name, string platName, out IVsCfg cfg)
         {
             cfg = null;
-            cfg = this.GetProjectConfiguration(name);
+            cfg = this.GetProjectConfiguration(name, platName);
 
             return VSConstants.S_OK;
         }
@@ -379,29 +410,48 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
         public virtual int GetCfgProviderProperty(int propid, out object var)
         {
-            var = false;
-            switch((__VSCFGPROPID)propid)
+            switch ((__VSCFGPROPID)propid)
             {
-                case __VSCFGPROPID.VSCFGPROPID_SupportsCfgAdd:
-                    var = true;
-                    break;
+            // If true, indicates that AddCfgsOfCfgName can be called on this object.
+            case __VSCFGPROPID.VSCFGPROPID_SupportsCfgAdd:
+                var = true;
+                break;
 
-                case __VSCFGPROPID.VSCFGPROPID_SupportsCfgDelete:
-                    var = true;
-                    break;
+            // If true, indicates that DeleteCfgsOfCfgName can be called on this object.
+            case __VSCFGPROPID.VSCFGPROPID_SupportsCfgDelete:
+                var = true;
+                break;
 
-                case __VSCFGPROPID.VSCFGPROPID_SupportsCfgRename:
-                    var = true;
-                    break;
+            // If true, indicates that RenameCfgsOfCfgName can be called on this object.
+            case __VSCFGPROPID.VSCFGPROPID_SupportsCfgRename:
+                var = true;
+                break;
 
-                case __VSCFGPROPID.VSCFGPROPID_SupportsPlatformAdd:
-                    var = false;
-                    break;
+            // If true, indicates that AddCfgsOfPlatformName can be called on this object.
+            case __VSCFGPROPID.VSCFGPROPID_SupportsPlatformAdd:
+                var = false;
+                break;
 
-                case __VSCFGPROPID.VSCFGPROPID_SupportsPlatformDelete:
-                    var = false;
-                    break;
+            // If true, indicates that DeleteCfgsOfPlatformName can be called on this object.
+            case __VSCFGPROPID.VSCFGPROPID_SupportsPlatformDelete:
+                var = false;
+                break;
+
+            // Establishes the basis for automation extenders to make the configuration automation assignment extensible.
+            case __VSCFGPROPID.VSCFGPROPID_IntrinsicExtenderCATID:
+                var = null;
+                return VSConstants.E_NOTIMPL;
+
+            // Configurations will be hidden when this project is the active selected project in the selection context.
+            case (__VSCFGPROPID)__VSCFGPROPID2.VSCFGPROPID_HideConfigurations:
+                var = false;
+                break;
+
+            default:
+                var = null;
+                return VSConstants.E_NOTIMPL;
             }
+
             return VSConstants.S_OK;
         }
 
@@ -420,20 +470,29 @@ namespace Microsoft.VisualStudio.Project
 
             int i = 0;
             string[] configList = GetPropertiesConditionedOn(ProjectFileConstants.Configuration);
+            string[] platformList = GetPlatformsFromProject();
 
-            if(a != null)
+            if (a != null)
             {
-                foreach(string configName in configList)
+                foreach (string configName in configList)
                 {
-                    a[i] = this.GetProjectConfiguration(configName);
+                    foreach (string platform in platformList)
+                    {
+                        a[i] = this.GetProjectConfiguration(configName, platform);
 
-                    i++;
-                    if(i == celt)
+                        i++;
+                        if (i == celt)
+                            break;
+                    }
+
+                    if (i == celt)
                         break;
                 }
             }
             else
-                i = configList.Length;
+            {
+                i = configList.Length * platformList.Length;
+            }
 
             if(actual != null)
                 actual[0] = (uint)i;
@@ -476,7 +535,8 @@ namespace Microsoft.VisualStudio.Project
         public virtual int RenameCfgsOfCfgName(string old, string newname)
         {
             // First create the condition that represent the configuration we want to rename
-            string condition = String.Format(CultureInfo.InvariantCulture, configString, old).Trim();
+            string condition = GetConfigurationCondition(old).Trim();
+            string[] platforms = GetPlatformsFromProject();
 
             foreach (ProjectPropertyGroupElement config in this.project.BuildProject.Xml.PropertyGroups)
             {
@@ -484,24 +544,40 @@ namespace Microsoft.VisualStudio.Project
                 if(config.Condition == null || config.Condition.Length == 0)
                     continue;
 
-                // Skip if it isn't the group we want
-                if(!String.Equals(config.Condition.Trim(), condition, StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                // Change the name 
-                config.Condition = String.Format(CultureInfo.InvariantCulture, configString, newname);
-                // Update the name in our config list
-                if(configurationsList.ContainsKey(old))
+                if (string.Equals(config.Condition.Trim(), condition, StringComparison.OrdinalIgnoreCase))
                 {
-                    ProjectConfig configuration = configurationsList[old];
-                    configurationsList.Remove(old);
-                    configurationsList.Add(newname, configuration);
+                    // Change the name 
+                    config.Condition = GetConfigurationCondition(newname);
+                }
+
+                foreach (var platform in platforms)
+                {
+                    string platformCondition = GetConfigurationPlatformCondition(old, platform).Trim();
+                    if (string.Equals(config.Condition.Trim(), platformCondition, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Change the name 
+                        config.Condition = GetConfigurationPlatformCondition(newname, platform);
+                    }
+                }
+            }
+
+            foreach (var platform in platforms)
+            {
+                string oldKey = string.Format("{0}|{1}", old, platform);
+                string newKey = string.Format("{0}|{1}", newname, platform);
+
+                // Update the name in our config list
+                ProjectConfig configuration;
+                if (configurationsList.TryGetValue(oldKey, out configuration))
+                {
+                    configurationsList.Remove(oldKey);
+                    configurationsList.Add(newKey, configuration);
                     // notify the configuration of its new name
                     configuration.ConfigName = newname;
                 }
-
-                NotifyOnCfgNameRenamed(old, newname);
             }
+
+            NotifyOnCfgNameRenamed(old, newname);
 
             return VSConstants.S_OK;
         }
@@ -529,6 +605,87 @@ namespace Microsoft.VisualStudio.Project
             return VSConstants.S_OK;
         }
         #endregion
+
+        protected virtual int CreateConfiguration(string configurationName, string platformName, string copyFromConfigurationName, string copyFromPlatformName)
+        {
+            Contract.Requires<ArgumentNullException>(configurationName != null, "configurationName");
+            Contract.Requires<ArgumentNullException>(platformName != null, "platformName");
+            Contract.Requires<ArgumentException>(string.IsNullOrEmpty(copyFromConfigurationName) || !string.IsNullOrEmpty(copyFromPlatformName));
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(copyFromConfigurationName) || string.IsNullOrEmpty(copyFromPlatformName));
+
+            // We need to QE/QS the project file
+            if (!this.ProjectManager.QueryEditProjectFile(false))
+            {
+                throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
+            }
+
+            // First create the condition that represent the configuration we want to clone
+            string condition = GetConfigurationPlatformCondition(copyFromConfigurationName, copyFromPlatformName).Trim();
+
+            // Get all configs
+            List<ProjectPropertyGroupElement> configGroup = new List<ProjectPropertyGroupElement>(this.project.BuildProject.Xml.PropertyGroups);
+            ProjectPropertyGroupElement configToClone = null;
+
+            if (!string.IsNullOrEmpty(copyFromConfigurationName))
+            {
+                // Find the configuration to clone
+                foreach (ProjectPropertyGroupElement currentConfig in configGroup)
+                {
+                    // Only care about conditional property groups
+                    if (string.IsNullOrEmpty(currentConfig.Condition))
+                        continue;
+
+                    // Skip if it isn't the group we want
+                    if (!string.Equals(currentConfig.Condition.Trim(), condition, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    configToClone = currentConfig;
+                    break;
+                }
+            }
+
+            ProjectPropertyGroupElement newConfig = null;
+            if (configToClone != null)
+            {
+                // Clone the configuration settings
+                newConfig = this.project.ClonePropertyGroup(configToClone);
+
+                //Will be added later with the new values to the path
+                foreach (ProjectPropertyElement property in newConfig.Properties.ToArray())
+                {
+                    if (property.Name.Equals("OutputPath", StringComparison.OrdinalIgnoreCase))
+                    {
+                        property.Parent.RemoveChild(property);
+                    }
+                }
+            }
+            else
+            {
+                // no source to clone from, lets just create a new empty config
+                newConfig = this.project.BuildProject.Xml.AddPropertyGroup();
+                // Get the list of property name, condition value from the config provider
+                IList<KeyValuePair<KeyValuePair<string, string>, string>> propVals = this.NewConfigProperties;
+                foreach (KeyValuePair<KeyValuePair<string, string>, string> data in propVals)
+                {
+                    KeyValuePair<string, string> propData = data.Key;
+                    string value = data.Value;
+                    ProjectPropertyElement newProperty = newConfig.AddProperty(propData.Key, value);
+                    if (!string.IsNullOrEmpty(propData.Value))
+                        newProperty.Condition = propData.Value;
+                }
+            }
+
+            //add the output path
+            string outputBasePath = this.ProjectManager.OutputBaseRelativePath;
+            if (outputBasePath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
+                outputBasePath = Path.GetDirectoryName(outputBasePath);
+            newConfig.AddProperty("OutputPath", Path.Combine(outputBasePath, configurationName) + Path.DirectorySeparatorChar.ToString());
+
+            // Set the condition that will define the new configuration
+            string newCondition = GetConfigurationPlatformCondition(configurationName, platformName);
+            newConfig.Condition = newCondition;
+            return VSConstants.S_OK;
+        }
 
         #region IVsExtensibleObject Members
 
@@ -629,42 +786,48 @@ namespace Microsoft.VisualStudio.Project
         /// Gets all the platforms defined in the project
         /// </summary>
         /// <returns>An array of platform names.</returns>
-        private string[] GetPlatformsFromProject()
+        protected virtual string[] GetPlatformsFromProject()
         {
             string[] platforms = GetPropertiesConditionedOn(ProjectFileConstants.Platform);
 
-            if(platforms == null || platforms.Length == 0)
+            if (platforms == null || platforms.Length == 0)
             {
-                return new string[] { x86Platform, AnyCPUPlatform };
+                return GetDefaultPlatforms();
             }
 
-            for(int i = 0; i < platforms.Length; i++)
+            for (int i = 0; i < platforms.Length; i++)
             {
-                platforms[i] = ConvertPlatformToVsProject(platforms[i]);
+                platforms[i] = GetPlatformNameFromPlatformProperty(platforms[i]);
             }
 
             return platforms;
+        }
+
+        protected virtual string[] GetDefaultPlatforms()
+        {
+            return new string[] { AnyCPUPlatform };
         }
 
         /// <summary>
         /// Return the supported platform names.
         /// </summary>
         /// <returns>An array of supported platform names.</returns>
-        private string[] GetSupportedPlatformsFromProject()
+        protected virtual string[] GetSupportedPlatformsFromProject()
         {
-            string platforms = this.ProjectManager.BuildProject.GetPropertyValue(ProjectFileConstants.AvailablePlatforms);
+            string platformsString = this.ProjectManager.BuildProject.GetPropertyValue(ProjectFileConstants.AvailablePlatforms);
 
-            if(platforms == null)
+            if (platformsString == null)
             {
-                return new string[] { };
+                return new string[0];
             }
 
-            if(platforms.Contains(","))
+            string[] platforms = platformsString.Split(',', ';');
+            for (int i = 0; i < platforms.Length; i++)
             {
-                return platforms.Split(',');
+                platforms[i] = GetPlatformNameFromPlatformProperty(platforms[i]);
             }
 
-            return new string[] { platforms };
+            return platforms;
         }
 
         /// <summary>
@@ -672,14 +835,29 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         /// <param name="oldName">The oldname.</param>
         /// <returns>The new name.</returns>
-        private static string ConvertPlatformToVsProject(string oldPlatformName)
+        public virtual string GetPlatformNameFromPlatformProperty(string platformProperty)
         {
-            if(String.Equals(oldPlatformName, ProjectFileValues.AnyCPU, StringComparison.OrdinalIgnoreCase))
+            if(String.Equals(platformProperty, ProjectFileValues.AnyCPU, StringComparison.OrdinalIgnoreCase))
             {
                 return AnyCPUPlatform;
             }
 
-            return oldPlatformName;
+            return platformProperty;
+        }
+
+        /// <summary>
+        /// Helper function to convert Any CPU to AnyCPU.
+        /// </summary>
+        /// <param name="oldName">The oldname.</param>
+        /// <returns>The new name.</returns>
+        public virtual string GetPlatformPropertyFromPlatformName(string platformName)
+        {
+            if (String.Equals(platformName, AnyCPUPlatform, StringComparison.OrdinalIgnoreCase))
+            {
+                return ProjectFileValues.AnyCPU;
+            }
+
+            return platformName;
         }
 
         /// <summary>
@@ -740,7 +918,7 @@ namespace Microsoft.VisualStudio.Project
         /// <summary>
         /// Get all the configurations in the project.
         /// </summary>
-        private string[] GetPropertiesConditionedOn(string constant)
+        protected virtual string[] GetPropertiesConditionedOn(string constant)
         {
             List<string> configurations = null;
             this.project.BuildProject.ReevaluateIfNecessary();

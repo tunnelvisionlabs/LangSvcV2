@@ -96,7 +96,7 @@ namespace Microsoft.VisualStudio.Project
         protected virtual void Refresh()
         {
             // Let MSBuild know which configuration we are working with
-            project.SetConfiguration(projectCfg.ConfigName);
+            project.SetConfiguration(projectCfg.ConfigName, projectCfg.Platform);
 
             // Generate dependencies if such a task exist
             const string generateDependencyList = "AllProjectOutputGroups";

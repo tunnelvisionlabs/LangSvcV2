@@ -265,7 +265,7 @@ Copyright (C) Sam Harwell. All rights reserved.
 
   </Target>
 
-  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+  <Import Project="Tvl.Jvm.Common.targets" />
 
   <!--<Target Name="_SetTargetFrameworkMonikerAttribute" BeforeTargets="GenerateTargetFrameworkMonikerAttribute">
     <PropertyGroup>

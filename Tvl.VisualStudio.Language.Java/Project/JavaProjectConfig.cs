@@ -22,8 +22,8 @@
     {
         private Microsoft.Build.Execution.ProjectInstance _currentUserConfig;
 
-        internal JavaProjectConfig(JavaProjectNode project, string configuration)
-            : base(project, configuration)
+        internal JavaProjectConfig(JavaProjectNode project, string configuration, string platform)
+            : base(project, configuration, platform)
         {
         }
 
@@ -49,7 +49,7 @@
                         ProjectManager.CreateUserBuildProject();
 
                     // Get properties for current configuration from project file and cache it
-                    ProjectManager.SetConfiguration(this.ConfigName);
+                    ProjectManager.SetConfiguration(this.ConfigName, this.Platform);
                     ProjectManager.UserBuildProject.ReevaluateIfNecessary();
                     // Create a snapshot of the evaluated project in its current state
                     _currentUserConfig = ProjectManager.UserBuildProject.CreateProjectInstance();
@@ -74,7 +74,7 @@
             }
             else
             {
-                string condition = string.Format(CultureInfo.InvariantCulture, ConfigProvider.configString, this.ConfigName);
+                string condition = ProjectManager.ConfigProvider.GetConfigurationPlatformCondition(this.ConfigName, this.Platform);
                 SetUserPropertyUnderCondition(propertyName, propertyValue, condition);
                 Invalidate();
             }

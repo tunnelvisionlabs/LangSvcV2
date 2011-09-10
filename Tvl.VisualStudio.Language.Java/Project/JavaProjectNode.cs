@@ -185,13 +185,17 @@
             return result;
         }
 
-        public override void SetConfiguration(string config)
+        public override void SetConfiguration(string config, string platform)
         {
-            base.SetConfiguration(config);
+            base.SetConfiguration(config, platform);
             if (_userBuildProject != null)
+            {
                 _userBuildProject.SetGlobalProperty(ProjectFileConstants.Configuration, config);
+                _userBuildProject.SetGlobalProperty(ProjectFileConstants.Platform, platform);
+            }
         }
 
+#if false
         internal static void SetConfigurationProperty(ProjectConfig config, string propertyName, string propertyValue, Project buildProject)
         {
             if (!config.ProjectManager.QueryEditProjectFile(false))
@@ -199,13 +203,14 @@
                 throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
             }
 
-            string condition = String.Format(CultureInfo.InvariantCulture, ConfigProvider.configString, config.ConfigName);
+            string condition = String.Format(CultureInfo.InvariantCulture, ConfigProvider.configPlatformString, config.ConfigName, config.Platform);
 
             SetPropertyUnderCondition(propertyName, propertyValue, condition, buildProject);
 
             // property cache will need to be updated
             config.Invalidate();
         }
+#endif
 
         internal static void SetPropertyUnderCondition(string propertyName, string propertyValue, string condition, Project buildProject)
         {
@@ -352,6 +357,11 @@
         protected override ConfigProvider CreateConfigProvider()
         {
             return new JavaConfigProvider(this);
+        }
+
+        protected override bool PerformTargetFrameworkCheck()
+        {
+            return true;
         }
 
         protected override int QueryStatusOnNode(Guid cmdGroup, uint cmd, IntPtr pCmdText, ref QueryStatusResult result)
