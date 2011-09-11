@@ -9,172 +9,216 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
-using VSLangProj;
-
 namespace Microsoft.VisualStudio.Project.Automation
 {
-	/// <summary>
-	/// Represents the automation equivalent of ReferenceNode
-	/// </summary>
-	/// <typeparam name="RefType"></typeparam>
-	[SuppressMessage("Microsoft.Naming", "CA1715:IdentifiersShouldHaveCorrectPrefix", MessageId = "T")]
-	[ComVisible(true)]
-	public abstract class OAReferenceBase<RefType> : Reference
-		where RefType : ReferenceNode
-	{
-		#region fields
-		private RefType referenceNode;
-		#endregion
+    using System;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Runtime.InteropServices;
+    using prjReferenceType = VSLangProj.prjReferenceType;
+    using Reference = VSLangProj.Reference;
+    using References = VSLangProj.References;
 
-		#region ctors
-		protected OAReferenceBase(RefType referenceNode)
-		{
-			this.referenceNode = referenceNode;
-		}
-		#endregion
+    /// <summary>
+    /// Represents the automation equivalent of ReferenceNode
+    /// </summary>
+    /// <typeparam name="RefType"></typeparam>
+    [SuppressMessage("Microsoft.Naming", "CA1715:IdentifiersShouldHaveCorrectPrefix", MessageId = "T")]
+    [ComVisible(true)]
+    public abstract class OAReferenceBase<RefType> : Reference
+        where RefType : ReferenceNode
+    {
+        private RefType referenceNode;
 
-		#region properties
-		protected RefType BaseReferenceNode
-		{
-			get { return referenceNode; }
-		}
-		#endregion
+        protected OAReferenceBase(RefType referenceNode)
+        {
+            this.referenceNode = referenceNode;
+        }
 
-		#region Reference Members
-		public virtual int BuildNumber
-		{
-			get { return 0; }
-		}
+        protected RefType BaseReferenceNode
+        {
+            get
+            {
+                return referenceNode;
+            }
+        }
 
-		public virtual References Collection
-		{
-			get
-			{
-				return BaseReferenceNode.Parent.Object as References;
-			}
-		}
+        #region Reference Members
 
-		public virtual EnvDTE.Project ContainingProject
-		{
-			get
-			{
-				return BaseReferenceNode.ProjectManager.GetAutomationObject() as EnvDTE.Project;
-			}
-		}
+        public virtual int BuildNumber
+        {
+            get
+            {
+                return 0;
+            }
+        }
 
-		public virtual bool CopyLocal
-		{
-			get
-			{
-				throw new NotImplementedException();
-			}
-			set
-			{
-				throw new NotImplementedException();
-			}
-		}
+        public virtual References Collection
+        {
+            get
+            {
+                return BaseReferenceNode.Parent.Object as References;
+            }
+        }
 
-		public virtual string Culture
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public virtual EnvDTE.Project ContainingProject
+        {
+            get
+            {
+                return BaseReferenceNode.ProjectManager.GetAutomationObject() as EnvDTE.Project;
+            }
+        }
 
-		public virtual EnvDTE.DTE DTE
-		{
-			get
-			{
-				return BaseReferenceNode.ProjectManager.Site.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
-			}
-		}
+        public virtual bool CopyLocal
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
 
-		public virtual string Description
-		{
-			get
-			{
-				return this.Name;
-			}
-		}
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-		public virtual string ExtenderCATID
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public virtual string Culture
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-		public virtual object ExtenderNames
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public virtual EnvDTE.DTE DTE
+        {
+            get
+            {
+                return BaseReferenceNode.ProjectManager.Site.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+            }
+        }
 
-		public virtual string Identity
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public virtual string Description
+        {
+            get
+            {
+                return this.Name;
+            }
+        }
 
-		public virtual int MajorVersion
-		{
-			get { return 0; }
-		}
+        public virtual string ExtenderCATID
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-		public virtual int MinorVersion
-		{
-			get { return 0; }
-		}
+        public virtual object ExtenderNames
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-		public virtual string Name
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public virtual string Identity
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-		public virtual string Path
-		{
-			get
-			{
-				return BaseReferenceNode.Url;
-			}
-		}
+        public virtual int MajorVersion
+        {
+            get
+            {
+                return 0;
+            }
+        }
 
-		public virtual string PublicKeyToken
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public virtual int MinorVersion
+        {
+            get
+            {
+                return 0;
+            }
+        }
 
-		public virtual void Remove()
-		{
-			BaseReferenceNode.Remove(false);
-		}
+        public virtual string Name
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-		public virtual int RevisionNumber
-		{
-			get { return 0; }
-		}
+        public virtual string Path
+        {
+            get
+            {
+                return BaseReferenceNode.Url;
+            }
+        }
 
-		public virtual EnvDTE.Project SourceProject
-		{
-			get { return null; }
-		}
+        public virtual string PublicKeyToken
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-		public virtual bool StrongName
-		{
-			get { return false; }
-		}
+        public virtual void Remove()
+        {
+            BaseReferenceNode.Remove(false);
+        }
 
-		public virtual prjReferenceType Type
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public virtual int RevisionNumber
+        {
+            get
+            {
+                return 0;
+            }
+        }
 
-		public virtual string Version
-		{
-			get { return new Version().ToString(); }
-		}
+        public virtual EnvDTE.Project SourceProject
+        {
+            get
+            {
+                return null;
+            }
+        }
 
-		public virtual object get_Extender(string ExtenderName)
-		{
-			throw new NotImplementedException();
-		}
-		#endregion
-	}
+        public virtual bool StrongName
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public virtual prjReferenceType Type
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public virtual string Version
+        {
+            get
+            {
+                return new Version().ToString();
+            }
+        }
+
+        public virtual object get_Extender(string ExtenderName)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+    }
 }

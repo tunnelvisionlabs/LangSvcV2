@@ -9,63 +9,58 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
-using EnvDTE;
-using VSLangProj;
-
 namespace Microsoft.VisualStudio.Project.Automation
 {
-	public class EmptyReferencesEvents : ConnectionPointContainer, IEventSource<_dispReferencesEvents>, ReferencesEvents
-	{
-		public static readonly EmptyReferencesEvents Instance = new EmptyReferencesEvents();
+    using VSLangProj;
 
-		public EmptyReferencesEvents()
-		{
-			AddEventSource<_dispReferencesEvents>(this as IEventSource<_dispReferencesEvents>);
-		}
+    public sealed class EmptyReferencesEvents : ConnectionPointContainer, IEventSource<_dispReferencesEvents>, ReferencesEvents
+    {
+        public static readonly EmptyReferencesEvents Instance = new EmptyReferencesEvents();
 
-		event _dispReferencesEvents_ReferenceAddedEventHandler _dispReferencesEvents_Event.ReferenceAdded
-		{
-			add
-			{
-			}
+        public EmptyReferencesEvents()
+        {
+            AddEventSource<_dispReferencesEvents>(this as IEventSource<_dispReferencesEvents>);
+        }
 
-			remove
-			{
-			}
-		}
+        event _dispReferencesEvents_ReferenceAddedEventHandler _dispReferencesEvents_Event.ReferenceAdded
+        {
+            add
+            {
+            }
 
-		event _dispReferencesEvents_ReferenceChangedEventHandler _dispReferencesEvents_Event.ReferenceChanged
-		{
-			add
-			{
-			}
+            remove
+            {
+            }
+        }
 
-			remove
-			{
-			}
-		}
+        event _dispReferencesEvents_ReferenceChangedEventHandler _dispReferencesEvents_Event.ReferenceChanged
+        {
+            add
+            {
+            }
 
-		event _dispReferencesEvents_ReferenceRemovedEventHandler _dispReferencesEvents_Event.ReferenceRemoved
-		{
-			add
-			{
-			}
+            remove
+            {
+            }
+        }
 
-			remove
-			{
-			}
-		}
+        event _dispReferencesEvents_ReferenceRemovedEventHandler _dispReferencesEvents_Event.ReferenceRemoved
+        {
+            add
+            {
+            }
 
-		void IEventSource<_dispReferencesEvents>.OnSinkAdded(_dispReferencesEvents sink)
-		{
-		}
+            remove
+            {
+            }
+        }
 
-		void IEventSource<_dispReferencesEvents>.OnSinkRemoved(_dispReferencesEvents sink)
-		{
-		}
-	}
+        void IEventSource<_dispReferencesEvents>.OnSinkAdded(_dispReferencesEvents sink)
+        {
+        }
+
+        void IEventSource<_dispReferencesEvents>.OnSinkRemoved(_dispReferencesEvents sink)
+        {
+        }
+    }
 }

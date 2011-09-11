@@ -9,72 +9,81 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
-using EnvDTE;
-using VSLangProj;
-
 namespace Microsoft.VisualStudio.Project.Automation
 {
-	/// <summary>
-	/// Represents a language-specific project item
-	/// </summary>
-	[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "OAVS")]
-	[ComVisible(true), CLSCompliant(false)]
-	public class OAVSProjectItem : VSProjectItem
-	{
-		#region fields
-		private FileNode fileNode;
-		#endregion
+    using System;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Runtime.InteropServices;
+    using EnvDTE;
+    using VSLangProj;
 
-		#region ctors
-		public OAVSProjectItem(FileNode fileNode)
-		{
-			this.FileNode = fileNode;
-		}
-		#endregion
+    /// <summary>
+    /// Represents a language-specific project item
+    /// </summary>
+    [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "OAVS")]
+    [CLSCompliant(false)]
+    [ComVisible(true)]
+    public class OAVSProjectItem : VSProjectItem
+    {
+        private FileNode fileNode;
 
-		#region VSProjectItem Members
+        public OAVSProjectItem(FileNode fileNode)
+        {
+            this.FileNode = fileNode;
+        }
 
-		public virtual EnvDTE.Project ContainingProject
-		{
-			get { return fileNode.ProjectManager.GetAutomationObject() as EnvDTE.Project; }
-		}
+        #region VSProjectItem Members
 
-		public virtual ProjectItem ProjectItem
-		{
-			get { return fileNode.GetAutomationObject() as ProjectItem; }
-		}
+        public virtual EnvDTE.Project ContainingProject
+        {
+            get
+            {
+                return fileNode.ProjectManager.GetAutomationObject() as EnvDTE.Project;
+            }
+        }
 
-		public virtual DTE DTE
-		{
-			get { return (DTE)this.fileNode.ProjectManager.Site.GetService(typeof(DTE)); }
-		}
+        public virtual ProjectItem ProjectItem
+        {
+            get
+            {
+                return fileNode.GetAutomationObject() as ProjectItem;
+            }
+        }
 
-		public virtual void RunCustomTool()
-		{
-			this.FileNode.RunGenerator();
-		}
+        public virtual DTE DTE
+        {
+            get
+            {
+                return (DTE)this.fileNode.ProjectManager.Site.GetService(typeof(DTE));
+            }
+        }
 
-		#endregion
+        public virtual void RunCustomTool()
+        {
+            this.FileNode.RunGenerator();
+        }
 
-		#region public properties
-		/// <summary>
-		/// File Node property
-		/// </summary>
-		public FileNode FileNode
-		{
-			get
-			{
-				return fileNode;
-			}
-			set
-			{
-				fileNode = value;
-			}
-		}
-		#endregion
+        #endregion
 
-	}
+        #region public properties
+
+        /// <summary>
+        /// File Node property
+        /// </summary>
+        public FileNode FileNode
+        {
+            get
+            {
+                return fileNode;
+            }
+
+            set
+            {
+                fileNode = value;
+            }
+        }
+
+        #endregion
+
+    }
 }

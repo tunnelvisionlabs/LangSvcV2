@@ -9,62 +9,57 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
-using EnvDTE;
-using VSLangProj;
-
 namespace Microsoft.VisualStudio.Project.Automation
 {
-	/// <summary>
-	/// Provides access to language-specific project events
-	/// </summary>
-	[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "OAVS")]
-	[ComVisible(true), CLSCompliant(false)]
-	public class OAVSProjectEvents : VSProjectEvents
-	{
-		#region fields
-		private OAVSProject vsProject;
-		#endregion
+    using System;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Runtime.InteropServices;
+    using VSLangProj;
 
-		#region ctors
-		public OAVSProjectEvents(OAVSProject vsProject)
-		{
-			this.vsProject = vsProject;
-		}
-		#endregion
+    /// <summary>
+    /// Provides access to language-specific project events
+    /// </summary>
+    [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "OAVS")]
+    [CLSCompliant(false)]
+    [ComVisible(true)]
+    public class OAVSProjectEvents : VSProjectEvents
+    {
+        private OAVSProject vsProject;
 
-		#region VSProjectEvents Members
+        public OAVSProjectEvents(OAVSProject vsProject)
+        {
+            this.vsProject = vsProject;
+        }
 
-		public virtual BuildManagerEvents BuildManagerEvents
-		{
-			get
-			{
-				return vsProject.BuildManager as BuildManagerEvents;
-			}
-		}
+        #region VSProjectEvents Members
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
-		public virtual ImportsEvents ImportsEvents
-		{
-			get
-			{
-				throw new NotImplementedException();
-			}
-		}
+        public virtual BuildManagerEvents BuildManagerEvents
+        {
+            get
+            {
+                return vsProject.BuildManager as BuildManagerEvents;
+            }
+        }
 
-		public virtual ReferencesEvents ReferencesEvents
-		{
-			get
-			{
-				// this can't return null or a NullReferenceException in Microsoft.VisualStudio.Xaml will take down the IDE (VS2010)
-				ReferencesEvents events = vsProject.References as ReferencesEvents;
-				return events ?? EmptyReferencesEvents.Instance;
-			}
-		}
+        [SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
+        public virtual ImportsEvents ImportsEvents
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-		#endregion
-	}
+        public virtual ReferencesEvents ReferencesEvents
+        {
+            get
+            {
+                // this can't return null or a NullReferenceException in Microsoft.VisualStudio.Xaml will take down the IDE (VS2010)
+                ReferencesEvents events = vsProject.References as ReferencesEvents;
+                return events ?? EmptyReferencesEvents.Instance;
+            }
+        }
+
+        #endregion
+    }
 }
