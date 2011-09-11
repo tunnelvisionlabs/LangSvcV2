@@ -363,9 +363,21 @@ Based on Microsoft.Common.targets, Copyright (C) Microsoft Corporation. All righ
         <ProcessorArchitecture Condition=" '$(PlatformTarget)' == 'x86' ">x86</ProcessorArchitecture>
     </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(PlatformVendor)' == '' ">
+    <PlatformVendor Condition=" '$(Platform)' == 'HotspotAnyCPU' ">Hotspot</PlatformVendor>
+    <PlatformVendor Condition=" '$(Platform)' == 'HotspotX86' ">Hotspot</PlatformVendor>
+    <PlatformVendor Condition=" '$(Platform)' == 'HotspotX64' ">Hotspot</PlatformVendor>
+    <PlatformVendor Condition=" '$(Platform)' == 'JRockitAnyCPU' ">JRockit</PlatformVendor>
+    <PlatformVendor Condition=" '$(Platform)' == 'JRockitX86' ">JRockit</PlatformVendor>
+    <PlatformVendor Condition=" '$(Platform)' == 'JRockitX64' ">JRockit</PlatformVendor>
+  </PropertyGroup>
+
     <!-- AvailablePlatforms is the list of platform targets available. -->
     <PropertyGroup>
       <AvailablePlatforms>HotspotAnyCPU,HotspotX86,HotspotX64,JRockitAnyCPU,JRockitX86,JRockitX64</AvailablePlatforms>
+
+      <JvmRegistryBase Condition=" '$(JvmRegistryBase)' == '' and '$(PlatformVendor)' == 'Hotspot' ">JavaSoft</JvmRegistryBase>
+      <JvmRegistryBase Condition=" '$(JvmRegistryBase)' == '' and '$(PlatformVendor)' == 'JRockit' ">JRockit</JvmRegistryBase>
     </PropertyGroup>
 
     <!-- Flavor is the project flavor. For example, Client, Smart Devices, SQL Server, etc. -->
@@ -835,6 +847,7 @@ Based on Microsoft.Common.targets, Copyright (C) Microsoft Corporation. All righ
     ============================================================
     -->
     <Target
+        Condition="false"
         Name="GetReferenceAssemblyPaths"
         DependsOnTargets="$(GetReferenceAssemblyPathsDependsOn)">
 
