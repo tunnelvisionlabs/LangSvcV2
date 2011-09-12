@@ -30,7 +30,6 @@ Copyright (C) Sam Harwell. All rights reserved.
     <DefaultLanguageSourceExtension>.java</DefaultLanguageSourceExtension>
     <Language>Java</Language>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
-    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
     <AllowedReferenceAssemblyFileExtensions Condition=" '$(AllowedReferenceAssemblyFileExtensions)' == '' ">
       .jar
     </AllowedReferenceAssemblyFileExtensions>
@@ -158,10 +157,10 @@ Copyright (C) Sam Harwell. All rights reserved.
                 $(Win32Manifest);
                 @(CustomAdditionalCompileInputs)"
       Outputs="@(DocFileItem);
-                 @(IntermediateAssembly);
-                 @(_DebugSymbolsIntermediatePath);
-                 $(NonExistentFile);
-                 @(CustomAdditionalCompileOutputs)"
+               @(CompileOutputs);
+               @(_DebugSymbolsIntermediatePath);
+               $(NonExistentFile);
+               @(CustomAdditionalCompileOutputs)"
       Returns=""
       DependsOnTargets="$(CoreCompileDependsOn)"
     >
@@ -245,14 +244,17 @@ Copyright (C) Sam Harwell. All rights reserved.
            Encoding="%(Compile.Encoding)"
            SourceRelease="$(SourceRelease)"
            TargetRelease="$(TargetRelease)"
-           OutputPath="$(OutputPath)"
+           OutputPath="$(IntermediateOutputPath)"
            DebugSymbols="$(DebugSymbols)"
            SpecificDebugSymbols="$(SpecificDebugSymbols)"
            ShowWarnings="$(ShowWarnings)"
            ShowAllWarnings="$(ShowAllWarnings)"
            BuildArgs="$(BuildArgs)"
+           Platform="$(Platform)"
+           JvmRegistryBase="$(JvmRegistryBase)"
                >
 
+      <Output TaskParameter="GeneratedClassFiles" ItemName="CompileOutputs" />
       <Output TaskParameter="GeneratedClassFiles" ItemName="FileWrites" />
 
     </Javac>

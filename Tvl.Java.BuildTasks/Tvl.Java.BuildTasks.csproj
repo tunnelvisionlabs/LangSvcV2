@@ -102,7 +102,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Jar.cs" />
     <Compile Include="Javac.cs" />
+    <Compile Include="JavaToolTask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -111,7 +113,6 @@
     </None>
     <None Include="Tvl.Java.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
     </None>
     <None Include="Tvl.Jvm.Common.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

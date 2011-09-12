@@ -15,7 +15,7 @@
     using Path = System.IO.Path;
     using SecurityException = System.Security.SecurityException;
 
-    public class Javac : ToolTask
+    public class Javac : JavaToolTask
     {
         private readonly List<ITaskItem> _generatedClassFiles = new List<ITaskItem>();
         private readonly List<string> _previousErrorLines = new List<string>();
@@ -118,14 +118,6 @@
             }
         }
 
-        protected override Encoding ResponseFileEncoding
-        {
-            get
-            {
-                return new UTF8Encoding(false);
-            }
-        }
-
         protected override string ToolName
         {
             get
@@ -134,33 +126,11 @@
             }
         }
 
-        protected override string GenerateFullPathToTool()
-        {
-            if (File.Exists(ToolPath))
-                return Path.GetFullPath(ToolPath);
-
-            return FindJavacPath();
-        }
-
-        protected override string GenerateCommandLineCommands()
-        {
-            CommandLineBuilderExtension commandLine = new CommandLineBuilderExtension();
-            AddCommandLineCommands(commandLine);
-            return commandLine.ToString();
-        }
-
-        protected override string GenerateResponseFileCommands()
-        {
-            CommandLineBuilderExtension commandLine = new CommandLineBuilderExtension();
-            AddResponseFileCommands(commandLine);
-            return commandLine.ToString();
-        }
-
-        protected void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
+        protected override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
         {
         }
 
-        protected void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
+        protected override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
         {
             // the -verbose flag must be included or there's no way to figure out what the output files are
             commandLine.AppendSwitch("-verbose");
@@ -319,7 +289,10 @@
             {
                 int startIndex = "[wrote ".Length;
                 string outputFile = singleLine.Substring(startIndex, singleLine.Length - startIndex - 1);
-                _generatedClassFiles.Add(new TaskItem(outputFile));
+
+                TaskItem generated = new TaskItem(outputFile);
+                generated.SetMetadata("BaseOutputDirectory", OutputPath);
+                _generatedClassFiles.Add(generated);
             }
             else if (CompileMessageFormat.IsMatch(singleLine))
             {
@@ -328,51 +301,6 @@
             else if (!singleLine.StartsWith("[") || !singleLine.EndsWith("]"))
             {
                 base.LogEventsFromTextOutput(singleLine, messageImportance);
-            }
-        }
-
-        private static string FindJavacPath()
-        {
-            string javac = FindJavacPath(@"SOFTWARE\JavaSoft\Java Development Kit");
-            if (javac == null)
-                javac = FindJavacPath(@"SOFTWARE\Wow6432Node\JavaSoft\Java Development Kit");
-
-            return javac;
-        }
-
-        private static string FindJavacPath(string registryRoot)
-        {
-            try
-            {
-                using (RegistryKey jdk = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\JavaSoft\Java Development Kit", RegistryKeyPermissionCheck.ReadSubTree))
-                {
-                    if (jdk == null)
-                        return null;
-
-                    string currentVersion = jdk.GetValue("CurrentVersion") as string;
-                    if (currentVersion == null)
-                        return null;
-
-                    using (RegistryKey jdkVersion = jdk.OpenSubKey(currentVersion, RegistryKeyPermissionCheck.ReadSubTree))
-                    {
-                        if (jdkVersion == null)
-                            return null;
-
-                        string javaHome = jdkVersion.GetValue("JavaHome") as string;
-                        if (!Directory.Exists(javaHome))
-                            return null;
-
-                        string javac = Path.Combine(javaHome, "bin", "javac.exe");
-                        if (!File.Exists(javac))
-                            return null;
-
-                        return javac;
-                    }
-                }
-            }
-            catch (SecurityException)
-            {
-                return null;
             }
         }
     }

@@ -25,6 +25,8 @@ Based on Microsoft.Common.targets, Copyright (C) Microsoft Corporation. All righ
 
   <Import Project="$(MSBuildProjectFullPath).user" Condition="Exists('$(MSBuildProjectFullPath).user')"/>
 
+  <UsingTask Condition="'$(JavaBuildTaskPath)'==''" TaskName="Tvl.Java.BuildTasks.Jar" AssemblyFile="Tvl.Java.BuildTasks.dll" />
+
   <PropertyGroup>
     <CustomBeforeTvlJvmCommonTargets Condition="'$(CustomBeforeTvlJvmCommonTargets)'==''">$(MSBuildExtensionsPath)\Java\Custom.Before.$(MSBuildThisFile)</CustomBeforeTvlJvmCommonTargets>
     <CustomAfterTvlJvmCommonTargets Condition="'$(CustomAfterTvlJvmCommonTargets)'==''">$(MSBuildExtensionsPath)\Java\Custom.After.$(MSBuildThisFile)</CustomAfterTvlJvmCommonTargets>
@@ -96,11 +98,11 @@ Based on Microsoft.Common.targets, Copyright (C) Microsoft Corporation. All righ
     <!-- Example, Debug -->
     <ConfigurationName Condition=" '$(ConfigurationName)' == '' ">$(Configuration)</ConfigurationName>
 
-    <Platform Condition=" '$(Platform)'=='' ">HotspotAnyCPU</Platform>
+    <Platform Condition=" '$(Platform)'=='' ">AnyCPU</Platform>
 
     <OutputType Condition=" '$(TargetType)' != ''">$(TargetType)</OutputType>
     <OutputType Condition=" '$(TargetType)' == 'Container' or '$(TargetType)' == 'DocumentContainer' ">library</OutputType>
-    <OutputType Condition=" '$(OutputType)' == '' ">exe</OutputType>
+    <OutputType Condition=" '$(OutputType)' == '' ">jar</OutputType>
 
     <DebugSymbols Condition=" '$(ConfigurationName)' == 'Debug' and '$(DebugSymbols)' == '' and '$(DebugType)'==''">true</DebugSymbols>
 
@@ -133,10 +135,16 @@ Based on Microsoft.Common.targets, Copyright (C) Microsoft Corporation. All righ
     pre and post build steps.
     -->
   <PropertyGroup>
-    <TargetExt Condition="'$(TargetExt)' == '' and '$(OutputType)'=='exe'">.exe</TargetExt>
+    <!--<TargetExt Condition="'$(TargetExt)' == '' and '$(OutputType)'=='exe'">.exe</TargetExt>
     <TargetExt Condition="'$(TargetExt)' == '' and '$(OutputType)'=='winexe'">.exe</TargetExt>
     <TargetExt Condition="'$(TargetExt)' == '' and '$(OutputType)'=='library'">.dll</TargetExt>
-    <TargetExt Condition="'$(TargetExt)' == '' and '$(OutputType)'=='module'">.netmodule</TargetExt>
+    <TargetExt Condition="'$(TargetExt)' == '' and '$(OutputType)'=='module'">.netmodule</TargetExt>-->
+
+    <TargetExt Condition="'$(TargetExt)' == '' and '$(OutputType)'=='jar'">.jar</TargetExt>
+    <TargetExt Condition="'$(TargetExt)' == '' and '$(OutputType)'=='ear'">.ear</TargetExt>
+    <TargetExt Condition="'$(TargetExt)' == '' and '$(OutputType)'=='rar'">.rar</TargetExt>
+    <TargetExt Condition="'$(TargetExt)' == '' and '$(OutputType)'=='war'">.war</TargetExt>
+    <!--<TargetExt Condition="'$(TargetExt)' == '' and '$(OutputType)'=='ejb'">.???</TargetExt>-->
   </PropertyGroup>
 
   <PropertyGroup>
@@ -247,7 +255,7 @@ Based on Microsoft.Common.targets, Copyright (C) Microsoft Corporation. All righ
     <!-- Example, c:\MyProjects\MyProject\MyProject.csproj -->
     <ProjectPath Condition=" '$(ProjectPath)' == '' ">$(ProjectDir)$(ProjectFileName)</ProjectPath>
 
-    <!-- Example, HotspotAnyCPU -->
+    <!-- Example, AnyCPU -->
     <PlatformName Condition=" '$(PlatformName)' == '' ">$(Platform)</PlatformName>
   </PropertyGroup>
 
@@ -298,8 +306,8 @@ Based on Microsoft.Common.targets, Copyright (C) Microsoft Corporation. All righ
   </PropertyGroup>
 
   <PropertyGroup Condition=" $(IntermediateOutputPath) == '' ">
-    <IntermediateOutputPath Condition=" '$(PlatformName)' == 'HotspotAnyCPU' ">$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
-    <IntermediateOutputPath Condition=" '$(PlatformName)' != 'HotspotAnyCPU' ">$(BaseIntermediateOutputPath)$(PlatformName)\$(Configuration)\</IntermediateOutputPath>
+    <IntermediateOutputPath Condition=" '$(PlatformName)' == 'AnyCPU' ">$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
+    <IntermediateOutputPath Condition=" '$(PlatformName)' != 'AnyCPU' ">$(BaseIntermediateOutputPath)$(PlatformName)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <IntermediateOutputPath Condition="!HasTrailingSlash('$(IntermediateOutputPath)')">$(IntermediateOutputPath)\</IntermediateOutputPath>
@@ -399,17 +407,13 @@ Based on Microsoft.Common.targets, Copyright (C) Microsoft Corporation. All righ
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(PlatformVendor)' == '' ">
-    <PlatformVendor Condition=" '$(Platform)' == 'HotspotAnyCPU' ">Hotspot</PlatformVendor>
-    <PlatformVendor Condition=" '$(Platform)' == 'HotspotX86' ">Hotspot</PlatformVendor>
-    <PlatformVendor Condition=" '$(Platform)' == 'HotspotX64' ">Hotspot</PlatformVendor>
-    <PlatformVendor Condition=" '$(Platform)' == 'JRockitAnyCPU' ">JRockit</PlatformVendor>
-    <PlatformVendor Condition=" '$(Platform)' == 'JRockitX86' ">JRockit</PlatformVendor>
-    <PlatformVendor Condition=" '$(Platform)' == 'JRockitX64' ">JRockit</PlatformVendor>
+    <PlatformVendor Condition=" '$(TargetVM)' == 'Hotspot' ">Hotspot</PlatformVendor>
+    <PlatformVendor Condition=" '$(TargetVM)' == 'JRockit' ">JRockit</PlatformVendor>
   </PropertyGroup>
 
   <!-- AvailablePlatforms is the list of platform targets available. -->
   <PropertyGroup>
-    <AvailablePlatforms>HotspotAnyCPU,HotspotX86,HotspotX64,JRockitAnyCPU,JRockitX86,JRockitX64</AvailablePlatforms>
+    <AvailablePlatforms>AnyCPU,X86,X64</AvailablePlatforms>
 
     <JvmRegistryBase Condition=" '$(JvmRegistryBase)' == '' and '$(PlatformVendor)' == 'Hotspot' ">JavaSoft</JvmRegistryBase>
     <JvmRegistryBase Condition=" '$(JvmRegistryBase)' == '' and '$(PlatformVendor)' == 'JRockit' ">JRockit</JvmRegistryBase>
@@ -481,8 +485,10 @@ Based on Microsoft.Common.targets, Copyright (C) Microsoft Corporation. All righ
         Put the most likely extensions first for reference resolution speed.
         -->
     <AllowedReferenceAssemblyFileExtensions Condition=" '$(AllowedReferenceAssemblyFileExtensions)' == '' ">
-      .dll;
-      .exe
+      .jar;
+      .war;
+      .rar;
+      .par;
     </AllowedReferenceAssemblyFileExtensions>
 
     <!--
@@ -593,6 +599,7 @@ Based on Microsoft.Common.targets, Copyright (C) Microsoft Corporation. All righ
       PrepareResources;
       ResolveKeySource;
       Compile;
+      CreatePackage;
       UnmanagedUnregistration;
       GenerateSerializationAssemblies;
       CreateSatelliteAssemblies;
@@ -1022,6 +1029,7 @@ Based on Microsoft.Common.targets, Copyright (C) Microsoft Corporation. All righ
       ResolveNativeReferences;
       ResolveAssemblyReferences;
       ResolveComReferences;
+      ResolveJarReferences;
       AfterResolveReferences
     </ResolveReferencesDependsOn>
   </PropertyGroup>
@@ -1635,8 +1643,27 @@ Based on Microsoft.Common.targets, Copyright (C) Microsoft Corporation. All righ
 
   </Target>
 
+  <!--
+    ============================================================
+                                        ResolveJarReferences
 
+    Resolve Jar references
 
+        [IN]
+        @(JarReference) - The list of JAR references
+
+        [OUT]
+        @(ReferencePath) - Paths to referenced wrappers.
+    ============================================================
+    -->
+
+  <Target Name="ResolveJarReferences"
+          Condition="'@(JarReference)' != ''"
+          Returns="@(ReferencePath)">
+    <ItemGroup>
+      <ReferencePath Include="@(JarReference)" Condition="'%(JarReference.IncludeInBuild)'!='false'" />
+    </ItemGroup>
+  </Target>
 
   <!--
     ***********************************************************************************************
@@ -2251,8 +2278,85 @@ Based on Microsoft.Common.targets, Copyright (C) Microsoft Corporation. All righ
 
   </Target>
 
+  <!--
+    ***********************************************************************************************
+    ***********************************************************************************************
+                                                                CreatePackage Section
+    ***********************************************************************************************
+    ***********************************************************************************************
+    -->
+
+  <!--
+    ============================================================
+                                        CreatePackage
+    ============================================================
+    -->
+  <PropertyGroup>
+    <CreatePackageDependsOn>
+      BeforeCreatePackage;
+      CoreCreatePackage;
+      AfterCreatePackage;
+    </CreatePackageDependsOn>
+  </PropertyGroup>
+  <Target Name="CreatePackage"
+          DependsOnTargets="$(CreatePackageDependsOn)"/>
+
+  <!--
+    ============================================================
+                                        BeforeCreatePackage
+
+    Redefine this target in your project in order to run tasks just before CreatePackage.
+    ============================================================
+    -->
+  <Target Name="BeforeCreatePackage"/>
 
 
+  <!--
+    ============================================================
+                                        CoreCreatePackage
+    ============================================================
+    -->
+  <Target Name="CoreCreatePackage"
+          Inputs="@(CompileOutputs);
+                  @(_CoreCreatePackageResourceInputs);
+                  @(CustomAdditionalPackageInputs);
+                  @(PackageManifest)"
+          Outputs="@(IntermediateAssembly);
+                   @(CustomAdditionalPackageOutputs)"
+          Returns=""
+          DependsOnTargets="$(CoreCreatePackageDependsOn)">
+
+    <PropertyGroup>
+      <CreatePackageVerbose Condition="'$(CreatePackageVerbose)' == ''">false</CreatePackageVerbose>
+      <CompressPackage Condition="'$(CompressPackage)' == ''">true</CompressPackage>
+      <CreateManifest Condition="'$(CreateManifest)' == ''">true</CreateManifest>
+    </PropertyGroup>
+    
+    <!-- commands are "create", "update", "extract", "index", "list" -->
+    <Jar Command="create"
+         JarFile="@(IntermediateAssembly)"
+         Verbose="$(CreatePackageVerbose)"
+         Compress="$(CompressPackage)"
+         CreateManifest="$(CreateManifest)"
+         Manifest="@(PackageManifest)"
+         EntryPoint="$(PackageEntryPoint)"
+         JvmOptions="$(CreatePackageJvmOptions)"
+         Inputs="@(CompileOutputs);@(_CoreCreatePackageResourceInputs)"
+         Platform="$(Platform)"
+         JvmRegistryBase="$(JvmRegistryBase)"
+         />
+
+    <CallTarget Targets="$(TargetsTriggeredByCreatePackage)" Condition="'$(TargetsTriggeredByCreatePackage)' != ''"/>
+  </Target>
+
+  <!--
+    ============================================================
+                                        AfterCreatePackage
+
+    Redefine this target in your project in order to run tasks just after CreatePackage.
+    ============================================================
+    -->
+  <Target Name="AfterCreatePackage"/>
 
   <!--
     ***********************************************************************************************
