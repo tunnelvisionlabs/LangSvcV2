@@ -2,8 +2,9 @@
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Microsoft.Build.Construction;
     using Microsoft.VisualStudio.Project;
+
+    using MSBuild = Microsoft.Build.Evaluation;
 
     public class JavaConfigProvider : ConfigProvider
     {
@@ -65,13 +66,12 @@
             }
         }
 
-        protected override IEnumerable<ProjectPropertyGroupElement> GetBuildProjectXmlPropertyGroups(bool includeUserBuildProjects = true)
+        protected override IEnumerable<MSBuild.Project> GetBuildProjects(bool includeUserBuildProjects = true)
         {
-            var result = base.GetBuildProjectXmlPropertyGroups(includeUserBuildProjects);
-            if (includeUserBuildProjects && ProjectManager.UserBuildProject != null)
-                result = result.Concat(ProjectManager.UserBuildProject.Xml.PropertyGroups);
+            if (!includeUserBuildProjects || ProjectManager.UserBuildProject == null)
+                return base.GetBuildProjects(includeUserBuildProjects);
 
-            return result;
+            return base.GetBuildProjects(false).Concat(new[] { ProjectManager.UserBuildProject });
         }
     }
 }

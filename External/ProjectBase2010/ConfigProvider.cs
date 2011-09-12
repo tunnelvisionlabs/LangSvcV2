@@ -23,16 +23,18 @@ namespace Microsoft.VisualStudio.Project
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
     using System.Globalization;
-    using System.IO;
+    using System.Linq;
     using System.Runtime.InteropServices;
+    using Microsoft.Build.Construction;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
+
+    using Path = System.IO.Path;
     using MSBuild = Microsoft.Build.Evaluation;
-    using Microsoft.Build.Construction;
-    using System.Diagnostics.Contracts;
-    using System.Linq;
+    using MSBuildConstruction = Microsoft.Build.Construction;
 
     [CLSCompliant(false)]
     [ComVisible(true)]
@@ -207,6 +209,7 @@ namespace Microsoft.VisualStudio.Project
         #endregion
 
         #region IVsCfgProvider2 methods
+
         /// <summary>
         /// Copies an existing configuration name or creates a new one. 
         /// </summary>
@@ -216,10 +219,17 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code. </returns>
         public virtual int AddCfgsOfCfgName(string name, string cloneName, int fPrivate)
         {
-            string[] platforms = GetPlatformsFromProject();
-            foreach (var platform in platforms)
+            // We need to QE/QS the project file
+            if (!this.ProjectManager.QueryEditProjectFile(false))
             {
-                CreateConfiguration(name, platform, cloneName, !string.IsNullOrEmpty(cloneName) ? platform : null);
+                throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
+            }
+
+            foreach (MSBuild.Project project in GetBuildProjects(true))
+            {
+                int hr = AddConfiguration(project, name, cloneName);
+                if (ErrorHandler.Failed(hr))
+                    return hr;
             }
 
             NotifyOnCfgNameAdded(name);
@@ -234,10 +244,17 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
         public virtual int AddCfgsOfPlatformName(string platformName, string clonePlatformName)
         {
-            string[] configurations = GetPropertiesConditionedOn(ProjectFileConstants.Configuration);
-            foreach (var configuration in configurations)
+            // We need to QE/QS the project file
+            if (!this.ProjectManager.QueryEditProjectFile(false))
             {
-                CreateConfiguration(configuration, platformName, !string.IsNullOrEmpty(clonePlatformName) ? configuration : null, clonePlatformName);
+                throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
+            }
+
+            foreach (MSBuild.Project project in GetBuildProjects(true))
+            {
+                int hr = AddPlatform(project, platformName, clonePlatformName);
+                if (ErrorHandler.Failed(hr))
+                    return hr;
             }
 
             NotifyOnPlatformNameAdded(platformName);
@@ -267,40 +284,15 @@ namespace Microsoft.VisualStudio.Project
             if (!configs.Contains(name, StringComparer.OrdinalIgnoreCase))
                 return VSConstants.S_OK;
 
-            string[] platforms = GetPlatformsFromProject();
-
-            foreach (string config in configs)
+            foreach (MSBuild.Project project in GetBuildProjects(true))
             {
-                if (!string.Equals(config, name, StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                foreach (string platform in platforms)
-                {
-                    // Create condition of config to remove
-                    string configCondition = GetConfigurationCondition(config).Trim();
-                    string configPlatformCondition = GetConfigurationPlatformCondition(config, platform).Trim();
-
-                    foreach (ProjectPropertyGroupElement element in GetBuildProjectXmlPropertyGroups().ToArray())
-                    {
-                        if (element.Condition == null)
-                            continue;
-
-                        if (string.Equals(element.Condition.Trim(), configCondition, StringComparison.OrdinalIgnoreCase)
-                            || string.Equals(element.Condition.Trim(), configPlatformCondition, StringComparison.OrdinalIgnoreCase))
-                        {
-                            element.Parent.RemoveChild(element);
-                        }
-                    }
-                }
+                int hr = DeleteConfiguration(project, name);
+                if (ErrorHandler.Failed(hr))
+                    return hr;
             }
 
             NotifyOnCfgNameDeleted(name);
             return VSConstants.S_OK;
-        }
-
-        protected virtual IEnumerable<ProjectPropertyGroupElement> GetBuildProjectXmlPropertyGroups(bool includeUserBuildProjects = true)
-        {
-            return project.BuildProject.Xml.PropertyGroups;
         }
 
         /// <summary>
@@ -326,31 +318,11 @@ namespace Microsoft.VisualStudio.Project
             if (!platforms.Contains(platName, StringComparer.OrdinalIgnoreCase))
                 return VSConstants.S_OK;
 
-            string[] configs = GetPropertiesConditionedOn(ProjectFileConstants.Configuration);
-
-            foreach (string platform in platforms)
+            foreach (MSBuild.Project project in GetBuildProjects(true))
             {
-                if (!string.Equals(platform, platName, StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                foreach (string config in configs)
-                {
-                    // Create condition of config to remove
-                    string platformCondition = GetPlatformCondition(platform).Trim();
-                    string configPlatformCondition = GetConfigurationPlatformCondition(config, platform).Trim();
-
-                    foreach (ProjectPropertyGroupElement element in GetBuildProjectXmlPropertyGroups().ToArray())
-                    {
-                        if (element.Condition == null)
-                            continue;
-
-                        if (string.Equals(element.Condition.Trim(), platformCondition, StringComparison.OrdinalIgnoreCase)
-                            || string.Equals(element.Condition.Trim(), configPlatformCondition, StringComparison.OrdinalIgnoreCase))
-                        {
-                            element.Parent.RemoveChild(element);
-                        }
-                    }
-                }
+                int hr = DeletePlatform(project, platName);
+                if (ErrorHandler.Failed(hr))
+                    return hr;
             }
 
             NotifyOnPlatformNameDeleted(platName);
@@ -539,33 +511,27 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
         public virtual int RenameCfgsOfCfgName(string old, string newname)
         {
-            // First create the condition that represent the configuration we want to rename
-            string condition = GetConfigurationCondition(old).Trim();
-            string[] platforms = GetPlatformsFromProject();
+            if (old == null)
+                throw new ArgumentNullException("old");
+            if (newname == null)
+                throw new ArgumentNullException("newname");
+            if (string.IsNullOrEmpty(old) || string.IsNullOrEmpty(newname))
+                throw new ArgumentException();
 
-            foreach (ProjectPropertyGroupElement config in GetBuildProjectXmlPropertyGroups().ToArray())
+            // We need to QE/QS the project file
+            if (!this.ProjectManager.QueryEditProjectFile(false))
             {
-                // Only care about conditional property groups
-                if(config.Condition == null || config.Condition.Length == 0)
-                    continue;
-
-                if (string.Equals(config.Condition.Trim(), condition, StringComparison.OrdinalIgnoreCase))
-                {
-                    // Change the name 
-                    config.Condition = GetConfigurationCondition(newname);
-                }
-
-                foreach (var platform in platforms)
-                {
-                    string platformCondition = GetConfigurationPlatformCondition(old, platform).Trim();
-                    if (string.Equals(config.Condition.Trim(), platformCondition, StringComparison.OrdinalIgnoreCase))
-                    {
-                        // Change the name 
-                        config.Condition = GetConfigurationPlatformCondition(newname, platform);
-                    }
-                }
+                throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
             }
 
+            foreach (MSBuild.Project project in GetBuildProjects(true))
+            {
+                int hr = RenameConfiguration(project, old, newname);
+                if (ErrorHandler.Failed(hr))
+                    return hr;
+            }
+
+            string[] platforms = GetPlatformsFromProject();
             foreach (var platform in platforms)
             {
                 string oldKey = string.Format("{0}|{1}", old, platform);
@@ -611,85 +577,434 @@ namespace Microsoft.VisualStudio.Project
         }
         #endregion
 
-        protected virtual int CreateConfiguration(string configurationName, string platformName, string copyFromConfigurationName, string copyFromPlatformName)
+        protected virtual IEnumerable<MSBuild.Project> GetBuildProjects(bool includeUserBuildProjects = true)
         {
-            Contract.Requires<ArgumentNullException>(configurationName != null, "configurationName");
-            Contract.Requires<ArgumentNullException>(platformName != null, "platformName");
-            Contract.Requires<ArgumentException>(string.IsNullOrEmpty(copyFromConfigurationName) || !string.IsNullOrEmpty(copyFromPlatformName));
-            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(copyFromConfigurationName) || string.IsNullOrEmpty(copyFromPlatformName));
+            return new[] { project.BuildProject };
+        }
 
-            // We need to QE/QS the project file
-            if (!this.ProjectManager.QueryEditProjectFile(false))
+        protected virtual int AddConfiguration(MSBuild.Project project, string configurationName, string cloneConfigurationName)
+        {
+            if (!string.IsNullOrEmpty(cloneConfigurationName))
             {
-                throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
+                string[] existingConfigurations = GetPropertiesConditionedOn(ProjectFileConstants.Configuration);
+                if (existingConfigurations.Contains(cloneConfigurationName, StringComparer.OrdinalIgnoreCase))
+                    return CloneConfiguration(project, cloneConfigurationName, configurationName);
             }
 
-            // First create the condition that represent the configuration we want to clone
-            string condition = GetConfigurationPlatformCondition(copyFromConfigurationName, copyFromPlatformName).Trim();
+            return AddConfiguration(project, configurationName);
+        }
 
-            // Get all configs
-            List<ProjectPropertyGroupElement> configGroup = new List<ProjectPropertyGroupElement>(GetBuildProjectXmlPropertyGroups());
-            ProjectPropertyGroupElement configToClone = null;
+        protected virtual int RenameConfiguration(MSBuild.Project project, string oldConfigurationName, string newConfigurationName)
+        {
+            // First create the condition that represent the configuration we want to rename
+            string condition = GetConfigurationCondition(oldConfigurationName).Trim();
+            string[] platforms = GetPlatformsFromProject();
 
-            if (!string.IsNullOrEmpty(copyFromConfigurationName))
+            foreach (ProjectPropertyGroupElement config in project.Xml.PropertyGroups.ToArray())
             {
-                // Find the configuration to clone
-                foreach (ProjectPropertyGroupElement currentConfig in configGroup)
+                // Only care about conditional property groups
+                if (config.Condition == null || config.Condition.Length == 0)
+                    continue;
+
+                if (string.Equals(config.Condition.Trim(), condition, StringComparison.OrdinalIgnoreCase))
                 {
-                    // Only care about conditional property groups
-                    if (string.IsNullOrEmpty(currentConfig.Condition))
-                        continue;
+                    // Change the name 
+                    config.Condition = GetConfigurationCondition(newConfigurationName);
+                }
 
-                    // Skip if it isn't the group we want
-                    if (!string.Equals(currentConfig.Condition.Trim(), condition, StringComparison.OrdinalIgnoreCase))
-                        continue;
+                foreach (var platform in platforms)
+                {
+                    string platformCondition = GetConfigurationPlatformCondition(oldConfigurationName, platform).Trim();
+                    if (string.Equals(config.Condition.Trim(), platformCondition, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Change the name 
+                        config.Condition = GetConfigurationPlatformCondition(newConfigurationName, platform);
+                    }
+                }
+            }
 
-                    configToClone = currentConfig;
+            return VSConstants.S_OK;
+        }
+
+        protected virtual int DeleteConfiguration(MSBuild.Project project, string configurationName)
+        {
+            // Verify that this config exist
+            string[] configs = GetPropertiesConditionedOn(ProjectFileConstants.Configuration);
+            if (!configs.Contains(configurationName, StringComparer.OrdinalIgnoreCase))
+                return VSConstants.S_OK;
+
+            string[] platforms = GetPlatformsFromProject();
+
+            foreach (string config in configs)
+            {
+                if (!string.Equals(config, configurationName, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                foreach (string platform in platforms)
+                {
+                    // Create condition of config to remove
+                    string configCondition = GetConfigurationCondition(config).Trim();
+                    string configPlatformCondition = GetConfigurationPlatformCondition(config, platform).Trim();
+
+                    foreach (ProjectPropertyGroupElement element in project.Xml.PropertyGroups.ToArray())
+                    {
+                        if (element.Condition == null)
+                            continue;
+
+                        if (string.Equals(element.Condition.Trim(), configCondition, StringComparison.OrdinalIgnoreCase)
+                            || string.Equals(element.Condition.Trim(), configPlatformCondition, StringComparison.OrdinalIgnoreCase))
+                        {
+                            element.Parent.RemoveChild(element);
+                        }
+                    }
+                }
+            }
+
+            return VSConstants.S_OK;
+        }
+
+        protected virtual int AddPlatform(MSBuild.Project project, string platformName, string clonePlatformName)
+        {
+            if (!string.IsNullOrEmpty(clonePlatformName))
+            {
+                string[] existingPlatforms = GetPlatformsFromProject();
+                if (existingPlatforms.Contains(clonePlatformName, StringComparer.OrdinalIgnoreCase))
+                    return ClonePlatform(project, clonePlatformName, platformName);
+            }
+
+            return AddPlatform(project, platformName);
+        }
+
+        protected virtual int DeletePlatform(MSBuild.Project project, string platformName)
+        {
+            // Verify that this config exist
+            string[] platforms = GetPlatformsFromProject();
+            if (!platforms.Contains(platformName, StringComparer.OrdinalIgnoreCase))
+                return VSConstants.S_OK;
+
+            string[] configs = GetPropertiesConditionedOn(ProjectFileConstants.Configuration);
+
+            foreach (string platform in platforms)
+            {
+                if (!string.Equals(platform, platformName, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                foreach (string config in configs)
+                {
+                    // Create condition of config to remove
+                    string platformCondition = GetPlatformCondition(platform).Trim();
+                    string configPlatformCondition = GetConfigurationPlatformCondition(config, platform).Trim();
+
+                    foreach (ProjectPropertyGroupElement element in project.Xml.PropertyGroups.ToArray())
+                    {
+                        if (element.Condition == null)
+                            continue;
+
+                        if (string.Equals(element.Condition.Trim(), platformCondition, StringComparison.OrdinalIgnoreCase)
+                            || string.Equals(element.Condition.Trim(), configPlatformCondition, StringComparison.OrdinalIgnoreCase))
+                        {
+                            element.Parent.RemoveChild(element);
+                        }
+                    }
+                }
+            }
+
+            return VSConstants.S_OK;
+        }
+
+        protected virtual int AddConfiguration(MSBuild.Project project, string configurationName)
+        {
+            Contract.Requires<ArgumentNullException>(project != null, "project");
+            Contract.Requires<ArgumentNullException>(configurationName != null, "configurationName");
+            Contract.Requires<ArgumentException>(!String.IsNullOrEmpty(configurationName));
+
+            MSBuildConstruction.ProjectElement lastRelevantElement = null;
+            foreach (ProjectPropertyGroupElement group in project.Xml.PropertyGroupsReversed)
+            {
+                if (string.IsNullOrEmpty(group.Condition))
+                    continue;
+
+                if (group.Condition.IndexOf("'$(Configuration)'", StringComparison.OrdinalIgnoreCase) >= 0
+                    || group.Condition.IndexOf("'$(Platform)'", StringComparison.OrdinalIgnoreCase) >= 0
+                    || group.Condition.IndexOf("'$(Configuration)|$(Platform)'", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    lastRelevantElement = group;
                     break;
                 }
             }
 
-            ProjectPropertyGroupElement newConfig = null;
-            if (configToClone != null)
-            {
-                // Clone the configuration settings
-                newConfig = this.project.ClonePropertyGroup(configToClone);
+            if (lastRelevantElement == null)
+                lastRelevantElement = project.Xml.PropertyGroupsReversed.First();
 
-                //Will be added later with the new values to the path
-                foreach (ProjectPropertyElement property in newConfig.Properties.ToArray())
+            string[] platformNames = GetPlatformsFromProject();
+            foreach (var platformName in platformNames)
+            {
+                ProjectPropertyGroupElement element = project.Xml.CreatePropertyGroupElement();
+                project.Xml.InsertAfterChild(element, lastRelevantElement);
+                lastRelevantElement = element;
+
+                element.Condition = GetConfigurationPlatformCondition(configurationName, platformName);
+
+                /* TODO:
+                 *  1. No need to create a property group if there are no properties to insert into in *and* this is a user build project.
+                 *     If this is the main project, we still need to insert the group because the conditions are used to determine which
+                 *     configurations/platforms are included in the project. For now, it's fine to always add the group.
+                 *  2. Need a way to specify NewConfigProperties for each type of build project (main, user, etc).
+                 */
+
+                if (project == this.project.BuildProject)
                 {
-                    if (property.Name.Equals("OutputPath", StringComparison.OrdinalIgnoreCase))
+                    // Get the list of property name, condition value from the config provider
+                    IList<KeyValuePair<KeyValuePair<string, string>, string>> propVals = this.NewConfigProperties;
+                    foreach (KeyValuePair<KeyValuePair<string, string>, string> data in propVals)
                     {
-                        property.Parent.RemoveChild(property);
+                        KeyValuePair<string, string> propData = data.Key;
+                        string value = data.Value;
+                        ProjectPropertyElement newProperty = element.AddProperty(propData.Key, value);
+                        if (!string.IsNullOrEmpty(propData.Value))
+                            newProperty.Condition = propData.Value;
+                    }
+
+                    //add the output path
+                    string outputBasePath = this.ProjectManager.OutputBaseRelativePath;
+                    if (outputBasePath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
+                        outputBasePath = Path.GetDirectoryName(outputBasePath);
+
+                    element.AddProperty("OutputPath", Path.Combine(outputBasePath, configurationName) + Path.DirectorySeparatorChar.ToString());
+                }
+            }
+
+            return VSConstants.S_OK;
+        }
+
+        protected virtual int CloneConfiguration(MSBuild.Project project, string existingConfigurationName, string newConfigurationName)
+        {
+            Contract.Requires<ArgumentNullException>(project != null, "project");
+            Contract.Requires<ArgumentNullException>(existingConfigurationName != null, "existingConfigurationName");
+            Contract.Requires<ArgumentNullException>(newConfigurationName != null, "newConfigurationName");
+            Contract.Requires<ArgumentException>(!String.IsNullOrEmpty(existingConfigurationName));
+            Contract.Requires<ArgumentException>(!String.IsNullOrEmpty(newConfigurationName));
+
+            string[] platformNames = GetPlatformsFromProject();
+
+            string existingConfigurationCondition = GetConfigurationCondition(existingConfigurationName).Trim();
+            string newConfigurationCondition = GetConfigurationCondition(newConfigurationName);
+
+            string[] existingConfigurationPlatformConditions = new string[platformNames.Length];
+            string[] newConfigurationPlatformConditions = new string[platformNames.Length];
+
+            for (int i = 0; i < existingConfigurationPlatformConditions.Length; i++)
+            {
+                existingConfigurationPlatformConditions[i] = GetConfigurationPlatformCondition(existingConfigurationName, platformNames[i]).Trim();
+                newConfigurationPlatformConditions[i] = GetConfigurationPlatformCondition(newConfigurationName, platformNames[i]);
+            }
+
+            foreach (var group in project.Xml.PropertyGroups.ToArray())
+            {
+                if (string.IsNullOrEmpty(group.Condition))
+                    continue;
+
+                if (string.Equals(group.Condition.Trim(), existingConfigurationCondition, StringComparison.OrdinalIgnoreCase))
+                {
+                    ProjectPropertyGroupElement clonedGroup = ClonePropertyGroup(project, group);
+                    clonedGroup.Condition = newConfigurationCondition;
+                }
+                else
+                {
+                    int index = Array.FindIndex(existingConfigurationPlatformConditions, i => StringComparer.OrdinalIgnoreCase.Equals(i, group.Condition.Trim()));
+                    if (index < 0)
+                        continue;
+
+                    ProjectPropertyGroupElement clonedGroup = ClonePropertyGroup(project, group);
+                    clonedGroup.Condition = newConfigurationPlatformConditions[index];
+
+                    // update the OutputPath property if it exists and isn't conditioned on $(Configuration)
+                    foreach (var property in clonedGroup.Properties)
+                    {
+                        if (!string.Equals(property.Name, "OutputPath", StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        if (!string.IsNullOrEmpty(property.Condition))
+                            continue;
+
+                        if (property.Value.IndexOf("$(Configuration)", StringComparison.OrdinalIgnoreCase) >= 0)
+                            continue;
+
+                        // update the output path
+                        string outputBasePath = this.ProjectManager.OutputBaseRelativePath;
+                        if (outputBasePath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
+                            outputBasePath = Path.GetDirectoryName(outputBasePath);
+
+                        property.Value = Path.Combine(outputBasePath, newConfigurationName) + Path.DirectorySeparatorChar.ToString();
                     }
                 }
             }
-            else
+
+            return VSConstants.S_OK;
+        }
+
+        protected virtual int AddPlatform(MSBuild.Project project, string platformName)
+        {
+            Contract.Requires<ArgumentNullException>(project != null, "project");
+            Contract.Requires<ArgumentNullException>(platformName != null, "platformName");
+            Contract.Requires<ArgumentException>(!String.IsNullOrEmpty(platformName));
+
+            MSBuildConstruction.ProjectElement lastRelevantElement = null;
+            foreach (ProjectPropertyGroupElement group in project.Xml.PropertyGroupsReversed)
             {
-                // no source to clone from, lets just create a new empty config
-                newConfig = this.project.BuildProject.Xml.AddPropertyGroup();
-                // Get the list of property name, condition value from the config provider
-                IList<KeyValuePair<KeyValuePair<string, string>, string>> propVals = this.NewConfigProperties;
-                foreach (KeyValuePair<KeyValuePair<string, string>, string> data in propVals)
+                if (string.IsNullOrEmpty(group.Condition))
+                    continue;
+
+                if (group.Condition.IndexOf("'$(Configuration)'", StringComparison.OrdinalIgnoreCase) >= 0
+                    || group.Condition.IndexOf("'$(Platform)'", StringComparison.OrdinalIgnoreCase) >= 0
+                    || group.Condition.IndexOf("'$(Configuration)|$(Platform)'", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    KeyValuePair<string, string> propData = data.Key;
-                    string value = data.Value;
-                    ProjectPropertyElement newProperty = newConfig.AddProperty(propData.Key, value);
-                    if (!string.IsNullOrEmpty(propData.Value))
-                        newProperty.Condition = propData.Value;
+                    lastRelevantElement = group;
+                    break;
                 }
             }
 
-            //add the output path
-            string outputBasePath = this.ProjectManager.OutputBaseRelativePath;
-            if (outputBasePath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
-                outputBasePath = Path.GetDirectoryName(outputBasePath);
-            newConfig.AddProperty("OutputPath", Path.Combine(outputBasePath, configurationName) + Path.DirectorySeparatorChar.ToString());
+            if (lastRelevantElement == null)
+                lastRelevantElement = project.Xml.PropertyGroupsReversed.First();
 
-            // Set the condition that will define the new configuration
-            string newCondition = GetConfigurationPlatformCondition(configurationName, platformName);
-            newConfig.Condition = newCondition;
+            string[] configurationNames = GetPropertiesConditionedOn(ProjectFileConstants.Configuration);
+            foreach (var configurationName in configurationNames)
+            {
+                ProjectPropertyGroupElement element = project.Xml.CreatePropertyGroupElement();
+                project.Xml.InsertAfterChild(element, lastRelevantElement);
+                lastRelevantElement = element;
+
+                element.Condition = GetConfigurationPlatformCondition(configurationName, platformName);
+
+                /* TODO:
+                 *  1. No need to create a property group if there are no properties to insert into in *and* this is a user build project.
+                 *     If this is the main project, we still need to insert the group because the conditions are used to determine which
+                 *     configurations/platforms are included in the project. For now, it's fine to always add the group.
+                 *  2. Need a way to specify NewConfigProperties for each type of build project (main, user, etc).
+                 */
+
+                if (project == this.project.BuildProject)
+                {
+                    // Get the list of property name, condition value from the config provider
+                    IList<KeyValuePair<KeyValuePair<string, string>, string>> propVals = this.NewConfigProperties;
+                    foreach (KeyValuePair<KeyValuePair<string, string>, string> data in propVals)
+                    {
+                        KeyValuePair<string, string> propData = data.Key;
+                        string value = data.Value;
+                        ProjectPropertyElement newProperty = element.AddProperty(propData.Key, value);
+                        if (!string.IsNullOrEmpty(propData.Value))
+                            newProperty.Condition = propData.Value;
+                    }
+
+                    //add the output path
+                    string outputBasePath = this.ProjectManager.OutputBaseRelativePath;
+                    if (outputBasePath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
+                        outputBasePath = Path.GetDirectoryName(outputBasePath);
+
+                    element.AddProperty("OutputPath", Path.Combine(outputBasePath, configurationName) + Path.DirectorySeparatorChar.ToString());
+                }
+            }
+
             return VSConstants.S_OK;
+        }
+
+        protected virtual int ClonePlatform(MSBuild.Project project, string existingPlatformName, string newPlatformName)
+        {
+            Contract.Requires<ArgumentNullException>(project != null, "project");
+            Contract.Requires<ArgumentNullException>(existingPlatformName != null, "existingPlatformName");
+            Contract.Requires<ArgumentNullException>(newPlatformName != null, "newPlatformName");
+            Contract.Requires<ArgumentException>(!String.IsNullOrEmpty(existingPlatformName));
+            Contract.Requires<ArgumentException>(!String.IsNullOrEmpty(newPlatformName));
+
+            string[] configurationNames = GetPropertiesConditionedOn(ProjectFileConstants.Configuration);
+
+            string existingPlatformCondition = GetPlatformCondition(existingPlatformName).Trim();
+            string newPlatformCondition = GetPlatformCondition(existingPlatformName);
+
+            string[] existingConfigurationPlatformConditions = new string[configurationNames.Length];
+            string[] newConfigurationPlatformConditions = new string[configurationNames.Length];
+
+            for (int i = 0; i < existingConfigurationPlatformConditions.Length; i++)
+            {
+                existingConfigurationPlatformConditions[i] = GetConfigurationPlatformCondition(configurationNames[i], existingPlatformName).Trim();
+                newConfigurationPlatformConditions[i] = GetConfigurationPlatformCondition(configurationNames[i], newPlatformName);
+            }
+
+            foreach (var group in project.Xml.PropertyGroups.ToArray())
+            {
+                if (string.IsNullOrEmpty(group.Condition))
+                    continue;
+
+                if (string.Equals(group.Condition.Trim(), existingPlatformCondition, StringComparison.OrdinalIgnoreCase))
+                {
+                    ProjectPropertyGroupElement clonedGroup = ClonePropertyGroup(project, group);
+                    clonedGroup.Condition = newPlatformCondition;
+                }
+                else
+                {
+                    int index = Array.FindIndex(existingConfigurationPlatformConditions, i => StringComparer.OrdinalIgnoreCase.Equals(i, group.Condition.Trim()));
+                    if (index < 0)
+                        continue;
+
+                    ProjectPropertyGroupElement clonedGroup = ClonePropertyGroup(project, group);
+                    clonedGroup.Condition = newConfigurationPlatformConditions[index];
+
+                    // update the OutputPath property if it exists and isn't conditioned on $(Platform)
+                    foreach (var property in clonedGroup.Properties)
+                    {
+                        if (!string.Equals(property.Name, "OutputPath", StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        if (!string.IsNullOrEmpty(property.Condition))
+                            continue;
+
+                        if (property.Value.IndexOf("$(Platform)", StringComparison.OrdinalIgnoreCase) >= 0)
+                            continue;
+
+                        // update the output path
+                        string outputBasePath = this.ProjectManager.OutputBaseRelativePath;
+                        if (outputBasePath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
+                            outputBasePath = Path.GetDirectoryName(outputBasePath);
+
+                        property.Value = Path.Combine(outputBasePath, configurationNames[index]) + Path.DirectorySeparatorChar.ToString();
+                    }
+                }
+            }
+
+            return VSConstants.S_OK;
+        }
+
+        /// <summary>
+        /// For internal use only.
+        /// This creates a copy of an existing configuration and add it to the project.
+        /// Caller should change the condition on the PropertyGroup.
+        /// If derived class want to accomplish this, they should call ConfigProvider.AddCfgsOfCfgName()
+        /// It is expected that in the future MSBuild will have support for this so we don't have to
+        /// do it manually.
+        /// </summary>
+        /// <param name="group">PropertyGroup to clone</param>
+        /// <returns></returns>
+        protected virtual ProjectPropertyGroupElement ClonePropertyGroup(MSBuild.Project project, ProjectPropertyGroupElement group)
+        {
+            Contract.Requires<ArgumentNullException>(project != null, "project");
+            Contract.Requires<ArgumentNullException>(group != null, "group");
+
+            // Create a new (empty) PropertyGroup
+            ProjectPropertyGroupElement newPropertyGroup = project.Xml.CreatePropertyGroupElement();
+            project.Xml.InsertAfterChild(newPropertyGroup, group);
+
+            // Now copy everything from the group we are trying to clone to the group we are creating
+            if (!String.IsNullOrEmpty(group.Condition))
+                newPropertyGroup.Condition = group.Condition;
+
+            foreach (ProjectPropertyElement prop in group.Properties)
+            {
+                ProjectPropertyElement newProperty = newPropertyGroup.AddProperty(prop.Name, prop.Value);
+                if (!String.IsNullOrEmpty(prop.Condition))
+                    newProperty.Condition = prop.Condition;
+            }
+
+            return newPropertyGroup;
         }
 
         #region IVsExtensibleObject Members

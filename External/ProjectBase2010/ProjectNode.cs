@@ -9,38 +9,44 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
-using System.Text;
-using System.Xml;
-using EnvDTE;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
-using IServiceProvider = System.IServiceProvider;
-using MSBuild = Microsoft.Build.Evaluation;
-using MSBuildConstruction = Microsoft.Build.Construction;
-using MSBuildExecution = Microsoft.Build.Execution;
-using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
-using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
-using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
-using System.Diagnostics.Contracts;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.CodeDom.Compiler;
+    using System.Collections.Generic;
+    using System.Collections.Specialized;
+    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.Linq;
+    using System.Runtime.InteropServices;
+    using System.Runtime.Versioning;
+    using System.Text;
+    using System.Xml;
+    using EnvDTE;
+    using Microsoft.Build.Evaluation;
+    using Microsoft.Build.Execution;
+    using Microsoft.VisualStudio.OLE.Interop;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using Directory = System.IO.Directory;
+    using File = System.IO.File;
+    using FileAttributes = System.IO.FileAttributes;
+    using FileInfo = System.IO.FileInfo;
+    using IOException = System.IO.IOException;
+    using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+    using IServiceProvider = System.IServiceProvider;
+    using MSBuild = Microsoft.Build.Evaluation;
+    using MSBuildConstruction = Microsoft.Build.Construction;
+    using MSBuildExecution = Microsoft.Build.Execution;
+    using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
+    using Path = System.IO.Path;
+    using SearchOption = System.IO.SearchOption;
+    using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
+    using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+
     /// <summary>
     /// Manages the persistent state of the project (References, options, files, etc.) and deals with user interaction via a GUI in the form a hierarchy.
     /// </summary>
@@ -4766,34 +4772,6 @@ namespace Microsoft.VisualStudio.Project
             }
 
             return baseDir;
-        }
-
-        /// <summary>
-        /// For internal use only.
-        /// This creates a copy of an existing configuration and add it to the project.
-        /// Caller should change the condition on the PropertyGroup.
-        /// If derived class want to accomplish this, they should call ConfigProvider.AddCfgsOfCfgName()
-        /// It is expected that in the future MSBuild will have support for this so we don't have to
-        /// do it manually.
-        /// </summary>
-        /// <param name="group">PropertyGroup to clone</param>
-        /// <returns></returns>
-        internal MSBuildConstruction.ProjectPropertyGroupElement ClonePropertyGroup(MSBuildConstruction.ProjectPropertyGroupElement group)
-        {
-            // Create a new (empty) PropertyGroup
-            MSBuildConstruction.ProjectPropertyGroupElement newPropertyGroup = this.buildProject.Xml.AddPropertyGroup();
-
-            // Now copy everything from the group we are trying to clone to the group we are creating
-            if (!String.IsNullOrEmpty(group.Condition))
-                newPropertyGroup.Condition = group.Condition;
-            foreach (MSBuildConstruction.ProjectPropertyElement prop in group.Properties)
-            {
-                MSBuildConstruction.ProjectPropertyElement newProperty = newPropertyGroup.AddProperty(prop.Name, prop.Value);
-                if (!String.IsNullOrEmpty(prop.Condition))
-                    newProperty.Condition = prop.Condition;
-            }
-
-            return newPropertyGroup;
         }
 
         /// <summary>
