@@ -23,6 +23,7 @@ using MSBuild = Microsoft.Build.Evaluation;
 using MSBuildExecution = Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using System.Diagnostics.Contracts;
 
 namespace Microsoft.VisualStudio.Project
 {
@@ -90,7 +91,7 @@ namespace Microsoft.VisualStudio.Project
 		}
 
 		private Automation.OAAssemblyReference assemblyRef;
-		internal override object Object
+		public override object Object
 		{
 			get
 			{
@@ -125,15 +126,9 @@ namespace Microsoft.VisualStudio.Project
 		public AssemblyReferenceNode(ProjectNode root, string assemblyPath)
 			: base(root)
 		{
-			// Validate the input parameters.
-			if(null == root)
-			{
-				throw new ArgumentNullException("root");
-			}
-			if(string.IsNullOrEmpty(assemblyPath))
-			{
-				throw new ArgumentNullException("assemblyPath");
-			}
+            Contract.Requires<ArgumentNullException>(root != null, "root");
+            Contract.Requires<ArgumentNullException>(assemblyPath != null, "assemblyPath");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(assemblyPath));
 
 			this.InitializeFileChangeEvents();
 

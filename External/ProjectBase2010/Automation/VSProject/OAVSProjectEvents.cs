@@ -15,6 +15,8 @@ namespace Microsoft.VisualStudio.Project.Automation
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.InteropServices;
     using VSLangProj;
+    using VSLangProj80;
+    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// Provides access to language-specific project events
@@ -22,13 +24,14 @@ namespace Microsoft.VisualStudio.Project.Automation
     [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "OAVS")]
     [CLSCompliant(false)]
     [ComVisible(true)]
-    public class OAVSProjectEvents : VSProjectEvents
+    public class OAVSProjectEvents : VSProjectEvents, VSProjectEvents2
     {
-        private OAVSProject vsProject;
+        private readonly OAVSProject _vsProject;
 
         public OAVSProjectEvents(OAVSProject vsProject)
         {
-            this.vsProject = vsProject;
+            Contract.Requires<ArgumentNullException>(vsProject != null, "vsProject");
+            this._vsProject = vsProject;
         }
 
         #region VSProjectEvents Members
@@ -37,7 +40,7 @@ namespace Microsoft.VisualStudio.Project.Automation
         {
             get
             {
-                return vsProject.BuildManager as BuildManagerEvents;
+                return _vsProject.BuildManager as BuildManagerEvents;
             }
         }
 
@@ -55,8 +58,20 @@ namespace Microsoft.VisualStudio.Project.Automation
             get
             {
                 // this can't return null or a NullReferenceException in Microsoft.VisualStudio.Xaml will take down the IDE (VS2010)
-                ReferencesEvents events = vsProject.References as ReferencesEvents;
+                ReferencesEvents events = _vsProject.References as ReferencesEvents;
                 return events ?? EmptyReferencesEvents.Instance;
+            }
+        }
+
+        #endregion
+
+        #region VSProjectEvents2 Members
+
+        public virtual VSLangProjWebReferencesEvents VSLangProjWebReferencesEvents
+        {
+            get
+            {
+                throw new NotImplementedException();
             }
         }
 

@@ -14,6 +14,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
+using ProjectItems = EnvDTE.ProjectItems;
 
 namespace Microsoft.VisualStudio.Project.Automation
 {
@@ -22,12 +23,12 @@ namespace Microsoft.VisualStudio.Project.Automation
 	/// </summary>
 	[SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
 	[ComVisible(true), CLSCompliant(false)]
-	public class OANavigableProjectItems : EnvDTE.ProjectItems
+	public class OANavigableProjectItems : ProjectItems
 	{
 		#region fields
-		private OAProject project;
-		private IList<EnvDTE.ProjectItem> items;
-		private HierarchyNode nodeWithItems;
+		private readonly OAProject project;
+		private readonly IList<EnvDTE.ProjectItem> items;
+		private readonly HierarchyNode nodeWithItems;
 		#endregion
 
 		#region properties

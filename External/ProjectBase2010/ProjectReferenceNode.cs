@@ -270,7 +270,7 @@ namespace Microsoft.VisualStudio.Project
 		}
 
 		private Automation.OAProjectReference projectReference;
-		internal override object Object
+		public override object Object
 		{
 			get
 			{

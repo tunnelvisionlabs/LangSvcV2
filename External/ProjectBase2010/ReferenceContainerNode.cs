@@ -23,6 +23,8 @@ using MSBuild = Microsoft.Build.Evaluation;
 using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
 using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
 using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 
 namespace Microsoft.VisualStudio.Project
 {
@@ -30,7 +32,7 @@ namespace Microsoft.VisualStudio.Project
     public class ReferenceContainerNode : HierarchyNode, IReferenceContainer
     {
         #region fields
-        internal const string ReferencesNodeVirtualName = "References";
+        public const string ReferencesNodeVirtualName = "References";
         #endregion
 
         #region ctor
@@ -49,9 +51,9 @@ namespace Microsoft.VisualStudio.Project
             ProjectFileConstants.COMReference
         };
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
-        protected virtual string[] SupportedReferenceTypes
+        protected virtual ReadOnlyCollection<string> SupportedReferenceTypes
         {
-            get { return supportedReferenceTypes; }
+            get { return new ReadOnlyCollection<string>(supportedReferenceTypes); }
         }
         #endregion
 
@@ -91,7 +93,7 @@ namespace Microsoft.VisualStudio.Project
 
 
         private Automation.OAReferences references;
-        internal override object Object
+        public override object Object
         {
             get
             {
@@ -390,10 +392,7 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         protected virtual ReferenceNode CreateFileComponent(VSCOMPONENTSELECTORDATA selectorData, string wrapperTool = null)
         {
-            if(null == selectorData.bstrFile)
-            {
-                throw new ArgumentNullException("selectorData");
-            }
+            Contract.Requires<ArgumentNullException>(selectorData.bstrFile != null, "selectorData");
 
             // We have a path to a file, it could be anything
             // First see if it is a managed assembly

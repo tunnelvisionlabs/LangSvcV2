@@ -265,6 +265,18 @@
     <Reference Include="VSLangProj, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="VSLangProj100, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="VSLangProj2, Version=7.0.5000.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="VSLangProj80, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="VSLangProj90, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="WindowsBase">
       <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\WindowsBase.dll</HintPath>
     </Reference>
@@ -437,6 +449,8 @@
     <Compile Include="OptionsPages\JavaIntellisenseOptionsControl.Designer.cs">
       <DependentUpon>JavaIntellisenseOptionsControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Project\Automation\OAJarReference.cs" />
+    <Compile Include="Project\Extensions\CommandLineBuilderExtensions.cs" />
     <Compile Include="Project\Controls\FileBrowserTextBox.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -450,6 +464,8 @@
       <DependentUpon>FolderBrowserTextBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Project\FolderBuildAction.cs" />
+    <Compile Include="Project\JarReferenceNode.cs" />
+    <Compile Include="Project\JarReferenceProperties.cs" />
     <Compile Include="Project\JavaConfigProvider.cs" />
     <Compile Include="Project\JavaBuildOptions.cs" />
     <Compile Include="Project\JavaConfigConstants.cs" />
@@ -462,6 +478,14 @@
     <Compile Include="Project\JavaProjectFileConstants.cs" />
     <Compile Include="Project\JavaProjectNode.cs" />
     <Compile Include="Project\JavaProjectPackage.cs" />
+    <Compile Include="Project\JavaReferenceContainerNode.cs" />
+    <Compile Include="Project\PropertyPages\JavaApplicationPropertyPage.cs" />
+    <Compile Include="Project\PropertyPages\JavaApplicationPropertyPagePanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Project\PropertyPages\JavaApplicationPropertyPagePanel.Designer.cs">
+      <DependentUpon>JavaApplicationPropertyPagePanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Project\PropertyPages\DebuggingInformation.cs" />
     <Compile Include="Project\PropertyPages\JavaBuildEventsPropertyPage.cs" />
     <Compile Include="Project\PropertyPages\JavaBuildEventsPropertyPagePanel.cs">
@@ -595,6 +619,9 @@
     <Compile Include="Text.Language\LanguageElementManager.cs" />
     <Compile Include="Text.Language\LanguageElementManagerService.cs" />
     <Compile Include="Text.Language\LanguageElementsChangedEventArgs.cs" />
+    <EmbeddedResource Include="Project\PropertyPages\JavaApplicationPropertyPagePanel.resx">
+      <DependentUpon>JavaApplicationPropertyPagePanel.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Project\Resources\imagelis.bmp" />
     <Content Include="VSIXProject_large.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

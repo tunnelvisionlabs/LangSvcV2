@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.Drawing;
     using System.Globalization;
@@ -93,6 +94,14 @@
             private set
             {
                 _propertyPagePanel = value;
+            }
+        }
+
+        public ReadOnlyCollection<ProjectConfig> Configurations
+        {
+            get
+            {
+                return new ReadOnlyCollection<ProjectConfig>(_projectConfigs ?? new ProjectConfig[0]);
             }
         }
 

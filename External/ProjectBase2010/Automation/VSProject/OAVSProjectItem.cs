@@ -13,6 +13,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
     using EnvDTE;
     using VSLangProj;
@@ -25,11 +26,23 @@ namespace Microsoft.VisualStudio.Project.Automation
     [ComVisible(true)]
     public class OAVSProjectItem : VSProjectItem
     {
-        private FileNode fileNode;
+        private readonly FileNode _fileNode;
 
         public OAVSProjectItem(FileNode fileNode)
         {
-            this.FileNode = fileNode;
+            Contract.Requires<ArgumentNullException>(fileNode != null, "fileNode");
+            this._fileNode = fileNode;
+        }
+
+        /// <summary>
+        /// File Node property
+        /// </summary>
+        public FileNode FileNode
+        {
+            get
+            {
+                return _fileNode;
+            }
         }
 
         #region VSProjectItem Members
@@ -38,7 +51,7 @@ namespace Microsoft.VisualStudio.Project.Automation
         {
             get
             {
-                return fileNode.ProjectManager.GetAutomationObject() as EnvDTE.Project;
+                return _fileNode.ProjectManager.GetAutomationObject() as EnvDTE.Project;
             }
         }
 
@@ -46,7 +59,7 @@ namespace Microsoft.VisualStudio.Project.Automation
         {
             get
             {
-                return fileNode.GetAutomationObject() as ProjectItem;
+                return _fileNode.GetAutomationObject() as ProjectItem;
             }
         }
 
@@ -54,7 +67,7 @@ namespace Microsoft.VisualStudio.Project.Automation
         {
             get
             {
-                return (DTE)this.fileNode.ProjectManager.Site.GetService(typeof(DTE));
+                return (DTE)this._fileNode.ProjectManager.Site.GetService(typeof(DTE));
             }
         }
 
@@ -64,26 +77,5 @@ namespace Microsoft.VisualStudio.Project.Automation
         }
 
         #endregion
-
-        #region public properties
-
-        /// <summary>
-        /// File Node property
-        /// </summary>
-        public FileNode FileNode
-        {
-            get
-            {
-                return fileNode;
-            }
-
-            set
-            {
-                fileNode = value;
-            }
-        }
-
-        #endregion
-
     }
 }

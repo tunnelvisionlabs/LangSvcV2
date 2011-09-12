@@ -9,66 +9,60 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-
 namespace Microsoft.VisualStudio.Project.Automation
 {
-	[SuppressMessage("Microsoft.Interoperability", "CA1405:ComVisibleTypeBaseTypesShouldBeComVisible")]
-	[ComVisible(true), CLSCompliant(false)]
-	public class OANestedProjectItem : OAProjectItem<NestedProjectNode>
-	{
-		#region fields
-		EnvDTE.Project nestedProject;
-		#endregion
+    using System;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
 
-		#region ctors
-		public OANestedProjectItem(OAProject project, NestedProjectNode node)
-			: base(project, node)
-		{
-            if (node == null)
+    [SuppressMessage("Microsoft.Interoperability", "CA1405:ComVisibleTypeBaseTypesShouldBeComVisible")]
+    [ComVisible(true)]
+    [CLSCompliant(false)]
+    public class OANestedProjectItem : OAProjectItem<NestedProjectNode>
+    {
+        private readonly EnvDTE.Project nestedProject;
+
+        public OANestedProjectItem(OAProject project, NestedProjectNode node)
+            : base(project, node)
+        {
+            Contract.Requires<ArgumentNullException>(project != null, "project");
+            Contract.Requires<ArgumentNullException>(node != null, "node");
+
+            object nestedproject;
+            if (ErrorHandler.Succeeded(node.NestedHierarchy.GetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_ExtObject, out nestedproject)))
             {
-                throw new ArgumentNullException("node");
+                this.nestedProject = nestedproject as EnvDTE.Project;
             }
+        }
 
-			object nestedproject;
-			if(ErrorHandler.Succeeded(node.NestedHierarchy.GetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_ExtObject, out nestedproject)))
-			{
-				this.nestedProject = nestedproject as EnvDTE.Project;
-			}
-		}
+        /// <summary>
+        /// Returns the collection of project items defined in the nested project
+        /// </summary>
+        public override EnvDTE.ProjectItems ProjectItems
+        {
+            get
+            {
+                if (this.nestedProject != null)
+                {
+                    return this.nestedProject.ProjectItems;
+                }
 
-		#endregion
+                return null;
+            }
+        }
 
-		#region overridden methods
-		/// <summary>
-		/// Returns the collection of project items defined in the nested project
-		/// </summary>
-		public override EnvDTE.ProjectItems ProjectItems
-		{
-			get
-			{
-				if(this.nestedProject != null)
-				{
-					return this.nestedProject.ProjectItems;
-				}
-				return null;
-			}
-		}
-
-		/// <summary>
-		/// Returns the nested project.
-		/// </summary>
-		public override EnvDTE.Project SubProject
-		{
-			get
-			{
-				return this.nestedProject;
-			}
-		}
-		#endregion
-	}
+        /// <summary>
+        /// Returns the nested project.
+        /// </summary>
+        public override EnvDTE.Project SubProject
+        {
+            get
+            {
+                return this.nestedProject;
+            }
+        }
+    }
 }

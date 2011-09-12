@@ -379,7 +379,6 @@ namespace Microsoft.VisualStudio.Project
             }
         }
 
-
         #endregion
 
         #region virtual properties
@@ -4181,7 +4180,7 @@ namespace Microsoft.VisualStudio.Project
             }
 
             bool propertiesChanged = this.buildProject.SetGlobalProperty(ProjectFileConstants.Configuration, config);
-            propertiesChanged |= this.buildProject.SetGlobalProperty(ProjectFileConstants.Platform, platform);
+            propertiesChanged |= this.buildProject.SetGlobalProperty(ProjectFileConstants.Platform, ConfigProvider.GetPlatformPropertyFromPlatformName(platform));
             if (this.currentConfig == null || propertiesChanged)
             {
                 this.currentConfig = this.buildProject.CreateProjectInstance();

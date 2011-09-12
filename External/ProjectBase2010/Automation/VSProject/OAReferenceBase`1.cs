@@ -17,40 +17,37 @@ namespace Microsoft.VisualStudio.Project.Automation
     using prjReferenceType = VSLangProj.prjReferenceType;
     using Reference = VSLangProj.Reference;
     using References = VSLangProj.References;
+    using Reference2 = VSLangProj2.Reference2;
+    using Reference3 = VSLangProj80.Reference3;
+    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// Represents the automation equivalent of ReferenceNode
     /// </summary>
-    /// <typeparam name="RefType"></typeparam>
+    /// <typeparam name="TReferenceNode"></typeparam>
     [SuppressMessage("Microsoft.Naming", "CA1715:IdentifiersShouldHaveCorrectPrefix", MessageId = "T")]
     [ComVisible(true)]
-    public abstract class OAReferenceBase<RefType> : Reference
-        where RefType : ReferenceNode
+    public abstract class OAReferenceBase<TReferenceNode> : Reference, Reference2, Reference3
+        where TReferenceNode : ReferenceNode
     {
-        private RefType referenceNode;
+        private readonly TReferenceNode _referenceNode;
 
-        protected OAReferenceBase(RefType referenceNode)
+        protected OAReferenceBase(TReferenceNode referenceNode)
         {
-            this.referenceNode = referenceNode;
+            Contract.Requires<ArgumentNullException>(referenceNode != null, "referenceNode");
+            this._referenceNode = referenceNode;
         }
 
-        protected RefType BaseReferenceNode
+        protected TReferenceNode BaseReferenceNode
         {
             get
             {
-                return referenceNode;
+                Contract.Ensures(Contract.Result<TReferenceNode>() != null);
+                return _referenceNode;
             }
         }
 
         #region Reference Members
-
-        public virtual int BuildNumber
-        {
-            get
-            {
-                return 0;
-            }
-        }
 
         public virtual References Collection
         {
@@ -145,6 +142,30 @@ namespace Microsoft.VisualStudio.Project.Automation
             }
         }
 
+        public virtual int BuildNumber
+        {
+            get
+            {
+                return 0;
+            }
+        }
+
+        public virtual int RevisionNumber
+        {
+            get
+            {
+                return 0;
+            }
+        }
+
+        public virtual string Version
+        {
+            get
+            {
+                return new Version(MajorVersion, MinorVersion, BuildNumber, RevisionNumber).ToString();
+            }
+        }
+
         public virtual string Name
         {
             get
@@ -166,19 +187,6 @@ namespace Microsoft.VisualStudio.Project.Automation
             get
             {
                 throw new NotImplementedException();
-            }
-        }
-
-        public virtual void Remove()
-        {
-            BaseReferenceNode.Remove(false);
-        }
-
-        public virtual int RevisionNumber
-        {
-            get
-            {
-                return 0;
             }
         }
 
@@ -206,17 +214,130 @@ namespace Microsoft.VisualStudio.Project.Automation
             }
         }
 
-        public virtual string Version
-        {
-            get
-            {
-                return new Version().ToString();
-            }
-        }
-
         public virtual object get_Extender(string ExtenderName)
         {
             throw new NotImplementedException();
+        }
+
+        public virtual void Remove()
+        {
+            BaseReferenceNode.Remove(false);
+        }
+
+        #endregion
+
+        #region Reference2 Members
+
+        /// <summary>
+        /// Gets the version of the runtime the reference was built against.
+        /// </summary>
+        public virtual string RuntimeVersion
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        #endregion
+
+        #region Reference3 Members
+
+        /// <summary>
+        /// Gets or sets the aliased names for the specified reference. This property applies to Visual C# only.
+        /// </summary>
+        public virtual string Aliases
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets whether the reference is automatically referenced by the compiler.
+        /// </summary>
+        public virtual bool AutoReferenced
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether the COM reference is isolated, that is, not registered with Windows.
+        /// </summary>
+        public virtual bool Isolated
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets the type of reference: assembly, COM, or native.
+        /// </summary>
+        public virtual uint RefType
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets whether the current reference was resolved.
+        /// </summary>
+        public virtual bool Resolved
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether only a specific version of the reference is used.
+        /// </summary>
+        public virtual bool SpecificVersion
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Sets or Gets the assembly subtype.
+        /// </summary>
+        public virtual string SubType
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
         }
 
         #endregion

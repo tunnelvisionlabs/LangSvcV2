@@ -251,13 +251,14 @@
 
             if (string.IsNullOrEmpty(fullucc))
             {
-                fullucc = JavaProjectPackage.FindJavacPath(true);
+                var projectConfigs = ParentPropertyPage.Configurations;
+                JavaProjectConfig projectConfig = projectConfigs != null && projectConfigs.Count == 1 ? (JavaProjectConfig)projectConfigs[0] : null;
+                fullucc = projectConfig != null ? projectConfig.FindJavaBinary("javac.exe", true) : null;
             }
 
             commandLine.AppendFileNameIfNotNull(fullucc);
 
-            if (!string.IsNullOrEmpty(Encoding))
-                commandLine.AppendSwitchIfNotNull("-encoding ", Encoding);
+            commandLine.AppendSwitchIfNotNullOrEmpty("-encoding ", Encoding);
 
             switch (DebuggingInformation)
             {
@@ -287,8 +288,7 @@
             if (!string.IsNullOrEmpty(TargetRelease) && !string.Equals(TargetRelease, "Default", StringComparison.OrdinalIgnoreCase))
                 commandLine.AppendSwitchIfNotNull("-target ", TargetRelease);
 
-            if (!string.IsNullOrEmpty(OutputPath))
-                commandLine.AppendSwitchIfNotNull("-d ", OutputPath);
+            commandLine.AppendSwitchIfNotNullOrEmpty("-d ", OutputPath);
 
             if (!ShowWarnings)
             {

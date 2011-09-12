@@ -23,7 +23,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 	public class OAProject : EnvDTE.Project, EnvDTE.ISupportVSProperties
 	{
 		#region fields
-		private ProjectNode project;
+		private readonly ProjectNode project;
 		EnvDTE.ConfigurationManager configurationManager;
 		#endregion
 

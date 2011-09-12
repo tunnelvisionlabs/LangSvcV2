@@ -4,12 +4,9 @@
 
     public class JavaConfigProvider : ConfigProvider
     {
-        public const string DisplayHotspotAnyCPU = "Hotspot Any CPU";
-        public const string DisplayHotspotX86 = "Hotspot X86";
-        public const string DisplayHotspotX64 = "Hotspot X64";
-        public const string DisplayJRockitAnyCPU = "JRockit Any CPU";
-        public const string DisplayJRockitX86 = "JRockit X86";
-        public const string DisplayJRockitX64 = "JRockit X64";
+        public const string DisplayAnyCPU = "Any CPU";
+        public const string DisplayX86 = "X86";
+        public const string DisplayX64 = "X64";
 
         public JavaConfigProvider(JavaProjectNode manager)
             : base(manager)
@@ -33,23 +30,14 @@
         {
             switch (platformProperty)
             {
-            case JavaProjectFileConstants.HotspotAnyCPU:
-                return DisplayHotspotAnyCPU;
+            case JavaProjectFileConstants.AnyCPU:
+                return DisplayAnyCPU;
 
-            case JavaProjectFileConstants.HotspotX86:
-                return DisplayHotspotX86;
+            case JavaProjectFileConstants.X86:
+                return DisplayX86;
 
-            case JavaProjectFileConstants.HotspotX64:
-                return DisplayHotspotX64;
-
-            case JavaProjectFileConstants.JRockitAnyCPU:
-                return DisplayJRockitAnyCPU;
-
-            case JavaProjectFileConstants.JRockitX86:
-                return DisplayJRockitX86;
-
-            case JavaProjectFileConstants.JRockitX64:
-                return DisplayJRockitX64;
+            case JavaProjectFileConstants.X64:
+                return DisplayX64;
 
             default:
                 return base.GetPlatformNameFromPlatformProperty(platformProperty);
@@ -60,23 +48,14 @@
         {
             switch (platformName)
             {
-            case DisplayHotspotAnyCPU:
-                return JavaProjectFileConstants.HotspotAnyCPU;
+            case DisplayAnyCPU:
+                return JavaProjectFileConstants.AnyCPU;
 
-            case DisplayHotspotX86:
-                return JavaProjectFileConstants.HotspotX86;
+            case DisplayX86:
+                return JavaProjectFileConstants.X86;
 
-            case DisplayHotspotX64:
-                return JavaProjectFileConstants.HotspotX64;
-
-            case DisplayJRockitAnyCPU:
-                return JavaProjectFileConstants.JRockitAnyCPU;
-
-            case DisplayJRockitX86:
-                return JavaProjectFileConstants.JRockitX86;
-
-            case DisplayJRockitX64:
-                return JavaProjectFileConstants.JRockitX64;
+            case DisplayX64:
+                return JavaProjectFileConstants.X64;
 
             default:
                 return base.GetPlatformPropertyFromPlatformName(platformName);

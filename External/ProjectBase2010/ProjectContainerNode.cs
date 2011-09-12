@@ -75,7 +75,7 @@ namespace Microsoft.VisualStudio.Project
 		/// <summary>
 		/// This is the object that will be returned by EnvDTE.Project.Object for this project
 		/// </summary>
-		internal override object Object
+		public override object Object
 		{
 			get { return new OASolutionFolder<ProjectContainerNode>(this); }
 		}

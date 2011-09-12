@@ -6,6 +6,7 @@
         // Page names
         //
         public const string PageNameGeneral = "General";
+        public const string PageNameApplication = "Application";
         public const string PageNameBuildEvents = "Build Events";
         public const string PageNameBuild = "Build";
         public const string PageNameDebug = "Debug";
@@ -14,6 +15,14 @@
         // General
         //
         public const string JavacPath = "JavacPath";
+
+        //
+        // Application
+        //
+        public const string PackageName = "PackageName";
+        public const string TargetVM = "TargetVM";
+        public const string OutputType = "OutputType";
+        public const string StartupObject = "StartupObject";
 
         //
         // Build events

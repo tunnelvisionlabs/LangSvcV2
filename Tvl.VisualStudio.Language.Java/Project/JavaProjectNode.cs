@@ -152,13 +152,14 @@
             else if (!folderNode.ItemNode.IsVirtual)
             {
                 folderNode.ItemNode.ItemName = buildAction.ToString();
-                return;
             }
             else
             {
                 ProjectElement updatedElement = AddFolderToMsBuild(folderNode.VirtualNodeName, buildAction.ToString());
                 folderNode.ItemNode = updatedElement;
             }
+
+            folderNode.ReDraw(UIHierarchyElement.Icon);
         }
 
         protected override ProjectElement AddFolderToMsBuild(string folder, string itemType)
@@ -191,7 +192,7 @@
             if (_userBuildProject != null)
             {
                 _userBuildProject.SetGlobalProperty(ProjectFileConstants.Configuration, config);
-                _userBuildProject.SetGlobalProperty(ProjectFileConstants.Platform, platform);
+                _userBuildProject.SetGlobalProperty(ProjectFileConstants.Platform, ConfigProvider.GetPlatformPropertyFromPlatformName(platform));
             }
         }
 
@@ -344,6 +345,11 @@
                 || base.FilterItemTypeToBeAddedToHierarchy(itemType);
         }
 
+        protected override ReferenceContainerNode CreateReferenceContainerNode()
+        {
+            return new JavaReferenceContainerNode(this);
+        }
+
         public override FileNode CreateFileNode(ProjectElement item)
         {
             return new JavaFileNode(this, item);
@@ -458,7 +464,6 @@
         {
             return new Guid[]
                 {
-                    typeof(PropertyPages.JavaGeneralPropertyPage).GUID,
                     typeof(PropertyPages.JavaBuildEventsPropertyPage).GUID,
                 };
         }
@@ -467,6 +472,7 @@
         {
             return new Guid[]
                 {
+                    typeof(PropertyPages.JavaApplicationPropertyPage).GUID,
                     typeof(PropertyPages.JavaBuildPropertyPage).GUID,
                     typeof(PropertyPages.JavaDebugPropertyPage).GUID,
                 };

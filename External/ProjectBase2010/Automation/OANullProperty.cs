@@ -9,93 +9,115 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Runtime.InteropServices;
-
 namespace Microsoft.VisualStudio.Project.Automation
 {
-	/// <summary>
-	/// This object defines a so called null object that is returned as instead of null. This is because callers in VSCore usually crash if a null propery is returned for them.
-	/// </summary>
-	[CLSCompliant(false), ComVisible(true)]
-	public class OANullProperty : EnvDTE.Property
-	{
-		#region fields
-		private OAProperties parent;
-		#endregion
+    using System;
+    using System.Runtime.InteropServices;
+    using System.Diagnostics.Contracts;
 
-		#region ctors
+    /// <summary>
+    /// This object defines a so called null object that is returned as instead of null. This is because callers in VSCore usually crash if a null propery is returned for them.
+    /// </summary>
+    [CLSCompliant(false), ComVisible(true)]
+    public class OANullProperty : EnvDTE.Property
+    {
+        private readonly OAProperties _parent;
 
-		public OANullProperty(OAProperties parent)
-		{
-			this.parent = parent;
-		}
-		#endregion
+        public OANullProperty(OAProperties parent)
+        {
+            Contract.Requires<ArgumentNullException>(parent != null, "parent");
+            this._parent = parent;
+        }
 
-		#region EnvDTE.Property
+        #region EnvDTE.Property
 
-		public object Application
-		{
-			get { return String.Empty; }
-		}
+        public object Application
+        {
+            get
+            {
+                return String.Empty;
+            }
+        }
 
-		public EnvDTE.Properties Collection
-		{
-			get
-			{
-				//todo: EnvDTE.Property.Collection
-				return this.parent;
-			}
-		}
+        public EnvDTE.Properties Collection
+        {
+            get
+            {
+                //todo: EnvDTE.Property.Collection
+                return this._parent;
+            }
+        }
 
-		public EnvDTE.DTE DTE
-		{
-			get { return null; }
-		}
+        public EnvDTE.DTE DTE
+        {
+            get
+            {
+                return null;
+            }
+        }
 
-		public object get_IndexedValue(object index1, object index2, object index3, object index4)
-		{
-			return String.Empty;
-		}
+        public object get_IndexedValue(object index1, object index2, object index3, object index4)
+        {
+            return String.Empty;
+        }
 
-		public void let_Value(object value)
-		{
-			//todo: let_Value
-		}
+        public void let_Value(object value)
+        {
+            //todo: let_Value
+        }
 
-		public string Name
-		{
-			get { return String.Empty; }
-		}
+        public string Name
+        {
+            get
+            {
+                return String.Empty;
+            }
+        }
 
-		public short NumIndices
-		{
-			get { return 0; }
-		}
+        public short NumIndices
+        {
+            get
+            {
+                return 0;
+            }
+        }
 
-		public object Object
-		{
-			get { return this.parent.Target; }
-			set
-			{
-			}
-		}
+        public object Object
+        {
+            get
+            {
+                return this._parent.Target;
+            }
 
-		public EnvDTE.Properties Parent
-		{
-			get { return this.parent; }
-		}
+            set
+            {
+            }
+        }
 
-		public void set_IndexedValue(object index1, object index2, object index3, object index4, object value)
-		{
+        public EnvDTE.Properties Parent
+        {
+            get
+            {
+                return this._parent;
+            }
+        }
 
-		}
+        public void set_IndexedValue(object index1, object index2, object index3, object index4, object value)
+        {
+        }
 
-		public object Value
-		{
-			get { return String.Empty; }
-			set { }
-		}
-		#endregion
-	}
+        public object Value
+        {
+            get
+            {
+                return String.Empty;
+            }
+
+            set
+            {
+            }
+        }
+
+        #endregion
+    }
 }

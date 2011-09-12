@@ -3,6 +3,7 @@
     using System;
     using CommandLineBuilder = Microsoft.Build.Utilities.CommandLineBuilder;
     using Path = System.IO.Path;
+    using Microsoft.VisualStudio.Project;
 
     public partial class JavaDebugPropertyPagePanel : JavaPropertyPagePanel
     {
@@ -191,7 +192,10 @@
             switch (StartAction)
             {
             case StartAction.Class:
-                commandLine.AppendFileNameIfNotNull(JavaProjectPackage.FindJavaPath(false));
+                var projectConfigs = ParentPropertyPage.Configurations;
+                JavaProjectConfig projectConfig = projectConfigs != null && projectConfigs.Count == 1 ? (JavaProjectConfig)projectConfigs[0] : null;
+                string javaPath = projectConfig != null ? projectConfig.FindJavaBinary("java.exe", true) : null;
+                commandLine.AppendFileNameIfNotNull(javaPath);
 
                 commandLine.AppendSwitch("-agentpath:{AgentPath}");
                 if (!string.IsNullOrEmpty(AgentArguments))

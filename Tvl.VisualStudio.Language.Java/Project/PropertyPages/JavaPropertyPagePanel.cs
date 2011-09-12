@@ -11,6 +11,8 @@
 
     public partial class JavaPropertyPagePanel : UserControl
     {
+        private readonly JavaPropertyPage _parentPropertyPage;
+
         public JavaPropertyPagePanel()
             : this(null)
         {
@@ -18,14 +20,16 @@
 
         public JavaPropertyPagePanel(JavaPropertyPage parentPropertyPage)
         {
-            ParentPropertyPage = parentPropertyPage;
+            _parentPropertyPage = parentPropertyPage;
             InitializeComponent();
         }
 
         internal JavaPropertyPage ParentPropertyPage
         {
-            get;
-            set;
+            get
+            {
+                return _parentPropertyPage;
+            }
         }
 
         protected bool IsDirty

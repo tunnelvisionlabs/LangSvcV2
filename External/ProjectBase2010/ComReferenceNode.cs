@@ -122,7 +122,7 @@ namespace Microsoft.VisualStudio.Project
             }
         }
         private Automation.OAComReference comReference;
-        internal override object Object
+        public override object Object
         {
             get
             {
@@ -206,11 +206,14 @@ namespace Microsoft.VisualStudio.Project
         {
             Debug.Assert(this.ItemNode != null, "The AssemblyName field has not been initialized");
 
-            // We need to create the project element at this point if it has not been created.
-            // We cannot do that from the ctor if input comes from a component selector data, since had we been doing that we would have added a project element to the project file.  
-            // The problem with that approach is that we would need to remove the project element if the item cannot be added to the hierachy (E.g. It already exists).
-            // It is just safer to update the project file now. This is the intent of this method.
-            // Call MSBuild to build the target ResolveComReferences
+            /* We need to create the project element at this point if it has not been created.
+             * We cannot do that from the ctor if input comes from a component selector data, since
+             * had we been doing that we would have added a project element to the project file.  
+             * The problem with that approach is that we would need to remove the project element
+             * if the item cannot be added to the hierachy (E.g. It already exists). It is just
+             * safer to update the project file now. This is the intent of this method. Call MSBuild
+             * to build the target ResolveComReferences.
+             */
             if(this.ItemNode == null || this.ItemNode.Item == null)
             {
                 this.ItemNode = this.GetProjectElementBasedOnInputFromComponentSelectorData();
@@ -266,7 +269,6 @@ namespace Microsoft.VisualStudio.Project
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase")]
         private ProjectElement GetProjectElementBasedOnInputFromComponentSelectorData()
         {
-
             ProjectElement element = new ProjectElement(this.ProjectManager, this.typeName, ProjectFileConstants.COMReference);
 
             // Set the basic information regarding this COM component

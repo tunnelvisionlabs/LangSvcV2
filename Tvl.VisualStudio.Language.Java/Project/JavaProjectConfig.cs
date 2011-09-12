@@ -1,22 +1,28 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Project
 {
-    using Path = System.IO.Path;
     using System;
+    using System.Collections.Generic;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Project;
-    using DEBUG_LAUNCH_OPERATION = Microsoft.VisualStudio.Shell.Interop.DEBUG_LAUNCH_OPERATION;
-
-    using CultureInfo = System.Globalization.CultureInfo;
-    using StringComparison = System.StringComparison;
-    using System.Collections.Generic;
     using Tvl.VisualStudio.Shell.Extensions;
-    using IVsDebugger2 = Microsoft.VisualStudio.Shell.Interop.IVsDebugger2;
-    using JavaDebugEngine = Tvl.VisualStudio.Language.Java.Debugger.JavaDebugEngine;
+
     using __VSDBGLAUNCHFLAGS = Microsoft.VisualStudio.Shell.Interop.__VSDBGLAUNCHFLAGS;
-    using SVsShellDebugger = Microsoft.VisualStudio.Shell.Interop.SVsShellDebugger;
-    using IVsUIShell = Microsoft.VisualStudio.Shell.Interop.IVsUIShell;
-    using SVsUIShell = Microsoft.VisualStudio.Shell.Interop.SVsUIShell;
     using CommandLineBuilder = Microsoft.Build.Utilities.CommandLineBuilder;
+    using CultureInfo = System.Globalization.CultureInfo;
+    using DEBUG_LAUNCH_OPERATION = Microsoft.VisualStudio.Shell.Interop.DEBUG_LAUNCH_OPERATION;
+    using Directory = System.IO.Directory;
+    using File = System.IO.File;
+    using IVsDebugger2 = Microsoft.VisualStudio.Shell.Interop.IVsDebugger2;
+    using IVsUIShell = Microsoft.VisualStudio.Shell.Interop.IVsUIShell;
+    using JavaDebugEngine = Tvl.VisualStudio.Language.Java.Debugger.JavaDebugEngine;
+    using Path = System.IO.Path;
+    using Registry = Microsoft.Win32.Registry;
+    using RegistryKey = Microsoft.Win32.RegistryKey;
+    using RegistryKeyPermissionCheck = Microsoft.Win32.RegistryKeyPermissionCheck;
+    using SecurityException = System.Security.SecurityException;
+    using StringComparison = System.StringComparison;
+    using SVsShellDebugger = Microsoft.VisualStudio.Shell.Interop.SVsShellDebugger;
+    using SVsUIShell = Microsoft.VisualStudio.Shell.Interop.SVsUIShell;
 
     public class JavaProjectConfig : ProjectConfig
     {
@@ -32,6 +38,73 @@
             get
             {
                 return (JavaProjectNode)base.ProjectManager;
+            }
+        }
+
+        public string FindJavaBinary(string fileName, bool developmentKit)
+        {
+            string vendorBase = GetConfigurationProperty("JvmRegistryBase", false);
+
+            bool allow64bit = Platform.EndsWith("X64", StringComparison.OrdinalIgnoreCase) || Platform.EndsWith("Any CPU", StringComparison.OrdinalIgnoreCase);
+            bool allow32bit = Platform.EndsWith("X86", StringComparison.OrdinalIgnoreCase) || Platform.EndsWith("Any CPU", StringComparison.OrdinalIgnoreCase);
+
+            string softwareRegKey64 = Environment.Is64BitOperatingSystem ? @"SOFTWARE\" : null;
+            string softwareRegKey32 = Environment.Is64BitOperatingSystem ? @"SOFTWARE\Wow6432Node\" : @"SOFTWARE\";
+
+            string installation = developmentKit ? "Java Development Kit" : "Java Runtime Environment";
+
+            if (allow64bit && softwareRegKey64 != null)
+            {
+                string registryRoot = softwareRegKey64 + vendorBase + @"\" + installation;
+                string path = FindJavaPath(registryRoot, fileName);
+                if (!string.IsNullOrEmpty(path))
+                    return path;
+            }
+
+            if (allow32bit)
+            {
+                string registryRoot = softwareRegKey32 + vendorBase + @"\" + installation;
+                string path = FindJavaPath(registryRoot, fileName);
+                if (!string.IsNullOrEmpty(path))
+                    return path;
+            }
+
+            return null;
+        }
+
+        private static string FindJavaPath(string registryRoot, string fileName)
+        {
+            try
+            {
+                using (RegistryKey jdk = Registry.LocalMachine.OpenSubKey(registryRoot, RegistryKeyPermissionCheck.ReadSubTree))
+                {
+                    if (jdk == null)
+                        return null;
+
+                    string currentVersion = jdk.GetValue("CurrentVersion") as string;
+                    if (currentVersion == null)
+                        return null;
+
+                    using (RegistryKey jdkVersion = jdk.OpenSubKey(currentVersion, RegistryKeyPermissionCheck.ReadSubTree))
+                    {
+                        if (jdkVersion == null)
+                            return null;
+
+                        string javaHome = jdkVersion.GetValue("JavaHome") as string;
+                        if (!Directory.Exists(javaHome))
+                            return null;
+
+                        string javac = Path.Combine(javaHome, "bin", fileName);
+                        if (!File.Exists(javac))
+                            return null;
+
+                        return javac;
+                    }
+                }
+            }
+            catch (SecurityException)
+            {
+                return null;
             }
         }
 
@@ -98,7 +171,14 @@
 
             CommandLineBuilder commandLine = new CommandLineBuilder();
 
-            string agentPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(typeof(JavaProjectConfig).Assembly.Location), "Tvl.Java.DebugHostWrapper.dll"));
+            bool x64 = Platform.EndsWith("X64", StringComparison.OrdinalIgnoreCase) || (Platform.EndsWith("Any CPU", StringComparison.OrdinalIgnoreCase) && Environment.Is64BitOperatingSystem);
+            string agentBaseFileName = "Tvl.Java.DebugHostWrapper";
+            if (x64)
+                agentBaseFileName += "X64";
+
+            string agentFolder = Path.GetDirectoryName(typeof(JavaProjectConfig).Assembly.Location);
+            string agentFileName = agentBaseFileName + ".dll";
+            string agentPath = Path.GetFullPath(Path.Combine(agentFolder, agentFileName));
             commandLine.AppendSwitchIfNotNull("-agentpath:", agentPath);
 
             string agentArguments = GetConfigurationProperty(JavaConfigConstants.DebugAgentArguments, false, ProjectPropertyStorage.UserFile);
@@ -149,7 +229,9 @@
 
             info.Arguments = commandLine.ToString();
 
-            info.Executable = JavaProjectPackage.FindJavaPath(false);
+            bool useDevelopmentEnvironment = (grfLaunch & (uint)__VSDBGLAUNCHFLAGS.DBGLAUNCH_NoDebug) == 0;
+            info.Executable = FindJavaBinary("java.exe", useDevelopmentEnvironment);
+
             //info.CurrentDirectory = GetConfigurationProperty("WorkingDirectory", false, ProjectPropertyStorage.UserFile);
             info.CurrentDirectory = workingDirectory;
             info.SendToOutputWindow = false;

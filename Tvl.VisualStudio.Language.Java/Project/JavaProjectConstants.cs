@@ -19,6 +19,9 @@
         public const string JavaGeneralPropertyPageGuidString = "88F03B6B-FB44-4403-B6D9-45E8C55BA694";
         public static readonly Guid JavaGeneralPropertyPageGuid = new Guid("{" + JavaGeneralPropertyPageGuidString + "}");
 
+        public const string JavaApplicationPropertyPageGuidString = "9AEC2F56-7F7B-4939-887C-A3EA832613E0";
+        public static readonly Guid JavaApplicationPropertyPageGuid = new Guid("{" + JavaApplicationPropertyPageGuidString + "}");
+
         public const string JavaBuildEventsPropertyPageGuidString = "65E17C43-D7A8-4B97-A4D8-A66CFE97558C";
         public static readonly Guid JavaBuildEventsPropertyPageGuid = new Guid("{" + JavaBuildEventsPropertyPageGuidString + "}");
 
