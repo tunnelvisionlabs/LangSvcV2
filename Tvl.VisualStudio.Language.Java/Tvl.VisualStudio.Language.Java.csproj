@@ -643,6 +643,11 @@
       <Name>Tvl.Java.DebugHostWrapper</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+    <ProjectReference Include="..\Tvl.Java.DebugHostWrapper\Tvl.Java.DebugHostWrapperX64.vcxproj">
+      <Project>{65C841CD-AEC6-416C-B22D-B2116B36B0B5}</Project>
+      <Name>Tvl.Java.DebugHostWrapperX64</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
     <ProjectReference Include="..\Tvl.Java.DebugHost\Tvl.Java.DebugHost.csproj">
       <Project>{833550B8-B651-4FFB-B3AE-BF572AC4A18C}</Project>
       <Name>Tvl.Java.DebugHost</Name>
