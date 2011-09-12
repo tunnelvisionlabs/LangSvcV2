@@ -280,7 +280,7 @@ namespace Microsoft.VisualStudio.Project
                     string configCondition = GetConfigurationCondition(config).Trim();
                     string configPlatformCondition = GetConfigurationPlatformCondition(config, platform).Trim();
 
-                    foreach (ProjectPropertyGroupElement element in this.project.BuildProject.Xml.PropertyGroups.ToArray())
+                    foreach (ProjectPropertyGroupElement element in GetBuildProjectXmlPropertyGroups().ToArray())
                     {
                         if (element.Condition == null)
                             continue;
@@ -296,6 +296,11 @@ namespace Microsoft.VisualStudio.Project
 
             NotifyOnCfgNameDeleted(name);
             return VSConstants.S_OK;
+        }
+
+        protected virtual IEnumerable<ProjectPropertyGroupElement> GetBuildProjectXmlPropertyGroups(bool includeUserBuildProjects = true)
+        {
+            return project.BuildProject.Xml.PropertyGroups;
         }
 
         /// <summary>
@@ -334,7 +339,7 @@ namespace Microsoft.VisualStudio.Project
                     string platformCondition = GetPlatformCondition(platform).Trim();
                     string configPlatformCondition = GetConfigurationPlatformCondition(config, platform).Trim();
 
-                    foreach (ProjectPropertyGroupElement element in this.project.BuildProject.Xml.PropertyGroups.ToArray())
+                    foreach (ProjectPropertyGroupElement element in GetBuildProjectXmlPropertyGroups().ToArray())
                     {
                         if (element.Condition == null)
                             continue;
@@ -538,7 +543,7 @@ namespace Microsoft.VisualStudio.Project
             string condition = GetConfigurationCondition(old).Trim();
             string[] platforms = GetPlatformsFromProject();
 
-            foreach (ProjectPropertyGroupElement config in this.project.BuildProject.Xml.PropertyGroups)
+            foreach (ProjectPropertyGroupElement config in GetBuildProjectXmlPropertyGroups().ToArray())
             {
                 // Only care about conditional property groups
                 if(config.Condition == null || config.Condition.Length == 0)
@@ -623,7 +628,7 @@ namespace Microsoft.VisualStudio.Project
             string condition = GetConfigurationPlatformCondition(copyFromConfigurationName, copyFromPlatformName).Trim();
 
             // Get all configs
-            List<ProjectPropertyGroupElement> configGroup = new List<ProjectPropertyGroupElement>(this.project.BuildProject.Xml.PropertyGroups);
+            List<ProjectPropertyGroupElement> configGroup = new List<ProjectPropertyGroupElement>(GetBuildProjectXmlPropertyGroups());
             ProjectPropertyGroupElement configToClone = null;
 
             if (!string.IsNullOrEmpty(copyFromConfigurationName))

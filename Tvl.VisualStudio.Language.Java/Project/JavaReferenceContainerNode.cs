@@ -34,7 +34,7 @@
             get
             {
                 
-                return base.SupportedReferenceTypes;
+                return _supportedReferenceTypes;
             }
         }
 

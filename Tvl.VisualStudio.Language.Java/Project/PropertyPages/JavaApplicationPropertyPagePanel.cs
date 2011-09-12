@@ -17,7 +17,7 @@
         private static readonly string DisplayJavaArchiveOutputType = "Java Archive (jar)";
         private static readonly string DisplayNotSetStartupObject = "(Not Set)";
 
-        private static readonly ImmutableList<string> _emptyList;
+        private static readonly ImmutableList<string> _emptyList = new ImmutableList<string>(new string[0]);
 
         private ImmutableList<string> _availableTargetVirtualMachines = _emptyList;
         private ImmutableList<string> _availableOutputTypes = _emptyList;
@@ -54,7 +54,7 @@
             set
             {
                 Contract.Requires<ArgumentNullException>(value != null, "value");
-                Contract.Requires<ArgumentException>(Contract.ForAll(value, i => string.IsNullOrEmpty(i)));
+                Contract.Requires<ArgumentException>(Contract.ForAll(value, i => !string.IsNullOrEmpty(i)));
 
                 if (_availableTargetVirtualMachines.SequenceEqual(value, StringComparer.CurrentCulture))
                     return;
@@ -77,14 +77,14 @@
             set
             {
                 Contract.Requires<ArgumentNullException>(value != null, "value");
-                Contract.Requires<ArgumentException>(Contract.ForAll(value, i => string.IsNullOrEmpty(i)));
+                Contract.Requires<ArgumentException>(Contract.ForAll(value, i => !string.IsNullOrEmpty(i)));
 
                 if (_availableOutputTypes.SequenceEqual(value, StringComparer.CurrentCulture))
                     return;
 
                 _availableOutputTypes = value;
                 cmbOutputType.Items.Clear();
-                cmbOutputType.Items.AddRange(value.ToArray());
+                cmbOutputType.Items.AddRange(value.Select(i => (i == JavaProjectFileConstants.JavaArchiveOutputType) ? DisplayJavaArchiveOutputType : i).ToArray());
             }
         }
 
@@ -100,14 +100,14 @@
             set
             {
                 Contract.Requires<ArgumentNullException>(value != null, "value");
-                Contract.Requires<ArgumentException>(Contract.ForAll(value, i => string.IsNullOrEmpty(i)));
+                Contract.Requires<ArgumentException>(Contract.ForAll(value, i => i != null));
 
                 if (_availableStartupObjects.SequenceEqual(value, StringComparer.CurrentCulture))
                     return;
 
                 _availableStartupObjects = value;
                 cmbStartupObject.Items.Clear();
-                cmbStartupObject.Items.AddRange(value.ToArray());
+                cmbStartupObject.Items.AddRange(value.Select(i => string.IsNullOrEmpty(i) ? DisplayNotSetStartupObject : i).ToArray());
             }
         }
 
@@ -128,6 +128,8 @@
         {
             get
             {
+                Contract.Ensures(Contract.Result<string>() != null);
+
                 if (cmbTargetVirtualMachine.SelectedItem == null)
                     return string.Empty;
 
@@ -136,6 +138,8 @@
 
             set
             {
+                Contract.Requires<ArgumentNullException>(value != null, "value");
+
                 cmbTargetVirtualMachine.SelectedItem = value;
             }
         }
@@ -144,15 +148,27 @@
         {
             get
             {
+                Contract.Ensures(Contract.Result<string>() != null);
+
                 if (cmbOutputType.SelectedItem == null)
                     return string.Empty;
 
-                return cmbOutputType.SelectedItem.ToString();
+                string outputType = cmbOutputType.SelectedItem.ToString();
+                if (outputType == DisplayJavaArchiveOutputType)
+                    outputType = JavaProjectFileConstants.JavaArchiveOutputType;
+
+                return outputType;
             }
 
             set
             {
-                cmbOutputType.SelectedItem = value;
+                Contract.Requires<ArgumentNullException>(value != null, "value");
+
+                string outputType = value;
+                if (outputType == JavaProjectFileConstants.JavaArchiveOutputType)
+                    outputType = DisplayJavaArchiveOutputType;
+
+                cmbOutputType.SelectedItem = outputType;
             }
         }
 
@@ -160,16 +176,33 @@
         {
             get
             {
+                Contract.Ensures(Contract.Result<string>() != null);
+
                 if (cmbStartupObject.SelectedItem == null)
                     return string.Empty;
 
-                return cmbStartupObject.SelectedItem.ToString();
+                string startupObject = cmbStartupObject.SelectedItem.ToString();
+                if (startupObject == DisplayNotSetStartupObject)
+                    startupObject = string.Empty;
+
+                return startupObject;
             }
 
             set
             {
-                cmbStartupObject.SelectedItem = value;
+                Contract.Requires<ArgumentNullException>(value != null, "value");
+
+                string startupObject = value;
+                if (string.IsNullOrEmpty(startupObject))
+                    startupObject = DisplayNotSetStartupObject;
+
+                cmbStartupObject.SelectedItem = startupObject;
             }
+        }
+
+        private void HandleBuildSettingChanged(object sender, EventArgs e)
+        {
+            ParentPropertyPage.IsDirty = true;
         }
     }
 }

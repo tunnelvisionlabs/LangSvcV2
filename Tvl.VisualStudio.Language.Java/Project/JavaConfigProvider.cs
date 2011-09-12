@@ -1,5 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Project
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using Microsoft.Build.Construction;
     using Microsoft.VisualStudio.Project;
 
     public class JavaConfigProvider : ConfigProvider
@@ -60,6 +63,15 @@
             default:
                 return base.GetPlatformPropertyFromPlatformName(platformName);
             }
+        }
+
+        protected override IEnumerable<ProjectPropertyGroupElement> GetBuildProjectXmlPropertyGroups(bool includeUserBuildProjects = true)
+        {
+            var result = base.GetBuildProjectXmlPropertyGroups(includeUserBuildProjects);
+            if (includeUserBuildProjects && ProjectManager.UserBuildProject != null)
+                result = result.Concat(ProjectManager.UserBuildProject.Xml.PropertyGroups);
+
+            return result;
         }
     }
 }

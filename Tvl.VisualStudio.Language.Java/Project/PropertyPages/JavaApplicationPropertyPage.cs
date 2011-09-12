@@ -6,26 +6,24 @@
     using System.Text;
     using System.Runtime.InteropServices;
     using Tvl.Collections;
+    using Microsoft.VisualStudio.Project;
 
     [ComVisible(true)]
     [Guid(JavaProjectConstants.JavaApplicationPropertyPageGuidString)]
     public class JavaApplicationPropertyPage : JavaPropertyPage
     {
-        private static readonly string HotspotTargetVirtualMachine = "Hotspot";
-        private static readonly string JRockitTargetVirtualMachine = "JRockit";
-        private static readonly string JavaArchiveOutputType = "jar";
         private static readonly string NotSetStartupObject = string.Empty;
 
         private static readonly ImmutableList<string> _defaultAvailableTargetVirtualMachines =
             new ImmutableList<string>(new string[]
             {
-                HotspotTargetVirtualMachine,
-                JRockitTargetVirtualMachine,
+                JavaProjectFileConstants.HotspotTargetVirtualMachine,
+                JavaProjectFileConstants.JRockitTargetVirtualMachine,
             });
         private static readonly ImmutableList<string> _defaultAvailableOutputTypes =
             new ImmutableList<string>(new string[]
             {
-                JavaArchiveOutputType,
+                JavaProjectFileConstants.JavaArchiveOutputType,
             });
         private static readonly ImmutableList<string> _defaultAvailableStartupObjects =
             new ImmutableList<string>(new string[]
@@ -54,7 +52,7 @@
         protected override void BindProperties()
         {
             // package name
-            PropertyPagePanel.PackageName = GetConfigProperty(JavaConfigConstants.PackageName);
+            PropertyPagePanel.PackageName = GetConfigProperty(ProjectFileConstants.AssemblyName);
 
             // available items
             PropertyPagePanel.AvailableTargetVirtualMachines = _defaultAvailableTargetVirtualMachines;
@@ -62,14 +60,14 @@
             PropertyPagePanel.AvailableStartupObjects = _defaultAvailableStartupObjects;
 
             // selected items
-            PropertyPagePanel.TargetVirtualMachine = HotspotTargetVirtualMachine;
-            PropertyPagePanel.OutputType = JavaArchiveOutputType;
-            PropertyPagePanel.StartupObject = NotSetStartupObject;
+            PropertyPagePanel.TargetVirtualMachine = GetConfigProperty(JavaConfigConstants.TargetVM);
+            PropertyPagePanel.OutputType = GetConfigProperty(JavaConfigConstants.OutputType);
+            PropertyPagePanel.StartupObject = GetConfigProperty(JavaConfigConstants.StartupObject);
         }
 
         protected override bool ApplyChanges()
         {
-            SetConfigProperty(JavaConfigConstants.PackageName, PropertyPagePanel.PackageName);
+            SetConfigProperty(ProjectFileConstants.AssemblyName, PropertyPagePanel.PackageName);
             SetConfigProperty(JavaConfigConstants.TargetVM, PropertyPagePanel.TargetVirtualMachine);
             SetConfigProperty(JavaConfigConstants.OutputType, PropertyPagePanel.OutputType);
             SetConfigProperty(JavaConfigConstants.StartupObject, PropertyPagePanel.StartupObject);

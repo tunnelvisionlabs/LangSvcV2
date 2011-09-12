@@ -342,6 +342,8 @@
         {
             return string.Equals(itemType, JavaProjectFileConstants.SourceFolder, StringComparison.OrdinalIgnoreCase)
                 || string.Equals(itemType, JavaProjectFileConstants.TestSourceFolder, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(itemType, JavaProjectFileConstants.JarReference, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(itemType, JavaProjectFileConstants.MavenReference, StringComparison.OrdinalIgnoreCase)
                 || base.FilterItemTypeToBeAddedToHierarchy(itemType);
         }
 

@@ -39,10 +39,10 @@
             System.Windows.Forms.Panel panel5;
             System.Windows.Forms.Panel panel6;
             System.Windows.Forms.Panel panel4;
-            this.cmbOutputType = new System.Windows.Forms.ComboBox();
             this.cmbStartupObject = new System.Windows.Forms.ComboBox();
             this.txtPackageName = new System.Windows.Forms.TextBox();
             this.cmbTargetVirtualMachine = new System.Windows.Forms.ComboBox();
+            this.cmbOutputType = new System.Windows.Forms.ComboBox();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
             label3 = new System.Windows.Forms.Label();
@@ -88,37 +88,6 @@
             label3.TabIndex = 0;
             label3.Text = "Startup object:";
             // 
-            // cmbOutputType
-            // 
-            this.cmbOutputType.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cmbOutputType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbOutputType.FormattingEnabled = true;
-            this.cmbOutputType.Location = new System.Drawing.Point(3, 16);
-            this.cmbOutputType.Name = "cmbOutputType";
-            this.cmbOutputType.Size = new System.Drawing.Size(282, 21);
-            this.cmbOutputType.TabIndex = 1;
-            // 
-            // cmbStartupObject
-            // 
-            this.cmbStartupObject.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cmbStartupObject.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbStartupObject.FormattingEnabled = true;
-            this.cmbStartupObject.Location = new System.Drawing.Point(3, 16);
-            this.cmbStartupObject.Name = "cmbStartupObject";
-            this.cmbStartupObject.Size = new System.Drawing.Size(282, 21);
-            this.cmbStartupObject.TabIndex = 1;
-            // 
-            // txtPackageName
-            // 
-            this.txtPackageName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtPackageName.Location = new System.Drawing.Point(3, 16);
-            this.txtPackageName.Name = "txtPackageName";
-            this.txtPackageName.Size = new System.Drawing.Size(282, 20);
-            this.txtPackageName.TabIndex = 1;
-            // 
             // label4
             // 
             label4.AutoSize = true;
@@ -127,17 +96,6 @@
             label4.Size = new System.Drawing.Size(115, 13);
             label4.TabIndex = 0;
             label4.Text = "Target virtual machine:";
-            // 
-            // cmbTargetVirtualMachine
-            // 
-            this.cmbTargetVirtualMachine.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cmbTargetVirtualMachine.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbTargetVirtualMachine.FormattingEnabled = true;
-            this.cmbTargetVirtualMachine.Location = new System.Drawing.Point(3, 16);
-            this.cmbTargetVirtualMachine.Name = "cmbTargetVirtualMachine";
-            this.cmbTargetVirtualMachine.Size = new System.Drawing.Size(282, 21);
-            this.cmbTargetVirtualMachine.TabIndex = 1;
             // 
             // tableLayoutPanel1
             // 
@@ -156,7 +114,7 @@
             tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            tableLayoutPanel1.Size = new System.Drawing.Size(588, 184);
+            tableLayoutPanel1.Size = new System.Drawing.Size(588, 145);
             tableLayoutPanel1.TabIndex = 0;
             // 
             // panel1
@@ -164,10 +122,22 @@
             panel1.Controls.Add(this.cmbStartupObject);
             panel1.Controls.Add(label3);
             panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            panel1.Location = new System.Drawing.Point(3, 125);
+            panel1.Location = new System.Drawing.Point(3, 99);
             panel1.Name = "panel1";
-            panel1.Size = new System.Drawing.Size(288, 56);
+            panel1.Size = new System.Drawing.Size(288, 43);
             panel1.TabIndex = 5;
+            // 
+            // cmbStartupObject
+            // 
+            this.cmbStartupObject.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbStartupObject.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbStartupObject.FormattingEnabled = true;
+            this.cmbStartupObject.Location = new System.Drawing.Point(3, 16);
+            this.cmbStartupObject.Name = "cmbStartupObject";
+            this.cmbStartupObject.Size = new System.Drawing.Size(282, 21);
+            this.cmbStartupObject.TabIndex = 1;
+            this.cmbStartupObject.SelectedIndexChanged += new System.EventHandler(this.HandleBuildSettingChanged);
             // 
             // panel2
             // 
@@ -176,35 +146,69 @@
             panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             panel2.Location = new System.Drawing.Point(3, 3);
             panel2.Name = "panel2";
-            panel2.Size = new System.Drawing.Size(288, 55);
+            panel2.Size = new System.Drawing.Size(288, 42);
             panel2.TabIndex = 0;
+            // 
+            // txtPackageName
+            // 
+            this.txtPackageName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtPackageName.Location = new System.Drawing.Point(3, 16);
+            this.txtPackageName.Name = "txtPackageName";
+            this.txtPackageName.Size = new System.Drawing.Size(282, 20);
+            this.txtPackageName.TabIndex = 1;
+            this.txtPackageName.TextChanged += new System.EventHandler(this.HandleBuildSettingChanged);
             // 
             // panel3
             // 
             panel3.Controls.Add(this.cmbTargetVirtualMachine);
             panel3.Controls.Add(label4);
             panel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            panel3.Location = new System.Drawing.Point(3, 64);
+            panel3.Location = new System.Drawing.Point(3, 51);
             panel3.Name = "panel3";
-            panel3.Size = new System.Drawing.Size(288, 55);
+            panel3.Size = new System.Drawing.Size(288, 42);
             panel3.TabIndex = 3;
+            // 
+            // cmbTargetVirtualMachine
+            // 
+            this.cmbTargetVirtualMachine.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbTargetVirtualMachine.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbTargetVirtualMachine.FormattingEnabled = true;
+            this.cmbTargetVirtualMachine.Location = new System.Drawing.Point(3, 16);
+            this.cmbTargetVirtualMachine.Name = "cmbTargetVirtualMachine";
+            this.cmbTargetVirtualMachine.Size = new System.Drawing.Size(282, 21);
+            this.cmbTargetVirtualMachine.TabIndex = 1;
+            this.cmbTargetVirtualMachine.SelectedIndexChanged += new System.EventHandler(this.HandleBuildSettingChanged);
             // 
             // panel5
             // 
             panel5.Controls.Add(label2);
             panel5.Controls.Add(this.cmbOutputType);
             panel5.Dock = System.Windows.Forms.DockStyle.Fill;
-            panel5.Location = new System.Drawing.Point(297, 64);
+            panel5.Location = new System.Drawing.Point(297, 51);
             panel5.Name = "panel5";
-            panel5.Size = new System.Drawing.Size(288, 55);
+            panel5.Size = new System.Drawing.Size(288, 42);
             panel5.TabIndex = 4;
+            // 
+            // cmbOutputType
+            // 
+            this.cmbOutputType.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbOutputType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbOutputType.FormattingEnabled = true;
+            this.cmbOutputType.Location = new System.Drawing.Point(3, 16);
+            this.cmbOutputType.Name = "cmbOutputType";
+            this.cmbOutputType.Size = new System.Drawing.Size(282, 21);
+            this.cmbOutputType.TabIndex = 1;
+            this.cmbOutputType.SelectedIndexChanged += new System.EventHandler(this.HandleBuildSettingChanged);
             // 
             // panel6
             // 
             panel6.Dock = System.Windows.Forms.DockStyle.Fill;
-            panel6.Location = new System.Drawing.Point(297, 125);
+            panel6.Location = new System.Drawing.Point(297, 99);
             panel6.Name = "panel6";
-            panel6.Size = new System.Drawing.Size(288, 56);
+            panel6.Size = new System.Drawing.Size(288, 43);
             panel6.TabIndex = 5;
             // 
             // panel4
@@ -212,7 +216,7 @@
             panel4.Dock = System.Windows.Forms.DockStyle.Fill;
             panel4.Location = new System.Drawing.Point(297, 3);
             panel4.Name = "panel4";
-            panel4.Size = new System.Drawing.Size(288, 55);
+            panel4.Size = new System.Drawing.Size(288, 42);
             panel4.TabIndex = 1;
             // 
             // JavaApplicationPropertyPagePanel
