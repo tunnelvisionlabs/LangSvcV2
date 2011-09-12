@@ -6,9 +6,10 @@
     using System.Text;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio;
+    using System.Diagnostics.Contracts;
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
-    public sealed class ProvideDebuggerExceptionAttribute : RegistrationAttribute
+    public class ProvideDebuggerExceptionAttribute : RegistrationAttribute
     {
         private readonly Guid _debugEngine;
         private readonly string _exceptionKind;
@@ -27,16 +28,13 @@
         {
         }
 
-        public ProvideDebuggerExceptionAttribute(string debugEngine, string exceptionKind, string exceptionNamespace, string exceptionName)
+        public ProvideDebuggerExceptionAttribute(string debugEngineGuid, string exceptionKind, string exceptionNamespace, string exceptionName)
         {
-            if (debugEngine == null)
-                throw new ArgumentNullException("debugEngine");
-            if (exceptionKind == null)
-                throw new ArgumentNullException("exceptionKind");
-            if (exceptionName == null)
-                throw new ArgumentNullException("exceptionName");
+            Contract.Requires<ArgumentNullException>(debugEngineGuid != null, "debugEngineGuid");
+            Contract.Requires<ArgumentNullException>(exceptionKind != null, "exceptionKind");
+            Contract.Requires<ArgumentNullException>(exceptionName != null, "exceptionName");
 
-            _debugEngine = Guid.Parse(debugEngine);
+            _debugEngine = Guid.Parse(debugEngineGuid);
             _exceptionKind = exceptionKind;
             _exceptionName = exceptionName;
             _exceptionNamespace = exceptionNamespace;

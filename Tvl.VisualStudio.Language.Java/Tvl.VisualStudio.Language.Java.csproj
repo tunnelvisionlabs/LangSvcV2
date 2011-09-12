@@ -367,6 +367,7 @@
     <Compile Include="Debugger\JavaDebugFunctionPosition.cs" />
     <Compile Include="Debugger\JavaDebuggerConstants.cs" />
     <Compile Include="Debugger\JavaDebuggerPackage.cs" />
+    <Compile Include="Debugger\JavaDebuggerPackage.ProvideExceptions.cs" />
     <Compile Include="Debugger\JavaDebugLocationPendingBreakpoint.cs" />
     <Compile Include="Debugger\JavaDebugMemoryBytes.cs" />
     <Compile Include="Debugger\JavaDebugMemoryContext.cs" />
@@ -387,6 +388,7 @@
     <Compile Include="Debugger\JavaDebugThread.cs" />
     <Compile Include="Debugger\Events\DebugThreadCreateEvent.cs" />
     <Compile Include="Debugger\JavaDebugStaticMembersPseudoProperty.cs" />
+    <Compile Include="Debugger\ProvideJvmExceptionAttribute.cs" />
     <Compile Include="Debugger\ThreadCategory.cs" />
     <Compile Include="Experimental\BraceLevelTracker.cs" />
     <Compile Include="Experimental\ClassAnchorTracker.cs" />

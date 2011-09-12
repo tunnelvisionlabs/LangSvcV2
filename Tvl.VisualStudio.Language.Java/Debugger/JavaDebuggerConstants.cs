@@ -17,5 +17,7 @@
         public static readonly Guid JavaProgramProviderGuid = new Guid("{" + JavaProgramProviderGuidString + "}");
 
         public const int E_INSUFFICIENT_BUFFER = unchecked((int)0x8007007A);
+
+        public const string JvmExceptionKind = "Java Runtime Exceptions";
     }
 }

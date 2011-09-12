@@ -1,11 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Shell;
     using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio.Shell;
     using Tvl.VisualStudio.Shell;
 
     [PackageRegistration(UseManagedResourcesOnly = true)]
@@ -24,7 +21,7 @@
         )]
     [ProvideObject(typeof(JavaDebugEngine))]
     [ProvideObject(typeof(JavaDebugProgramProvider))]
-    public class JavaDebuggerPackage : Package
+    public partial class JavaDebuggerPackage : Package
     {
     }
 }
