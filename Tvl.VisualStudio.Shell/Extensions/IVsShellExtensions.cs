@@ -1,4 +1,4 @@
-﻿namespace Tvl.VisualStudio.Shell.Extensions
+﻿namespace Tvl.VisualStudio.Shell
 {
     using ArgumentNullException = System.ArgumentNullException;
     using Contract = System.Diagnostics.Contracts.Contract;

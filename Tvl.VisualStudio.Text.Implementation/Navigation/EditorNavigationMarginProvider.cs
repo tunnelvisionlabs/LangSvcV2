@@ -1,19 +1,15 @@
 ﻿namespace Tvl.VisualStudio.Text.Navigation.Implementation
 {
-    using IVsDropdownBarManager = Microsoft.VisualStudio.TextManager.Interop.IVsDropdownBarManager;
-    using Tvl.VisualStudio.Text.Navigation;
-    using System.Linq;
-    using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Language.Intellisense;
-    using Microsoft.VisualStudio.Text.Editor;
-    using Microsoft.VisualStudio.Text.Tagging;
-    using Microsoft.VisualStudio.Utilities;
-    using Tvl.VisualStudio.Text.Tagging;
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.Composition;
+    using System.Linq;
     using Microsoft.VisualStudio.Editor;
-    using Tvl.VisualStudio.Shell.Extensions;
-    using IVsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
+    using Microsoft.VisualStudio.Text.Editor;
+    using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Shell;
+    using Tvl.VisualStudio.Text.Navigation;
+
     using IVsTextBuffer = Microsoft.VisualStudio.TextManager.Interop.IVsTextBuffer;
 
     [Export(typeof(IWpfTextViewMarginProvider))]

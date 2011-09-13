@@ -5,7 +5,8 @@
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Intellisense;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Shell;
+
     using AntlrIntellisenseOptions = Tvl.VisualStudio.Language.Antlr3.OptionsPages.AntlrIntellisenseOptions;
     using IVsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
     using VSOBJGOTOSRCTYPE = Microsoft.VisualStudio.Shell.Interop.VSOBJGOTOSRCTYPE;

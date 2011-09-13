@@ -7,7 +7,6 @@
     using Microsoft.VisualStudio.Text.Operations;
     using Microsoft.VisualStudio.TextManager.Interop;
     using Microsoft.VisualStudio.Utilities;
-    using Tvl.VisualStudio.Shell.Extensions;
     using Tvl.VisualStudio.Language.Intellisense;
 
     [Name("AlloyCompletionSourceProvider")]

@@ -7,9 +7,7 @@
     using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
-    using Tvl.Extensions;
     using Tvl.VisualStudio.Language.Java.Debugger.Events;
-    using Tvl.VisualStudio.Language.Java.Debugger.Extensions;
 
     [ComVisible(true)]
     public class JavaDebugExpression : IDebugExpression2

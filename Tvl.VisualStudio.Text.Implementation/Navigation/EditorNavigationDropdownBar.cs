@@ -9,7 +9,7 @@
     using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.TextManager.Interop;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Shell;
 
     using Bitmap = System.Drawing.Bitmap;
     using BitmapSource = System.Windows.Media.Imaging.BitmapSource;

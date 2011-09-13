@@ -1,23 +1,21 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger
 {
-    using EnumDebugPrograms = Tvl.VisualStudio.Language.Java.Debugger.Collections.EnumDebugPrograms;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
-    using System.Diagnostics.Contracts;
-    using Microsoft.VisualStudio;
-    using System.Globalization;
-    using Tvl.VisualStudio.Language.Java.Debugger.Events;
-    using Tvl.VisualStudio.Language.Java.Debugger.Extensions;
-    using Microsoft.VisualStudio.Utilities;
-    using Tvl.Java.DebugInterface.Request;
-    using Tvl.Java.DebugInterface;
-    using Tvl.Extensions;
-    using System.Threading.Tasks;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.Linq;
+    using System.Runtime.InteropServices;
+    using System.Threading.Tasks;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Debugger.Interop;
+    using Microsoft.VisualStudio.Utilities;
+    using Tvl.Java.DebugInterface;
+    using Tvl.Java.DebugInterface.Request;
+    using Tvl.VisualStudio.Language.Java.Debugger.Events;
+
+    using EnumDebugPrograms = Tvl.VisualStudio.Language.Java.Debugger.Collections.EnumDebugPrograms;
 
     [ComVisible(true)]
     [Guid(JavaDebuggerConstants.JavaDebugEngineGuidString)]

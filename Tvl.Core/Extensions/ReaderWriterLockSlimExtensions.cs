@@ -1,4 +1,4 @@
-﻿namespace Tvl.Extensions
+﻿namespace Tvl
 {
     using System;
     using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;

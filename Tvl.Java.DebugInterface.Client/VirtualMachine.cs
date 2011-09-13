@@ -13,7 +13,6 @@
     using AccessModifiers = Tvl.Java.DebugInterface.AccessModifiers;
     using EventWaitHandle = System.Threading.EventWaitHandle;
     using EventResetMode = System.Threading.EventResetMode;
-    using Tvl.Extensions;
     using System.ServiceModel;
     using Tvl.Java.DebugInterface.Client.Events;
     using System.Diagnostics.Contracts;

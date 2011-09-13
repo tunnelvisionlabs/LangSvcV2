@@ -1,4 +1,4 @@
-﻿namespace Tvl.VisualStudio.Language.Java.Debugger.Extensions
+﻿namespace Tvl.VisualStudio.Language.Java.Debugger
 {
     using System;
     using Microsoft.VisualStudio;

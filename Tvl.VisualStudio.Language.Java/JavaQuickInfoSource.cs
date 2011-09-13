@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
-    using Tvl.Extensions;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
 
     using CancellationToken = System.Threading.CancellationToken;

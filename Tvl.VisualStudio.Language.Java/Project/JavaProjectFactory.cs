@@ -3,7 +3,8 @@
     using System;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio.Project;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Shell;
+
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
     [Guid(JavaProjectConstants.JavaProjectFactoryGuidString)]

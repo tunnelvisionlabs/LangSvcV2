@@ -5,7 +5,6 @@
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Linq;
-    using Tvl.Extensions;
     using IntervalSet = Tvl.VisualStudio.Language.Parsing.Collections.IntervalSet;
 
     public abstract class ContextTransition : Transition

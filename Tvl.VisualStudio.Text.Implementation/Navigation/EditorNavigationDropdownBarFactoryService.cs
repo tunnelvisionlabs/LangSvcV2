@@ -4,11 +4,11 @@
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
     using System.Linq;
-    using IVsDropdownBarClient = Microsoft.VisualStudio.TextManager.Interop.IVsDropdownBarClient;
-    using IWpfTextView = Microsoft.VisualStudio.Text.Editor.IWpfTextView;
-    using Microsoft.VisualStudio.TextManager.Interop;
     using Microsoft.VisualStudio.Editor;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Microsoft.VisualStudio.TextManager.Interop;
+    using Tvl.VisualStudio.Shell;
+
+    using IWpfTextView = Microsoft.VisualStudio.Text.Editor.IWpfTextView;
 
     [Export(typeof(IEditorNavigationDropdownBarFactoryService))]
     public class EditorNavigationDropdownBarFactoryService : IEditorNavigationDropdownBarFactoryService

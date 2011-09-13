@@ -6,7 +6,7 @@ namespace Tvl.VisualStudio.Language.Java.Project.Controls
     using System.IO;
     using System.Windows.Forms;
     using Microsoft.VisualStudio.Shell.Interop;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Shell;
 
     using Package = Microsoft.VisualStudio.Shell.Package;
     using Url = Microsoft.VisualStudio.Shell.Url;

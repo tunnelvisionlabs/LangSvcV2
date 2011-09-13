@@ -1,20 +1,16 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
-    using System.Diagnostics.Contracts;
-    using Microsoft.VisualStudio;
-    using Tvl.VisualStudio.Language.Java.Debugger.Extensions;
-    using Tvl.Java.DebugInterface;
-    using Tvl.Java.DebugInterface.Types.Analysis;
     using System.Collections.ObjectModel;
-    using Tvl.Java.DebugInterface.Types;
-    using Tvl.Extensions;
+    using System.Diagnostics.Contracts;
+    using System.Linq;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Debugger.Interop;
     using Tvl.Collections;
+    using Tvl.Java.DebugInterface;
+    using Tvl.Java.DebugInterface.Types;
+    using Tvl.Java.DebugInterface.Types.Analysis;
 
     [ComVisible(true)]
     public class JavaDebugDisassemblyStream : IDebugDisassemblyStream2

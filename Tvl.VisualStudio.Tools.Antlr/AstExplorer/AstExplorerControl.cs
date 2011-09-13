@@ -14,7 +14,6 @@
     using Tvl.Events;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell;
-    using Tvl.VisualStudio.Shell.Extensions;
     using Tvl.VisualStudio.Text.Tagging;
 
     internal class AstExplorerControl : ContentControl

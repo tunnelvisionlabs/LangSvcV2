@@ -11,7 +11,6 @@
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.TextManager.Interop;
-    using Tvl.Extensions;
     using Tvl.VisualStudio.Shell;
     using Tvl.VisualStudio.Text;
     using OLECMDEXECOPT = Microsoft.VisualStudio.OLE.Interop.OLECMDEXECOPT;

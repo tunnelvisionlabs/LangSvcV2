@@ -1,13 +1,12 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger
 {
-    using System.Linq;
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
-    using Tvl.VisualStudio.Language.Java.Debugger.Extensions;
-    using System.Collections.Generic;
 
     [ComVisible(true)]
     [Guid(JavaDebuggerConstants.JavaProgramProviderGuidString)]

@@ -5,7 +5,6 @@
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
     using System.Linq;
-    using Tvl.VisualStudio.Shell.Extensions;
 
     using Dispatcher = System.Windows.Threading.Dispatcher;
     using DispatcherPriority = System.Windows.Threading.DispatcherPriority;

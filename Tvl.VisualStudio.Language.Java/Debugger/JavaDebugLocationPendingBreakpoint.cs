@@ -1,22 +1,19 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger
 {
-    using TextSpan = Microsoft.VisualStudio.TextManager.Interop.TextSpan;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Diagnostics.Contracts;
-    using Microsoft.VisualStudio;
-    using Tvl.VisualStudio.Language.Java.Debugger.Collections;
-    using Path = System.IO.Path;
-    using Tvl.VisualStudio.Language.Java.Debugger.Extensions;
-    using Tvl.Java.DebugInterface;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
+    using System.Linq;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Debugger.Interop;
+    using Tvl.Java.DebugInterface;
     using Tvl.Java.DebugInterface.Request;
+    using Tvl.VisualStudio.Language.Java.Debugger.Collections;
     using Tvl.VisualStudio.Language.Java.Debugger.Events;
-    using Task = System.Threading.Tasks.Task;
-    using Tvl.Extensions;
+
+    using Path = System.IO.Path;
+    using TextSpan = Microsoft.VisualStudio.TextManager.Interop.TextSpan;
 
     internal class JavaDebugLocationPendingBreakpoint : IJavaVirtualizableBreakpoint, IDebugPendingBreakpoint2, IDebugPendingBreakpoint3, IDebugQueryEngine2
     {

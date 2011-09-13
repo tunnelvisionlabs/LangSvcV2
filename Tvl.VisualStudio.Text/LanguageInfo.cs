@@ -2,15 +2,16 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.ComponentModelHost;
     using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.TextManager.Interop;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Shell;
+
     using IConnectionPointContainer = Microsoft.VisualStudio.OLE.Interop.IConnectionPointContainer;
-    using System.Diagnostics.Contracts;
 
     public abstract class LanguageInfo : IVsLanguageInfo, IVsLanguageDebugInfo, IDisposable
     {

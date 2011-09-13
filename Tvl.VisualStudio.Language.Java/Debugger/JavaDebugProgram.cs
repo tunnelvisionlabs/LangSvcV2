@@ -1,21 +1,15 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger
 {
-    using Interlocked = System.Threading.Interlocked;
-    using OAProject = Microsoft.VisualStudio.Project.Automation.OAProject;
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Runtime.InteropServices;
-    using System.ServiceModel;
-    using System.ServiceModel.Channels;
-    using System.Text;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
-    using Tvl.Extensions;
     using Tvl.Java.DebugInterface;
     using Tvl.Java.DebugInterface.Client.Connect;
     using Tvl.Java.DebugInterface.Client.Events;
@@ -23,17 +17,16 @@
     using Tvl.Java.DebugInterface.Request;
     using Tvl.VisualStudio.Language.Java.Debugger.Collections;
     using Tvl.VisualStudio.Language.Java.Debugger.Events;
-    using Tvl.VisualStudio.Language.Java.Debugger.Extensions;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Language.Java.Project;
+    using Tvl.VisualStudio.Shell;
 
     using Directory = System.IO.Directory;
-    using EventResetMode = System.Threading.EventResetMode;
-    using EventWaitHandle = System.Threading.EventWaitHandle;
+    using Interlocked = System.Threading.Interlocked;
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+    using MSBuild = Microsoft.Build.Evaluation;
+    using OAProject = Microsoft.VisualStudio.Project.Automation.OAProject;
     using Path = System.IO.Path;
     using Task = System.Threading.Tasks.Task;
-    using Tvl.VisualStudio.Language.Java.Project;
-    using MSBuild = Microsoft.Build.Evaluation;
 
     [ComVisible(true)]
     public partial class JavaDebugProgram

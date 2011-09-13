@@ -15,7 +15,7 @@
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Shell;
 
     using ANTLRLexer = global::Antlr3.Grammars.ANTLRLexer;
     using Attribute = global::Antlr3.Tool.Attribute;

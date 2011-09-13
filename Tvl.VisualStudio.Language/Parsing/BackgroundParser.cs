@@ -10,7 +10,6 @@
     using Timer = System.Timers.Timer;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Tvl.Extensions;
 
     public abstract class BackgroundParser : IBackgroundParser, IDisposable
     {

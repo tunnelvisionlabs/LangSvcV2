@@ -1,6 +1,5 @@
 ﻿namespace Tvl.Java.DebugHost.Services
 {
-    using Tvl.Extensions;
     using System;
     using System.Collections.Generic;
     using System.Linq;

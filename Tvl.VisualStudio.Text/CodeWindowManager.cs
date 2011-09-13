@@ -7,7 +7,7 @@
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.TextManager.Interop;
     using Tvl.Events;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Shell;
     using Tvl.VisualStudio.Text.Navigation;
 
     public class CodeWindowManager : IVsCodeWindowManager

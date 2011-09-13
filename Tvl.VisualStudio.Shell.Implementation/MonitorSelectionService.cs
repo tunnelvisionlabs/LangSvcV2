@@ -10,7 +10,6 @@
     using Microsoft.VisualStudio.Shell.Interop;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.TextManager.Interop;
-    using Tvl.VisualStudio.Shell.Extensions;
     using IOleCommandTarget = Microsoft.VisualStudio.OLE.Interop.IOleCommandTarget;
     using IOleUndoManager = Microsoft.VisualStudio.OLE.Interop.IOleUndoManager;
     using VsShellUtilities = Microsoft.VisualStudio.Shell.VsShellUtilities;

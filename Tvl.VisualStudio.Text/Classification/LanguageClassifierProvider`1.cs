@@ -6,7 +6,7 @@
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Shell;
 
     [ContractClass(typeof(Contracts.LanguageClassifierProviderContracts<>))]
     public abstract class LanguageClassifierProvider<TLanguagePackage> : IClassifierProvider

@@ -3,7 +3,7 @@
     using System.Collections.Generic;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Shell;
     using Tvl.VisualStudio.Text;
 
     using IVsEditorAdaptersFactoryService = Microsoft.VisualStudio.Editor.IVsEditorAdaptersFactoryService;

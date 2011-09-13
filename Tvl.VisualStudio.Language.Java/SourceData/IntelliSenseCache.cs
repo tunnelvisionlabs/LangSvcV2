@@ -8,11 +8,9 @@
     using Antlr.Runtime;
     using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio;
-    using Tvl.Extensions;
     using Tvl.VisualStudio.Language.Java.SourceData.Emit;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell;
-    using Tvl.VisualStudio.Shell.Extensions;
     using Tvl.VisualStudio.Shell.OutputWindow;
 
     using CancellationToken = System.Threading.CancellationToken;

@@ -6,7 +6,6 @@
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
     using Tvl.Java.DebugInterface;
-    using Tvl.VisualStudio.Language.Java.Debugger.Extensions;
 
     [ComVisible(true)]
     public class JavaDebugExceptionEvent : DebugEvent, IDebugExceptionEvent2

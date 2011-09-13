@@ -5,7 +5,7 @@
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.TextManager.Interop;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Shell;
 
     public abstract class CompletionSourceProvider : ICompletionSourceProvider
     {

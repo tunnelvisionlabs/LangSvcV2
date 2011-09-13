@@ -9,7 +9,6 @@
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Shell;
-    using Tvl.VisualStudio.Shell.Extensions;
     using Tvl.VisualStudio.Shell.OutputWindow;
 
     [Export(typeof(ITaggerProvider))]

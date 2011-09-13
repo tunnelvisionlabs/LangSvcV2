@@ -1,4 +1,4 @@
-﻿namespace Tvl.VisualStudio.Shell.Extensions
+﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
     using System.Diagnostics.CodeAnalysis;

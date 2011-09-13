@@ -6,7 +6,6 @@
     using System.Linq;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
-    using Tvl.Extensions;
     using CharStreamConstants = Antlr.Runtime.CharStreamConstants;
     using ICharStream = Antlr.Runtime.ICharStream;
     using IToken = Antlr.Runtime.IToken;

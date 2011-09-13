@@ -2,16 +2,15 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Tvl.VisualStudio.Language.Intellisense;
-    using Microsoft.VisualStudio.Language.Intellisense;
-    using Tvl.VisualStudio.Language.Antlr3.OptionsPages;
-    using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Shell.Extensions;
-    using Microsoft.VisualStudio.Text.Operations;
-    using GrammarType = global::Antlr3.Tool.GrammarType;
     using System.Text.RegularExpressions;
+    using Microsoft.VisualStudio.Language.Intellisense;
+    using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Operations;
+    using Tvl.VisualStudio.Language.Antlr3.OptionsPages;
+    using Tvl.VisualStudio.Language.Intellisense;
+    using Tvl.VisualStudio.Shell;
+
+    using GrammarType = global::Antlr3.Tool.GrammarType;
 
     public class CompletionSourceTest : CompletionSource, ICompletionSource
     {

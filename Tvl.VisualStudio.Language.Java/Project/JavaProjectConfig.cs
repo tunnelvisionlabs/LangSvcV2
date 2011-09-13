@@ -1,14 +1,12 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Project
 {
     using System;
-    using System.Collections.Generic;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Project;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Shell;
 
     using __VSDBGLAUNCHFLAGS = Microsoft.VisualStudio.Shell.Interop.__VSDBGLAUNCHFLAGS;
     using CommandLineBuilder = Microsoft.Build.Utilities.CommandLineBuilder;
-    using CultureInfo = System.Globalization.CultureInfo;
     using DEBUG_LAUNCH_OPERATION = Microsoft.VisualStudio.Shell.Interop.DEBUG_LAUNCH_OPERATION;
     using Directory = System.IO.Directory;
     using File = System.IO.File;

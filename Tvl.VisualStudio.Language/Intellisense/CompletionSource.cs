@@ -7,7 +7,8 @@
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.TextManager.Interop;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Shell;
+
     using ImageSource = System.Windows.Media.ImageSource;
 
     public abstract class CompletionSource : ICompletionSource

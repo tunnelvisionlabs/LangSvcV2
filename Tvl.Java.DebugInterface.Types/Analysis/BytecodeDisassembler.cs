@@ -5,7 +5,6 @@
     using System.Diagnostics.Contracts;
     using System.Collections.ObjectModel;
     using Tvl.Collections;
-    using Tvl.Extensions;
 
     public static class BytecodeDisassembler
     {

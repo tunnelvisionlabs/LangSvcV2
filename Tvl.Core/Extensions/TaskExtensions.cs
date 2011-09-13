@@ -1,4 +1,4 @@
-﻿namespace Tvl.Extensions
+﻿namespace Tvl
 {
     using System;
     using System.Diagnostics.Contracts;

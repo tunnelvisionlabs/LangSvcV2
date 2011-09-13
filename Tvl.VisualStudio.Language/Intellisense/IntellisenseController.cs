@@ -9,7 +9,6 @@
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
-    using Tvl.Extensions;
     using IVsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
     using Marshal = System.Runtime.InteropServices.Marshal;
     using OLECMDEXECOPT = Microsoft.VisualStudio.OLE.Interop.OLECMDEXECOPT;

@@ -4,7 +4,6 @@
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio.Shell;
     using Tvl.VisualStudio.Shell;
-    using Tvl.VisualStudio.Shell.Extensions;
     using AntlrIntellisenseOptions = Tvl.VisualStudio.Language.Antlr3.OptionsPages.AntlrIntellisenseOptions;
     using IServiceContainer = System.ComponentModel.Design.IServiceContainer;
 

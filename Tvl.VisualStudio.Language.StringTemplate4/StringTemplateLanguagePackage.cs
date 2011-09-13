@@ -3,7 +3,8 @@
     using System;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio.Shell;
-    using Tvl.VisualStudio.Shell.Extensions;
+    using Tvl.VisualStudio.Shell;
+
     using IServiceContainer = System.ComponentModel.Design.IServiceContainer;
 
     [PackageRegistration(UseManagedResourcesOnly = true)]
