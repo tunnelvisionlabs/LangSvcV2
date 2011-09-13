@@ -1,34 +1,17 @@
 ﻿namespace Tvl.VisualStudio.Language.Java
 {
     using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
     using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Text.Classification;
 
     [Export(typeof(IClassifierProvider))]
     [ContentType(Constants.JavaContentType)]
-    public sealed class JavaClassifierProvider : IClassifierProvider
+    public sealed class JavaClassifierProvider : LanguageClassifierProvider<JavaLanguagePackage>
     {
-        [Import]
-        private IStandardClassificationService StandardClassificationService
+        protected override IClassifier GetClassifierImpl(ITextBuffer textBuffer)
         {
-            get;
-            set;
-        }
-
-        [Import]
-        private IClassificationTypeRegistryService ClassificationTypeRegistryService
-        {
-            get;
-            set;
-        }
-
-        public IClassifier GetClassifier(ITextBuffer textBuffer)
-        {
-            if (textBuffer == null)
-                return null;
-
             return new JavaClassifier(textBuffer, StandardClassificationService, ClassificationTypeRegistryService);
         }
     }

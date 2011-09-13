@@ -1,34 +1,17 @@
 ﻿namespace Tvl.VisualStudio.Language.Antlr3
 {
     using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
     using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Text.Classification;
 
     [Export(typeof(IClassifierProvider))]
     [ContentType(AntlrConstants.AntlrContentType)]
-    public sealed class AntlrClassifierProvider : IClassifierProvider
+    public sealed class AntlrClassifierProvider : LanguageClassifierProvider<AntlrLanguagePackage>
     {
-        [Import]
-        private IStandardClassificationService StandardClassificationService
+        protected override IClassifier GetClassifierImpl(ITextBuffer textBuffer)
         {
-            get;
-            set;
-        }
-
-        [Import]
-        private IClassificationTypeRegistryService ClassificationTypeRegistryService
-        {
-            get;
-            set;
-        }
-
-        public IClassifier GetClassifier(ITextBuffer textBuffer)
-        {
-            if (textBuffer == null)
-                return null;
-
             return new AntlrClassifier(textBuffer, StandardClassificationService, ClassificationTypeRegistryService);
         }
     }

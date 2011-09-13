@@ -260,6 +260,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classification\Contracts\LanguageClassifierProviderContracts`1.cs" />
+    <Compile Include="Classification\LanguageClassifierProvider`1.cs" />
     <Compile Include="Contracts\ICommenterContracts.cs" />
     <Compile Include="Contracts\ICommenterProviderContracts.cs" />
     <Compile Include="Contracts\ITextViewMappingServiceContracts.cs" />

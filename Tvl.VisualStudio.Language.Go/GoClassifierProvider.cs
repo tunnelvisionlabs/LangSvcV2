@@ -1,34 +1,17 @@
 ﻿namespace Tvl.VisualStudio.Language.Go
 {
     using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
     using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Text.Classification;
 
     [Export(typeof(IClassifierProvider))]
     [ContentType(GoConstants.GoContentType)]
-    public sealed class GoClassifierProvider : IClassifierProvider
+    public sealed class GoClassifierProvider : LanguageClassifierProvider<GoLanguagePackage>
     {
-        [Import]
-        private IStandardClassificationService StandardClassificationService
+        protected override IClassifier GetClassifierImpl(ITextBuffer textBuffer)
         {
-            get;
-            set;
-        }
-
-        [Import]
-        private IClassificationTypeRegistryService ClassificationTypeRegistryService
-        {
-            get;
-            set;
-        }
-
-        public IClassifier GetClassifier(ITextBuffer textBuffer)
-        {
-            if (textBuffer == null)
-                return null;
-
             return new GoClassifier(textBuffer, StandardClassificationService, ClassificationTypeRegistryService);
         }
     }

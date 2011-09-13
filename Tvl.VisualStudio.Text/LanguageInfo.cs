@@ -21,8 +21,7 @@
 
         public LanguageInfo(SVsServiceProvider serviceProvider, Guid languageGuid)
         {
-            if (serviceProvider == null)
-                throw new ArgumentNullException("serviceProvider");
+            Contract.Requires<ArgumentNullException>(serviceProvider != null, "serviceProvider");
 
             _serviceProvider = serviceProvider;
             _languageGuid = languageGuid;
