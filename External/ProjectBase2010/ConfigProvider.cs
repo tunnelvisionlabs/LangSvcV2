@@ -406,12 +406,12 @@ namespace Microsoft.VisualStudio.Project
 
             // If true, indicates that AddCfgsOfPlatformName can be called on this object.
             case __VSCFGPROPID.VSCFGPROPID_SupportsPlatformAdd:
-                var = false;
+                var = true;
                 break;
 
             // If true, indicates that DeleteCfgsOfPlatformName can be called on this object.
             case __VSCFGPROPID.VSCFGPROPID_SupportsPlatformDelete:
-                var = false;
+                var = true;
                 break;
 
             // Establishes the basis for automation extenders to make the configuration automation assignment extensible.
