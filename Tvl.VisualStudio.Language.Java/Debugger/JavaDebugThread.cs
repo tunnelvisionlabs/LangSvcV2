@@ -352,7 +352,7 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
         public int Resume(out uint pdwSuspendCount)
         {
 #if HIDE_THREADS
-            Tvl.Extensions.TaskExtensions.HandleNonCriticalExceptions(System.Threading.Tasks.Task.Factory.StartNew(_thread.Resume));
+            System.Threading.Tasks.Task.Factory.StartNew(_thread.Resume).HandleNonCriticalExceptions();
             pdwSuspendCount = 0;
             return VSConstants.S_OK;
 #endif
@@ -375,7 +375,7 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
         public int Suspend(out uint pdwSuspendCount)
         {
 #if HIDE_THREADS
-            Tvl.Extensions.TaskExtensions.HandleNonCriticalExceptions(System.Threading.Tasks.Task.Factory.StartNew(_thread.Suspend));
+            System.Threading.Tasks.Task.Factory.StartNew(_thread.Suspend).HandleNonCriticalExceptions();
             pdwSuspendCount = 1;
             return VSConstants.S_OK;
 #endif
