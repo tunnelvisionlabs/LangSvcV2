@@ -1,21 +1,20 @@
 ﻿namespace Tvl.Java.DebugHost.Services
 {
-    using Interlocked = System.Threading.Interlocked;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Diagnostics.Contracts;
-    using Tvl.Java.DebugInterface.Types;
-    using Tvl.Java.DebugHost.Interop;
-    using Marshal = System.Runtime.InteropServices.Marshal;
+    using System.Linq;
     using System.Windows.Threading;
+    using Tvl.Collections;
+    using Tvl.Java.DebugHost.Interop;
+    using Tvl.Java.DebugInterface.Types;
+    using Tvl.Java.DebugInterface.Types.Loader;
+
+    using Interlocked = System.Threading.Interlocked;
     using ManualResetEventSlim = System.Threading.ManualResetEventSlim;
-    using MessageBox = System.Windows.Forms.MessageBox;
     using MessageBoxButtons = System.Windows.Forms.MessageBoxButtons;
     using MessageBoxDefaultButton = System.Windows.Forms.MessageBoxDefaultButton;
     using MessageBoxIcon = System.Windows.Forms.MessageBoxIcon;
-    using Tvl.Collections;
 
     partial class DebugProtocolService
     {
@@ -132,6 +131,7 @@
                 JvmtiErrorHandler.ThrowOnFailure(environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ThreadEnd));
                 JvmtiErrorHandler.ThrowOnFailure(environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ClassLoad));
                 JvmtiErrorHandler.ThrowOnFailure(environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ClassPrepare));
+                JvmtiErrorHandler.ThrowOnFailure(environment.SetEventNotificationMode(JvmEventMode.Enable, JvmEventType.ClassFileLoadHook));
 
 #if false
                 jvmtiCapabilities capabilities;
@@ -685,6 +685,33 @@
 
             private void HandleClassFileLoadHook(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jclass classBeingRedefinedHandle, jobject loaderHandle, IntPtr name, jobject protectionDomainHandle, int classDataLength, IntPtr classData, ref int newClassDataLength, ref IntPtr newClassData)
             {
+                // need to extract the exception_table for each method
+                ClassFile classFile = ClassFile.FromMemory(classData, 0);
+                ConstantClass constantClass = classFile.ThisClass;
+                ConstantUtf8 constantClassSignature = (ConstantUtf8)classFile.ConstantPool[constantClass.NameIndex - 1];
+                string classSignature = constantClassSignature.Value;
+                if (classSignature[0] != '[')
+                    classSignature = 'L' + classSignature + ';';
+
+                foreach (var methodInfo in classFile.Methods)
+                {
+                    if ((methodInfo.Modifiers & (AccessModifiers.Abstract | AccessModifiers.Native)) != 0)
+                        continue;
+
+                    Code codeAttribute = methodInfo.Attributes.OfType<Code>().SingleOrDefault();
+                    if (codeAttribute == null)
+                        continue;
+
+                    ConstantUtf8 constantMethodName = (ConstantUtf8)classFile.ConstantPool[methodInfo.NameIndex - 1];
+                    string methodName = constantMethodName.Value;
+
+                    ConstantUtf8 constantMethodSignature = (ConstantUtf8)classFile.ConstantPool[methodInfo.DescriptorIndex - 1];
+                    string methodSignature = constantMethodSignature.Value;
+
+                    VirtualMachine.SetExceptionTable(classSignature, methodName, methodSignature, codeAttribute.ExceptionTable);
+                }
+
+#if false
                 if (!VirtualMachine.IsAgentThread.Value)
                 {
                     // ignore events before VMInit
@@ -707,6 +734,7 @@
                 //{
                 //    processor.HandleClassFileLoadHook(environment, classBeingRedefined, loader, name.GetString(), protectionDomain);
                 //}
+#endif
             }
 
             private void HandleClassLoad(jvmtiEnvHandle env, JNIEnvHandle jniEnv, jthread threadHandle, jclass classHandle)

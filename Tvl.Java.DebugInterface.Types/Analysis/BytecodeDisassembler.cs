@@ -2,9 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
     using Tvl.Collections;
+    using Tvl.Java.DebugInterface.Types.Loader;
 
     public static class BytecodeDisassembler
     {
@@ -137,15 +138,29 @@
             return new DisassembledMethod(instructions, switchData);
         }
 
-        public static ImmutableList<int?> GetEvaluationStackDepths(DisassembledMethod disassembledMethod, ReadOnlyCollection<ConstantPoolEntry> constantPool)
+        public static ImmutableList<int?> GetEvaluationStackDepths(DisassembledMethod disassembledMethod, ReadOnlyCollection<ConstantPoolEntry> constantPool, ReadOnlyCollection<ExceptionTableEntry> exceptionTable)
         {
             Contract.Requires<ArgumentNullException>(disassembledMethod != null, "disassembledMethod");
             Contract.Requires<ArgumentNullException>(constantPool != null, "constantPool");
+            Contract.Requires<ArgumentNullException>(exceptionTable != null, "exceptionTable");
 
             int?[] depths = new int?[disassembledMethod.Instructions.Count];
             Queue<int> workQueue = new Queue<int>();
+
+            // can obviously start at the beginning of the method
             depths[0] = 0;
             workQueue.Enqueue(0);
+            // can also start inside each exception handler
+            foreach (var entry in exceptionTable)
+            {
+                int nextIndex = disassembledMethod.Instructions.FindIndex(i => i.Offset == entry.HandlerOffset);
+                if (!depths[nextIndex].HasValue)
+                {
+                    depths[nextIndex] = 1;
+                    workQueue.Enqueue(nextIndex);
+                }
+            }
+
             while (workQueue.Count > 0)
             {
                 int index = workQueue.Dequeue();

@@ -2,6 +2,7 @@
 {
     using System.ServiceModel;
     using Tvl.Java.DebugInterface.Types;
+    using Tvl.Java.DebugInterface.Types.Loader;
 
     [ServiceContract(CallbackContract = typeof(IDebugProcotolCallback), SessionMode = SessionMode.Required)]
     public interface IDebugProtocolService
@@ -141,6 +142,9 @@
         #endregion
 
         #region Method command set
+
+        [OperationContract]
+        Error GetMethodExceptionTable(ReferenceTypeId referenceType, MethodId method, out ExceptionTableEntry[] entries);
 
         [OperationContract]
         Error GetMethodLineTable(ReferenceTypeId referenceType, MethodId method, out long start, out long end, out LineNumberData[] lines);

@@ -3,7 +3,7 @@
     using System;
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
-
+    using ExceptionTableEntry = Tvl.Java.DebugInterface.Types.Loader.ExceptionTableEntry;
 
     /// <summary>
     /// A static or instance method in the target VM. See <see cref="ITypeComponent"/> for
@@ -41,6 +41,8 @@
         /// Returns an array containing the bytecodes for this method.
         /// </summary>
         byte[] GetBytecodes();
+
+        ReadOnlyCollection<ExceptionTableEntry> GetExceptionTable();
 
         /// <summary>
         /// Determine if this method is abstract.

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Runtime.ExceptionServices;
@@ -9,7 +10,7 @@
     using Tvl.Collections;
     using Tvl.Java.DebugHost.Interop;
     using Tvl.Java.DebugInterface.Types;
-    using System.Collections.ObjectModel;
+    using ExceptionTableEntry = Tvl.Java.DebugInterface.Types.Loader.ExceptionTableEntry;
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Reentrant, IncludeExceptionDetailInFaults = true)]
     public partial class DebugProtocolService : IDebugProtocolService
@@ -891,6 +892,60 @@
                 newArray = VirtualMachine.TrackLocalObjectReference(array, environment, nativeEnvironment, false);
                 VirtualMachine.AddGlobalReference(environment, nativeEnvironment, array);
                 nativeEnvironment.DeleteLocalReference(array);
+                return Error.None;
+            }
+        }
+
+        public Error GetMethodExceptionTable(ReferenceTypeId referenceType, MethodId methodId, out ExceptionTableEntry[] entries)
+        {
+            entries = null;
+
+            JniEnvironment nativeEnvironment;
+            JvmtiEnvironment environment;
+            jvmtiError error = GetEnvironment(out environment, out nativeEnvironment);
+            if (error != jvmtiError.None)
+                return GetStandardError(error);
+
+            using (var classHandle = VirtualMachine.GetLocalReferenceForClass(nativeEnvironment, referenceType))
+            {
+                if (!classHandle.IsAlive)
+                    return Error.InvalidClass;
+
+                bool native;
+                error = environment.IsMethodNative(methodId, out native);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
+
+                if (native)
+                    return Error.NativeMethod;
+
+                JvmAccessModifiers modifiers;
+                error = environment.GetMethodModifiers(methodId, out modifiers);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
+
+                if ((modifiers & JvmAccessModifiers.Abstract) != 0)
+                    return Error.AbsentInformation;
+
+                string classSignature;
+                string classGenericSignature;
+                error = environment.GetClassSignature(classHandle.Value, out classSignature, out classGenericSignature);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
+
+                string methodName;
+                string methodSignature;
+                string methodGenericSignature;
+                error = environment.GetMethodName(methodId, out methodName, out methodSignature, out methodGenericSignature);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
+
+                ReadOnlyCollection<ExceptionTableEntry> exceptionTable;
+                error = environment.VirtualMachine.GetExceptionTable(classSignature, methodName, methodSignature, out exceptionTable);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
+
+                entries = exceptionTable.ToArray();
                 return Error.None;
             }
         }

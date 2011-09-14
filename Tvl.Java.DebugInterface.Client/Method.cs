@@ -5,6 +5,7 @@
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Linq;
+    using ExceptionTableEntry = Tvl.Java.DebugInterface.Types.Loader.ExceptionTableEntry;
     using MethodId = Tvl.Java.DebugInterface.Types.MethodId;
     using Path = System.IO.Path;
     using SignatureHelper = Tvl.Java.DebugInterface.Types.SignatureHelper;
@@ -25,6 +26,7 @@
         private bool? _obsolete;
         private Location _location;
         private byte[] _bytecode;
+        private ReadOnlyCollection<ExceptionTableEntry> _exceptionTable;
 
         internal Method(VirtualMachine virtualMachine, ReferenceType declaringType, string name, string signature, string genericSignature, AccessModifiers modifiers, MethodId methodId)
             : base(virtualMachine, declaringType, name, signature, genericSignature, modifiers)
@@ -130,6 +132,18 @@
             }
 
             return _bytecode;
+        }
+
+        public ReadOnlyCollection<ExceptionTableEntry> GetExceptionTable()
+        {
+            if (_exceptionTable == null)
+            {
+                ExceptionTableEntry[] result;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetMethodExceptionTable(out result, DeclaringType.ReferenceTypeId, MethodId));
+                _exceptionTable = new ReadOnlyCollection<ExceptionTableEntry>(result);
+            }
+
+            return _exceptionTable;
         }
 
         public bool GetIsAbstract()

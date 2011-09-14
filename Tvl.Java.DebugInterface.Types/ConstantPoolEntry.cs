@@ -223,17 +223,17 @@
             }
         }
 
-        private static ushort ByteSwap(ushort value)
+        internal static ushort ByteSwap(ushort value)
         {
             return (ushort)((value << 8) + (value >> 8));
         }
 
-        private static uint ByteSwap(uint value)
+        internal static uint ByteSwap(uint value)
         {
             return ((uint)ByteSwap((ushort)value) << 16) + ByteSwap((ushort)(value >> 16));
         }
 
-        private static ulong ByteSwap(ulong value)
+        internal static ulong ByteSwap(ulong value)
         {
             return ((ulong)ByteSwap((uint)value) << 32) + ByteSwap((uint)(value >> 32));
         }

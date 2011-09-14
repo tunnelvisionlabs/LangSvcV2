@@ -29,7 +29,11 @@
             _executionContext = executionContext;
             _bytecode = _executionContext.Location.GetMethod().GetBytecodes();
             _disassembledMethod = BytecodeDisassembler.Disassemble(_bytecode);
-            _evaluationStackDepths = BytecodeDisassembler.GetEvaluationStackDepths(_disassembledMethod, executionContext.Location.GetDeclaringType().GetConstantPool());
+
+            var constantPool = executionContext.Location.GetDeclaringType().GetConstantPool();
+            var exceptionTable = executionContext.Location.GetMethod().GetExceptionTable();
+
+            _evaluationStackDepths = BytecodeDisassembler.GetEvaluationStackDepths(_disassembledMethod, constantPool, exceptionTable);
         }
 
         #region IDebugDisassemblyStream2 Members

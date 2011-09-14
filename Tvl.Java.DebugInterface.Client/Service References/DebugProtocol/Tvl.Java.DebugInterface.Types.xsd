@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/Tvl.Java.DebugInterface.Types" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
-  <xs:complexType name="ObjectId">
+  <xs:complexType name="ReferenceTypeId">
     <xs:annotation>
       <xs:appinfo>
         <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
@@ -11,7 +11,18 @@
       <xs:element name="Handle" type="xs:long" />
     </xs:sequence>
   </xs:complexType>
-  <xs:element name="ObjectId" nillable="true" type="tns:ObjectId" />
+  <xs:element name="ReferenceTypeId" nillable="true" type="tns:ReferenceTypeId" />
+  <xs:complexType name="MethodId">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Handle" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="MethodId" nillable="true" type="tns:MethodId" />
   <xs:simpleType name="Error">
     <xs:restriction base="xs:string">
       <xs:enumeration value="None" />
@@ -403,16 +414,7 @@
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="Error" nillable="true" type="tns:Error" />
-  <xs:simpleType name="TypeTag">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Invalid" />
-      <xs:enumeration value="Class" />
-      <xs:enumeration value="Interface" />
-      <xs:enumeration value="Array" />
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:element name="TypeTag" nillable="true" type="tns:TypeTag" />
-  <xs:complexType name="ReferenceTypeId">
+  <xs:complexType name="ObjectId">
     <xs:annotation>
       <xs:appinfo>
         <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
@@ -422,7 +424,16 @@
       <xs:element name="Handle" type="xs:long" />
     </xs:sequence>
   </xs:complexType>
-  <xs:element name="ReferenceTypeId" nillable="true" type="tns:ReferenceTypeId" />
+  <xs:element name="ObjectId" nillable="true" type="tns:ObjectId" />
+  <xs:simpleType name="TypeTag">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Invalid" />
+      <xs:enumeration value="Class" />
+      <xs:enumeration value="Interface" />
+      <xs:enumeration value="Array" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="TypeTag" nillable="true" type="tns:TypeTag" />
   <xs:complexType name="ArrayOfFieldId">
     <xs:sequence>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="FieldId" type="tns:FieldId" />
@@ -604,17 +615,6 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="ClassId" nillable="true" type="tns:ClassId" />
-  <xs:complexType name="MethodId">
-    <xs:annotation>
-      <xs:appinfo>
-        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
-      </xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="Handle" type="xs:long" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="MethodId" nillable="true" type="tns:MethodId" />
   <xs:simpleType name="InvokeOptions">
     <xs:list>
       <xs:simpleType>

@@ -2,14 +2,15 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Tvl.Java.DebugInterface.Types;
-    using System.Diagnostics.Contracts;
     using System.Collections.ObjectModel;
-    using Tvl.Java.DebugHost.Interop;
+    using System.Diagnostics.Contracts;
+    using System.Linq;
     using Tvl.Collections;
+    using Tvl.Java.DebugHost.Interop;
+    using Tvl.Java.DebugInterface.Types;
     using Tvl.Java.DebugInterface.Types.Analysis;
+
+    using ExceptionTableEntry = Tvl.Java.DebugInterface.Types.Loader.ExceptionTableEntry;
 
     partial class DebugProtocolService
     {
@@ -273,7 +274,7 @@
             private jmethodID _framePopMethod;
 
             private DisassembledMethod _disassembledMethod;
-            private ConstantPoolEntry[] _constantPool;
+            private ReadOnlyCollection<ConstantPoolEntry> _constantPool;
             private ImmutableList<int?> _evaluationStackDepths;
 
             public StepEventFilter(EventKind internalEventKind, RequestId requestId, SuspendPolicy suspendPolicy, IEnumerable<EventRequestModifier> modifiers, ThreadId thread, JvmtiEnvironment environment, JniEnvironment nativeEnvironment, StepSize size, StepDepth depth)
@@ -332,9 +333,20 @@
                                     }
                                 }
 
-                                _constantPool = entryList.ToArray();
+                                _constantPool = entryList.AsReadOnly();
 
-                                _evaluationStackDepths = BytecodeDisassembler.GetEvaluationStackDepths(_disassembledMethod, new ReadOnlyCollection<ConstantPoolEntry>(_constantPool));
+                                string classSignature;
+                                string classGenericSignature;
+                                JvmtiErrorHandler.ThrowOnFailure(environment.GetClassSignature(classHandle.Value, out classSignature, out classGenericSignature));
+                                string methodName;
+                                string methodSignature;
+                                string methodGenericSignature;
+                                JvmtiErrorHandler.ThrowOnFailure(environment.GetMethodName(_lastMethod, out methodName, out methodSignature, out methodGenericSignature));
+
+                                ReadOnlyCollection<ExceptionTableEntry> exceptionTable;
+                                JvmtiErrorHandler.ThrowOnFailure(environment.VirtualMachine.GetExceptionTable(classSignature, methodName, methodSignature, out exceptionTable));
+
+                                _evaluationStackDepths = BytecodeDisassembler.GetEvaluationStackDepths(_disassembledMethod, _constantPool, exceptionTable);
                             }
                         }
                     }

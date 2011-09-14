@@ -224,6 +224,7 @@
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.FrameLocationData.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.InterfaceId.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.LineNumberData.datasource" />
+    <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.Loader.ExceptionTableEntry.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ReferenceTypeData.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.ReferenceTypeId.datasource" />
     <None Include="Properties\DataSources\Tvl.Java.DebugInterface.Types.RequestId.datasource" />
@@ -242,6 +243,9 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Service References\DebugProtocol\service1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\DebugProtocol\Tvl.Java.DebugInterface.Types.Loader.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="Service References\DebugProtocol\Tvl.Java.DebugInterface.Types.xsd">

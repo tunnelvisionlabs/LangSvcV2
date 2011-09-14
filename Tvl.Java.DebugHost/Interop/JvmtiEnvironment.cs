@@ -1,13 +1,12 @@
 ﻿namespace Tvl.Java.DebugHost.Interop
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
+    using System.Linq;
     using System.Runtime.InteropServices;
     using Tvl.Java.DebugInterface.Types;
-    using System.Diagnostics.Contracts;
 
     public sealed class JvmtiEnvironment
     {
@@ -43,6 +42,7 @@
                     | jvmtiCapabilities.CapabilityFlags1.CanGenerateExceptionEvents
                     | jvmtiCapabilities.CapabilityFlags1.CanGenerateBreakpointEvents
                     | jvmtiCapabilities.CapabilityFlags1.CanGenerateFramePopEvents
+                    | jvmtiCapabilities.CapabilityFlags1.CanGenerateAllClassHookEvents
                     | jvmtiCapabilities.CapabilityFlags1.CanGetBytecodes
                     | jvmtiCapabilities.CapabilityFlags1.CanSuspend,
                     jvmtiCapabilities.CapabilityFlags2.CanGetConstantPool

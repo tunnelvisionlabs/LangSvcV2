@@ -26,6 +26,7 @@
     <MetadataFile FileName="service1.xsd" MetadataType="Schema" ID="b4635cb5-0d77-4e68-aeb6-088825735954" SourceId="1" SourceUrl="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost/DebugProtocolService/mex" />
     <MetadataFile FileName="Tvl.Java.DebugInterface.Types.xsd" MetadataType="Schema" ID="94455bb3-6453-4638-9b2a-ac4d9ae02bfa" SourceId="1" SourceUrl="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost/DebugProtocolService/mex" />
     <MetadataFile FileName="Arrays.xsd" MetadataType="Schema" ID="02a3aefd-e6d3-42d2-8c76-c62a0333c732" SourceId="1" SourceUrl="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost/DebugProtocolService/mex" />
+    <MetadataFile FileName="Tvl.Java.DebugInterface.Types.Loader.xsd" MetadataType="Schema" ID="c08a3843-4f18-44e6-8f8e-e45b5b6bd9fe" SourceId="1" SourceUrl="http://localhost:8732/Design_Time_Addresses/Tvl.Java.DebugHost/DebugProtocolService/mex" />
   </Metadata>
   <Extensions>
     <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />

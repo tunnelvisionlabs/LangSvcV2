@@ -1,26 +1,28 @@
 ﻿namespace Tvl.Java.DebugHost.Interop
 {
-    using ReferenceTypeId = Tvl.Java.DebugInterface.Types.ReferenceTypeId;
-    using TypeTag = Tvl.Java.DebugInterface.Types.TypeTag;
-    using TaggedReferenceTypeId = Tvl.Java.DebugInterface.Types.TaggedReferenceTypeId;
-    using ThreadId = Tvl.Java.DebugInterface.Types.ThreadId;
-    using DispatcherOperation = System.Windows.Threading.DispatcherOperation;
-    using Thread = System.Threading.Thread;
+    using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
+    using System.Linq;
     using System.Runtime.InteropServices;
     using Tvl.Java.DebugHost.Services;
-    using IntPtr = System.IntPtr;
+
     using Dispatcher = System.Windows.Threading.Dispatcher;
-    using System;
     using DispatcherFrame = System.Windows.Threading.DispatcherFrame;
-    using System.Diagnostics.Contracts;
+    using DispatcherOperation = System.Windows.Threading.DispatcherOperation;
     using DispatcherPriority = System.Windows.Threading.DispatcherPriority;
-    using System.Collections.Generic;
-    using System.Linq;
-    using TaggedObjectId = Tvl.Java.DebugInterface.Types.TaggedObjectId;
-    using Tag = Tvl.Java.DebugInterface.Types.Tag;
-    using ObjectId = Tvl.Java.DebugInterface.Types.ObjectId;
+    using ExceptionTableEntry = Tvl.Java.DebugInterface.Types.Loader.ExceptionTableEntry;
     using Interlocked = System.Threading.Interlocked;
+    using IntPtr = System.IntPtr;
+    using ObjectId = Tvl.Java.DebugInterface.Types.ObjectId;
+    using ReferenceTypeId = Tvl.Java.DebugInterface.Types.ReferenceTypeId;
+    using Tag = Tvl.Java.DebugInterface.Types.Tag;
+    using TaggedObjectId = Tvl.Java.DebugInterface.Types.TaggedObjectId;
+    using TaggedReferenceTypeId = Tvl.Java.DebugInterface.Types.TaggedReferenceTypeId;
+    using ThreadId = Tvl.Java.DebugInterface.Types.ThreadId;
+    using TypeTag = Tvl.Java.DebugInterface.Types.TypeTag;
 
     public class JavaVM
     {
@@ -34,6 +36,9 @@
         private readonly HashSet<ThreadId> _agentThreads = new HashSet<ThreadId>();
 
         private readonly ConcurrentDictionary<ThreadId, int> _suspendCounts = new ConcurrentDictionary<ThreadId, int>();
+
+        private readonly Dictionary<string, Dictionary<string, ReadOnlyCollection<ExceptionTableEntry>>> _exceptionTableEntries
+            = new Dictionary<string, Dictionary<string, ReadOnlyCollection<ExceptionTableEntry>>>();
 
         #region Object tracking
 
@@ -129,6 +134,46 @@
             get
             {
                 return _suspendCounts;
+            }
+        }
+
+        internal jvmtiError GetExceptionTable(string classSignature, string methodName, string methodSignature, out ReadOnlyCollection<ExceptionTableEntry> exceptionTable)
+        {
+            Contract.Requires<ArgumentNullException>(classSignature != null, "classSignature");
+            Contract.Requires<ArgumentNullException>(methodName != null, "methodName");
+            Contract.Requires<ArgumentNullException>(methodSignature != null, "methodSignature");
+
+            exceptionTable = null;
+            lock (_exceptionTableEntries)
+            {
+                Dictionary<string, ReadOnlyCollection<ExceptionTableEntry>> classMethods;
+                if (!_exceptionTableEntries.TryGetValue(classSignature, out classMethods))
+                    return jvmtiError.AbsentInformation;
+
+                string fullMethodSignature = methodName + methodSignature;
+                if (!classMethods.TryGetValue(fullMethodSignature, out exceptionTable))
+                    return jvmtiError.AbsentInformation;
+
+                return jvmtiError.None;
+            }
+        }
+
+        internal void SetExceptionTable(string classSignature, string methodName, string methodSignature, ReadOnlyCollection<ExceptionTableEntry> exceptionTable)
+        {
+            if (exceptionTable == null)
+                return;
+
+            lock (_exceptionTableEntries)
+            {
+                Dictionary<string, ReadOnlyCollection<ExceptionTableEntry>> classMethods;
+                if (!_exceptionTableEntries.TryGetValue(classSignature, out classMethods))
+                {
+                    classMethods = new Dictionary<string, ReadOnlyCollection<ExceptionTableEntry>>();
+                    _exceptionTableEntries.Add(classSignature, classMethods);
+                }
+
+                string fullMethodSignature = methodName + methodSignature;
+                classMethods.Add(fullMethodSignature, exceptionTable);
             }
         }
 

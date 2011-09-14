@@ -3,6 +3,7 @@
     using System;
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
+    using ExceptionTableEntry = Tvl.Java.DebugInterface.Types.Loader.ExceptionTableEntry;
 
     [ContractClassFor(typeof(IMethod))]
     internal abstract class IMethodContracts : IMethod
@@ -64,6 +65,13 @@
         public byte[] GetBytecodes()
         {
             Contract.Ensures(Contract.Result<byte[]>() != null);
+
+            throw new NotImplementedException();
+        }
+
+        public ReadOnlyCollection<ExceptionTableEntry> GetExceptionTable()
+        {
+            Contract.Ensures(Contract.Result<ReadOnlyCollection<ExceptionTableEntry>>() != null);
 
             throw new NotImplementedException();
         }

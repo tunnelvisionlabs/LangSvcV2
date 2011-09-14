@@ -15,6 +15,9 @@ namespace Tvl.Java.DebugInterface.Client.DebugProtocol {
     [System.ServiceModel.ServiceContractAttribute(ConfigurationName="DebugProtocol.IDebugProtocolService", CallbackContract=typeof(Tvl.Java.DebugInterface.Client.DebugProtocol.IDebugProtocolServiceCallback), SessionMode=System.ServiceModel.SessionMode.Required)]
     public interface IDebugProtocolService {
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetMethodIsObsolete", ReplyAction="http://tempuri.org/IDebugProtocolService/GetMethodIsObsoleteResponse")]
+        Tvl.Java.DebugInterface.Types.Error GetMethodIsObsolete(out bool result, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType, Tvl.Java.DebugInterface.Types.MethodId method);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetObjectReferenceType", ReplyAction="http://tempuri.org/IDebugProtocolService/GetObjectReferenceTypeResponse")]
         Tvl.Java.DebugInterface.Types.Error GetObjectReferenceType(out Tvl.Java.DebugInterface.Types.TypeTag typeTag, out Tvl.Java.DebugInterface.Types.ReferenceTypeId typeId, Tvl.Java.DebugInterface.Types.ObjectId @object);
         
@@ -238,6 +241,9 @@ namespace Tvl.Java.DebugInterface.Client.DebugProtocol {
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/CreateArrayInstance", ReplyAction="http://tempuri.org/IDebugProtocolService/CreateArrayInstanceResponse")]
         Tvl.Java.DebugInterface.Types.Error CreateArrayInstance(out Tvl.Java.DebugInterface.Types.TaggedObjectId newArray, Tvl.Java.DebugInterface.Types.ArrayTypeId arrayType, int length);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetMethodExceptionTable", ReplyAction="http://tempuri.org/IDebugProtocolService/GetMethodExceptionTableResponse")]
+        Tvl.Java.DebugInterface.Types.Error GetMethodExceptionTable(out Tvl.Java.DebugInterface.Types.Loader.ExceptionTableEntry[] entries, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType, Tvl.Java.DebugInterface.Types.MethodId method);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetMethodLineTable", ReplyAction="http://tempuri.org/IDebugProtocolService/GetMethodLineTableResponse")]
         Tvl.Java.DebugInterface.Types.Error GetMethodLineTable(out long start, out long end, out Tvl.Java.DebugInterface.Types.LineNumberData[] lines, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType, Tvl.Java.DebugInterface.Types.MethodId method);
         
@@ -246,9 +252,6 @@ namespace Tvl.Java.DebugInterface.Client.DebugProtocol {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetMethodBytecodes", ReplyAction="http://tempuri.org/IDebugProtocolService/GetMethodBytecodesResponse")]
         Tvl.Java.DebugInterface.Types.Error GetMethodBytecodes(out byte[] bytecode, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType, Tvl.Java.DebugInterface.Types.MethodId method);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDebugProtocolService/GetMethodIsObsolete", ReplyAction="http://tempuri.org/IDebugProtocolService/GetMethodIsObsoleteResponse")]
-        Tvl.Java.DebugInterface.Types.Error GetMethodIsObsolete(out bool result, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType, Tvl.Java.DebugInterface.Types.MethodId method);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -332,6 +335,10 @@ namespace Tvl.Java.DebugInterface.Client.DebugProtocol {
         
         public DebugProtocolServiceClient(System.ServiceModel.InstanceContext callbackInstance, System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) : 
                 base(callbackInstance, binding, remoteAddress) {
+        }
+        
+        public Tvl.Java.DebugInterface.Types.Error GetMethodIsObsolete(out bool result, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType, Tvl.Java.DebugInterface.Types.MethodId method) {
+            return base.Channel.GetMethodIsObsolete(out result, referenceType, method);
         }
         
         public Tvl.Java.DebugInterface.Types.Error GetObjectReferenceType(out Tvl.Java.DebugInterface.Types.TypeTag typeTag, out Tvl.Java.DebugInterface.Types.ReferenceTypeId typeId, Tvl.Java.DebugInterface.Types.ObjectId @object) {
@@ -630,6 +637,10 @@ namespace Tvl.Java.DebugInterface.Client.DebugProtocol {
             return base.Channel.CreateArrayInstance(out newArray, arrayType, length);
         }
         
+        public Tvl.Java.DebugInterface.Types.Error GetMethodExceptionTable(out Tvl.Java.DebugInterface.Types.Loader.ExceptionTableEntry[] entries, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType, Tvl.Java.DebugInterface.Types.MethodId method) {
+            return base.Channel.GetMethodExceptionTable(out entries, referenceType, method);
+        }
+        
         public Tvl.Java.DebugInterface.Types.Error GetMethodLineTable(out long start, out long end, out Tvl.Java.DebugInterface.Types.LineNumberData[] lines, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType, Tvl.Java.DebugInterface.Types.MethodId method) {
             return base.Channel.GetMethodLineTable(out start, out end, out lines, referenceType, method);
         }
@@ -640,10 +651,6 @@ namespace Tvl.Java.DebugInterface.Client.DebugProtocol {
         
         public Tvl.Java.DebugInterface.Types.Error GetMethodBytecodes(out byte[] bytecode, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType, Tvl.Java.DebugInterface.Types.MethodId method) {
             return base.Channel.GetMethodBytecodes(out bytecode, referenceType, method);
-        }
-        
-        public Tvl.Java.DebugInterface.Types.Error GetMethodIsObsolete(out bool result, Tvl.Java.DebugInterface.Types.ReferenceTypeId referenceType, Tvl.Java.DebugInterface.Types.MethodId method) {
-            return base.Channel.GetMethodIsObsolete(out result, referenceType, method);
         }
     }
 }
