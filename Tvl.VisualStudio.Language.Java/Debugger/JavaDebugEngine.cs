@@ -126,15 +126,18 @@
                 SuspendPolicy suspendPolicy;
                 if (!manualResume && propertyOwner.Properties.TryGetProperty(typeof(SuspendPolicy), out suspendPolicy))
                 {
+                    IThreadReference thread = propertyOwner.Properties.GetProperty<IThreadReference>(typeof(IThreadReference));
+
                     switch (suspendPolicy)
                     {
                     case SuspendPolicy.All:
-                        IVirtualMachine virtualMachine = propertyOwner.Properties.GetProperty<IVirtualMachine>(typeof(IVirtualMachine));
-                        Task.Factory.StartNew(virtualMachine.Resume).HandleNonCriticalExceptions();
+                        JavaDebugProgram program = propertyOwner.Properties.GetProperty<JavaDebugProgram>(typeof(JavaDebugProgram));
+                        JavaDebugThread debugThread;
+                        program.Threads.TryGetValue(thread.GetUniqueId(), out debugThread);
+                        program.Continue(debugThread);
                         break;
 
                     case SuspendPolicy.EventThread:
-                        IThreadReference thread = propertyOwner.Properties.GetProperty<IThreadReference>(typeof(IThreadReference));
                         Task.Factory.StartNew(thread.Resume).HandleNonCriticalExceptions();
                         break;
 
