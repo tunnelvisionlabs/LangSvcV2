@@ -164,7 +164,11 @@
                     if (string.IsNullOrEmpty(currentFile))
                         continue;
 
-                    bool grammarFile = currentFile.EndsWith(".g", StringComparison.OrdinalIgnoreCase) || currentFile.EndsWith(".g3", StringComparison.OrdinalIgnoreCase);
+                    bool grammarFile =
+                        currentFile.EndsWith(".tokens", StringComparison.OrdinalIgnoreCase)
+                        || currentFile.EndsWith(".g", StringComparison.OrdinalIgnoreCase)
+                        || currentFile.EndsWith(".g3", StringComparison.OrdinalIgnoreCase);
+
                     bool grammarHelperFile = !grammarFile &&
                         (currentFile.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase)
                         || currentFile.EndsWith(".g3.cs", StringComparison.OrdinalIgnoreCase)
@@ -224,6 +228,10 @@
             if (found == 0 || priority[0] != VSDOCUMENTPRIORITY.DP_Standard)
                 return;
 
+            string desiredItemType = "Antlr3";
+            if (string.Equals(Path.GetExtension(currentFile), ".tokens", StringComparison.OrdinalIgnoreCase))
+                desiredItemType = "AntlrTokens";
+
             IVsHierarchy hierarchy = project as IVsHierarchy;
             if (hierarchy != null)
             {
@@ -240,7 +248,7 @@
                     string buildAction = obj != null ? obj.ToString() : null;
                     if (string.IsNullOrWhiteSpace(buildAction) || string.Equals(buildAction, "None", StringComparison.OrdinalIgnoreCase))
                     {
-                        hr = ErrorHandler.CallWithCOMConvention(() => hierarchy.SetProperty(itemId, (int)__VSHPROPID4.VSHPROPID_BuildAction, "Antlr3"));
+                        hr = ErrorHandler.CallWithCOMConvention(() => hierarchy.SetProperty(itemId, (int)__VSHPROPID4.VSHPROPID_BuildAction, desiredItemType));
                     }
                 }
 
@@ -255,7 +263,7 @@
                         {
                             try
                             {
-                                obj = itemTypeDescriptor.Converter.ConvertFromInvariantString("Antlr3");
+                                obj = itemTypeDescriptor.Converter.ConvertFromInvariantString(desiredItemType);
                                 itemTypeDescriptor.SetValue(browseObject, obj);
                             }
                             catch (NotSupportedException)
