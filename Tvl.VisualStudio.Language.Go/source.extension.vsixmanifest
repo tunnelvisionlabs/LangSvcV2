@@ -3,7 +3,7 @@
   <Identifier Id="Tvl.VisualStudio.Language.Go.c837d3e9-5ae2-4455-a608-f6a4ae016688">
     <Name>Go Language Support</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0.6.318</Version>
+    <Version>1.0.7.594</Version>
     <Description xml:space="preserve">Basic support for the Go programming language.</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
@@ -20,7 +20,7 @@
     <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
   </Identifier>
   <References>
-    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.0.7">
+    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.0.10">
       <Name>Visual Studio Extensibility Framework</Name>
       <VsixPath>Tvl.VisualStudio.Framework.vsix</VsixPath>
     </Reference>
