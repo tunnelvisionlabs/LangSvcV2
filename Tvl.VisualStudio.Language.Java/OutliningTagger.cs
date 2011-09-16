@@ -73,7 +73,7 @@
                 ITextSnapshot snapshot = antlrParseResultArgs.Snapshot;
 
                 // outline all the imports
-                IList<ITree> children = result.Children;
+                IList<ITree> children = result.Children ?? new ITree[0];
                 for (int i = 0; i < children.Count; i++)
                 {
                     /*
