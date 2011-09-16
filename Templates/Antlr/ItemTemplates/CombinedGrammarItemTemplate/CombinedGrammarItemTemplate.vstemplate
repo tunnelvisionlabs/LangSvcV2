@@ -4,7 +4,7 @@
     <Name>ANTLR Combined Parser</Name>
     <Description>&lt;No description available&gt;</Description>
     <Icon>CombinedGrammarItemTemplate.ico</Icon>
-    <TemplateID>ef69e268-d164-4917-aeea-e4e90606925b</TemplateID>
+    <TemplateID>Tvl.Antlr.CombinedGrammar</TemplateID>
     <TemplateGroupID>ANTLR</TemplateGroupID>
     <ProjectType>CSharp</ProjectType>
     <RequiredFrameworkVersion>3.0</RequiredFrameworkVersion>

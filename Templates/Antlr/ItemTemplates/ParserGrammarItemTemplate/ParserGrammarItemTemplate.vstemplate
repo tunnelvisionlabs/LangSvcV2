@@ -4,7 +4,7 @@
     <Name>ANTLR Parser</Name>
     <Description>&lt;No description available&gt;</Description>
     <Icon>ParserGrammarItemTemplate.ico</Icon>
-    <TemplateID>680a8f4b-bc44-4546-8340-456eada5635e</TemplateID>
+    <TemplateID>Tvl.Antlr.ParserGrammar</TemplateID>
     <ProjectType>CSharp</ProjectType>
     <RequiredFrameworkVersion>3.0</RequiredFrameworkVersion>
     <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>

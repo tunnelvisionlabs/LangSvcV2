@@ -4,7 +4,7 @@
     <Name>ANTLR Lexer</Name>
     <Description>&lt;No description available&gt;</Description>
     <Icon>LexerGrammarItemTemplate.ico</Icon>
-    <TemplateID>7530aa98-067e-45c5-ba38-96acbd367a95</TemplateID>
+    <TemplateID>Tvl.Antlr.LexerGrammar</TemplateID>
     <ProjectType>CSharp</ProjectType>
     <RequiredFrameworkVersion>3.0</RequiredFrameworkVersion>
     <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>

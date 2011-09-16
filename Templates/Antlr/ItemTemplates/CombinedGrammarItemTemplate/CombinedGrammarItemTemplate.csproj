@@ -67,7 +67,9 @@
     <None Include="Combined.g3" />
   </ItemGroup>
   <ItemGroup>
-    <VSTemplate Include="CombinedGrammarItemTemplate.vstemplate" />
+    <VSTemplate Include="CombinedGrammarItemTemplate.vstemplate">
+      <OutputSubPath>ANTLR</OutputSubPath>
+    </VSTemplate>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets" />

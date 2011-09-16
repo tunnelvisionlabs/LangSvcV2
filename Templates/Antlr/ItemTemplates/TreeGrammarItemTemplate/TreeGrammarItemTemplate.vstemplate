@@ -4,7 +4,7 @@
     <Name>ANTLR Tree Parser</Name>
     <Description>&lt;No description available&gt;</Description>
     <Icon>TreeGrammarItemTemplate.ico</Icon>
-    <TemplateID>b0e09cee-8852-4edf-9c11-8e1724ef9e3a</TemplateID>
+    <TemplateID>Tvl.Antlr.TreeGrammar</TemplateID>
     <ProjectType>CSharp</ProjectType>
     <RequiredFrameworkVersion>3.0</RequiredFrameworkVersion>
     <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
