@@ -766,11 +766,7 @@ namespace Microsoft.VisualStudio.Project
                     }
 
                     //add the output path
-                    string outputBasePath = this.ProjectManager.OutputBaseRelativePath;
-                    if (outputBasePath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
-                        outputBasePath = Path.GetDirectoryName(outputBasePath);
-
-                    element.AddProperty("OutputPath", Path.Combine(outputBasePath, configurationName) + Path.DirectorySeparatorChar.ToString());
+                    element.AddProperty("OutputPath", GetDefaultOutputPath(configurationName, platformName));
                 }
             }
 
@@ -831,11 +827,7 @@ namespace Microsoft.VisualStudio.Project
                             continue;
 
                         // update the output path
-                        string outputBasePath = this.ProjectManager.OutputBaseRelativePath;
-                        if (outputBasePath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
-                            outputBasePath = Path.GetDirectoryName(outputBasePath);
-
-                        property.Value = Path.Combine(outputBasePath, newConfigurationName) + Path.DirectorySeparatorChar.ToString();
+                        property.Value = GetDefaultOutputPath(newConfigurationName, platformNames[index]);
                     }
                 }
             }
@@ -897,11 +889,7 @@ namespace Microsoft.VisualStudio.Project
                     }
 
                     //add the output path
-                    string outputBasePath = this.ProjectManager.OutputBaseRelativePath;
-                    if (outputBasePath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
-                        outputBasePath = Path.GetDirectoryName(outputBasePath);
-
-                    element.AddProperty("OutputPath", Path.Combine(outputBasePath, configurationName) + Path.DirectorySeparatorChar.ToString());
+                    element.AddProperty("OutputPath", GetDefaultOutputPath(configurationName, platformName));
                 }
             }
 
@@ -962,16 +950,31 @@ namespace Microsoft.VisualStudio.Project
                             continue;
 
                         // update the output path
-                        string outputBasePath = this.ProjectManager.OutputBaseRelativePath;
-                        if (outputBasePath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
-                            outputBasePath = Path.GetDirectoryName(outputBasePath);
-
-                        property.Value = Path.Combine(outputBasePath, configurationNames[index]) + Path.DirectorySeparatorChar.ToString();
+                        property.Value = GetDefaultOutputPath(configurationNames[index], newPlatformName);
                     }
                 }
             }
 
             return VSConstants.S_OK;
+        }
+
+        protected virtual string GetDefaultOutputPath(string configurationName, string platformName)
+        {
+            Contract.Requires<ArgumentNullException>(configurationName != null, "configurationName");
+            Contract.Requires<ArgumentNullException>(platformName != null, "platformName");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(configurationName));
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(platformName));
+            Contract.Ensures(!string.IsNullOrEmpty(Contract.Result<string>()));
+
+            string outputBasePath = ProjectManager.OutputBaseRelativePath;
+            if (outputBasePath[outputBasePath.Length - 1] == Path.DirectorySeparatorChar || outputBasePath[outputBasePath.Length - 1] == Path.AltDirectorySeparatorChar)
+                outputBasePath = Path.GetDirectoryName(outputBasePath);
+
+            string platformProperty = GetPlatformPropertyFromPlatformName(platformName);
+            if (!string.Equals(platformProperty, ProjectFileValues.AnyCPU, StringComparison.OrdinalIgnoreCase))
+                outputBasePath = Path.Combine(outputBasePath, platformProperty);
+
+            return Path.Combine(outputBasePath, configurationName) + Path.DirectorySeparatorChar;
         }
 
         /// <summary>
