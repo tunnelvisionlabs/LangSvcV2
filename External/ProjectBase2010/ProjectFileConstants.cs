@@ -9,11 +9,11 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System.Diagnostics.CodeAnalysis;
-using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System.Diagnostics.CodeAnalysis;
+    using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+
 	/// <summary>
 	/// Defines the constant strings used with project files.
 	/// </summary>
@@ -26,6 +26,7 @@ namespace Microsoft.VisualStudio.Project
 		public const string Name = "Name";
 		public const string HintPath = "HintPath";
 		public const string AssemblyName = "AssemblyName";
+        public const string IntermediateAssembly = "IntermediateAssembly";
 		public const string FinalOutputPath = "FinalOutputPath";
 		public const string Project = "Project";
 		public const string LinkedIntoProjectAt = "LinkedIntoProjectAt";

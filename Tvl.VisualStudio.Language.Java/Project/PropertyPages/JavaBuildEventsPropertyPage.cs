@@ -2,6 +2,7 @@
 {
     using System;
     using System.Runtime.InteropServices;
+    using _PersistStorageType = Microsoft.VisualStudio.Shell.Interop._PersistStorageType;
 
     [ComVisible(true)]
     [Guid(JavaProjectConstants.JavaBuildEventsPropertyPageGuidString)]
@@ -22,15 +23,15 @@
 
         protected override void BindProperties()
         {
-            PropertyPagePanel.PreBuildEvent = GetConfigProperty(JavaConfigConstants.PreBuildEvent);
-            PropertyPagePanel.PostBuildEvent = GetConfigProperty(JavaConfigConstants.PostBuildEvent);
-            PropertyPagePanel.RunPostBuildEvent = GetConfigProperty(JavaConfigConstants.RunPostBuildEvent);
+            PropertyPagePanel.PreBuildEvent = GetConfigProperty(JavaConfigConstants.PreBuildEvent, _PersistStorageType.PST_PROJECT_FILE);
+            PropertyPagePanel.PostBuildEvent = GetConfigProperty(JavaConfigConstants.PostBuildEvent, _PersistStorageType.PST_PROJECT_FILE);
+            PropertyPagePanel.RunPostBuildEvent = GetConfigProperty(JavaConfigConstants.RunPostBuildEvent, _PersistStorageType.PST_PROJECT_FILE);
         }
         protected override bool ApplyChanges()
         {
-            SetConfigProperty(JavaConfigConstants.PreBuildEvent, PropertyPagePanel.PreBuildEvent);
-            SetConfigProperty(JavaConfigConstants.PostBuildEvent, PropertyPagePanel.PostBuildEvent);
-            SetConfigProperty(JavaConfigConstants.RunPostBuildEvent, PropertyPagePanel.RunPostBuildEvent);
+            SetConfigProperty(JavaConfigConstants.PreBuildEvent, _PersistStorageType.PST_PROJECT_FILE, PropertyPagePanel.PreBuildEvent);
+            SetConfigProperty(JavaConfigConstants.PostBuildEvent, _PersistStorageType.PST_PROJECT_FILE, PropertyPagePanel.PostBuildEvent);
+            SetConfigProperty(JavaConfigConstants.RunPostBuildEvent, _PersistStorageType.PST_PROJECT_FILE, PropertyPagePanel.RunPostBuildEvent);
             return true;
         }
 

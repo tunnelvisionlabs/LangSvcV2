@@ -2,22 +2,19 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Runtime.InteropServices;
     using System.Text;
     using Microsoft.VisualStudio.Project;
 
     using __VSHPROPID = Microsoft.VisualStudio.Shell.Interop.__VSHPROPID;
+    using _PersistStorageType = Microsoft.VisualStudio.Shell.Interop._PersistStorageType;
     using CultureInfo = System.Globalization.CultureInfo;
     using DirectoryInfo = System.IO.DirectoryInfo;
-    using File = System.IO.File;
     using FileAttributes = System.IO.FileAttributes;
     using FileInfo = System.IO.FileInfo;
-    using Marshal = System.Runtime.InteropServices.Marshal;
     using MSBuild = Microsoft.Build.Evaluation;
     using OAVSProject = Microsoft.VisualStudio.Project.Automation.OAVSProject;
     using Path = System.IO.Path;
-    using Project = Microsoft.Build.Evaluation.Project;
     using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
     using VSCOMPONENTSELECTORTABINIT = Microsoft.VisualStudio.Shell.Interop.VSCOMPONENTSELECTORTABINIT;
     using VSConstants = Microsoft.VisualStudio.VSConstants;
@@ -28,7 +25,6 @@
         private static readonly char[] charsToEscape = new char[] { '%', '*', '?', '@', '$', '(', ')', ';', '\'' };
 
         private readonly JavaBuildOptions _sharedBuildOptions;
-        private Project _userBuildProject;
         private VSLangProj.VSProject _vsProject;
         private ImageHandler _extendedImageHandler;
 
@@ -70,26 +66,6 @@
             get
             {
                 return Constants.JavaLanguageName;
-            }
-        }
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public Project UserBuildProject
-        {
-            get
-            {
-                if (_userBuildProject == null && File.Exists(UserFileName))
-                    CreateUserBuildProject();
-
-                return _userBuildProject;
-            }
-        }
-
-        public string UserFileName
-        {
-            get
-            {
-                return FileName + PerUserFileExtension;
             }
         }
 
@@ -175,83 +151,6 @@
             {
                 return base.AddFolderToMsBuild(folder, itemType);
             }
-        }
-
-        public override int Save(string fileToBeSaved, int remember, uint formatIndex)
-        {
-            int result = base.Save(fileToBeSaved, remember, formatIndex);
-            if (result == VSConstants.S_OK && _userBuildProject != null)
-                _userBuildProject.Save(UserFileName);
-
-            return result;
-        }
-
-        public override void SetConfiguration(string config, string platform)
-        {
-            base.SetConfiguration(config, platform);
-            if (_userBuildProject != null)
-            {
-                _userBuildProject.SetGlobalProperty(ProjectFileConstants.Configuration, config);
-                _userBuildProject.SetGlobalProperty(ProjectFileConstants.Platform, ConfigProvider.GetPlatformPropertyFromPlatformName(platform));
-            }
-        }
-
-#if false
-        internal static void SetConfigurationProperty(ProjectConfig config, string propertyName, string propertyValue, Project buildProject)
-        {
-            if (!config.ProjectManager.QueryEditProjectFile(false))
-            {
-                throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
-            }
-
-            string condition = String.Format(CultureInfo.InvariantCulture, ConfigProvider.configPlatformString, config.ConfigName, config.Platform);
-
-            SetPropertyUnderCondition(propertyName, propertyValue, condition, buildProject);
-
-            // property cache will need to be updated
-            config.Invalidate();
-        }
-#endif
-
-        internal static void SetPropertyUnderCondition(string propertyName, string propertyValue, string condition, Project buildProject)
-        {
-            string conditionTrimmed = (condition == null) ? String.Empty : condition.Trim();
-
-            if (conditionTrimmed.Length == 0)
-            {
-                buildProject.SetProperty(propertyName, propertyValue);
-                return;
-            }
-
-            // New OM doesn't have a convenient equivalent for setting a property with a particular property group condition. 
-            // So do it ourselves.
-            Microsoft.Build.Construction.ProjectPropertyGroupElement newGroup = null;
-
-            foreach (Microsoft.Build.Construction.ProjectPropertyGroupElement group in buildProject.Xml.PropertyGroups)
-            {
-                if (String.Equals(group.Condition.Trim(), conditionTrimmed, StringComparison.OrdinalIgnoreCase))
-                {
-                    newGroup = group;
-                    break;
-                }
-            }
-
-            if (newGroup == null)
-            {
-                newGroup = buildProject.Xml.AddPropertyGroup(); // Adds after last existing PG, else at start of project
-                newGroup.Condition = condition;
-            }
-
-            foreach (Microsoft.Build.Construction.ProjectPropertyElement property in newGroup.PropertiesReversed) // If there's dupes, pick the last one so we win
-            {
-                if (String.Equals(property.Name, propertyName, StringComparison.OrdinalIgnoreCase) && property.Condition.Length == 0)
-                {
-                    property.Value = propertyValue;
-                    return;
-                }
-            }
-
-            newGroup.AddProperty(propertyName, propertyValue);
         }
 
         protected override string GetComponentSelectorBrowseFilters()
@@ -416,49 +315,26 @@
             return base.IsFolderItem(buildItem);
         }
 
-        public void CreateUserBuildProject()
+        public void SetProjectProperty(string propertyName, _PersistStorageType storageType, string propertyValue, string condition)
         {
-            if (!File.Exists(UserFileName))
-            {
-                Project userBuildProject = new Project();
-                userBuildProject.Save(UserFileName);
-            }
-
-            _userBuildProject = BuildEngine.LoadProject(UserFileName);
+            SetProjectProperty(propertyName, storageType, propertyValue, condition, false);
         }
 
-        public void SetProjectProperty(string propertyName, string propertyValue, string condition)
-        {
-            SetProjectProperty(propertyName, propertyValue, condition, false);
-        }
-
-        public void SetProjectProperty(string propertyName, string propertyValue, string condition, bool treatPropertyValueAsLiteral)
+        public void SetProjectProperty(string propertyName, _PersistStorageType storageType, string propertyValue, string condition, bool treatPropertyValueAsLiteral)
         {
             if (propertyValue == null)
                 propertyValue = string.Empty;
 
             // see if the value is the same as what's already in the project so we
             // know whether to actually mark the project file dirty or not
-            string oldValue = GetProjectProperty(propertyName, true);
+            string oldValue = GetProjectProperty(propertyName, storageType, true);
 
             if (!String.Equals(oldValue, propertyValue, StringComparison.Ordinal))
             {
-                // check out the project file
-                if (ProjectManager != null && !ProjectManager.QueryEditProjectFile(false))
-                {
-                    throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
-                }
-
                 if (treatPropertyValueAsLiteral)
-                {
                     propertyValue = Escape(propertyValue);
-                }
 
-                SetPropertyUnderCondition(propertyName, propertyValue, condition, BuildProject);
-
-                // refresh the cached values
-                SetCurrentConfiguration();
-                SetProjectFileDirty(true);
+                SetPropertyUnderCondition(propertyName, storageType, condition, propertyValue);
             }
         }
 

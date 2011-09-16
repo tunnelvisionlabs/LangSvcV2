@@ -527,7 +527,6 @@
     <Compile Include="Project\PropertyPages\JavaPropertyPagePanel.Designer.cs">
       <DependentUpon>JavaPropertyPagePanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="Project\ProjectPropertyStorage.cs" />
     <Compile Include="Project\PropertyPages\MavenComponentSelector.cs">
       <SubType>UserControl</SubType>
     </Compile>

@@ -7,7 +7,6 @@
     using System.Drawing;
     using System.Globalization;
     using System.Runtime.InteropServices;
-    using Microsoft.Build.Evaluation;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.OLE.Interop;
     using Microsoft.VisualStudio.Project;
@@ -300,7 +299,7 @@
             return VSConstants.S_FALSE;
         }
 
-        public string GetConfigProperty(string propertyName, ProjectPropertyStorage propertyStorage = ProjectPropertyStorage.ProjectFile)
+        public string GetConfigProperty(string propertyName, _PersistStorageType storageType)
         {
             string unifiedResult = string.Empty;
 
@@ -311,20 +310,7 @@
                 for (int i = 0; i < _projectConfigs.Length; i++)
                 {
                     ProjectConfig config = _projectConfigs[i];
-                    JavaProjectConfig ucconfig = config as JavaProjectConfig;
-                    string property;
-                    if (ucconfig != null)
-                    {
-                        property = ucconfig.GetConfigurationProperty(propertyName, cacheNeedReset, propertyStorage);
-                    }
-                    else if (propertyStorage == ProjectPropertyStorage.ProjectFile)
-                    {
-                        property = config.GetConfigurationProperty(propertyName, cacheNeedReset);
-                    }
-                    else
-                    {
-                        throw new NotSupportedException();
-                    }
+                    string property = config.GetConfigurationProperty(propertyName, storageType, cacheNeedReset);
 
                     cacheNeedReset = false;
 
@@ -348,9 +334,9 @@
             return unifiedResult;
         }
 
-        public bool GetConfigPropertyBoolean(string propertyName, ProjectPropertyStorage propertyStorage = ProjectPropertyStorage.ProjectFile)
+        public bool GetConfigPropertyBoolean(string propertyName, _PersistStorageType storageType)
         {
-            string value = GetConfigProperty(propertyName, propertyStorage);
+            string value = GetConfigProperty(propertyName, storageType);
 
             bool converted;
             if (string.IsNullOrEmpty(value) || !bool.TryParse(value, out converted))
@@ -359,9 +345,9 @@
             return converted;
         }
 
-        public int GetConfigPropertyInt32(string propertyName, ProjectPropertyStorage propertyStorage = ProjectPropertyStorage.ProjectFile)
+        public int GetConfigPropertyInt32(string propertyName, _PersistStorageType storageType)
         {
-            string value = GetConfigProperty(propertyName, propertyStorage);
+            string value = GetConfigProperty(propertyName, storageType);
 
             int converted;
             if (string.IsNullOrEmpty(value) || !int.TryParse(value, out converted))
@@ -370,11 +356,11 @@
             return converted;
         }
 
-        public string GetProperty(string propertyName)
+        public string GetProperty(string propertyName, _PersistStorageType storageType)
         {
             if (ProjectManager != null)
             {
-                string property = ProjectManager.GetProjectProperty(propertyName, true);
+                string property = ProjectManager.GetProjectProperty(propertyName, storageType, true);
                 if (property != null)
                     return property;
             }
@@ -382,17 +368,17 @@
             return string.Empty;
         }
 
-        public void SetConfigProperty(string propertyName, bool propertyValue, ProjectPropertyStorage propertyStorage = ProjectPropertyStorage.ProjectFile)
+        public void SetConfigProperty(string propertyName, _PersistStorageType storageType, bool propertyValue)
         {
-            SetConfigProperty(propertyName, propertyValue.ToString(), propertyStorage);
+            SetConfigProperty(propertyName, storageType, propertyValue.ToString());
         }
 
-        public void SetConfigProperty(string propertyName, int propertyValue, ProjectPropertyStorage propertyStorage = ProjectPropertyStorage.ProjectFile)
+        public void SetConfigProperty(string propertyName, _PersistStorageType storageType, int propertyValue)
         {
-            SetConfigProperty(propertyName, propertyValue.ToString(CultureInfo.InvariantCulture), propertyStorage);
+            SetConfigProperty(propertyName, storageType, propertyValue.ToString(CultureInfo.InvariantCulture));
         }
 
-        public void SetConfigProperty(string propertyName, string propertyValue, ProjectPropertyStorage propertyStorage = ProjectPropertyStorage.ProjectFile)
+        public void SetConfigProperty(string propertyName, _PersistStorageType storageType, string propertyValue)
         {
             if (propertyValue == null)
             {
@@ -401,66 +387,26 @@
 
             if (ProjectManager != null)
             {
-                if (propertyStorage == ProjectPropertyStorage.UserFile && ProjectManager.UserBuildProject == null)
-                    ProjectManager.CreateUserBuildProject();
-
-                Project buildProject = (propertyStorage == ProjectPropertyStorage.ProjectFile) ? ProjectManager.BuildProject : ProjectManager.UserBuildProject;
-
                 for (int i = 0, n = _projectConfigs.Length; i < n; i++)
                 {
                     ProjectConfig config = _projectConfigs[i];
-                    JavaProjectConfig ucconfig = config as JavaProjectConfig;
-                    if (ucconfig != null)
-                    {
-                        ucconfig.SetConfigurationProperty(propertyName, propertyValue, propertyStorage);
-                    }
-                    else if (propertyStorage == ProjectPropertyStorage.ProjectFile)
-                    {
-                        config.SetConfigurationProperty(propertyName, propertyValue);
-                    }
-                    else
-                    {
-                        throw new NotSupportedException();
-                    }
+                    config.SetConfigurationProperty(propertyName, storageType, propertyValue);
                 }
 
                 ProjectManager.SetProjectFileDirty(true);
             }
         }
 
-        public void SetProperty(string propertyName, string propertyValue, ProjectPropertyStorage propertyStorage)
+        public void SetProperty(string propertyName, _PersistStorageType storageType, string propertyValue)
         {
-            if (propertyValue == null)
-            {
-                propertyValue = string.Empty;
-            }
-
             if (ProjectManager != null)
-            {
-                if (propertyStorage == ProjectPropertyStorage.UserFile)
-                {
-                    if (ProjectManager.UserBuildProject == null)
-                    {
-                        ProjectManager.CreateUserBuildProject();
-                    }
-
-                    Project buildProject = ProjectManager.UserBuildProject;
-                    buildProject.SetProperty(propertyName, propertyValue);
-                    ProjectManager.BuildProject.SetGlobalProperty(propertyName, propertyValue);
-
-                    ProjectManager.SetProjectFileDirty(true);
-                }
-                else
-                {
-                    ProjectManager.SetProjectProperty(propertyName, propertyValue);
-                }
-            }
+                ProjectManager.SetProjectProperty(propertyName, storageType, propertyValue ?? string.Empty);
         }
 
-        public void SetProperty(string propertyName, string propertyValue, string condition, bool treatPropertyValueAsLiteral)
+        public void SetProperty(string propertyName, _PersistStorageType storageType, string propertyValue, string condition, bool treatPropertyValueAsLiteral)
         {
             if (ProjectManager != null)
-                ProjectManager.SetProjectProperty(propertyName, propertyValue ?? string.Empty, condition, treatPropertyValueAsLiteral);
+                ProjectManager.SetProjectProperty(propertyName, storageType, propertyValue ?? string.Empty, condition, treatPropertyValueAsLiteral);
         }
 
         internal void UpdateStatus()

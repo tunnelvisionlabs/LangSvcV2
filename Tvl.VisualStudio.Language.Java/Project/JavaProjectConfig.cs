@@ -1,11 +1,13 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Project
 {
     using System;
+    using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Project;
     using Tvl.VisualStudio.Shell;
 
     using __VSDBGLAUNCHFLAGS = Microsoft.VisualStudio.Shell.Interop.__VSDBGLAUNCHFLAGS;
+    using _PersistStorageType = Microsoft.VisualStudio.Shell.Interop._PersistStorageType;
     using CommandLineBuilder = Microsoft.Build.Utilities.CommandLineBuilder;
     using DEBUG_LAUNCH_OPERATION = Microsoft.VisualStudio.Shell.Interop.DEBUG_LAUNCH_OPERATION;
     using Directory = System.IO.Directory;
@@ -24,24 +26,26 @@
 
     public class JavaProjectConfig : ProjectConfig
     {
-        private Microsoft.Build.Execution.ProjectInstance _currentUserConfig;
-
         internal JavaProjectConfig(JavaProjectNode project, string configuration, string platform)
             : base(project, configuration, platform)
         {
+            Contract.Requires(project != null);
+            Contract.Requires(!string.IsNullOrEmpty(configuration));
+            Contract.Requires(!string.IsNullOrEmpty(platform));
         }
 
         public new JavaProjectNode ProjectManager
         {
             get
             {
+                Contract.Ensures(Contract.Result<JavaProjectNode>() != null);
                 return (JavaProjectNode)base.ProjectManager;
             }
         }
 
         public string FindJavaBinary(string fileName, bool developmentKit)
         {
-            string vendorBase = GetConfigurationProperty("JvmRegistryBase", false);
+            string vendorBase = GetConfigurationProperty("JvmRegistryBase", _PersistStorageType.PST_PROJECT_FILE, false);
 
             bool allow64bit = Platform.EndsWith("X64", StringComparison.OrdinalIgnoreCase) || Platform.EndsWith("Any CPU", StringComparison.OrdinalIgnoreCase);
             bool allow32bit = Platform.EndsWith("X86", StringComparison.OrdinalIgnoreCase) || Platform.EndsWith("Any CPU", StringComparison.OrdinalIgnoreCase);
@@ -106,55 +110,9 @@
             }
         }
 
-        public virtual string GetConfigurationProperty(string propertyName, bool resetCache, ProjectPropertyStorage propertyStorage)
-        {
-            if (propertyStorage == ProjectPropertyStorage.ProjectFile)
-            {
-                return base.GetConfigurationProperty(propertyName, resetCache);
-            }
-            else
-            {
-                if (resetCache || _currentUserConfig == null)
-                {
-                    if (ProjectManager.UserBuildProject == null)
-                        ProjectManager.CreateUserBuildProject();
-
-                    // Get properties for current configuration from project file and cache it
-                    ProjectManager.SetConfiguration(this.ConfigName, this.Platform);
-                    ProjectManager.UserBuildProject.ReevaluateIfNecessary();
-                    // Create a snapshot of the evaluated project in its current state
-                    _currentUserConfig = ProjectManager.UserBuildProject.CreateProjectInstance();
-
-                    // Restore configuration
-                    ProjectManager.SetCurrentConfiguration();
-                }
-
-                Microsoft.Build.Execution.ProjectPropertyInstance property = _currentUserConfig.GetProperty(propertyName);
-                if (property == null)
-                    return null;
-
-                return property.EvaluatedValue;
-            }
-        }
-
-        public virtual void SetConfigurationProperty(string propertyName, string propertyValue, ProjectPropertyStorage propertyStorage)
-        {
-            if (propertyStorage == ProjectPropertyStorage.ProjectFile)
-            {
-                base.SetConfigurationProperty(propertyName, propertyValue);
-            }
-            else
-            {
-                string condition = ProjectManager.ConfigProvider.GetConfigurationPlatformCondition(this.ConfigName, this.Platform);
-                SetUserPropertyUnderCondition(propertyName, propertyValue, condition);
-                Invalidate();
-            }
-        }
-
         public override void Invalidate()
         {
             base.Invalidate();
-            _currentUserConfig = null;
         }
 
         public override int QueryDebugLaunch(uint flags, out int fCanLaunch)
@@ -179,18 +137,18 @@
             string agentPath = Path.GetFullPath(Path.Combine(agentFolder, agentFileName));
             commandLine.AppendSwitchIfNotNull("-agentpath:", agentPath);
 
-            string agentArguments = GetConfigurationProperty(JavaConfigConstants.DebugAgentArguments, false, ProjectPropertyStorage.UserFile);
+            string agentArguments = GetConfigurationProperty(JavaConfigConstants.DebugAgentArguments, _PersistStorageType.PST_USER_FILE, false);
             if (!string.IsNullOrEmpty(agentArguments))
                 commandLine.AppendTextUnquoted("=" + agentArguments);
 
-            switch (GetConfigurationProperty(JavaConfigConstants.DebugStartAction, false, ProjectPropertyStorage.UserFile))
+            switch (GetConfigurationProperty(JavaConfigConstants.DebugStartAction, _PersistStorageType.PST_USER_FILE, false))
             {
             case "Class":
-                string jvmArguments = GetConfigurationProperty(JavaConfigConstants.DebugJvmArguments, false, ProjectPropertyStorage.UserFile);
+                string jvmArguments = GetConfigurationProperty(JavaConfigConstants.DebugJvmArguments, _PersistStorageType.PST_USER_FILE, false);
                 if (!string.IsNullOrEmpty(jvmArguments))
                     commandLine.AppendTextUnquoted(" " + jvmArguments);
 
-                string startupObject = GetConfigurationProperty(JavaConfigConstants.DebugStartClass, false, ProjectPropertyStorage.UserFile);
+                string startupObject = GetConfigurationProperty(JavaConfigConstants.DebugStartClass, _PersistStorageType.PST_USER_FILE, false);
                 if (!string.IsNullOrEmpty(startupObject))
                     commandLine.AppendFileNameIfNotNull(startupObject);
 
@@ -200,13 +158,13 @@
                 throw new NotImplementedException();
             }
 
-            string debugArgs = GetConfigurationProperty(JavaConfigConstants.DebugExtraArgs, false, ProjectPropertyStorage.UserFile);
+            string debugArgs = GetConfigurationProperty(JavaConfigConstants.DebugExtraArgs, _PersistStorageType.PST_USER_FILE, false);
             if (!string.IsNullOrEmpty(debugArgs))
                 commandLine.AppendTextUnquoted(" " + debugArgs);
 
-            string workingDirectory = GetConfigurationProperty(JavaConfigConstants.DebugWorkingDirectory, false, ProjectPropertyStorage.UserFile);
+            string workingDirectory = GetConfigurationProperty(JavaConfigConstants.DebugWorkingDirectory, _PersistStorageType.PST_USER_FILE, false);
             if (string.IsNullOrEmpty(workingDirectory))
-                workingDirectory = GetConfigurationProperty(JavaConfigConstants.OutputPath, false, ProjectPropertyStorage.ProjectFile);
+                workingDirectory = GetConfigurationProperty(JavaConfigConstants.OutputPath, _PersistStorageType.PST_USER_FILE, false);
 
             if (!Path.IsPathRooted(workingDirectory))
             {
@@ -220,8 +178,8 @@
             ////arguments.Add(@"C:\dev\JavaProjectTest\JavaProject\out\Debug");
             //arguments.Add("tvl.school.ee382v.a3.problem1.program1");
             ////arguments.Add(GetConfigurationProperty("OutputPath", true));
-            ////arguments.Add(GetConfigurationProperty(JavaConfigConstants.DebugStartClass, false, ProjectPropertyStorage.UserFile));
-            ////arguments.Add(GetConfigurationProperty(JavaConfigConstants.DebugExtraArgs, false, ProjectPropertyStorage.UserFile));
+            ////arguments.Add(GetConfigurationProperty(JavaConfigConstants.DebugStartClass, false, _PersistStorageType.PST_USER_FILE));
+            ////arguments.Add(GetConfigurationProperty(JavaConfigConstants.DebugExtraArgs, false, _PersistStorageType.PST_USER_FILE));
 
             //info.Arguments = string.Join(" ", arguments);
 
@@ -230,7 +188,7 @@
             bool useDevelopmentEnvironment = (grfLaunch & (uint)__VSDBGLAUNCHFLAGS.DBGLAUNCH_NoDebug) == 0;
             info.Executable = FindJavaBinary("java.exe", useDevelopmentEnvironment);
 
-            //info.CurrentDirectory = GetConfigurationProperty("WorkingDirectory", false, ProjectPropertyStorage.UserFile);
+            //info.CurrentDirectory = GetConfigurationProperty("WorkingDirectory", false, _PersistStorageType.PST_USER_FILE);
             info.CurrentDirectory = workingDirectory;
             info.SendToOutputWindow = false;
             info.DebugEngines = new Guid[]
@@ -253,50 +211,6 @@
             }
 
             return result;
-        }
-
-        private void SetUserPropertyUnderCondition(string propertyName, string propertyValue, string condition)
-        {
-            string conditionTrimmed = (condition == null) ? string.Empty : condition.Trim();
-
-            if (ProjectManager.UserBuildProject == null)
-                ProjectManager.CreateUserBuildProject();
-
-            if (conditionTrimmed.Length == 0)
-            {
-                ProjectManager.UserBuildProject.SetProperty(propertyName, propertyValue);
-                return;
-            }
-
-            // New OM doesn't have a convenient equivalent for setting a property with a particular property group condition. 
-            // So do it ourselves.
-            Microsoft.Build.Construction.ProjectPropertyGroupElement newGroup = null;
-
-            foreach (Microsoft.Build.Construction.ProjectPropertyGroupElement group in ProjectManager.UserBuildProject.Xml.PropertyGroups)
-            {
-                if (string.Equals(group.Condition.Trim(), conditionTrimmed, StringComparison.OrdinalIgnoreCase))
-                {
-                    newGroup = group;
-                    break;
-                }
-            }
-
-            if (newGroup == null)
-            {
-                newGroup = ProjectManager.UserBuildProject.Xml.AddPropertyGroup(); // Adds after last existing PG, else at start of project
-                newGroup.Condition = condition;
-            }
-
-            foreach (Microsoft.Build.Construction.ProjectPropertyElement property in newGroup.PropertiesReversed) // If there's dupes, pick the last one so we win
-            {
-                if (string.Equals(property.Name, propertyName, StringComparison.OrdinalIgnoreCase) && property.Condition.Length == 0)
-                {
-                    property.Value = propertyValue;
-                    return;
-                }
-            }
-
-            newGroup.AddProperty(propertyName, propertyValue);
         }
     }
 }

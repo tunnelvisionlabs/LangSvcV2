@@ -9,16 +9,17 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.IO;
-using System.Text;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Collections;
+    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
+    using System.IO;
+    using System.Text;
+    using _PersistStorageType = Microsoft.VisualStudio.Shell.Interop._PersistStorageType;
+
 	/// <summary>
 	/// Contain a number of functions that handle token replacement
 	/// </summary>
@@ -321,7 +322,7 @@ namespace Microsoft.VisualStudio.Project
             }
 			
             // Get base namespace from the project
-			string namespce = node.GetProjectProperty("RootNamespace");
+			string namespce = node.GetProjectProperty("RootNamespace", _PersistStorageType.PST_PROJECT_FILE);
 			if(String.IsNullOrEmpty(namespce))
 				namespce = Path.GetFileNameWithoutExtension(fileFullPath); ;
 

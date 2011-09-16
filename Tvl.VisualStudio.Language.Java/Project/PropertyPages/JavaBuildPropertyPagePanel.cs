@@ -1,17 +1,12 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Project.PropertyPages
 {
     using System;
-    using Microsoft.Win32;
+    using _PersistStorageType = Microsoft.VisualStudio.Shell.Interop._PersistStorageType;
     using CommandLineBuilder = Microsoft.Build.Utilities.CommandLineBuilder;
-    using Directory = System.IO.Directory;
-    using File = System.IO.File;
     using Path = System.IO.Path;
-    using SecurityException = System.Security.SecurityException;
 
     public partial class JavaBuildPropertyPagePanel : JavaPropertyPagePanel
     {
-        private static string _javac;
-
         public JavaBuildPropertyPagePanel()
             : this(null)
         {
@@ -234,7 +229,7 @@
             if (ParentPropertyPage.ProjectManager != null && ParentPropertyPage.ProjectManager.SharedBuildOptions.General != null)
                 javacPath = ParentPropertyPage.ProjectManager.SharedBuildOptions.General.JavacPath;
             if (javacPath == null)
-                javacPath = ParentPropertyPage.GetConfigProperty(JavaConfigConstants.JavacPath, ProjectPropertyStorage.ProjectFile);
+                javacPath = ParentPropertyPage.GetConfigProperty(JavaConfigConstants.JavacPath, _PersistStorageType.PST_PROJECT_FILE);
 
             string fullucc = javacPath;
             try

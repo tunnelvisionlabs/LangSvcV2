@@ -9,20 +9,19 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections;
-using System.ComponentModel;
-using System.Drawing;
-using System.Globalization;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
-using System.Windows.Forms;
-using Microsoft.VisualStudio.Designer.Interfaces;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Shell.Interop;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Collections;
+    using System.ComponentModel;
+    using System.Drawing;
+    using System.Globalization;
+    using System.Runtime.InteropServices;
+    using System.Security.Permissions;
+    using System.Windows.Forms;
+    using Microsoft.VisualStudio.Designer.Interfaces;
+    using Microsoft.VisualStudio.OLE.Interop;
+    using Microsoft.VisualStudio.Shell.Interop;
 
 	/// <summary>
 	/// The base class for property pages.
@@ -108,25 +107,26 @@ namespace Microsoft.VisualStudio.Project
 		#endregion
 
 		#region public methods
-		public object GetTypedConfigProperty(string name, Type type)
+
+		public object GetTypedConfigProperty(string name, Type type, _PersistStorageType storageType)
 		{
-			string value = GetConfigProperty(name);
+			string value = GetConfigProperty(name, storageType);
 			if(string.IsNullOrEmpty(value)) return null;
 
 			TypeConverter tc = TypeDescriptor.GetConverter(type);
 			return tc.ConvertFromInvariantString(value);
 		}
 
-		public object GetTypedProperty(string name, Type type)
+		public object GetTypedProperty(string name, Type type, _PersistStorageType storageType)
 		{
-			string value = GetProperty(name);
+			string value = GetProperty(name, storageType);
 			if(string.IsNullOrEmpty(value)) return null;
 
 			TypeConverter tc = TypeDescriptor.GetConverter(type);
 			return tc.ConvertFromInvariantString(value);
 		}
 
-		public string GetProperty(string propertyName)
+		public string GetProperty(string propertyName, _PersistStorageType storageType)
 		{
 			if(this.ProjectManager != null)
 			{
@@ -143,7 +143,7 @@ namespace Microsoft.VisualStudio.Project
 		}
 
 		// relative to active configuration.
-		public string GetConfigProperty(string propertyName)
+		public string GetConfigProperty(string propertyName, _PersistStorageType storageType)
 		{
 			if(this.ProjectManager != null)
 			{
@@ -153,7 +153,7 @@ namespace Microsoft.VisualStudio.Project
 				for(int i = 0; i < this.projectConfigs.Length; i++)
 				{
 					ProjectConfig config = projectConfigs[i];
-					string property = config.GetConfigurationProperty(propertyName, cacheNeedReset);
+					string property = config.GetConfigurationProperty(propertyName, storageType, cacheNeedReset);
 					cacheNeedReset = false;
 
 					if(property != null)
@@ -180,7 +180,7 @@ namespace Microsoft.VisualStudio.Project
 		/// </summary>
 		/// <param name="name">property name.</param>
 		/// <param name="value">value of property</param>
-		public void SetConfigProperty(string name, string value)
+		public void SetConfigProperty(string name, _PersistStorageType storageType, string value)
 		{
 			CCITracing.TraceCall();
 			if(value == null)
@@ -194,7 +194,7 @@ namespace Microsoft.VisualStudio.Project
 				{
 					ProjectConfig config = projectConfigs[i];
 
-					config.SetConfigurationProperty(name, value);
+					config.SetConfigurationProperty(name, storageType, value);
 				}
 
 				this.ProjectManager.SetProjectFileDirty(true);

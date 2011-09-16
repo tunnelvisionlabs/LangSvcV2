@@ -1,12 +1,10 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Project.PropertyPages
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Runtime.InteropServices;
-    using Tvl.Collections;
     using Microsoft.VisualStudio.Project;
+    using Tvl.Collections;
+    using _PersistStorageType = Microsoft.VisualStudio.Shell.Interop._PersistStorageType;
 
     [ComVisible(true)]
     [Guid(JavaProjectConstants.JavaApplicationPropertyPageGuidString)]
@@ -52,7 +50,7 @@
         protected override void BindProperties()
         {
             // package name
-            PropertyPagePanel.PackageName = GetConfigProperty(ProjectFileConstants.AssemblyName);
+            PropertyPagePanel.PackageName = GetConfigProperty(ProjectFileConstants.AssemblyName, _PersistStorageType.PST_PROJECT_FILE);
 
             // available items
             PropertyPagePanel.AvailableTargetVirtualMachines = _defaultAvailableTargetVirtualMachines;
@@ -60,17 +58,17 @@
             PropertyPagePanel.AvailableStartupObjects = _defaultAvailableStartupObjects;
 
             // selected items
-            PropertyPagePanel.TargetVirtualMachine = GetConfigProperty(JavaConfigConstants.TargetVM);
-            PropertyPagePanel.OutputType = GetConfigProperty(JavaConfigConstants.OutputType);
-            PropertyPagePanel.StartupObject = GetConfigProperty(JavaConfigConstants.StartupObject);
+            PropertyPagePanel.TargetVirtualMachine = GetConfigProperty(JavaConfigConstants.TargetVM, _PersistStorageType.PST_PROJECT_FILE);
+            PropertyPagePanel.OutputType = GetConfigProperty(JavaConfigConstants.OutputType, _PersistStorageType.PST_PROJECT_FILE);
+            PropertyPagePanel.StartupObject = GetConfigProperty(JavaConfigConstants.StartupObject, _PersistStorageType.PST_PROJECT_FILE);
         }
 
         protected override bool ApplyChanges()
         {
-            SetConfigProperty(ProjectFileConstants.AssemblyName, PropertyPagePanel.PackageName);
-            SetConfigProperty(JavaConfigConstants.TargetVM, PropertyPagePanel.TargetVirtualMachine);
-            SetConfigProperty(JavaConfigConstants.OutputType, PropertyPagePanel.OutputType);
-            SetConfigProperty(JavaConfigConstants.StartupObject, PropertyPagePanel.StartupObject);
+            SetConfigProperty(ProjectFileConstants.AssemblyName, _PersistStorageType.PST_PROJECT_FILE, PropertyPagePanel.PackageName);
+            SetConfigProperty(JavaConfigConstants.TargetVM, _PersistStorageType.PST_PROJECT_FILE, PropertyPagePanel.TargetVirtualMachine);
+            SetConfigProperty(JavaConfigConstants.OutputType, _PersistStorageType.PST_PROJECT_FILE, PropertyPagePanel.OutputType);
+            SetConfigProperty(JavaConfigConstants.StartupObject, _PersistStorageType.PST_PROJECT_FILE, PropertyPagePanel.StartupObject);
             return true;
         }
     }

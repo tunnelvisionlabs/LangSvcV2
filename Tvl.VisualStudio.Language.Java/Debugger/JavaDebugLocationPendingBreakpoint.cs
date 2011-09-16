@@ -28,7 +28,6 @@
 
         private bool _virtualized;
         private bool _disabled;
-        private bool _bound;
         private bool _deleted;
 
         public JavaDebugLocationPendingBreakpoint(JavaDebugEngine engine, BreakpointRequestInfo requestInfo)
@@ -103,7 +102,6 @@
             _boundBreakpoints.AddRange(boundBreakpoints);
             if (boundBreakpoints.Count > 0)
             {
-                _bound = true;
                 _errorBreakpoints.Clear();
             }
 

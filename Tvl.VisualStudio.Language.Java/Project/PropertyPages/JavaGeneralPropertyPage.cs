@@ -2,6 +2,7 @@
 {
     using System;
     using System.Runtime.InteropServices;
+    using _PersistStorageType = Microsoft.VisualStudio.Shell.Interop._PersistStorageType;
 
     [ComVisible(true)]
     [Guid(JavaProjectConstants.JavaGeneralPropertyPageGuidString)]
@@ -26,12 +27,12 @@
                 ProjectManager.SharedBuildOptions.General = PropertyPagePanel;
 
             PropertyPagePanel.ProjectFolder = ProjectManager.ProjectFolder;
-            PropertyPagePanel.JavacPath = GetConfigProperty(JavaConfigConstants.JavacPath, ProjectPropertyStorage.ProjectFile);
+            PropertyPagePanel.JavacPath = GetConfigProperty(JavaConfigConstants.JavacPath, _PersistStorageType.PST_PROJECT_FILE);
         }
 
         protected override bool ApplyChanges()
         {
-            SetProperty(JavaConfigConstants.JavacPath, PropertyPagePanel.JavacPath, ProjectPropertyStorage.ProjectFile);
+            SetProperty(JavaConfigConstants.JavacPath, _PersistStorageType.PST_PROJECT_FILE, PropertyPagePanel.JavacPath);
             return true;
         }
 
