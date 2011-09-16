@@ -33,6 +33,11 @@
         private int _lookBehindPosition = 0;
         private int _lookAheadPosition = 0;
 
+        private bool _beginningOfFile;
+        private bool _endOfFile;
+        private bool _failedBackward;
+        private bool _failedForward;
+
         public NetworkInterpreter(Network network, ITokenStream input)
         {
             Contract.Requires<ArgumentNullException>(network != null, "network");
@@ -63,6 +68,46 @@
             get
             {
                 return _contexts;
+            }
+        }
+
+        public bool BeginningOfFile
+        {
+            get
+            {
+                return _beginningOfFile;
+            }
+        }
+
+        public bool EndOfFile
+        {
+            get
+            {
+                return _endOfFile;
+            }
+        }
+
+        public bool FailedBackward
+        {
+            get
+            {
+                return _failedBackward;
+            }
+        }
+
+        public bool FailedForward
+        {
+            get
+            {
+                return _failedForward;
+            }
+        }
+
+        public bool Failed
+        {
+            get
+            {
+                return FailedBackward || FailedForward;
             }
         }
 
@@ -232,12 +277,21 @@
 
         public bool TryStepBackward()
         {
-            if (_input.Index - _lookBehindPosition <= 0)
+            if (_failedBackward || _beginningOfFile)
                 return false;
+
+            if (_input.Index - _lookBehindPosition <= 0)
+            {
+                _beginningOfFile = true;
+                return false;
+            }
 
             IToken token = _input.LT(-1 - _lookBehindPosition);
             if (token == null)
+            {
+                _beginningOfFile = true;
                 return false;
+            }
 
             int symbol = token.Type;
             int symbolPosition = token.TokenIndex;
@@ -340,17 +394,29 @@
             if (success)
                 _lookBehindPosition++;
 
+            if (!success)
+                _failedBackward = true;
+
             return success;
         }
 
         public bool TryStepForward()
         {
-            if (_input.Index + _lookAheadPosition >= _input.Count)
+            if (_failedForward || _endOfFile)
                 return false;
+
+            if (_input.Index + _lookAheadPosition >= _input.Count)
+            {
+                _endOfFile = true;
+                return false;
+            }
 
             IToken token = _input.LT(-1 - _lookBehindPosition);
             if (token == null)
+            {
+                _endOfFile = true;
                 return false;
+            }
 
             int symbol = token.Type;
             int symbolPosition = token.TokenIndex;
@@ -414,6 +480,9 @@
 
             if (success)
                 _lookAheadPosition++;
+
+            if (!success)
+                _failedForward = true;
 
             return success;
         }

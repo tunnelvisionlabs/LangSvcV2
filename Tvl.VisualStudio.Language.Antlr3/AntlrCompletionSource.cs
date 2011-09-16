@@ -179,6 +179,12 @@
                     }
                 }
 
+                if (completionInfo.InfoType == CompletionInfoType.AutoListMemberInfo && extentOfWord.Span.GetText().StartsWith("$") && labels.Count == 0)
+                {
+                    session.Dismiss();
+                    return;
+                }
+
                 ITrackingSpan applicableTo = snapshot.CreateTrackingSpan(extentOfWord.Span, SpanTrackingMode.EdgeInclusive, TrackingFidelityMode.Forward);
                 if (extendLeft)
                 {
@@ -280,21 +286,17 @@
             }
 
             NetworkInterpreter interpreter = CreateNetworkInterpreter(tokens);
-            bool success = true;
             while (interpreter.TryStepBackward())
             {
-                if (interpreter.Contexts.Count == 0 || interpreter.Contexts.Count > 400)
-                {
-                    success = false;
+                if (interpreter.Contexts.Count == 0 || interpreter.Contexts.Count > 4000)
                     break;
-                }
 
                 if (interpreter.Contexts.All(context => context.BoundedStart))
                     break;
             }
 
-            if (!success)
-                interpreter.Contexts.RemoveAll(i => !i.BoundedStart);
+            if (interpreter.Failed)
+                interpreter.Contexts.Clear();
 
             interpreter.CombineBoundedStartContexts();
 
@@ -496,57 +498,60 @@
                 tokens.Rewind(mark);
             }
 
-            switch (grammarType)
+            if (inAction)
             {
-            case GrammarType.Combined:
-                if (ruleNameToken == null)
-                    goto default;
-                if (ruleNameToken.Type == ANTLRLexer.RULE_REF)
-                    goto case GrammarType.Parser;
-                else
-                    goto case GrammarType.Lexer;
+                switch (grammarType)
+                {
+                case GrammarType.Combined:
+                    if (ruleNameToken == null)
+                        goto default;
+                    if (ruleNameToken.Type == ANTLRLexer.RULE_REF)
+                        goto case GrammarType.Parser;
+                    else
+                        goto case GrammarType.Lexer;
 
-            case GrammarType.Lexer:
-                labels.Add(new LabelInfo("text", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("type", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("line", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("index", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("pos", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("channel", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("start", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("stop", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("int", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                break;
+                case GrammarType.Lexer:
+                    labels.Add(new LabelInfo("text", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("type", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("line", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("index", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("pos", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("channel", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("start", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("stop", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("int", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    break;
 
-            case GrammarType.Parser:
-                labels.Add(new LabelInfo("text", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("start", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("stop", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("tree", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("st", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                break;
+                case GrammarType.Parser:
+                    labels.Add(new LabelInfo("text", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("start", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("stop", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("tree", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("st", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    break;
 
-            case GrammarType.TreeParser:
-                labels.Add(new LabelInfo("text", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("start", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("tree", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("st", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                break;
+                case GrammarType.TreeParser:
+                    labels.Add(new LabelInfo("text", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("start", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("tree", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("st", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    break;
 
-            default:
-                // if we're unsure about the grammar type, include all the possible options to make sure we're covered
-                labels.Add(new LabelInfo("text", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("type", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("line", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("index", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("pos", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("channel", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("start", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("stop", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("int", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("tree", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                labels.Add(new LabelInfo("st", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
-                break;
+                default:
+                    // if we're unsure about the grammar type, include all the possible options to make sure we're covered
+                    labels.Add(new LabelInfo("text", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("type", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("line", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("index", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("pos", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("channel", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("start", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("stop", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("int", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("tree", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    labels.Add(new LabelInfo("st", string.Empty, new SnapshotSpan(), StandardGlyphGroup.GlyphGroupIntrinsic, Enumerable.Empty<LabelInfo>()));
+                    break;
+                }
             }
 
             return labels;
