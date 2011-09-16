@@ -18,6 +18,7 @@ using System.Runtime.InteropServices;
 using Microsoft.VisualStudio;
 using MSBuild = Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation;
+using System.Diagnostics.Contracts;
 
 namespace Microsoft.VisualStudio.Project
 {
@@ -86,6 +87,8 @@ namespace Microsoft.VisualStudio.Project
         }
         #endregion
 
+        private static string ParameterCannotBeNullOrEmptyMessage = SR.GetString(SR.ParameterCannotBeNullOrEmpty, CultureInfo.CurrentUICulture);
+
         #region ctors
         /// <summary>
         /// Constructor to create a new MSBuild.ProjectItem and add it to the project
@@ -94,21 +97,11 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         public ProjectElement(ProjectNode project, string itemPath, string itemType)
         {
-            if(project == null)
-            {
-                throw new ArgumentNullException("project");
-            }
-
-            if(String.IsNullOrEmpty(itemPath))
-            {
-                throw new ArgumentException(SR.GetString(SR.ParameterCannotBeNullOrEmpty, CultureInfo.CurrentUICulture), "itemPath");
-            }
-
-
-            if(String.IsNullOrEmpty(itemType))
-            {
-                throw new ArgumentException(SR.GetString(SR.ParameterCannotBeNullOrEmpty, CultureInfo.CurrentUICulture), "itemType");
-            }
+            Contract.Requires<ArgumentNullException>(project != null, "project");
+            Contract.Requires<ArgumentNullException>(itemPath != null, "itemPath");
+            Contract.Requires<ArgumentNullException>(itemType != null, "itemType");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(itemPath), ParameterCannotBeNullOrEmptyMessage);
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(itemType), ParameterCannotBeNullOrEmptyMessage);
 
             this.itemProject = project;
 
@@ -131,10 +124,8 @@ namespace Microsoft.VisualStudio.Project
         /// <param name="virtualFolder">Is this item virtual (such as reference folder)</param>
         public ProjectElement(ProjectNode project, MSBuild.ProjectItem existingItem, bool virtualFolder)
         {
-            if(project == null)
-                throw new ArgumentNullException("project");
-            if(!virtualFolder && existingItem == null)
-                throw new ArgumentNullException("existingItem");
+            Contract.Requires<ArgumentNullException>(project != null, "project");
+            Contract.Requires<ArgumentNullException>(virtualFolder || existingItem != null, "existingItem");
 
             // Keep a reference to project and item
             this.itemProject = project;

@@ -145,6 +145,7 @@
                 ProjectElement folderElement = new ProjectElement(this, null, true);
                 folderElement.Rename(folder);
                 folderElement.SetMetadata(ProjectFileConstants.Name, folder);
+                folderElement.SetMetadata(ProjectFileConstants.BuildAction, itemType);
                 return folderElement;
             }
             else
@@ -215,6 +216,7 @@
             return unescapedString.IndexOfAny(charsToEscape) != -1;
         }
 
+#if false
         protected override void AddNonMemberFileItems(IList<string> fileList)
         {
             for (int i = fileList.Count - 1; i >= 0; i--)
@@ -236,6 +238,7 @@
 
             base.AddNonMemberFolderItems(folderList);
         }
+#endif
 
         protected override bool FilterItemTypeToBeAddedToHierarchy(string itemType)
         {
@@ -271,6 +274,7 @@
             return true;
         }
 
+#if false
         protected override int QueryStatusOnNode(Guid cmdGroup, uint cmd, IntPtr pCmdText, ref QueryStatusResult result)
         {
             if (cmdGroup == VsMenus.guidStandardCommandSet2K)
@@ -284,13 +288,16 @@
 
             return base.QueryStatusOnNode(cmdGroup, cmd, pCmdText, ref result);
         }
+#endif
 
+#if false
         protected override void ProcessFolders()
         {
             base.ProcessFolders();
 
             this.AddNonMemberItems();
         }
+#endif
 
         public override bool IsCodeFile(string fileName)
         {

@@ -2521,7 +2521,7 @@ namespace Microsoft.VisualStudio.Project
         /// <param name="key">Key to retrieve the target item from the subitems list</param>
         /// <returns>Newly added node</returns>
         /// <remarks>If the parent node was found we add the dependent item to it otherwise we add the item ignoring the "DependentUpon" metatdata</remarks>
-        protected virtual HierarchyNode AddDependentFileNode(IDictionary<String, MSBuild.ProjectItem> subitems, string key)
+        protected virtual HierarchyNode AddDependentFileNode(IDictionary<String, MSBuild.ProjectItem> subitems, string key, IDictionary<string, HierarchyNode> nodeCache)
         {
             if (subitems == null)
             {
@@ -2539,16 +2539,25 @@ namespace Microsoft.VisualStudio.Project
             if (subitems.ContainsKey(dependentOf))
             {
                 // The parent item is an other subitem, so recurse into this method to add the parent first
-                parent = AddDependentFileNode(subitems, dependentOf);
+                parent = AddDependentFileNode(subitems, dependentOf, nodeCache);
             }
             else
             {
                 // See if the parent node already exist in the hierarchy
                 uint parentItemID;
                 string path = Path.Combine(this.ProjectFolder, dependentOf);
-                ErrorHandler.ThrowOnFailure(this.ParseCanonicalName(path, out parentItemID));
-                if (parentItemID != (uint)VSConstants.VSITEMID.Nil)
-                    parent = this.NodeFromItemId(parentItemID);
+
+                if (nodeCache == null || !nodeCache.TryGetValue(path, out parent))
+                {
+                    ErrorHandler.ThrowOnFailure(this.ParseCanonicalName(path, out parentItemID));
+                    if (parentItemID != (uint)VSConstants.VSITEMID.Nil)
+                    {
+                        parent = this.NodeFromItemId(parentItemID);
+                        if (parent != null && nodeCache != null)
+                            nodeCache.Add(path, parent);
+                    }
+                }
+
                 Debug.Assert(parent != null, "File dependent upon a non existing item or circular dependency. Ignoring the DependentUpon metadata");
             }
 
@@ -2556,7 +2565,7 @@ namespace Microsoft.VisualStudio.Project
             if (parent != null)
                 newNode = this.AddDependentFileNodeToNode(item, parent);
             else
-                newNode = this.AddIndependentFileNode(item);
+                newNode = this.AddIndependentFileNode(item, nodeCache);
 
             return newNode;
         }
@@ -3098,12 +3107,10 @@ namespace Microsoft.VisualStudio.Project
         /// Walks the subpaths of a project relative path and checks if the folder nodes hierarchy is already there, if not creates it.
         /// </summary>
         /// <param name="strPath">Path of the folder, can be relative to project or absolute</param>
-        public virtual HierarchyNode CreateFolderNodes(string path)
+        public virtual HierarchyNode CreateFolderNodes(string path, IDictionary<string, HierarchyNode> nodeCache = null)
         {
-            if (String.IsNullOrEmpty(path))
-            {
-                throw new ArgumentNullException("path");
-            }
+            Contract.Requires<ArgumentNullException>(path != null, "path");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(path));
 
             if (Path.IsPathRooted(path))
             {
@@ -3127,7 +3134,7 @@ namespace Microsoft.VisualStudio.Project
                 if (parts[i].Length > 0)
                 {
                     path += parts[i] + "\\";
-                    curParent = VerifySubFolderExists(path, curParent);
+                    curParent = VerifySubFolderExists(path, curParent, nodeCache);
                 }
             }
             return curParent;
@@ -3179,20 +3186,28 @@ namespace Microsoft.VisualStudio.Project
         /// <param name="parent">the parent node where to add the subfolder if it does not exist.</param>
         /// <returns>the foldernode correcsponding to the path.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "SubFolder")]
-        protected virtual FolderNode VerifySubFolderExists(string path, HierarchyNode parent)
+        protected virtual FolderNode VerifySubFolderExists(string path, HierarchyNode parent, IDictionary<string, HierarchyNode> nodeCache = null)
         {
             FolderNode folderNode = null;
             uint uiItemId;
             Url url = new Url(this.BaseURI, path);
             string strFullPath = url.AbsoluteUrl;
-            // Folders end in our storage with a backslash, so add one...
-            this.ParseCanonicalName(strFullPath, out uiItemId);
-            if (uiItemId != (uint)VSConstants.VSITEMID.Nil)
+
+            HierarchyNode cachedNode = null;
+            if (nodeCache == null || !nodeCache.TryGetValue(strFullPath, out cachedNode))
             {
-                Debug.Assert(this.NodeFromItemId(uiItemId) is FolderNode, "Not a FolderNode");
-                folderNode = (FolderNode)this.NodeFromItemId(uiItemId);
+                // Folders end in our storage with a backslash, so add one...
+                this.ParseCanonicalName(strFullPath, out uiItemId);
+                if (uiItemId != (uint)VSConstants.VSITEMID.Nil)
+                {
+                    Debug.Assert(this.NodeFromItemId(uiItemId) is FolderNode, "Not a FolderNode");
+                    cachedNode = this.NodeFromItemId(uiItemId);
+                    if (nodeCache != null)
+                        nodeCache.Add(strFullPath, cachedNode);
+                }
             }
 
+            folderNode = (FolderNode)cachedNode;
             if (folderNode == null && path != null && parent != null)
             {
                 // folder does not exist yet...
@@ -3224,6 +3239,8 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>A FolderNode that can then be added to the hierarchy</returns>
         protected internal virtual FolderNode CreateFolderNode(string path, ProjectElement element)
         {
+            Contract.Requires<ArgumentNullException>(element != null, "element");
+
             FolderNode folderNode = new FolderNode(this, path, element);
             return folderNode;
         }
@@ -3426,9 +3443,11 @@ namespace Microsoft.VisualStudio.Project
 
                 this.ProcessReferences();
 
-                this.ProcessFiles();
+                Dictionary<string, HierarchyNode> nodeCache = new Dictionary<string, HierarchyNode>(StringComparer.OrdinalIgnoreCase);
 
-                this.ProcessFolders();
+                this.ProcessFiles(nodeCache);
+
+                this.ProcessFolders(nodeCache);
 
                 this.LoadNonBuildInformation();
 
@@ -4363,7 +4382,7 @@ namespace Microsoft.VisualStudio.Project
         /// <summary>
         /// Loads folders from the project file into the hierarchy.
         /// </summary>
-        protected internal virtual void ProcessFolders()
+        protected internal virtual void ProcessFolders(IDictionary<string, HierarchyNode> nodeCache)
         {
             // Process Folders (useful to persist empty folder)
             foreach (MSBuild.ProjectItem folder in this.buildProject.Items.Where(IsFolderItem).ToArray())
@@ -4372,14 +4391,14 @@ namespace Microsoft.VisualStudio.Project
 
                 // We do not need any special logic for assuring that a folder is only added once to the ui hierarchy.
                 // The below method will only add once the folder to the ui hierarchy
-                this.CreateFolderNodes(strPath);
+                this.CreateFolderNodes(strPath, nodeCache);
             }
         }
 
         /// <summary>
         /// Loads file items from the project file into the hierarchy.
         /// </summary>
-        protected internal virtual void ProcessFiles()
+        protected internal virtual void ProcessFiles(IDictionary<string, HierarchyNode> nodeCache)
         {
             List<String> subitemsKeys = new List<String>();
             Dictionary<String, MSBuild.ProjectItem> subitems = new Dictionary<String, MSBuild.ProjectItem>();
@@ -4412,7 +4431,7 @@ namespace Microsoft.VisualStudio.Project
 
                 if (!this.CanFileNodesHaveChilds || String.IsNullOrEmpty(dependentOf))
                 {
-                    AddIndependentFileNode(item);
+                    AddIndependentFileNode(item, nodeCache);
                 }
                 else
                 {
@@ -4427,7 +4446,7 @@ namespace Microsoft.VisualStudio.Project
             // Now process the dependent items.
             if (this.CanFileNodesHaveChilds)
             {
-                ProcessDependentFileNodes(subitemsKeys, subitems);
+                ProcessDependentFileNodes(subitemsKeys, subitems, nodeCache);
             }
 
         }
@@ -4437,7 +4456,7 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         /// <param name="subitemsKeys">List of sub item keys </param>
         /// <param name="subitems"></param>
-        protected internal virtual void ProcessDependentFileNodes(IList<String> subitemsKeys, Dictionary<String, MSBuild.ProjectItem> subitems)
+        protected internal virtual void ProcessDependentFileNodes(IList<String> subitemsKeys, Dictionary<String, MSBuild.ProjectItem> subitems, IDictionary<string, HierarchyNode> nodeCache)
         {
             if (subitemsKeys == null || subitems == null)
             {
@@ -4450,7 +4469,7 @@ namespace Microsoft.VisualStudio.Project
                 if (!subitems.ContainsKey(key))
                     continue;
 
-                AddDependentFileNode(subitems, key);
+                AddDependentFileNode(subitems, key, nodeCache);
             }
         }
 
@@ -6577,8 +6596,12 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         /// <param name="item">Item to add</param>
         /// <returns>Added node</returns>
-        private HierarchyNode AddIndependentFileNode(MSBuild.ProjectItem item)
+        private HierarchyNode AddIndependentFileNode(MSBuild.ProjectItem item, IDictionary<string, HierarchyNode> parentNodeCache)
         {
+            Contract.Requires(item != null);
+            Contract.Requires(parentNodeCache != null);
+            Contract.Ensures(Contract.Result<HierarchyNode>() != null);
+
             // Make sure the item is within the project folder hierarchy. If not, link it.
             string linkPath = item.GetMetadataValue(ProjectFileConstants.Link);
             if (String.IsNullOrEmpty(linkPath))
@@ -6592,7 +6615,7 @@ namespace Microsoft.VisualStudio.Project
                 }
             }
 
-            HierarchyNode currentParent = GetItemParentNode(item);
+            HierarchyNode currentParent = GetItemParentNode(item, parentNodeCache);
             return AddFileNodeToNode(item, currentParent);
         }
 
@@ -6634,8 +6657,12 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         /// <param name="item">msbuild item</param>
         /// <returns>parent node</returns>
-        private HierarchyNode GetItemParentNode(MSBuild.ProjectItem item)
+        private HierarchyNode GetItemParentNode(MSBuild.ProjectItem item, IDictionary<string, HierarchyNode> nodeCache)
         {
+            Contract.Requires(item != null);
+            Contract.Requires(nodeCache != null);
+            Contract.Ensures(Contract.Result<HierarchyNode>() != null);
+
             HierarchyNode currentParent = this;
             string strPath = item.EvaluatedInclude;
             string link = item.GetMetadataValue(ProjectFileConstants.Link);
@@ -6645,9 +6672,14 @@ namespace Microsoft.VisualStudio.Project
             strPath = Path.GetDirectoryName(strPath);
             if (strPath.Length > 0)
             {
-                // Use the relative to verify the folders...
-                currentParent = this.CreateFolderNodes(strPath);
+                if (!nodeCache.TryGetValue(strPath, out currentParent))
+                {
+                    // Use the relative to verify the folders...
+                    currentParent = this.CreateFolderNodes(strPath, nodeCache);
+                    nodeCache.Add(strPath, currentParent);
+                }
             }
+
             return currentParent;
         }
 

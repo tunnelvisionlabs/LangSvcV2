@@ -22,6 +22,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
 using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
 using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+using System.Diagnostics.Contracts;
 
 namespace Microsoft.VisualStudio.Project
 {
@@ -41,10 +42,9 @@ namespace Microsoft.VisualStudio.Project
 		public FolderNode(ProjectNode root, string relativePath, ProjectElement element)
 			: base(root, element)
 		{
-            if (relativePath == null)
-            {
-                throw new ArgumentNullException("relativePath");
-            }
+            Contract.Requires(root != null);
+            Contract.Requires(element != null);
+            Contract.Requires<ArgumentNullException>(relativePath != null, "relativePath");
 
 			this.VirtualNodeName = relativePath.TrimEnd('\\');
             this.isNonMemberItem = element.IsVirtual;
@@ -109,6 +109,11 @@ namespace Microsoft.VisualStudio.Project
             {
                 return this.isNonMemberItem;
             }
+
+            set
+            {
+                this.isNonMemberItem = value;
+            }
         }
 
 		#region overridden methods
@@ -158,7 +163,7 @@ namespace Microsoft.VisualStudio.Project
                 CCITracing.TraceCall(this.ID + "," + id.ToString());
                 if (bool.TryParse(value.ToString(), out boolValue))
                 {
-                    this.isNonMemberItem = boolValue;
+                    this.IsNonMemberItem = boolValue;
                 }
                 else
                 {

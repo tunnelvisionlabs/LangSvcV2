@@ -50,16 +50,8 @@ namespace Microsoft.VisualStudio.Project
 	//, IVsBuildStatusCallback 
 	{
 		#region Events
-		internal event EventHandler<HierarchyNodeEventArgs> OnChildAdded
-		{
-			add { onChildAdded += value; }
-			remove { onChildAdded -= value; }
-		}
-		internal event EventHandler<HierarchyNodeEventArgs> OnChildRemoved
-		{
-			add { onChildRemoved += value; }
-			remove { onChildRemoved -= value; }
-		}
+        internal event EventHandler<HierarchyNodeEventArgs> OnChildAdded;
+        internal event EventHandler<HierarchyNodeEventArgs> OnChildRemoved;
 		#endregion
 
 		#region static/const fields
@@ -88,8 +80,6 @@ namespace Microsoft.VisualStudio.Project
 		private NodeProperties nodeProperties;
 		private OleServiceProvider oleServiceProvider = new OleServiceProvider();
 		private bool excludeNodeFromScc;
-		private EventHandler<HierarchyNodeEventArgs> onChildAdded;
-		private EventHandler<HierarchyNodeEventArgs> onChildRemoved;
 		private bool hasParentNodeNameRelation;
 		private List<HierarchyNode> itemsDraggedOrCutOrCopied;
 		private bool sourceDraggedOrCutOrCopied;
@@ -1023,10 +1013,11 @@ namespace Microsoft.VisualStudio.Project
 			this.ProjectManager.Tracker.OnItemRemoved(documentToRemove, removeFlags[0]);
 
 			// Notify hierarchy event listeners that we have removed the item
-			if(null != this.parentNode.onChildRemoved)
+            var onChildRemoved = parentNode.OnChildRemoved;
+            if (onChildRemoved != null)
 			{
 				HierarchyNodeEventArgs args = new HierarchyNodeEventArgs(this);
-				parentNode.onChildRemoved(parentNode, args);
+				onChildRemoved(parentNode, args);
 			}
 
 			// Notify hierarchy event listeners that items have been invalidated
@@ -2306,10 +2297,11 @@ namespace Microsoft.VisualStudio.Project
             Contract.Requires<ArgumentNullException>(parent != null, "parent");
             Contract.Requires<ArgumentNullException>(child != null, "child");
 
-			if(null != parent.onChildAdded)
+            var onChildAdded = parent.OnChildAdded;
+			if (onChildAdded != null)
 			{
 				HierarchyNodeEventArgs args = new HierarchyNodeEventArgs(child);
-				parent.onChildAdded(parent, args);
+				onChildAdded(parent, args);
 			}
 			
 			HierarchyNode foo;
