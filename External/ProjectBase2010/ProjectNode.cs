@@ -673,12 +673,12 @@ namespace Microsoft.VisualStudio.Project
             {
                 return this.outputBaseRelativePath;
             }
+
             set
             {
-                if (Path.IsPathRooted(value))
-                {
-                    throw new ArgumentException("Path must not be rooted.");
-                }
+                Contract.Requires<ArgumentNullException>(value != null, "value");
+                Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(value));
+                Contract.Requires<ArgumentException>(!Path.IsPathRooted(value), "Path must not be rooted.");
 
                 this.outputBaseRelativePath = value;
             }
