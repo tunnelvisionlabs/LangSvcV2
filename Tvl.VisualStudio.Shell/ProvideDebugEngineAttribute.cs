@@ -153,6 +153,16 @@
         }
 
         /// <summary>
+        /// Set to true to exclude this debug engine from the Attach to Process manual selection list
+        /// </summary>
+        [DebugMetric("ExcludeManualSelect")]
+        public bool ExcludeManualSelect
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Set to true to indicate support for named breakpoints (breakpoints that break when a certain function name is called).
         /// </summary>
         [DebugMetric("FunctionBP")]
@@ -381,7 +391,7 @@
         /// Set this to true to indicate that just-in-time optimizations (for managed code) should be disabled during debugging.
         /// </summary>
         [DebugMetric("DisableJITOptimization")]
-        public bool DiableJitOptimization
+        public bool DisableJitOptimization
         {
             get;
             set;

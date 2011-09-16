@@ -9,15 +9,26 @@
     [Guid(JavaDebuggerConstants.JavaDebuggerPackageGuidString)]
     [ProvideDebugEngine(typeof(JavaDebugEngine), Constants.JavaLanguageName,
         PortSuppliers = new string[] { "{708C1ECA-FF48-11D2-904F-00C04FA302A1}" },
-        ProgramProvider = "{" + JavaDebuggerConstants.JavaProgramProviderGuidString + "}",
-        //ProgramProvider = "{4FF9DEF4-8922-4D02-9379-3FFA64D1D639}", // this is the local Win32 program provider
-        Attach = true,
+        ProgramProvider = JavaDebuggerConstants.JavaProgramProviderGuidString,
+        // basic configuration
         AlwaysLoadProgramProviderLocal = true,
         AlwaysLoadLocal = true,
-        AutoSelectPriority = 5,
-        Disassembly = true
-        //EngineCanWatchProcess = true
-        //RemoteDebugging = true
+        AutoSelectPriority = 0,
+        ExcludeManualSelect = true,
+        // feature support
+        Attach = false,
+        Disassembly = true,
+        SuspendThread = true,
+        SetNextStatement = false,
+        JustInTimeDebugging = false,
+        HitCountBreakpoints = false,
+        FunctionBreakpoints = false,
+        Exceptions = false,
+        EditAndContinue = false,
+        DumpWriting = false,
+        DataBreakpoints = false,
+        ConditionalBreakpoints = false,
+        RemoteDebugging = false
         )]
     [ProvideObject(typeof(JavaDebugEngine))]
     [ProvideObject(typeof(JavaDebugProgramProvider))]

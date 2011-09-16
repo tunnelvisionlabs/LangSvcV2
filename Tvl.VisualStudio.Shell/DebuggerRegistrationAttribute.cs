@@ -82,13 +82,20 @@
                         else if (typeof(Guid[]).IsAssignableFrom(property.PropertyType))
                         {
                             Guid[] value = accessor.Invoke(this, null) as Guid[];
-                            if (value != null)
+                            if (value != null && value.Length > 0)
                             {
-                                using (Key subkey = key.CreateSubkey(metric.Name))
+                                if (value.Length == 1 && metric.Name == "PortSupplier")
                                 {
-                                    for (int i = 0; i < value.Length; i++)
+                                    key.SetValue(metric.Name, value[0].ToString("B"));
+                                }
+                                else
+                                {
+                                    using (Key subkey = key.CreateSubkey(metric.Name))
                                     {
-                                        subkey.SetValue(i.ToString(), value[i].ToString("B"));
+                                        for (int i = 0; i < value.Length; i++)
+                                        {
+                                            subkey.SetValue(i.ToString(), value[i].ToString("B"));
+                                        }
                                     }
                                 }
                             }

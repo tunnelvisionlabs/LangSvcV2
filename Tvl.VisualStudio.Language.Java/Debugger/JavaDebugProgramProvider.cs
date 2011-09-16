@@ -42,9 +42,13 @@
              *   PFLAG_GET_PROGRAM_NODES:       Caller is asking for a list of program nodes to be returned.
              */
 
-            IDebugProcess2 debugProcess = port.GetProcess(processId);
+#if false
+            // make sure this request is relevant to this debug engine
+            if (!engineFilter.AsEnumerable().Contains(JavaDebuggerConstants.JavaDebugEngineGuid))
+                return VSConstants.E_INVALIDARG;
+#endif
 
-            throw new NotImplementedException();
+            return VSConstants.S_FALSE;
         }
 
         /// <summary>
@@ -66,7 +70,8 @@
              *   PFLAG_ATTACHED_TO_DEBUGGEE:    Caller was attached to but not launched by the debugger.
              */
 
-            throw new NotImplementedException();
+            programNode = null;
+            return VSConstants.E_NOTIMPL;
         }
 
         public int SetLocale(ushort languageId)
