@@ -27,6 +27,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.Win32;
 using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+using System.Diagnostics.Contracts;
 
 namespace Microsoft.VisualStudio.Project
 {
@@ -121,10 +122,8 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         public IDEBuildLogger(IVsOutputWindowPane output, TaskProvider taskProvider, IVsHierarchy hierarchy)
         {
-            if (taskProvider == null)
-                throw new ArgumentNullException("taskProvider");
-            if (hierarchy == null)
-                throw new ArgumentNullException("hierarchy");
+            Contract.Requires<ArgumentNullException>(taskProvider != null, "taskProvider");
+            Contract.Requires<ArgumentNullException>(hierarchy != null, "hierarchy");
 
             Trace.WriteLineIf(Thread.CurrentThread.GetApartmentState() != ApartmentState.STA, "WARNING: IDEBuildLogger constructor running on the wrong thread.");
 
@@ -147,10 +146,7 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         public override void Initialize(IEventSource eventSource)
         {
-            if (null == eventSource)
-            {
-                throw new ArgumentNullException("eventSource");
-            }
+            Contract.Requires<ArgumentNullException>(eventSource != null, "eventSource");
 
             this.taskQueue = new ConcurrentQueue<Func<ErrorTask>>();
             this.outputQueue = new ConcurrentQueue<string>();

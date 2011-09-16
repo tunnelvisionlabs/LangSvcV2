@@ -511,14 +511,14 @@ namespace Microsoft.VisualStudio.Project
                 if(property != null && string.Equals(property, "true", StringComparison.OrdinalIgnoreCase))
                 {
                     //Set the unmanged debugger
-                    //TODO change to vsconstant when it is available in VsConstants (guidNativeOnlyEng was the old name, maybe it has got a new name)
-                    info.clsidCustom = new Guid("{3B476D35-A401-11D2-AAD4-00C04F990171}");
+                    info.clsidCustom = VSConstants.DebugEnginesGuids.NativeOnly_guid;
                 }
                 else
                 {
                     //Set the managed debugger
-                    info.clsidCustom = VSConstants.CLSID_ComPlusOnlyDebugEngine;
+                    info.clsidCustom = VSConstants.DebugEnginesGuids.ManagedOnly_guid;
                 }
+
                 info.grfLaunch = grfLaunch;
                 VsShellUtilities.LaunchDebugger(this.project.Site, info);
             }
