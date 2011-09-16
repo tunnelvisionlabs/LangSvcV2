@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+  <TemplateData>
+    <Name>Empty Project</Name>
+    <Description>An empty project for creating a local application</Description>
+    <Icon>JavaEmptyProjectProjectTemplate.ico</Icon>
+    <TemplateID>Tvl.Java.EmptyProject</TemplateID>
+    <ProjectType>Java</ProjectType>
+    <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>Project</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+  </TemplateData>
+  <TemplateContent>
+    <Project File="EmptyProject.javaproj" ReplaceParameters="true">
+    </Project>
+  </TemplateContent>
+</VSTemplate>

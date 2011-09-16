@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+  <TemplateData>
+    <Name>Console Application</Name>
+    <Description>A project for creating a command-line application</Description>
+    <Icon>JavaConsoleApplicationProjectTemplate.ico</Icon>
+    <TemplateID>Tvl.Java.ConsoleApplication</TemplateID>
+    <ProjectType>Java</ProjectType>
+    <SortOrder>12</SortOrder>
+    <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>ConsoleApplication</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+  </TemplateData>
+  <TemplateContent>
+    <Project File="ConsoleApplication.javaproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="true" OpenInEditor="true">Program.java</ProjectItem>
+    </Project>
+  </TemplateContent>
+</VSTemplate>

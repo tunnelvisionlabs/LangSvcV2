@@ -1,0 +1,5 @@
+﻿package $rootnamespace$;
+
+interface $safeitemrootname$
+{
+}

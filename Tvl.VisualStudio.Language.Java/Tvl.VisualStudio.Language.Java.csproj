@@ -664,6 +664,54 @@
       <Project>{CACB60A9-1E76-4F92-8831-B134A658C695}</Project>
       <Name>Microsoft.VisualStudio.Project</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Templates\Java\ItemTemplates\JavaClassItemTemplate\JavaClassItemTemplate.csproj">
+      <Project>{4F09FA7B-761E-4EEF-B705-53AF973B4B59}</Project>
+      <Name>JavaClassItemTemplate</Name>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <TemplateType>Item</TemplateType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <VSIXSubPath>ItemTemplates</VSIXSubPath>
+    </ProjectReference>
+    <ProjectReference Include="..\Templates\Java\ItemTemplates\JavaCodeFileItemTemplate\JavaCodeFileItemTemplate.csproj">
+      <Project>{4DF3F0E0-A3BD-4522-B16E-27FFC8453E1D}</Project>
+      <Name>JavaCodeFileItemTemplate</Name>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <TemplateType>Item</TemplateType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <VSIXSubPath>ItemTemplates</VSIXSubPath>
+    </ProjectReference>
+    <ProjectReference Include="..\Templates\Java\ItemTemplates\JavaInterfaceItemTemplate\JavaInterfaceItemTemplate.csproj">
+      <Project>{2A89CA0B-91C3-4F5A-832B-7ABE3B94A643}</Project>
+      <Name>JavaInterfaceItemTemplate</Name>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <TemplateType>Item</TemplateType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <VSIXSubPath>ItemTemplates</VSIXSubPath>
+    </ProjectReference>
+    <ProjectReference Include="..\Templates\Java\ProjectTemplates\JavaClassLibraryProjectTemplate\JavaClassLibraryProjectTemplate.csproj">
+      <Project>{DE3785D0-ABA0-4F33-8D4A-8086D8E7DBA0}</Project>
+      <Name>JavaClassLibraryProjectTemplate</Name>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <TemplateType>Project</TemplateType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
+    </ProjectReference>
+    <ProjectReference Include="..\Templates\Java\ProjectTemplates\JavaConsoleApplicationProjectTemplate\JavaConsoleApplicationProjectTemplate.csproj">
+      <Project>{76300F7B-9997-47FE-AD18-420D7B4F4E92}</Project>
+      <Name>JavaConsoleApplicationProjectTemplate</Name>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <TemplateType>Project</TemplateType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
+    </ProjectReference>
+    <ProjectReference Include="..\Templates\Java\ProjectTemplates\JavaEmptyProjectProjectTemplate\JavaEmptyProjectProjectTemplate.csproj">
+      <Project>{E2176434-D936-46EF-80C4-B358BE7FA2CB}</Project>
+      <Name>JavaEmptyProjectProjectTemplate</Name>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <TemplateType>Project</TemplateType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
+    </ProjectReference>
     <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
       <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
       <Name>Tvl.Core</Name>

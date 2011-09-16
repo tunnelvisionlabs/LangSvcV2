@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+  <TemplateData>
+    <Name>Class Library</Name>
+    <Description>A project for creating a Java class library (.jar)</Description>
+    <Icon>JavaClassLibraryProjectTemplate.ico</Icon>
+    <TemplateID>Tvl.Java.ClassLibrary</TemplateID>
+    <ProjectType>Java</ProjectType>
+    <SortOrder>20</SortOrder>
+    <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>ClassLibrary</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+  </TemplateData>
+  <TemplateContent>
+    <Project File="ClassLibrary.javaproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="true" OpenInEditor="true">Class1.java</ProjectItem>
+    </Project>
+  </TemplateContent>
+</VSTemplate>
