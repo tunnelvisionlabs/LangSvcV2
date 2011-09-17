@@ -3081,14 +3081,14 @@ namespace Microsoft.VisualStudio.Project
 		#endregion
 
 		#region helper methods
-		public HierarchyNode FindChild(string name)
+		public HierarchyNode FindChild(string name, bool recursive = true)
 		{
 			if(String.IsNullOrEmpty(name))
 			{
 				return null;
 			}
 
-			HierarchyNode result;
+			HierarchyNode result = null;
 			for(HierarchyNode child = this.firstChild; child != null; child = child.NextSibling)
 			{
 				if(!String.IsNullOrEmpty(child.VirtualNodeName) && String.Equals(child.VirtualNodeName, name, StringComparison.OrdinalIgnoreCase))
@@ -3102,7 +3102,9 @@ namespace Microsoft.VisualStudio.Project
 					return child;
 				}
 
-				result = child.FindChild(name);
+				if (recursive)
+					result = child.FindChild(name, recursive);
+
 				if(result != null)
 				{
 					return result;
