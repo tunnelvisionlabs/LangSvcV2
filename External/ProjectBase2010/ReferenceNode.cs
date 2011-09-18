@@ -9,22 +9,23 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
-using System.Text;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
-using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
-
 namespace Microsoft.VisualStudio.Project
 {
-	[CLSCompliant(false), ComVisible(true)]
+    using System;
+    using System.Diagnostics;
+    using System.Diagnostics.Contracts;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using System.Security.Permissions;
+    using System.Text;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
+    using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+
+	[CLSCompliant(false)]
+    [ComVisible(true)]
 	public abstract class ReferenceNode : HierarchyNode
 	{
 		protected delegate void CannotAddReferenceErrorMessage();
@@ -59,22 +60,6 @@ namespace Microsoft.VisualStudio.Project
 		public override Guid ItemTypeGuid
 		{
 			get { return Guid.Empty; }
-		}
-
-		public override string Url
-		{
-			get
-			{
-				return String.Empty;
-			}
-		}
-
-		public override string Caption
-		{
-			get
-			{
-				return String.Empty;
-			}
 		}
 		#endregion
 
@@ -181,7 +166,7 @@ namespace Microsoft.VisualStudio.Project
 		public virtual void AddReference()
 		{
 			ReferenceContainerNode referencesFolder = this.ProjectManager.FindChild(ReferenceContainerNode.ReferencesNodeVirtualName) as ReferenceContainerNode;
-			Debug.Assert(referencesFolder != null, "Could not find the References node");
+			Contract.Assert(referencesFolder != null, "Could not find the References node");
 
 			CannotAddReferenceErrorMessage referenceErrorMessageHandler = null;
 
@@ -257,7 +242,7 @@ namespace Microsoft.VisualStudio.Project
 		protected internal virtual bool IsAlreadyAdded(out ReferenceNode existingEquivalentNode)
 		{
 			ReferenceContainerNode referencesFolder = this.ProjectManager.FindChild(ReferenceContainerNode.ReferencesNodeVirtualName) as ReferenceContainerNode;
-			Debug.Assert(referencesFolder != null, "Could not find the References node");
+			Contract.Assert(referencesFolder != null, "Could not find the References node");
 
 			for(HierarchyNode n = referencesFolder.FirstChild; n != null; n = n.NextSibling)
 			{
