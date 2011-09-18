@@ -32,40 +32,43 @@ namespace Microsoft.VisualStudio.Project
     /// </summary>
     public sealed class ProjectElement
     {
-        #region fields
+        private readonly ProjectNode itemProject;
         private MSBuild.ProjectItem item;
-        private ProjectNode itemProject;
         private bool deleted;
         private bool isVirtual;
         private Dictionary<string, string> virtualProperties;
-        #endregion
 
         #region properties
         public string ItemName
         {
             get
             {
-                if(this.HasItemBeenDeleted())
+                Contract.Requires<InvalidOperationException>(!HasItemBeenDeleted);
+
+                if (IsVirtual)
                 {
                     return String.Empty;
                 }
                 else
                 {
-                    return this.item.ItemType;
+                    return this.Item.ItemType;
                 }
             }
+
             set
             {
-                if(!this.HasItemBeenDeleted())
-                {
-                    // Check out the project file.
-                    if(!this.itemProject.QueryEditProjectFile(false))
-                    {
-                        throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
-                    }
+                Contract.Requires<ArgumentNullException>(value != null, "value");
+                Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(value));
+                Contract.Requires<InvalidOperationException>(!IsVirtual);
+                Contract.Requires<InvalidOperationException>(!HasItemBeenDeleted);
 
-                    this.item.ItemType = value;
+                // Check out the project file.
+                if (!this.ProjectManager.QueryEditProjectFile(false))
+                {
+                    throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
                 }
+
+                this.Item.ItemType = value;
             }
         }
 
@@ -73,6 +76,7 @@ namespace Microsoft.VisualStudio.Project
         {
             get
             {
+                Contract.Requires<InvalidOperationException>(!HasItemBeenDeleted);
                 return this.item;
             }
         }
@@ -82,6 +86,26 @@ namespace Microsoft.VisualStudio.Project
             get
             {
                 return this.isVirtual;
+            }
+        }
+
+        public ProjectNode ProjectManager
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<ProjectNode>() != null);
+                return itemProject;
+            }
+        } 
+
+        /// <summary>
+        /// Has the item been deleted
+        /// </summary>
+        public bool HasItemBeenDeleted
+        {
+            get
+            {
+                return (this.deleted || (!IsVirtual && this.item == null));
             }
         }
         #endregion
@@ -108,7 +132,7 @@ namespace Microsoft.VisualStudio.Project
 
             this.item = project.BuildProject.AddItem(itemType, Microsoft.Build.Evaluation.ProjectCollection.Escape(itemPath))[0];
             if (project.BuildProject.IsDirty)
-                this.itemProject.SetProjectFileDirty(true);
+                this.ProjectManager.SetProjectFileDirty(true);
 
             this.RefreshProperties();
         }
@@ -144,12 +168,12 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         public void RemoveFromProjectFile()
         {
-            if(!deleted && item != null)
+            if(!deleted && Item != null)
             {
                 deleted = true;
-                itemProject.BuildProject.RemoveItem(item);
+                ProjectManager.BuildProject.RemoveItem(Item);
             }
-            itemProject = null;
+
             item = null;
         }
 
@@ -160,63 +184,71 @@ namespace Microsoft.VisualStudio.Project
         /// <param name="attributeValue">Value to give to the attribute.  Use <c>null</c> to delete the metadata definition.</param>
         public void SetMetadata(string attributeName, string attributeValue)
         {
-            Contract.Assert(!String.Equals(attributeName, ProjectFileConstants.Include, StringComparison.OrdinalIgnoreCase), "Use rename as this won't work");
+            Contract.Requires<ArgumentNullException>(attributeName != null, "attributeName");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(attributeName));
+            Contract.Requires<ArgumentException>(!string.Equals(attributeName, ProjectFileConstants.Include, StringComparison.OrdinalIgnoreCase), "Use Rename to set the Include attribute.");
+            Contract.Requires<InvalidOperationException>(!HasItemBeenDeleted);
 
             if(this.IsVirtual)
             {
-                // For virtual node, use our virtual property collection
-                if(virtualProperties.ContainsKey(attributeName))
-                    virtualProperties.Remove(attributeName);
+                /* For virtual node, use our virtual property collection
+                 * Remove followed by Add ensures that the key in the dictionary has the same case as attributeName
+                 */
+                virtualProperties.Remove(attributeName);
                 virtualProperties.Add(attributeName, attributeValue);
                 return;
+            }
+
+            // Check out the project file.
+            if(!this.ProjectManager.QueryEditProjectFile(false))
+            {
+                throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
             }
 
             // Build Action is the type, not a property, so intercept
             if(String.Equals(attributeName, ProjectFileConstants.BuildAction, StringComparison.OrdinalIgnoreCase))
             {
-                item.ItemType = attributeValue;
+                Item.ItemType = attributeValue;
                 return;
             }
 
-            // Check out the project file.
-            if(!this.itemProject.QueryEditProjectFile(false))
-            {
-                throw Marshal.GetExceptionForHR(VSConstants.OLE_E_PROMPTSAVECANCELLED);
-            }
-
             if(attributeValue == null)
-                item.RemoveMetadata(attributeName);
+                Item.RemoveMetadata(attributeName);
             else
-                item.SetMetadataValue(attributeName, attributeValue);
-            itemProject.SetProjectFileDirty(true);
+                Item.SetMetadataValue(attributeName, attributeValue);
+
+            ProjectManager.SetProjectFileDirty(true);
         }
 
         public string GetEvaluatedMetadata(string attributeName)
         {
+            Contract.Requires<ArgumentNullException>(attributeName != null, "attributeName");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(attributeName));
+            Contract.Requires<InvalidOperationException>(!HasItemBeenDeleted);
+
             if(this.IsVirtual)
             {
                 // For virtual items, use our virtual property collection
-                if(!virtualProperties.ContainsKey(attributeName))
-                {
-                    return String.Empty;
-                }
+                string attributeValue;
+                if (!virtualProperties.TryGetValue(attributeName, out attributeValue))
+                    return string.Empty;
 
-                return ProjectCollection.Unescape(virtualProperties[attributeName]);
+                return ProjectCollection.Unescape(attributeValue);
             }
 
             // cannot ask MSBuild for Include, so intercept it and return the corresponding property
             if(String.Equals(attributeName, ProjectFileConstants.Include, StringComparison.OrdinalIgnoreCase))
             {
-                return item.EvaluatedInclude;
+                return Item.EvaluatedInclude;
             }
 
             // Build Action is the type, not a property, so intercept this one as well
             if(String.Equals(attributeName, ProjectFileConstants.BuildAction, StringComparison.OrdinalIgnoreCase))
             {
-                return item.ItemType;
+                return Item.ItemType;
             }
 
-            return item.GetMetadataValue(attributeName);
+            return Item.GetMetadataValue(attributeName);
         }
 
         /// <summary>
@@ -226,6 +258,10 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>Value of the attribute</returns>
         public string GetMetadata(string attributeName)
         {
+            Contract.Requires<ArgumentNullException>(attributeName != null, "attributeName");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(attributeName));
+            Contract.Requires<InvalidOperationException>(!HasItemBeenDeleted);
+
             if(this.IsVirtual)
             {
                 // For virtual items, use our virtual property collection
@@ -237,13 +273,13 @@ namespace Microsoft.VisualStudio.Project
 
             // cannot ask MSBuild for Include, so intercept it and return the corresponding property
             if(String.Equals(attributeName, ProjectFileConstants.Include, StringComparison.OrdinalIgnoreCase))
-                return item.EvaluatedInclude;
+                return Item.EvaluatedInclude;
 
             // Build Action is the type, not a property, so intercept this one as well
             if(String.Equals(attributeName, ProjectFileConstants.BuildAction, StringComparison.OrdinalIgnoreCase))
-                return item.ItemType;
+                return Item.ItemType;
 
-            return item.GetMetadataValue(attributeName);
+            return Item.GetMetadataValue(attributeName);
         }
 
         /// <summary>
@@ -255,6 +291,10 @@ namespace Microsoft.VisualStudio.Project
         /// <remarks>The method will throw an Exception and neglect the passed in exception if the attribute is deleted</remarks>
         public string GetMetadataAndThrow(string attributeName, Exception exception)
         {
+            Contract.Requires<ArgumentNullException>(attributeName != null, "attributeName");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(attributeName));
+            Contract.Requires<InvalidOperationException>(!HasItemBeenDeleted);
+
             Contract.Assert(!String.IsNullOrEmpty(attributeName), "Cannot retrieve an attribute for a null or empty attribute name");
             string attribute = GetMetadata(attributeName);
 
@@ -262,10 +302,11 @@ namespace Microsoft.VisualStudio.Project
             {
                 if(String.IsNullOrEmpty(exception.Message))
                 {
-                    Contract.Assert(!String.IsNullOrEmpty(this.itemProject.BaseURI.AbsoluteUrl), "Cannot retrieve an attribute for a project that does not have a name");
-                    string message = String.Format(CultureInfo.CurrentCulture, SR.GetString(SR.AttributeLoad, CultureInfo.CurrentUICulture), attributeName, this.itemProject.BaseURI.AbsoluteUrl);
+                    Contract.Assert(!String.IsNullOrEmpty(this.ProjectManager.BaseURI.AbsoluteUrl), "Cannot retrieve an attribute for a project that does not have a name");
+                    string message = String.Format(CultureInfo.CurrentCulture, SR.GetString(SR.AttributeLoad, CultureInfo.CurrentUICulture), attributeName, this.ProjectManager.BaseURI.AbsoluteUrl);
                     throw new Exception(message, exception);
                 }
+
                 throw exception;
             }
 
@@ -275,6 +316,10 @@ namespace Microsoft.VisualStudio.Project
 
         public void Rename(string newPath)
         {
+            Contract.Requires<ArgumentNullException>(newPath != null, "newPath");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(newPath));
+            Contract.Requires<InvalidOperationException>(!HasItemBeenDeleted);
+
             string escapedPath = Microsoft.Build.Evaluation.ProjectCollection.Escape(newPath);
             if(this.IsVirtual)
             {
@@ -282,7 +327,7 @@ namespace Microsoft.VisualStudio.Project
                 return;
             }
 
-            item.Rename(escapedPath);
+            Item.Rename(escapedPath);
             this.RefreshProperties();
         }
 
@@ -296,15 +341,17 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         public void RefreshProperties()
         {
+            Contract.Requires<InvalidOperationException>(!HasItemBeenDeleted);
+
             if(this.IsVirtual)
                 return;
 
-            itemProject.BuildProject.ReevaluateIfNecessary();
+            ProjectManager.BuildProject.ReevaluateIfNecessary();
 
-            IEnumerable<ProjectItem> items = itemProject.BuildProject.GetItems(item.ItemType);
+            IEnumerable<ProjectItem> items = ProjectManager.BuildProject.GetItems(Item.ItemType);
             foreach (ProjectItem projectItem in items)
             {
-                if(projectItem!= null && projectItem.EvaluatedInclude.Equals(item.EvaluatedInclude))
+                if(projectItem!= null && projectItem.EvaluatedInclude.Equals(Item.EvaluatedInclude))
                 {
                     item = projectItem;
                     return;
@@ -324,25 +371,17 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>FullPath</returns>
         public string GetFullPathForElement()
         {
+            Contract.Requires<InvalidOperationException>(!HasItemBeenDeleted);
+
             string path = this.GetMetadata(ProjectFileConstants.Include);
             if(!Path.IsPathRooted(path))
-                path = Path.Combine(this.itemProject.ProjectFolder, path);
+                path = Path.Combine(this.ProjectManager.ProjectFolder, path);
 
             // If any part of the path used relative paths, resolve this now
             path = Path.GetFullPath(path);
             return path;
         }
 
-        #endregion
-
-        #region helper methods
-        /// <summary>
-        /// Has the item been deleted
-        /// </summary>
-        private bool HasItemBeenDeleted()
-        {
-            return (this.deleted || this.item == null);
-        }
         #endregion
 
         #region overridden from System.Object
@@ -367,7 +406,7 @@ namespace Microsoft.VisualStudio.Project
             }
 
             // Do they reference the same project?
-            if(!element1.itemProject.Equals(element2.itemProject))
+            if(!element1.ProjectManager.Equals(element2.ProjectManager))
                 return false;
 
             // Do they have the same include?
