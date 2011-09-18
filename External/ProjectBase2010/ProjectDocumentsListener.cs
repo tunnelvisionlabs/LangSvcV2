@@ -9,16 +9,15 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using ShellConstants = Microsoft.VisualStudio.Shell.Interop.Constants;
-using System.Diagnostics.CodeAnalysis;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+    using ShellConstants = Microsoft.VisualStudio.Shell.Interop.Constants;
 
 	[CLSCompliant(false)]
 	public abstract class ProjectDocumentsListener : IVsTrackProjectDocumentsEvents2, IDisposable
@@ -45,7 +44,7 @@ namespace Microsoft.VisualStudio.Project
             this.serviceProvider = serviceProviderParameter;
 			this.projectDocTracker = this.serviceProvider.GetService(typeof(SVsTrackProjectDocuments)) as IVsTrackProjectDocuments2;
 
-			Debug.Assert(this.projectDocTracker != null, "Could not get the IVsTrackProjectDocuments2 object from the services exposed by this project");
+			Contract.Assert(this.projectDocTracker != null, "Could not get the IVsTrackProjectDocuments2 object from the services exposed by this project");
 
 			if(this.projectDocTracker == null)
 			{

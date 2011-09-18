@@ -12,10 +12,11 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 namespace Microsoft.VisualStudio.Project
 {
     using System;
-    using System.Diagnostics;
+    using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
+
     using _PersistStorageType = Microsoft.VisualStudio.Shell.Interop._PersistStorageType;
 
 	/// <summary>
@@ -55,7 +56,7 @@ namespace Microsoft.VisualStudio.Project
 		{
 			if(this.ProjectManager == null)
 			{
-				Debug.Assert(false);
+				Contract.Assert(false);
 				return;
 			}
 
@@ -66,7 +67,7 @@ namespace Microsoft.VisualStudio.Project
 		{
 			if(this.ProjectManager == null)
 			{
-				Debug.Assert(false);
+				Contract.Assert(false);
 				return VSConstants.E_INVALIDARG;
 			}
 

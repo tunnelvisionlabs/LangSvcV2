@@ -9,13 +9,13 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Diagnostics.Contracts;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
+
 	/// <summary>
 	/// Used by a project to query the environment for permission to add, remove, or rename a file or directory in a solution
 	/// </summary>
@@ -43,7 +43,7 @@ namespace Microsoft.VisualStudio.Project
 		/// <returns>the IVsTrackProjectDocuments2 object</returns>
 		private IVsTrackProjectDocuments2 GetIVsTrackProjectDocuments2()
 		{
-			Debug.Assert(this.projectMgr != null && !this.projectMgr.IsClosed && this.projectMgr.Site != null);
+			Contract.Assert(this.projectMgr != null && !this.projectMgr.IsClosed && this.projectMgr.Site != null);
 
 			IVsTrackProjectDocuments2 documentTracker = this.projectMgr.Site.GetService(typeof(SVsTrackProjectDocuments)) as IVsTrackProjectDocuments2;
 			if(documentTracker == null)

@@ -9,19 +9,18 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using MSBuild = Microsoft.Build.Evaluation;
-using Microsoft.Build.Evaluation;
-using System.Diagnostics.Contracts;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using Microsoft.Build.Evaluation;
+    using Microsoft.VisualStudio;
+
+    using MSBuild = Microsoft.Build.Evaluation;
 
     /// <summary>
     /// This class represent a project item (usualy a file) and allow getting and
@@ -161,7 +160,7 @@ namespace Microsoft.VisualStudio.Project
         /// <param name="attributeValue">Value to give to the attribute.  Use <c>null</c> to delete the metadata definition.</param>
         public void SetMetadata(string attributeName, string attributeValue)
         {
-            Debug.Assert(!String.Equals(attributeName, ProjectFileConstants.Include, StringComparison.OrdinalIgnoreCase), "Use rename as this won't work");
+            Contract.Assert(!String.Equals(attributeName, ProjectFileConstants.Include, StringComparison.OrdinalIgnoreCase), "Use rename as this won't work");
 
             if(this.IsVirtual)
             {
@@ -256,14 +255,14 @@ namespace Microsoft.VisualStudio.Project
         /// <remarks>The method will throw an Exception and neglect the passed in exception if the attribute is deleted</remarks>
         public string GetMetadataAndThrow(string attributeName, Exception exception)
         {
-            Debug.Assert(!String.IsNullOrEmpty(attributeName), "Cannot retrieve an attribute for a null or empty attribute name");
+            Contract.Assert(!String.IsNullOrEmpty(attributeName), "Cannot retrieve an attribute for a null or empty attribute name");
             string attribute = GetMetadata(attributeName);
 
             if(String.IsNullOrEmpty(attributeName) && exception != null)
             {
                 if(String.IsNullOrEmpty(exception.Message))
                 {
-                    Debug.Assert(!String.IsNullOrEmpty(this.itemProject.BaseURI.AbsoluteUrl), "Cannot retrieve an attribute for a project that does not have a name");
+                    Contract.Assert(!String.IsNullOrEmpty(this.itemProject.BaseURI.AbsoluteUrl), "Cannot retrieve an attribute for a project that does not have a name");
                     string message = String.Format(CultureInfo.CurrentCulture, SR.GetString(SR.AttributeLoad, CultureInfo.CurrentUICulture), attributeName, this.itemProject.BaseURI.AbsoluteUrl);
                     throw new Exception(message, exception);
                 }
@@ -354,12 +353,12 @@ namespace Microsoft.VisualStudio.Project
                 return true;
 
             // Verify that they are not null (cast to object first to avoid stack overflow)
-            if(element1 as object == null || element2 as object == null)
+            if (object.ReferenceEquals(element1, null) || object.ReferenceEquals(element2, null))
             {
                 return false;
             }
 
-            Debug.Assert(!element1.IsVirtual || !element2.IsVirtual, "Cannot compare virtual nodes");
+            Contract.Assert(!element1.IsVirtual || !element2.IsVirtual, "Cannot compare virtual nodes");
 
             // Cannot compare vitual items.
             if(element1.IsVirtual || element2.IsVirtual)
@@ -375,13 +374,7 @@ namespace Microsoft.VisualStudio.Project
             string include1 = element1.GetMetadata(ProjectFileConstants.Include);
             string include2 = element2.GetMetadata(ProjectFileConstants.Include);
 
-            // Unfortunately the checking for nulls have to be done again, since neither String.Equals nor String.Compare can handle nulls.
             // Virtual folders should not be handled here.
-            if(include1 == null || include2 == null)
-            {
-                return false;
-            }
-
             return String.Equals(include1, include2, StringComparison.CurrentCultureIgnoreCase);
         }
 

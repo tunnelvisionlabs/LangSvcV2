@@ -9,24 +9,26 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
-using System.Text;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using IOleDataObject = Microsoft.VisualStudio.OLE.Interop.IDataObject;
-using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using System.Security.Permissions;
+    using System.Text;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.OLE.Interop;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using IOleDataObject = Microsoft.VisualStudio.OLE.Interop.IDataObject;
+    using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
+
 	/// <summary>
 	/// Manages the CopyPaste and Drag and Drop scenarios for a Project.
 	/// </summary>
@@ -824,7 +826,7 @@ namespace Microsoft.VisualStudio.Project
 			{
 				// Register
 				ErrorHandler.ThrowOnFailure(clipboardHelper.AdviseClipboardHelperEvents(this, out this.copyPasteCookie));
-				Debug.Assert(this.copyPasteCookie != 0, "AdviseClipboardHelperEvents returned an invalid cookie");
+				Contract.Assert(this.copyPasteCookie != 0, "AdviseClipboardHelperEvents returned an invalid cookie");
 			}
 			else if(!register && this.copyPasteCookie != 0)
 			{

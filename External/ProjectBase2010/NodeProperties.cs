@@ -9,26 +9,25 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.ComponentModel;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.OLE.Interop;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+
 	/// <summary>
 	/// To create your own localizable node properties, subclass this and add public properties
 	/// decorated with your own localized display name, category and description attributes.
 	/// </summary>
-	[CLSCompliant(false), ComVisible(true)]
+	[CLSCompliant(false)]
+    [ComVisible(true)]
 	public class NodeProperties : LocalizableProperties,
 		ISpecifyPropertyPages,
 		IVsGetCfgProvider,
@@ -258,7 +257,7 @@ namespace Microsoft.VisualStudio.Project
 		public object ExtenderNames()
 		{
 			EnvDTE.ObjectExtenders extenderService = (EnvDTE.ObjectExtenders)this.Node.GetService(typeof(EnvDTE.ObjectExtenders));
-			Debug.Assert(extenderService != null, "Could not get the ObjectExtenders object from the services exposed by this property object");
+			Contract.Assert(extenderService != null, "Could not get the ObjectExtenders object from the services exposed by this property object");
 			if(extenderService == null)
 			{
 				throw new InvalidOperationException();
@@ -269,7 +268,7 @@ namespace Microsoft.VisualStudio.Project
 		public object Extender(string extenderName)
 		{
 			EnvDTE.ObjectExtenders extenderService = (EnvDTE.ObjectExtenders)this.Node.GetService(typeof(EnvDTE.ObjectExtenders));
-			Debug.Assert(extenderService != null, "Could not get the ObjectExtenders object from the services exposed by this property object");
+			Contract.Assert(extenderService != null, "Could not get the ObjectExtenders object from the services exposed by this property object");
 			if(extenderService == null)
 			{
 				throw new InvalidOperationException();

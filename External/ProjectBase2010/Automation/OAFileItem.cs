@@ -12,8 +12,8 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 namespace Microsoft.VisualStudio.Project.Automation
 {
     using System;
-    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.IO;
     using System.Runtime.InteropServices;
@@ -21,6 +21,7 @@ namespace Microsoft.VisualStudio.Project.Automation
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
+
     using VSConstants = Microsoft.VisualStudio.VSConstants;
 
     /// <summary>
@@ -155,7 +156,7 @@ namespace Microsoft.VisualStudio.Project.Automation
                     IVsHierarchy ivsHierarchy;
                     uint docCookie;
                     IVsRunningDocumentTable rdt = this.Node.ProjectManager.Site.GetService(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
-                    Debug.Assert(rdt != null, " Could not get running document table from the services exposed by this project");
+                    Contract.Assert(rdt != null, " Could not get running document table from the services exposed by this project");
                     if (rdt == null)
                     {
                         throw new InvalidOperationException();
@@ -294,7 +295,7 @@ namespace Microsoft.VisualStudio.Project.Automation
                 try
                 {
                     IVsRunningDocumentTable rdt = this.Node.ProjectManager.Site.GetService(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
-                    Debug.Assert(rdt != null, " Could not get running document table from the services exposed by this project");
+                    Contract.Assert(rdt != null, " Could not get running document table from the services exposed by this project");
                     if (rdt == null)
                     {
                         throw new InvalidOperationException();

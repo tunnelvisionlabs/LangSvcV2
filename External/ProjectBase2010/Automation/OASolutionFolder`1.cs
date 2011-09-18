@@ -9,16 +9,17 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-
 namespace Microsoft.VisualStudio.Project.Automation
 {
-	[ComVisible(true), CLSCompliant(false)]
+    using System;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+	[ComVisible(true)]
+    [CLSCompliant(false)]
 	public class OASolutionFolder<T> : EnvDTE80.SolutionFolder
 		where T : HierarchyNode
 	{
@@ -32,7 +33,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 				throw new ArgumentNullException("associatedNode");
 			}
 
-			Debug.Assert(associatedNode.ProjectManager is ProjectContainerNode, "Expecting obejct of type" + typeof(ProjectContainerNode).Name);
+			Contract.Assert(associatedNode.ProjectManager is ProjectContainerNode, "Expecting obejct of type" + typeof(ProjectContainerNode).Name);
 
 			if(!(associatedNode.ProjectManager is ProjectContainerNode))
 				throw new ArgumentException(SR.GetString(SR.InvalidParameter, CultureInfo.CurrentUICulture), "associatedNode");

@@ -21,7 +21,6 @@ namespace Microsoft.VisualStudio.Project
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Diagnostics.Contracts;
     using System.Globalization;
@@ -32,9 +31,9 @@ namespace Microsoft.VisualStudio.Project
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
 
-    using Path = System.IO.Path;
     using MSBuild = Microsoft.Build.Evaluation;
     using MSBuildConstruction = Microsoft.Build.Construction;
+    using Path = System.IO.Path;
 
     [CLSCompliant(false)]
     [ComVisible(true)]
@@ -1194,7 +1193,7 @@ namespace Microsoft.VisualStudio.Project
         /// <devremark>The platforms array is never null. It is assured by the callers.</devremark>
         private static int GetPlatforms(uint celt, string[] names, uint[] actual, string[] platforms)
         {
-            Debug.Assert(platforms != null, "The plaforms array should never be null");
+            Contract.Assert(platforms != null, "The plaforms array should never be null");
             if(names == null)
             {
                 if(actual == null || actual.Length == 0)

@@ -9,17 +9,18 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-using IServiceProvider = System.IServiceProvider;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using IServiceProvider = System.IServiceProvider;
+
 	[CLSCompliant(false)]
 	public class SolutionListenerForProjectReferenceUpdate : SolutionListener
 	{
@@ -169,7 +170,7 @@ namespace Microsoft.VisualStudio.Project
 			IEnumHierarchies enumHierarchies = null;
 
 			ErrorHandler.ThrowOnFailure(this.Solution.GetProjectEnum(flags, ref enumOnlyThisType, out enumHierarchies));
-			Debug.Assert(enumHierarchies != null, "Could not get list of hierarchies in solution");
+			Contract.Assert(enumHierarchies != null, "Could not get list of hierarchies in solution");
 
 			IVsHierarchy[] hierarchies = new IVsHierarchy[1];
 			uint fetched;
@@ -177,11 +178,11 @@ namespace Microsoft.VisualStudio.Project
 			do
 			{
 				returnValue = enumHierarchies.Next(1, hierarchies, out fetched);
-				Debug.Assert(fetched <= 1, "We asked one project to be fetched VSCore gave more than one. We cannot handle that");
+				Contract.Assert(fetched <= 1, "We asked one project to be fetched VSCore gave more than one. We cannot handle that");
 				if(returnValue == VSConstants.S_OK && fetched == 1)
 				{
 					IVsHierarchy hierarchy = hierarchies[0];
-					Debug.Assert(hierarchy != null, "Could not retrieve a hierarchy");
+					Contract.Assert(hierarchy != null, "Could not retrieve a hierarchy");
 					IReferenceContainerProvider provider = hierarchy as IReferenceContainerProvider;
 					if(provider != null)
 					{

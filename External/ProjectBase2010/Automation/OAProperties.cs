@@ -9,22 +9,23 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Reflection;
-using System.Runtime.InteropServices;
-
 namespace Microsoft.VisualStudio.Project.Automation
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.Reflection;
+    using System.Runtime.InteropServices;
+
 	/// <summary>
 	/// Contains all of the properties of a given object that are contained in a generic collection of properties.
 	/// </summary>
 	[SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
-	[CLSCompliant(false), ComVisible(true)]
+	[CLSCompliant(false)]
+    [ComVisible(true)]
 	public class OAProperties : EnvDTE.Properties
 	{
 		#region fields
@@ -71,7 +72,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
 		public OAProperties(NodeProperties target)
 		{
-			System.Diagnostics.Debug.Assert(target != null);
+			Contract.Assert(target != null);
 
             if (target == null)
             {
@@ -192,7 +193,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 		/// <param name="targetType">The type of NodeProperties the we should filter on</param>
 		protected void AddPropertiesFromType(Type targetType)
 		{
-			Debug.Assert(targetType != null);
+			Contract.Assert(targetType != null);
 
             if (targetType == null)
             {

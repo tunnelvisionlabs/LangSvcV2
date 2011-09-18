@@ -9,15 +9,15 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.Build.Execution;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Diagnostics.Contracts;
+    using Microsoft.Build.Execution;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+
 	public class Output : IVsOutput2
 	{
 		private ProjectNode project;
@@ -45,7 +45,7 @@ namespace Microsoft.VisualStudio.Project
 		{
 			// Get the output assembly path (including the name)
 			pbstrCanonicalName = output.GetMetadataValue(ProjectFileConstants.FinalOutputPath);
-			Debug.Assert(!String.IsNullOrEmpty(pbstrCanonicalName), "Output Assembly not defined");
+			Contract.Assert(!String.IsNullOrEmpty(pbstrCanonicalName), "Output Assembly not defined");
 
 			// Make sure we have a full path
 			if(!System.IO.Path.IsPathRooted(pbstrCanonicalName))

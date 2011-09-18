@@ -12,13 +12,13 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 namespace Microsoft.VisualStudio.Project.Automation
 {
     using System;
-    using System.Diagnostics;
+    using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
-    using System.Diagnostics.Contracts;
 
-    [ComVisible(true), CLSCompliant(false)]
+    [ComVisible(true)]
+    [CLSCompliant(false)]
     public class OAProjectItem<T> : EnvDTE.ProjectItem
          where T : HierarchyNode
     {
@@ -179,7 +179,7 @@ namespace Microsoft.VisualStudio.Project.Automation
             {
                 // Get the parent node
                 HierarchyNode parentNode = this.node.Parent;
-                Debug.Assert(parentNode != null, "Failed to get the parent node");
+                Contract.Assert(parentNode != null, "Failed to get the parent node");
 
                 // Get the ProjectItems object for the parent node
                 if (parentNode is ProjectNode)
@@ -377,7 +377,7 @@ namespace Microsoft.VisualStudio.Project.Automation
             // there used to be a bug in VB/C# that would work with 0. To avoid breaking
             // existing automation they are still accepting 0. To be compatible with them
             // we accept it as well.
-            //Debug.Assert(index > 0, "Index is 1 based.");
+            //Contract.Assert(index > 0, "Index is 1 based.");
             if (index < 0)
             {
                 throw new ArgumentOutOfRangeException("index");

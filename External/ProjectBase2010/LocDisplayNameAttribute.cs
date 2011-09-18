@@ -9,13 +9,13 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Globalization;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.ComponentModel;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
 	public sealed class LocDisplayNameAttribute : DisplayNameAttribute
 	{
@@ -38,7 +38,7 @@ namespace Microsoft.VisualStudio.Project
 				string result = SR.GetString(this.name, CultureInfo.CurrentUICulture);
 				if(result == null)
 				{
-					Debug.Assert(false, "String resource '" + this.name + "' is missing");
+					Contract.Assert(false, "String resource '" + this.name + "' is missing");
 					result = this.name;
 				}
 				return result;

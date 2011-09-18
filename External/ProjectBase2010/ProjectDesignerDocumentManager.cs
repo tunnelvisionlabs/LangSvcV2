@@ -9,14 +9,14 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Diagnostics.Contracts;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
+    using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+
 	public class ProjectDesignerDocumentManager : DocumentManager
 	{
 		#region ctors
@@ -37,7 +37,7 @@ namespace Microsoft.VisualStudio.Project
 		public override int OpenWithSpecific(uint editorFlags, ref Guid editorType, string physicalView, ref Guid logicalView, IntPtr docDataExisting, out IVsWindowFrame frame, WindowFrameShowAction windowFrameAction)
 		{
 			frame = null;
-			Debug.Assert(editorType == VSConstants.GUID_ProjectDesignerEditor, "Cannot open project designer with guid " + editorType.ToString());
+			Contract.Assert(editorType == VSConstants.GUID_ProjectDesignerEditor, "Cannot open project designer with guid " + editorType.ToString());
 
 
 			if(this.Node == null || this.Node.ProjectManager == null || this.Node.ProjectManager.IsClosed)

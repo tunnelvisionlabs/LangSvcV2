@@ -13,6 +13,7 @@ namespace Microsoft.VisualStudio.Project
 {
     using System;
     using System.Diagnostics;
+    using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.Threading;
     using System.Windows.Forms;
@@ -90,14 +91,14 @@ namespace Microsoft.VisualStudio.Project
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal void InitUnitTestingMode()
         {
-            Debug.Assert(this.synchronizationContext == null, "Context has already been captured; too late to InitUnitTestingMode");
+            Contract.Assert(this.synchronizationContext == null, "Context has already been captured; too late to InitUnitTestingMode");
             IsUnitTest = true;
         }
 
         [Conditional("DEBUG")]
         internal void MustBeCalledFromUIThread()
         {
-            Debug.Assert(this.uithread == System.Threading.Thread.CurrentThread || IsUnitTest, "This must be called from the GUI thread");
+            Contract.Assert(this.uithread == System.Threading.Thread.CurrentThread || IsUnitTest, "This must be called from the GUI thread");
         }
 
         /// <summary>
@@ -112,7 +113,7 @@ namespace Microsoft.VisualStudio.Project
                 a();
                 return;
             }
-            Debug.Assert(this.synchronizationContext != null, "The SynchronizationContext must be captured before calling this method");
+            Contract.Assert(this.synchronizationContext != null, "The SynchronizationContext must be captured before calling this method");
 #if DEBUG
             StackTrace stackTrace = new StackTrace(true);
 #endif
@@ -127,7 +128,7 @@ namespace Microsoft.VisualStudio.Project
                 catch (Exception e)
                 {
                     // swallow, random exceptions should not kill process
-                    Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "UIThread.Run caught and swallowed exception: {0}\n\noriginally invoked from stack:\n{1}", e.ToString(), stackTrace.ToString()));
+                    Contract.Assert(false, string.Format(CultureInfo.InvariantCulture, "UIThread.Run caught and swallowed exception: {0}\n\noriginally invoked from stack:\n{1}", e.ToString(), stackTrace.ToString()));
                 }
 #else
                 catch (Exception)
@@ -152,7 +153,7 @@ namespace Microsoft.VisualStudio.Project
                 return;
             }
             Exception exn = null; ;
-            Debug.Assert(this.synchronizationContext != null, "The SynchronizationContext must be captured before calling this method");
+            Contract.Assert(this.synchronizationContext != null, "The SynchronizationContext must be captured before calling this method");
             
             // Send on UI thread will execute immediately.
             this.synchronizationContext.Send(ignore =>
@@ -205,7 +206,7 @@ namespace Microsoft.VisualStudio.Project
             else
             {
                  // Make sure we are always capturing the same thread.
-                 Debug.Assert(this.uithread == Thread.CurrentThread);
+                 Contract.Assert(this.uithread == Thread.CurrentThread);
             }
         }       
     }

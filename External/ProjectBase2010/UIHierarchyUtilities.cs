@@ -9,13 +9,13 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Diagnostics.Contracts;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
+
 	/// <summary>
 	///This class provides some useful static shell based methods. 
 	/// </summary>
@@ -39,7 +39,7 @@ namespace Microsoft.VisualStudio.Project
 
 			IVsUIShell shell = serviceProvider.GetService(typeof(SVsUIShell)) as IVsUIShell;
 
-			Debug.Assert(shell != null, "Could not get the ui shell from the project");
+			Contract.Assert(shell != null, "Could not get the ui shell from the project");
 			if(shell == null)
 			{
 				throw new InvalidOperationException();

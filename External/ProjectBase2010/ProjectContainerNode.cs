@@ -9,21 +9,24 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio.Project.Automation;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using MSBuild = Microsoft.Build.Evaluation;
-
 namespace Microsoft.VisualStudio.Project
 {
-	[CLSCompliant(false), ComVisible(true)]
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio.Project.Automation;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using MSBuild = Microsoft.Build.Evaluation;
+
+	[CLSCompliant(false)]
+    [ComVisible(true)]
 	public abstract class ProjectContainerNode : ProjectNode,
 		IVsParentProject,
 		IBuildDependencyOnProjectContainer
@@ -138,7 +141,7 @@ namespace Microsoft.VisualStudio.Project
 		public override int IsItemDirty(uint itemId, IntPtr punkDocData, out int pfDirty)
 		{
 			HierarchyNode hierNode = this.NodeFromItemId(itemId);
-			Debug.Assert(hierNode != null, "Hierarchy node not found");
+			Contract.Assert(hierNode != null, "Hierarchy node not found");
 			if(hierNode != this)
 			{
 				return ErrorHandler.ThrowOnFailure(hierNode.IsItemDirty(itemId, punkDocData, out pfDirty));
@@ -152,7 +155,7 @@ namespace Microsoft.VisualStudio.Project
 		public override int SaveItem(VSSAVEFLAGS dwSave, string silentSaveAsName, uint itemid, IntPtr punkDocData, out int pfCancelled)
 		{
 			HierarchyNode hierNode = this.NodeFromItemId(itemid);
-			Debug.Assert(hierNode != null, "Hierarchy node not found");
+			Contract.Assert(hierNode != null, "Hierarchy node not found");
 			if(hierNode != this)
 			{
 				return ErrorHandler.ThrowOnFailure(hierNode.SaveItem(dwSave, silentSaveAsName, itemid, punkDocData, out pfCancelled));
@@ -224,7 +227,7 @@ namespace Microsoft.VisualStudio.Project
 		{
 			IVsSolution solution = this.GetService(typeof(IVsSolution)) as IVsSolution;
 
-			Debug.Assert(solution != null, "Could not retrieve the solution from the services provided by this project");
+			Contract.Assert(solution != null, "Could not retrieve the solution from the services provided by this project");
 			if(solution == null)
 			{
 				return VSConstants.E_FAIL;
@@ -282,7 +285,7 @@ namespace Microsoft.VisualStudio.Project
 			int returnValue = VSConstants.S_OK; // be optimistic.
 
 			IVsSolution solution = this.GetService(typeof(IVsSolution)) as IVsSolution;
-			Debug.Assert(solution != null, "Could not retrieve the solution from the services provided by this project");
+			Contract.Assert(solution != null, "Could not retrieve the solution from the services provided by this project");
 
 			if(solution == null)
 			{
@@ -431,7 +434,7 @@ namespace Microsoft.VisualStudio.Project
 
 			string filename = elementToUse.GetFullPathForElement();
 			// Delegate to AddNestedProjectFromTemplate. Because we pass flags that specify open project rather then clone, this will works.
-			Debug.Assert((creationFlags & __VSCREATEPROJFLAGS.CPF_OPENFILE) == __VSCREATEPROJFLAGS.CPF_OPENFILE, "__VSCREATEPROJFLAGS.CPF_OPENFILE should have been specified, did you mean to call AddNestedProjectFromTemplate?");
+			Contract.Assert((creationFlags & __VSCREATEPROJFLAGS.CPF_OPENFILE) == __VSCREATEPROJFLAGS.CPF_OPENFILE, "__VSCREATEPROJFLAGS.CPF_OPENFILE should have been specified, did you mean to call AddNestedProjectFromTemplate?");
 			return AddNestedProjectFromTemplate(filename, Path.GetDirectoryName(filename), Path.GetFileName(filename), elementToUse, creationFlags);
 		}
 
@@ -460,7 +463,7 @@ namespace Microsoft.VisualStudio.Project
 			Automation.OAProject oaProject = GetAutomationObject() as Automation.OAProject;
 			if(oaProject == null || oaProject.ProjectItems == null)
 				throw new System.InvalidOperationException(SR.GetString(SR.InvalidAutomationObject, CultureInfo.CurrentUICulture));
-			Debug.Assert(oaProject.Object != null, "The project automation object should have set the Object to the SolutionFolder");
+			Contract.Assert(oaProject.Object != null, "The project automation object should have set the Object to the SolutionFolder");
 			Automation.OASolutionFolder<ProjectContainerNode> folder = oaProject.Object as Automation.OASolutionFolder<ProjectContainerNode>;
 
 			// Prepare the parameters to pass to RunWizardFile
@@ -609,7 +612,7 @@ namespace Microsoft.VisualStudio.Project
 			}
 
 			string templateFile = elementToUse.GetMetadata(ProjectFileConstants.Template);
-			Debug.Assert(!String.IsNullOrEmpty(templateFile), "No template file has been specified in the template attribute in the project file");
+			Contract.Assert(!String.IsNullOrEmpty(templateFile), "No template file has been specified in the template attribute in the project file");
 
 			string fullPath = templateFile;
 			if(!Path.IsPathRooted(templateFile))
@@ -617,7 +620,7 @@ namespace Microsoft.VisualStudio.Project
 				RegisteredProjectType registeredProjectType = this.GetRegisteredProject(elementToUse);
 
 				// This is not a full path
-				Debug.Assert(registeredProjectType != null && (!String.IsNullOrEmpty(registeredProjectType.DefaultProjectExtensionValue) || !String.IsNullOrEmpty(registeredProjectType.WizardTemplatesDirValue)), " Registered wizard directory value not set in the registry.");
+				Contract.Assert(registeredProjectType != null && (!String.IsNullOrEmpty(registeredProjectType.DefaultProjectExtensionValue) || !String.IsNullOrEmpty(registeredProjectType.WizardTemplatesDirValue)), " Registered wizard directory value not set in the registry.");
 
 				// See if this specify a VsTemplate file
 				fullPath = registeredProjectType.GetVsTemplateFile(templateFile);
@@ -649,13 +652,13 @@ namespace Microsoft.VisualStudio.Project
 			Guid projectFactoryGuid = new Guid(typeGuidString);
 
 			EnvDTE.DTE dte = this.ProjectManager.Site.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
-			Debug.Assert(dte != null, "Could not get the automation object from the services exposed by this project");
+			Contract.Assert(dte != null, "Could not get the automation object from the services exposed by this project");
 
 			if(dte == null)
 				throw new InvalidOperationException();
 
 			RegisteredProjectType registeredProjectType = RegisteredProjectType.CreateRegisteredProjectType(projectFactoryGuid);
-			Debug.Assert(registeredProjectType != null, "Could not read the registry setting associated to this project.");
+			Contract.Assert(registeredProjectType != null, "Could not read the registry setting associated to this project.");
 			if(registeredProjectType == null)
 			{
 				throw new InvalidOperationException();
@@ -737,7 +740,7 @@ namespace Microsoft.VisualStudio.Project
 #if DEBUG
 				IVsHierarchy nestedHierarchy;
 				ErrorHandler.ThrowOnFailure(solution.GetProjectOfUniqueName(newNode.GetMkDocument(), out nestedHierarchy));
-				Debug.Assert(nestedHierarchy != null && Utilities.IsSameComObject(nestedHierarchy, newNode.NestedHierarchy), "The nested hierrachy was not reloaded correctly.");
+				Contract.Assert(nestedHierarchy != null && Utilities.IsSameComObject(nestedHierarchy, newNode.NestedHierarchy), "The nested hierrachy was not reloaded correctly.");
 #endif
 				this.SetProjectFileDirty(isDirty);
 
@@ -767,7 +770,7 @@ namespace Microsoft.VisualStudio.Project
 		private void OnNestedProjectFileChangedOnDisk(object sender, FileChangedOnDiskEventArgs e)
 		{
 			#region Pre-condition validation
-			Debug.Assert(e != null, "No event args specified for the FileChangedOnDisk event");
+			Contract.Assert(e != null, "No event args specified for the FileChangedOnDisk event");
 
 			// We care only about time change for reload.
 			if((e.FileChangeFlag & _VSFILECHANGEFLAGS.VSFILECHG_Time) == 0)
@@ -778,7 +781,7 @@ namespace Microsoft.VisualStudio.Project
 			// test if we actually have a document for this id.
 			string moniker;
 			this.GetMkDocument(e.ItemID, out moniker);
-			Debug.Assert(NativeMethods.IsSamePath(moniker, e.FileName), " The file + " + e.FileName + " has changed but we could not retrieve the path for the item id associated to the path.");
+			Contract.Assert(NativeMethods.IsSamePath(moniker, e.FileName), " The file + " + e.FileName + " has changed but we could not retrieve the path for the item id associated to the path.");
 			#endregion
 
 			bool reload = true;

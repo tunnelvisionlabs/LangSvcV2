@@ -13,8 +13,8 @@ namespace Microsoft.VisualStudio.Project
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
@@ -24,7 +24,8 @@ namespace Microsoft.VisualStudio.Project
     /// <summary>
     /// Allows projects to group outputs according to usage.
     /// </summary>
-    [CLSCompliant(false), ComVisible(true)]
+    [CLSCompliant(false)]
+    [ComVisible(true)]
     public class OutputGroup : IVsOutputGroup2
     {
         #region fields
@@ -104,7 +105,7 @@ namespace Microsoft.VisualStudio.Project
             {
                 bool succeeded = false;
                 project.BuildTarget(generateDependencyList, out succeeded);
-                Debug.Assert(succeeded, "Failed to build target: " + generateDependencyList);
+                Contract.Assert(succeeded, "Failed to build target: " + generateDependencyList);
             }
 
             // Rebuild the content of our list of output

@@ -9,15 +9,15 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-using IServiceProvider = System.IServiceProvider;
-using ShellConstants = Microsoft.VisualStudio.Shell.Interop.Constants;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Diagnostics.Contracts;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using IServiceProvider = System.IServiceProvider;
+    using ShellConstants = Microsoft.VisualStudio.Shell.Interop.Constants;
 
 	[CLSCompliant(false)]
 	public abstract class SolutionListener : IVsSolutionEvents3, IVsSolutionEvents4, IDisposable
@@ -45,7 +45,7 @@ namespace Microsoft.VisualStudio.Project
             this.serviceProvider = serviceProviderParameter;
             this.solution = this.serviceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
 
-			Debug.Assert(this.solution != null, "Could not get the IVsSolution object from the services exposed by this project");
+			Contract.Assert(this.solution != null, "Could not get the IVsSolution object from the services exposed by this project");
 
 			if(this.solution == null)
 			{

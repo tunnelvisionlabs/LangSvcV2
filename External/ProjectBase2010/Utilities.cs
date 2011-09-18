@@ -9,32 +9,31 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
-using System.Security.Policy;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Windows.Forms;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.Win32;
-using IServiceProvider = System.IServiceProvider;
-using MSBuild = Microsoft.Build.Evaluation;
-using VSRegistry = Microsoft.VisualStudio.Shell.VSRegistry;
-using System.Diagnostics.Contracts;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
+    using System.Drawing;
+    using System.Globalization;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using System.Security.Permissions;
+    using System.Text;
+    using System.Text.RegularExpressions;
+    using System.Windows.Forms;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.OLE.Interop;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+    using Microsoft.Win32;
+
+    using IServiceProvider = System.IServiceProvider;
+    using MSBuild = Microsoft.Build.Evaluation;
+    using VSRegistry = Microsoft.VisualStudio.Shell.VSRegistry;
+
     public static class Utilities
     {
         private const string defaultMSBuildVersion = "4.0";
@@ -782,7 +781,7 @@ namespace Microsoft.VisualStudio.Project
             if(attributes != null && attributes.Length == 1)
             {
 
-                Debug.Assert(attributes[0] is PropertyPageTypeConverterAttribute, "The returned attribute must be an attribute is PropertyPageTypeConverterAttribute");
+                Contract.Assert(attributes[0] is PropertyPageTypeConverterAttribute, "The returned attribute must be an attribute is PropertyPageTypeConverterAttribute");
                 PropertyPageTypeConverterAttribute converterAttribute = (PropertyPageTypeConverterAttribute)attributes[0];
 
                 if(converterAttribute.ConverterType.IsSubclassOf(typeof(EnumConverter)))
@@ -975,7 +974,7 @@ namespace Microsoft.VisualStudio.Project
             IVsProjectCfg activeCfg = activeConfigs[0];
 
             // Can it be that the activeCfg is null?
-            System.Diagnostics.Debug.Assert(activeCfg != null, "Cannot find the active configuration");
+            Contract.Assert(activeCfg != null, "Cannot find the active configuration");
 
             string canonicalName;
             ErrorHandler.ThrowOnFailure(activeCfg.get_CanonicalName(out canonicalName));

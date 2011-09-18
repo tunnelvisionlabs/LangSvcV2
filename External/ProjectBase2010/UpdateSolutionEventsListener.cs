@@ -9,15 +9,16 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-using IServiceProvider = System.IServiceProvider;
-using ShellConstants = Microsoft.VisualStudio.Shell.Interop.Constants;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Diagnostics.Contracts;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using IServiceProvider = System.IServiceProvider;
+    using ShellConstants = Microsoft.VisualStudio.Shell.Interop.Constants;
+
 	/// <summary>
 	/// Defines an abstract class implementing IVsUpdateSolutionEvents interfaces.
 	/// </summary>
@@ -80,7 +81,7 @@ namespace Microsoft.VisualStudio.Project
 
 			ErrorHandler.ThrowOnFailure(this.solutionBuildManager.AdviseUpdateSolutionEvents(this, out this.solutionEvents2Cookie));
 
-			Debug.Assert(this.solutionBuildManager is IVsSolutionBuildManager3, "The solution build manager object implementing IVsSolutionBuildManager2 does not implement IVsSolutionBuildManager3");
+			Contract.Assert(this.solutionBuildManager is IVsSolutionBuildManager3, "The solution build manager object implementing IVsSolutionBuildManager2 does not implement IVsSolutionBuildManager3");
 			ErrorHandler.ThrowOnFailure(this.SolutionBuildManager3.AdviseUpdateSolutionEvents3(this, out this.solutionEvents3Cookie));
 		}
 		#endregion

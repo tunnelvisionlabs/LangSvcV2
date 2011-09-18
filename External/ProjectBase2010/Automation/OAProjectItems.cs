@@ -9,23 +9,24 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using EnvDTE;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-
 namespace Microsoft.VisualStudio.Project.Automation
 {
+    using System;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using EnvDTE;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
+
 	/// <summary>
 	/// Contains ProjectItem objects
 	/// </summary>
 	[SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
-	[ComVisible(true), CLSCompliant(false)]
+	[ComVisible(true)]
+    [CLSCompliant(false)]
 	public class OAProjectItems : OANavigableProjectItems
 	{
 		#region ctor
@@ -208,7 +209,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 			if(result == VSADDRESULT.ADDRESULT_Success)
 			{
 				HierarchyNode nodeAdded = this.NodeWithItems.FindChild(path);
-				Debug.Assert(nodeAdded != null, "We should have been able to find the new element in the hierarchy");
+				Contract.Assert(nodeAdded != null, "We should have been able to find the new element in the hierarchy");
 				if(nodeAdded != null)
 				{
 					EnvDTE.ProjectItem item = null;

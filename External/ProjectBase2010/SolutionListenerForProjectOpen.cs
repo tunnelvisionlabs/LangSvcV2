@@ -9,14 +9,15 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-using IServiceProvider = System.IServiceProvider;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Diagnostics;
+    using System.Diagnostics.Contracts;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using IServiceProvider = System.IServiceProvider;
 
 	[CLSCompliant(false)]
 	public class SolutionListenerForProjectOpen : SolutionListener
@@ -32,7 +33,7 @@ namespace Microsoft.VisualStudio.Project
 			if(added != 0 && hierarchy is IBuildDependencyUpdate)
 			{
 				IVsUIHierarchy uiHierarchy = hierarchy as IVsUIHierarchy;
-				Debug.Assert(uiHierarchy != null, "The ProjectNode should implement IVsUIHierarchy");
+				Contract.Assert(uiHierarchy != null, "The ProjectNode should implement IVsUIHierarchy");
 				// Expand and select project node
 				IVsUIHierarchyWindow uiWindow = UIHierarchyUtilities.GetUIHierarchyWindow(this.ServiceProvider, HierarchyNode.SolutionExplorer);
 				if(uiWindow != null)

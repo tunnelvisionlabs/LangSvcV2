@@ -9,18 +9,19 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
-
 namespace Microsoft.VisualStudio.Project.Automation
 {
+    using System;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
+
 	/// <summary>
 	/// Represents the automation object equivalent to a ReferenceNode object
 	/// </summary>
 	[SuppressMessage("Microsoft.Interoperability", "CA1405:ComVisibleTypeBaseTypesShouldBeComVisible")]
-	[ComVisible(true), CLSCompliant(false)]
+	[ComVisible(true)]
+    [CLSCompliant(false)]
 	public class OAReferenceItem : OAProjectItem<ReferenceNode>
 	{
 		#region ctors
@@ -75,7 +76,7 @@ namespace Microsoft.VisualStudio.Project.Automation
 			{
 				// Get the parent node (ReferenceContainerNode)
 				ReferenceContainerNode parentNode = this.Node.Parent as ReferenceContainerNode;
-				Debug.Assert(parentNode != null, "Failed to get the parent node");
+				Contract.Assert(parentNode != null, "Failed to get the parent node");
 
 				// Get the ProjectItems object for the parent node
 				if(parentNode != null)

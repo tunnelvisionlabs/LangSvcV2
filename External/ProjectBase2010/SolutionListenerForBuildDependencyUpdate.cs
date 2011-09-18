@@ -9,16 +9,17 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-using IServiceProvider = System.IServiceProvider;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using IServiceProvider = System.IServiceProvider;
+
 	/// <summary>
 	/// The purpose of this class is to set a build dependency from a modeling project to all its sub projects
 	/// </summary>
@@ -117,7 +118,7 @@ namespace Microsoft.VisualStudio.Project
 		{
 			List<IBuildDependencyOnProjectContainer> projectList = new List<IBuildDependencyOnProjectContainer>();
 
-			Debug.Assert(this.Solution != null, "IVsSolution object not set on this object");
+			Contract.Assert(this.Solution != null, "IVsSolution object not set on this object");
 			if(this.Solution == null)
 			{
 				// Bad state, so we quit
@@ -157,8 +158,8 @@ namespace Microsoft.VisualStudio.Project
 		private static void AddBuildDependenyToNestedProject(IBuildDependencyUpdate projectContainer, IVsHierarchy nestedProject)
 		{
 			// Validate input
-			Debug.Assert(projectContainer != null, "Project Container must not be null");
-			Debug.Assert(nestedProject != null, "Nested Project must not be null");
+			Contract.Assert(projectContainer != null, "Project Container must not be null");
+			Contract.Assert(nestedProject != null, "Nested Project must not be null");
 			if(projectContainer == null || nestedProject == null)
 			{
 				// Invalid argument

@@ -9,18 +9,16 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.TextManager.Interop;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio.OLE.Interop;
+    using Microsoft.VisualStudio.TextManager.Interop;
+
 	public static class NativeMethods
 	{
 		// IIDS
@@ -517,7 +515,7 @@ namespace Microsoft.VisualStudio.Project
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		public static string GetAbsolutePath(string fileName)
 		{
-			System.Diagnostics.Debug.Assert(fileName != null && fileName.Length > 0, "Cannot get absolute path, fileName is not valid");
+			Contract.Assert(fileName != null && fileName.Length > 0, "Cannot get absolute path, fileName is not valid");
 
 			Uri uri = new Uri(fileName);
 			return uri.LocalPath + uri.Fragment;

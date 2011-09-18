@@ -9,18 +9,19 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using IServiceProvider = System.IServiceProvider;
-using ShellConstants = Microsoft.VisualStudio.Shell.Interop.Constants;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using IServiceProvider = System.IServiceProvider;
+    using ShellConstants = Microsoft.VisualStudio.Shell.Interop.Constants;
+
 	/// <summary>
 	/// This abstract class handles opening, saving of items in the hierarchy.
 	/// </summary>
@@ -188,7 +189,7 @@ namespace Microsoft.VisualStudio.Project
 
 		protected string GetOwnerCaption()
 		{
-			Debug.Assert(this.node != null, "No node has been initialized for the document manager");
+			Contract.Assert(this.node != null, "No node has been initialized for the document manager");
 
 			object pvar;
 			ErrorHandler.ThrowOnFailure(this.node.GetProperty(this.node.ID, (int)__VSHPROPID.VSHPROPID_Caption, out pvar));
@@ -215,12 +216,12 @@ namespace Microsoft.VisualStudio.Project
 		{
 			string fullPath = String.Empty;
 
-			Debug.Assert(this.node != null, "No node has been initialized for the document manager");
+			Contract.Assert(this.node != null, "No node has been initialized for the document manager");
 
 			// Get the URL representing the item
 			fullPath = this.node.GetMkDocument();
 
-			Debug.Assert(!String.IsNullOrEmpty(fullPath), "Could not retrive the fullpath for the node" + this.Node.ID.ToString(CultureInfo.CurrentCulture));
+			Contract.Assert(!String.IsNullOrEmpty(fullPath), "Could not retrive the fullpath for the node" + this.Node.ID.ToString(CultureInfo.CurrentCulture));
 			return fullPath;
 		}
 

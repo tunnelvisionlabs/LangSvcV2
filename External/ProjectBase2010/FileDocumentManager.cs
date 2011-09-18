@@ -9,15 +9,17 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Diagnostics;
+    using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+
 	/// <summary>
 	/// This class handles opening, saving of file items in the hierarchy.
 	/// </summary>
@@ -98,7 +100,7 @@ namespace Microsoft.VisualStudio.Project
 		{
 			frame = null;
 			IVsRunningDocumentTable rdt = this.Node.ProjectManager.Site.GetService(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
-			Debug.Assert(rdt != null, " Could not get running document table from the services exposed by this project");
+			Contract.Assert(rdt != null, " Could not get running document table from the services exposed by this project");
 			if(rdt == null)
 			{
 				return VSConstants.E_FAIL;
@@ -166,9 +168,9 @@ namespace Microsoft.VisualStudio.Project
 				return VSConstants.E_FAIL;
 			}
 
-			Debug.Assert(this.Node != null, "No node has been initialized for the document manager");
-			Debug.Assert(this.Node.ProjectManager != null, "No project manager has been initialized for the document manager");
-			Debug.Assert(this.Node is FileNode, "Node is not FileNode object");
+			Contract.Assert(this.Node != null, "No node has been initialized for the document manager");
+			Contract.Assert(this.Node.ProjectManager != null, "No project manager has been initialized for the document manager");
+			Contract.Assert(this.Node is FileNode, "Node is not FileNode object");
 
 			int returnValue = VSConstants.S_OK;
 			string caption = this.GetOwnerCaption();
