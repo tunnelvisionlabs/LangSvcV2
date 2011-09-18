@@ -112,6 +112,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="$(MSBuildToolsPath)\Microsoft.Common.targets">
+      <Link>Microsoft.Common.targets</Link>
+    </None>
+    <None Include="$(MSBuildToolsPath)\Microsoft.CSharp.targets">
+      <Link>Microsoft.CSharp.targets</Link>
+    </None>
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
     </None>
