@@ -9,35 +9,38 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
-using System.Text;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Shell;
 //#define CCI_TRACING
-using Microsoft.VisualStudio.Shell.Interop;
-using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
-using ShellConstants = Microsoft.VisualStudio.Shell.Interop.Constants;
-using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
-using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
-using System.Diagnostics.Contracts;
 
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+    using System.Runtime.InteropServices;
+    using System.Runtime.Versioning;
+    using System.Text;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.OLE.Interop;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
+    using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
+    using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+
 	/// <summary>
 	/// An object that deals with user interaction via a GUI in the form a hierarchy: a parent node with zero or more child nodes, each of which
 	/// can itself be a hierarchy.  
 	/// </summary>
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling"), CLSCompliant(false), ComVisible(true)]
+	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
+    [CLSCompliant(false)]
+    [ComVisible(true)]
 	public abstract partial class HierarchyNode :
 		IVsUIHierarchy,
 		IVsPersistHierarchyItem2,
@@ -63,22 +66,23 @@ namespace Microsoft.VisualStudio.Project
 		#endregion
 
 		#region fields
-		private EventSinkCollection hierarchyEventSinks = new EventSinkCollection();
-		private ProjectNode projectMgr;
-		private ProjectElement itemNode;
+		private readonly uint _hierarchyId;
+		private readonly EventSinkCollection hierarchyEventSinks = new EventSinkCollection();
+		private readonly ProjectNode projectMgr;
+		private readonly OleServiceProvider oleServiceProvider = new OleServiceProvider();
+
 		private HierarchyNode parentNode;
-		private HierarchyNode nextSibling;
-		private HierarchyNode firstChild;
-		private HierarchyNode lastChild;
+        private readonly LinkedList<HierarchyNode> _children = new LinkedList<HierarchyNode>();
+        private LinkedListNode<HierarchyNode> _linkedNode;
+
+		private ProjectElement itemNode;
 		private bool isExpanded;
-		private uint hierarchyId;
 		private uint docCookie;
 		private bool hasDesigner;
 		private string virtualNodeName = String.Empty;	// Only used by virtual nodes
 		private IVsHierarchy parentHierarchy;
 		private int parentHierarchyItemId;
 		private NodeProperties nodeProperties;
-		private OleServiceProvider oleServiceProvider = new OleServiceProvider();
 		private bool excludeNodeFromScc;
 		private bool hasParentNodeNameRelation;
 		private List<HierarchyNode> itemsDraggedOrCutOrCopied;
@@ -123,6 +127,22 @@ namespace Microsoft.VisualStudio.Project
 		#endregion
 
 		#region virtual properties
+        public virtual string CanonicalName
+        {
+            get
+            {
+                return Url;
+            }
+        }
+
+        public virtual bool CanCacheCanonicalName
+        {
+            get
+            {
+                return false;
+            }
+        }
+
 		/// <summary>
 		/// Defines a string that is used to separate the name relation from the extension
 		/// </summary>
@@ -246,10 +266,6 @@ namespace Microsoft.VisualStudio.Project
 			{
 				return this.projectMgr;
 			}
-			set
-			{
-				this.projectMgr = value;
-			}
 		}
 
 
@@ -258,11 +274,14 @@ namespace Microsoft.VisualStudio.Project
 		{
 			get
 			{
-				return this.nextSibling;
-			}
-			set
-			{
-				this.nextSibling = value;
+                if (_linkedNode == null)
+                    return null;
+
+                LinkedListNode<HierarchyNode> next = _linkedNode.Next;
+                if (next == null)
+                    return null;
+
+                return next.Value;
 			}
 		}
 
@@ -272,11 +291,11 @@ namespace Microsoft.VisualStudio.Project
 		{
 			get
 			{
-				return this.firstChild;
-			}
-			set
-			{
-				this.firstChild = value;
+                LinkedListNode<HierarchyNode> first = _children.First;
+                if (first == null)
+                    return null;
+
+                return first.Value;
 			}
 		}
 
@@ -285,11 +304,11 @@ namespace Microsoft.VisualStudio.Project
 		{
 			get
 			{
-				return this.lastChild;
-			}
-			set
-			{
-				this.lastChild = value;
+                LinkedListNode<HierarchyNode> last = _children.Last;
+                if (last == null)
+                    return null;
+
+                return last.Value;
 			}
 		}
 
@@ -301,10 +320,6 @@ namespace Microsoft.VisualStudio.Project
 			{
 				return this.parentNode;
 			}
-			set
-			{
-				this.parentNode = value;
-			}
 		}
 
 
@@ -314,11 +329,13 @@ namespace Microsoft.VisualStudio.Project
 		{
 			get
 			{
-				return this.hierarchyId;
-			}
-			internal set
-			{
-				this.hierarchyId = value;
+                if (Parent == null && (this._hierarchyId != (uint)VSConstants.VSITEMID.Root))
+                {
+                    if (!object.ReferenceEquals(this, ProjectManager.ItemIdMap[this._hierarchyId]))
+                        throw new InvalidOperationException("This node has been removed from the hierarchy.");
+                }
+
+				return this._hierarchyId;
 			}
 		}
 
@@ -330,6 +347,7 @@ namespace Microsoft.VisualStudio.Project
 			{
 				return itemNode;
 			}
+
 			set
 			{
 				itemNode = value;
@@ -358,33 +376,42 @@ namespace Microsoft.VisualStudio.Project
 			set { this.isExpanded = value; }
 		}
 
-		public string VirtualNodeName
+		public virtual string VirtualNodeName
 		{
 			get
 			{
 				return this.virtualNodeName;
 			}
+
 			set
 			{
 				this.virtualNodeName = value;
 			}
 		}
 
-
 		[System.ComponentModel.BrowsableAttribute(false)]
 		public HierarchyNode PreviousSibling
 		{
 			get
 			{
-				if(this.parentNode == null) return null;
-				HierarchyNode prev = null;
-				for(HierarchyNode child = this.parentNode.firstChild; child != null; child = child.nextSibling)
-				{
-					if(child == this)
-						break;
-					prev = child;
-				}
-				return prev;
+                if (_linkedNode == null)
+                    return null;
+
+                LinkedListNode<HierarchyNode> previous = _linkedNode.Previous;
+                if (previous == null)
+                    return null;
+
+                return previous.Value;
+
+                //if(this.parentNode == null) return null;
+                //HierarchyNode prev = null;
+                //for(HierarchyNode child = this.parentNode.firstChild; child != null; child = child.nextSibling)
+                //{
+                //    if(child == this)
+                //        break;
+                //    prev = child;
+                //}
+                //return prev;
 			}
 		}
 
@@ -451,12 +478,28 @@ namespace Microsoft.VisualStudio.Project
 				return this.itemsDraggedOrCutOrCopied;
 			}
 		}
+
+        protected LinkedList<HierarchyNode> Children
+        {
+            get
+            {
+                return _children;
+            }
+        }
+
 		#endregion
 
 		#region ctors
 
-		protected HierarchyNode()
+		protected HierarchyNode(VSConstants.VSITEMID itemId)
 		{
+            if (itemId != VSConstants.VSITEMID.Root)
+                throw new NotSupportedException();
+            if (!(this is ProjectNode))
+                throw new NotSupportedException();
+
+            this.projectMgr = (ProjectNode)this;
+            this._hierarchyId = (uint)itemId;
 			this.IsExpanded = true;
 		}
 
@@ -467,7 +510,7 @@ namespace Microsoft.VisualStudio.Project
 
 			this.projectMgr = root;
 			this.itemNode = element;
-			this.hierarchyId = this.projectMgr.ItemIdMap.Add(this);
+			this._hierarchyId = this.projectMgr.ItemIdMap.Add(this);
 			this.oleServiceProvider.AddService(typeof(IVsHierarchy), root, false);
 		}
 
@@ -481,7 +524,7 @@ namespace Microsoft.VisualStudio.Project
 
 			this.projectMgr = root;
 			this.itemNode = new ProjectElement(this.projectMgr, null, true);
-			this.hierarchyId = this.projectMgr.ItemIdMap.Add(this);
+			this._hierarchyId = this.projectMgr.ItemIdMap.Add(this);
 			this.oleServiceProvider.AddService(typeof(IVsHierarchy), root, false);
 		}
 
@@ -513,6 +556,13 @@ namespace Microsoft.VisualStudio.Project
 		#endregion
 
 		#region virtual methods
+
+        protected virtual void SetParent(HierarchyNode parent, LinkedListNode<HierarchyNode> linkedNode)
+        {
+            this.parentNode = parent;
+            this._linkedNode = linkedNode;
+        }
+
 		/// <summary>
 		/// Creates an object derived from NodeProperties that will be used to expose properties
 		/// spacific for this object to the property browser.
@@ -542,50 +592,42 @@ namespace Microsoft.VisualStudio.Project
             Contract.Requires<ArgumentNullException>(node != null, "node");
 
 			// make sure the node is in the map.
-			Object nodeWithSameID = this.projectMgr.ItemIdMap[node.hierarchyId];
-			if(!Object.ReferenceEquals(node, nodeWithSameID as HierarchyNode))
+			Object nodeWithSameID = this.projectMgr.ItemIdMap[node.ID];
+			if(!Object.ReferenceEquals(node, nodeWithSameID))
 			{
-				if(nodeWithSameID == null && node.ID <= this.ProjectManager.ItemIdMap.Count)
-				{ // reuse our hierarchy id if possible.
-					this.projectMgr.ItemIdMap.SetAt(node.hierarchyId, this);
-				}
-				else
-				{
-					throw new InvalidOperationException();
-				}
+                throw new InvalidOperationException();
+                //if(nodeWithSameID == null && node.ID <= this.ProjectManager.ItemIdMap.Count)
+                //{
+                //    // reuse our hierarchy id if possible.
+                //    this.projectMgr.ItemIdMap[node.hierarchyId] = this;
+                //}
+                //else
+                //{
+                //    throw new InvalidOperationException();
+                //}
 			}
 
-			HierarchyNode previous = null;
-			for(HierarchyNode n = this.firstChild; n != null; n = n.nextSibling)
+			LinkedListNode<HierarchyNode> previous = null;
+			for(LinkedListNode<HierarchyNode> n = _children.First; n != null; n = n.Next)
 			{
-				if(this.ProjectManager.CompareNodes(node, n) > 0) break;
+				if(this.ProjectManager.CompareNodes(node, n.Value) > 0) break;
 				previous = n;
 			}
+
 			// insert "node" after "previous".
-			if(previous != null)
-			{
-				node.nextSibling = previous.nextSibling;
-				previous.nextSibling = node;
-				if(previous == this.lastChild)
-				{
-					this.lastChild = node;
-				}
-			}
-			else
-			{
-				if(this.lastChild == null)
-				{
-					this.lastChild = node;
-				}
-				node.nextSibling = this.firstChild;
-				this.firstChild = node;
-			}
-			node.parentNode = this;
+            LinkedListNode<HierarchyNode> linkedNode;
+            if (previous == null)
+                linkedNode = _children.AddFirst(node);
+            else
+                linkedNode = _children.AddAfter(previous, node);
+
+            node.SetParent(this, linkedNode);
+
 			this.OnItemAdded(this, node);
 		}
 
 		/// <summary>
-		/// Removes a node from the hierarchy.
+		/// Removes a node from the hierarchy. After removing a node from the hierarchy, it may not be added again.
 		/// </summary>
 		/// <param name="node">The node to remove.</param>
 		public virtual void RemoveChild(HierarchyNode node)
@@ -594,35 +636,40 @@ namespace Microsoft.VisualStudio.Project
 
 			this.projectMgr.ItemIdMap.Remove(node);
 
-			HierarchyNode last = null;
-			for(HierarchyNode n = this.firstChild; n != null; n = n.nextSibling)
-			{
-				if(n == node)
-				{
-					if(last != null)
-					{
-						last.nextSibling = n.nextSibling;
-					}
-					if(n == this.lastChild)
-					{
-						if(last == this.lastChild)
-						{
-							this.lastChild = null;
-						}
-						else
-						{
-							this.lastChild = last;
-						}
-					}
-					if(n == this.firstChild)
-					{
-						this.firstChild = n.nextSibling;
-					}
-					return;
-				}
-				last = n;
-			}
-			throw new InvalidOperationException("Node not found");
+            if (!_children.Remove(node))
+                throw new InvalidOperationException("Node not found");
+
+            node.SetParent(null, null);
+            //HierarchyNode last = null;
+            //for(HierarchyNode n = this.firstChild; n != null; n = n.nextSibling)
+            //{
+            //    if(n == node)
+            //    {
+            //        if(last != null)
+            //        {
+            //            last.nextSibling = n.nextSibling;
+            //        }
+            //        if(n == this.lastChild)
+            //        {
+            //            if(last == this.lastChild)
+            //            {
+            //                this.lastChild = null;
+            //            }
+            //            else
+            //            {
+            //                this.lastChild = last;
+            //            }
+            //        }
+            //        if(n == this.firstChild)
+            //        {
+            //            this.firstChild = n.nextSibling;
+            //        }
+            //        return;
+            //    }
+            //    last = n;
+            //}
+
+            //throw new InvalidOperationException("Node not found");
 		}
 
 		/// <summary>
@@ -646,7 +693,7 @@ namespace Microsoft.VisualStudio.Project
 			switch((__VSHPROPID)propId)
 			{
 				case __VSHPROPID.VSHPROPID_Expandable:
-					result = (this.firstChild != null);
+					result = _children.Count > 0;
 					break;
 
 				case __VSHPROPID.VSHPROPID_Caption:
@@ -690,14 +737,14 @@ namespace Microsoft.VisualStudio.Project
 					goto case __VSHPROPID.VSHPROPID_NextSibling;
 
 				case __VSHPROPID.VSHPROPID_NextSibling:
-					result = (int)((this.nextSibling != null) ? this.nextSibling.hierarchyId : VSConstants.VSITEMID_NIL);
+					result = (int)((this.NextSibling != null) ? this.NextSibling.ID : VSConstants.VSITEMID_NIL);
 					break;
 
 				case __VSHPROPID.VSHPROPID_FirstChild:
 					goto case __VSHPROPID.VSHPROPID_FirstVisibleChild;
 
 				case __VSHPROPID.VSHPROPID_FirstVisibleChild:
-					result = (int)((this.firstChild != null) ? this.firstChild.hierarchyId : VSConstants.VSITEMID_NIL);
+					result = (int)((this.FirstChild != null) ? this.FirstChild.ID : VSConstants.VSITEMID_NIL);
 					break;
 
 				case __VSHPROPID.VSHPROPID_Parent:
@@ -707,7 +754,7 @@ namespace Microsoft.VisualStudio.Project
 					}
 					else
 					{
-						result = new IntPtr((int)this.parentNode.hierarchyId);  // see bug 176470
+						result = new IntPtr((int)this.parentNode.ID);  // see bug 176470
 					}
 					break;
 
@@ -812,7 +859,7 @@ namespace Microsoft.VisualStudio.Project
 			if(propId != LastTracedProperty)
 			{
 				string trailer = (result == null) ? "null" : result.ToString();
-				CCITracing.TraceCall(this.hierarchyId + "," + propId.ToString() + " = " + trailer);
+				CCITracing.TraceCall(this.ID + "," + propId.ToString() + " = " + trailer);
 				LastTracedProperty = propId; // some basic filtering here...
 			}
 #endif
@@ -830,7 +877,7 @@ namespace Microsoft.VisualStudio.Project
 		{
 			__VSHPROPID id = (__VSHPROPID)propid;
 
-			CCITracing.TraceCall(this.hierarchyId + "," + id.ToString());
+			CCITracing.TraceCall(this.ID + "," + id.ToString());
 			switch(id)
 			{
 				case __VSHPROPID.VSHPROPID_Expanded:
@@ -992,7 +1039,7 @@ namespace Microsoft.VisualStudio.Project
 
             if (single)
             {
-                this.itemNode.RemoveFromProjectFile();
+                this.ItemNode.RemoveFromProjectFile();
             }
             else
             {
@@ -1009,7 +1056,7 @@ namespace Microsoft.VisualStudio.Project
 
 			// Notify document tracker listeners that we have removed the item.
 			VSREMOVEFILEFLAGS[] removeFlags = this.GetRemoveFileFlags(filesToBeDeleted);
-			Debug.Assert(removeFlags != null, "At least an empty array should be returned for the GetRemoveFileFlags");
+			Contract.Assert(removeFlags != null, "At least an empty array should be returned for the GetRemoveFileFlags");
 			this.ProjectManager.Tracker.OnItemRemoved(documentToRemove, removeFlags[0]);
 
 			// Notify hierarchy event listeners that we have removed the item
@@ -1152,10 +1199,10 @@ namespace Microsoft.VisualStudio.Project
 			{
 				// Generate a new folder name
 				string newFolderName;
-				ErrorHandler.ThrowOnFailure(this.projectMgr.GenerateUniqueItemName(this.hierarchyId, String.Empty, String.Empty, out newFolderName));
+				ErrorHandler.ThrowOnFailure(this.projectMgr.GenerateUniqueItemName(this.ID, String.Empty, String.Empty, out newFolderName));
 
 				// create the project part of it, the project file
-				HierarchyNode child = this.ProjectManager.CreateFolderNodes(Path.Combine(this.virtualNodeName, newFolderName));
+				HierarchyNode child = this.ProjectManager.CreateFolderNodes(Path.Combine(this.VirtualNodeName, newFolderName));
 
 				if (child is FolderNode)
 				{
@@ -1174,12 +1221,12 @@ namespace Microsoft.VisualStudio.Project
 					{
 						// we need to get into label edit mode now...
 						// so first select the new guy...
-						ErrorHandler.ThrowOnFailure(uiWindow.ExpandItem(this.projectMgr, child.hierarchyId, EXPANDFLAGS.EXPF_SelectItem));
+						ErrorHandler.ThrowOnFailure(uiWindow.ExpandItem(this.projectMgr, child.ID, EXPANDFLAGS.EXPF_SelectItem));
 						// them post the rename command to the shell. Folder verification and creation will
 						// happen in the setlabel code...
 						IVsUIShell shell = this.projectMgr.Site.GetService(typeof(SVsUIShell)) as IVsUIShell;
 
-						Debug.Assert(shell != null, "Could not get the ui shell from the project");
+						Contract.Assert(shell != null, "Could not get the ui shell from the project");
 						if (shell == null)
 						{
 							return VSConstants.E_FAIL;
@@ -1221,7 +1268,7 @@ namespace Microsoft.VisualStudio.Project
 			else
 				uiFlags = (uint)(__VSADDITEMFLAGS.VSADDITEM_AddExistingItems | __VSADDITEMFLAGS.VSADDITEM_AllowMultiSelect | __VSADDITEMFLAGS.VSADDITEM_AllowStickyFilter | __VSADDITEMFLAGS.VSADDITEM_ProjectHandlesLinks);
 
-			ErrorHandler.ThrowOnFailure(addItemDialog.AddProjectItemDlg(this.hierarchyId, ref projectGuid, project, uiFlags, null, null, ref strBrowseLocations, ref strFilter, out iDontShowAgain)); /*&fDontShowAgain*/
+			ErrorHandler.ThrowOnFailure(addItemDialog.AddProjectItemDlg(this.ID, ref projectGuid, project, uiFlags, null, null, ref strBrowseLocations, ref strFilter, out iDontShowAgain)); /*&fDontShowAgain*/
 
 			return VSConstants.S_OK;
 		}
@@ -1240,7 +1287,7 @@ namespace Microsoft.VisualStudio.Project
 		/// <returns></returns>
 		protected virtual int ExcludeFromProject()
 		{
-			Debug.Assert(this.ProjectManager != null, "The project item " + this.ToString() + " has not been initialised correctly. It has a null ProjectManager");
+			Contract.Assert(this.ProjectManager != null, "The project item " + this.ToString() + " has not been initialised correctly. It has a null ProjectManager");
 			this.Remove(false);
 			return VSConstants.S_OK;
 		}
@@ -1263,11 +1310,11 @@ namespace Microsoft.VisualStudio.Project
 		[SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "ClipBoard")]
 		protected internal virtual StringBuilder PrepareSelectedNodesForClipBoard()
 		{
-			Debug.Assert(this.ProjectManager != null, " No project mananager available for this node " + ToString());
-			Debug.Assert(this.ProjectManager.ItemsDraggedOrCutOrCopied != null, " The itemsdragged list should have been initialized prior calling this method");
+			Contract.Assert(this.ProjectManager != null, " No project mananager available for this node " + ToString());
+			Contract.Assert(this.ProjectManager.ItemsDraggedOrCutOrCopied != null, " The itemsdragged list should have been initialized prior calling this method");
 			StringBuilder sb = new StringBuilder();
 
-			if(this.hierarchyId == VSConstants.VSITEMID_ROOT)
+			if(this.ID == VSConstants.VSITEMID_ROOT)
 			{
 				if(this.ProjectManager.ItemsDraggedOrCutOrCopied != null)
 				{
@@ -1285,7 +1332,7 @@ namespace Microsoft.VisualStudio.Project
 			IVsSolution solution = this.GetService(typeof(IVsSolution)) as IVsSolution;
 			if(solution != null)
 			{
-				ErrorHandler.ThrowOnFailure(solution.GetProjrefOfItem(this.ProjectManager, this.hierarchyId, out projref));
+				ErrorHandler.ThrowOnFailure(solution.GetProjrefOfItem(this.ProjectManager, this.ID, out projref));
 				if(String.IsNullOrEmpty(projref))
 				{
 					if(this.ProjectManager.ItemsDraggedOrCutOrCopied != null)
@@ -1383,7 +1430,7 @@ namespace Microsoft.VisualStudio.Project
 		{
 			IVsUIShell shell = this.projectMgr.Site.GetService(typeof(SVsUIShell)) as IVsUIShell;
 
-			Debug.Assert(shell != null, "Could not get the ui shell from the project");
+			Contract.Assert(shell != null, "Could not get the ui shell from the project");
 			if(shell == null)
 			{
 				return VSConstants.E_FAIL;
@@ -2184,7 +2231,7 @@ namespace Microsoft.VisualStudio.Project
 
 			files.Add(this.GetMkDocument());
 
-			tagVsSccFilesFlags flagsToAdd = (this.firstChild != null && (this.firstChild is DependentFileNode)) ? tagVsSccFilesFlags.SFF_HasSpecialFiles : tagVsSccFilesFlags.SFF_NoFlags;
+			tagVsSccFilesFlags flagsToAdd = (this.FirstChild != null && (this.FirstChild is DependentFileNode)) ? tagVsSccFilesFlags.SFF_HasSpecialFiles : tagVsSccFilesFlags.SFF_NoFlags;
 
 			flags.Add(flagsToAdd);
 		}
@@ -2303,7 +2350,9 @@ namespace Microsoft.VisualStudio.Project
 				HierarchyNodeEventArgs args = new HierarchyNodeEventArgs(child);
 				onChildAdded(parent, args);
 			}
-			
+
+            ProjectManager.ItemIdMap.UpdateCanonicalName(child);
+
 			HierarchyNode foo;
 			foo = this.projectMgr == null ? this : this.projectMgr;
 
@@ -2313,14 +2362,18 @@ namespace Microsoft.VisualStudio.Project
 			}
 
 			HierarchyNode prev = child.PreviousSibling;
-			uint prevId = (prev != null) ? prev.hierarchyId : VSConstants.VSITEMID_NIL;
-			foreach(IVsHierarchyEvents sink in foo.hierarchyEventSinks)
+			uint prevId = (prev != null) ? prev.ID : VSConstants.VSITEMID_NIL;
+			foreach(IVsHierarchyEvents sink in foo.hierarchyEventSinks.OfType<IVsHierarchyEvents>().ToArray())
 			{
-				int result = sink.OnItemAdded(parent.hierarchyId, prevId, child.hierarchyId);
-				if(ErrorHandler.Failed(result) && result != VSConstants.E_NOTIMPL)
-				{
-					ErrorHandler.ThrowOnFailure(result);
-				}
+                try
+                {
+                    int result = sink.OnItemAdded(parent.ID, prevId, child.ID);
+                    if (ErrorHandler.Failed(result) && result != VSConstants.E_NOTIMPL)
+                        ErrorHandler.ThrowOnFailure(result);
+                }
+                catch (NotImplementedException)
+                {
+                }
 			}
 		}
 
@@ -2335,26 +2388,20 @@ namespace Microsoft.VisualStudio.Project
 				return;
 			}
 
-			if(foo.hierarchyEventSinks.Count > 0)
+			// Note that in some cases (deletion of project node for example), an Advise
+			// may be removed while we are iterating over it. To get around this problem we
+			// take a snapshot of the advise list and walk that.
+			foreach(IVsHierarchyEvents clonedEvent in foo.hierarchyEventSinks.OfType<IVsHierarchyEvents>().ToArray())
 			{
-				// Note that in some cases (deletion of project node for example), an Advise
-				// may be removed while we are iterating over it. To get around this problem we
-				// take a snapshot of the advise list and walk that.
-				List<IVsHierarchyEvents> clonedSink = new List<IVsHierarchyEvents>();
-
-				foreach(IVsHierarchyEvents anEvent in foo.hierarchyEventSinks)
-				{
-					clonedSink.Add(anEvent);
-				}
-
-				foreach(IVsHierarchyEvents clonedEvent in clonedSink)
-				{
-					int result = clonedEvent.OnItemDeleted(this.hierarchyId);
-					if(ErrorHandler.Failed(result) && result != VSConstants.E_NOTIMPL)
-					{
-						ErrorHandler.ThrowOnFailure(result);
-					}
-				}
+                try
+                {
+                    int result = clonedEvent.OnItemDeleted(this.ID);
+                    if (ErrorHandler.Failed(result) && result != VSConstants.E_NOTIMPL)
+                        ErrorHandler.ThrowOnFailure(result);
+                }
+                catch (NotImplementedException)
+                {
+                }
 			}
 		}
 
@@ -2370,14 +2417,17 @@ namespace Microsoft.VisualStudio.Project
 				return;
 			}
 
-			foreach(IVsHierarchyEvents sink in foo.hierarchyEventSinks)
+			foreach(IVsHierarchyEvents sink in foo.hierarchyEventSinks.OfType<IVsHierarchyEvents>().ToArray())
 			{
-				int result = sink.OnItemsAppended(parent.hierarchyId);
-
-				if(ErrorHandler.Failed(result) && result != VSConstants.E_NOTIMPL)
-				{
-					ErrorHandler.ThrowOnFailure(result);
-				}
+                try
+                {
+                    int result = sink.OnItemsAppended(parent.ID);
+                    if (ErrorHandler.Failed(result) && result != VSConstants.E_NOTIMPL)
+                        ErrorHandler.ThrowOnFailure(result);
+                }
+                catch (NotImplementedException)
+                {
+                }
 			}
 		}
 
@@ -2394,14 +2444,17 @@ namespace Microsoft.VisualStudio.Project
 				return;
 			}
 
-			foreach(IVsHierarchyEvents sink in foo.hierarchyEventSinks)
+			foreach(IVsHierarchyEvents sink in foo.hierarchyEventSinks.OfType<IVsHierarchyEvents>().ToArray())
 			{
-				int result = sink.OnPropertyChanged(node.hierarchyId, propid, flags);
-
-				if(ErrorHandler.Failed(result) && result != VSConstants.E_NOTIMPL)
-				{
-					ErrorHandler.ThrowOnFailure(result);
-				}
+                try
+                {
+                    int result = sink.OnPropertyChanged(node.ID, propid, flags);
+                    if (ErrorHandler.Failed(result) && result != VSConstants.E_NOTIMPL)
+                        ErrorHandler.ThrowOnFailure(result);
+                }
+                catch (NotImplementedException)
+                {
+                }
 			}
 		}
 
@@ -2417,14 +2470,17 @@ namespace Microsoft.VisualStudio.Project
 				return;
 			}
 
-			foreach(IVsHierarchyEvents sink in foo.hierarchyEventSinks)
+			foreach(IVsHierarchyEvents sink in foo.hierarchyEventSinks.OfType<IVsHierarchyEvents>().ToArray())
 			{
-				int result = sink.OnInvalidateItems(parent.hierarchyId);
-
-				if(ErrorHandler.Failed(result) && result != VSConstants.E_NOTIMPL)
-				{
-					ErrorHandler.ThrowOnFailure(result);
-				}
+                try
+                {
+                    int result = sink.OnInvalidateItems(parent.ID);
+                    if (ErrorHandler.Failed(result) && result != VSConstants.E_NOTIMPL)
+                        ErrorHandler.ThrowOnFailure(result);
+                }
+                catch (NotImplementedException)
+                {
+                }
 			}
 		}
 
@@ -2436,25 +2492,25 @@ namespace Microsoft.VisualStudio.Project
 		[SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "ReDraw")]
 		public virtual void ReDraw(UIHierarchyElement element)
 		{
-			foreach(IVsHierarchyEvents sink in this.projectMgr.hierarchyEventSinks)
+			foreach(IVsHierarchyEvents sink in this.projectMgr.hierarchyEventSinks.OfType<IVsHierarchyEvents>().ToArray())
 			{
 				int result;
 				if((element & UIHierarchyElement.Icon) != 0)
 				{
-					result = sink.OnPropertyChanged(this.ID, (int)__VSHPROPID.VSHPROPID_IconIndex, 0);
-					Debug.Assert(ErrorHandler.Succeeded(result), "Redraw failed for node " + this.GetMkDocument());
+					result = ErrorHandler.CallWithCOMConvention(() => sink.OnPropertyChanged(this.ID, (int)__VSHPROPID.VSHPROPID_IconIndex, 0));
+					Contract.Assert(ErrorHandler.Succeeded(result), "Redraw failed for node " + this.GetMkDocument());
 				}
 
 				if((element & UIHierarchyElement.Caption) != 0)
 				{
-					result = sink.OnPropertyChanged(this.ID, (int)__VSHPROPID.VSHPROPID_Caption, 0);
-					Debug.Assert(ErrorHandler.Succeeded(result), "Redraw failed for node " + this.GetMkDocument());
+					result = ErrorHandler.CallWithCOMConvention(() => sink.OnPropertyChanged(this.ID, (int)__VSHPROPID.VSHPROPID_Caption, 0));
+					Contract.Assert(ErrorHandler.Succeeded(result), "Redraw failed for node " + this.GetMkDocument());
 				}
 
 				if((element & UIHierarchyElement.SccState) != 0)
 				{
-					result = sink.OnPropertyChanged(this.ID, (int)__VSHPROPID.VSHPROPID_StateIconIndex, 0);
-					Debug.Assert(ErrorHandler.Succeeded(result), "Redraw failed for node " + this.GetMkDocument());
+					result = ErrorHandler.CallWithCOMConvention(() => sink.OnPropertyChanged(this.ID, (int)__VSHPROPID.VSHPROPID_StateIconIndex, 0));
+					Contract.Assert(ErrorHandler.Succeeded(result), "Redraw failed for node " + this.GetMkDocument());
 				}
 			}
 
@@ -2507,6 +2563,10 @@ namespace Microsoft.VisualStudio.Project
 
 		public virtual int AdviseHierarchyEvents(IVsHierarchyEvents sink, out uint cookie)
 		{
+            cookie = 0;
+            if (sink == null)
+                return VSConstants.E_INVALIDARG;
+
 			cookie = this.hierarchyEventSinks.Add(sink) + 1;
 			return VSConstants.S_OK;
 		}
@@ -2608,8 +2668,23 @@ namespace Microsoft.VisualStudio.Project
 		/// </summary>
 		/// <param name="name"></param>
 		/// <param name="itemId"></param>
-		public virtual int ParseCanonicalName(string name, out uint itemId)
+		public int ParseCanonicalName(string name, out uint itemId)
 		{
+            List<HierarchyNode> nodes = ProjectManager.ItemIdMap.GetNodesByName(name);
+
+            if (this.Parent != null)
+                nodes.RemoveAll(i => object.ReferenceEquals(this, i) || i.IsDescendentOf(this));
+
+            if (nodes.Count == 0)
+            {
+                itemId = (uint)VSConstants.VSITEMID.Nil;
+                return VSConstants.E_FAIL;
+            }
+
+            itemId = nodes[0].ID;
+            return VSConstants.S_OK;
+
+#if false
 			// we always start at the current node and go it's children down, so 
 			//  if you want to scan the whole tree, better call 
 			// the root
@@ -2619,21 +2694,22 @@ namespace Microsoft.VisualStudio.Project
 			// The default implemenation will check for case insensitive comparision.
 			if(String.Equals(name, this.Url, StringComparison.OrdinalIgnoreCase))
 			{
-				itemId = this.hierarchyId;
+				itemId = this.ID;
 				return VSConstants.S_OK;
 			}
 
-			if (itemId == notFoundValue && this.firstChild != null)
+			if (itemId == notFoundValue && this.FirstChild != null)
 			{
-				this.firstChild.ParseCanonicalName(name, out itemId);
+				this.FirstChild.ParseCanonicalName(name, out itemId);
 			}
 
-			if (itemId == notFoundValue && this.nextSibling != null)
+			if (itemId == notFoundValue && this.NextSibling != null)
 			{
-				this.nextSibling.ParseCanonicalName(name, out itemId);
+				this.NextSibling.ParseCanonicalName(name, out itemId);
 			}
 
 			return itemId == notFoundValue ? VSConstants.E_FAIL : VSConstants.S_OK;
+#endif
 		}
 
 
@@ -2643,6 +2719,18 @@ namespace Microsoft.VisualStudio.Project
 			return VSConstants.S_OK;
 		}
 
+        private bool IsDescendentOf(HierarchyNode node)
+        {
+            Contract.Requires<ArgumentNullException>(node != null, "node");
+
+            for (HierarchyNode parent = Parent; parent != null; parent = parent.Parent)
+            {
+                if (parent == node)
+                    return true;
+            }
+
+            return false;
+        }
 
 		public virtual int SetGuidProperty(uint itemId, int propid, ref Guid guid)
 		{
@@ -2684,30 +2772,55 @@ namespace Microsoft.VisualStudio.Project
 			return VSConstants.S_OK;
 		}
 
-		public int Unused0()
+		int IVsHierarchy.Unused0()
 		{
 			return VSConstants.E_NOTIMPL;
 		}
 
-		public int Unused1()
+        int IVsHierarchy.Unused1()
 		{
 			return VSConstants.E_NOTIMPL;
 		}
 
-		public int Unused2()
+        int IVsHierarchy.Unused2()
 		{
 			return VSConstants.E_NOTIMPL;
 		}
 
-		public int Unused3()
+        int IVsHierarchy.Unused3()
 		{
 			return VSConstants.E_NOTIMPL;
 		}
 
-		public int Unused4()
+        int IVsHierarchy.Unused4()
 		{
 			return VSConstants.E_NOTIMPL;
 		}
+
+        int IVsUIHierarchy.Unused0()
+        {
+            return VSConstants.E_NOTIMPL;
+        }
+
+        int IVsUIHierarchy.Unused1()
+        {
+            return VSConstants.E_NOTIMPL;
+        }
+
+        int IVsUIHierarchy.Unused2()
+        {
+            return VSConstants.E_NOTIMPL;
+        }
+
+        int IVsUIHierarchy.Unused3()
+        {
+            return VSConstants.E_NOTIMPL;
+        }
+
+        int IVsUIHierarchy.Unused4()
+        {
+            return VSConstants.E_NOTIMPL;
+        }
 
 		#endregion
 
@@ -3089,7 +3202,7 @@ namespace Microsoft.VisualStudio.Project
 			}
 
 			HierarchyNode result = null;
-			for(HierarchyNode child = this.firstChild; child != null; child = child.NextSibling)
+			for(HierarchyNode child = this.FirstChild; child != null; child = child.NextSibling)
 			{
 				if(!String.IsNullOrEmpty(child.VirtualNodeName) && String.Equals(child.VirtualNodeName, name, StringComparison.OrdinalIgnoreCase))
 				{
@@ -3122,6 +3235,8 @@ namespace Microsoft.VisualStudio.Project
 		internal void FindNodesOfType<T>(List<T> nodes)
 			where T : HierarchyNode
 		{
+            Contract.Requires<ArgumentNullException>(nodes != null, "nodes");
+
 			for(HierarchyNode n = this.FirstChild; n != null; n = n.NextSibling)
 			{
 				if(n is T)
@@ -3141,15 +3256,9 @@ namespace Microsoft.VisualStudio.Project
 		/// <param name="targetNode"></param>
 		internal bool AddFileToNodeFromProjectReference(string projectRef, HierarchyNode targetNode)
 		{
-			if(String.IsNullOrEmpty(projectRef))
-			{
-				throw new ArgumentException(SR.GetString(SR.ParameterCannotBeNullOrEmpty, CultureInfo.CurrentUICulture), "projectRef");
-			}
-
-			if(targetNode == null)
-			{
-				throw new ArgumentNullException("targetNode");
-			}
+            Contract.Requires<ArgumentNullException>(projectRef != null, "projectRef");
+            Contract.Requires<ArgumentNullException>(targetNode != null, "targetNode");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(projectRef));
 
 			IVsSolution solution = this.GetService(typeof(IVsSolution)) as IVsSolution;
 			if(solution == null)
@@ -3188,6 +3297,7 @@ namespace Microsoft.VisualStudio.Project
 		{
 			this.itemsDraggedOrCutOrCopied = new List<HierarchyNode>();
 		}
+
 		#endregion
 	}
 }

@@ -325,6 +325,7 @@
     <Compile Include="BuildPropertyPageTag.cs" />
     <Compile Include="EnumConnectionPoints`1.cs" />
     <Compile Include="EnumConnections.cs" />
+    <Compile Include="HierarchyNodeCollection.cs" />
     <Compile Include="PropertyPageTypeConverterAttribute.cs" />
     <Compile Include="LocDisplayNameAttribute.cs" />
     <Compile Include="ProjectConfigProperties.cs" />

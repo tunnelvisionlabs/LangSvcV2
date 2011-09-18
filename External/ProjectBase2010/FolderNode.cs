@@ -9,23 +9,24 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
-using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
-using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
-using System.Diagnostics.Contracts;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
+    using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
+    using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+
 	[CLSCompliant(false)]
 	[ComVisible(true)]
 	public class FolderNode : HierarchyNode, IProjectSourceNode
@@ -274,7 +275,7 @@ namespace Microsoft.VisualStudio.Project
 
 				//Refresh the properties in the properties window
 				IVsUIShell shell = this.ProjectManager.GetService(typeof(SVsUIShell)) as IVsUIShell;
-				Debug.Assert(shell != null, "Could not get the ui shell from the project");
+				Contract.Assert(shell != null, "Could not get the ui shell from the project");
 				ErrorHandler.ThrowOnFailure(shell.RefreshPropertyBrowser(0));
 
 				// Notify the listeners that the name of this folder is changed. This will
@@ -332,9 +333,34 @@ namespace Microsoft.VisualStudio.Project
 			}
 		}
 
+        public override bool CanCacheCanonicalName
+        {
+            get
+            {
+                return ProjectManager.CanCacheCanonicalName && !string.IsNullOrEmpty(VirtualNodeName);
+            }
+        }
+
+        public override string VirtualNodeName
+        {
+            get
+            {
+                return base.VirtualNodeName;
+            }
+
+            set
+            {
+                if (VirtualNodeName == value)
+                    return;
+
+                base.VirtualNodeName = value;
+                ProjectManager.ItemIdMap.UpdateCanonicalName(this);
+            }
+        }
+
 		public override string GetMkDocument()
 		{
-			Debug.Assert(this.Url != null, "No url sepcified for this node");
+			Contract.Assert(this.Url != null, "No url sepcified for this node");
 
 			return this.Url;
 		}
@@ -513,6 +539,9 @@ namespace Microsoft.VisualStudio.Project
         /// This should be 'true' for expanded and 'false' for collapsed state.</param>
         protected void SetExpanded(bool expanded)
         {
+            if (this.IsExpanded == expanded)
+                return;
+
             this.IsExpanded = expanded;
             this.SetProperty((int)__VSHPROPID.VSHPROPID_Expanded, expanded);
 
@@ -794,6 +823,8 @@ namespace Microsoft.VisualStudio.Project
 			{
 				ErrorHandler.ThrowOnFailure(uiWindow.ExpandItem(this.ProjectManager, this.ID, EXPANDFLAGS.EXPF_SelectItem));
 			}
+
+            ProjectManager.ItemIdMap.UpdateCanonicalName(this);
 		}
 
 		/// <summary>

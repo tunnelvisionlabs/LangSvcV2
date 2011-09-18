@@ -21,6 +21,7 @@
             Contract.Requires<ArgumentNullException>(element != null, "element");
 
             _projectRelativeFilePath = element.Item.EvaluatedInclude;
+            ProjectManager.ItemIdMap.UpdateCanonicalName(this);
         }
 
         public JarReferenceNode(ProjectNode root, string fileName)
@@ -37,7 +38,7 @@
         {
             get
             {
-                return Path.Combine(ProjectManager.ProjectFolder, _projectRelativeFilePath);
+                return Path.Combine(ProjectManager.ProjectFolder, ProjectRelativeFilePath);
             }
         }
 
@@ -45,7 +46,15 @@
         {
             get
             {
-                return _projectRelativeFilePath;
+                return ProjectRelativeFilePath;
+            }
+        }
+
+        public override bool CanCacheCanonicalName
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(ProjectRelativeFilePath);
             }
         }
 
@@ -53,7 +62,7 @@
         {
             get
             {
-                return Path.GetFileNameWithoutExtension(_projectRelativeFilePath);
+                return Path.GetFileNameWithoutExtension(ProjectRelativeFilePath);
             }
         }
 
@@ -68,6 +77,14 @@
             }
         }
 
+        private string ProjectRelativeFilePath
+        {
+            get
+            {
+                return _projectRelativeFilePath;
+            }
+        } 
+
         protected override NodeProperties CreatePropertiesObject()
         {
             return new JarReferenceProperties(this);
@@ -77,7 +94,7 @@
         {
             if (ItemNode == null || ItemNode.Item == null)
             {
-                ProjectElement element = new ProjectElement(ProjectManager, _projectRelativeFilePath, JavaProjectFileConstants.JarReference);
+                ProjectElement element = new ProjectElement(ProjectManager, ProjectRelativeFilePath, JavaProjectFileConstants.JarReference);
 
                 // Set the basic information about this reference
                 element.SetMetadata(JavaProjectFileConstants.IncludeInBuild, true.ToString());

@@ -9,26 +9,28 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-using MSBuild = Microsoft.Build.Evaluation;
-using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
-using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
-using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
-using System.Collections.ObjectModel;
-using System.Diagnostics.Contracts;
-
 namespace Microsoft.VisualStudio.Project
 {
-    [CLSCompliant(false), ComVisible(true)]
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.Diagnostics;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.IO;
+    using System.Reflection;
+    using System.Runtime.InteropServices;
+    using System.Text;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using MSBuild = Microsoft.Build.Evaluation;
+    using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
+    using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
+    using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+
+    [CLSCompliant(false)]
+    [ComVisible(true)]
     public class ReferenceContainerNode : HierarchyNode, IReferenceContainer
     {
         #region fields
@@ -83,6 +85,31 @@ namespace Microsoft.VisualStudio.Project
             get { return this.VirtualNodeName; }
         }
 
+        public override bool CanCacheCanonicalName
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(VirtualNodeName);
+            }
+        }
+
+        public override string VirtualNodeName
+        {
+            get
+            {
+                return base.VirtualNodeName;
+            }
+
+            set
+            {
+                if (VirtualNodeName == value)
+                    return;
+
+                base.VirtualNodeName = value;
+                ProjectManager.ItemIdMap.UpdateCanonicalName(this);
+            }
+        }
+
         public override string Caption
         {
             get
@@ -90,7 +117,6 @@ namespace Microsoft.VisualStudio.Project
                 return SR.GetString(SR.ReferencesNodeName, CultureInfo.CurrentUICulture);
             }
         }
-
 
         private Automation.OAReferences references;
         public override object Object

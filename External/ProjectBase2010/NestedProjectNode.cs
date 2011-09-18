@@ -9,22 +9,24 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
-using ShellConstants = Microsoft.VisualStudio.Shell.Interop.Constants;
-
 namespace Microsoft.VisualStudio.Project
 {
-    [CLSCompliant(false), ComVisible(true)]
+    using System;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.OLE.Interop;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
+    using ShellConstants = Microsoft.VisualStudio.Shell.Interop.Constants;
+
+    [CLSCompliant(false)]
+    [ComVisible(true)]
     public class NestedProjectNode : HierarchyNode, IPropertyNotifySink
     {
         #region fields
@@ -60,6 +62,23 @@ namespace Microsoft.VisualStudio.Project
                 return this.nestedHierarchy;
             }
         }
+
+        private string ProjectPath
+        {
+            get
+            {
+                return projectPath;
+            }
+
+            set
+            {
+                if (projectPath == value)
+                    return;
+
+                projectPath = value;
+                ProjectManager.ItemIdMap.UpdateCanonicalName(this);
+            }
+        }
         #endregion
 
         #region virtual properties
@@ -80,7 +99,15 @@ namespace Microsoft.VisualStudio.Project
         {
             get
             {
-                return this.projectPath;
+                return this.ProjectPath;
+            }
+        }
+
+        public override bool CanCacheCanonicalName
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(ProjectPath);
             }
         }
 
@@ -132,15 +159,12 @@ namespace Microsoft.VisualStudio.Project
 
         #region ctor
 
-        protected NestedProjectNode()
-        {
-        }
-
         public NestedProjectNode(ProjectNode root, ProjectElement element)
             : base(root, element)
         {
             this.IsExpanded = true;
         }
+
         #endregion
 
         #region IPropertyNotifySink Members
@@ -262,12 +286,12 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
         public override int IsItemDirty(uint itemId, IntPtr punkDocData, out int pfDirty)
         {
-            Debug.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
-            Debug.Assert(punkDocData != IntPtr.Zero, "docData intptr was zero");
+            Contract.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
+            Contract.Assert(punkDocData != IntPtr.Zero, "docData intptr was zero");
 
             // Get an IPersistFileFormat object from docData object 
             IPersistFileFormat persistFileFormat = Marshal.GetTypedObjectForIUnknown(punkDocData, typeof(IPersistFileFormat)) as IPersistFileFormat;
-            Debug.Assert(persistFileFormat != null, "The docData object does not implement the IPersistFileFormat interface");
+            Contract.Assert(persistFileFormat != null, "The docData object does not implement the IPersistFileFormat interface");
 
             // Call IsDirty on the IPersistFileFormat interface
             ErrorHandler.ThrowOnFailure(persistFileFormat.IsDirty(out pfDirty));
@@ -291,12 +315,12 @@ namespace Microsoft.VisualStudio.Project
             try
             {
                 this.StopObservingNestedProjectFile();
-                Debug.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
-                Debug.Assert(punkDocData != IntPtr.Zero, "docData intptr was zero");
+                Contract.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
+                Contract.Assert(punkDocData != IntPtr.Zero, "docData intptr was zero");
 
                 // Get an IPersistFileFormat object from docData object (we don't call release on punkDocData since did not increment its ref count)
                 IPersistFileFormat persistFileFormat = Marshal.GetTypedObjectForIUnknown(punkDocData, typeof(IPersistFileFormat)) as IPersistFileFormat;
-                Debug.Assert(persistFileFormat != null, "The docData object does not implement the IPersistFileFormat interface");
+                Contract.Assert(persistFileFormat != null, "The docData object does not implement the IPersistFileFormat interface");
 
                 IVsUIShell uiShell = this.GetService(typeof(SVsUIShell)) as IVsUIShell;
                 string newName;
@@ -323,7 +347,7 @@ namespace Microsoft.VisualStudio.Project
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "Microsoft.VisualStudio.Shell.Interop.IVsHierarchy.GetProperty(System.UInt32,System.Int32,System.Object@)")]
         public override object GetIconHandle(bool open)
         {
-            Debug.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
+            Contract.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
 
             object iconHandle = null;
             this.nestedHierarchy.GetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_IconHandle, out iconHandle);
@@ -373,13 +397,13 @@ namespace Microsoft.VisualStudio.Project
         /// <returns></returns>
         public override string GetMkDocument()
         {
-            Debug.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
+            Contract.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
             if (this.isDisposed || this.ProjectManager == null || this.ProjectManager.IsClosed)
             {
                 return String.Empty;
             }
 
-            return this.projectPath;
+            return this.ProjectPath;
         }
 
         /// <summary>
@@ -427,7 +451,7 @@ namespace Microsoft.VisualStudio.Project
                 throw new InvalidOperationException();
             }
 
-            Debug.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
+            Contract.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
             #endregion
 
             IVsPersistHierarchyItem2 persistHierachyItem = this.nestedHierarchy as IVsPersistHierarchyItem2;
@@ -454,7 +478,7 @@ namespace Microsoft.VisualStudio.Project
                 throw new InvalidOperationException();
             }
 
-            Debug.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
+            Contract.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
             #endregion
 
             this.IgnoreNestedProjectFile(ignoreFlag);
@@ -581,11 +605,11 @@ namespace Microsoft.VisualStudio.Project
             }
 
             this.projectName = Path.GetFileName(fileName);
-            this.projectPath = Path.Combine(destination, this.projectName);
+            this.ProjectPath = Path.Combine(destination, this.projectName);
 
             // get the IVsSolution interface from the global service provider
             IVsSolution solution = this.GetService(typeof(IVsSolution)) as IVsSolution;
-            Debug.Assert(solution != null, "Could not get the IVsSolution object from the services exposed by this project");
+            Contract.Assert(solution != null, "Could not get the IVsSolution object from the services exposed by this project");
             if (solution == null)
             {
                 throw new InvalidOperationException();
@@ -617,8 +641,8 @@ namespace Microsoft.VisualStudio.Project
                 if (projectPtr != IntPtr.Zero)
                 {
                     this.nestedHierarchy = Marshal.GetTypedObjectForIUnknown(projectPtr, typeof(IVsHierarchy)) as IVsHierarchy;
-                    Debug.Assert(this.nestedHierarchy != null, "Nested hierarchy could not be created");
-                    Debug.Assert(cancelled == 0);
+                    Contract.Assert(this.nestedHierarchy != null, "Nested hierarchy could not be created");
+                    Contract.Assert(cancelled == 0);
                 }
             }
             finally
@@ -660,7 +684,7 @@ namespace Microsoft.VisualStudio.Project
             #endregion
             // get the IVsSolution interface from the global service provider
             IVsSolution solution = this.GetService(typeof(IVsSolution)) as IVsSolution;
-            Debug.Assert(solution != null, "Could not get the IVsSolution object from the services exposed by this project");
+            Contract.Assert(solution != null, "Could not get the IVsSolution object from the services exposed by this project");
             if (solution == null)
             {
                 throw new InvalidOperationException();
@@ -716,7 +740,7 @@ namespace Microsoft.VisualStudio.Project
         /// <returns></returns>
         protected virtual void CreateProjectDirectory()
         {
-            string directoryName = Path.GetDirectoryName(this.projectPath);
+            string directoryName = Path.GetDirectoryName(this.ProjectPath);
 
             if (!Directory.Exists(directoryName))
             {
@@ -738,7 +762,7 @@ namespace Microsoft.VisualStudio.Project
 
             // Request the RDT service
             IVsRunningDocumentTable rdt = this.GetService(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
-            Debug.Assert(rdt != null, " Could not get running document table from the services exposed by this project");
+            Contract.Assert(rdt != null, " Could not get running document table from the services exposed by this project");
             if (rdt == null)
             {
                 throw new InvalidOperationException();
@@ -753,7 +777,7 @@ namespace Microsoft.VisualStudio.Project
 
             try
             {
-                ErrorHandler.ThrowOnFailure(rdt.FindAndLockDocument((uint)flags, this.projectPath, out ivsHierarchy, out itemid, out docData, out docCookie));
+                ErrorHandler.ThrowOnFailure(rdt.FindAndLockDocument((uint)flags, this.ProjectPath, out ivsHierarchy, out itemid, out docData, out docCookie));
                 flags |= _VSRDTFLAGS.RDT_EditLock;
 
                 if (ivsHierarchy != null && docCookie != (uint)ShellConstants.VSDOCCOOKIE_NIL)
@@ -768,11 +792,11 @@ namespace Microsoft.VisualStudio.Project
 
                     // get inptr for hierarchy
                     projectPtr = Marshal.GetIUnknownForObject(this.nestedHierarchy);
-                    Debug.Assert(projectPtr != IntPtr.Zero, " Project pointer for the nested hierarchy has not been initialized");
-                    ErrorHandler.ThrowOnFailure(rdt.RegisterAndLockDocument((uint)flags, this.projectPath, this.ProjectManager, this.ID, projectPtr, out docCookie));
+                    Contract.Assert(projectPtr != IntPtr.Zero, " Project pointer for the nested hierarchy has not been initialized");
+                    ErrorHandler.ThrowOnFailure(rdt.RegisterAndLockDocument((uint)flags, this.ProjectPath, this.ProjectManager, this.ID, projectPtr, out docCookie));
 
                     this.DocCookie = docCookie;
-                    Debug.Assert(this.DocCookie != (uint)ShellConstants.VSDOCCOOKIE_NIL, "Invalid cookie when registering document in the running document table.");
+                    Contract.Assert(this.DocCookie != (uint)ShellConstants.VSDOCCOOKIE_NIL, "Invalid cookie when registering document in the running document table.");
 
                     //we must also set the doc cookie on the nested hier
                     this.SetDocCookieOnNestedHier(this.DocCookie);
@@ -828,7 +852,7 @@ namespace Microsoft.VisualStudio.Project
                 return;
             }
 
-            string oldFileName = this.projectPath;
+            string oldFileName = this.ProjectPath;
             string oldPath = this.Url;
 
             try
@@ -850,14 +874,14 @@ namespace Microsoft.VisualStudio.Project
 
                 // update state.
                 this.projectName = newFileName;
-                this.projectPath = Path.Combine(projectDirectory, this.projectName);
+                this.ProjectPath = Path.Combine(projectDirectory, this.projectName);
 
                 // Unload and lock the RDT entries
                 this.UnlockRDTEntry();
                 this.LockRDTEntry();
 
                 // Since actually this is a rename in our hierarchy notify the tracker that a rename has happened.
-                this.ProjectManager.Tracker.OnItemRenamed(oldPath, this.projectPath, VSRENAMEFILEFLAGS.VSRENAMEFILEFLAGS_IsNestedProjectFile);
+                this.ProjectManager.Tracker.OnItemRenamed(oldPath, this.ProjectPath, VSRENAMEFILEFLAGS.VSRENAMEFILEFLAGS_IsNestedProjectFile);
             }
             finally
             {
@@ -897,7 +921,7 @@ namespace Microsoft.VisualStudio.Project
                 IVsUIHierarchy hier;
 
                 IVsWindowFrame windowFrame;
-                VsShellUtilities.IsDocumentOpen(this.ProjectManager.Site, this.projectPath, Guid.Empty, out hier, out itemid, out windowFrame);
+                VsShellUtilities.IsDocumentOpen(this.ProjectManager.Site, this.ProjectPath, Guid.Empty, out hier, out itemid, out windowFrame);
 
 
                 if (itemid == VSConstants.VSITEMID_NIL)
@@ -937,7 +961,7 @@ namespace Microsoft.VisualStudio.Project
 
             Guid instanceGuid = Guid.Empty;
 
-            Debug.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
+            Contract.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
 
             // This method should be called from the open children method, then we can safely use the IsNewProject property
             if (this.ProjectManager.IsNewProject)
@@ -1001,7 +1025,7 @@ namespace Microsoft.VisualStudio.Project
 
         private void InitImageHandler()
         {
-            Debug.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
+            Contract.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
 
             if (null == imageHandler)
             {
@@ -1024,7 +1048,7 @@ namespace Microsoft.VisualStudio.Project
         {
             if (!this.ProjectManager.IsClosed)
             {
-                Debug.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
+                Contract.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
 
                 object returnValue;
 
@@ -1052,7 +1076,7 @@ namespace Microsoft.VisualStudio.Project
                 return VSConstants.E_FAIL;
             }
 
-            Debug.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
+            Contract.Assert(this.nestedHierarchy != null, "The nested hierarchy object must be created before calling this method");
 
             // Do not throw since some project types will return E_FAIL if they do not support a property.
             return this.nestedHierarchy.SetProperty(VSConstants.VSITEMID_ROOT, propID, value);
@@ -1064,7 +1088,7 @@ namespace Microsoft.VisualStudio.Project
         private void ObserveNestedProjectFile()
         {
             ProjectContainerNode parent = this.ProjectManager as ProjectContainerNode;
-            Debug.Assert(parent != null, "The parent project for nested projects should be subclassed from ProjectContainerNode");
+            Contract.Assert(parent != null, "The parent project for nested projects should be subclassed from ProjectContainerNode");
             parent.NestedProjectNodeReloader.ObserveItem(this.GetMkDocument(), this.ID);
         }
 
@@ -1074,7 +1098,7 @@ namespace Microsoft.VisualStudio.Project
         private void StopObservingNestedProjectFile()
         {
             ProjectContainerNode parent = this.ProjectManager as ProjectContainerNode;
-            Debug.Assert(parent != null, "The parent project for nested projects should be subclassed from ProjectContainerNode");
+            Contract.Assert(parent != null, "The parent project for nested projects should be subclassed from ProjectContainerNode");
             parent.NestedProjectNodeReloader.StopObservingItem(this.GetMkDocument());
         }
 
@@ -1085,7 +1109,7 @@ namespace Microsoft.VisualStudio.Project
         private void IgnoreNestedProjectFile(bool ignoreFlag)
         {
             ProjectContainerNode parent = this.ProjectManager as ProjectContainerNode;
-            Debug.Assert(parent != null, "The parent project for nested projects should be subclassed from ProjectContainerNode");
+            Contract.Assert(parent != null, "The parent project for nested projects should be subclassed from ProjectContainerNode");
             parent.NestedProjectNodeReloader.IgnoreItemChanges(this.GetMkDocument(), ignoreFlag);
         }
 

@@ -9,21 +9,20 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.Win32;
-using System.Collections.Generic;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using Microsoft.Build.Evaluation;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
+    using Microsoft.Win32;
+
     /// <summary>
     /// This type of node is used for references to COM components.
     /// </summary>
@@ -51,7 +50,7 @@ namespace Microsoft.VisualStudio.Project
         {
             get
             {
-                return this.projectRelativeFilePath;
+                return this.ProjectRelativeFilePath;
             }
         }
 
@@ -133,6 +132,31 @@ namespace Microsoft.VisualStudio.Project
                 return comReference;
             }
         }
+
+        public override bool CanCacheCanonicalName
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(ProjectRelativeFilePath);
+            }
+        }
+
+        private string ProjectRelativeFilePath
+        {
+            get
+            {
+                return projectRelativeFilePath;
+            }
+
+            set
+            {
+                if (projectRelativeFilePath == value)
+                    return;
+
+                projectRelativeFilePath = value;
+                ProjectManager.ItemIdMap.UpdateCanonicalName(this);
+            }
+        }
         #endregion
 
         #region ctors
@@ -204,7 +228,7 @@ namespace Microsoft.VisualStudio.Project
         /// </summary>
         protected override void BindReferenceData()
         {
-            Debug.Assert(this.ItemNode != null, "The AssemblyName field has not been initialized");
+            Contract.Assert(this.ItemNode != null, "The AssemblyName field has not been initialized");
 
             /* We need to create the project element at this point if it has not been created.
              * We cannot do that from the ctor if input comes from a component selector data, since
@@ -229,7 +253,7 @@ namespace Microsoft.VisualStudio.Project
 		protected internal override bool IsAlreadyAdded(out ReferenceNode existingReference)
         {
             ReferenceContainerNode referencesFolder = this.ProjectManager.FindChild(ReferenceContainerNode.ReferencesNodeVirtualName) as ReferenceContainerNode;
-            Debug.Assert(referencesFolder != null, "Could not find the References node");
+            Contract.Assert(referencesFolder != null, "Could not find the References node");
 
             for(HierarchyNode n = referencesFolder.FirstChild; n != null; n = n.NextSibling)
             {
@@ -316,11 +340,11 @@ namespace Microsoft.VisualStudio.Project
                     string name = reference.EvaluatedInclude;
                     if(Path.IsPathRooted(name))
                     {
-                        this.projectRelativeFilePath = name;
+                        this.ProjectRelativeFilePath = name;
                     }
                     else
                     {
-                        this.projectRelativeFilePath = Path.Combine(this.ProjectManager.ProjectFolder, name);
+                        this.ProjectRelativeFilePath = Path.Combine(this.ProjectManager.ProjectFolder, name);
                     }
 
                     if(renameItemNode)

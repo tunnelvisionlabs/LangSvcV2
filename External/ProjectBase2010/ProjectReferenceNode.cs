@@ -9,18 +9,18 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-
 namespace Microsoft.VisualStudio.Project
 {
-	[CLSCompliant(false), ComVisible(true)]
+    using System;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+	[CLSCompliant(false)]
+    [ComVisible(true)]
 	public class ProjectReferenceNode : ReferenceNode
 	{
 		#region fieds
@@ -33,7 +33,7 @@ namespace Microsoft.VisualStudio.Project
 
 		private string referencedProjectRelativePath = String.Empty;
 
-		private string referencedProjectFullPath = String.Empty;
+        private string referencedProjectFullPath = String.Empty;
 
 		private BuildDependency buildDependency;
 
@@ -63,9 +63,17 @@ namespace Microsoft.VisualStudio.Project
 		{
 			get
 			{
-				return this.referencedProjectFullPath;
+				return this.ReferencedProjectFullPath;
 			}
 		}
+
+        public override bool CanCacheCanonicalName
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(ReferencedProjectFullPath);
+            }
+        }
 
 		public override string Caption
 		{
@@ -186,7 +194,7 @@ namespace Microsoft.VisualStudio.Project
 
                         // If the full path of this project is the same as the one of this
                         // reference, then we have found the right project.
-                        if (NativeMethods.IsSamePath(prjPath, referencedProjectFullPath))
+                        if (NativeMethods.IsSamePath(prjPath, ReferencedProjectFullPath))
                         {
                             this.referencedProject = prj;
                             break;
@@ -243,7 +251,7 @@ namespace Microsoft.VisualStudio.Project
 				// based on the project directory.
 				if(!System.IO.Path.IsPathRooted(outputPath))
 				{
-					string projectDir = System.IO.Path.GetDirectoryName(referencedProjectFullPath);
+					string projectDir = System.IO.Path.GetDirectoryName(ReferencedProjectFullPath);
 					outputPath = System.IO.Path.Combine(projectDir, outputPath);
 				}
 
@@ -281,6 +289,23 @@ namespace Microsoft.VisualStudio.Project
 				return projectReference;
 			}
 		}
+
+        private string ReferencedProjectFullPath
+        {
+            get
+            {
+                return referencedProjectFullPath;
+            }
+
+            set
+            {
+                if (referencedProjectFullPath == value)
+                    return;
+
+                referencedProjectFullPath = value;
+                ProjectManager.ItemIdMap.UpdateCanonicalName(this);
+            }
+        }
 		#endregion
 
 		#region ctors
@@ -292,7 +317,7 @@ namespace Microsoft.VisualStudio.Project
 			: base(root, element)
 		{
 			this.referencedProjectRelativePath = this.ItemNode.GetMetadata(ProjectFileConstants.Include);
-			Debug.Assert(!String.IsNullOrEmpty(this.referencedProjectRelativePath), "Could not retrive referenced project path form project file");
+			Contract.Assert(!String.IsNullOrEmpty(this.referencedProjectRelativePath), "Could not retrive referenced project path form project file");
 
 			string guidString = this.ItemNode.GetMetadata(ProjectFileConstants.Project);
 
@@ -306,18 +331,18 @@ namespace Microsoft.VisualStudio.Project
 			}
 			finally
 			{
-				Debug.Assert(this.referencedProjectGuid != Guid.Empty, "Could not retrive referenced project guidproject file");
+				Contract.Assert(this.referencedProjectGuid != Guid.Empty, "Could not retrive referenced project guidproject file");
 
 				this.referencedProjectName = this.ItemNode.GetMetadata(ProjectFileConstants.Name);
 
-				Debug.Assert(!String.IsNullOrEmpty(this.referencedProjectName), "Could not retrive referenced project name form project file");
+				Contract.Assert(!String.IsNullOrEmpty(this.referencedProjectName), "Could not retrive referenced project name form project file");
 			}
 
 			Uri uri = new Uri(this.ProjectManager.BaseURI.Uri, this.referencedProjectRelativePath);
 
 			if(uri != null)
 			{
-				this.referencedProjectFullPath = Microsoft.VisualStudio.Shell.Url.Unescape(uri.LocalPath, true);
+				this.ReferencedProjectFullPath = Microsoft.VisualStudio.Shell.Url.Unescape(uri.LocalPath, true);
 			}
 		}
 
@@ -327,7 +352,7 @@ namespace Microsoft.VisualStudio.Project
 		public ProjectReferenceNode(ProjectNode root, string referencedProjectName, string projectPath, string projectReference)
 			: base(root)
 		{
-			Debug.Assert(root != null && !String.IsNullOrEmpty(referencedProjectName) && !String.IsNullOrEmpty(projectReference)
+			Contract.Assert(root != null && !String.IsNullOrEmpty(referencedProjectName) && !String.IsNullOrEmpty(projectReference)
 				&& !String.IsNullOrEmpty(projectPath), "Can not add a reference because the input for adding one is invalid.");
 
             if (projectReference == null)
@@ -363,19 +388,19 @@ namespace Microsoft.VisualStudio.Project
 				}
 			}
 
-			Debug.Assert(!String.IsNullOrEmpty(fileName), "Can not add a project reference because the input for adding one is invalid.");
+			Contract.Assert(!String.IsNullOrEmpty(fileName), "Can not add a project reference because the input for adding one is invalid.");
 
 			// Did we get just a file or a relative path?
 			Uri uri = new Uri(projectPath);
 
 			string referenceDir = PackageUtilities.GetPathDistance(this.ProjectManager.BaseURI.Uri, uri);
 
-			Debug.Assert(!String.IsNullOrEmpty(referenceDir), "Can not add a project reference because the input for adding one is invalid.");
+			Contract.Assert(!String.IsNullOrEmpty(referenceDir), "Can not add a project reference because the input for adding one is invalid.");
 
 			string justTheFileName = Path.GetFileName(fileName);
 			this.referencedProjectRelativePath = Path.Combine(referenceDir, justTheFileName);
 
-			this.referencedProjectFullPath = Path.Combine(projectPath, justTheFileName);
+			this.ReferencedProjectFullPath = Path.Combine(projectPath, justTheFileName);
 
 			this.buildDependency = new BuildDependency(this.ProjectManager, this.referencedProjectGuid);
 
@@ -421,8 +446,8 @@ namespace Microsoft.VisualStudio.Project
 		/// </summary>
 		protected override void BindReferenceData()
 		{
-			Debug.Assert(!String.IsNullOrEmpty(this.referencedProjectName), "The referencedProjectName field has not been initialized");
-			Debug.Assert(this.referencedProjectGuid != Guid.Empty, "The referencedProjectName field has not been initialized");
+			Contract.Assert(!String.IsNullOrEmpty(this.referencedProjectName), "The referencedProjectName field has not been initialized");
+			Contract.Assert(this.referencedProjectGuid != Guid.Empty, "The referencedProjectName field has not been initialized");
 
 			this.ItemNode = new ProjectElement(this.ProjectManager, this.referencedProjectRelativePath, ProjectFileConstants.ProjectReference);
 
@@ -457,7 +482,7 @@ namespace Microsoft.VisualStudio.Project
 				return false;
 			}
 
-			return (!String.IsNullOrEmpty(this.referencedProjectFullPath) && File.Exists(this.referencedProjectFullPath));
+			return (!String.IsNullOrEmpty(this.ReferencedProjectFullPath) && File.Exists(this.ReferencedProjectFullPath));
 		}
 
 		/// <summary>

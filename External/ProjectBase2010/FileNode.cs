@@ -9,22 +9,24 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
-using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
-using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
+    using System.Globalization;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Interop;
+
+    using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
+    using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
+    using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+
     [CLSCompliant(false)]
     [ComVisible(true)]
     public class FileNode : HierarchyNode, IProjectSourceNode
@@ -147,8 +149,17 @@ namespace Microsoft.VisualStudio.Project
                     // Path is relative, so make it relative to project path
                     url = new Url(this.ProjectManager.BaseURI, path);
                 }
-                return url.AbsoluteUrl;
 
+                return url.AbsoluteUrl;
+            }
+        }
+
+        public override bool CanCacheCanonicalName
+        {
+            get
+            {
+                return this.ProjectManager.CanCacheCanonicalName
+                    && !string.IsNullOrEmpty(ItemNode.GetMetadata(ProjectFileConstants.Include));
             }
         }
         #endregion
@@ -336,7 +347,7 @@ namespace Microsoft.VisualStudio.Project
                 string message = SR.GetString(SR.ConfirmExtensionChange, CultureInfo.CurrentUICulture, new string[] { label });
                 IVsUIShell shell = this.ProjectManager.Site.GetService(typeof(SVsUIShell)) as IVsUIShell;
 
-                Debug.Assert(shell != null, "Could not get the ui shell from the project");
+                Contract.Assert(shell != null, "Could not get the ui shell from the project");
                 if(shell == null)
                 {
                     return VSConstants.E_FAIL;
@@ -365,7 +376,7 @@ namespace Microsoft.VisualStudio.Project
 
         public override string GetMkDocument()
         {
-            Debug.Assert(this.Url != null, "No url sepcified for this node");
+            Contract.Assert(this.Url != null, "No url sepcified for this node");
 
             return this.Url;
         }
@@ -432,6 +443,7 @@ namespace Microsoft.VisualStudio.Project
                 {
                     this.ItemNode.Rename(oldrelPath);
                     this.ItemNode.RefreshProperties();
+                    ProjectManager.ItemIdMap.UpdateCanonicalName(this);
                 }
 
                 if(this is DependentFileNode)
@@ -478,7 +490,7 @@ namespace Microsoft.VisualStudio.Project
         /// <returns></returns>
         protected internal override HierarchyNode GetDragTargetHandlerNode()
         {
-            Debug.Assert(this.ProjectManager != null, " The project manager is null for the filenode");
+            Contract.Assert(this.ProjectManager != null, " The project manager is null for the filenode");
             HierarchyNode handlerNode = this;
             while(handlerNode != null && !(handlerNode is ProjectNode || handlerNode is FolderNode))
                 handlerNode = handlerNode.Parent;
@@ -627,7 +639,7 @@ namespace Microsoft.VisualStudio.Project
         {
             CCITracing.TraceCall();
             FileDocumentManager manager = this.GetDocumentManager() as FileDocumentManager;
-            Debug.Assert(manager != null, "Could not get the FileDocumentManager");
+            Contract.Assert(manager != null, "Could not get the FileDocumentManager");
             manager.Open(false, false, WindowFrameShowAction.Show);
         }
 
@@ -701,10 +713,10 @@ namespace Microsoft.VisualStudio.Project
             {
                 // Add a chain of subdirectories to the project.
                 string relativeUri = PackageUtilities.GetPathDistance(this.ProjectManager.BaseURI.Uri, newDirectoryUri);
-                Debug.Assert(!String.IsNullOrEmpty(relativeUri) && relativeUri != newDirectoryUri.LocalPath, "Could not make pat distance of " + this.ProjectManager.BaseURI.Uri.LocalPath + " and " + newDirectoryUri);
+                Contract.Assert(!String.IsNullOrEmpty(relativeUri) && relativeUri != newDirectoryUri.LocalPath, "Could not make pat distance of " + this.ProjectManager.BaseURI.Uri.LocalPath + " and " + newDirectoryUri);
                 targetContainer = this.ProjectManager.CreateFolderNodes(relativeUri);
             }
-            Debug.Assert(targetContainer != null, "We should have found a target node by now");
+            Contract.Assert(targetContainer != null, "We should have found a target node by now");
 
             //Suspend file changes while we rename the document
             string oldrelPath = this.ItemNode.GetMetadata(ProjectFileConstants.Include);
@@ -723,7 +735,7 @@ namespace Microsoft.VisualStudio.Project
                 {
                     // The path of the file is changed or its parent is changed; in both cases we have
                     // to rename the item.
-                    this.RenameFileNode(oldName, newFilePath, linkPath, targetContainer.ID);
+                    this.RenameFileNode(oldName, newFilePath, linkPath, targetContainer);
                     this.ItemNode.SetMetadata(ProjectFileConstants.Link, linkPath);
                     OnInvalidateItems(this.Parent);
                 }
@@ -814,8 +826,14 @@ namespace Microsoft.VisualStudio.Project
         /// <param name="newParentId">The new parent id of the item.</param>
         /// <returns>The newly added FileNode.</returns>
         /// <remarks>While a new node will be used to represent the item, the underlying MSBuild item will be the same and as a result file properties saved in the project file will not be lost.</remarks>
-        protected virtual FileNode RenameFileNode(string oldFileName, string newFileName, string linkPath, uint newParentId)
+        protected virtual FileNode RenameFileNode(string oldFileName, string newFileName, string linkPath, HierarchyNode newParent)
         {
+            Contract.Requires<ArgumentNullException>(oldFileName != null, "oldFileName");
+            Contract.Requires<ArgumentNullException>(newFileName != null, "newFileName");
+            Contract.Requires<ArgumentNullException>(newParent != null, "newParent");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(oldFileName));
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(newFileName));
+
             if(string.Equals(oldFileName, newFileName, StringComparison.Ordinal))
             {
                 // We do not want to rename the same file
@@ -833,11 +851,14 @@ namespace Microsoft.VisualStudio.Project
             VSADDRESULT[] result = new VSADDRESULT[1];
             Guid emptyGuid = Guid.Empty;
             VSADDITEMOPERATION op = (String.IsNullOrEmpty(linkPath) ? VSADDITEMOPERATION.VSADDITEMOP_OPENFILE : VSADDITEMOPERATION.VSADDITEMOP_LINKTOFILE);
-            ErrorHandler.ThrowOnFailure(this.ProjectManager.AddItemWithSpecific(newParentId, op, null, 0, file, IntPtr.Zero, 0, ref emptyGuid, null, ref emptyGuid, result));
+            ErrorHandler.ThrowOnFailure(this.ProjectManager.AddItemWithSpecific(newParent.ID, op, null, 0, file, IntPtr.Zero, 0, ref emptyGuid, null, ref emptyGuid, result));
             FileNode childAdded = this.ProjectManager.FindChild(newFileName) as FileNode;
-            Debug.Assert(childAdded != null, "Could not find the renamed item in the hierarchy");
-            // Update the itemid to the newly added.
-            this.ID = childAdded.ID;
+            Contract.Assert(childAdded != null, "Could not find the renamed item in the hierarchy");
+
+            /* No need to update the ID of this node. If ID is referenced by the caller after the
+             * node is removed from the hierarchy, it will throw an InvalidOperationException.
+             */
+            //this.ID = childAdded.ID;
 
             // Remove the item created by the add item. We need to do this otherwise we will have two items.
             // Please be aware that we have not removed the ItemNode associated to the removed file node from the hierrachy.
@@ -885,10 +906,13 @@ namespace Microsoft.VisualStudio.Project
 			}
 
             //Update FirstChild
-            childAdded.FirstChild = this.FirstChild;
+            foreach (var child in this.Children)
+            {
+                LinkedListNode<HierarchyNode> linkedNode = childAdded.Children.AddLast(child);
+                childAdded.SetParent(childAdded, linkedNode);
+            }
 
             //Update ChildNodes
-            SetNewParentOnChildNodes(childAdded);
             RenameChildNodes(childAdded);
 
             return childAdded;
@@ -900,7 +924,7 @@ namespace Microsoft.VisualStudio.Project
         /// <param name="newFileNode">The newly added Parent node.</param>
         protected virtual void RenameChildNodes(FileNode parentNode)
         {
-            foreach(HierarchyNode child in GetChildNodes())
+            foreach(HierarchyNode child in Children)
             {
                 FileNode childNode = child as FileNode;
                 if(null == childNode)
@@ -943,6 +967,7 @@ namespace Microsoft.VisualStudio.Project
             if(this.ItemNode != null && !String.IsNullOrEmpty(originalFileName))
             {
                 this.ItemNode.Rename(originalFileName);
+                ProjectManager.ItemIdMap.UpdateCanonicalName(this);
             }
         }
 
@@ -994,17 +1019,7 @@ namespace Microsoft.VisualStudio.Project
                 return;
             }
 
-            if(files == null)
-            {
-                throw new ArgumentNullException("files");
-            }
-
-            if(flags == null)
-            {
-                throw new ArgumentNullException("flags");
-            }
-
-            foreach(HierarchyNode node in this.GetChildNodes())
+            foreach(HierarchyNode node in this.Children)
             {
                 files.Add(node.GetMkDocument());
             }
@@ -1315,7 +1330,7 @@ namespace Microsoft.VisualStudio.Project
 
         private FileNode RenameFileNode(string oldFileName, string newFileName)
         {
-            return this.RenameFileNode(oldFileName, newFileName, null, this.Parent.ID);
+            return this.RenameFileNode(oldFileName, newFileName, null, this.Parent);
         }
 
         /// <summary>
@@ -1343,7 +1358,7 @@ namespace Microsoft.VisualStudio.Project
 
             // Refresh the property browser.
             IVsUIShell shell = this.ProjectManager.Site.GetService(typeof(SVsUIShell)) as IVsUIShell;
-            Debug.Assert(shell != null, "Could not get the ui shell from the project");
+            Contract.Assert(shell != null, "Could not get the ui shell from the project");
             if(shell == null)
             {
                 throw new InvalidOperationException();
@@ -1399,29 +1414,6 @@ namespace Microsoft.VisualStudio.Project
             }
         }
 
-        /// <summary>
-        /// Update the ChildNodes after the parent node has been renamed
-        /// </summary>
-        /// <param name="newFileNode">The new FileNode created as part of the rename of this node</param>
-        private void SetNewParentOnChildNodes(FileNode newFileNode)
-        {
-            foreach(HierarchyNode childNode in GetChildNodes())
-            {
-                childNode.Parent = newFileNode;
-            }
-        }
-
-        private List<HierarchyNode> GetChildNodes()
-        {
-            List<HierarchyNode> childNodes = new List<HierarchyNode>();
-            HierarchyNode childNode = this.FirstChild;
-            while(childNode != null)
-            {
-                childNodes.Add(childNode);
-                childNode = childNode.NextSibling;
-            }
-            return childNodes;
-        }
         #endregion
     }
 }
