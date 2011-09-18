@@ -1,5 +1,6 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.SourceData
 {
+    using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Linq;
@@ -9,6 +10,17 @@
 
     partial class IntelliSenseCacheWalker
     {
+        private int _errorCount;
+
+        public override void DisplayRecognitionError(string[] tokenNames, RecognitionException e)
+        {
+            _errorCount++;
+            if (_errorCount > 100)
+                throw new OperationCanceledException();
+
+            base.DisplayRecognitionError(tokenNames, e);
+        }
+
         private static Interval GetSourceInterval(ITree tree, ITokenStream tokenStream)
         {
             Contract.Requires(tree != null);
