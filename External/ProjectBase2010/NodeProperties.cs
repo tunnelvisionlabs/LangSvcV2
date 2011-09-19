@@ -61,11 +61,9 @@ namespace Microsoft.VisualStudio.Project
 
 		#region ctors
 		public NodeProperties(HierarchyNode node)
+            : base(node.ProjectManager)
 		{
-			if(node == null)
-			{
-				throw new ArgumentNullException("node");
-			}
+            Contract.Requires<ArgumentNullException>(node != null, "node");
 			this.node = node;
 		}
 		#endregion

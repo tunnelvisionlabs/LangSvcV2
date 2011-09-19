@@ -3,6 +3,7 @@
     using System.ComponentModel;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio.Project;
+    using prjBuildAction = VSLangProj.prjBuildAction;
 
     [ComVisible(true)]
     public class JavaFileNodeProperties : FileNodeProperties
@@ -13,7 +14,7 @@
         }
 
         [Browsable(false)]
-        public override BuildAction BuildAction
+        public override prjBuildAction BuildAction
         {
             get
             {

@@ -2,6 +2,7 @@
 {
     using System;
     using System.ComponentModel;
+    using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
 
     [ComVisible(true)]
@@ -10,7 +11,9 @@
         private readonly HierarchyNode _node;
 
         public SingleFileGeneratorNodeExtenderProperties(HierarchyNode node)
+            : base(node.ProjectManager)
         {
+            Contract.Requires<ArgumentNullException>(node != null, "node");
             _node = node;
         }
 

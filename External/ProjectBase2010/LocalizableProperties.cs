@@ -9,19 +9,39 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Collections;
+    using System.ComponentModel;
+    using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
+
 	/// <summary>
 	/// Enables a managed object to expose properties and attributes for COM objects.
 	/// </summary>
 	[ComVisible(true)]
 	public class LocalizableProperties : ICustomTypeDescriptor
 	{
+        private readonly ProjectNode _projectManager;
+
+        public LocalizableProperties(ProjectNode projectManager)
+        {
+            Contract.Requires<ArgumentNullException>(projectManager != null, "projectManager");
+            _projectManager = projectManager;
+        }
+
+        [Browsable(false)]
+        [AutomationBrowsable(false)]
+        public ProjectNode ProjectManager
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<ProjectNode>() != null);
+                return _projectManager;
+            }
+        }
+
 		#region ICustomTypeDescriptor
 		public virtual AttributeCollection GetAttributes()
 		{
@@ -83,7 +103,7 @@ namespace Microsoft.VisualStudio.Project
 
 		public virtual DesignPropertyDescriptor CreateDesignPropertyDescriptor(PropertyDescriptor propertyDescriptor)
 		{
-			return new DesignPropertyDescriptor(propertyDescriptor);
+			return new DesignPropertyDescriptor(propertyDescriptor, ProjectManager);
 		}
 
 		public virtual string GetComponentName()

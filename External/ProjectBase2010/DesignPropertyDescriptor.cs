@@ -9,12 +9,14 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections;
-using System.ComponentModel;
-
 namespace Microsoft.VisualStudio.Project
 {
+    using System;
+    using System.Collections;
+    using System.ComponentModel;
+    using System.Diagnostics.Contracts;
+    using prjBuildAction = VSLangProj.prjBuildAction;
+
 	/// <summary>
 	/// The purpose of DesignPropertyDescriptor is to allow us to customize the
 	/// display name of the property in the property grid.  None of the CLR
@@ -22,11 +24,11 @@ namespace Microsoft.VisualStudio.Project
 	/// </summary>
 	public class DesignPropertyDescriptor : PropertyDescriptor
 	{
-		private string displayName; // Custom display name
-		private PropertyDescriptor property;	// Base property descriptor
-		private Hashtable editors = new Hashtable(); // Type -> editor instance
+        private readonly ProjectNode _projectManager;
+		private readonly string displayName; // Custom display name
+		private readonly PropertyDescriptor property;	// Base property descriptor
+		private readonly Hashtable editors = new Hashtable(); // Type -> editor instance
 		private TypeConverter converter;
-
 
 		/// <summary>
 		/// Delegates to base.
@@ -114,6 +116,11 @@ namespace Microsoft.VisualStudio.Project
 			{
 				if(converter == null)
 				{
+                    if (PropertyType == typeof(prjBuildAction))
+                    {
+                        converter = new AvailableFileBuildActionConverter(_projectManager);
+                    }
+
 					PropertyPageTypeConverterAttribute attr = (PropertyPageTypeConverterAttribute)Attributes[typeof(PropertyPageTypeConverterAttribute)];
 					if(attr != null && attr.ConverterType != null)
 					{
@@ -125,11 +132,10 @@ namespace Microsoft.VisualStudio.Project
 						converter = TypeDescriptor.GetConverter(this.PropertyType);
 					}
 				}
+
 				return converter;
 			}
 		}
-
-
 
 		/// <summary>
 		/// Convert name to a Type object.
@@ -138,7 +144,6 @@ namespace Microsoft.VisualStudio.Project
 		{
 			return Type.GetType(typeName);
 		}
-
 
 		/// <summary>
 		/// Delegates to base.
@@ -187,14 +192,13 @@ namespace Microsoft.VisualStudio.Project
 		/// Constructor.  Copy the base property descriptor and also hold a pointer
 		/// to it for calling its overridden abstract methods.
 		/// </summary>
-		public DesignPropertyDescriptor(PropertyDescriptor prop)
+		public DesignPropertyDescriptor(PropertyDescriptor prop, ProjectNode projectManager)
 			: base(prop)
 		{
-            if (prop == null)
-            {
-                throw new ArgumentNullException("prop");
-            }
+            Contract.Requires<ArgumentNullException>(prop != null, "prop");
+            Contract.Requires<ArgumentNullException>(projectManager != null, "projectManager");
 
+            this._projectManager = projectManager;
 			this.property = prop;
 
 			DisplayNameAttribute attr = prop.Attributes[typeof(DisplayNameAttribute)] as DisplayNameAttribute;

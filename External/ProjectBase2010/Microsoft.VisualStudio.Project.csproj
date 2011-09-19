@@ -306,14 +306,13 @@
     <Compile Include="Automation\VSProject\OAReferences.cs" />
     <Compile Include="Automation\VSProject\OAVSProject.cs" />
     <Compile Include="Automation\VSProject\OAVSProjectItem.cs" />
+    <Compile Include="AvailableFileBuildActionConverter.cs" />
     <Compile Include="BuildDependency.cs" />
-    <Compile Include="BuildPropertyPage.cs" />
+    <None Include="BuildPropertyPage.cs" />
     <Compile Include="ComReferenceNode.cs" />
     <Compile Include="ConfigProvider.cs" />
     <Compile Include="ConnectionPointContainer.cs" />
-    <Compile Include="BuildActionConverter.cs" />
     <Compile Include="BuildKind.cs" />
-    <Compile Include="BuildAction.cs" />
     <Compile Include="CommandOrigin.cs" />
     <Compile Include="AfterProjectFileOpenedEventArgs.cs" />
     <Compile Include="BeforeProjectFileClosedEventArgs.cs" />
@@ -438,7 +437,7 @@
     <Compile Include="ReferenceNode.cs" />
     <Compile Include="RegisteredProjectType.cs" />
     <Compile Include="SelectionListener.cs" />
-    <Compile Include="SettingsPage.cs" />
+    <None Include="SettingsPage.cs" />
     <Compile Include="SingleFileGenerator.cs" />
     <Compile Include="SingleFileGeneratorFactory.cs" />
     <Compile Include="SolutionListener.cs" />

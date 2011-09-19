@@ -14,6 +14,7 @@ namespace Microsoft.VisualStudio.Project
     using System;
     using System.CodeDom.Compiler;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Collections.Specialized;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
@@ -43,6 +44,7 @@ namespace Microsoft.VisualStudio.Project
     using MSBuildExecution = Microsoft.Build.Execution;
     using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
     using Path = System.IO.Path;
+    using prjBuildAction = VSLangProj.prjBuildAction;
     using SearchOption = System.IO.SearchOption;
     using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
     using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
@@ -276,6 +278,8 @@ namespace Microsoft.VisualStudio.Project
 
         // Has the object been disposed.
         private bool isDisposed;
+
+        private readonly List<KeyValuePair<string, prjBuildAction>> _availableFileBuildActions = new List<KeyValuePair<string, prjBuildAction>>();
         #endregion
 
         #region abstract properties
@@ -327,6 +331,14 @@ namespace Microsoft.VisualStudio.Project
         #endregion
 
         #region properties
+
+        public ReadOnlyCollection<KeyValuePair<string, prjBuildAction>> AvailableFileBuildActions
+        {
+            get
+            {
+                return _availableFileBuildActions.AsReadOnly();
+            }
+        }
 
         #region overridden properties
         public override int MenuCommandId
@@ -3665,14 +3677,15 @@ namespace Microsoft.VisualStudio.Project
         /// <returns>True = items of this type should be included in the project</returns>
         protected virtual bool IsItemTypeFileType(string type)
         {
-            if (String.Equals(type, BuildAction.Compile.ToString(), StringComparison.OrdinalIgnoreCase)
-                || String.Equals(type, BuildAction.Content.ToString(), StringComparison.OrdinalIgnoreCase)
-                || String.Equals(type, BuildAction.EmbeddedResource.ToString(), StringComparison.OrdinalIgnoreCase)
-                || String.Equals(type, BuildAction.None.ToString(), StringComparison.OrdinalIgnoreCase))
-                return true;
+            return _availableFileBuildActions.Any(i => string.Equals(i.Key, type, StringComparison.OrdinalIgnoreCase));
+            //if (String.Equals(type, BuildAction.Compile.ToString(), StringComparison.OrdinalIgnoreCase)
+            //    || String.Equals(type, BuildAction.Content.ToString(), StringComparison.OrdinalIgnoreCase)
+            //    || String.Equals(type, BuildAction.EmbeddedResource.ToString(), StringComparison.OrdinalIgnoreCase)
+            //    || String.Equals(type, BuildAction.None.ToString(), StringComparison.OrdinalIgnoreCase))
+            //    return true;
 
-            // we don't know about this type, so ignore it.
-            return false;
+            //// we don't know about this type, so ignore it.
+            //return false;
         }
 
         /// <summary>
@@ -6996,6 +7009,18 @@ namespace Microsoft.VisualStudio.Project
             if (this.buildProject != null)
             {
                 SetupProjectGlobalPropertiesThatAllProjectSystemsMustSet();
+
+                _availableFileBuildActions.Clear();
+                _availableFileBuildActions.Add(new KeyValuePair<string, prjBuildAction>("None", prjBuildAction.prjBuildActionNone));
+                _availableFileBuildActions.Add(new KeyValuePair<string, prjBuildAction>("Compile", prjBuildAction.prjBuildActionCompile));
+                _availableFileBuildActions.Add(new KeyValuePair<string, prjBuildAction>("Content", prjBuildAction.prjBuildActionContent));
+                _availableFileBuildActions.Add(new KeyValuePair<string, prjBuildAction>("EmbeddedResource", prjBuildAction.prjBuildActionEmbeddedResource));
+                ICollection<MSBuild.ProjectItem> availableItemNames = buildProject.GetItems("AvailableItemName");
+                foreach (var itemName in availableItemNames)
+                {
+                    if (!_availableFileBuildActions.Any(i => string.Equals(i.Key, itemName.EvaluatedInclude, StringComparison.OrdinalIgnoreCase)))
+                        _availableFileBuildActions.Add(new KeyValuePair<string, prjBuildAction>(itemName.EvaluatedInclude, (prjBuildAction)_availableFileBuildActions.Count));
+                }
             }
         }
 
