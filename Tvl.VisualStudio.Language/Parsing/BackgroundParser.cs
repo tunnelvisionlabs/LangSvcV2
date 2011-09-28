@@ -1,15 +1,16 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing
 {
-    using Path = System.IO.Path;
     using System;
+    using System.Diagnostics;
     using System.Diagnostics.Contracts;
     using System.Threading;
+    using System.Threading.Tasks;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+
     using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
-    using Timer = System.Timers.Timer;
-    using System.Diagnostics;
-    using System.Threading.Tasks;
+    using Path = System.IO.Path;
+    using Timer = System.Threading.Timer;
 
     public abstract class BackgroundParser : IBackgroundParser, IDisposable
     {
@@ -20,6 +21,7 @@
         private readonly string _outputWindowName;
         private readonly Timer _timer;
 
+        private TimeSpan _reparseDelay;
         private DateTimeOffset _lastEdit;
         private bool _dirty;
         private int _parsing;
@@ -60,10 +62,9 @@
             this._textBuffer.PostChanged += TextBufferPostChanged;
 
             this._dirty = true;
-            this._timer = new Timer(1500);
-            this._timer.Elapsed += OnParseTimerElapsed;
+            this._reparseDelay = TimeSpan.FromMilliseconds(1500);
+            this._timer = new Timer(ParseTimerCallback, null, _reparseDelay, _reparseDelay);
             this._lastEdit = DateTimeOffset.MinValue;
-            this._timer.Start();
         }
 
         public ITextBuffer TextBuffer
@@ -82,25 +83,32 @@
             private set;
         }
 
-        public bool IsDisposing
+        public TimeSpan ReparseDelay
         {
-            get;
-            private set;
+            get
+            {
+                return _reparseDelay;
+            }
+
+            set
+            {
+                TimeSpan originalDelay = _reparseDelay;
+                try
+                {
+                    _reparseDelay = value;
+                    _timer.Change(value, value);
+                }
+                catch (ArgumentException)
+                {
+                    _reparseDelay = originalDelay;
+                }
+            }
         }
 
         public void Dispose()
         {
-            try
-            {
-                IsDisposing = false;
-                Dispose(true);
-            }
-            finally
-            {
-                IsDisposing = false;
-                Disposed = true;
-                GC.SuppressFinalize(this);
-            }
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public virtual string Name
@@ -134,6 +142,7 @@
 
         protected virtual void Dispose(bool disposing)
         {
+            Disposed = true;
         }
 
         protected abstract void ReParseImpl();
@@ -147,25 +156,28 @@
                 t(this, e);
         }
 
-        private void MarkDirty()
+        protected void MarkDirty(bool resetTimer)
         {
             this._dirty = true;
             this._lastEdit = DateTimeOffset.Now;
+
+            if (resetTimer)
+                _timer.Change(_reparseDelay, _reparseDelay);
         }
 
         private void TextBufferPostChanged(object sender, EventArgs e)
         {
-            MarkDirty();
+            MarkDirty(true);
         }
 
-        private void OnParseTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void ParseTimerCallback(object state)
         {
             TryReparse(_dirty);
         }
 
         private void TryReparse(bool forceReparse)
         {
-            if (!_dirty)
+            if (!_dirty && !forceReparse)
                 return;
 
             if (DateTimeOffset.Now - _lastEdit < TimeSpan.FromSeconds(2))
