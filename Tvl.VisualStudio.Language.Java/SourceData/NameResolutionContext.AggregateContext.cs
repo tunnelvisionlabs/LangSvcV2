@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using System.Diagnostics.Contracts;
 
     partial class NameResolutionContext
     {
@@ -14,6 +15,9 @@
             public AggregateContext(IntelliSenseCache cache, IEnumerable<NameResolutionContext> contexts)
                 : base(cache)
             {
+                Contract.Requires(cache != null);
+                Contract.Requires(contexts != null);
+
                 _contexts = contexts.ToArray();
             }
 

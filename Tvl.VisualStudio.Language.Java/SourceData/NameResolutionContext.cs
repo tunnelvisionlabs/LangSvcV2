@@ -21,6 +21,7 @@
         {
             Contract.Requires<ArgumentNullException>(cache != null, "cache");
             Contract.Requires<ArgumentNullException>(contexts != null, "contexts");
+            Contract.Ensures(Contract.Result<NameResolutionContext>() != null);
 
             return new AggregateContext(cache, contexts);
         }
