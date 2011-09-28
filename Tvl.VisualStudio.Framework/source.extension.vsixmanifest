@@ -19,7 +19,12 @@
     </SupportedProducts>
     <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
   </Identifier>
-  <References />
+  <References>
+    <Reference Id="Tvl.VisualStudio.OutputWindow.1a87220f-ee82-4c49-bcfb-bbb9bc4df16d" MinVersion="1.0.0">
+      <Name>Tunnel Vision Labs Output Window Services</Name>
+      <VsixPath>Tvl.VisualStudio.OutputWindow.vsix</VsixPath>
+    </Reference>
+  </References>
   <Content>
     <MefComponent>|Tvl.VisualStudio.Shell.Implementation|</MefComponent>
     <MefComponent>|Tvl.VisualStudio.Text.Implementation|</MefComponent>

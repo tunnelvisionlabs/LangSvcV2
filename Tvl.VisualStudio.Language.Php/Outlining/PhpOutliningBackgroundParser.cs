@@ -7,7 +7,7 @@
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
-    using Tvl.VisualStudio.Shell.OutputWindow;
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
     using Stopwatch = System.Diagnostics.Stopwatch;
 
     public class PhpOutliningBackgroundParser : BackgroundParser

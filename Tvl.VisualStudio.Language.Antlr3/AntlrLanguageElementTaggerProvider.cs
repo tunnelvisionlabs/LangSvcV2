@@ -5,9 +5,9 @@
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
-    using Tvl.VisualStudio.Shell.OutputWindow;
-    using Tvl.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+    using Tvl.VisualStudio.Text.Tagging;
 
     [Export(typeof(ITaggerProvider))]
     [ContentType(AntlrConstants.AntlrContentType)]

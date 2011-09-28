@@ -3,7 +3,7 @@
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Utilities;
     using IntelliSenseCache = Tvl.VisualStudio.Language.Java.SourceData.IntelliSenseCache;
-    using IOutputWindowService = Tvl.VisualStudio.Shell.OutputWindow.IOutputWindowService;
+    using IOutputWindowService = Tvl.VisualStudio.Shell.OutputWindow.Interfaces.IOutputWindowService;
     using IQuickInfoBroker = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoBroker;
     using IQuickInfoSource = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoSource;
     using IQuickInfoSourceProvider = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoSourceProvider;

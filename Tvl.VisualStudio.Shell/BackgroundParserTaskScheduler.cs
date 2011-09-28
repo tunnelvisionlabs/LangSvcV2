@@ -6,7 +6,8 @@
     using System.Diagnostics.Contracts;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio;
-    using Tvl.VisualStudio.Shell.OutputWindow;
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+
     using CancellationTokenSource = System.Threading.CancellationTokenSource;
     using Thread = System.Threading.Thread;
 
@@ -120,7 +121,7 @@
             if (string.IsNullOrWhiteSpace(message))
                 return;
 
-            var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
+            var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlDiagnostics);
             if (outputWindow == null)
                 return;
 

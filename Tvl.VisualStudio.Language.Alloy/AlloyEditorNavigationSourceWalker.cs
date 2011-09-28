@@ -10,7 +10,7 @@
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Alloy.Experimental;
-    using Tvl.VisualStudio.Shell.OutputWindow;
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
     using Tvl.VisualStudio.Text.Navigation;
     using ImageSource = System.Windows.Media.ImageSource;
 

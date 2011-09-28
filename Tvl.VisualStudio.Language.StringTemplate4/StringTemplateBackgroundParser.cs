@@ -3,15 +3,15 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
+    using System.Threading.Tasks;
     using Antlr.Runtime;
     using Antlr.Runtime.Tree;
     using Antlr4.StringTemplate.Compiler;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
-    using Tvl.VisualStudio.Shell.OutputWindow;
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
     using Stopwatch = System.Diagnostics.Stopwatch;
-    using System.Threading.Tasks;
 
     public class StringTemplateBackgroundParser : BackgroundParser
     {

@@ -11,7 +11,7 @@
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter;
-    using Tvl.VisualStudio.Shell.OutputWindow;
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
 
     internal sealed class AlloySymbolTagger : BackgroundParser, ITagger<IClassificationTag>
     {

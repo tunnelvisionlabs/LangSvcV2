@@ -5,8 +5,7 @@
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
-    using Tvl.VisualStudio.Shell.OutputWindow;
-
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
     using AntlrTool = global::Antlr3.AntlrTool;
     using CommonTree = Antlr.Runtime.Tree.CommonTree;
     using Contract = System.Diagnostics.Contracts.Contract;

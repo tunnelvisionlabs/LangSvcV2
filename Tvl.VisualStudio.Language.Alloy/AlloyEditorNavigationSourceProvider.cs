@@ -10,7 +10,7 @@
 
     using IDispatcherGlyphService = Tvl.VisualStudio.Language.Intellisense.IDispatcherGlyphService;
     using ImageSource = System.Windows.Media.ImageSource;
-    using IOutputWindowService = Tvl.VisualStudio.Shell.OutputWindow.IOutputWindowService;
+    using IOutputWindowService = Tvl.VisualStudio.Shell.OutputWindow.Interfaces.IOutputWindowService;
     using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;
 
 #if false

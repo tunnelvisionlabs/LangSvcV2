@@ -5,7 +5,7 @@
     using System.Diagnostics.Contracts;
     using System.Threading;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Shell.OutputWindow;
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
     using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
     using Timer = System.Timers.Timer;
     using System.Diagnostics;
@@ -28,7 +28,7 @@
 
         [Obsolete]
         public BackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
-            : this(textBuffer, TaskScheduler.Default, textDocumentFactoryService, outputWindowService, PredefinedOutputWindowPanes.TvlIntellisense)
+            : this(textBuffer, TaskScheduler.Default, textDocumentFactoryService, outputWindowService, PredefinedOutputWindowPanes.TvlDiagnostics)
         {
             Contract.Requires(textBuffer != null);
             Contract.Requires(textDocumentFactoryService != null);
@@ -36,7 +36,7 @@
         }
 
         public BackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
-            : this(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService, PredefinedOutputWindowPanes.TvlIntellisense)
+            : this(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService, PredefinedOutputWindowPanes.TvlDiagnostics)
         {
             Contract.Requires(textBuffer != null);
             Contract.Requires(taskScheduler != null);

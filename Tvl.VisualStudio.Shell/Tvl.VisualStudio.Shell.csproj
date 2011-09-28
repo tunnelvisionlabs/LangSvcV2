@@ -297,12 +297,6 @@
     <Compile Include="IMonitorSelectionService.cs" />
     <Compile Include="IOpenedViewTrackerService.cs" />
     <Compile Include="MetricTypes.cs" />
-    <Compile Include="OutputWindow\IOutputWindowPane.cs" />
-    <Compile Include="OutputWindow\IOutputWindowService.cs" />
-    <Compile Include="OutputWindow\IOutputWindowServiceContracts.cs" />
-    <Compile Include="OutputWindow\OutputWindowDefinition.cs" />
-    <Compile Include="OutputWindow\IOutputWindowPaneContracts.cs" />
-    <Compile Include="OutputWindow\PredefinedOutputWindowPanes.cs" />
     <Compile Include="PredefinedTaskSchedulers.cs" />
     <Compile Include="PriorityCommandFilter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -317,6 +311,10 @@
     <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
       <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
       <Name>Tvl.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.Shell.OutputWindow.Interfaces\Tvl.VisualStudio.Shell.OutputWindow.Interfaces.csproj">
+      <Project>{56D7EB29-6705-4C37-A7B1-E8780B4350EA}</Project>
+      <Name>Tvl.VisualStudio.Shell.OutputWindow.Interfaces</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

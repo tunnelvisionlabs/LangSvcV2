@@ -1,8 +1,8 @@
-﻿namespace Tvl.VisualStudio.Shell.OutputWindow
+﻿namespace Tvl.VisualStudio.Shell.OutputWindow.Interfaces
 {
     using System.Diagnostics.Contracts;
 
-    [ContractClass(typeof(IOutputWindowServiceContracts))]
+    [ContractClass(typeof(Contracts.IOutputWindowServiceContracts))]
     public interface IOutputWindowService
     {
         IOutputWindowPane TryGetPane(string name);

@@ -8,7 +8,7 @@
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Shell;
-    using Tvl.VisualStudio.Shell.OutputWindow;
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
 
     [Export(typeof(ITaggerProvider))]
     [ContentType(AlloyConstants.AlloyContentType)]

@@ -318,6 +318,13 @@
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.OutputWindow\Tvl.VisualStudio.OutputWindow.csproj">
+      <Project>{A899479D-F92F-462B-8492-723CE90FD1ED}</Project>
+      <Name>Tvl.VisualStudio.OutputWindow</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>False</Private>
+      <IncludeOutputGroupsInVSIX>CreateVsixContainer</IncludeOutputGroupsInVSIX>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!--<Import Project="$(ProjectDir)\..\External\Build\VSSDK\Microsoft.VsSDK.targets" />-->

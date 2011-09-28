@@ -2,6 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Threading.Tasks;
     using Antlr.Runtime;
@@ -11,9 +13,7 @@
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter;
-    using Tvl.VisualStudio.Shell.OutputWindow;
-    using System.Diagnostics.Contracts;
-    using System.Diagnostics;
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
 
     internal sealed class GoSymbolTagger : BackgroundParser, ITagger<IClassificationTag>
     {

@@ -4,6 +4,7 @@
     using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
 
     internal sealed class VsOutputWindowPaneAdapter : IOutputWindowPane, IDisposable
     {

@@ -7,7 +7,7 @@
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell;
-    using Tvl.VisualStudio.Shell.OutputWindow;
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
 
     [Export(typeof(IBackgroundParserProvider))]
     [ContentType(StringTemplateConstants.StringTemplateContentType)]

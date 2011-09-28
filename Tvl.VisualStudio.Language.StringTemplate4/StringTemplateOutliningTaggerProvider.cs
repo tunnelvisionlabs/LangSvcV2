@@ -6,7 +6,7 @@
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Language.Parsing;
-    using Tvl.VisualStudio.Shell.OutputWindow;
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
 
     [Export(typeof(ITaggerProvider))]
     [ContentType(StringTemplateConstants.StringTemplateContentType)]

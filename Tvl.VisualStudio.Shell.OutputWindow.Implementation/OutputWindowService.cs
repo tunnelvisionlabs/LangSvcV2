@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
     using System.Linq;
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
 
     using Dispatcher = System.Windows.Threading.Dispatcher;
     using DispatcherPriority = System.Windows.Threading.DispatcherPriority;
@@ -48,9 +49,9 @@
         private readonly Dictionary<string, Guid> _outputWindows =
             new Dictionary<string, Guid>()
             {
-                { PredefinedOutputWindowPanes.Build, VSConstants.GUID_BuildOutputWindowPane },
-                { PredefinedOutputWindowPanes.Debug, VSConstants.GUID_OutWindowDebugPane },
-                { PredefinedOutputWindowPanes.General, VSConstants.GUID_OutWindowGeneralPane },
+                { PredefinedOutputWindowPanes.Build, VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid },
+                { PredefinedOutputWindowPanes.Debug, VSConstants.OutputWindowPaneGuid.DebugPane_guid },
+                { PredefinedOutputWindowPanes.General, VSConstants.OutputWindowPaneGuid.GeneralPane_guid },
             };
 
         private readonly ConcurrentDictionary<string, IOutputWindowPane> _panes =
@@ -88,7 +89,11 @@
                 bool visible = true;
                 bool clearWithSolution = false;
 
-                if (ErrorHandler.Failed(ErrorHandler.CallWithCOMConvention(() => outputWindow.CreatePane(ref guid, definition.Metadata.Name, Convert.ToInt32(visible), Convert.ToInt32(clearWithSolution)))))
+                string displayName = definition.Metadata.Name;
+                if (definition.Value != null && !string.IsNullOrEmpty(definition.Value.DisplayName))
+                    displayName = definition.Value.DisplayName;
+
+                if (ErrorHandler.Failed(ErrorHandler.CallWithCOMConvention(() => outputWindow.CreatePane(ref guid, displayName, Convert.ToInt32(visible), Convert.ToInt32(clearWithSolution)))))
                     return null;
 
                 _outputWindows.Add(definition.Metadata.Name, guid);

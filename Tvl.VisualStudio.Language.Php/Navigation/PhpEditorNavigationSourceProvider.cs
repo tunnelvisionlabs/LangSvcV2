@@ -12,7 +12,7 @@
     using IEditorNavigationTypeRegistryService = Tvl.VisualStudio.Text.Navigation.IEditorNavigationTypeRegistryService;
     using IGlyphService = Microsoft.VisualStudio.Language.Intellisense.IGlyphService;
     using ImageSource = System.Windows.Media.ImageSource;
-    using IOutputWindowService = Tvl.VisualStudio.Shell.OutputWindow.IOutputWindowService;
+    using IOutputWindowService = Tvl.VisualStudio.Shell.OutputWindow.Interfaces.IOutputWindowService;
     using ITextBuffer = Microsoft.VisualStudio.Text.ITextBuffer;
     using ITextDocumentFactoryService = Microsoft.VisualStudio.Text.ITextDocumentFactoryService;
     using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;

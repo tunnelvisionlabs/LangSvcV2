@@ -1,4 +1,4 @@
-﻿namespace Tvl.VisualStudio.Shell.OutputWindow
+﻿namespace Tvl.VisualStudio.Shell.OutputWindow.Interfaces.Contracts
 {
     using System;
     using System.Diagnostics.Contracts;

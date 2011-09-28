@@ -3,7 +3,8 @@
     using System.Collections.Generic;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
-    using Tvl.VisualStudio.Shell.OutputWindow;
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+
     using CommonTokenStream = Antlr.Runtime.CommonTokenStream;
     using Contract = System.Diagnostics.Contracts.Contract;
     using OperationCanceledException = System.OperationCanceledException;
