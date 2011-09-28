@@ -245,7 +245,7 @@
                 || Index < _currentSnapshotLineStartIndex
                 || Index >= _currentSnapshotLineStartIndex + _currentSnapshotLine.Length)
             {
-                if (Index >= 0 || Index < Count)
+                if (Index >= 0 && Index < Count)
                 {
                     ITextSnapshotLine line = Snapshot.GetLineFromPosition(Index);
                     _currentSnapshotLineStartIndex = line.Start;
