@@ -63,6 +63,23 @@
             ForceReclassifyLines(0, textBuffer.CurrentSnapshot.LineCount - 1);
         }
 
+        public ITextBuffer TextBuffer
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<ITextBuffer>() != null);
+                return _textBuffer;
+            }
+        }
+
+        public ClassifierOptions Options
+        {
+            get
+            {
+                return _options;
+            }
+        }
+
         public event EventHandler<ClassificationChangedEventArgs> ClassificationChanged;
 
         public virtual AntlrClassifierBase<TState> GetClassifierSnapshot()
@@ -293,7 +310,7 @@
 
         protected virtual bool IsMultilineToken(ITextSnapshot snapshot, ITokenSourceWithState<TState> lexer, IToken token)
         {
-            if (lexer != null && lexer.CharStream.Line >= token.Line)
+            if (lexer != null && lexer.CharStream.Line > token.Line)
                 return true;
 
             int startLine = snapshot.GetLineNumberFromPosition(token.StartIndex);
@@ -488,6 +505,7 @@
             }
         }
 
+        // TODO: need to consider lookahead distance as well
         protected struct LineStateInfo
         {
             public static readonly LineStateInfo Multiline =

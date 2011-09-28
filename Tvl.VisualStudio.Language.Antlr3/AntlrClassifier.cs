@@ -30,7 +30,6 @@
                 "options",
             };
 
-        private readonly ITextBuffer _textBuffer;
         private readonly IStandardClassificationService _standardClassificationService;
         private readonly IClassificationTypeRegistryService _classificationTypeRegistryService;
 
@@ -50,7 +49,6 @@
         public AntlrClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService, IClassificationTypeRegistryService classificationTypeRegistryService)
             : base(textBuffer)
         {
-            this._textBuffer = textBuffer;
             this._standardClassificationService = standardClassificationService;
             this._classificationTypeRegistryService = classificationTypeRegistryService;
 
