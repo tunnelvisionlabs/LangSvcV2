@@ -121,7 +121,7 @@
 
             set
             {
-                if (InStringLiteral == value)
+                if (InCharLiteral == value)
                     return;
 
                 switch (Mode)
