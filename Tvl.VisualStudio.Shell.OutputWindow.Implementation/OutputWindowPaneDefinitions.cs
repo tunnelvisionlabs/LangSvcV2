@@ -12,21 +12,8 @@ namespace Tvl.VisualStudio.Shell.OutputWindow
         [Name(PredefinedOutputWindowPanes.TvlIntellisense)]
         private static readonly OutputWindowDefinition TvlIntellisenseOutputWindowDefinition;
 
-        //[Export]
-        //[Name(PredefinedOutputWindowPanes.TvlDiagnostics)]
-        //private static readonly OutputWindowDefinition TvlDiagnosticsOutputWindowDefinition;
-
-        [Export(typeof(OutputWindowDefinition))]
+        [Export]
         [Name(PredefinedOutputWindowPanes.TvlDiagnostics)]
-        private class TvlDiagnosticsOutputWindowDefinition : OutputWindowDefinition
-        {
-            public override string DisplayName
-            {
-                get
-                {
-                    return "TVL Diagnostics!";
-                }
-            }
-        }
+        private static readonly OutputWindowDefinition TvlDiagnosticsOutputWindowDefinition;
     }
 }
