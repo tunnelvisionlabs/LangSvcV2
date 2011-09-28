@@ -25,19 +25,6 @@
             }
         }
 
-        private int ActionLevel
-        {
-            get
-            {
-                return _lexer.ActionLevel;
-            }
-
-            set
-            {
-                _lexer.ActionLevel = value;
-            }
-        }
-
         public override IToken NextToken()
         {
             IToken token = base.NextToken();
