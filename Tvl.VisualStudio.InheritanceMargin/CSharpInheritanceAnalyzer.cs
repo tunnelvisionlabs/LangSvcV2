@@ -1,5 +1,6 @@
 ﻿namespace Tvl.VisualStudio.InheritanceMargin
 {
+    using StringBuilder = System.Text.StringBuilder;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
@@ -124,38 +125,72 @@
                         if (implementingMethods.Count == 0 && implementedMethods.Count == 0 && overriddenMethods.Count == 0 && overridingMethods.Count == 0)
                             continue;
 
+                        StringBuilder builder = new StringBuilder();
+                        string elementKindDisplayName =
+                            member.IsProperty ? "properties" :
+                            member.IsEvent ? "events" :
+                            "methods";
+
+                        if (implementedMethods.Count > 0)
+                        {
+                            builder.AppendLine("Implemented " + elementKindDisplayName + ":");
+                            foreach (var methodId in implementedMethods)
+                                builder.AppendLine("    " + methodId.ToString());
+                        }
+
+                        if (overriddenMethods.Count > 0)
+                        {
+                            builder.AppendLine("Overridden " + elementKindDisplayName + ":");
+                            foreach (var methodId in overriddenMethods)
+                                builder.AppendLine("    " + methodId.ToString());
+                        }
+
+                        if (implementingMethods.Count > 0)
+                        {
+                            builder.AppendLine("Implementing " + elementKindDisplayName + " in derived types:");
+                            foreach (var methodId in implementingMethods)
+                                builder.AppendLine("    " + methodId.ToString());
+                        }
+
+                        if (overridingMethods.Count > 0)
+                        {
+                            builder.AppendLine("Overriding " + elementKindDisplayName + " in derived types:");
+                            foreach (var methodId in overridingMethods)
+                                builder.AppendLine("    " + methodId.ToString());
+                        }
+
                         int nameIndex = node.Token;
                         Token token = parseTree.LexData.Tokens[nameIndex];
                         ITextSnapshotLine line = snapshot.GetLineFromLineNumber(token.StartPosition.Line);
                         SnapshotSpan span = new SnapshotSpan(snapshot, new Span(line.Start + token.StartPosition.Character, token.EndPosition.Character - token.StartPosition.Character));
 
-                        InheritanceTag tag;
+                        InheritanceGlyph tag;
                         if (implementedMethods.Count > 0)
                         {
                             if (overridingMethods.Count > 0)
-                                tag = InheritanceTags.ImplementsAndOverridden;
+                                tag = InheritanceGlyph.ImplementsAndOverridden;
                             else if (implementingMethods.Count > 0)
-                                tag = InheritanceTags.ImplementsAndHasImplementations;
+                                tag = InheritanceGlyph.ImplementsAndHasImplementations;
                             else
-                                tag = InheritanceTags.Implements;
+                                tag = InheritanceGlyph.Implements;
                         }
                         else if (implementingMethods.Count > 0)
                         {
-                            tag = InheritanceTags.HasImplementations;
+                            tag = InheritanceGlyph.HasImplementations;
                         }
                         else if (overriddenMethods.Count > 0)
                         {
                             if (overridingMethods.Count > 0)
-                                tag = InheritanceTags.OverridesAndOverridden;
+                                tag = InheritanceGlyph.OverridesAndOverridden;
                             else
-                                tag = InheritanceTags.Overrides;
+                                tag = InheritanceGlyph.Overrides;
                         }
                         else
                         {
-                            tag = InheritanceTags.Overridden;
+                            tag = InheritanceGlyph.Overridden;
                         }
 
-                        tags.Add(new TagSpan<InheritanceTag>(span, tag));
+                        tags.Add(new TagSpan<InheritanceTag>(span, new InheritanceTag(tag, builder.ToString().TrimEnd())));
                     }
                 }
 

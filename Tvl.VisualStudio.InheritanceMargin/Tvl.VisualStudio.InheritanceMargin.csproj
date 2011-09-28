@@ -102,14 +102,21 @@
     <Compile Include="InheritanceGlyph.cs" />
     <Compile Include="InheritanceGlyphFactory.cs" />
     <Compile Include="InheritanceGlyphFactoryProvider.cs" />
+    <Compile Include="InheritanceGlyphMouseHandler.cs" />
+    <Compile Include="InheritanceGlyphMouseHandlerProvider.cs" />
     <Compile Include="InheritanceParseResultEventArgs.cs" />
     <Compile Include="InheritanceTag.cs" />
-    <Compile Include="InheritanceTags.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\External\Eula.rtf">
       <Link>Eula.rtf</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="VSIXImage_large.png">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="VSIXImage_small.png">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <None Include="..\External\Key.snk">

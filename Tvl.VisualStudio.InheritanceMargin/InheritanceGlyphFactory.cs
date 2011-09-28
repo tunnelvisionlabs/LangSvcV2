@@ -66,7 +66,8 @@
             BitmapSource source = new BitmapImage(new Uri("pack://application:,,,/Tvl.VisualStudio.InheritanceMargin;component/Resources/" + imageName + ".png"));
             Image image = new Image()
                 {
-                    Source = source
+                    Source = source,
+                    ToolTip = inheritanceTag.Glyph.ToString()
                 };
 
             return image;
