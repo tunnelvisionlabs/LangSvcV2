@@ -97,6 +97,6 @@
 /Tvl.VisualStudio.Text.Antlr/obj/
 /Tvl.VisualStudio.Text.Implementation/bin/
 /Tvl.VisualStudio.Text.Implementation/obj/
-Tvl.VisualStudio.Language.Go/TestGenerated/
-Tvl.VisualStudio.Language.StringTemplate4/TestGenerated/
-Tvl.VisualStudio.Language.Php/TestGenerated/
+/Tvl.VisualStudio.Language.Go/TestGenerated/
+/Tvl.VisualStudio.Language.StringTemplate4/TestGenerated/
+/Tvl.VisualStudio.Language.Php/TestGenerated/
