@@ -109,9 +109,8 @@
       <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.ExtensibilityHosting, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <Reference Include="Microsoft.VisualStudio.ExtensibilityHosting, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>C:\Windows\Microsoft.Net\assembly\GAC_MSIL\Microsoft.VisualStudio.ExtensibilityHosting\v4.0_10.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.ExtensibilityHosting.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Microsoft.Build">
       <HintPath>$(MSBuildExtensionsPath)\..\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Microsoft.Build.dll</HintPath>
@@ -130,7 +129,6 @@
     </Reference>
     <Reference Include="microsoft.VisualStudio.CommonIDE, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>C:\Windows\Microsoft.Net\assembly\GAC_MSIL\microsoft.VisualStudio.CommonIDE\v4.0_10.0.0.0__b03f5f7f11d50a3a\microsoft.VisualStudio.CommonIDE.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Designer.Interfaces, Version=1.0.5000.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>$(MSBuildExtensionsPath)\..\Microsoft Visual Studio 2010 SDK\VisualStudioIntegration\Common\Assemblies\v2.0\Microsoft.VisualStudio.Designer.Interfaces.dll</HintPath>
@@ -142,10 +140,6 @@
     </Reference>
     <Reference Include="Microsoft.VisualStudio.ProjectAggregator, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>$(MSBuildExtensionsPath)\..\Microsoft Visual Studio 2010 SDK\VisualStudioIntegration\Common\Assemblies\v2.0\Microsoft.VisualStudio.ProjectAggregator.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.Settings, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>$(MSBuildExtensionsPath)\..\Microsoft Visual Studio 2010 SDK\VisualStudioIntegration\Common\Assemblies\v4.0\Microsoft.VisualStudio.Settings.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -188,12 +182,10 @@
       <HintPath>$(MSBuildExtensionsPath)\..\Common Files\Microsoft Shared\MSEnv\PublicAssemblies\Microsoft.VisualStudio.VSHelp.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="Microsoft.WizardFramework, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Microsoft.WizardFramework, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>$(MSBuildExtensionsPath)\..\Microsoft Visual Studio 10.0\Common7\IDE\Microsoft.WizardFramework.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.WizardFrameworkVS, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Microsoft.WizardFrameworkVS, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>$(MSBuildExtensionsPath)\..\Microsoft Visual Studio 10.0\Common7\IDE\Microsoft.WizardFrameworkVS.dll</HintPath>
     </Reference>
     <Reference Include="stdole, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
