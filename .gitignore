@@ -4,6 +4,7 @@
 *.sln.docstates
 *.suo
 *.vcxproj.user
+/External/Key.snk
 /External/ProjectBase2010/bin/
 /External/ProjectBase2010/obj/
 /Prepared/
