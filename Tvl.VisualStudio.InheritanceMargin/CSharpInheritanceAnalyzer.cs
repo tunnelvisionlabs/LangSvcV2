@@ -81,7 +81,14 @@
                 if (host != null && project != null && !string.IsNullOrEmpty(fileName))
                 {
                     Compilation compilation = host.CreateCompiler(project).GetCompilation();
-                    SourceFile sourceFile = compilation.SourceFiles[new FileName(fileName)];
+                    SourceFile sourceFile;
+                    if (!compilation.SourceFiles.TryGetValue(new FileName(fileName), out sourceFile))
+                    {
+                        InheritanceParseResultEventArgs errorResult = new InheritanceParseResultEventArgs(snapshot, NoErrors, stopwatch.Elapsed, tags);
+                        OnParseComplete(errorResult);
+                        return;
+                    }
+
                     ParseTree parseTree = sourceFile.GetParseTree();
 
                     SpecializedMatchingMemberCollector collector = new SpecializedMatchingMemberCollector(host.Compilers.Select(i => i.GetCompilation()), false);
