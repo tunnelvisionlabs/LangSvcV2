@@ -31,14 +31,20 @@
         public void VsTextViewCreated(IVsTextView textViewAdapter)
         {
             ITextView textView = EditorAdaptersFactoryService.GetWpfTextView(textViewAdapter);
+            if (textView == null)
+                return;
+
             var provider = CommenterProviders.FirstOrDefault(providerInfo => providerInfo.Metadata.ContentTypes.Any(contentType => textView.TextBuffer.ContentType.IsOfType(contentType)));
-            if (provider != null)
-            {
-                var commenter = provider.Value.GetCommenter(textView);
-                CommenterFilter filter = new CommenterFilter(textViewAdapter, textView, commenter);
-                filter.Enabled = true;
-                textView.Closed += (sender, e) => filter.Dispose();
-            }
+            if (provider == null)
+                return;
+
+            var commenter = provider.Value.GetCommenter(textView);
+            if (commenter == null)
+                return;
+
+            CommenterFilter filter = new CommenterFilter(textViewAdapter, textView, commenter);
+            filter.Enabled = true;
+            textView.Properties.AddProperty(typeof(CommenterFilter), filter);
         }
     }
 }

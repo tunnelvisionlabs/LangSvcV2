@@ -7,6 +7,7 @@
     using Tvl.VisualStudio.Shell;
 
     using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
+    using System.Diagnostics.Contracts;
 
     [ComVisible(true)]
     internal class CommenterFilter : TextViewCommandFilter
@@ -14,8 +15,13 @@
         public CommenterFilter(IVsTextView textViewAdapter, ITextView textView, ICommenter commenter)
             : base(textViewAdapter)
         {
+            Contract.Requires(textViewAdapter != null);
+            Contract.Requires<ArgumentNullException>(textView != null, "textView");
+            Contract.Requires<ArgumentNullException>(commenter != null, "commenter");
+
             this.TextView = textView;
             this.Commenter = commenter;
+            textView.Closed += (sender, e) => Dispose();
         }
 
         public ITextView TextView
