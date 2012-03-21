@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Vsix Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
   <Identifier Id="Tvl.VisualStudio.InheritanceMargin.8a936765-90d2-4d37-ae52-e43d7aae9e06">
     <Name>Inheritance Margin</Name>
@@ -28,6 +28,7 @@
 
   <Content>
     <MefComponent>|%CurrentProject%|</MefComponent>
+    <VsPackage>|%CurrentProject%|</VsPackage>
   </Content>
 
 </Vsix>
