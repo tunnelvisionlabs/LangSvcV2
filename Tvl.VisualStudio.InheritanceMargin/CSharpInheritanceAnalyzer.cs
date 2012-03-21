@@ -1,6 +1,5 @@
 ﻿namespace Tvl.VisualStudio.InheritanceMargin
 {
-    using StringBuilder = System.Text.StringBuilder;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
@@ -21,10 +20,12 @@
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
 
+    using CSRPOSDATA = Microsoft.VisualStudio.CSharp.Services.Language.Interop.CSRPOSDATA;
     using ICSharpTextBuffer = Microsoft.VisualStudio.CSharp.Services.Language.Interop.ICSharpTextBuffer;
     using ILangService = Microsoft.VisualStudio.CSharp.Services.Language.Interop.ILangService;
     using IProject = Microsoft.VisualStudio.CSharp.Services.Language.Interop.IProject;
     using Stopwatch = System.Diagnostics.Stopwatch;
+    using StringBuilder = System.Text.StringBuilder;
 
     public class CSharpInheritanceAnalyzer : BackgroundParser
     {
@@ -50,6 +51,98 @@
 
         [DllImport("CSLangSvc.dll", PreserveSig = false)]
         internal static extern void LangService_GetInstance(out ILangService langService);
+
+        public static Tuple<CSharpMember, Compilation> ResolveMemberIdentifier(IEnumerable<Compilation> projectList, CSharpMemberIdentifier memberId)
+        {
+            return Resolve(projectList, project => project.ResolveMemberIdentifier(memberId), memberId.AssemblyIdentifier);
+        }
+
+        public static Tuple<T, Compilation> Resolve<T>(IEnumerable<Compilation> compilations, Func<Compilation, T> resolver, CSharpAssemblyIdentifier definingAssembly)
+            where T : class
+        {
+            Compilation compilation = null;
+            T result = default(T);
+            foreach (Compilation c in compilations)
+            {
+                T t = resolver(c);
+                if (t != null)
+                {
+                    result = t;
+                    compilation = c;
+                }
+
+                if (c.MainAssembly.SymbolicIdentifier.Equals(definingAssembly))
+                {
+                    return Tuple.Create(t, c);
+                }
+            }
+
+            if (compilation != null && result != null)
+            {
+                return Tuple.Create(result, compilation);
+            }
+
+            return null;
+        }
+
+        public static void NavigateToMember(CSharpMemberIdentifier memberIdentifier)
+        {
+            bool result = false;
+            try
+            {
+                CSharpMember currentMember = ResolveMember(memberIdentifier);
+                if (currentMember == null)
+                    return;
+
+                var sourceLocations = currentMember.SourceLocations;
+                if (sourceLocations == null || sourceLocations.Count == 0)
+                    return;
+
+                var location = sourceLocations[0];
+                if (location.FileName == null || !location.Position.IsValid)
+                    return;
+
+                CSRPOSDATA position = new CSRPOSDATA()
+                {
+                    LineIndex = location.Position.Line,
+                    ColumnIndex = location.Position.Character
+                };
+
+                ILangService languageService;
+                CSharpInheritanceAnalyzer.LangService_GetInstance(out languageService);
+                if (languageService == null)
+                    return;
+
+                IProject project = null;
+                languageService.OpenSourceFile(project, location.FileName.Value, position);
+            }
+            catch (ApplicationException)
+            {
+                //_callHierarchy.LanguageService.DisplayErrorMessage(exception.Message);
+                return;
+            }
+            catch (InvalidOperationException)
+            {
+                //this._callHierarchy.LanguageService.DisplayErrorMessage(exception2.Message);
+                return;
+            }
+
+            if (!result)
+            {
+                //NativeMessageId.Create(this._callHierarchy.LanguageService, jrc_StringResource_identifiers.IDS_HIDDEN_DEFINITION, new object[0]).DisplayError(this._callHierarchy.LanguageService);
+            }
+        }
+
+        private static CSharpMember ResolveMember(CSharpMemberIdentifier memberIdentifier)
+        {
+            IDECompilerHost host = new IDECompilerHost();
+            var currentCompilations = host.Compilers.Select(i => i.GetCompilation()).ToList();
+            var resolved = CSharpInheritanceAnalyzer.ResolveMemberIdentifier(currentCompilations, memberIdentifier);
+            if (resolved != null)
+                return resolved.Item1;
+
+            return null;
+        }
 
         protected override void ReParseImpl()
         {
@@ -197,7 +290,13 @@
                             tag = InheritanceGlyph.Overridden;
                         }
 
-                        tags.Add(new TagSpan<InheritanceTag>(span, new InheritanceTag(tag, builder.ToString().TrimEnd())));
+                        List<CSharpMemberIdentifier> members = new List<CSharpMemberIdentifier>();
+                        members.AddRange(implementedMethods);
+                        members.AddRange(overriddenMethods);
+                        members.AddRange(implementingMethods);
+                        members.AddRange(overridingMethods);
+
+                        tags.Add(new TagSpan<InheritanceTag>(span, new InheritanceTag(tag, builder.ToString().TrimEnd(), members)));
                     }
                 }
 
@@ -332,39 +431,6 @@
 
                 AddVirtualOverridersFromDerivedTypes(member, resultList);
                 return resultList;
-            }
-
-            private static Tuple<CSharpMember, Compilation> ResolveMemberIdentifier(IEnumerable<Compilation> projectList, CSharpMemberIdentifier memberId)
-            {
-                return Resolve(projectList, project => project.ResolveMemberIdentifier(memberId), memberId.AssemblyIdentifier);
-            }
-
-            private static Tuple<T, Compilation> Resolve<T>(IEnumerable<Compilation> compilations, Func<Compilation, T> resolver, CSharpAssemblyIdentifier definingAssembly)
-                where T : class
-            {
-                Compilation compilation = null;
-                T result = default(T);
-                foreach (Compilation c in compilations)
-                {
-                    T t = resolver(c);
-                    if (t != null)
-                    {
-                        result = t;
-                        compilation = c;
-                    }
-
-                    if (c.MainAssembly.SymbolicIdentifier.Equals(definingAssembly))
-                    {
-                        return Tuple.Create(t, c);
-                    }
-                }
-
-                if (compilation != null && result != null)
-                {
-                    return Tuple.Create(result, compilation);
-                }
-
-                return null;
             }
 
             private class CSharpMemberIdentifierEqualityComparer : IEqualityComparer<CSharpMemberIdentifier>

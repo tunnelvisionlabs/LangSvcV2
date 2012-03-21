@@ -6,10 +6,8 @@
     using System.Windows.Media.Imaging;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Formatting;
-    using CanExecuteRoutedEventArgs = System.Windows.Input.CanExecuteRoutedEventArgs;
+
     using CommandBinding = System.Windows.Input.CommandBinding;
-    using CommandTargetParameters = Tvl.VisualStudio.InheritanceMargin.CommandTranslation.CommandTargetParameters;
-    using ExecutedRoutedEventArgs = System.Windows.Input.ExecutedRoutedEventArgs;
 
     public class InheritanceGlyphFactory : IGlyphFactory
     {
@@ -73,38 +71,11 @@
                     Source = source,
                     ToolTip = inheritanceTag.Glyph.ToString()
                 };
-            image.CommandBindings.Add(new CommandBinding(InheritanceMarginPackage.InheritanceTargetsList, HandleExecutedInheritanceTargetsList, HandleCanExecuteInheritanceTargetsList));
+            image.CommandBindings.Add(new CommandBinding(InheritanceMarginPackage.InheritanceTargetsList, inheritanceTag.HandleExecutedInheritanceTargetsList, inheritanceTag.HandleCanExecuteInheritanceTargetsList));
 
             inheritanceTag.MarginGlyph = image;
 
             return image;
-        }
-
-        private void HandleExecutedInheritanceTargetsList(object sender, ExecutedRoutedEventArgs e)
-        {
-        }
-
-        private void HandleCanExecuteInheritanceTargetsList(object sender, CanExecuteRoutedEventArgs e)
-        {
-            CommandTargetParameters parameter = e.Parameter as CommandTargetParameters;
-            if (parameter != null)
-            {
-                int index = parameter.Id - InheritanceMarginConstants.cmdidInheritanceTargetsList;
-                if (index < 5)
-                {
-                    e.CanExecute = true;
-                    parameter.Enabled = true;
-                    parameter.Visible = true;
-                    parameter.Pressed = false;
-                    parameter.Text = "Item " + (index + 1);
-                }
-                else
-                {
-                    e.CanExecute = false;
-                    parameter.Enabled = false;
-                    parameter.Visible = false;
-                }
-            }
         }
 
         #endregion
