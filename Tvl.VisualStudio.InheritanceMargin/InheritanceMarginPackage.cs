@@ -1,4 +1,4 @@
-namespace Tvl.VisualStudio.InheritanceMargin
+﻿namespace Tvl.VisualStudio.InheritanceMargin
 {
     using System;
     using System.Collections.Generic;
@@ -6,13 +6,16 @@ namespace Tvl.VisualStudio.InheritanceMargin
     using System.Runtime.InteropServices;
     using System.Windows.Input;
     using Microsoft.VisualStudio.Shell;
-    using Tvl.VisualStudio.InheritanceMargin.CommandTranslation;
+    using CommandId = Tvl.VisualStudio.InheritanceMargin.CommandTranslation.CommandId;
     using IOleCommandTarget = Microsoft.VisualStudio.OLE.Interop.IOleCommandTarget;
     using OLECMD = Microsoft.VisualStudio.OLE.Interop.OLECMD;
     using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
+    using UICONTEXT = Microsoft.VisualStudio.VSConstants.UICONTEXT;
 
     [Guid(InheritanceMarginConstants.guidInheritanceMarginPackageString)]
     [PackageRegistration(UseManagedResourcesOnly = true)]
+    [ProvideMenuResource(1000, 1)]
+    [ProvideAutoLoad(UICONTEXT.CSharpProject_string)]
     public class InheritanceMarginPackage : Package, IOleCommandTarget
     {
         private static InheritanceMarginPackage _instance;
@@ -31,6 +34,12 @@ namespace Tvl.VisualStudio.InheritanceMargin
             {
                 return _instance;
             }
+        }
+
+        public static RoutedCommand InheritanceTargetsList
+        {
+            get;
+            private set;
         }
 
         public SVsServiceProvider ServiceProvider
@@ -63,7 +72,7 @@ namespace Tvl.VisualStudio.InheritanceMargin
 
         private void DefineRoutableCommands()
         {
-            // TODO: define package specific commands here
+            DefineRoutableCommand("InheritanceTargetsList", InheritanceMarginConstants.guidInheritanceMarginCommandSet, InheritanceMarginConstants.cmdidInheritanceTargetsList, InheritanceMarginConstants.cmdidInheritanceTargetsListEnd);
         }
 
         private void DefineRoutableCommand(string propertyName, Guid guid, int startId, int endId)

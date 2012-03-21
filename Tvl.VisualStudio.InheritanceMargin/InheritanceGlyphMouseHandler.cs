@@ -2,17 +2,16 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Text.Editor;
-    using System.Windows.Input;
     using System.Diagnostics.Contracts;
-    using System.Windows.Threading;
-    using Microsoft.VisualStudio.Text.Formatting;
-    using System.Windows.Controls.Primitives;
+    using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Controls.Primitives;
+    using System.Windows.Input;
+    using System.Windows.Threading;
     using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Editor;
+    using Microsoft.VisualStudio.Text.Formatting;
     using Microsoft.VisualStudio.Text.Tagging;
 
     internal class InheritanceGlyphMouseHandler : MouseProcessorBase
@@ -61,7 +60,22 @@
 
         public override void PostprocessMouseRightButtonUp(MouseButtonEventArgs e)
         {
-            // TODO: context menu for quick jump
+            Point mouseLocationInTextView = GetMouseLocationInTextView(e);
+            ITextViewLine textViewLine = GetTextViewLine(mouseLocationInTextView.Y);
+            if (textViewLine != null)
+            {
+                var tags = GetInheritanceGlyphTagsStartingOnLine(textViewLine);
+                var firstTag = tags.FirstOrDefault();
+                if (firstTag != null)
+                {
+                    FrameworkElement glyphElement = firstTag.MarginGlyph;
+                    if (glyphElement != null)
+                    {
+                        Action action = () => firstTag.ShowContextMenu(e);
+                        glyphElement.Dispatcher.BeginInvoke(DispatcherPriority.Normal, action);
+                    }
+                }
+            }
         }
 
         public override void PostprocessMouseLeftButtonDown(MouseButtonEventArgs e)

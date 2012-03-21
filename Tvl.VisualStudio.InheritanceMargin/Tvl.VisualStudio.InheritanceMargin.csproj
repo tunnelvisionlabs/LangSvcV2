@@ -114,6 +114,10 @@
       <Link>Eula.rtf</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <VSCTCompile Include="InheritanceMargin.vsct">
+      <ResourceName>1000</ResourceName>
+      <SubType>Designer</SubType>
+    </VSCTCompile>
     <Content Include="VSIXImage_large.png">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
@@ -316,6 +320,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="VSPackage.resx">
+      <MergeWithCTO>true</MergeWithCTO>
       <LogicalName>VSPackage.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>

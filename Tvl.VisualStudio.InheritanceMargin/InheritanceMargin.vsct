@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable">
+  <Commands package="guidInheritanceMarginPackage">
+    <Menus>
+      <Menu guid="guidInheritanceMarginPackageCmdSet" id="menuInheritanceTargets" priority="0x0100" type="Context">
+        <Strings>
+          <ButtonText>Inheritance2</ButtonText>
+          <CommandName>Inheritance</CommandName>
+        </Strings>
+      </Menu>
+    </Menus>
+
+    <Groups>
+      <Group guid="guidInheritanceMarginPackageCmdSet" id="groupInheritanceTargets" priority="0x0100">
+        <Parent guid="guidInheritanceMarginPackageCmdSet" id="menuInheritanceTargets" />
+      </Group>
+    </Groups>
+
+    <Buttons>
+      <Button guid="guidInheritanceMarginPackageCmdSet" id="cmdidInheritanceTargetsList" priority="0x0100" type="Button">
+        <Parent guid="guidInheritanceMarginPackageCmdSet" id="groupInheritanceTargets" />
+        <CommandFlag>DynamicItemStart</CommandFlag>
+        <Strings>
+          <CommandName>cmdidInheritanceTargetsList</CommandName>
+          <ButtonText>Inheritance Targets Placeholder</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+  </Commands>
+  
+  <Symbols>
+    <GuidSymbol name="guidInheritanceMarginPackage" value="{B03A0D8A-A6E0-4983-B545-F73D2531D534}" />
+
+    <GuidSymbol name="guidInheritanceMarginPackageCmdSet" value="{102A7E39-1CD8-4F49-816E-245D813D884E}">
+      <IDSymbol name="menuInheritanceTargets" value="0x0100" />
+      <IDSymbol name="groupInheritanceTargets" value="0x0101" />
+      <IDSymbol name="cmdidInheritanceTargetsList" value="0x0200" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>
