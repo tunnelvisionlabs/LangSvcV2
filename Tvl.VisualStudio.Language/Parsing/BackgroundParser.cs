@@ -228,18 +228,10 @@
                 {
                     ReParseImpl();
 
-                    try
+                    if (outputWindow != null)
                     {
-                        if (outputWindow != null)
-                        {
-                            long time = stopwatch.ElapsedMilliseconds;
-                            outputWindow.WriteLine(string.Format(message, filename, name, "succeeded", time, string.Empty));
-                        }
-                    }
-                    catch (Exception e3)
-                    {
-                        if (ErrorHandler.IsCriticalException(e3))
-                            throw;
+                        long time = stopwatch.ElapsedMilliseconds;
+                        outputWindow.WriteLine(string.Format(message, filename, name, "succeeded", time, string.Empty));
                     }
                 }
                 catch (Exception e2)
