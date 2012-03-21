@@ -92,6 +92,9 @@
     <AssemblyOriginatorKeyFile>..\External\Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CommandTranslation\CommandId.cs" />
+    <Compile Include="CommandTranslation\CommandRouter.cs" />
+    <Compile Include="CommandTranslation\CommandTargetParameters.cs" />
     <Compile Include="CSharpInheritanceAnalyzer.cs" />
     <Compile Include="CSharpInheritanceTagger.cs" />
     <Compile Include="CSharpInheritanceTaggerProvider.cs" />
