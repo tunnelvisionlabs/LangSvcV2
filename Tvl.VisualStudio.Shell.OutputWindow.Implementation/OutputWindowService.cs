@@ -46,65 +46,67 @@
             set;
         }
 
-        private readonly Dictionary<string, Guid> _outputWindows =
-            new Dictionary<string, Guid>()
-            {
-                { PredefinedOutputWindowPanes.Build, VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid },
-                { PredefinedOutputWindowPanes.Debug, VSConstants.OutputWindowPaneGuid.DebugPane_guid },
-                { PredefinedOutputWindowPanes.General, VSConstants.OutputWindowPaneGuid.GeneralPane_guid },
-            };
-
-        private readonly ConcurrentDictionary<string, IOutputWindowPane> _panes =
-            new ConcurrentDictionary<string, IOutputWindowPane>();
+        private readonly ConcurrentDictionary<string, Guid?> _outputWindows =
+            new ConcurrentDictionary<string, Guid?>(
+                new KeyValuePair<string, Guid?>[]
+                {
+                    new KeyValuePair<string, Guid?>(PredefinedOutputWindowPanes.Build, VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid),
+                    new KeyValuePair<string, Guid?>(PredefinedOutputWindowPanes.Debug, VSConstants.OutputWindowPaneGuid.DebugPane_guid),
+                    new KeyValuePair<string, Guid?>(PredefinedOutputWindowPanes.General, VSConstants.OutputWindowPaneGuid.GeneralPane_guid),
+                });
 
         public IOutputWindowPane TryGetPane(string name)
-        {
-            return _panes.GetOrAdd(name, CreateWindowPaneOnMainThread);
-        }
-
-        private IOutputWindowPane CreateWindowPaneOnMainThread(string name)
-        {
-            if (Dispatcher.Thread == Thread.CurrentThread)
-                return CreateWindowPane(name);
-
-            return (IOutputWindowPane)Dispatcher.Invoke(DispatcherPriority.Normal, (Func<string, IOutputWindowPane>)CreateWindowPane, name);
-        }
-
-        private IOutputWindowPane CreateWindowPane(string name)
         {
             var olesp = (IOleServiceProvider)GlobalServiceProvider.GetService(typeof(IOleServiceProvider));
             var outputWindow = olesp.TryGetGlobalService<SVsOutputWindow, IVsOutputWindow>();
             if (outputWindow == null)
                 return null;
 
-            Guid guid;
-            if (!_outputWindows.TryGetValue(name, out guid))
-            {
-                var definition = OutputWindowDefinitions.FirstOrDefault(lazy => lazy.Metadata.Name.Equals(name));
-                if (definition == null)
-                    return null;
+            Guid? guid = _outputWindows.GetOrAdd(name, CreateWindowPaneOnMainThread);
+            if (!guid.HasValue)
+                return null;
 
-                guid = Guid.NewGuid();
-                // this controls whether the pane is listed in the output panes dropdown list, *not* whether the pane is initially selected
-                bool visible = true;
-                bool clearWithSolution = false;
-
-                string displayName = definition.Metadata.Name;
-                if (definition.Value != null && !string.IsNullOrEmpty(definition.Value.DisplayName))
-                    displayName = definition.Value.DisplayName;
-
-                if (ErrorHandler.Failed(ErrorHandler.CallWithCOMConvention(() => outputWindow.CreatePane(ref guid, displayName, Convert.ToInt32(visible), Convert.ToInt32(clearWithSolution)))))
-                    return null;
-
-                _outputWindows.Add(definition.Metadata.Name, guid);
-            }
-
+            Guid guidValue = guid.Value;
             IVsOutputWindowPane vspane = null;
-            if (ErrorHandler.Failed(ErrorHandler.CallWithCOMConvention(() => outputWindow.GetPane(ref guid, out vspane))))
+            if (ErrorHandler.Failed(ErrorHandler.CallWithCOMConvention(() => outputWindow.GetPane(ref guidValue, out vspane))))
                 return null;
 
             IOutputWindowPane pane = new VsOutputWindowPaneAdapter(vspane);
             return pane;
+        }
+
+        private Guid? CreateWindowPaneOnMainThread(string name)
+        {
+            if (Dispatcher.Thread == Thread.CurrentThread)
+                return CreateWindowPane(name);
+
+            return (Guid?)Dispatcher.Invoke(DispatcherPriority.Normal, (Func<string, Guid?>)CreateWindowPane, name);
+        }
+
+        private Guid? CreateWindowPane(string name)
+        {
+            var olesp = (IOleServiceProvider)GlobalServiceProvider.GetService(typeof(IOleServiceProvider));
+            var outputWindow = olesp.TryGetGlobalService<SVsOutputWindow, IVsOutputWindow>();
+            if (outputWindow == null)
+                return null;
+
+            var definition = OutputWindowDefinitions.FirstOrDefault(lazy => lazy.Metadata.Name.Equals(name));
+            if (definition == null)
+                return null;
+
+            Guid guid = Guid.NewGuid();
+            // this controls whether the pane is listed in the output panes dropdown list, *not* whether the pane is initially selected
+            bool visible = true;
+            bool clearWithSolution = false;
+
+            string displayName = definition.Metadata.Name;
+            if (definition.Value != null && !string.IsNullOrEmpty(definition.Value.DisplayName))
+                displayName = definition.Value.DisplayName;
+
+            if (ErrorHandler.Failed(ErrorHandler.CallWithCOMConvention(() => outputWindow.CreatePane(ref guid, displayName, Convert.ToInt32(visible), Convert.ToInt32(clearWithSolution)))))
+                return null;
+
+            return guid;
         }
     }
 }

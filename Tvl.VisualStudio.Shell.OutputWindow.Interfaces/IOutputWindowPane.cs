@@ -1,10 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Shell.OutputWindow.Interfaces
 {
-    using System;
     using System.Diagnostics.Contracts;
 
     [ContractClass(typeof(Contracts.IOutputWindowPaneContracts))]
-    public interface IOutputWindowPane : IDisposable
+    public interface IOutputWindowPane
     {
         string Name
         {

@@ -6,9 +6,9 @@
     using Microsoft.VisualStudio.Shell.Interop;
     using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
 
-    internal sealed class VsOutputWindowPaneAdapter : IOutputWindowPane, IDisposable
+    internal sealed class VsOutputWindowPaneAdapter : IOutputWindowPane
     {
-        private IVsOutputWindowPane _pane;
+        private readonly IVsOutputWindowPane _pane;
 
         public VsOutputWindowPaneAdapter(IVsOutputWindowPane pane)
         {
@@ -29,11 +29,6 @@
             {
                 ErrorHandler.ThrowOnFailure(this._pane.SetName(value));
             }
-        }
-
-        public void Dispose()
-        {
-            _pane = null;
         }
 
         public void Activate()
