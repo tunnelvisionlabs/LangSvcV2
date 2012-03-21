@@ -3,7 +3,7 @@
   <Identifier Id="Tvl.VisualStudio.InheritanceMargin.8a936765-90d2-4d37-ae52-e43d7aae9e06">
     <Name>Inheritance Margin</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0.0.626</Version>
+    <Version>1.0.1.1</Version>
     <Description xml:space="preserve">Show inheritance information in the glyph margin.</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
@@ -20,7 +20,7 @@
     <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
   </Identifier>
   <References>
-    <Reference Id="Tvl.VisualStudio.OutputWindow.1a87220f-ee82-4c49-bcfb-bbb9bc4df16d" MinVersion="1.0.0">
+    <Reference Id="Tvl.VisualStudio.OutputWindow.1a87220f-ee82-4c49-bcfb-bbb9bc4df16d" MinVersion="1.0">
       <Name>Tunnel Vision Labs Output Window Services</Name>
       <VsixPath>Tvl.VisualStudio.OutputWindow.vsix</VsixPath>
     </Reference>
