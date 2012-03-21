@@ -1,5 +1,6 @@
 ﻿namespace Tvl.VisualStudio.InheritanceMargin
 {
+    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
 
@@ -7,6 +8,7 @@
     using CommandRouter = Tvl.VisualStudio.InheritanceMargin.CommandTranslation.CommandRouter;
     using CommandTargetParameters = Tvl.VisualStudio.InheritanceMargin.CommandTranslation.CommandTargetParameters;
     using CSharpMemberIdentifier = Microsoft.RestrictedUsage.CSharp.Semantics.CSharpMemberIdentifier;
+    using CSharpTypeIdentifier = Microsoft.RestrictedUsage.CSharp.Semantics.CSharpTypeIdentifier;
     using ExecutedRoutedEventArgs = System.Windows.Input.ExecutedRoutedEventArgs;
     using FrameworkElement = System.Windows.FrameworkElement;
     using IGlyphTag = Microsoft.VisualStudio.Text.Editor.IGlyphTag;
@@ -19,11 +21,21 @@
         private FrameworkElement _marginGlyph;
 
         private readonly List<CSharpMemberIdentifier> _members;
+        private readonly List<Tuple<string, CSharpTypeIdentifier>> _types;
+
+        public InheritanceTag(InheritanceGlyph glyph, string tooltip, List<Tuple<string, CSharpTypeIdentifier>> types)
+        {
+            this._glyph = glyph;
+            this._tooltip = tooltip;
+            this._types = types;
+            this._members = new List<CSharpMemberIdentifier>();
+        }
 
         public InheritanceTag(InheritanceGlyph glyph, string tooltip, List<CSharpMemberIdentifier> members)
         {
             this._glyph = glyph;
             this._tooltip = tooltip;
+            this._types = new List<Tuple<string, CSharpTypeIdentifier>>();
             this._members = members;
         }
 
@@ -64,6 +76,14 @@
             }
         }
 
+        public ReadOnlyCollection<Tuple<string, CSharpTypeIdentifier>> Types
+        {
+            get
+            {
+                return _types.AsReadOnly();
+            }
+        }
+
         public void ShowContextMenu(MouseEventArgs e)
         {
             CommandRouter.DisplayContextMenu(InheritanceMarginConstants.guidInheritanceMarginCommandSet, InheritanceMarginConstants.menuInheritanceTargets, _marginGlyph);
@@ -75,8 +95,10 @@
             if (parameter != null)
             {
                 int index = parameter.Id - InheritanceMarginConstants.cmdidInheritanceTargetsList;
-                if (index < Members.Count)
-                    CSharpInheritanceAnalyzer.NavigateToMember(Members[index]);
+                if (index < Types.Count)
+                    CSharpInheritanceAnalyzer.NavigateToType(Types[index].Item2);
+                else if (index < Types.Count + Members.Count)
+                    CSharpInheritanceAnalyzer.NavigateToMember(Members[index - Types.Count]);
             }
         }
 
@@ -86,13 +108,16 @@
             if (parameter != null)
             {
                 int index = parameter.Id - InheritanceMarginConstants.cmdidInheritanceTargetsList;
-                if (index < Members.Count)
+                if (index < Types.Count + Members.Count)
                 {
                     e.CanExecute = true;
                     parameter.Enabled = true;
                     parameter.Visible = true;
                     parameter.Pressed = false;
-                    parameter.Text = Members[index].ToString();
+                    if (index < Types.Count)
+                        parameter.Text = Types[index].Item1;
+                    else
+                        parameter.Text = Members[index - Types.Count].ToString();
                 }
                 else
                 {

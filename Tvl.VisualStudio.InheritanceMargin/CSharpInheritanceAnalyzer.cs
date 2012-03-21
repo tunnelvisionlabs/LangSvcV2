@@ -12,6 +12,7 @@
     using Microsoft.RestrictedUsage.CSharp.Extensions;
     using Microsoft.RestrictedUsage.CSharp.Semantics;
     using Microsoft.RestrictedUsage.CSharp.Syntax;
+    using Microsoft.RestrictedUsage.CSharp.Utilities;
     using Microsoft.VisualStudio.CSharp.Services.Language.Refactoring;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Text;
@@ -22,6 +23,8 @@
 
     using CSRPOSDATA = Microsoft.VisualStudio.CSharp.Services.Language.Interop.CSRPOSDATA;
     using ICSharpTextBuffer = Microsoft.VisualStudio.CSharp.Services.Language.Interop.ICSharpTextBuffer;
+    using IEnumerable = System.Collections.IEnumerable;
+    using IEnumerator = System.Collections.IEnumerator;
     using ILangService = Microsoft.VisualStudio.CSharp.Services.Language.Interop.ILangService;
     using IProject = Microsoft.VisualStudio.CSharp.Services.Language.Interop.IProject;
     using Stopwatch = System.Diagnostics.Stopwatch;
@@ -57,6 +60,11 @@
             return Resolve(projectList, project => project.ResolveMemberIdentifier(memberId), memberId.AssemblyIdentifier);
         }
 
+        public static Tuple<CSharpType, Compilation> ResolveTypeIdentifier(IEnumerable<Compilation> projectList, CSharpTypeIdentifier typeId)
+        {
+            return Resolve(projectList, project => project.ResolveTypeIdentifier(typeId), typeId.AssemblyIdentifier);
+        }
+
         public static Tuple<T, Compilation> Resolve<T>(IEnumerable<Compilation> compilations, Func<Compilation, T> resolver, CSharpAssemblyIdentifier definingAssembly)
             where T : class
         {
@@ -83,6 +91,54 @@
             }
 
             return null;
+        }
+
+        public static void NavigateToType(CSharpTypeIdentifier typeIdentifier)
+        {
+            bool result = false;
+            try
+            {
+                CSharpType currentType = ResolveType(typeIdentifier);
+                if (currentType == null)
+                    return;
+
+                var sourceLocations = currentType.SourceLocations;
+                if (sourceLocations == null || sourceLocations.Count == 0)
+                    return;
+
+                var location = sourceLocations[0];
+                if (location.FileName == null || !location.Position.IsValid)
+                    return;
+
+                CSRPOSDATA position = new CSRPOSDATA()
+                {
+                    LineIndex = location.Position.Line,
+                    ColumnIndex = location.Position.Character
+                };
+
+                ILangService languageService;
+                CSharpInheritanceAnalyzer.LangService_GetInstance(out languageService);
+                if (languageService == null)
+                    return;
+
+                IProject project = null;
+                languageService.OpenSourceFile(project, location.FileName.Value, position);
+            }
+            catch (ApplicationException)
+            {
+                //_callHierarchy.LanguageService.DisplayErrorMessage(exception.Message);
+                return;
+            }
+            catch (InvalidOperationException)
+            {
+                //this._callHierarchy.LanguageService.DisplayErrorMessage(exception2.Message);
+                return;
+            }
+
+            if (!result)
+            {
+                //NativeMessageId.Create(this._callHierarchy.LanguageService, jrc_StringResource_identifiers.IDS_HIDDEN_DEFINITION, new object[0]).DisplayError(this._callHierarchy.LanguageService);
+            }
         }
 
         public static void NavigateToMember(CSharpMemberIdentifier memberIdentifier)
@@ -133,11 +189,22 @@
             }
         }
 
+        private static CSharpType ResolveType(CSharpTypeIdentifier memberIdentifier)
+        {
+            IDECompilerHost host = new IDECompilerHost();
+            var currentCompilations = host.Compilers.Select(i => i.GetCompilation()).ToList();
+            var resolved = ResolveTypeIdentifier(currentCompilations, memberIdentifier);
+            if (resolved != null)
+                return resolved.Item1;
+
+            return null;
+        }
+
         private static CSharpMember ResolveMember(CSharpMemberIdentifier memberIdentifier)
         {
             IDECompilerHost host = new IDECompilerHost();
             var currentCompilations = host.Compilers.Select(i => i.GetCompilation()).ToList();
-            var resolved = CSharpInheritanceAnalyzer.ResolveMemberIdentifier(currentCompilations, memberIdentifier);
+            var resolved = ResolveMemberIdentifier(currentCompilations, memberIdentifier);
             if (resolved != null)
                 return resolved.Item1;
 
@@ -186,7 +253,46 @@
 
                     SpecializedMatchingMemberCollector collector = new SpecializedMatchingMemberCollector(host.Compilers.Select(i => i.GetCompilation()), false);
 
-                    IEnumerable<ParseTreeNode> nodes = parseTree.SelectMethodsPropertiesAndFields();
+                    IEnumerable<ParseTreeNode> nodes = SelectTypes(parseTree);
+                    foreach (var node in nodes)
+                    {
+                        CSharpType type = null;
+
+                        type = compilation.GetTypeFromTypeDeclaration(node);
+                        if (type == null)
+                        {
+                            MarkDirty(true);
+                            return;
+                        }
+
+                        if (type.IsSealed)
+                            continue;
+
+                        // types which implement or derive from this type
+                        ISet<CSharpType> derivedClasses = collector.GetDerivedTypes(type.SymbolicIdentifier);
+
+                        if (derivedClasses.Count == 0)
+                            continue;
+
+                        StringBuilder builder = new StringBuilder();
+                        string elementKindDisplayName =
+                            "types";
+
+                        builder.AppendLine("Derived " + elementKindDisplayName + ":");
+                        foreach (var derived in derivedClasses)
+                            builder.AppendLine("    " + derived.GetFullTypeName());
+
+                        int nameIndex = node.Token;
+                        Token token = parseTree.LexData.Tokens[nameIndex];
+                        ITextSnapshotLine line = snapshot.GetLineFromLineNumber(token.StartPosition.Line);
+                        SnapshotSpan span = new SnapshotSpan(snapshot, new Span(line.Start + token.StartPosition.Character, token.EndPosition.Character - token.StartPosition.Character));
+
+                        InheritanceGlyph tag = type.IsInterface ? InheritanceGlyph.HasImplementations : InheritanceGlyph.Overridden;
+                        List<Tuple<string, CSharpTypeIdentifier>> types = new List<Tuple<string, CSharpTypeIdentifier>>(derivedClasses.Select(i => Tuple.Create(i.GetFullTypeName(), i.SymbolicIdentifier)));
+                        tags.Add(new TagSpan<InheritanceTag>(span, new InheritanceTag(tag, builder.ToString().TrimEnd(), types)));
+                    }
+
+                    nodes = parseTree.SelectMethodsPropertiesAndFields();
                     foreach (var node in nodes)
                     {
                         CSharpMember member = null;
@@ -311,6 +417,14 @@
             }
         }
 
+        private IEnumerable<ParseTreeNode> SelectTypes(ParseTree parseTree)
+        {
+            if (parseTree == null)
+                return Enumerable.Empty<ParseTreeNode>();
+
+            return new TypeCollector(parseTree.RootNode);
+        }
+
         private IEnumerable<CSharpMember> FindHideBySigMethod(CSharpType type, CSharpMember member, bool checkBaseTypes, bool includeInheritedInterfaces)
         {
             List<CSharpMember> results = new List<CSharpMember>();
@@ -433,6 +547,31 @@
                 return resultList;
             }
 
+            public ISet<CSharpType> GetDerivedTypes(CSharpTypeIdentifier typeId)
+            {
+                ISet<CSharpType> result = new HashSet<CSharpType>();
+                foreach (Compilation compilation in AllProjects)
+                {
+                    CSharpType baseType = compilation.ResolveTypeIdentifier(typeId);
+                    if (baseType == null)
+                        continue;
+
+                    BaseTypeCollector collector = baseType.IsInterface ? GetBaseInterfaceCollector() : GetBaseClassCollector();
+                    foreach (CSharpType type in compilation.MainAssembly.Types)
+                    {
+                        // an interface can't be derived from a class
+                        if (type.IsInterface && !baseType.IsInterface)
+                            continue;
+
+                        var baseTypes = collector.GetBaseTypes(type);
+                        if (baseTypes.Contains(baseType))
+                            result.Add(type);
+                    }
+                }
+
+                return result;
+            }
+
             private class CSharpMemberIdentifierEqualityComparer : IEqualityComparer<CSharpMemberIdentifier>
             {
                 public bool Equals(CSharpMemberIdentifier left, CSharpMemberIdentifier right)
@@ -449,6 +588,93 @@
                 public int GetHashCode(CSharpMemberIdentifier identifier)
                 {
                     return identifier.GetHashCode();
+                }
+            }
+        }
+
+        public class TypeCollector : ParseTreeVisitor, IEnumerable<ParseTreeNode>
+        {
+            private readonly List<ParseTreeNode> nodes = new List<ParseTreeNode>();
+
+            public TypeCollector(ParseTreeNode node)
+            {
+                this.Visit(node);
+            }
+
+            public IEnumerator<ParseTreeNode> GetEnumerator()
+            {
+                return this.nodes.GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
+
+            public override bool TraverseInteriorTree(ParseTreeNode node)
+            {
+                return false;
+            }
+
+            public override void VisitAccessorDeclarationNode(AccessorDeclarationNode node)
+            {
+            }
+
+            public override void VisitConstructorDeclarationNode(ConstructorDeclarationNode node)
+            {
+            }
+
+            public override void VisitDelegateDeclarationNode(DelegateDeclarationNode node)
+            {
+            }
+
+            public override void VisitEnumMemberDeclarationNode(EnumMemberDeclarationNode node)
+            {
+            }
+
+            public override void VisitFieldDeclarationNode(FieldDeclarationNode node)
+            {
+            }
+
+            public override void VisitMemberDeclarationNode(MemberDeclarationNode node)
+            {
+            }
+
+            public override void VisitMethodDeclarationNode(MethodDeclarationNode node)
+            {
+            }
+
+            public override void VisitNamespaceDeclarationNode(NamespaceDeclarationNode node)
+            {
+                this.VisitList<ParseTreeNode>(node.NamespaceMemberDeclarations);
+            }
+
+            public override void VisitNestedTypeDeclarationNode(NestedTypeDeclarationNode node)
+            {
+                this.nodes.Add(node);
+
+                this.Visit(node.Type);
+            }
+
+            public override void VisitOperatorDeclarationNode(OperatorDeclarationNode node)
+            {
+            }
+
+            public override void VisitParseTreeNode(ParseTreeNode node)
+            {
+            }
+
+            public override void VisitPropertyDeclarationNode(PropertyDeclarationNode node)
+            {
+            }
+
+            public override void VisitTypeDeclarationNode(TypeDeclarationNode node)
+            {
+                this.nodes.Add(node);
+
+                for (MemberDeclarationNode node2 = node.MemberDeclarations; node2 != null; node2 = node2.Next)
+                {
+                    this.Visit(node2);
                 }
             }
         }
