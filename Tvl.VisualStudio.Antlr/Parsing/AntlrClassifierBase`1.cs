@@ -148,8 +148,7 @@
                                 if (!_lineStates[i].MultilineToken || lineStateChanged)
                                     extendMultilineSpanToLine = i + 1;
 
-                                if (inBounds)
-                                    SetLineState(i, LineStateInfo.Multiline);
+                                SetLineState(i, LineStateInfo.Multiline);
                             }
                         }
                     }
@@ -169,8 +168,7 @@
                             if (!_lineStates[i].MultilineToken)
                                 extendMultilineSpanToLine = i + 1;
 
-                            if (inBounds)
-                                SetLineState(i, LineStateInfo.Multiline);
+                            SetLineState(i, LineStateInfo.Multiline);
                         }
                     }
 
@@ -184,8 +182,7 @@
                             || !_stateComparer.Equals(_lineStates[line].EndLineState, stateAtEndOfLine);
 
                         // even if the state didn't change, we call SetLineState to make sure the _first/_lastChangedLine values get updated.
-                        if (inBounds)
-                            SetLineState(line, new LineStateInfo(stateAtEndOfLine));
+                        SetLineState(line, new LineStateInfo(stateAtEndOfLine));
 
                         if (lineStateChanged)
                         {
