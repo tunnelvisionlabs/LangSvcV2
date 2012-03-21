@@ -651,8 +651,6 @@
 
             public override void VisitNestedTypeDeclarationNode(NestedTypeDeclarationNode node)
             {
-                this.nodes.Add(node);
-
                 this.Visit(node.Type);
             }
 
