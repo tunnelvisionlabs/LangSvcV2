@@ -101,6 +101,8 @@
 /Tvl.VisualStudio.MouseNavigation/obj/
 /Tvl.VisualStudio.MouseFastScroll/bin/
 /Tvl.VisualStudio.MouseFastScroll/obj/
+/Tvl.VisualStudio.FindInSolutionExplorer/bin/
+/Tvl.VisualStudio.FindInSolutionExplorer/obj/
 /Tvl.VisualStudio.Language.Go/TestGenerated/
 /Tvl.VisualStudio.Language.StringTemplate4/TestGenerated/
 /Tvl.VisualStudio.Language.Php/TestGenerated/
