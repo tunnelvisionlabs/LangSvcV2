@@ -3,7 +3,7 @@
   <Identifier Id="Tvl.VisualStudio.FindInSolutionExplorer.E528F3A5-318E-4F77-BC25-888236886F93">
     <Name>Find in Solution Explorer</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0.0.0</Version>
+    <Version>1.0.0</Version>
     <Description xml:space="preserve">Adds the Find in Solution Explorer command to the context menu of open document tabs.</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
