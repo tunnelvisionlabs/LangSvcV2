@@ -6,8 +6,7 @@
     <Buttons>
       <Button guid="guidFindInSolutionExplorerPackageCmdSet" id="cmdidFindInSolutionExplorer" priority="0x0000" type="Button">
         <Strings>
-          <CommandName>Find in Solution Explorer</CommandName>
-          <ButtonText>Find in Solution Explorer</ButtonText>
+          <ButtonText>Find In Solution Explorer</ButtonText>
           <ToolTipText>Find this document in the solution explorer</ToolTipText>
         </Strings>
       </Button>
@@ -15,8 +14,8 @@
   </Commands>
 
   <CommandPlacements>
+    <!-- Document tab context menu, between "Copy Full Path" and "Open Containing Folder" -->
     <CommandPlacement guid="guidFindInSolutionExplorerPackageCmdSet" id="cmdidFindInSolutionExplorer" priority="0x0180">
-      <!--<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_EZDOCWINTAB" />-->
       <Parent guid="guidSHLMainMenu" id="IDG_VS_EZ_DOCWINDOWPATHOPS" />
     </CommandPlacement>
   </CommandPlacements>
