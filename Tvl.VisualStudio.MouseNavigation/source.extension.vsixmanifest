@@ -3,12 +3,18 @@
   <Identifier Id="Tvl.VisualStudio.MouseNavigation.74370A5B-33D9-4F9E-A910-D83D487A825D">
     <Name>Mouse Navigation</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0.0.0</Version>
+    <Version>1.0.1</Version>
     <Description xml:space="preserve">Add support for mouse navigation buttons (back and forward).</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
     <SupportedProducts>
       <VisualStudio Version="10.0">
+        <Edition>Ultimate</Edition>
+        <Edition>Premium</Edition>
+        <Edition>Pro</Edition>
+        <Edition>IntegratedShell</Edition>
+      </VisualStudio>
+      <VisualStudio Version="11.0">
         <Edition>Ultimate</Edition>
         <Edition>Premium</Edition>
         <Edition>Pro</Edition>

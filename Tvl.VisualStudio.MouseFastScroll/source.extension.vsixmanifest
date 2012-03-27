@@ -3,12 +3,18 @@
   <Identifier Id="Tvl.VisualStudio.MouseFastScroll.7DFA0DD1-8052-464D-9A1A-5EADC10A84B0">
     <Name>Mouse Fast Scroll</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0.0.0</Version>
+    <Version>1.0.1</Version>
     <Description xml:space="preserve">Use Ctrl+Mouse Wheel for fast and easy Page Up/Down scrolling.</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
     <SupportedProducts>
       <VisualStudio Version="10.0">
+        <Edition>Ultimate</Edition>
+        <Edition>Premium</Edition>
+        <Edition>Pro</Edition>
+        <Edition>IntegratedShell</Edition>
+      </VisualStudio>
+      <VisualStudio Version="11.0">
         <Edition>Ultimate</Edition>
         <Edition>Premium</Edition>
         <Edition>Pro</Edition>
