@@ -100,10 +100,24 @@
             }
 
             _command.Supported = true;
-            if (doc != null && doc.ProjectItem != null && doc.ProjectItem.Document != null)
-                _command.Enabled = true;
-            else
-                _command.Enabled = false;
+
+            bool enabled = false;
+            EnvDTE.ProjectItem projectItem = doc != null ? doc.ProjectItem : null;
+            if (projectItem != null)
+            {
+                if (projectItem.Document != null)
+                {
+                    // normal project documents
+                    enabled = true;
+                }
+                else if (projectItem.ContainingProject != null)
+                {
+                    // this applies to files in the "Solution Files" folder
+                    enabled = projectItem.ContainingProject.Object != null;
+                }
+            }
+
+            _command.Enabled = enabled;
         }
     }
 }
