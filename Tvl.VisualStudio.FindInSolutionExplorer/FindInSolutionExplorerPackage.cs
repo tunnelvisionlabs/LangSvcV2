@@ -75,13 +75,13 @@
                 {
                     track.Value = true;
                     track.Value = false;
-
-                    // Find the Solution Explorer object
-                    EnvDTE80.Windows2 windows = ApplicationObject.Windows as EnvDTE80.Windows2;
-                    EnvDTE80.Window2 solutionExplorer = FindWindow(windows, EnvDTE.vsWindowType.vsWindowTypeSolutionExplorer);
-                    if (solutionExplorer != null)
-                        solutionExplorer.Activate();
                 }
+
+                // Find the Solution Explorer object
+                EnvDTE80.Windows2 windows = ApplicationObject.Windows as EnvDTE80.Windows2;
+                EnvDTE80.Window2 solutionExplorer = FindWindow(windows, EnvDTE.vsWindowType.vsWindowTypeSolutionExplorer);
+                if (solutionExplorer != null)
+                    solutionExplorer.Activate();
             }
             catch (Exception ex)
             {
