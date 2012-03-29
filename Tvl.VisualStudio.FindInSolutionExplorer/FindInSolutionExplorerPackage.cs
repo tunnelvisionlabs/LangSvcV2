@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio.Shell;
+    using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
     using IMenuCommandService = System.ComponentModel.Design.IMenuCommandService;
     using UICONTEXT = Microsoft.VisualStudio.VSConstants.UICONTEXT;
 
@@ -67,17 +68,25 @@
 
         private void HandleInvokeFindInSolutionExplorer(object sender, EventArgs e)
         {
-            EnvDTE.Property track = ApplicationObject.get_Properties("Environment", "ProjectsAndSolution").Item("TrackFileSelectionInExplorer");
-            if (track.Value is bool && !((bool)track.Value))
+            try
             {
-                track.Value = true;
-                track.Value = false;
+                EnvDTE.Property track = ApplicationObject.get_Properties("Environment", "ProjectsAndSolution").Item("TrackFileSelectionInExplorer");
+                if (track.Value is bool && !((bool)track.Value))
+                {
+                    track.Value = true;
+                    track.Value = false;
 
-                // Find the Solution Explorer object
-                EnvDTE80.Windows2 windows = ApplicationObject.Windows as EnvDTE80.Windows2;
-                EnvDTE80.Window2 solutionExplorer = FindWindow(windows, EnvDTE.vsWindowType.vsWindowTypeSolutionExplorer);
-                if (solutionExplorer != null)
-                    solutionExplorer.Activate();
+                    // Find the Solution Explorer object
+                    EnvDTE80.Windows2 windows = ApplicationObject.Windows as EnvDTE80.Windows2;
+                    EnvDTE80.Window2 solutionExplorer = FindWindow(windows, EnvDTE.vsWindowType.vsWindowTypeSolutionExplorer);
+                    if (solutionExplorer != null)
+                        solutionExplorer.Activate();
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ErrorHandler.IsCriticalException(ex))
+                    throw;
             }
         }
 
@@ -87,37 +96,44 @@
 
         private void HandleBeforeQueryStatusFindInSolutionExplorer(object sender, EventArgs e)
         {
-            EnvDTE.Document doc = null;
-
             try
             {
-                doc = ApplicationObject.ActiveDocument;
+                EnvDTE.Document doc = ApplicationObject.ActiveDocument;
+
+                _command.Supported = true;
+
+                bool enabled = false;
+                EnvDTE.ProjectItem projectItem = doc != null ? doc.ProjectItem : null;
+                if (projectItem != null)
+                {
+                    if (projectItem.Document != null)
+                    {
+                        // normal project documents
+                        enabled = true;
+                    }
+                    else if (projectItem.ContainingProject != null)
+                    {
+                        // this applies to files in the "Solution Files" folder
+                        enabled = projectItem.ContainingProject.Object != null;
+                    }
+                }
+
+                _command.Enabled = enabled;
             }
             catch (ArgumentException)
             {
                 // stupid thing throws if the active window is a C# project properties pane
-                return;
+                _command.Supported = false;
+                _command.Enabled = false;
             }
-
-            _command.Supported = true;
-
-            bool enabled = false;
-            EnvDTE.ProjectItem projectItem = doc != null ? doc.ProjectItem : null;
-            if (projectItem != null)
+            catch (Exception ex)
             {
-                if (projectItem.Document != null)
-                {
-                    // normal project documents
-                    enabled = true;
-                }
-                else if (projectItem.ContainingProject != null)
-                {
-                    // this applies to files in the "Solution Files" folder
-                    enabled = projectItem.ContainingProject.Object != null;
-                }
-            }
+                if (ErrorHandler.IsCriticalException(ex))
+                    throw;
 
-            _command.Enabled = enabled;
+                _command.Supported = false;
+                _command.Enabled = false;
+            }
         }
     }
 }
