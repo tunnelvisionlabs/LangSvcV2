@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Shell", "Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj", "{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language", "Tvl.VisualStudio.Language\Tvl.VisualStudio.Language.csproj", "{90E28BCA-BD13-475B-B051-7A7D852A6206}"

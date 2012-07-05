@@ -702,12 +702,12 @@
     </ProjectReference>
     <ProjectReference Include="..\Tvl.Java.DebugHostWrapper\Tvl.Java.DebugHostWrapper.vcxproj">
       <Project>{538F6A87-53C9-4F02-B154-2A6925715C1C}</Project>
-      <Name>Tvl.Java.DebugHostWrapper</Name>
+      <Name>Tvl.Java.DebugHostWrapper %28Visual Studio 2010%29</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.Java.DebugHostWrapper\Tvl.Java.DebugHostWrapperX64.vcxproj">
       <Project>{65C841CD-AEC6-416C-B22D-B2116B36B0B5}</Project>
-      <Name>Tvl.Java.DebugHostWrapperX64</Name>
+      <Name>Tvl.Java.DebugHostWrapperX64 %28Visual Studio 2010%29</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.Java.DebugHost\Tvl.Java.DebugHost.csproj">

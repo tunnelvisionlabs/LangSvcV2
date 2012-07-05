@@ -214,7 +214,7 @@
     </ProjectReference>
     <ProjectReference Include="..\Tvl.Java.DebugHostWrapper\Tvl.Java.DebugHostWrapper.vcxproj">
       <Project>{538F6A87-53C9-4F02-B154-2A6925715C1C}</Project>
-      <Name>Tvl.Java.DebugHostWrapper</Name>
+      <Name>Tvl.Java.DebugHostWrapper %28Visual Studio 2010%29</Name>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.Java.DebugInterface.Types\Tvl.Java.DebugInterface.Types.csproj">
       <Project>{889EF7CB-9682-4D01-8757-D6FE5B460E9A}</Project>
