@@ -16,6 +16,7 @@
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [ProvideMenuResource(1000, 1)]
     [ProvideAutoLoad(UICONTEXT.CSharpProject_string)]
+    [ProvideBindingPath]
     public class InheritanceMarginPackage : Package, IOleCommandTarget
     {
         private static InheritanceMarginPackage _instance;
