@@ -1,17 +1,16 @@
 ﻿namespace Tvl.VisualStudio.InheritanceMargin
 {
     using System.ComponentModel.Composition;
+    using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
     using IOutputWindowService = Tvl.VisualStudio.Shell.OutputWindow.Interfaces.IOutputWindowService;
-    using PredefinedTaskSchedulers = Tvl.VisualStudio.Shell.PredefinedTaskSchedulers;
     using TaskScheduler = System.Threading.Tasks.TaskScheduler;
-    using Microsoft.VisualStudio.Shell;
 
     [Name("CSharp Inheritance Tagger Provider")]
-    [TagType(typeof(InheritanceTag))]
+    [TagType(typeof(IInheritanceTag))]
     [Export(typeof(IViewTaggerProvider))]
     [ContentType("CSharp")]
     public class CSharpInheritanceTaggerProvider : IViewTaggerProvider

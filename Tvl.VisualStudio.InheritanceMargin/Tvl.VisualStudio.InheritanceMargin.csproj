@@ -97,18 +97,16 @@
     <Compile Include="CommandTranslation\CommandId.cs" />
     <Compile Include="CommandTranslation\CommandRouter.cs" />
     <Compile Include="CommandTranslation\CommandTargetParameters.cs" />
-    <Compile Include="CSharpInheritanceAnalyzer.cs" />
     <Compile Include="CSharpInheritanceTagger.cs" />
     <Compile Include="CSharpInheritanceTaggerProvider.cs" />
-    <Compile Include="InheritanceGlyph.cs" />
     <Compile Include="InheritanceGlyphFactory.cs" />
     <Compile Include="InheritanceGlyphFactoryProvider.cs" />
     <Compile Include="InheritanceGlyphMouseHandler.cs" />
     <Compile Include="InheritanceGlyphMouseHandlerProvider.cs" />
     <Compile Include="InheritanceMarginConstants.cs" />
     <Compile Include="InheritanceMarginPackage.cs" />
-    <Compile Include="InheritanceParseResultEventArgs.cs" />
     <Compile Include="InheritanceTag.cs" />
+    <Compile Include="InheritanceTagFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -146,11 +144,6 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.CoreUtility, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.CSharp.Services.Language, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.VisualStudio.CSharp.Services.Language.Interop, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <EmbedInteropTypes>False</EmbedInteropTypes>
       <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Editor, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -268,6 +261,20 @@
     <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
       <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
       <Name>Tvl.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.InheritanceMargin.CSharp\Tvl.VisualStudio.InheritanceMargin.CSharp.10.0.csproj">
+      <Project>{3aff1709-477e-4c8a-aec6-4d2e32a04097}</Project>
+      <Name>Tvl.VisualStudio.InheritanceMargin.CSharp.10.0</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.InheritanceMargin.CSharp\Tvl.VisualStudio.InheritanceMargin.CSharp.11.0.csproj">
+      <Project>{2acb7340-8400-4d5d-8624-a4e7fe8fc474}</Project>
+      <Name>Tvl.VisualStudio.InheritanceMargin.CSharp.11.0</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.InheritanceMargin.Interfaces\Tvl.VisualStudio.InheritanceMargin.Interfaces.csproj">
+      <Project>{f4b709e6-8926-42e6-914a-749cb473f37b}</Project>
+      <Name>Tvl.VisualStudio.InheritanceMargin.Interfaces</Name>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Language\Tvl.VisualStudio.Language.csproj">
       <Project>{90E28BCA-BD13-475B-B051-7A7D852A6206}</Project>

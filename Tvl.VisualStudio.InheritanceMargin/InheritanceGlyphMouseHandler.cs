@@ -19,7 +19,7 @@
         private readonly InheritanceGlyphMouseHandlerProvider _provider;
         private readonly IWpfTextViewHost _textViewHost;
         private readonly IWpfTextViewMargin _margin;
-        private readonly ITagAggregator<InheritanceTag> _glyphTagAggregator;
+        private readonly ITagAggregator<IInheritanceTag> _glyphTagAggregator;
         private readonly Popup _popup;
 
         private Point _clickLocation;
@@ -37,7 +37,7 @@
             _provider = provider;
             _textViewHost = textViewHost;
             _margin = margin;
-            _glyphTagAggregator = provider.ViewTagAggregatorFactoryService.CreateTagAggregator<InheritanceTag>(textViewHost.TextView);
+            _glyphTagAggregator = provider.ViewTagAggregatorFactoryService.CreateTagAggregator<IInheritanceTag>(textViewHost.TextView);
             _popup = new Popup()
                 {
                     IsOpen = false,
