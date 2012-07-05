@@ -27,6 +27,7 @@
         //CodeSense = true,
         RequestStockColors = true)]
     [ProvideLanguageExtension(typeof(ChapelLanguageInfo), ChapelConstants.ChapelFileExtension)]
+    [ProvideBindingPath]
     public class ChapelLanguagePackage : Package
     {
         private static ChapelLanguagePackage _instance;

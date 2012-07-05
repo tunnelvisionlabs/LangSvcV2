@@ -28,6 +28,7 @@
         RequestStockColors = true)]
     [ProvideLanguageExtension(typeof(PhpLanguageInfo), PhpConstants.PhpFileExtension)]
     [ProvideLanguageExtension(typeof(PhpLanguageInfo), PhpConstants.Php5FileExtension)]
+    [ProvideBindingPath]
     public class PhpLanguagePackage : Package
     {
         private static PhpLanguagePackage _instance;

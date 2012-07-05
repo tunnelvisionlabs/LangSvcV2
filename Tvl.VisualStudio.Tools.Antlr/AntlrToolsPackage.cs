@@ -22,6 +22,7 @@
     // Menu commands
     [ProvideMenuResource(1000, 1)]
     [Guid("81989F3D-7E1B-4A12-B307-1E8D000573AE")]
+    [ProvideBindingPath]
     internal class AntlrToolsPackage : Package
     {
         protected override void Initialize()

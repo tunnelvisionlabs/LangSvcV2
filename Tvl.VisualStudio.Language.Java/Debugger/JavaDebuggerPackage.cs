@@ -32,6 +32,7 @@
         )]
     [ProvideObject(typeof(JavaDebugEngine))]
     [ProvideObject(typeof(JavaDebugProgramProvider))]
+    [ProvideBindingPath]
     public partial class JavaDebuggerPackage : Package
     {
     }

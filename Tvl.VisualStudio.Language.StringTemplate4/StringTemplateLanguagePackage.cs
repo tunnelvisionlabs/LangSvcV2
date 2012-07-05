@@ -30,6 +30,8 @@
     [ProvideLanguageExtension(typeof(StringTemplateLanguageInfo), StringTemplateConstants.StringTemplateGroup4FileExtension)]
     [ProvideLanguageExtension(typeof(StringTemplateLanguageInfo), StringTemplateConstants.StringTemplateTemplateFileExtension)]
     [ProvideLanguageExtension(typeof(StringTemplateLanguageInfo), StringTemplateConstants.StringTemplateTemplate4FileExtension)]
+
+    [ProvideBindingPath]
     public class StringTemplateLanguagePackage : Package
     {
         private static StringTemplateLanguagePackage _instance;

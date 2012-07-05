@@ -55,6 +55,8 @@
     [ProvideDebuggerException(typeof(Antlr.Runtime.Tree.RewriteEmptyStreamException))]
 
     [ProvideAutoLoad(VSConstants.UICONTEXT.CSharpProject_string)]
+
+    [ProvideBindingPath]
     public class AntlrLanguagePackage
         : Package
         , IVsTrackProjectDocumentsEvents2

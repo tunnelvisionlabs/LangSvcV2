@@ -31,6 +31,7 @@
 
     [ProvideLanguageEditorOptionPage(typeof(JavaIntellisenseOptions), Constants.JavaLanguageName, "", "IntelliSense", "#410")]
 
+    [ProvideBindingPath]
     public class JavaLanguagePackage : Package
     {
         private static JavaLanguagePackage _instance;
