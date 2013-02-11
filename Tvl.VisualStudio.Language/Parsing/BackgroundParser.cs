@@ -14,7 +14,7 @@
 
     public abstract class BackgroundParser : IBackgroundParser, IDisposable
     {
-        private readonly ITextBuffer _textBuffer;
+        private readonly WeakReference<ITextBuffer> _textBuffer;
         private readonly TaskScheduler _taskScheduler;
         private readonly ITextDocumentFactoryService _textDocumentFactoryService;
         private readonly IOutputWindowService _outputWindowService;
@@ -53,13 +53,13 @@
             Contract.Requires<ArgumentNullException>(textDocumentFactoryService != null, "textDocumentFactoryService");
             Contract.Requires<ArgumentNullException>(outputWindowService != null, "outputWindowService");
 
-            this._textBuffer = textBuffer;
+            this._textBuffer = new WeakReference<ITextBuffer>(textBuffer);
             this._taskScheduler = taskScheduler;
             this._textDocumentFactoryService = textDocumentFactoryService;
             this._outputWindowService = outputWindowService;
             this._outputWindowName = outputPaneName;
 
-            this._textBuffer.PostChanged += TextBufferPostChanged;
+            textBuffer.PostChanged += TextBufferPostChanged;
 
             this._dirty = true;
             this._reparseDelay = TimeSpan.FromMilliseconds(1500);
@@ -71,9 +71,7 @@
         {
             get
             {
-                Contract.Ensures(Contract.Result<ITextBuffer>() != null);
-
-                return _textBuffer;
+                return _textBuffer.Target;
             }
         }
 
@@ -142,6 +140,15 @@
 
         protected virtual void Dispose(bool disposing)
         {
+            if (disposing)
+            {
+                ITextBuffer textBuffer = TextBuffer;
+                if (textBuffer != null)
+                    textBuffer.PostChanged -= TextBufferPostChanged;
+
+                _timer.Dispose();
+            }
+
             Disposed = true;
         }
 
@@ -172,6 +179,12 @@
 
         private void ParseTimerCallback(object state)
         {
+            if (TextBuffer == null)
+            {
+                Dispose();
+                return;
+            }
+
             TryReparse(_dirty);
         }
 
