@@ -3,7 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
-    using Antlr.Runtime;
+    using Antlr4.Runtime;
+    using Antlr4.Runtime.Misc;
     using Microsoft.VisualStudio.Text;
 
     public class SnapshotCharStream : ICharStream
@@ -13,21 +14,6 @@
         private int _currentSnapshotLineStartIndex;
 
         private string _currentSnapshotLine;
-
-        /** <summary>tracks how deep mark() calls are nested</summary> */
-        private int _markDepth = 0;
-
-        /** <summary>
-         *  A list of CharStreamState objects that tracks the stream state
-         *  values line, charPositionInLine, and p that can change as you
-         *  move through the input stream.  Indexed from 1..markDepth.
-         *  A null is kept @ index 0.  Create upon first call to mark().
-         *  </summary>
-         */
-        private List<CharStreamState> _markers;
-
-        /** <summary>Track the last mark() call result value for use in rewind().</summary> */
-        private int _lastMarker;
 
         private int _count;
 
@@ -76,7 +62,7 @@
             set;
         }
 
-        public int Count
+        public int Size
         {
             get
             {
@@ -98,9 +84,14 @@
             }
         }
 
-        public int LT(int i)
+        public int Lt(int i)
         {
-            return LA(i);
+            return La(i);
+        }
+
+        public string GetText(Interval interval)
+        {
+            return Substring(interval.a, interval.Length);
         }
 
         public string Substring(int startIndex, int length)
@@ -116,7 +107,7 @@
 
         public virtual void Consume()
         {
-            int la = LA(1);
+            int la = La(1);
             if (la < 0)
                 return;
 
@@ -134,7 +125,7 @@
             UpdateCachedLine();
         }
 
-        public virtual int LA(int i)
+        public virtual int La(int i)
         {
             if (i == 0)
             {
@@ -149,13 +140,13 @@
                 if ((Index + i - 1) < 0)
                 {
                     // invalid; no char before first char
-                    return CharStreamConstants.EndOfFile;
+                    return IntStreamConstants.Eof;
                 }
             }
 
-            if ((Index + i - 1) >= Count)
+            if ((Index + i - 1) >= Size)
             {
-                return CharStreamConstants.EndOfFile;
+                return IntStreamConstants.Eof;
             }
 
             int actualIndex = Index + i - 1;
@@ -172,56 +163,11 @@
 
         public int Mark()
         {
-            if (_markers == null)
-            {
-                _markers = new List<CharStreamState>();
-                // depth 0 means no backtracking, leave blank
-                _markers.Add(null);
-            }
-
-            _markDepth++;
-            CharStreamState state = null;
-            if (_markDepth >= _markers.Count)
-            {
-                state = new CharStreamState();
-                _markers.Add(state);
-            }
-            else
-            {
-                state = _markers[_markDepth];
-            }
-
-            state.p = Index;
-            state.line = Line;
-            state.charPositionInLine = CharPositionInLine;
-            _lastMarker = _markDepth;
-            return _markDepth;
+            return 0;
         }
 
         public void Release(int marker)
         {
-            // unwind any other markers made after m and release m
-            _markDepth = marker;
-            // release this marker
-            _markDepth--;
-        }
-
-        public void Rewind()
-        {
-            Rewind(_lastMarker);
-        }
-
-        public void Rewind(int marker)
-        {
-            CharStreamState state = _markers[marker];
-
-            // Restore stream state (don't use Seek because it calls UpdateCachedLine() unnecessarily).
-            Index = state.p;
-            Line = state.line;
-            CharPositionInLine = state.charPositionInLine;
-            Release(marker);
-
-            UpdateCachedLine();
         }
 
         public void Seek(int index)
@@ -245,7 +191,7 @@
                 || Index < _currentSnapshotLineStartIndex
                 || Index >= _currentSnapshotLineStartIndex + _currentSnapshotLine.Length)
             {
-                if (Index >= 0 && Index < Count)
+                if (Index >= 0 && Index < Size)
                 {
                     ITextSnapshotLine line = Snapshot.GetLineFromPosition(Index);
                     _currentSnapshotLineStartIndex = line.Start;

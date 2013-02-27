@@ -7,14 +7,16 @@
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
     using CharStreamConstants = Antlr.Runtime.CharStreamConstants;
-    using ICharStream = Antlr.Runtime.ICharStream;
-    using IToken = Antlr.Runtime.IToken;
+    using ICharStream = Antlr4.Runtime.ICharStream;
+    using IToken = Antlr4.Runtime.IToken;
     using LockRecursionPolicy = System.Threading.LockRecursionPolicy;
     using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;
     using VsShellUtilities = Microsoft.VisualStudio.Shell.VsShellUtilities;
     using OLEMSGICON = Microsoft.VisualStudio.Shell.Interop.OLEMSGICON;
     using OLEMSGBUTTON = Microsoft.VisualStudio.Shell.Interop.OLEMSGBUTTON;
     using OLEMSGDEFBUTTON = Microsoft.VisualStudio.Shell.Interop.OLEMSGDEFBUTTON;
+    using Tvl.VisualStudio.Language.Parsing;
+    using Antlr4.Runtime.Misc;
 
     public abstract class AntlrClassifierBase<TState> : IClassifier
         where TState : struct
@@ -307,7 +309,7 @@
 
         protected virtual bool IsMultilineToken(ITextSnapshot snapshot, ITokenSourceWithState<TState> lexer, IToken token)
         {
-            if (lexer != null && lexer.CharStream.Line > token.Line)
+            if (lexer != null && lexer.Line > token.Line)
                 return true;
 
             int startLine = snapshot.GetLineNumberFromPosition(token.StartIndex);
@@ -321,10 +323,10 @@
             if (charStream != null)
             {
                 int nextCharIndex = token.StopIndex + 1;
-                if (nextCharIndex >= charStream.Count)
+                if (nextCharIndex >= charStream.Size)
                     return true;
 
-                int c = charStream.Substring(token.StopIndex + 1, 1)[0];
+                int c = charStream.GetText(new Interval(token.StopIndex + 1, token.StopIndex + 1))[0];
                 return c == '\r' || c == '\n';
             }
 

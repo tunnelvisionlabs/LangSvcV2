@@ -4,10 +4,11 @@
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Linq;
-
-    using Antlr.Runtime;
+    using Antlr4.Runtime;
+    using Antlr4.Runtime.Misc;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
+    using Tvl.VisualStudio.Language.Parsing;
 
     public abstract class AntlrTaggerBase<TState, TTag> : ITagger<TTag>
         where TState : struct, ITextLineState<TState>
@@ -95,7 +96,7 @@
                 bool inBounds = token.StartIndex < span.End.Position;
 
                 int startLineCurrent;
-                if (token.Type == CharStreamConstants.EndOfFile)
+                if (token.Type == IntStreamConstants.Eof)
                     startLineCurrent = span.Snapshot.LineCount;
                 else
                     startLineCurrent = token.Line;
@@ -126,7 +127,7 @@
                     }
                 }
 
-                if (token.Type == CharStreamConstants.EndOfFile)
+                if (token.Type == IntStreamConstants.Eof)
                     break;
 
                 previousToken = token;
@@ -283,10 +284,10 @@
             if (charStream != null)
             {
                 int nextCharIndex = token.StopIndex + 1;
-                if (nextCharIndex >= charStream.Count)
+                if (nextCharIndex >= charStream.Size)
                     return true;
 
-                int c = charStream.Substring(token.StopIndex + 1, 1)[0];
+                int c = charStream.GetText(new Interval(token.StopIndex + 1, token.StopIndex + 1))[0];
                 return c == '\r' || c == '\n';
             }
 
@@ -339,11 +340,11 @@
             stateAfterToken = default(TState);
             int index = _tokenIndex + offset;
 
-            while (index >= 0 && (_tokenCache.Count == 0 || _tokenCache[_tokenCache.Count - 1].Item1.Type != CharStreamConstants.EndOfFile))
+            while (index >= 0 && (_tokenCache.Count == 0 || _tokenCache[_tokenCache.Count - 1].Item1.Type != IntStreamConstants.Eof))
             {
                 while (index >= _tokenCache.Count)
                 {
-                    if (_tokenCache.Count != 0 && _tokenCache[_tokenCache.Count - 1].Item1.Type == CharStreamConstants.EndOfFile)
+                    if (_tokenCache.Count != 0 && _tokenCache[_tokenCache.Count - 1].Item1.Type == IntStreamConstants.Eof)
                         break;
 
                     IToken token = _lexer.NextToken();
@@ -355,7 +356,7 @@
                     index = _tokenCache.Count - 1;
 
                 IToken t = _tokenCache[index].Item1;
-                if (skipOffChannelTokens && t.Channel != TokenChannels.Default)
+                if (skipOffChannelTokens && t.Channel != Lexer.DefaultTokenChannel)
                 {
                     if (offset < 0)
                         index--;

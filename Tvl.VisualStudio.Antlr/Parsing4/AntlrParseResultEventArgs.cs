@@ -3,12 +3,13 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using Antlr.Runtime;
+    using Antlr4.Runtime;
     using Microsoft.VisualStudio.Text;
+    using Tvl.VisualStudio.Language.Parsing;
 
     public class AntlrParseResultEventArgs : ParseResultEventArgs
     {
-        public AntlrParseResultEventArgs(ITextSnapshot snapshot, IList<ParseErrorEventArgs> errors, TimeSpan elapsedTime, IList<IToken> tokens, IRuleReturnScope result)
+        public AntlrParseResultEventArgs(ITextSnapshot snapshot, IList<ParseErrorEventArgs> errors, TimeSpan elapsedTime, IList<IToken> tokens, ParserRuleContext result)
             : base(snapshot, errors, elapsedTime)
         {
             Tokens = tokens as ReadOnlyCollection<IToken>;
@@ -24,7 +25,7 @@
             private set;
         }
 
-        public IRuleReturnScope Result
+        public ParserRuleContext Result
         {
             get;
             private set;
