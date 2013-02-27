@@ -1,10 +1,10 @@
 ﻿grammar Alloy;
 
 options {
-    language=CSharp3;
-    TokenLabelType=IToken;
-    output=AST;
-    ASTLabelType=CommonTree;
+	language=CSharp3;
+	TokenLabelType=IToken;
+	output=AST;
+	ASTLabelType=CommonTree;
 }
 
 tokens {

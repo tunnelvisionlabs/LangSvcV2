@@ -1,10 +1,10 @@
 ﻿parser grammar PhpEditorNavigationParser;
 
 options {
-    language=CSharp3;
-    TokenLabelType=CommonToken;
-    output=AST;
-    ASTLabelType=CommonTree;
+	language=CSharp3;
+	TokenLabelType=CommonToken;
+	output=AST;
+	ASTLabelType=CommonTree;
 	tokenVocab=PhpDocCommentClassifierLexer;
 }
 

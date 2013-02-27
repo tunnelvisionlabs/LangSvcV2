@@ -1,10 +1,10 @@
 ﻿grammar Chapel;
 
 options {
-    language=CSharp3;
-    TokenLabelType=CommonToken;
-    output=AST;
-    ASTLabelType=CommonTree;
+	language=CSharp3;
+	TokenLabelType=CommonToken;
+	output=AST;
+	ASTLabelType=CommonTree;
 }
 
 @lexer::namespace{Tvl.VisualStudio.Language.Chapel}
@@ -692,5 +692,5 @@ receiverClause
  */
 
 WS
-    :   ' '
-    ;
+	:   ' '
+	;

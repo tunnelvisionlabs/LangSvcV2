@@ -1,8 +1,8 @@
 ﻿lexer grammar ChapelCodeClassifierLexer;
 
 options {
-    language=CSharp3;
-    TokenLabelType=CommonToken;
+	language=CSharp3;
+	TokenLabelType=CommonToken;
 }
 
 @namespace{Tvl.VisualStudio.Language.Chapel}

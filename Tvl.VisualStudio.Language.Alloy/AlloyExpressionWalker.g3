@@ -1,9 +1,9 @@
 ﻿tree grammar AlloyExpressionWalker;
 
 options {
-    language=CSharp3;
-    tokenVocab=Alloy;
-    ASTLabelType=CommonTree;
+	language=CSharp3;
+	tokenVocab=Alloy;
+	ASTLabelType=CommonTree;
 }
 
 @namespace{Tvl.VisualStudio.Language.Alloy}

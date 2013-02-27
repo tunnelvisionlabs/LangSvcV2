@@ -1,9 +1,9 @@
 ﻿parser grammar AlloyExpressionSpanParser;
 
 options {
-    language=CSharp3;
+	language=CSharp3;
 	tokenVocab=Alloy;
-    TokenLabelType=CommonToken;
+	TokenLabelType=CommonToken;
 }
 
 @namespace{Tvl.VisualStudio.Language.Alloy}
