@@ -257,6 +257,7 @@
     <Compile Include="Parsing4\AntlrParseResultEventArgs.cs" />
     <Compile Include="Parsing4\AntlrTaggerBase`2.cs" />
     <Compile Include="Parsing4\ITokenSourceWithState`1.cs" />
+    <Compile Include="Parsing4\SimpleLexerState.cs" />
     <Compile Include="Parsing4\SnapshotCharStream.cs" />
     <Compile Include="Parsing\AntlrClassifierBase.cs" />
     <Compile Include="Parsing\AntlrClassifierBase`1.cs" />
