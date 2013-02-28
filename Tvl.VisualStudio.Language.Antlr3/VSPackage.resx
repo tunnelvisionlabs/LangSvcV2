@@ -121,6 +121,10 @@
     <value>ANTLR</value>
     <comment>ANTLR language name</comment>
   </data>
+  <data name="101" xml:space="preserve">
+    <value>ANTLR 4</value>
+    <comment>ANTLR 4 language name</comment>
+  </data>
   <data name="110" xml:space="preserve">
     <value>ANTLR language support for Visual Studio</value>
     <comment>Package name</comment>
