@@ -320,7 +320,6 @@
 
                 if (propertyDescriptors != null)
                 {
-#warning TODO: also set the CustomToolNamespace for ANTLR 4 grammars
                     PropertyDescriptor customToolDescriptor = propertyDescriptors["CustomTool"];
                     if (customToolDescriptor != null)
                     {
@@ -335,6 +334,29 @@
                             }
                             catch (NotSupportedException)
                             {
+                            }
+                        }
+                    }
+
+                    PropertyDescriptor customToolNamespaceDescriptor = propertyDescriptors["CustomToolNamespace"];
+                    if (customToolNamespaceDescriptor != null)
+                    {
+                        object defaultNamespace;
+                        hr = hierarchy.GetProperty(itemId, (int)__VSHPROPID.VSHPROPID_DefaultNamespace, out defaultNamespace);
+                        if (ErrorHandler.Succeeded(hr) && !string.IsNullOrEmpty(defaultNamespace as string))
+                        {
+                            obj = customToolNamespaceDescriptor.GetValue(browseObject);
+                            string customToolNamespace = customToolNamespaceDescriptor.Converter.ConvertToInvariantString(obj);
+                            if (string.IsNullOrWhiteSpace(customToolNamespace))
+                            {
+                                try
+                                {
+                                    obj = customToolNamespaceDescriptor.Converter.ConvertToInvariantString(defaultNamespace);
+                                    customToolNamespaceDescriptor.SetValue(browseObject, obj);
+                                }
+                                catch (NotSupportedException)
+                                {
+                                }
                             }
                         }
                     }
