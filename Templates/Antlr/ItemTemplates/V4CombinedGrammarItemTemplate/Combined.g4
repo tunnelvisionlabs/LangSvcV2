@@ -1,4 +1,4 @@
-﻿grammar $safeitemrootname$;
+grammar $safeitemrootname$;
 
 @parser::members
 {

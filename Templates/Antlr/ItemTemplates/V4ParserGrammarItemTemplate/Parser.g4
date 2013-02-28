@@ -1,4 +1,4 @@
-﻿parser grammar $safeitemrootname$;
+parser grammar $safeitemrootname$;
 
 @members
 {

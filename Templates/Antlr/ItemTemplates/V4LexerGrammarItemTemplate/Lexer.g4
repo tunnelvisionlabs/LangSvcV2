@@ -1,4 +1,4 @@
-﻿lexer grammar $safeitemrootname$;
+lexer grammar $safeitemrootname$;
 
 @members
 {
