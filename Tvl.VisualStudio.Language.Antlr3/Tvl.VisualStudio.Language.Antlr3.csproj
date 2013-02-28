@@ -319,6 +319,7 @@
     <Compile Include="OptionsPages\AntlrIntellisenseOptionsControl.Designer.cs">
       <DependentUpon>AntlrIntellisenseOptionsControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Project\GrammarFileObjectExtenderPropertiesV4.cs" />
     <Compile Include="Project\GrammarFileObjectExtenderProperties.cs" />
     <Compile Include="Project\GrammarFileObjectExtenderProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
