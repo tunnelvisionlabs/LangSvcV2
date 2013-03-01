@@ -6,6 +6,7 @@
     using System.Linq;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
+    using ClassifierOptions = Tvl.VisualStudio.Language.Parsing.ClassifierOptions;
     using ICharStream = Antlr4.Runtime.ICharStream;
     using IntStreamConstants = Antlr4.Runtime.IntStreamConstants;
     using IToken = Antlr4.Runtime.IToken;
@@ -15,7 +16,6 @@
     using OLEMSGICON = Microsoft.VisualStudio.Shell.Interop.OLEMSGICON;
     using OLEMSGBUTTON = Microsoft.VisualStudio.Shell.Interop.OLEMSGBUTTON;
     using OLEMSGDEFBUTTON = Microsoft.VisualStudio.Shell.Interop.OLEMSGDEFBUTTON;
-    using Tvl.VisualStudio.Language.Parsing;
     using Antlr4.Runtime.Misc;
 
     public abstract class AntlrClassifierBase<TState> : IClassifier
