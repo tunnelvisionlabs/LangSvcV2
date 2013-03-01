@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Item" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+	<TemplateData>
+		<Name>ANTLR 4 Lexer</Name>
+		<Description>&lt;No description available&gt;</Description>
+		<Icon>V4LexerGrammarItemTemplate.ico</Icon>
+		<TemplateID>Tvl.Antlr4.LexerGrammar</TemplateID>
+		<ProjectType>CSharp</ProjectType>
+		<RequiredFrameworkVersion>3.0</RequiredFrameworkVersion>
+		<NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
+		<DefaultName>Lexer.g4</DefaultName>
+	</TemplateData>
+	<TemplateContent>
+		<ProjectItem ReplaceParameters="true" CustomTool="MSBuild:Compile" ItemType="Antlr4" TargetFileName="$fileinputname$.g4">Lexer.g4</ProjectItem>
+		<ProjectItem ReplaceParameters="true" TargetFileName="$fileinputname$.g4.cs">Lexer.g4.cs</ProjectItem>
+	</TemplateContent>
+</VSTemplate>

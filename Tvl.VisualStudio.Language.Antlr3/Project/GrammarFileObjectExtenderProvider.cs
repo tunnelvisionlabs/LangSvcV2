@@ -1,18 +1,15 @@
 ﻿namespace Tvl.VisualStudio.Language.Antlr3.Project
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Runtime.InteropServices;
-    using IExtenderSite = EnvDTE.IExtenderSite;
-    using IExtenderProvider = EnvDTE.IExtenderProvider;
-    using IInternalExtenderProvider = EnvDTE80.IInternalExtenderProvider;
-    using PropertyDescriptorCollection = System.ComponentModel.PropertyDescriptorCollection;
-    using PropertyDescriptor = System.ComponentModel.PropertyDescriptor;
-    using TypeDescriptor = System.ComponentModel.TypeDescriptor;
-    using Microsoft.VisualStudio.Shell.Interop;
     using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
+    using IExtenderProvider = EnvDTE.IExtenderProvider;
+    using IExtenderSite = EnvDTE.IExtenderSite;
+    using IInternalExtenderProvider = EnvDTE80.IInternalExtenderProvider;
+    using PropertyDescriptor = System.ComponentModel.PropertyDescriptor;
+    using PropertyDescriptorCollection = System.ComponentModel.PropertyDescriptorCollection;
+    using TypeDescriptor = System.ComponentModel.TypeDescriptor;
 
     [Guid("2FBDD105-8744-4642-BBFB-679C4611A442")]
     [ComVisible(true)]
@@ -24,43 +21,15 @@
 
         public bool CanExtend(string ExtenderCATID, string ExtenderName, object ExtendeeObject)
         {
-            if (ExtenderName != Name)
-                return false;
-
-            try
-            {
-                PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(ExtendeeObject);
-                if (properties == null)
-                    return false;
-
-                PropertyDescriptor property = properties["ItemType"];
-                if (property == null)
-                    return false;
-
-                object value = property.GetValue(ExtendeeObject);
-                if (value == null)
-                    return false;
-
-                string itemType = value.ToString();
-                if (!string.Equals(itemType, "Antlr3", StringComparison.OrdinalIgnoreCase))
-                    return false;
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                if (ex.IsCritical())
-                    throw;
-
-                return false;
-            }
+            return GetExtendVersion(ExtenderCATID, ExtenderName, ExtendeeObject) != ExtendVersion.None;
         }
 
         public object GetExtender(string ExtenderCATID, string ExtenderName, object ExtendeeObject, IExtenderSite ExtenderSite, int Cookie)
         {
-            GrammarFileObjectExtenderProperties extender = null;
+            object extender = null;
 
-            if (CanExtend(ExtenderCATID, ExtenderName, ExtendeeObject))
+            ExtendVersion extendVersion = GetExtendVersion(ExtenderCATID, ExtenderName, ExtendeeObject);
+            if (extendVersion != ExtendVersion.None)
             {
                 IVsBrowseObject browseObject = ExtendeeObject as IVsBrowseObject;
                 if (browseObject == null)
@@ -75,7 +44,10 @@
                 if (buildPropertyStorage == null)
                     return null;
 
-                extender = new GrammarFileObjectExtenderProperties(buildPropertyStorage, itemId);
+                if (extendVersion == ExtendVersion.Antlr3)
+                    extender = new GrammarFileObjectExtenderProperties(buildPropertyStorage, itemId);
+                else
+                    extender = new GrammarFileObjectExtenderPropertiesV4(buildPropertyStorage, itemId);
             }
 
             return extender;
@@ -91,5 +63,49 @@
         }
 
         #endregion
+
+        private ExtendVersion GetExtendVersion(string ExtenderCATID, string ExtenderName, object ExtendeeObject)
+        {
+            if (ExtenderName != Name)
+                return ExtendVersion.None;
+
+            try
+            {
+                PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(ExtendeeObject);
+                if (properties == null)
+                    return ExtendVersion.None;
+
+                PropertyDescriptor property = properties["ItemType"];
+                if (property == null)
+                    return ExtendVersion.None;
+
+                object value = property.GetValue(ExtendeeObject);
+                if (value == null)
+                    return ExtendVersion.None;
+
+                string itemType = value.ToString();
+                if (string.Equals(itemType, "Antlr3", StringComparison.OrdinalIgnoreCase))
+                    return ExtendVersion.Antlr3;
+
+                if (string.Equals(itemType, "Antlr4", StringComparison.OrdinalIgnoreCase))
+                    return ExtendVersion.Antlr4;
+
+                return ExtendVersion.None;
+            }
+            catch (Exception ex)
+            {
+                if (ex.IsCritical())
+                    throw;
+
+                return ExtendVersion.None;
+            }
+        }
+
+        private enum ExtendVersion
+        {
+            None,
+            Antlr3,
+            Antlr4,
+        }
     }
 }

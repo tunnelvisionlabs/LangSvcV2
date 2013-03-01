@@ -1,18 +1,20 @@
 ﻿namespace Tvl.VisualStudio.Language.Antlr3
 {
-    using Path = System.IO.Path;
     using System;
-    using PrjKind = VSLangProj.PrjKind;
+    using System.ComponentModel;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
     using Tvl.VisualStudio.Language.Antlr3.Project;
     using Tvl.VisualStudio.Shell;
+    using Antlr4Constants = Tvl.VisualStudio.Language.AntlrV4.Antlr4Constants;
+    using Antlr4LanguageInfo = Tvl.VisualStudio.Language.AntlrV4.Antlr4LanguageInfo;
     using AntlrIntellisenseOptions = Tvl.VisualStudio.Language.Antlr3.OptionsPages.AntlrIntellisenseOptions;
     using IServiceContainer = System.ComponentModel.Design.IServiceContainer;
     using ObjectExtenders = EnvDTE.ObjectExtenders;
-    using System.ComponentModel;
+    using Path = System.IO.Path;
+    using PrjKind = VSLangProj.PrjKind;
 
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration(AntlrConstants.AntlrLanguagePackageNameResourceString, AntlrConstants.AntlrLanguagePackageDetailsResourceString, AntlrConstants.AntlrLanguagePackageProductVersionString/*, IconResourceID = 400*/)]
@@ -54,6 +56,29 @@
     [ProvideDebuggerException(typeof(Antlr.Runtime.Tree.RewriteEarlyExitException))]
     [ProvideDebuggerException(typeof(Antlr.Runtime.Tree.RewriteEmptyStreamException))]
 
+    [ProvideLanguageService(typeof(Antlr4LanguageInfo), Antlr4Constants.AntlrLanguageName, Antlr4Constants.AntlrLanguageResourceId,
+        //AutoOutlining = true,
+        //QuickInfo = true,
+        ShowCompletion = true,
+        ShowDropDownOptions = true,
+        //ShowHotURLs = true,
+        //ShowMatchingBrace = true,
+        EnableAdvancedMembersOption = false,
+        DefaultToInsertSpaces = false,
+        //EnableCommenting = true,
+        //HideAdvancedMembersByDefault = false,
+        EnableLineNumbers = true,
+        //CodeSense = true,
+        RequestStockColors = true)]
+    [ProvideLanguageExtension(typeof(Antlr4LanguageInfo), Antlr4Constants.AntlrFileExtension)]
+
+    [ProvideDebuggerException(typeof(Antlr4.Runtime.FailedPredicateException))]
+    [ProvideDebuggerException(typeof(Antlr4.Runtime.InputMismatchException))]
+    [ProvideDebuggerException(typeof(Antlr4.Runtime.LexerNoViableAltException))]
+    [ProvideDebuggerException(typeof(Antlr4.Runtime.NoViableAltException))]
+    [ProvideDebuggerException(typeof(Antlr4.Runtime.RecognitionException))]
+    [ProvideDebuggerException(typeof(Antlr4.Runtime.Misc.ParseCanceledException))]
+
     [ProvideAutoLoad(VSConstants.UICONTEXT.CSharpProject_string)]
 
     [ProvideBindingPath]
@@ -63,6 +88,7 @@
     {
         private static AntlrLanguagePackage _instance;
         private AntlrLanguageInfo _languageInfo;
+        private Antlr4LanguageInfo _languageInfo4;
         private GrammarFileObjectExtenderProvider _grammarFileObjectExtenderProvider;
         private int _grammarFileObjectExtenderCookie;
         private uint _trackDocumentsEventsCookie;
@@ -94,7 +120,10 @@
 
             // register the language service
             _languageInfo = new AntlrLanguageInfo(this.AsVsServiceProvider());
+            _languageInfo4 = new Antlr4LanguageInfo(this.AsVsServiceProvider());
+
             ((IServiceContainer)this).AddService(typeof(AntlrLanguageInfo), _languageInfo, true);
+            ((IServiceContainer)this).AddService(typeof(Antlr4LanguageInfo), _languageInfo4, true);
 
             ObjectExtenders objectExtenders = (ObjectExtenders)GetService(typeof(ObjectExtenders));
             _grammarFileObjectExtenderProvider = new GrammarFileObjectExtenderProvider();
@@ -131,6 +160,12 @@
                     _languageInfo.Dispose();
                     _languageInfo = null;
                 }
+
+                if (_languageInfo4 != null)
+                {
+                    _languageInfo4.Dispose();
+                    _languageInfo4 = null;
+                }
             }
 
             base.Dispose(disposing);
@@ -147,8 +182,10 @@
         {
             /* need to make the following alterations:
              *  1. set the Build Action of *.g and *.g3 to Antlr3
-             *  2. set the Custom Tool of *.g and *.g3 to MSBuild:Compile
-             *  3. set DependentUpon of *.g.cs and *.g3.cs to the matching *.g or *.g3 file
+             *  2. set the Build Action of *.g4 to Antlr4
+             *  3. set the Custom Tool of *.g, *.g3, and *.g4 to MSBuild:Compile
+             *  4. set the Custom Tool Namespace of *.g4 to $(RootNamespace) + relative folder path
+             *  5. set DependentUpon of *.g.cs, *.g3.cs, and *.g4.cs to the matching *.g, *.g3, or *.g4 file
              */
 
             for (int i = 0; i < cProjects; i++)
@@ -169,15 +206,19 @@
                     bool grammarFile =
                         currentFile.EndsWith(".tokens", StringComparison.OrdinalIgnoreCase)
                         || currentFile.EndsWith(".g", StringComparison.OrdinalIgnoreCase)
-                        || currentFile.EndsWith(".g3", StringComparison.OrdinalIgnoreCase);
+                        || currentFile.EndsWith(".g3", StringComparison.OrdinalIgnoreCase)
+                        || currentFile.EndsWith(".g4", StringComparison.OrdinalIgnoreCase);
 
                     bool grammarHelperFile = !grammarFile &&
                         (currentFile.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase)
                         || currentFile.EndsWith(".g3.cs", StringComparison.OrdinalIgnoreCase)
+                        || currentFile.EndsWith(".g4.cs", StringComparison.OrdinalIgnoreCase)
                         || currentFile.EndsWith(".g.lexer.cs", StringComparison.OrdinalIgnoreCase)
                         || currentFile.EndsWith(".g3.lexer.cs", StringComparison.OrdinalIgnoreCase)
+                        || currentFile.EndsWith(".g4.lexer.cs", StringComparison.OrdinalIgnoreCase)
                         || currentFile.EndsWith(".g.parser.cs", StringComparison.OrdinalIgnoreCase)
-                        || currentFile.EndsWith(".g3.parser.cs", StringComparison.OrdinalIgnoreCase));
+                        || currentFile.EndsWith(".g3.parser.cs", StringComparison.OrdinalIgnoreCase)
+                        || currentFile.EndsWith(".g4.parser.cs", StringComparison.OrdinalIgnoreCase));
 
                     if (grammarFile)
                     {
@@ -233,6 +274,8 @@
             string desiredItemType = "Antlr3";
             if (string.Equals(Path.GetExtension(currentFile), ".tokens", StringComparison.OrdinalIgnoreCase))
                 desiredItemType = "AntlrTokens";
+            else if (string.Equals(Path.GetExtension(currentFile), ".g4", StringComparison.OrdinalIgnoreCase))
+                desiredItemType = "Antlr4";
 
             IVsHierarchy hierarchy = project as IVsHierarchy;
             if (hierarchy != null)
@@ -291,6 +334,29 @@
                             }
                             catch (NotSupportedException)
                             {
+                            }
+                        }
+                    }
+
+                    PropertyDescriptor customToolNamespaceDescriptor = propertyDescriptors["CustomToolNamespace"];
+                    if (customToolNamespaceDescriptor != null)
+                    {
+                        object defaultNamespace;
+                        hr = hierarchy.GetProperty(itemId, (int)__VSHPROPID.VSHPROPID_DefaultNamespace, out defaultNamespace);
+                        if (ErrorHandler.Succeeded(hr) && !string.IsNullOrEmpty(defaultNamespace as string))
+                        {
+                            obj = customToolNamespaceDescriptor.GetValue(browseObject);
+                            string customToolNamespace = customToolNamespaceDescriptor.Converter.ConvertToInvariantString(obj);
+                            if (string.IsNullOrWhiteSpace(customToolNamespace))
+                            {
+                                try
+                                {
+                                    obj = customToolNamespaceDescriptor.Converter.ConvertToInvariantString(defaultNamespace);
+                                    customToolNamespaceDescriptor.SetValue(browseObject, obj);
+                                }
+                                catch (NotSupportedException)
+                                {
+                                }
                             }
                         }
                     }
