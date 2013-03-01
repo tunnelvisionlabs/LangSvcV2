@@ -22,7 +22,7 @@
         }
 
         [Category("ANTLR")]
-        [DefaultValue("(Not Set)")]
+        [DefaultValue("CSharp")]
         [DisplayName("Language Target")]
         [Description("Explicitly specifies the grammar's target language. If set, this property overrides any value specified within the grammar itself.")]
         public string LanguageTarget
@@ -109,7 +109,7 @@
         [DefaultValue(false)]
         [DisplayName("Abstract Grammar")]
         [Description("When true, the generated classes are marked as abstract.")]
-        public bool Profile
+        public bool Abstract
         {
             get
             {
