@@ -23,6 +23,12 @@
 /Templates/Antlr/ItemTemplates/ParserGrammarItemTemplate/obj/
 /Templates/Antlr/ItemTemplates/TreeGrammarItemTemplate/bin/
 /Templates/Antlr/ItemTemplates/TreeGrammarItemTemplate/obj/
+/Templates/Antlr/ItemTemplates/V4CombinedGrammarItemTemplate/bin/
+/Templates/Antlr/ItemTemplates/V4CombinedGrammarItemTemplate/obj/
+/Templates/Antlr/ItemTemplates/V4LexerGrammarItemTemplate/bin/
+/Templates/Antlr/ItemTemplates/V4LexerGrammarItemTemplate/obj/
+/Templates/Antlr/ItemTemplates/V4ParserGrammarItemTemplate/bin/
+/Templates/Antlr/ItemTemplates/V4ParserGrammarItemTemplate/obj/
 /Templates/Java/ItemTemplates/JavaClassItemTemplate/bin/
 /Templates/Java/ItemTemplates/JavaClassItemTemplate/obj/
 /Templates/Java/ItemTemplates/JavaCodeFileItemTemplate/bin/
