@@ -238,6 +238,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classification\V4PhpClassifierLexer.g4.cs">
+      <DependentUpon>V4PhpClassifierLexer.g4</DependentUpon>
+    </Compile>
     <Compile Include="PhpTextStructureNavigator.cs" />
     <Compile Include="PhpTextStructureNavigatorProvider.cs" />
     <Compile Include="Classification\PhpClassifierConstants.cs" />
@@ -311,6 +314,10 @@
     </Antlr3>
     <AntlrTokens Include="Classification\PhpClassifierConstants.tokens" />
     <None Include="Classification\PhpClassifierConstants.xlsx" />
+    <Antlr4 Include="Classification\V4PhpClassifierLexer.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Tvl.VisualStudio.Language.Php.Classification</CustomToolNamespace>
+    </Antlr4>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -371,6 +378,10 @@
     <AntlrBuildTaskPath>$(SolutionDir)External\Antlr</AntlrBuildTaskPath>
     <!-- Path to the ANTLR Tool itself. -->
     <AntlrToolPath>$(SolutionDir)External\Antlr\Antlr3.exe</AntlrToolPath>
+    <!-- Folder containing Antlr4BuildTasks.dll -->
+    <Antlr4BuildTaskPath>$(SolutionDir)External\Antlr4</Antlr4BuildTaskPath>
+    <!-- Path to the ANTLR Tool itself. -->
+    <Antlr4ToolPath>$(SolutionDir)External\Antlr4\antlr4-csharp-4.0.1-SNAPSHOT-complete.jar</Antlr4ToolPath>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -386,6 +397,7 @@
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets" Condition="false" />
   <Import Project="$(SolutionDir)External\Antlr\Antlr3.targets" />
+  <Import Project="$(SolutionDir)External\Antlr4\Antlr4.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
