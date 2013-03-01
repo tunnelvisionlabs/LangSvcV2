@@ -241,7 +241,8 @@
                  */
                 int firstLine = extendedSpan.Snapshot.GetLineNumberFromPosition(span.End);
                 int lastLine = extendedSpan.Snapshot.GetLineNumberFromPosition(extendedSpan.End) - 1;
-                ForceReclassifyLines(firstLine, lastLine);
+                // when considering the last line of a document, span and extendedSpan may end on the same line
+                ForceReclassifyLines(firstLine, Math.Max(firstLine, lastLine));
             }
 
             return classificationSpans;
