@@ -7,10 +7,20 @@ lexer grammar V4PhpClassifierLexer;
 }
 
 WS
-	:	' ' -> channel(HIDDEN)
+	:	' '
+	;
+
+NEWLINE
+	:	'\r'? '\n'
+	;
+
+ANY_CHAR
+	:	.
 	;
 
 mode HtmlText;
+
+	HtmlText_NEWLINE : NEWLINE -> type(NEWLINE);
 
 	HTML_CLOSE_TAG
 		:	'>'
@@ -57,15 +67,12 @@ mode HtmlText;
 		:	'&' -> type(HTML_TEXT)
 		;
 
-	NEWLINE
-		:	'\r'? '\n'
-		;
-
-	ANY_CHAR
-		:	.
-		;
+	HtmlText_ANYCHAR : ANYCHAR -> type(ANYCHAR);
 
 mode HtmlTag;
+
+	HtmlTag_NEWLINE : NEWLINE -> type(NEWLINE);
+	HtmlTag_WS : WS -> type(WS);
 
 	HTML_CLOSE_TAG
 		:	'/'? '>'
@@ -73,14 +80,6 @@ mode HtmlTag;
 
 	HTML_OPERATOR
 		:	'='
-		;
-
-	WS
-		:	(' ' | '\t')+
-		;
-
-	NEWLINE
-		:	'\r'? '\n'
 		;
 
 	fragment HTML_ELEMENT_NAME : ;
@@ -124,9 +123,7 @@ mode HtmlTag;
 		:	'\u0080'..'\u009f'
 		;
 
-	ANY_CHAR
-		:	.
-		;
+	HtmlTag_ANYCHAR : ANYCHAR -> type(ANYCHAR);
 
 mode SingleQuoteString;
 
@@ -161,6 +158,9 @@ mode DoubleQuoteString;
 		;
 
 mode PhpCode;
+
+	PhpCode_NEWLINE : NEWLINE -> type(NEWLINE);
+	PhpCode_WS : WS -> type(WS);
 
 	KW___CLASS__ : '__CLASS__';
 	KW___DIR__ : '__DIR__';
@@ -390,19 +390,11 @@ mode PhpCode;
 		:	'0'..'9' | 'a'..'f' | 'A'..'F'
 		;
 
-	WS
-		:	(' ' | '\t')+
-		;
-
-	NEWLINE
-		:	'\r'? '\n'
-		;
-
-	ANYCHAR
-		:	.
-		;
+	PhpCode_ANYCHAR : ANYCHAR -> type(ANYCHAR);
 
 mode DocComment;
+
+	DocComment_NEWLINE : NEWLINE -> type(NEWLINE);
 
 	END_COMMENT
 		:	'*/'
@@ -436,11 +428,4 @@ mode DocComment;
 
 	fragment DOC_COMMENT_INVALID_TAG : ;
 
-	NEWLINE
-		:	'\r'? '\n'
-		;
-
-	ANY_CHAR
-		:	.
-		;
-
+	DocComment_ANYCHAR : ANYCHAR -> type(ANYCHAR);
