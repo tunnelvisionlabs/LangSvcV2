@@ -16,7 +16,7 @@
         public const int AntlrLanguageResourceId = 100;
         public const string AntlrLanguagePackageNameResourceString = "#110";
         public const string AntlrLanguagePackageDetailsResourceString = "#111";
-        public const string AntlrLanguagePackageProductVersionString = "1.0";
+        public const string AntlrLanguagePackageProductVersionString = "1.1";
 
         public const string AntlrLanguagePackageGuidString = "8DA6DEAF-0AC9-4501-A21E-1CC07DA482EB";
         public static readonly Guid AntlrLanguagePackageGuid = new Guid("{" + AntlrLanguagePackageGuidString + "}");
