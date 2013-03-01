@@ -10,13 +10,13 @@
     using ICharStream = Antlr4.Runtime.ICharStream;
     using IntStreamConstants = Antlr4.Runtime.IntStreamConstants;
     using IToken = Antlr4.Runtime.IToken;
+    using ITokenSource = Antlr4.Runtime.ITokenSource;
     using LockRecursionPolicy = System.Threading.LockRecursionPolicy;
-    using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;
-    using VsShellUtilities = Microsoft.VisualStudio.Shell.VsShellUtilities;
-    using OLEMSGICON = Microsoft.VisualStudio.Shell.Interop.OLEMSGICON;
     using OLEMSGBUTTON = Microsoft.VisualStudio.Shell.Interop.OLEMSGBUTTON;
     using OLEMSGDEFBUTTON = Microsoft.VisualStudio.Shell.Interop.OLEMSGDEFBUTTON;
-    using Antlr4.Runtime.Misc;
+    using OLEMSGICON = Microsoft.VisualStudio.Shell.Interop.OLEMSGICON;
+    using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;
+    using VsShellUtilities = Microsoft.VisualStudio.Shell.VsShellUtilities;
 
     public abstract class AntlrClassifierBase<TState> : IClassifier
         where TState : struct
@@ -133,33 +133,30 @@
                     else
                         startLineCurrent = token.Line - 1;
 
-                    if (previousToken == null || previousToken.Line < startLineCurrent - 1)
+                    // endLinePrevious is the line number the previous token ended on
+                    int endLinePrevious;
+                    if (previousToken != null)
                     {
-                        // endLinePrevious is the line number the previous token ended on
-                        int endLinePrevious;
-                        if (previousToken != null)
-                        {
-                            // previousToken can't be EOF, so we know StopIndex>=StartIndex
-                            endLinePrevious = span.Snapshot.GetLineNumberFromPosition(previousToken.StopIndex);
-                        }
-                        else
-                        {
-                            endLinePrevious = span.Snapshot.GetLineNumberFromPosition(span.Start) - 1;
-                        }
+                        Contract.Assert(previousToken.StopIndex >= previousToken.StartIndex, "previousToken can't be EOF");
+                        endLinePrevious = span.Snapshot.GetLineNumberFromPosition(previousToken.StopIndex);
+                    }
+                    else
+                    {
+                        endLinePrevious = span.Snapshot.GetLineNumberFromPosition(span.Start) - 1;
+                    }
 
-                        if (startLineCurrent > endLinePrevious + 1)
+                    if (startLineCurrent > endLinePrevious + 1 || (startLineCurrent == endLinePrevious + 1 && !previousTokenEndsLine))
+                    {
+                        int firstMultilineLine = endLinePrevious;
+                        if (previousToken == null || previousTokenEndsLine)
+                            firstMultilineLine++;
+
+                        for (int i = firstMultilineLine; i < startLineCurrent; i++)
                         {
-                            int firstMultilineLine = endLinePrevious;
-                            if (previousToken == null || previousTokenEndsLine)
-                                firstMultilineLine++;
+                            if (!_lineStates[i].MultilineToken || lineStateChanged)
+                                extendMultilineSpanToLine = i + 1;
 
-                            for (int i = firstMultilineLine; i < startLineCurrent; i++)
-                            {
-                                if (!_lineStates[i].MultilineToken || lineStateChanged)
-                                    extendMultilineSpanToLine = i + 1;
-
-                                SetLineState(i, LineStateInfo.Multiline);
-                            }
+                            SetLineState(i, LineStateInfo.Multiline);
                         }
                     }
 
