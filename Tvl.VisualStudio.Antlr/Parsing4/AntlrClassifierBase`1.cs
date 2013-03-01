@@ -135,9 +135,14 @@
                         // endLinePrevious is the line number the previous token ended on
                         int endLinePrevious;
                         if (previousToken != null)
-                            endLinePrevious = span.Snapshot.GetLineNumberFromPosition(previousToken.StopIndex + 1);
+                        {
+                            // previousToken can't be EOF, so we know StopIndex>=StartIndex
+                            endLinePrevious = span.Snapshot.GetLineNumberFromPosition(previousToken.StopIndex);
+                        }
                         else
+                        {
                             endLinePrevious = span.Snapshot.GetLineNumberFromPosition(span.Start) - 1;
+                        }
 
                         if (startLineCurrent > endLinePrevious + 1)
                         {
@@ -161,7 +166,7 @@
                     if (IsMultilineToken(span.Snapshot, lexer, token))
                     {
                         int startLine = span.Snapshot.GetLineNumberFromPosition(token.StartIndex);
-                        int stopLine = span.Snapshot.GetLineNumberFromPosition(token.StopIndex + 1);
+                        int stopLine = span.Snapshot.GetLineNumberFromPosition(Math.Max(token.StartIndex, token.StopIndex));
                         for (int i = startLine; i < stopLine; i++)
                         {
                             if (!_lineStates[i].MultilineToken)
@@ -175,7 +180,7 @@
                     if (tokenEndsLine)
                     {
                         TState stateAtEndOfLine = lexer.GetCurrentState();
-                        int line = span.Snapshot.GetLineNumberFromPosition(token.StopIndex + 1);
+                        int line = span.Snapshot.GetLineNumberFromPosition(Math.Max(token.StartIndex, token.StopIndex));
                         lineStateChanged =
                             _lineStates[line].MultilineToken
                             || !_stateComparer.Equals(_lineStates[line].EndLineState, stateAtEndOfLine);
