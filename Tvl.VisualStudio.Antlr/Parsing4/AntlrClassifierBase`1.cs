@@ -158,9 +158,6 @@
                     if (token.Type == CharStreamConstants.EndOfFile)
                         break;
 
-                    previousToken = token;
-                    previousTokenEndsLine = TokenEndsAtEndOfLine(span.Snapshot, lexer, token);
-
                     if (IsMultilineToken(span.Snapshot, lexer, token))
                     {
                         int startLine = span.Snapshot.GetLineNumberFromPosition(token.StartIndex);
@@ -174,7 +171,7 @@
                         }
                     }
 
-                    bool tokenEndsLine = previousTokenEndsLine;
+                    bool tokenEndsLine = TokenEndsAtEndOfLine(span.Snapshot, lexer, token);
                     if (tokenEndsLine)
                     {
                         TState stateAtEndOfLine = lexer.GetCurrentState();
@@ -205,6 +202,9 @@
 
                     if (token.StartIndex >= span.End.Position)
                         break;
+
+                    previousToken = token;
+                    previousTokenEndsLine = tokenEndsLine;
 
                     if (token.StopIndex < requestedSpan.Start)
                         continue;
