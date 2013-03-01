@@ -317,7 +317,7 @@
     <Compile Include="V4\Antlr4LanguageInfo.cs" />
     <None Include="V4\Antlr4TextStructureNavigator.cs" />
     <None Include="V4\Antlr4TextStructureNavigatorProvider.cs" />
-    <None Include="V4\Antlr4Services.cs" />
+    <Compile Include="V4\Antlr4Services.cs" />
     <None Include="V4\Antlr4QuickSearchItemProvider.cs" />
     <None Include="V4\Antlr4QuickSearchItemProviderFactory.cs" />
     <None Include="V4\Antlr4BackgroundParser.cs" />
