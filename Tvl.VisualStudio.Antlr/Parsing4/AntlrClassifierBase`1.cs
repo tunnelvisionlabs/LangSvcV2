@@ -127,9 +127,9 @@
 
                     int startLineCurrent;
                     if (token.Type == CharStreamConstants.EndOfFile)
-                        startLineCurrent = span.Snapshot.LineCount;
+                        startLineCurrent = span.Snapshot.LineCount - 1;
                     else
-                        startLineCurrent = token.Line;
+                        startLineCurrent = token.Line - 1;
 
                     if (previousToken == null || previousToken.Line < startLineCurrent - 1)
                     {
