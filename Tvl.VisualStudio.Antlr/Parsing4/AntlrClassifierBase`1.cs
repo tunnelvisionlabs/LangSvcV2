@@ -123,7 +123,9 @@
                 {
                     IToken token = lexer.NextToken();
 
-                    bool inBounds = token.StartIndex < span.End.Position;
+                    // The latter is true for EOF token with span.End at the end of the document
+                    bool inBounds = token.StartIndex < span.End.Position
+                        || token.StopIndex < span.End.Position;
 
                     int startLineCurrent;
                     if (token.Type == IntStreamConstants.Eof)
