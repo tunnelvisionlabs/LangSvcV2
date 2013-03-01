@@ -315,8 +315,8 @@
     <Compile Include="Experimental\ISemanticTag.cs" />
     <Compile Include="V4\Antlr4Constants.cs" />
     <Compile Include="V4\Antlr4LanguageInfo.cs" />
-    <None Include="V4\Antlr4TextStructureNavigator.cs" />
-    <None Include="V4\Antlr4TextStructureNavigatorProvider.cs" />
+    <Compile Include="V4\Antlr4TextStructureNavigator.cs" />
+    <Compile Include="V4\Antlr4TextStructureNavigatorProvider.cs" />
     <Compile Include="V4\Antlr4Services.cs" />
     <None Include="V4\Antlr4QuickSearchItemProvider.cs" />
     <None Include="V4\Antlr4QuickSearchItemProviderFactory.cs" />
