@@ -17,6 +17,11 @@
     {
         public static readonly string Name = "AntlrGrammarFileObjectExtender";
 
+        // Only allow 1 extender at a time to ensure the NotifyDelete is always called
+        private object _extender;
+        private IExtenderSite _extenderSite;
+        private int _cookie;
+
         #region IExtenderProvider Members
 
         public bool CanExtend(string ExtenderCATID, string ExtenderName, object ExtendeeObject)
@@ -25,6 +30,32 @@
         }
 
         public object GetExtender(string ExtenderCATID, string ExtenderName, object ExtendeeObject, IExtenderSite ExtenderSite, int Cookie)
+        {
+            object extender = CreateExtender(ExtenderCATID, ExtenderName, ExtendeeObject, ExtenderSite, Cookie);
+            if (extender != null)
+            {
+                try
+                {
+                    if (_extenderSite != null && _cookie != 0)
+                    {
+                        _extenderSite.NotifyDelete(_cookie);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (ex.IsCritical())
+                        throw;
+                }
+
+                _extender = extender;
+                _extenderSite = ExtenderSite;
+                _cookie = Cookie;
+            }
+
+            return extender;
+        }
+
+        protected object CreateExtender(string ExtenderCATID, string ExtenderName, object ExtendeeObject, IExtenderSite ExtenderSite, int Cookie)
         {
             object extender = null;
 
