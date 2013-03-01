@@ -6,8 +6,8 @@
     using System.Linq;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
-    using CharStreamConstants = Antlr.Runtime.CharStreamConstants;
     using ICharStream = Antlr4.Runtime.ICharStream;
+    using IntStreamConstants = Antlr4.Runtime.IntStreamConstants;
     using IToken = Antlr4.Runtime.IToken;
     using LockRecursionPolicy = System.Threading.LockRecursionPolicy;
     using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;
@@ -126,7 +126,7 @@
                     bool inBounds = token.StartIndex < span.End.Position;
 
                     int startLineCurrent;
-                    if (token.Type == CharStreamConstants.EndOfFile)
+                    if (token.Type == IntStreamConstants.Eof)
                         startLineCurrent = span.Snapshot.LineCount - 1;
                     else
                         startLineCurrent = token.Line - 1;
@@ -160,9 +160,6 @@
                             }
                         }
                     }
-
-                    if (token.Type == CharStreamConstants.EndOfFile)
-                        break;
 
                     if (IsMultilineToken(span.Snapshot, lexer, token))
                     {
@@ -205,6 +202,9 @@
                             }
                         }
                     }
+
+                    if (token.Type == IntStreamConstants.Eof)
+                        break;
 
                     if (token.StartIndex >= span.End.Position)
                         break;
@@ -322,6 +322,8 @@
 
         protected virtual bool IsMultilineToken(ITextSnapshot snapshot, ITokenSourceWithState<TState> lexer, IToken token)
         {
+            if (token.Type == IntStreamConstants.Eof)
+                return false;
             if (lexer != null && lexer.Line > token.Line)
                 return true;
 
