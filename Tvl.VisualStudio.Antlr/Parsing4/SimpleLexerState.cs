@@ -3,6 +3,7 @@
     using System;
     using Antlr4.Runtime;
     using Tvl.Collections;
+    using Debug = System.Diagnostics.Debug;
 
     public struct SimpleLexerState : IEquatable<SimpleLexerState>
     {
@@ -60,7 +61,8 @@
         public void Apply(Lexer lexer)
         {
             lexer._mode = this.Mode;
-            lexer._modeStack.AddRange(_modeStack);
+            Debug.Assert(_modeStack != null);
+            lexer._modeStack.AddRange(_modeStack ?? EmptyModeStack);
         }
 
         public bool Equals(SimpleLexerState other)
