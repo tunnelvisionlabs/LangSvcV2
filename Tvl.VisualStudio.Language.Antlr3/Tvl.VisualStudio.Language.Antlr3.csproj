@@ -315,6 +315,7 @@
     <Compile Include="Experimental\ISemanticTag.cs" />
     <Compile Include="V4\Antlr4Constants.cs" />
     <Compile Include="V4\Antlr4LanguageInfo.cs" />
+    <Compile Include="V4\GrammarHighlighterLexer.cs" />
     <Compile Include="V4\Antlr4TextStructureNavigator.cs" />
     <Compile Include="V4\Antlr4TextStructureNavigatorProvider.cs" />
     <Compile Include="V4\Antlr4Services.cs" />
@@ -323,9 +324,9 @@
     <None Include="V4\Antlr4BackgroundParser.cs" />
     <None Include="V4\Antlr4BackgroundParserProvider.cs" />
     <None Include="V4\Antlr4BraceMatchingTaggerProvider.cs" />
-    <None Include="V4\Antlr4ClassificationTypeNames.cs" />
-    <None Include="V4\Antlr4Classifier.cs" />
-    <None Include="V4\Antlr4ClassifierProvider.cs" />
+    <Compile Include="V4\Antlr4ClassificationTypeNames.cs" />
+    <Compile Include="V4\Antlr4Classifier.cs" />
+    <Compile Include="V4\Antlr4ClassifierProvider.cs" />
     <Compile Include="V4\Antlr4CommenterProvider.cs" />
     <None Include="V4\Antlr4CompletionSource.cs" />
     <None Include="V4\Antlr4CompletionSourceProvider.cs" />
@@ -356,6 +357,9 @@
     <Compile Include="Project\GrammarFileObjectExtenderProperties.cs" />
     <Compile Include="Project\GrammarFileObjectExtenderProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Antlr4 Include="V4\GrammarHighlighterLexer.g4">
+      <CustomToolNamespace>Tvl.VisualStudio.Language.AntlrV4</CustomToolNamespace>
+    </Antlr4>
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\External\Antlr\Tool\Templates\depend.stg">

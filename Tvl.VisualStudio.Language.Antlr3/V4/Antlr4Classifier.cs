@@ -11,27 +11,6 @@
 
     internal class Antlr4Classifier : AntlrClassifierBase<SimpleLexerState>
     {
-        private static readonly HashSet<string> keywords =
-            new HashSet<string>
-            {
-                "lexer",
-                "parser",
-                "catch",
-                "finally",
-                "grammar",
-                "private",
-                "protected",
-                "public",
-                "returns",
-                "throws",
-                "tree",
-                "scope",
-                "import",
-                "fragment",
-                "tokens",
-                "options",
-            };
-
         private readonly IStandardClassificationService _standardClassificationService;
         private readonly IClassificationTypeRegistryService _classificationTypeRegistryService;
 
@@ -68,14 +47,6 @@
             this._actionSymbolReference = classificationTypeRegistryService.GetClassificationType(AntlrClassificationTypeNames.ActionSymbolReference);
         }
 
-        public static HashSet<string> Keywords
-        {
-            get
-            {
-                return keywords;
-            }
-        }
-
         protected override SimpleLexerState GetStartState()
         {
             return SimpleLexerState.Initial;
@@ -83,104 +54,89 @@
 
         protected override ITokenSourceWithState<SimpleLexerState> CreateLexer(ICharStream input, SimpleLexerState state)
         {
-#if false
-            return new Antlr4ClassifierLexer(input, state);
-#else
-            throw new NotImplementedException();
-#endif
+            var lexer = new GrammarHighlighterLexer(input);
+            state.Apply(lexer);
+            return lexer;
         }
 
         protected override IClassificationType ClassifyToken(IToken token)
         {
             switch (token.Type)
             {
-#if false
-            case AntlrGrammarClassifierLexer.IDENTIFIER:
-                string text = token.Text;
-                if (keywords.Contains(text))
-                    return _standardClassificationService.Keyword;
+            case GrammarHighlighterLexer.LEXER:
+            case GrammarHighlighterLexer.PARSER:
+            case GrammarHighlighterLexer.CATCH:
+            case GrammarHighlighterLexer.FINALLY:
+            case GrammarHighlighterLexer.GRAMMAR:
+            case GrammarHighlighterLexer.PRIVATE:
+            case GrammarHighlighterLexer.PROTECTED:
+            case GrammarHighlighterLexer.PUBLIC:
+            case GrammarHighlighterLexer.RETURNS:
+            case GrammarHighlighterLexer.THROWS:
+            case GrammarHighlighterLexer.IMPORT:
+            case GrammarHighlighterLexer.FRAGMENT:
+            case GrammarHighlighterLexer.TOKENS:
+            case GrammarHighlighterLexer.OPTIONS:
+            case GrammarHighlighterLexer.MODE:
+            case GrammarHighlighterLexer.LOCALS:
+                return _standardClassificationService.Keyword;
 
-                if (char.IsLower(text, 0))
-                    return this._parserRule;
+            case GrammarHighlighterLexer.IDENTIFIER:
+                if (char.IsUpper(token.Text, 0))
+                    return _lexerRule;
                 else
-                    return this._lexerRule;
+                    return _parserRule;
 
-            case AntlrGrammarClassifierLexer.ValidGrammarOption:
+            case GrammarHighlighterLexer.ValidGrammarOption:
                 return _validOption;
 
-            case AntlrGrammarClassifierLexer.InvalidGrammarOption:
+            case GrammarHighlighterLexer.InvalidGrammarOption:
                 return _invalidOption;
 
-            case AntlrGrammarClassifierLexer.OptionValue:
-                return _standardClassificationService.Identifier;
-
-            case AntlrGrammarClassifierLexer.LABEL:
+            case GrammarHighlighterLexer.LABEL:
                 return _standardClassificationService.SymbolDefinition;
 
-            case AntlrGrammarClassifierLexer.COMMENT:
-            case AntlrGrammarClassifierLexer.ML_COMMENT:
+            case GrammarHighlighterLexer.COMMENT:
+            case GrammarHighlighterLexer.ML_COMMENT:
                 return _standardClassificationService.Comment;
 
-            case AntlrGrammarClassifierLexer.CHAR_LITERAL:
-            case AntlrGrammarClassifierLexer.STRING_LITERAL:
-            case AntlrGrammarClassifierLexer.DOUBLE_ANGLE_STRING_LITERAL:
+            case GrammarHighlighterLexer.CHAR_LITERAL:
+            case GrammarHighlighterLexer.STRING_LITERAL:
                 return _standardClassificationService.StringLiteral;
 
-            case AntlrActionClassifierLexer.ACTION_COMMENT:
-            case AntlrActionClassifierLexer.ACTION_ML_COMMENT:
+            case GrammarHighlighterLexer.Action_COMMENT:
+            case GrammarHighlighterLexer.Action_ML_COMMENT:
                 return _actionComment;
 
-            case AntlrGrammarClassifierLexer.ACTION:
-            case AntlrGrammarClassifierLexer.ARG_ACTION:
-            case AntlrActionClassifierLexer.ACTION_TEXT:
-            case AntlrGrammarClassifierLexer.LBRACK:
-            case AntlrGrammarClassifierLexer.RBRACK:
+            case GrammarHighlighterLexer.ArgAction_TEXT:
+            case GrammarHighlighterLexer.ArgAction_ESCAPE:
+            case GrammarHighlighterLexer.Action_TEXT:
+            case GrammarHighlighterLexer.Action_ESCAPE:
                 return _actionLiteral;
 
-            case AntlrActionClassifierLexer.ACTION_CHAR_LITERAL:
-            case AntlrActionClassifierLexer.ACTION_STRING_LITERAL:
-                return _actionStringLiteral;
-
-            case AntlrActionClassifierLexer.ACTION_REFERENCE:
+            case GrammarHighlighterLexer.ArgAction_REFERENCE:
                 return _actionSymbolReference;
 
-            case AntlrGrammarClassifierLexer.DIRECTIVE:
-                return _standardClassificationService.PreprocessorKeyword;
+            case GrammarHighlighterLexer.ArgAction_CHAR_LITERAL:
+            case GrammarHighlighterLexer.ArgAction_STRING_LITERAL:
+            case GrammarHighlighterLexer.Action_CHAR_LITERAL:
+            case GrammarHighlighterLexer.Action_STRING_LITERAL:
+                return _actionStringLiteral;
 
-            case AntlrGrammarClassifierLexer.REFERENCE:
-                return _standardClassificationService.SymbolReference;
+            case GrammarHighlighterLexer.LexerCharSet_ESCAPE:
+            case GrammarHighlighterLexer.LexerCharSet_INVALID_ESCAPE:
+            case GrammarHighlighterLexer.LexerCharSet_TEXT:
+                return _standardClassificationService.StringLiteral;
 
-            case AntlrGrammarClassifierLexer.AMPERSAND:
-            //case AntlrGrammarClassifierLexer.COMMA:
-            case AntlrGrammarClassifierLexer.QUESTION:
-            //case AntlrGrammarClassifierLexer.COLON:
-            //case AntlrGrammarClassifierLexer.STAR:
-            case AntlrGrammarClassifierLexer.PLUS:
-            case AntlrGrammarClassifierLexer.ASSIGN:
-            case AntlrGrammarClassifierLexer.PLUS_ASSIGN:
-            case AntlrGrammarClassifierLexer.IMPLIES:
-            //case AntlrGrammarClassifierLexer.SEMI:
-            //case AntlrGrammarClassifierLexer.OR:
-            //case AntlrGrammarClassifierLexer.WILDCARD:
-            case AntlrGrammarClassifierLexer.ETC:
-            case AntlrGrammarClassifierLexer.RANGE:
-            case AntlrGrammarClassifierLexer.NOT:
-            case AntlrGrammarClassifierLexer.DOLLAR:
-                //return _standardClassificationService.Operator;
-                goto default;
-
-            case AntlrGrammarClassifierLexer.BANG:
-            case AntlrGrammarClassifierLexer.REWRITE:
-            case AntlrGrammarClassifierLexer.ROOT:
+            case GrammarHighlighterLexer.REWRITE:
                 return _astOperator;
 
-            case AntlrGrammarClassifierLexer.WS:
-                return null;
-                //return _standardClassificationService.WhiteSpace;
+            case GrammarHighlighterLexer.WS:
+                return _standardClassificationService.WhiteSpace;
 
-            case AntlrGrammarClassifierLexer.INT:
+            case GrammarHighlighterLexer.INT:
                 return _standardClassificationService.NumberLiteral;
-#endif
+
             default:
                 return base.ClassifyToken(token);
             }
