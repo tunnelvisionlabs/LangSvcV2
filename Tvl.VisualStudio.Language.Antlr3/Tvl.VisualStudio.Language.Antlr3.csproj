@@ -323,7 +323,7 @@
     <None Include="V4\Antlr4QuickSearchItemProviderFactory.cs" />
     <None Include="V4\Antlr4BackgroundParser.cs" />
     <None Include="V4\Antlr4BackgroundParserProvider.cs" />
-    <None Include="V4\Antlr4BraceMatchingTaggerProvider.cs" />
+    <Compile Include="V4\Antlr4BraceMatchingTaggerProvider.cs" />
     <Compile Include="V4\Antlr4ClassificationTypeNames.cs" />
     <Compile Include="V4\Antlr4Classifier.cs" />
     <Compile Include="V4\Antlr4ClassifierProvider.cs" />
