@@ -109,6 +109,7 @@
 
                 ICharStream input = CreateInputStream(span);
                 ITokenSourceWithState<TState> lexer = CreateLexer(input, startState);
+                lexer.TokenFactory = new SnapshotTokenFactory(GetEffectiveTokenSource(lexer));
 
                 IToken previousToken = null;
                 bool previousTokenEndsLine = false;
@@ -244,6 +245,12 @@
             }
 
             return classificationSpans;
+        }
+
+        protected virtual ITokenSource GetEffectiveTokenSource(ITokenSourceWithState<TState> lexer)
+        {
+            Contract.Ensures(Contract.Result<ITokenSource>() != null);
+            return lexer;
         }
 
         protected virtual void SetLineState(int line, LineStateInfo state)
