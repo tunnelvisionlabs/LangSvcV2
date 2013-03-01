@@ -100,7 +100,7 @@ mode HtmlTag;
 		;
 
 	BEGIN_DOUBLE_QUOTE_STRING
-		:	'"'
+		:	'"' -> type(DOUBLE_QUOTE_STRING), pushMode(DoubleQuoteString)
 		;
 
 	//fragment
@@ -112,21 +112,6 @@ mode HtmlTag;
 	//DOUBLE_QUOTE_STRING
 	//	:	'"' .* '"'
 	//	;
-
-	fragment
-	CONTINUE_DOUBLE_QUOTE_STRING
-	options {k=1;}
-		:	{IsPhpTagStart(input)}? => '<?php'		{state.type = HTML_START_CODE;}
-		|	(	~('\r' | '\n' | '<' | '"')
-			|	{!IsPhpTagStart(input)}? => '<'
-			)*
-			(	'"'							{state.type = END_STRING;}
-			|	/* still in the string */	{state.type = CONTINUE_STRING;}
-			)
-		;
-
-	fragment CONTINUE_STRING : ;
-	fragment END_STRING : ;
 
 	fragment
 	C0_CONTROL_CHAR
@@ -157,6 +142,22 @@ mode SingleQuoteString;
 
 	END_SINGLE_QUOTE_STRING
 		:	'\'' -> type(SINGLE_QUOTE_STRING), popMode
+		;
+
+mode DoubleQuoteString;
+
+	DoubleQuoteString_NEWLINE : NEWLINE -> type(NEWLINE);
+
+	DoubleQuoteString_PHP_TAG_START : '<?php' -> type(HTML_START_CODE), pushMode(PhpCode);
+
+	DoubleQuoteString_NOT_TAG_START : '<' -> type(DOUBLE_QUOTE_STRING);
+
+	CONTINUE_DOUBLE_QUOTE_STRING
+		:	~([<\r\n] | '"')+ -> type(DOUBLE_QUOTE_STRING)
+		;
+
+	END_DOUBLE_QUOTE_STRING
+		:	'"' -> type(DOUBLE_QUOTE_STRING), popMode
 		;
 
 mode PhpCode;
