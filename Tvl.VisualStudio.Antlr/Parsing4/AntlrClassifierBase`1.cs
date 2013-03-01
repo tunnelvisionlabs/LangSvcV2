@@ -326,29 +326,19 @@
         {
             if (token.Type == IntStreamConstants.Eof)
                 return false;
-            if (lexer != null && lexer.Line > token.Line)
-                return true;
 
             int startLine = snapshot.GetLineNumberFromPosition(token.StartIndex);
-            int stopLine = snapshot.GetLineNumberFromPosition(token.StopIndex + 1);
+            int stopLine = snapshot.GetLineNumberFromPosition(token.StopIndex);
             return startLine != stopLine;
         }
 
         protected virtual bool TokenEndsAtEndOfLine(ITextSnapshot snapshot, ITokenSourceWithState<TState> lexer, IToken token)
         {
-            ICharStream charStream = lexer.CharStream;
-            if (charStream != null)
-            {
-                int nextCharIndex = token.StopIndex + 1;
-                if (nextCharIndex >= charStream.Size)
-                    return true;
+            if (token.StopIndex + 1 >= snapshot.Length)
+                return true;
 
-                int c = charStream.GetText(new Interval(token.StopIndex + 1, token.StopIndex + 1))[0];
-                return c == '\r' || c == '\n';
-            }
-
-            ITextSnapshotLine line = snapshot.GetLineFromPosition(token.StopIndex + 1);
-            return line.End <= token.StopIndex + 1 && line.EndIncludingLineBreak >= token.StopIndex + 1;
+            char c = snapshot[token.StopIndex + 1];
+            return c == '\r' || c == '\n';
         }
 
         protected virtual ICharStream CreateInputStream(SnapshotSpan span)
