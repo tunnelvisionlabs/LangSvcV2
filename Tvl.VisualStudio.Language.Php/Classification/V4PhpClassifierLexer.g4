@@ -96,7 +96,7 @@ mode HtmlTag;
 	fragment HTML_ATTRIBUTE_VALUE : ;
 
 	BEGIN_SINGLE_QUOTE_STRING
-		:	'\''
+		:	'\'' -> type(SINGLE_QUOTE_STRING), pushMode(SingleQuoteString)
 		;
 
 	BEGIN_DOUBLE_QUOTE_STRING
@@ -112,18 +112,6 @@ mode HtmlTag;
 	//DOUBLE_QUOTE_STRING
 	//	:	'"' .* '"'
 	//	;
-
-	fragment
-	CONTINUE_SINGLE_QUOTE_STRING
-	options {k=1;}
-		:	{IsPhpTagStart(input)}? => '<?php'		{state.type = HTML_START_CODE;}
-		|	(	~('\r' | '\n' | '<' | '\'')
-			|	{!IsPhpTagStart(input)}? => '<'
-			)*
-			(	'\''						{state.type = END_STRING;}
-			|	/* still in the string */	{state.type = CONTINUE_STRING;}
-			)
-		;
 
 	fragment
 	CONTINUE_DOUBLE_QUOTE_STRING
@@ -153,6 +141,22 @@ mode HtmlTag;
 
 	ANY_CHAR
 		:	.
+		;
+
+mode SingleQuoteString;
+
+	SingleQuoteString_NEWLINE : NEWLINE -> type(NEWLINE);
+
+	SingleQuoteString_PHP_TAG_START : '<?php' -> type(HTML_START_CODE), pushMode(PhpCode);
+
+	SingleQuoteString_NOT_TAG_START : '<' -> type(SINGLE_QUOTE_STRING);
+
+	CONTINUE_SINGLE_QUOTE_STRING
+		:	~([<\r\n] | '\'')+ -> type(SINGLE_QUOTE_STRING)
+		;
+
+	END_SINGLE_QUOTE_STRING
+		:	'\'' -> type(SINGLE_QUOTE_STRING), popMode
 		;
 
 mode PhpCode;
