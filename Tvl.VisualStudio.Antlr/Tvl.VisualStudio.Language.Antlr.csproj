@@ -259,6 +259,8 @@
     <Compile Include="Parsing4\ITokenSourceWithState`1.cs" />
     <Compile Include="Parsing4\SimpleLexerState.cs" />
     <Compile Include="Parsing4\SnapshotCharStream.cs" />
+    <Compile Include="Parsing4\SnapshotToken.cs" />
+    <Compile Include="Parsing4\SnapshotTokenFactory.cs" />
     <Compile Include="Parsing\AntlrClassifierBase.cs" />
     <Compile Include="Parsing\AntlrClassifierBase`1.cs" />
     <Compile Include="Parsing\AntlrParseResultEventArgs.cs" />
