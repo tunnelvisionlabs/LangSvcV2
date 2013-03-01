@@ -326,7 +326,7 @@
     <None Include="V4\Antlr4ClassificationTypeNames.cs" />
     <None Include="V4\Antlr4Classifier.cs" />
     <None Include="V4\Antlr4ClassifierProvider.cs" />
-    <None Include="V4\Antlr4CommenterProvider.cs" />
+    <Compile Include="V4\Antlr4CommenterProvider.cs" />
     <None Include="V4\Antlr4CompletionSource.cs" />
     <None Include="V4\Antlr4CompletionSourceProvider.cs" />
     <None Include="V4\Antlr4EditorNavigationSource.cs" />
