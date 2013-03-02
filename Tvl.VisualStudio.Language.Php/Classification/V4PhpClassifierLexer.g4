@@ -10,6 +10,7 @@ tokens {
 	HTML_ELEMENT_NAME,
 	HTML_ATTRIBUTE_NAME,
 	HTML_ATTRIBUTE_VALUE,
+	DOC_COMMENT_INVALID_TAG,
 }
 
 WS
@@ -20,7 +21,7 @@ NEWLINE
 	:	'\r'? '\n'
 	;
 
-ANY_CHAR
+ANYCHAR
 	:	.
 	;
 
@@ -43,13 +44,13 @@ mode HtmlText;
 		;
 
 	HTML_START_TAG
-		:	{IsTagStart(input)}? '<' [/!]?
+		:	{IsTagStart(_input)}? '<' [/!]?
 			-> pushMode(HtmlTag)
 		;
 
 	HTML_TEXT
 		:	(	~[<&\r\n]
-			|	{!IsTagStart(input)}? '<'
+			|	{!IsTagStart(_input)}? '<'
 			)+
 		;
 
@@ -166,6 +167,7 @@ mode PhpCode;
 	PhpCode_NEWLINE : NEWLINE -> type(NEWLINE);
 	PhpCode_WS : WS -> type(WS);
 
+	// keywords
 	KW___CLASS__ : '__CLASS__';
 	KW___DIR__ : '__DIR__';
 	KW___FILE__ : '__FILE__';
@@ -223,31 +225,19 @@ mode PhpCode;
 	KW_WHILE : 'while';
 	KW_XOR : 'xor';
 
-	// keywords
-	fragment KW_CLASS : ;
-	fragment KW_EXTENDS : ;
-	fragment KW_FUNCTION : ;
-	fragment KW_IMPLEMENTS : ;
-	fragment KW_INTERFACE : ;
-
 	CLOSE_PHP_TAG
-		:	'?>'
-		;
-
-	fragment PHP_HEREDOC_TEXT : ;
-	fragment PHP_HEREDOC_END : ;
-
-	fragment
-	PHP_HEREDOC_START
-		:	'<<<' PHP_IDENTIFIER {input.LA(1) == '\r' || input.LA(1) == '\n'}?
-			{state.type = PHP_HEREDOC_START;}
+		:	'?>' -> popMode
 		;
 
 	LSHIFTEQ: '<<=';
 
+	PHP_HEREDOC_START
+		:	'<<<' PHP_IDENTIFIER {_input.La(1) == '\r' || _input.La(1) == '\n'}?
+			-> pushMode(PhpHereDoc)
+		;
+
 	LSHIFT
-		:	(PHP_HEREDOC_START) => PHP_HEREDOC_START {$type = state.type;}
-		|	'<<'
+		:	'<<'
 		;
 
 	ADDEQ	: '+=';
@@ -297,19 +287,8 @@ mode PhpCode;
 	EQEQ	: '==';
 	EQ		: '=';
 
-	fragment
-	CONTINUE_HEREDOC
-		:	(	options{greedy=true; k=1;} :
-				PHP_IDENTIFIER (options{greedy=true; k=1;} : ';')? {CheckHeredocEnd = input.LA(1) == '\r' || input.LA(1) == '\n';}
-			|	{CheckHeredocEnd = false;}
-			)
-			~('\r' | '\n')*
-			{state.type = CONTINUE_HEREDOC;}
-		;
-
 	PHP_IDENTIFIER
-		:	('a'..'z' | 'A'..'Z' | '_' | '$')
-			('a'..'z' | 'A'..'Z' | '0'..'9' | '_' | '$')*
+		:	[a-zA-Z_$] [a-zA-Z0-9_$]*
 		;
 
 	PHP_NUMBER
@@ -323,92 +302,123 @@ mode PhpCode;
 		:	'//' (~('\r' | '\n'))*
 		;
 
-	DOC_COMMENT_START
-		:	{input.LT(4) != '/'}? => '/**'
+	EMPTY_BLOCK_COMMENT
+		:	'/**/' -> type(PHP_ML_COMMENT)
 		;
 
-	EMPTY_BLOCK_COMMENT
-		:	'/**/' {$type = PHP_ML_COMMENT;}
+	DOC_COMMENT_START
+		:	'/**' -> type(DOC_COMMENT_TEXT), pushMode(DocComment)
 		;
 
 	PHP_ML_COMMENT
-		:	'/*' ~'*' .* '*/'
+		:	'/*' -> pushMode(BlockComment)
 		;
 
-	fragment END_SINGLE_STRING : ;
-	fragment END_DOUBLE_STRING : ;
-
 	PHP_SINGLE_STRING_LITERAL
-		:	'\'' CONTINUE_SINGLE_STRING {$type = state.type;}
+		:	'\'' -> pushMode(PhpSingleString)
 		;
 
 	PHP_DOUBLE_STRING_LITERAL
-		:	'"' {$type = CONTINUE_DOUBLE_STRING;}
-		;
-
-	fragment
-	CONTINUE_SINGLE_STRING
-		:	(	~('\r' | '\n' | '\'' | '\\')
-			|	'\\' ('\'' | '\\')
-			|	{input.LA(2) != '\'' && input.LA(2) != '\\'}? => '\\'
-			)*
-			(	'\''		{state.type = END_SINGLE_STRING;}
-			|				{state.type = CONTINUE_SINGLE_STRING;}
-			)
-		;
-
-	fragment DOUBLE_STRING_ESCAPE : ;
-
-	fragment
-	CONTINUE_DOUBLE_STRING
-		:	'->'													{state.type = ARROW;}
-		|	'['														{state.type = LBRACK;}
-		|	']'														{state.type = RBRACK;}
-		|	(PHP_IDENTIFIER) => PHP_IDENTIFIER						{state.type = PHP_IDENTIFIER;}
-		|	(' ' | '\t')+											{state.type = WS;}
-		|	{IsDoubleQuoteEscapeChar(input.LA(2))}? =>
-			'\\'
-			(	('n' | 'r' | 't' | 'v' | 'f' | '\\' | '$' | '"')	{state.type = DOUBLE_STRING_ESCAPE;}
-			|	'0'..'7' ('0'..'7' ('0'..'7')?)?					{state.type = DOUBLE_STRING_ESCAPE;}
-			|	'x'
-				(	HEXDIGIT HEXDIGIT?								{state.type = DOUBLE_STRING_ESCAPE;}
-				|													{state.type = CONTINUE_DOUBLE_STRING;}
-				)
-			)
-		|	{input.LA(2) == '$'}? => '{'							{state.type = LBRACE;}
-		|	{StringBraceLevel > 0}? => '}'							{state.type = RBRACE;}
-		//|	PHP_NUMBER
-		|	(	~('\r' | '\n' | '"' | '\\' | '$' | '-' | '[' | ']' | '{' | '}' | ' ' | '\t')
-			|	{!IsDoubleQuoteEscapeChar(input.LA(2))}? => '\\'
-			|	{input.LA(2) != '>'}? => '-'
-			|	{input.LA(2) != '$'}? => '{'
-			|	{StringBraceLevel == 0}? => '}'
-			)*
-			(	'"'		{state.type = END_DOUBLE_STRING;}
-			|			{state.type = CONTINUE_DOUBLE_STRING;}
-			)
+		:	'"' -> pushMode(PhpDoubleString)
 		;
 
 	fragment
 	HEXDIGIT
-		:	'0'..'9' | 'a'..'f' | 'A'..'F'
+		:	[0-9a-fA-F]
 		;
 
 	PhpCode_ANYCHAR : ANYCHAR -> type(ANYCHAR);
+
+mode BlockComment;
+
+	BlockComment_NEWLINE : NEWLINE -> type(NEWLINE);
+
+	BlockComment_TEXT
+		:	(	~[\r\n*]
+			|	'*' ~[\r\n/]
+			)+
+			-> type(PHP_ML_COMMENT)
+		;
+	BlockComment_STAR : '*' -> type(PHP_ML_COMMENT);
+
+	END_BLOCK_COMMENT : '*/' -> type(PHP_ML_COMMENT), popMode;
+
+mode PhpHereDoc;
+
+	PhpHereDoc_NEWLINE : NEWLINE -> type(NEWLINE);
+
+	PHP_HEREDOC_END
+		:	{_input.La(-1) == '\n'}?
+			PHP_IDENTIFIER ';'?
+			{CheckHeredocEnd(_input.La(1), Text);}?
+			-> popMode
+		;
+
+	PHP_HEREDOC_TEXT
+		:	~[\r\n]+
+		;
+
+mode PhpSingleString;
+
+	PhpSingleString_NEWLINE : NEWLINE -> type(NEWLINE), popMode;
+
+	PhpSingleString_ESCAPE : '\\' ('\'' | '\\')? -> type(PHP_SINGLE_STRING_LITERAL);
+
+	PhpSingleString_TEXT : ~('\r' | '\n' | '\'' | '\\')+ -> type(PHP_SINGLE_STRING_LITERAL);
+
+	END_SINGLE_STRING : '\'' -> type(PHP_SINGLE_STRING_LITERAL), popMode;
+
+mode PhpDoubleString;
+
+	PhpDoubleString_ARROW : ARROW -> type(ARROW);
+	PhpDoubleString_LBRACK : LBRACK -> type(LBRACK);
+	PhpDoubleString_RBRACK : RBRACK -> type(RBRACK);
+	PhpDoubleString_PHP_IDENTIFIER : PHP_IDENTIFIER -> type(PHP_IDENTIFIER);
+	PhpDoubleString_WS : WS -> type(WS);
+
+	PhpDoubleString_LBRACE : LBRACE {_input.La(1) == '\$'}? -> type(LBRACE);
+	PhpDoubleString_RBRACE : RBRACE {StringBraceLevel > 0}? -> type(RBRACE);
+
+	DOUBLE_STRING_ESCAPE
+		:	'\\'
+			(	('n' | 'r' | 't' | 'v' | 'f' | '\\' | '$' | '"')
+			|	'0'..'7' ('0'..'7' ('0'..'7')?)?
+			|	'x'
+				(	HEXDIGIT HEXDIGIT?
+				)
+			)
+		;
+
+	DOUBLE_STRING_INVALID_ESCAPE
+		:	'\\' -> type(PHP_DOUBLE_STRING_LITERAL)
+		;
+
+	CONTINUE_DOUBLE_STRING
+		:	(	~('\r' | '\n' | '"' | '\\' | '$' | '-' | '[' | ']' | '{' | '}' | ' ' | '\t')
+			|	'-' {_input.La(1) != '>'}?
+			|	'{' {_input.La(1) != '\$'}?
+			|	'}' {StringBraceLevel == 0}?
+			)+
+			-> type(PHP_DOUBLE_STRING_LITERAL)
+		;
+
+	END_DOUBLE_STRING
+		:	'"' -> type(PHP_DOUBLE_STRING_LITERAL), popMode
+		;
 
 mode DocComment;
 
 	DocComment_NEWLINE : NEWLINE -> type(NEWLINE);
 
 	END_COMMENT
-		:	'*/'
+		:	'*/' -> type(DOC_COMMENT_TEXT), popMode
 		;
 
 	fragment // disables this rule for now without breaking references to the token type in code
 	SVN_REFERENCE
 		:	'$'
 			(	~('$'|'\n'|'\r'|'*')
-			|	{input.LA(2) != '/'}? => '*'
+			|	{_input.La(2) != '/'}? '*'
 			)*
 			'$'
 		;
@@ -416,8 +426,8 @@ mode DocComment;
 	DOC_COMMENT_TEXT
 		:	//'$'? // this is a stray '$' that couldn't be made into an SVN_REFERENCE
 			(	~('@' | '\\' | '\r' | '\n' | '*' /*| '$'*/)
-			|	{input.LA(2) != '/'}? => '*'
-			|	{!IsDocCommentStartCharacter(input.LA(2))}? => ('\\' | '@')
+			|	{_input.La(2) != '/'}? '*'
+			|	{!IsDocCommentStartCharacter(_input.La(2))}? ('\\' | '@')
 			)+
 		;
 
@@ -429,7 +439,5 @@ mode DocComment;
 			|	('a'..'z' | 'A'..'Z')+
 			)
 		;
-
-	fragment DOC_COMMENT_INVALID_TAG : ;
 
 	DocComment_ANYCHAR : ANYCHAR -> type(ANYCHAR);
