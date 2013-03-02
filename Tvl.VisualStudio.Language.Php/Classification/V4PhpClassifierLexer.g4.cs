@@ -2,12 +2,14 @@
 {
     using Antlr4.Runtime;
     using Tvl.VisualStudio.Language.Parsing4;
+    using StringComparison = System.StringComparison;
 
     partial class V4PhpClassifierLexer : ITokenSourceWithState<V4PhpClassifierLexerState>
     {
         private const string DocCommentStartSymbols = "$@&~<>#%\"\\";
 
         private int _stringBraceLevel;
+        private string _heredocIdentifier;
 
         public int StringBraceLevel
         {
@@ -19,6 +21,19 @@
             set
             {
                 _stringBraceLevel = value;
+            }
+        }
+
+        public string HeredocIdentifier
+        {
+            get
+            {
+                return _heredocIdentifier;
+            }
+
+            set
+            {
+                _heredocIdentifier = value;
             }
         }
 
@@ -35,6 +50,21 @@
             IToken token = base.NextToken();
             while (token.Type == NEWLINE)
                 token = base.NextToken();
+
+            switch (token.Type)
+            {
+            case PHP_HEREDOC_START:
+                // <<<identifier
+                _heredocIdentifier = token.Text.Substring(3);
+                break;
+
+            case PHP_HEREDOC_END:
+                _heredocIdentifier = null;
+                break;
+
+            default:
+                break;
+            }
 
             return token;
         }
@@ -81,9 +111,14 @@
             return false;
         }
 
-        private static bool CheckHeredocEnd(int la1, string text)
+        private bool CheckHeredocEnd(int la1, string text)
         {
-            return true;
+            // identifier
+            //  - or -
+            // identifier;
+            bool semi = text[text.Length - 1] == ';';
+            string identifier = semi ? text.Substring(0, text.Length - 1) : text;
+            return string.Equals(identifier, HeredocIdentifier, StringComparison.Ordinal);
         }
 
         private static bool IsDocCommentStartCharacter(int c)

@@ -9,17 +9,20 @@
 
         private readonly SimpleLexerState _simpleLexerState;
         private readonly int _stringBraceLevel;
+        private readonly string _heredocIdentifier;
 
         public V4PhpClassifierLexerState(V4PhpClassifierLexer lexer)
         {
             _simpleLexerState = new SimpleLexerState(lexer);
             _stringBraceLevel = lexer.StringBraceLevel;
+            _heredocIdentifier = lexer.HeredocIdentifier;
         }
 
         private V4PhpClassifierLexerState(SimpleLexerState state)
         {
             _simpleLexerState = state;
             _stringBraceLevel = 0;
+            _heredocIdentifier = null;
         }
 
         public static V4PhpClassifierLexerState Initial
@@ -34,12 +37,14 @@
         {
             _simpleLexerState.Apply(lexer);
             lexer.StringBraceLevel = _stringBraceLevel;
+            lexer.HeredocIdentifier = _heredocIdentifier;
         }
 
         public bool Equals(V4PhpClassifierLexerState other)
         {
             return _simpleLexerState.Equals(other._simpleLexerState)
-                && _stringBraceLevel == other._stringBraceLevel;
+                && _stringBraceLevel == other._stringBraceLevel
+                && _heredocIdentifier == other._heredocIdentifier;
         }
 
         public override bool Equals(object obj)
@@ -55,6 +60,7 @@
             int hashCode = 1;
             hashCode = hashCode * 31 + _simpleLexerState.GetHashCode();
             hashCode = hashCode * 31 + _stringBraceLevel;
+            hashCode = hashCode * 31 + (_heredocIdentifier != null ? _heredocIdentifier.GetHashCode() : 0);
             return hashCode;
         }
     }
