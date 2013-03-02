@@ -35,11 +35,11 @@ mode HtmlText;
 		;
 
 	HTML_COMMENT
-		:	'<!--' .* '-->'
+		:	'<!--' .*? '-->'
 		;
 
 	HTML_CDATA
-		:	'<![CDATA[' .* ']]>'
+		:	'<![CDATA[' .*? ']]>'
 		;
 
 	HTML_START_TAG
