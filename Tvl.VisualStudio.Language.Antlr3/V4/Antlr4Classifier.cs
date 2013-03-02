@@ -9,7 +9,7 @@
     using Tvl.VisualStudio.Language.Parsing4;
     using AntlrClassificationTypeNames = Tvl.VisualStudio.Language.Antlr3.AntlrClassificationTypeNames;
 
-    internal class Antlr4Classifier : AntlrClassifierBase<SimpleLexerState>
+    internal class Antlr4Classifier : AntlrClassifierBase<V4GrammarClassifierLexerState>
     {
         private readonly IStandardClassificationService _standardClassificationService;
         private readonly IClassificationTypeRegistryService _classificationTypeRegistryService;
@@ -47,12 +47,12 @@
             this._actionSymbolReference = classificationTypeRegistryService.GetClassificationType(AntlrClassificationTypeNames.ActionSymbolReference);
         }
 
-        protected override SimpleLexerState GetStartState()
+        protected override V4GrammarClassifierLexerState GetStartState()
         {
-            return SimpleLexerState.Initial;
+            return V4GrammarClassifierLexerState.Initial;
         }
 
-        protected override ITokenSourceWithState<SimpleLexerState> CreateLexer(ICharStream input, SimpleLexerState state)
+        protected override ITokenSourceWithState<V4GrammarClassifierLexerState> CreateLexer(ICharStream input, V4GrammarClassifierLexerState state)
         {
             var lexer = new GrammarHighlighterLexer(input);
             state.Apply(lexer);

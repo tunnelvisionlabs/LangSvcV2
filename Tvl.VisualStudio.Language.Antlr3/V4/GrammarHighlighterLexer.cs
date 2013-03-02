@@ -6,7 +6,7 @@
     using Antlr4.Runtime.Misc;
     using Tvl.VisualStudio.Language.Parsing4;
 
-    public class GrammarHighlighterLexer : AbstractGrammarHighlighterLexer, ITokenSourceWithState<SimpleLexerState>
+    public class GrammarHighlighterLexer : AbstractGrammarHighlighterLexer, ITokenSourceWithState<V4GrammarClassifierLexerState>
     {
         private bool _inOptions;
         private bool _inTokens;
@@ -44,7 +44,7 @@
             }
         }
 
-        protected int RuleType
+        public int RuleType
         {
             get
             {
@@ -209,9 +209,9 @@
             }
         }
 
-        public SimpleLexerState GetCurrentState()
+        public V4GrammarClassifierLexerState GetCurrentState()
         {
-            return new SimpleLexerState(this);
+            return new V4GrammarClassifierLexerState(this);
         }
     }
 }

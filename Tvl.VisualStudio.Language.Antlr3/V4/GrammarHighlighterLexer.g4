@@ -23,10 +23,7 @@ options {
 }
 
 @members {
-protected abstract int GetMultilineCommentType(); /*{
-	return _modeStack.peek()==DEFAULT_MODE ? ML_COMMENT : Action_ML_COMMENT;
-}*/
-
+protected abstract int GetMultilineCommentType();
 protected abstract void HandleBeginArgAction();
 }
 
