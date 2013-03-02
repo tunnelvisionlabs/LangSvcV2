@@ -22,10 +22,9 @@
                 _modeStack = lexer._modeStack.ToArray();
         }
 
-        private SimpleLexerState(int mode)
+        public SimpleLexerState(int mode)
+            : this(mode, EmptyModeStack)
         {
-            _mode = mode;
-            _modeStack = EmptyModeStack;
         }
 
         private SimpleLexerState(int mode, int[] modeStack)
