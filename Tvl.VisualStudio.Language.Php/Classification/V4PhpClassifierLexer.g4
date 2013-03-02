@@ -6,6 +6,12 @@ lexer grammar V4PhpClassifierLexer;
 	protected const int HIDDEN = Hidden;
 }
 
+tokens {
+	HTML_ELEMENT_NAME,
+	HTML_ATTRIBUTE_NAME,
+	HTML_ATTRIBUTE_VALUE,
+}
+
 WS
 	:	' '
 	;
@@ -88,53 +94,38 @@ mode HtmlTag;
 	HtmlTag_WS : WS -> type(WS);
 
 	HTML_CLOSE_TAG
-		:	'/'? '>'
+		:	'/'? '>' -> popMode
 		;
 
 	HTML_OPERATOR
 		:	'='
 		;
 
-	fragment HTML_ELEMENT_NAME : ;
-	fragment HTML_ATTRIBUTE_NAME : ;
-
 	NAME
-		:	~(	C0_CONTROL_CHAR
-			|	C1_CONTROL_CHAR
+		:	~(	'\u0000'..'\u001F' | '\u007f' /*C0_CONTROL_CHAR*/
+			|	'\u0080'..'\u009f' /*C1_CONTROL_CHAR*/
 			|	' ' | '"' | '\'' | '>' | '/' | '='
 			)+
 		;
 
-	fragment HTML_ATTRIBUTE_VALUE : ;
-
-	BEGIN_SINGLE_QUOTE_STRING
-		:	'\'' -> type(SINGLE_QUOTE_STRING), pushMode(SingleQuoteString)
+	SINGLE_QUOTE_STRING
+		:	'\'' -> pushMode(SingleQuoteString)
 		;
 
-	BEGIN_DOUBLE_QUOTE_STRING
-		:	'"' -> type(DOUBLE_QUOTE_STRING), pushMode(DoubleQuoteString)
+	DOUBLE_QUOTE_STRING
+		:	'"' -> pushMode(DoubleQuoteString)
 		;
 
 	//fragment
-	//SINGLE_QUOTE_STRING
-	//	:	'\'' .* '\''
+	//C0_CONTROL_CHAR
+	//	:	'\u0000'..'\u001F'
+	//	|	'\u007f'
 	//	;
 
 	//fragment
-	//DOUBLE_QUOTE_STRING
-	//	:	'"' .* '"'
+	//C1_CONTROL_CHAR
+	//	:	'\u0080'..'\u009f'
 	//	;
-
-	fragment
-	C0_CONTROL_CHAR
-		:	'\u0000'..'\u001F'
-		|	'\u007f'
-		;
-
-	fragment
-	C1_CONTROL_CHAR
-		:	'\u0080'..'\u009f'
-		;
 
 	HtmlTag_ANYCHAR : ANYCHAR -> type(ANYCHAR);
 
@@ -142,12 +133,12 @@ mode SingleQuoteString;
 
 	SingleQuoteString_NEWLINE : NEWLINE -> type(NEWLINE);
 
-	SingleQuoteString_PHP_TAG_START : '<?php' -> type(HTML_START_CODE), pushMode(PhpCode);
+	SingleQuoteString_PHP_TAG_START : HTML_START_CODE -> type(HTML_START_CODE), pushMode(PhpCode);
 
 	SingleQuoteString_NOT_TAG_START : '<' -> type(SINGLE_QUOTE_STRING);
 
 	CONTINUE_SINGLE_QUOTE_STRING
-		:	~([<\r\n] | '\'')+ -> type(SINGLE_QUOTE_STRING)
+		:	~(['<\r\n])+ -> type(SINGLE_QUOTE_STRING)
 		;
 
 	END_SINGLE_QUOTE_STRING
@@ -158,12 +149,12 @@ mode DoubleQuoteString;
 
 	DoubleQuoteString_NEWLINE : NEWLINE -> type(NEWLINE);
 
-	DoubleQuoteString_PHP_TAG_START : '<?php' -> type(HTML_START_CODE), pushMode(PhpCode);
+	DoubleQuoteString_PHP_TAG_START : HTML_START_CODE -> type(HTML_START_CODE), pushMode(PhpCode);
 
 	DoubleQuoteString_NOT_TAG_START : '<' -> type(DOUBLE_QUOTE_STRING);
 
 	CONTINUE_DOUBLE_QUOTE_STRING
-		:	~([<\r\n] | '"')+ -> type(DOUBLE_QUOTE_STRING)
+		:	~(["<\r\n])+ -> type(DOUBLE_QUOTE_STRING)
 		;
 
 	END_DOUBLE_QUOTE_STRING
