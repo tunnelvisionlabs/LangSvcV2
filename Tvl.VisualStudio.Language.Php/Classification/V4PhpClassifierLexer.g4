@@ -22,32 +22,27 @@ mode HtmlText;
 
 	HtmlText_NEWLINE : NEWLINE -> type(NEWLINE);
 
-	HTML_CLOSE_TAG
-		:	'>'
-		;
-
 	HTML_START_CODE
-		:	'<?php'
-		;
-
-	HTML_END_CODE
-		:	'?>'
+		:	'<?php' -> pushMode(PhpCode)
 		;
 
 	HTML_COMMENT
-		:	'<!--' .*? '-->'
+		:	'<!--'
+			-> pushMode(HtmlComment)
 		;
 
 	HTML_CDATA
-		:	'<![CDATA[' .*? ']]>'
+		:	'<![CDATA['
+			-> pushMode(HtmlCdata)
 		;
 
 	HTML_START_TAG
-		:	{IsTagStart(input)}? '<' ('/'|'!')?
+		:	{IsTagStart(input)}? '<' [/!]?
+			-> pushMode(HtmlTag)
 		;
 
 	HTML_TEXT
-		:	(	~('\r' | '\n' | '<' | '&')
+		:	(	~[<&\r\n]
 			|	{!IsTagStart(input)}? '<'
 			)+
 		;
@@ -55,11 +50,11 @@ mode HtmlText;
 	HTML_CHAR_REF
 		:	'&'
 			(	// named character reference
-				('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9')* ';'
+				[a-zA-Z] [a-zA-Z0-9]* ';'
 			|	// decimal numeric character reference
-				'#' '0'..'9'+ ';'
+				'#' [0-9]+ ';'
 			|	// hexadecimal numeric character reference
-				'#' ('x'|'X') ('0'..'9'|'a'..'f'|'A'..'F')+ ';'
+				'#' [xX] [0-9a-fA-F]+ ';'
 			)
 		;
 
@@ -68,6 +63,24 @@ mode HtmlText;
 		;
 
 	HtmlText_ANYCHAR : ANYCHAR -> type(ANYCHAR);
+
+mode HtmlComment;
+
+	HtmlComment_NEWLINE : NEWLINE -> type(NEWLINE);
+
+	HtmlComment_TEXT : ~[\r\n'-]+ -> type(HTML_COMMENT);
+	HtmlComment_DASH : '-' -> type(HTML_COMMENT);
+
+	END_HTML_COMMENT : '-->' -> type(HTML_COMMENT), popMode;
+
+mode HtmlCdata;
+
+	HtmlCdata_NEWLINE : NEWLINE -> type(NEWLINE);
+
+	HtmlCdata_DATA : ~[\r\n\]]+ -> type(HTML_CDATA);
+	HtmlCdata_RBRACK : ']' -> type(HTML_CDATA);
+
+	END_HTML_CDATA : ']]>' -> type(HTML_CDATA), popMode;
 
 mode HtmlTag;
 
