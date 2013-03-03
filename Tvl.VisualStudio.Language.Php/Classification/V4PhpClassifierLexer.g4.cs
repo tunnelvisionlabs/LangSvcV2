@@ -11,6 +11,10 @@
         private int _stringBraceLevel;
         private string _heredocIdentifier;
 
+        // flags used by the HtmlTag mode
+        private bool _foundEntity;
+        private bool _foundOperator;
+
         public int StringBraceLevel
         {
             get
@@ -34,6 +38,32 @@
             set
             {
                 _heredocIdentifier = value;
+            }
+        }
+
+        public bool FoundEntity
+        {
+            get
+            {
+                return _foundEntity;
+            }
+
+            set
+            {
+                _foundEntity = value;
+            }
+        }
+
+        public bool FoundOperator
+        {
+            get
+            {
+                return _foundOperator;
+            }
+
+            set
+            {
+                _foundOperator = value;
             }
         }
 
@@ -62,11 +92,54 @@
                 _heredocIdentifier = null;
                 break;
 
+            case HTML_CLOSE_TAG:
+                FoundEntity = false;
+                FoundOperator = false;
+                break;
+
+            case HTML_ATTRIBUTE_VALUE:
+                FoundOperator = false;
+                break;
+
+            case HTML_OPERATOR:
+                FoundOperator = true;
+                break;
+
             default:
                 break;
             }
 
             return token;
+        }
+
+        public override IToken Emit()
+        {
+            switch (_type)
+            {
+            case NAME:
+                if (!FoundEntity)
+                {
+                    _type = HTML_ELEMENT_NAME;
+                    FoundEntity = true;
+                }
+                else if (FoundOperator)
+                {
+                    _type = HTML_ATTRIBUTE_VALUE;
+                }
+                else
+                {
+                    _type = HTML_ATTRIBUTE_NAME;
+                }
+
+                break;
+
+            case SINGLE_QUOTE_STRING:
+            case DOUBLE_QUOTE_STRING:
+                _type = HTML_ATTRIBUTE_VALUE;
+                break;
+            }
+
+            return base.Emit();
         }
 
         private static bool IsTagStart(IIntStream input)
