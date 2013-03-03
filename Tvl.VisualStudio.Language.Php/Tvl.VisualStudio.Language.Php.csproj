@@ -246,6 +246,7 @@
       <DependentUpon>V4PhpClassifierLexer.g4</DependentUpon>
     </Compile>
     <Compile Include="Classification\V4PhpClassifierLexerState.cs" />
+    <Compile Include="PhpEditorFactory.cs" />
     <Compile Include="PhpTextStructureNavigator.cs" />
     <Compile Include="PhpTextStructureNavigatorProvider.cs" />
     <Compile Include="Classification\PhpClassifierConstants.cs" />
