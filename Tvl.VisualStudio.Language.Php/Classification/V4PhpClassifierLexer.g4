@@ -94,6 +94,8 @@ mode HtmlTag;
 	HtmlTag_NEWLINE : NEWLINE -> type(NEWLINE);
 	HtmlTag_WS : WS -> type(WS);
 
+	HtmlTag_PHP_TAG_START : HTML_START_CODE -> type(HTML_START_CODE), pushMode(PhpCode);
+
 	HTML_CLOSE_TAG
 		:	'/'? '>' -> popMode
 		;
