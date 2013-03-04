@@ -18,6 +18,7 @@
     {
         private static readonly string[] _templateTags = new string[] { "<?php", "<?=", "?>" };
         private static readonly EditOptions _editOptions = new EditOptions(true, new StringDifferenceOptions(StringDifferenceTypes.Character, 0, false));
+        private static readonly int _maxTemplateTagLength = _templateTags.Select(i => i.Length).Max();
 
         private readonly ITextBuffer _diskBuffer;           // the buffer as it appears on disk.
         private readonly IProjectionBuffer _projBuffer; // the buffer we project into        
@@ -156,57 +157,30 @@
                         {
                             // Then see if they inserted/deleted text creates a template tag by being merged
                             // with the text around us.
-                            if (change.NewSpan.Start != 0 && change.NewSpan.End < e.After.Length)
+
+                            int changeBoundStart = Math.Max(0, change.NewSpan.Start - (_maxTemplateTagLength - 1));
+                            int changeBoundEnd = Math.Min(e.After.Length, change.NewSpan.End + (_maxTemplateTagLength - 1));
+                            Span changeBounds = Span.FromBounds(changeBoundStart, changeBoundEnd);
+
+                            var newText = e.After.GetText(changeBounds);
+                            foreach (var tag in _templateTags)
                             {
-                                // Check if the character before us plus the inserted character(s) makes a template tag
-                                var newText = e.After.GetText(new Span(change.NewSpan.Start - 1, 2));
-                                if (Array.IndexOf(_templateTags, newText) != -1)
+                                if (newText.Contains(tag))
                                 {
-                                    if (closest != 0)
-                                    {
-                                        recalcPosition = _spans[--closest].DiskBufferSpan.GetStartPoint(e.After);
-                                    }
-                                    else
-                                    {
-                                        recalcPosition = _spans[closest].DiskBufferSpan.GetStartPoint(e.After);
-                                    }
                                     recalc = true;
+                                    break;
                                 }
                             }
 
-                            if (!recalc && change.NewSpan.End >= 2)
+                            if (recalc)
                             {
-                                // check if we inserted template tags at the end
-                                var newText = e.After.GetText(new Span(change.NewSpan.End - 2, 2));
-                                if (Array.IndexOf(_templateTags, newText) != -1)
+                                if (closest != 0)
                                 {
-                                    if (closest != 0)
-                                    {
-                                        recalcPosition = _spans[--closest].DiskBufferSpan.GetStartPoint(e.After);
-                                    }
-                                    else
-                                    {
-                                        recalcPosition = _spans[closest].DiskBufferSpan.GetStartPoint(e.After);
-                                    }
-                                    recalc = true;
+                                    recalcPosition = _spans[--closest].DiskBufferSpan.GetStartPoint(e.After);
                                 }
-                            }
-
-                            if (!recalc && change.NewSpan.Start + 2 <= e.After.Length)
-                            {
-                                // check if the inserted char plus the char after us makes a template tag
-                                var newText = e.After.GetText(new Span(change.NewSpan.Start, 2));
-                                if (Array.IndexOf(_templateTags, newText) != -1)
+                                else
                                 {
-                                    if (closest != 0)
-                                    {
-                                        recalcPosition = _spans[--closest].DiskBufferSpan.GetStartPoint(e.After);
-                                    }
-                                    else
-                                    {
-                                        recalcPosition = _spans[closest].DiskBufferSpan.GetStartPoint(e.After);
-                                    }
-                                    recalc = true;
+                                    recalcPosition = _spans[closest].DiskBufferSpan.GetStartPoint(e.After);
                                 }
                             }
                         }
@@ -228,15 +202,9 @@
                     {
                         // check if the newly inserted text makes a tag, we include the character before
                         // our span and the character after.
-                        Span changeBounds = change.NewSpan;
-                        if (changeBounds.Start > 0)
-                        {
-                            changeBounds = new Span(changeBounds.Start - 1, changeBounds.Length + 1);
-                        }
-                        if (changeBounds.End < e.After.Length)
-                        {
-                            changeBounds = new Span(changeBounds.Start, changeBounds.Length + 1);
-                        }
+                        int changeBoundStart = Math.Max(0, change.NewSpan.Start - (_maxTemplateTagLength - 1));
+                        int changeBoundEnd = Math.Min(e.After.Length, change.NewSpan.End + (_maxTemplateTagLength - 1));
+                        Span changeBounds = Span.FromBounds(changeBoundStart, changeBoundEnd);
 
                         var newText = e.After.GetText(changeBounds);
                         foreach (var tag in _templateTags)
@@ -252,8 +220,8 @@
                         {
                             var templateStart = closestSpan.DiskBufferSpan.GetStartPoint(e.After);
 
-                            if (change.NewSpan.Start <= templateStart + 1 ||
-                                change.NewSpan.End == closestSpan.DiskBufferSpan.GetEndPoint(e.After) - 1)
+                            if (change.NewSpan.Start <= templateStart + (_maxTemplateTagLength - 1) ||
+                                change.NewSpan.End == closestSpan.DiskBufferSpan.GetEndPoint(e.After) - (_maxTemplateTagLength - 1))
                             {
                                 // we are altering one of the 1st two characters or the last character.  
                                 // Because we're a template that could be messing us up.  
