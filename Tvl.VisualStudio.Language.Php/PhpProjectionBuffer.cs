@@ -73,8 +73,8 @@
                 new object[] { 
                     _diskBuffer.CurrentSnapshot.CreateTrackingSpan(
                         0,
-                        _diskBuffer.CurrentSnapshot.Length,
-                        SpanTrackingMode.EdgeInclusive,
+                        0,
+                        SpanTrackingMode.EdgeExclusive,
                         TrackingFidelityMode.Forward
                     )
                 },
