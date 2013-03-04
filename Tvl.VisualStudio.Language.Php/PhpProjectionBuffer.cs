@@ -16,6 +16,9 @@
 
     internal class PhpProjectionBuffer : IProjectionEditResolver
     {
+        private static readonly string[] _templateTags = new string[] { "<?php", "<?=", "?>" };
+        private static readonly EditOptions _editOptions = new EditOptions(true, new StringDifferenceOptions(StringDifferenceTypes.Character, 0, false));
+
         private readonly ITextBuffer _diskBuffer;           // the buffer as it appears on disk.
         private readonly IProjectionBuffer _projBuffer; // the buffer we project into        
         private readonly List<SpanInfo> _spans = new List<SpanInfo>();
@@ -24,8 +27,6 @@
         private readonly IContentType _contentType;
         private readonly IElisionBuffer _htmlBuffer;
         private readonly IProjectionBuffer _templateBuffer;
-        private static string[] _templateTags = new string[] { "<?php", "<?=", "?>" };
-        private static EditOptions _editOptions = new EditOptions(true, new StringDifferenceOptions(StringDifferenceTypes.Character, 0, false));
 
         public PhpProjectionBuffer(IContentTypeRegistryService contentRegistry, IProjectionBufferFactoryService bufferFactory, ITextBuffer diskBuffer, IBufferGraphFactoryService bufferGraphFactory, IContentType contentType)
         {
