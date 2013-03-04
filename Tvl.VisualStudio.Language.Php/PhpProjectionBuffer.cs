@@ -647,7 +647,7 @@
             #endregion;
         }
 
-        class TrackingSpanComparer : IComparer<SpanInfo>
+        private class TrackingSpanComparer : IComparer<SpanInfo>
         {
             private readonly ITextSnapshot _snapshot;
 
