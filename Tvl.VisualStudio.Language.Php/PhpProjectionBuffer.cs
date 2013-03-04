@@ -3,6 +3,7 @@
     using TextReader = System.IO.TextReader;
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
     using System.Text;
     using Microsoft.VisualStudio.Text;
@@ -670,7 +671,7 @@
 
         #region IProjectionEditResolver Members
 
-        public void FillInInsertionSizes(SnapshotPoint projectionInsertionPoint, System.Collections.ObjectModel.ReadOnlyCollection<SnapshotPoint> sourceInsertionPoints, string insertionText, IList<int> insertionSizes)
+        public void FillInInsertionSizes(SnapshotPoint projectionInsertionPoint, ReadOnlyCollection<SnapshotPoint> sourceInsertionPoints, string insertionText, IList<int> insertionSizes)
         {
             for (int i = 0; i < sourceInsertionPoints.Count; i++)
             {
@@ -682,7 +683,7 @@
             }
         }
 
-        public void FillInReplacementSizes(SnapshotSpan projectionReplacementSpan, System.Collections.ObjectModel.ReadOnlyCollection<SnapshotSpan> sourceReplacementSpans, string insertionText, IList<int> insertionSizes)
+        public void FillInReplacementSizes(SnapshotSpan projectionReplacementSpan, ReadOnlyCollection<SnapshotSpan> sourceReplacementSpans, string insertionText, IList<int> insertionSizes)
         {
             for (int i = 0; i < sourceReplacementSpans.Count; i++)
             {
@@ -695,7 +696,7 @@
             }
         }
 
-        public int GetTypicalInsertionPosition(SnapshotPoint projectionInsertionPoint, System.Collections.ObjectModel.ReadOnlyCollection<SnapshotPoint> sourceInsertionPoints)
+        public int GetTypicalInsertionPosition(SnapshotPoint projectionInsertionPoint, ReadOnlyCollection<SnapshotPoint> sourceInsertionPoints)
         {
             return sourceInsertionPoints[0];
         }
