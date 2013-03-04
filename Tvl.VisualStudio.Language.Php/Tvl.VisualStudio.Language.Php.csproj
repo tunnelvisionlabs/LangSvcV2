@@ -246,7 +246,14 @@
       <DependentUpon>V4PhpClassifierLexer.g4</DependentUpon>
     </Compile>
     <Compile Include="Classification\V4PhpClassifierLexerState.cs" />
+    <Compile Include="CustomTrackingSpan.cs" />
+    <Compile Include="HtmlCompletionSource.cs" />
+    <Compile Include="HtmlCompletionSourceProvider.cs" />
+    <Compile Include="HtmlIntellisenseController.cs" />
+    <Compile Include="HtmlIntellisenseControllerProvider.cs" />
+    <Compile Include="PhpBlock.cs" />
     <Compile Include="PhpEditorFactory.cs" />
+    <Compile Include="PhpEditorFactoryWithEncoding.cs" />
     <Compile Include="PhpProjectionBuffer.cs" />
     <Compile Include="PhpTextStructureNavigator.cs" />
     <Compile Include="PhpTextStructureNavigatorProvider.cs" />
@@ -289,9 +296,16 @@
     <Compile Include="Outlining\PhpOutliningTagger.cs" />
     <Compile Include="Outlining\PhpOutliningTaggerProvider.cs" />
     <Compile Include="PhpServices.cs" />
+    <Compile Include="ProjectionClassifier.cs" />
+    <Compile Include="ProjectionClassifierProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PhpLanguageInfo.cs" />
     <Compile Include="PhpLanguagePackage.cs" />
+    <Compile Include="SnapshotSpanSourceCodeReader.cs" />
+    <Compile Include="TemplateRegion.cs" />
+    <Compile Include="TemplateToken.cs" />
+    <Compile Include="TemplateTokenizer.cs" />
+    <Compile Include="TemplateTokenKind.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\External\Eula.rtf">

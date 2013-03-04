@@ -31,8 +31,10 @@
     using Microsoft.VisualStudio.Utilities;
     using IVsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
     using Microsoft.VisualStudio.Text;
+    using System.Runtime.InteropServices;
     using Path = System.IO.Path;
 
+    [Guid("F25F5E78-96E7-4B63-9782-A81F7B0C3DE5")]
     public class PhpEditorFactory : IVsEditorFactory
     {
         private PhpLanguagePackage _package;
@@ -268,7 +270,7 @@
             Type codeWindowType = typeof(IVsCodeWindow);
             Guid riid = codeWindowType.GUID;
             Guid clsid = typeof(VsCodeWindowClass).GUID;
-            var compModel = (IComponentModel)_package.GetService(typeof(SComponentModel));
+            var compModel = _package.AsVsServiceProvider().GetComponentModel();
             var adapterService = compModel.GetService<IVsEditorAdaptersFactoryService>();
 
             var window = adapterService.CreateVsCodeWindowAdapter((IOleServiceProvider)_serviceProvider.GetService(typeof(IOleServiceProvider)));
@@ -286,7 +288,7 @@
                 }
             }
 
-            var textMgr = (IVsTextManager)_package.GetService(typeof(SVsTextManager));
+            var textMgr = _package.AsVsServiceProvider().GetTextManager();
 
             var bufferEventListener = new TextBufferEventListener(compModel, textLines, textMgr, window);
             if (!createdDocData)
@@ -350,11 +352,11 @@
                 IContentType contentType = SniffContentType(diskBuffer) ??
                                            contentRegistry.GetContentType("HTML");
 
-                var projBuffer = new TemplateProjectionBuffer(contentRegistry, factService, diskBuffer, _compModel.GetService<IBufferGraphFactoryService>(), contentType);
+                var projBuffer = new PhpProjectionBuffer(contentRegistry, factService, diskBuffer, _compModel.GetService<IBufferGraphFactoryService>(), contentType);
                 diskBuffer.ChangedHighPriority += projBuffer.DiskBufferChanged;
-                diskBuffer.Properties.AddProperty(typeof(TemplateProjectionBuffer), projBuffer);
+                diskBuffer.Properties.AddProperty(typeof(PhpProjectionBuffer), projBuffer);
 
-                Guid langSvcGuid = typeof(DjangoLanguageInfo).GUID;
+                Guid langSvcGuid = typeof(PhpLanguageInfo).GUID;
                 _textLines.SetLanguageServiceID(ref langSvcGuid);
 
                 adapterService.SetDataBuffer(_textLines, projBuffer.ProjectionBuffer);
@@ -381,7 +383,7 @@
                 ITextDocument textDocument;
                 if (diskBuffer.Properties.TryGetProperty<ITextDocument>(typeof(ITextDocument), out textDocument))
                 {
-                    if (Path.GetExtension(textDocument.FilePath).Equals(".djt", StringComparison.OrdinalIgnoreCase))
+                    if (Path.GetExtension(textDocument.FilePath).Equals(PhpConstants.Php5FileExtension, StringComparison.OrdinalIgnoreCase))
                     {
                         var path = Path.GetFileNameWithoutExtension(textDocument.FilePath);
                         if (path.IndexOf('.') != -1)
@@ -398,10 +400,6 @@
             }
 
             #endregion
-        }
-
-        public class PhpEditorFactoryWithEncoding : PhpEditorFactory
-        {
         }
     }
 }

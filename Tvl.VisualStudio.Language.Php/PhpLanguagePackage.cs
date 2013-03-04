@@ -26,6 +26,8 @@
         EnableLineNumbers = true,
         //CodeSense = true,
         RequestStockColors = true)]
+    [ProvideEditorExtension(typeof(PhpEditorFactory), PhpConstants.Php5FileExtension, 50, NameResourceID = 101)]
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.Php5FileExtension, 50, NameResourceID = 102)]
     [ProvideLanguageExtension(typeof(PhpLanguageInfo), PhpConstants.PhpFileExtension)]
     [ProvideLanguageExtension(typeof(PhpLanguageInfo), PhpConstants.Php5FileExtension)]
     [ProvideBindingPath]
@@ -46,6 +48,9 @@
             // register the language service
             _languageInfo = new PhpLanguageInfo(this.AsVsServiceProvider());
             ((IServiceContainer)this).AddService(typeof(PhpLanguageInfo), _languageInfo, true);
+
+            RegisterEditorFactory(new PhpEditorFactory(this));
+            RegisterEditorFactory(new PhpEditorFactoryWithEncoding(this));
         }
 
         protected override void Dispose(bool disposing)

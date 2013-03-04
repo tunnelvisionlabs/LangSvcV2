@@ -13,7 +13,7 @@
     using Microsoft.VisualStudio.Text.Differencing;
     using Microsoft.VisualStudio.TextManager.Interop;
 
-    public class PhpProjectionBuffer : IProjectionEditResolver
+    internal class PhpProjectionBuffer : IProjectionEditResolver
     {
         private readonly ITextBuffer _diskBuffer;           // the buffer as it appears on disk.
         private readonly IProjectionBuffer _projBuffer; // the buffer we project into        
@@ -23,7 +23,7 @@
         private readonly IContentType _contentType;
         private readonly IElisionBuffer _htmlBuffer;
         private readonly IProjectionBuffer _templateBuffer;
-        private static string[] _templateTags = new string[] { "{{", "{%", "{#", "#}", "%}", "}}" };
+        private static string[] _templateTags = new string[] { "<?php", "?>" };
         private static EditOptions _editOptions = new EditOptions(true, new StringDifferenceOptions(StringDifferenceTypes.Character, 0, false));
 
         public PhpProjectionBuffer(IContentTypeRegistryService contentRegistry, IProjectionBufferFactoryService bufferFactory, ITextBuffer diskBuffer, IBufferGraphFactoryService bufferGraphFactory, IContentType contentType)
@@ -76,7 +76,7 @@
                     )
                 },
                 ProjectionBufferOptions.None,
-                _contentRegistry.GetContentType(TemplateContentType.ContentTypeName)
+                _contentRegistry.GetContentType(PhpConstants.PhpContentType)
             );
             res.Properties.AddProperty(typeof(PhpProjectionBuffer), this);
             return res;
@@ -277,7 +277,7 @@
                         _spans[closest] = new SpanInfo(
                             closestSpan.DiskBufferSpan,
                             closestSpan.Kind,
-                            DjangoBlock.Parse(closestSpan.DiskBufferSpan.GetText(closestSpan.DiskBufferSpan.TextBuffer.CurrentSnapshot))
+                            PhpBlock.Parse(closestSpan.DiskBufferSpan.GetText(closestSpan.DiskBufferSpan.TextBuffer.CurrentSnapshot))
                         );
                     }
                 }
@@ -387,7 +387,7 @@
                             ),
                             curToken.Kind,
                             curToken.Kind == TemplateTokenKind.Block ?
-                                DjangoBlock.Parse(_diskBuffer.CurrentSnapshot.GetText(sourceSpan)) :
+                                PhpBlock.Parse(_diskBuffer.CurrentSnapshot.GetText(sourceSpan)) :
                                 null
                         )
                     );
@@ -566,7 +566,7 @@
         {
             public readonly ITrackingSpan DiskBufferSpan;
             public readonly TemplateTokenKind Kind;
-            public readonly DjangoBlock Block;
+            public readonly PhpBlock Block;
 
             public SpanInfo(ITrackingSpan diskBufferSpan, TemplateTokenKind kind)
             {
@@ -575,15 +575,15 @@
                 Block = null;
             }
 
-            public SpanInfo(ITrackingSpan diskBufferSpan, TemplateTokenKind kind, DjangoBlock djangoBlock)
+            public SpanInfo(ITrackingSpan diskBufferSpan, TemplateTokenKind kind, PhpBlock phpBlock)
             {
                 DiskBufferSpan = diskBufferSpan;
                 Kind = kind;
-                Block = djangoBlock;
+                Block = phpBlock;
             }
         }
 
-        class ComparisonTrackingSpan : ITrackingSpan
+        private class ComparisonTrackingSpan : ITrackingSpan
         {
             private readonly int _start, _end;
             public ComparisonTrackingSpan(int start, int end)
