@@ -24,7 +24,7 @@
         private readonly IContentType _contentType;
         private readonly IElisionBuffer _htmlBuffer;
         private readonly IProjectionBuffer _templateBuffer;
-        private static string[] _templateTags = new string[] { "<?php", "?>" };
+        private static string[] _templateTags = new string[] { "<?php", "<?=", "?>" };
         private static EditOptions _editOptions = new EditOptions(true, new StringDifferenceOptions(StringDifferenceTypes.Character, 0, false));
 
         public PhpProjectionBuffer(IContentTypeRegistryService contentRegistry, IProjectionBufferFactoryService bufferFactory, ITextBuffer diskBuffer, IBufferGraphFactoryService bufferGraphFactory, IContentType contentType)

@@ -84,14 +84,23 @@
             if (ReadChar() != '?')
                 return null;
 
-            if (ReadChar() != 'p')
-                return null;
+            switch (ReadChar())
+            {
+            case 'p':
+                if (ReadChar() != 'h')
+                    return null;
 
-            if (ReadChar() != 'h')
-                return null;
+                if (ReadChar() != 'p')
+                    return null;
 
-            if (ReadChar() != 'p')
+                break;
+
+            case '=':
+                break;
+
+            default:
                 return null;
+            }
 
             return ReadToClose(start, TemplateTokenKind.Block, '?');
         }

@@ -19,7 +19,8 @@ NEWLINE
 	;
 
 HTML_START_CODE
-	:	'<?php' -> pushMode(PhpCode)
+	:	('<?php' | '<?=')
+		-> pushMode(PhpCode)
 	;
 
 TEXT
