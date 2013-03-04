@@ -1,13 +1,10 @@
 ﻿namespace Tvl.VisualStudio.Language.Php.Classification
 {
-    using System.Collections.Generic;
     using Antlr4.Runtime;
     using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
     using Tvl.VisualStudio.Language.Parsing4;
-
-    using StringComparer = System.StringComparer;
 
     internal sealed partial class V4PhpClassifier : AntlrClassifierBase<V4PhpClassifierLexerState>
     {
@@ -22,14 +19,7 @@
         private readonly IClassificationType _docCommentTag;
         private readonly IClassificationType _docCommentInvalidTag;
 
-        private readonly IClassificationType _htmlAttributeName;
-        private readonly IClassificationType _htmlAttributeValue;
-        private readonly IClassificationType _htmlComment;
-        private readonly IClassificationType _htmlElementName;
-        private readonly IClassificationType _htmlEntity;
-        private readonly IClassificationType _htmlOperator;
         private readonly IClassificationType _htmlServerSideScript;
-        private readonly IClassificationType _htmlTagDelimiter;
 
         public V4PhpClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService, IClassificationTypeRegistryService classificationTypeRegistryService)
             : base(textBuffer)
@@ -45,14 +35,7 @@
             this._docCommentTag = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.DocCommentTag);
             this._docCommentInvalidTag = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.DocCommentInvalidTag);
 
-            this._htmlAttributeName = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlAttributeName);
-            this._htmlAttributeValue = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlAttributeValue);
-            this._htmlComment = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlComment);
-            this._htmlElementName = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlElementName);
-            this._htmlEntity = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlEntity);
-            this._htmlOperator = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlOperator);
             this._htmlServerSideScript = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlServerSideScript);
-            this._htmlTagDelimiter = this._classificationTypeRegistryService.GetClassificationType(PhpClassificationTypeNames.HtmlTagDelimiter);
         }
 
         protected override V4PhpClassifierLexerState GetStartState()
@@ -154,31 +137,6 @@
             case V4PhpClassifierLexer.CLOSE_PHP_TAG:
                 return _htmlServerSideScript;
 
-            // HTML Attribute Name
-            case V4PhpClassifierLexer.HTML_ATTRIBUTE_NAME:
-                return _htmlAttributeName;
-
-            // HTML Attribute Value
-            case V4PhpClassifierLexer.HTML_ATTRIBUTE_VALUE:
-                return _htmlAttributeValue;
-
-            // HTML Entity Name
-            case V4PhpClassifierLexer.HTML_ELEMENT_NAME:
-                return _htmlElementName;
-
-            // HTML Operator
-            case V4PhpClassifierLexer.HTML_OPERATOR:
-                return _htmlOperator;
-
-            // HTML Comment
-            case V4PhpClassifierLexer.HTML_COMMENT:
-                return _htmlComment;
-
-            // HTML Tag Delimiter
-            case V4PhpClassifierLexer.HTML_START_TAG:
-            case V4PhpClassifierLexer.HTML_CLOSE_TAG:
-                return _htmlTagDelimiter;
-
             case V4PhpClassifierLexer.PHP_COMMENT:
             case V4PhpClassifierLexer.PHP_ML_COMMENT:
                 return _standardClassificationService.Comment;
@@ -191,9 +149,6 @@
 
             case V4PhpClassifierLexer.DOC_COMMENT_INVALID_TAG:
                 return _docCommentInvalidTag;
-
-            case V4PhpClassifierLexer.HTML_CDATA:
-                return _standardClassificationService.ExcludedCode;
 
             default:
                 return null;

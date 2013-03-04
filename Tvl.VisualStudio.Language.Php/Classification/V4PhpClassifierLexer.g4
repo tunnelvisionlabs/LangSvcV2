@@ -7,162 +7,28 @@ lexer grammar V4PhpClassifierLexer;
 }
 
 tokens {
-	HTML_ELEMENT_NAME,
-	HTML_ATTRIBUTE_NAME,
-	HTML_ATTRIBUTE_VALUE,
 	DOC_COMMENT_INVALID_TAG,
 }
 
 WS
-	:	' '
+	:	[ \t]+
 	;
 
 NEWLINE
 	:	'\r'? '\n'
 	;
 
+HTML_START_CODE
+	:	'<?php' -> pushMode(PhpCode)
+	;
+
+TEXT
+	:	~[<\r\n]+
+	;
+
 ANYCHAR
 	:	.
 	;
-
-mode HtmlText;
-
-	HtmlText_NEWLINE : NEWLINE -> type(NEWLINE);
-
-	HTML_START_CODE
-		:	'<?php' -> pushMode(PhpCode)
-		;
-
-	HTML_COMMENT
-		:	'<!--'
-			-> pushMode(HtmlComment)
-		;
-
-	HTML_CDATA
-		:	'<![CDATA['
-			-> pushMode(HtmlCdata)
-		;
-
-	HTML_START_TAG
-		:	{IsTagStart(_input)}? '<' [/!]?
-			-> pushMode(HtmlTag)
-		;
-
-	HTML_TEXT
-		:	(	~[<&\r\n]
-			|	{!IsTagStart(_input)}? '<'
-			)+
-		;
-
-	HTML_CHAR_REF
-		:	'&'
-			(	// named character reference
-				[a-zA-Z] [a-zA-Z0-9]* ';'
-			|	// decimal numeric character reference
-				'#' [0-9]+ ';'
-			|	// hexadecimal numeric character reference
-				'#' [xX] [0-9a-fA-F]+ ';'
-			)
-		;
-
-	HTML_STRAY_CHAR_REF
-		:	'&' -> type(HTML_TEXT)
-		;
-
-	HtmlText_ANYCHAR : ANYCHAR -> type(ANYCHAR);
-
-mode HtmlComment;
-
-	HtmlComment_NEWLINE : NEWLINE -> type(NEWLINE);
-
-	HtmlComment_TEXT : ~[\r\n'-]+ -> type(HTML_COMMENT);
-	HtmlComment_DASH : '-' -> type(HTML_COMMENT);
-
-	END_HTML_COMMENT : '-->' -> type(HTML_COMMENT), popMode;
-
-mode HtmlCdata;
-
-	HtmlCdata_NEWLINE : NEWLINE -> type(NEWLINE);
-
-	HtmlCdata_DATA : ~[\r\n\]]+ -> type(HTML_CDATA);
-	HtmlCdata_RBRACK : ']' -> type(HTML_CDATA);
-
-	END_HTML_CDATA : ']]>' -> type(HTML_CDATA), popMode;
-
-mode HtmlTag;
-
-	HtmlTag_NEWLINE : NEWLINE -> type(NEWLINE);
-	HtmlTag_WS : WS -> type(WS);
-
-	HtmlTag_PHP_TAG_START : HTML_START_CODE -> type(HTML_START_CODE), pushMode(PhpCode);
-
-	HTML_CLOSE_TAG
-		:	'/'? '>' -> popMode
-		;
-
-	HTML_OPERATOR
-		:	'='
-		;
-
-	NAME
-		:	~(	'\u0000'..'\u001F' | '\u007f' /*C0_CONTROL_CHAR*/
-			|	'\u0080'..'\u009f' /*C1_CONTROL_CHAR*/
-			|	' ' | '"' | '\'' | '>' | '/' | '='
-			)+
-		;
-
-	SINGLE_QUOTE_STRING
-		:	'\'' -> pushMode(SingleQuoteString)
-		;
-
-	DOUBLE_QUOTE_STRING
-		:	'"' -> pushMode(DoubleQuoteString)
-		;
-
-	//fragment
-	//C0_CONTROL_CHAR
-	//	:	'\u0000'..'\u001F'
-	//	|	'\u007f'
-	//	;
-
-	//fragment
-	//C1_CONTROL_CHAR
-	//	:	'\u0080'..'\u009f'
-	//	;
-
-	HtmlTag_ANYCHAR : ANYCHAR -> type(ANYCHAR);
-
-mode SingleQuoteString;
-
-	SingleQuoteString_NEWLINE : NEWLINE -> type(NEWLINE);
-
-	SingleQuoteString_PHP_TAG_START : HTML_START_CODE -> type(HTML_START_CODE), pushMode(PhpCode);
-
-	SingleQuoteString_NOT_TAG_START : '<' -> type(SINGLE_QUOTE_STRING);
-
-	CONTINUE_SINGLE_QUOTE_STRING
-		:	~(['<\r\n])+ -> type(SINGLE_QUOTE_STRING)
-		;
-
-	END_SINGLE_QUOTE_STRING
-		:	'\'' -> type(SINGLE_QUOTE_STRING), popMode
-		;
-
-mode DoubleQuoteString;
-
-	DoubleQuoteString_NEWLINE : NEWLINE -> type(NEWLINE);
-
-	DoubleQuoteString_PHP_TAG_START : HTML_START_CODE -> type(HTML_START_CODE), pushMode(PhpCode);
-
-	DoubleQuoteString_NOT_TAG_START : '<' -> type(DOUBLE_QUOTE_STRING);
-
-	CONTINUE_DOUBLE_QUOTE_STRING
-		:	~(["<\r\n])+ -> type(DOUBLE_QUOTE_STRING)
-		;
-
-	END_DOUBLE_QUOTE_STRING
-		:	'"' -> type(DOUBLE_QUOTE_STRING), popMode
-		;
 
 mode PhpCode;
 
