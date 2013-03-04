@@ -395,7 +395,7 @@
 
                     newProjectionSpans.Add(
                         new CustomTrackingSpan(
-                            _templateBuffer.CurrentSnapshot,
+                            _diskBuffer.CurrentSnapshot,
                             sourceSpan,
                             PointTrackingMode.Positive,
                             PointTrackingMode.Negative
