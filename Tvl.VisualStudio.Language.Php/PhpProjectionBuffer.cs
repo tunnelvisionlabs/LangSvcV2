@@ -1,18 +1,17 @@
 ﻿namespace Tvl.VisualStudio.Language.Php
 {
-    using TextReader = System.IO.TextReader;
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
-    using System.Text;
     using Microsoft.VisualStudio.Text;
-    using Debug = System.Diagnostics.Debug;
-    using Microsoft.VisualStudio.Text.Projection;
-    using Microsoft.VisualStudio.Utilities;
-    using StringReader = System.IO.StringReader;
     using Microsoft.VisualStudio.Text.Differencing;
+    using Microsoft.VisualStudio.Text.Projection;
     using Microsoft.VisualStudio.TextManager.Interop;
+    using Microsoft.VisualStudio.Utilities;
+    using Debug = System.Diagnostics.Debug;
+    using StringReader = System.IO.StringReader;
+    using TextReader = System.IO.TextReader;
 
     internal class PhpProjectionBuffer : IProjectionEditResolver
     {
