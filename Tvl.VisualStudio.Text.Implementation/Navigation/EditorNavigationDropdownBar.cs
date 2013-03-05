@@ -346,9 +346,10 @@
                 if (target != null)
                 {
                     var seek = target.Seek.Snapshot == null ? target.Span : target.Seek;
+                    seek = MapTo(seek, _currentTextView.TextSnapshot, SpanTrackingMode.EdgeInclusive);
                     _currentTextView.Caret.MoveTo(seek.Start);
                     _currentTextView.Selection.Select(seek, false);
-                    _currentTextView.ViewScroller.EnsureSpanVisible(target.Seek);
+                    _currentTextView.ViewScroller.EnsureSpanVisible(seek);
                     Keyboard.Focus(_currentTextView.VisualElement);
                 }
             }
