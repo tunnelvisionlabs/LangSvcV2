@@ -590,6 +590,19 @@
                 return;
             }
 
+            try
+            {
+                UpdateSelectedNavigationTargetsImpl();
+            }
+            catch (Exception ex)
+            {
+                if (!ex.IsCritical())
+                    throw;
+            }
+        }
+
+        private void UpdateSelectedNavigationTargetsImpl()
+        {
             var currentPosition = _currentTextView.Caret.Position.BufferPosition;
 
             for (int i = 0; i < _navigationControls.Length; i++)
