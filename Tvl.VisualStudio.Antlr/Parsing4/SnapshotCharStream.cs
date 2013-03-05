@@ -50,18 +50,6 @@
             private set;
         }
 
-        public int Line
-        {
-            get;
-            set;
-        }
-
-        public int CharPositionInLine
-        {
-            get;
-            set;
-        }
-
         public int Size
         {
             get
@@ -110,16 +98,6 @@
             int la = La(1);
             if (la < 0)
                 return;
-
-            if (la == '\n')
-            {
-                Line++;
-                CharPositionInLine = 0;
-            }
-            else
-            {
-                CharPositionInLine++;
-            }
 
             Index++;
             UpdateCachedLine();
@@ -177,8 +155,6 @@
 
             Index = index;
             var line = Snapshot.GetLineFromPosition(Index);
-            Line = line.LineNumber;
-            CharPositionInLine = Index - line.Start.Position;
             UpdateCachedLine();
         }
 
