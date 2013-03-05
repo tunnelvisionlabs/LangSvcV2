@@ -7,7 +7,9 @@
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Editor;
+    using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
+    using Microsoft.VisualStudio.Text.Projection;
     using Microsoft.VisualStudio.TextManager.Interop;
     using Tvl.VisualStudio.Shell;
 
@@ -32,6 +34,7 @@
         private readonly IVsCodeWindow _codeWindow;
         private readonly IVsEditorAdaptersFactoryService _editorAdaptersFactory;
         private readonly IEnumerable<IEditorNavigationSource> _sources;
+        private readonly IBufferGraphFactoryService _bufferGraphFactoryService;
         private readonly IEditorNavigationTypeRegistryService _editorNavigationTypeRegistryService;
         private readonly Dispatcher _dispatcher;
         private readonly ImageList _imageList;
@@ -49,16 +52,18 @@
         private readonly Dictionary<IEditorNavigationTarget, IEditorNavigationTarget> _owners =
             new Dictionary<IEditorNavigationTarget, IEditorNavigationTarget>();
 
-        public EditorNavigationDropdownBar(IVsCodeWindow codeWindow, IVsEditorAdaptersFactoryService editorAdaptersFactory, IEnumerable<IEditorNavigationSource> sources, IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
+        public EditorNavigationDropdownBar(IVsCodeWindow codeWindow, IVsEditorAdaptersFactoryService editorAdaptersFactory, IEnumerable<IEditorNavigationSource> sources, IBufferGraphFactoryService bufferGraphFactoryService, IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
         {
             Contract.Requires<ArgumentNullException>(codeWindow != null, "codeWindow");
             Contract.Requires<ArgumentNullException>(editorAdaptersFactory != null, "editorAdaptersFactory");
             Contract.Requires<ArgumentNullException>(sources != null, "sources");
+            Contract.Requires<ArgumentNullException>(bufferGraphFactoryService != null, "bufferGraphFactoryService");
             Contract.Requires<ArgumentNullException>(editorNavigationTypeRegistryService != null, "editorNavigationTypeRegistryService");
 
             this._codeWindow = codeWindow;
             this._editorAdaptersFactory = editorAdaptersFactory;
             this._sources = sources;
+            this._bufferGraphFactoryService = bufferGraphFactoryService;
             this._editorNavigationTypeRegistryService = editorNavigationTypeRegistryService;
             this._currentTextView = editorAdaptersFactory.GetWpfTextView(codeWindow.GetLastActiveView());
             this._dispatcher = this._currentTextView.VisualElement.Dispatcher;
@@ -619,20 +624,20 @@
                 var positionOrderedItems = control.Item2.OrderBy(j => j.Span.Start).ToArray();
                 var newSelectedItem =
                     positionOrderedItems
-                    .LastOrDefault(j => j.Span.TranslateTo(currentPosition.Snapshot, SpanTrackingMode.EdgeInclusive).Contains(currentPosition));
+                    .LastOrDefault(j => MapTo(j.Span, currentPosition.Snapshot, SpanTrackingMode.EdgeInclusive).Contains(currentPosition));
 
                 if (newSelectedItem == null)
                 {
                     // select the first item starting after the current position
                     newSelectedItem =
-                        positionOrderedItems.FirstOrDefault(j => j.Span.TranslateTo(currentPosition.Snapshot, SpanTrackingMode.EdgeInclusive).Start > currentPosition);
+                        positionOrderedItems.FirstOrDefault(j => MapTo(j.Span, currentPosition.Snapshot, SpanTrackingMode.EdgeInclusive).Start > currentPosition);
                 }
 
                 if (newSelectedItem == null)
                 {
                     // select the last item ending before the current position
                     newSelectedItem =
-                        positionOrderedItems.LastOrDefault(j => j.Span.TranslateTo(currentPosition.Snapshot, SpanTrackingMode.EdgeInclusive).End < currentPosition);
+                        positionOrderedItems.LastOrDefault(j => MapTo(j.Span, currentPosition.Snapshot, SpanTrackingMode.EdgeInclusive).End < currentPosition);
                 }
 
                 if (newSelectedItem == null)
@@ -655,6 +660,20 @@
                     Updating = wasUpdating;
                 }
             }
+        }
+
+        private SnapshotSpan MapTo(SnapshotSpan span, ITextSnapshot snapshot, SpanTrackingMode spanTrackingMode)
+        {
+            if (span.Snapshot.TextBuffer == snapshot.TextBuffer)
+                return span.TranslateTo(snapshot, spanTrackingMode);
+
+            IBufferGraph graph = _bufferGraphFactoryService.CreateBufferGraph(snapshot.TextBuffer);
+            IMappingSpan mappingSpan = graph.CreateMappingSpan(span, spanTrackingMode);
+            NormalizedSnapshotSpanCollection mapped = mappingSpan.GetSpans(snapshot);
+            if (mapped.Count != 1)
+                throw new NotSupportedException();
+
+            return mapped[0];
         }
 
         private void OnCaretPositionChanged(object sender, CaretPositionChangedEventArgs e)
