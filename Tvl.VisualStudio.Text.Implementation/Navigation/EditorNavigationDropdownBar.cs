@@ -340,14 +340,24 @@
             if (Updating)
                 return VSConstants.E_FAIL;
 
-            IEditorNavigationTarget target = _navigationControls[iCombo].Item2[iIndex];
-            if (target != null)
+            try
             {
-                var seek = target.Seek.Snapshot == null ? target.Span : target.Seek;
-                _currentTextView.Caret.MoveTo(seek.Start);
-                _currentTextView.Selection.Select(seek, false);
-                _currentTextView.ViewScroller.EnsureSpanVisible(target.Seek);
-                Keyboard.Focus(_currentTextView.VisualElement);
+                IEditorNavigationTarget target = _navigationControls[iCombo].Item2[iIndex];
+                if (target != null)
+                {
+                    var seek = target.Seek.Snapshot == null ? target.Span : target.Seek;
+                    _currentTextView.Caret.MoveTo(seek.Start);
+                    _currentTextView.Selection.Select(seek, false);
+                    _currentTextView.ViewScroller.EnsureSpanVisible(target.Seek);
+                    Keyboard.Focus(_currentTextView.VisualElement);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.IsCritical())
+                    throw;
+
+                return Marshal.GetHRForException(ex);
             }
 
             return VSConstants.S_OK;
