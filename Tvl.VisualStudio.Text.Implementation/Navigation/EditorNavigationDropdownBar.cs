@@ -670,10 +670,10 @@
             IBufferGraph graph = _bufferGraphFactoryService.CreateBufferGraph(snapshot.TextBuffer);
             IMappingSpan mappingSpan = graph.CreateMappingSpan(span, spanTrackingMode);
             NormalizedSnapshotSpanCollection mapped = mappingSpan.GetSpans(snapshot);
-            if (mapped.Count != 1)
-                throw new NotSupportedException();
+            if (mapped.Count == 1)
+                return mapped[0];
 
-            return mapped[0];
+            return new SnapshotSpan(mapped[0].Start, mapped[mapped.Count - 1].End);
         }
 
         private void OnCaretPositionChanged(object sender, CaretPositionChangedEventArgs e)
