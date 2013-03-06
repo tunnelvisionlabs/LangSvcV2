@@ -11,13 +11,7 @@ options {
 
 compileUnit
 @version{4}
-	:	(htmlText? code)*
-		htmlText?
-		EOF
-	;
-
-htmlText
-	:	~HTML_START_CODE+
+	:	code* EOF
 	;
 
 code
@@ -43,8 +37,9 @@ codeBlock
 	;
 
 htmlLiteral
+@version{5}
 	:	CLOSE_PHP_TAG
-			~HTML_START_CODE*
+			// everything between these tags is on the hidden channel
 		HTML_START_CODE
 	;
 
