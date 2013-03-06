@@ -251,6 +251,12 @@
     <Compile Include="HtmlCompletionSourceProvider.cs" />
     <Compile Include="HtmlIntellisenseController.cs" />
     <Compile Include="HtmlIntellisenseControllerProvider.cs" />
+    <Compile Include="Parser\PhpLexer.g4.cs">
+      <DependentUpon>PhpLexer.g4</DependentUpon>
+    </Compile>
+    <Compile Include="Parser\PhpParser.g4.cs">
+      <DependentUpon>PhpParser.g4</DependentUpon>
+    </Compile>
     <Compile Include="PhpBlock.cs" />
     <Compile Include="PhpEditorFactory.cs" />
     <Compile Include="PhpEditorFactoryWithEncoding.cs" />
@@ -338,6 +344,14 @@
     <Antlr4 Include="Classification\V4PhpClassifierLexer.g4">
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>Tvl.VisualStudio.Language.Php.Classification</CustomToolNamespace>
+    </Antlr4>
+    <Antlr4 Include="Parser\PhpLexer.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Tvl.VisualStudio.Language.Php.Parser</CustomToolNamespace>
+    </Antlr4>
+    <Antlr4 Include="Parser\PhpParser.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Tvl.VisualStudio.Language.Php.Parser</CustomToolNamespace>
     </Antlr4>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
