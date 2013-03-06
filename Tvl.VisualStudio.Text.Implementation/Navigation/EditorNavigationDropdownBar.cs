@@ -345,6 +345,10 @@
                 IEditorNavigationTarget target = _navigationControls[iCombo].Item2[iIndex];
                 if (target != null)
                 {
+                    // show the span, then adjust if necessary to make sure the seek portion is visible
+                    var span = MapTo(target.Span, _currentTextView.TextSnapshot, SpanTrackingMode.EdgeInclusive);
+                    _currentTextView.ViewScroller.EnsureSpanVisible(span, EnsureSpanVisibleOptions.AlwaysCenter | EnsureSpanVisibleOptions.ShowStart);
+
                     var seek = target.Seek.Snapshot == null ? target.Span : target.Seek;
                     seek = MapTo(seek, _currentTextView.TextSnapshot, SpanTrackingMode.EdgeInclusive);
                     _currentTextView.Caret.MoveTo(seek.Start);
