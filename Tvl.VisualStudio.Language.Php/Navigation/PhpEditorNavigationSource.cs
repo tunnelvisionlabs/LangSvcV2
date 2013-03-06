@@ -244,7 +244,7 @@
                 SnapshotSpan span = new SnapshotSpan(_snapshot, new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1));
                 SnapshotSpan seek = span;
                 if (context.PHP_IDENTIFIER() != null)
-                    new SnapshotSpan(_snapshot, new Span(context.PHP_IDENTIFIER().Symbol.StartIndex, 0));
+                    seek = new SnapshotSpan(_snapshot, new Span(context.PHP_IDENTIFIER().Symbol.StartIndex, 0));
 
                 StandardGlyphGroup glyphGroup = StandardGlyphGroup.GlyphGroupMethod;
                 //StandardGlyphItem glyphItem = GetGlyphItemFromChildModifier(tree);
