@@ -383,7 +383,8 @@
                 ITextDocument textDocument;
                 if (diskBuffer.Properties.TryGetProperty<ITextDocument>(typeof(ITextDocument), out textDocument))
                 {
-                    if (Path.GetExtension(textDocument.FilePath).Equals(PhpConstants.Php5FileExtension, StringComparison.OrdinalIgnoreCase))
+                    if (Path.GetExtension(textDocument.FilePath).Equals(PhpConstants.PhpFileExtension, StringComparison.OrdinalIgnoreCase)
+                        || Path.GetExtension(textDocument.FilePath).Equals(PhpConstants.Php5FileExtension, StringComparison.OrdinalIgnoreCase))
                     {
                         var path = Path.GetFileNameWithoutExtension(textDocument.FilePath);
                         if (path.IndexOf('.') != -1)

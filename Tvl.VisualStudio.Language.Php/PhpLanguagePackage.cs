@@ -26,7 +26,9 @@
         EnableLineNumbers = true,
         //CodeSense = true,
         RequestStockColors = true)]
+    [ProvideEditorExtension(typeof(PhpEditorFactory), PhpConstants.PhpFileExtension, 50, NameResourceID = 101)]
     [ProvideEditorExtension(typeof(PhpEditorFactory), PhpConstants.Php5FileExtension, 50, NameResourceID = 101)]
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.PhpFileExtension, 50, NameResourceID = 102)]
     [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.Php5FileExtension, 50, NameResourceID = 102)]
     [ProvideLanguageExtension(typeof(PhpLanguageInfo), PhpConstants.PhpFileExtension)]
     [ProvideLanguageExtension(typeof(PhpLanguageInfo), PhpConstants.Php5FileExtension)]
