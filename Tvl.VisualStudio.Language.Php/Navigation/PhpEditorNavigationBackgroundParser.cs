@@ -58,7 +58,7 @@
             parser.BuildParseTree = true;
 
             List<ParseErrorEventArgs> errors = new List<ParseErrorEventArgs>();
-            parser.AddErrorListener(new ErrorListener(errors, outputWindow));
+            parser.AddErrorListener(new ErrorListener(filename, errors, outputWindow));
             var result = parser.compileUnit();
 
             NavigationTreesListener listener = new NavigationTreesListener();

@@ -61,7 +61,7 @@
             parser.BuildParseTree = true;
 
             List<ParseErrorEventArgs> errors = new List<ParseErrorEventArgs>();
-            parser.AddErrorListener(new ErrorListener(errors, outputWindow));
+            parser.AddErrorListener(new ErrorListener(filename, errors, outputWindow));
             var result = parser.compileUnit();
 
             OutliningTreesListener listener = new OutliningTreesListener();
@@ -72,13 +72,15 @@
 
         public class ErrorListener : BaseErrorListener
         {
+            private readonly string _fileName;
             private readonly List<ParseErrorEventArgs> _errors;
             private readonly IOutputWindowPane _outputWindow;
 
-            public ErrorListener(List<ParseErrorEventArgs> errors, IOutputWindowPane outputWindow)
+            public ErrorListener(string fileName, List<ParseErrorEventArgs> errors, IOutputWindowPane outputWindow)
             {
                 Contract.Requires<ArgumentNullException>(errors != null, "errors");
 
+                _fileName = fileName;
                 _errors = errors;
                 _outputWindow = outputWindow;
             }
@@ -96,7 +98,7 @@
                     if (msg.Length > 100)
                         msg = msg.Substring(0, 100) + " ...";
 
-                    _outputWindow.WriteLine(string.Format("{0}({1}:{2}): {3}", recognizer.InputStream.SourceName, line, charPositionInLine, msg));
+                    _outputWindow.WriteLine(string.Format("{0}({1}:{2}): {3}", _fileName ?? recognizer.InputStream.SourceName, line, charPositionInLine, msg));
                 }
 
                 if (_errors.Count > 100)
