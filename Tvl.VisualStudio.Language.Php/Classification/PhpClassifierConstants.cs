@@ -4,7 +4,7 @@
 
     using StringComparer = System.StringComparer;
 
-    partial class PhpClassifier
+    internal static class PhpClassifierConstants
     {
         internal static readonly HashSet<string> Keywords =
             new HashSet<string>(StringComparer.OrdinalIgnoreCase)

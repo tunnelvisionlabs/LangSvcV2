@@ -121,11 +121,11 @@
                 return _standardClassificationService.Keyword;
 
             case V4PhpClassifierLexer.PHP_IDENTIFIER:
-                if (PhpClassifier.Keywords.Contains(token.Text))
+                if (PhpClassifierConstants.Keywords.Contains(token.Text))
                     return _standardClassificationService.Keyword;
-                else if (PhpClassifier.BuiltinFunctions.Contains(token.Text))
+                else if (PhpClassifierConstants.BuiltinFunctions.Contains(token.Text))
                     return _globalFunction;
-                else if (PhpClassifier.BuiltinObjects.Contains(token.Text) || PhpClassifier.PredefinedConstants.Contains(token.Text))
+                else if (PhpClassifierConstants.BuiltinObjects.Contains(token.Text) || PhpClassifierConstants.PredefinedConstants.Contains(token.Text))
                     return _globalObject;
                 else if (token.Text[0] == '$')
                     return _standardClassificationService.SymbolDefinition;
