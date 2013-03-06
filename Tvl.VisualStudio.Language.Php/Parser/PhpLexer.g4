@@ -12,10 +12,12 @@ tokens {
 
 WS
 	:	[ \t]+
+		-> channel(HIDDEN)
 	;
 
 NEWLINE
 	:	'\r'? '\n'
+		-> channel(HIDDEN)
 	;
 
 HTML_START_CODE
@@ -25,6 +27,7 @@ HTML_START_CODE
 
 TEXT
 	:	~[<\r\n]+
+		-> channel(HIDDEN)
 	;
 
 ANYCHAR
@@ -33,8 +36,8 @@ ANYCHAR
 
 mode PhpCode;
 
-	PhpCode_NEWLINE : NEWLINE -> type(NEWLINE);
-	PhpCode_WS : WS -> type(WS);
+	PhpCode_NEWLINE : NEWLINE -> type(NEWLINE), channel(HIDDEN);
+	PhpCode_WS : WS -> type(WS), channel(HIDDEN);
 
 	// keywords
 	KW___CLASS__ : '__CLASS__';
