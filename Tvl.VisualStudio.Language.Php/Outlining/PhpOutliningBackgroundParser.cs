@@ -2,12 +2,19 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Threading.Tasks;
-    using Antlr.Runtime;
+    using Antlr4.Runtime;
+    using Antlr4.Runtime.Tree;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Language.Php.Parser;
     using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+    using BackgroundParser = Tvl.VisualStudio.Language.Parsing.BackgroundParser;
+    using BaseErrorListener = Antlr4.Runtime.BaseErrorListener;
+    using CommonTokenStream = Antlr4.Runtime.CommonTokenStream;
+    using ParseErrorEventArgs = Tvl.VisualStudio.Language.Parsing.ParseErrorEventArgs;
+    using SnapshotCharStream = Tvl.VisualStudio.Language.Parsing4.SnapshotCharStream;
     using Stopwatch = System.Diagnostics.Stopwatch;
 
     public class PhpOutliningBackgroundParser : BackgroundParser
@@ -31,6 +38,7 @@
             return new PhpOutliningBackgroundParser(textBuffer, taskScheduler, outputWindowService, textDocumentFactoryService);
         }
 
+        [RuleDependency(typeof(PhpParser), PhpParser.RULE_compileUnit, 0, Dependents.Parents)]
         protected override void ReParseImpl()
         {
             var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
@@ -44,32 +52,92 @@
 
             var snapshot = TextBuffer.CurrentSnapshot;
             var input = new SnapshotCharStream(snapshot, new Span(0, snapshot.Length));
-            var lexer = new PhpOutliningLexer(input);
+            var lexer = new PhpLexer(input);
             var tokens = new CommonTokenStream(lexer);
-            var parser = new PhpOutliningParser(tokens);
+
+            var parser = new PhpParser(tokens);
+            parser.BuildParseTree = true;
 
             List<ParseErrorEventArgs> errors = new List<ParseErrorEventArgs>();
-            parser.ParseError += (sender, e) =>
-            {
-                errors.Add(e);
-
-                string message = e.Message;
-                if (message.Length > 100)
-                    message = message.Substring(0, 100) + " ...";
-
-                ITextSnapshotLine startLine = snapshot.GetLineFromPosition(e.Span.Start);
-                int line = startLine.LineNumber;
-                int column = e.Span.Start - startLine.Start;
-
-                if (outputWindow != null)
-                    outputWindow.WriteLine(string.Format("{0}({1}:{2}): {3}", filename, line, column, message));
-
-                if (errors.Count > 100)
-                    throw new OperationCanceledException();
-            };
-
+            parser.AddErrorListener(new ErrorListener(errors, outputWindow));
             var result = parser.compileUnit();
-            OnParseComplete(new PhpOutliningParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), result, parser.OutliningTrees));
+
+            OutliningTreesListener listener = new OutliningTreesListener();
+            ParseTreeWalker.Default.Walk(listener, result);
+
+            OnParseComplete(new PhpOutliningParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), result, listener.OutliningTrees));
+        }
+
+        public class ErrorListener : BaseErrorListener
+        {
+            private readonly List<ParseErrorEventArgs> _errors;
+            private readonly IOutputWindowPane _outputWindow;
+
+            public ErrorListener(List<ParseErrorEventArgs> errors, IOutputWindowPane outputWindow)
+            {
+                Contract.Requires<ArgumentNullException>(errors != null, "errors");
+
+                _errors = errors;
+                _outputWindow = outputWindow;
+            }
+
+            public override void SyntaxError(IRecognizer recognizer, IToken offendingSymbol, int line, int charPositionInLine, string msg, RecognitionException e)
+            {
+                Span span = new Span();
+                if (offendingSymbol != null)
+                    span = Span.FromBounds(offendingSymbol.StartIndex, offendingSymbol.StopIndex + 1);
+
+                _errors.Add(new ParseErrorEventArgs(msg, span));
+
+                if (_outputWindow != null)
+                {
+                    if (msg.Length > 100)
+                        msg = msg.Substring(0, 100) + " ...";
+
+                    _outputWindow.WriteLine(string.Format("{0}({1}:{2}): {3}", recognizer.InputStream.SourceName, line, charPositionInLine, msg));
+                }
+
+                if (_errors.Count > 100)
+                    throw new OperationCanceledException();
+            }
+        }
+
+        protected class OutliningTreesListener : PhpParserBaseListener
+        {
+            private readonly List<ParserRuleContext> _outliningTrees =
+                new List<ParserRuleContext>();
+
+            public ReadOnlyCollection<ParserRuleContext> OutliningTrees
+            {
+                get
+                {
+                    return _outliningTrees.AsReadOnly();
+                }
+            }
+
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_code, 0, Dependents.Parents)]
+            public override void EnterCode(PhpParser.CodeContext context)
+            {
+                _outliningTrees.Add(context);
+            }
+
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_classOrInterfaceDefinition, 0, Dependents.Parents)]
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_codeBlock, 0, Dependents.Self)]
+            public override void EnterClassOrInterfaceDefinition(PhpParser.ClassOrInterfaceDefinitionContext context)
+            {
+                var codeBlock = context.codeBlock();
+                if (codeBlock != null)
+                    _outliningTrees.Add(context.codeBlock());
+            }
+
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionDefinition, 0, Dependents.Parents)]
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_codeBlock, 0, Dependents.Self)]
+            public override void EnterFunctionDefinition(PhpParser.FunctionDefinitionContext context)
+            {
+                var codeBlock = context.codeBlock();
+                if (codeBlock != null)
+                    _outliningTrees.Add(context.codeBlock());
+            }
         }
     }
 }

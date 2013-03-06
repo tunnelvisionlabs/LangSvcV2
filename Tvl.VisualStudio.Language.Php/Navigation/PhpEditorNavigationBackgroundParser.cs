@@ -2,13 +2,19 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Threading.Tasks;
-    using Antlr.Runtime;
+    using Antlr4.Runtime;
+    using Antlr4.Runtime.Tree;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Language.Parsing4;
+    using Tvl.VisualStudio.Language.Php.Parser;
     using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
-    using PhpOutliningLexer = Tvl.VisualStudio.Language.Php.Outlining.PhpOutliningLexer;
+
+    using BackgroundParser = Tvl.VisualStudio.Language.Parsing.BackgroundParser;
+    using ErrorListener = Tvl.VisualStudio.Language.Php.Outlining.PhpOutliningBackgroundParser.ErrorListener;
+    using ParseErrorEventArgs = Tvl.VisualStudio.Language.Parsing.ParseErrorEventArgs;
     using Stopwatch = System.Diagnostics.Stopwatch;
 
     internal class PhpEditorNavigationBackgroundParser : BackgroundParser
@@ -45,32 +51,45 @@
 
             var snapshot = TextBuffer.CurrentSnapshot;
             var input = new SnapshotCharStream(snapshot, new Span(0, snapshot.Length));
-            var lexer = new PhpOutliningLexer(input);
+            var lexer = new PhpLexer(input);
             var tokens = new CommonTokenStream(lexer);
-            var parser = new PhpEditorNavigationParser(tokens);
+            var parser = new PhpParser(tokens);
+            parser.BuildParseTree = true;
 
             List<ParseErrorEventArgs> errors = new List<ParseErrorEventArgs>();
-            parser.ParseError += (sender, e) =>
-            {
-                errors.Add(e);
-
-                string message = e.Message;
-                if (message.Length > 100)
-                    message = message.Substring(0, 100) + " ...";
-
-                ITextSnapshotLine startLine = snapshot.GetLineFromPosition(e.Span.Start);
-                int line = startLine.LineNumber;
-                int column = e.Span.Start - startLine.Start;
-
-                if (outputWindow != null)
-                    outputWindow.WriteLine(string.Format("{0}({1}:{2}): {3}", filename, line, column, message));
-
-                if (errors.Count > 100)
-                    throw new OperationCanceledException();
-            };
-
+            parser.AddErrorListener(new ErrorListener(errors, outputWindow));
             var result = parser.compileUnit();
-            OnParseComplete(new PhpEditorNavigationParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), result, parser.NavigationTrees));
+
+            NavigationTreesListener listener = new NavigationTreesListener();
+            ParseTreeWalker.Default.Walk(listener, result);
+
+            OnParseComplete(new PhpEditorNavigationParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), result, listener.NavigationTrees));
+        }
+
+        protected class NavigationTreesListener : PhpParserBaseListener
+        {
+            private readonly List<ParserRuleContext> _navigationTrees =
+                new List<ParserRuleContext>();
+
+            public ReadOnlyCollection<ParserRuleContext> NavigationTrees
+            {
+                get
+                {
+                    return _navigationTrees.AsReadOnly();
+                }
+            }
+
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_classOrInterfaceDefinition, 0, Dependents.Parents)]
+            public override void EnterClassOrInterfaceDefinition(PhpParser.ClassOrInterfaceDefinitionContext context)
+            {
+                _navigationTrees.Add(context);
+            }
+
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionDefinition, 0, Dependents.Parents)]
+            public override void EnterFunctionDefinition(PhpParser.FunctionDefinitionContext context)
+            {
+                _navigationTrees.Add(context);
+            }
         }
     }
 }

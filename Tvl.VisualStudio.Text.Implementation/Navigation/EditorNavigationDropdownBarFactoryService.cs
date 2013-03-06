@@ -2,9 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.ComponentModel.Composition;
     using System.Linq;
     using Microsoft.VisualStudio.Editor;
+    using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Projection;
     using Microsoft.VisualStudio.TextManager.Interop;
     using Tvl.VisualStudio.Shell;
 
@@ -27,21 +30,36 @@
             set;
         }
 
+        [Import]
+        private IBufferGraphFactoryService BufferGraphFactoryService
+        {
+            get;
+            set;
+        }
+
         public IEditorNavigationDropdownBarClient CreateEditorNavigationDropdownBar(IVsCodeWindow codeWindow, IVsEditorAdaptersFactoryService editorAdaptersFactory)
         {
             // a code window can only be associated with a single buffer, so the primary view will get us the correct information
             IVsTextView primaryViewAdapter = codeWindow.GetPrimaryView();
             IWpfTextView textView = editorAdaptersFactory.GetWpfTextView(primaryViewAdapter);
 
-            var providers = NavigationSourceProviders.Where(provider => provider.Metadata.ContentTypes.Any(contentType => textView.TextBuffer.ContentType.IsOfType(contentType)));
+            IBufferGraph bufferGraph = BufferGraphFactoryService.CreateBufferGraph(textView.TextBuffer);
+            Collection<ITextBuffer> buffers = bufferGraph.GetTextBuffers(i => true);
 
-            var sources =
-                providers
-                .Select(provider => provider.Value.TryCreateEditorNavigationSource(textView.TextBuffer))
-                .Where(source => source != null)
-                .ToArray();
+            List<IEditorNavigationSource> sources = new List<IEditorNavigationSource>();
+            foreach (ITextBuffer buffer in buffers)
+            {
+                var bufferProviders = NavigationSourceProviders.Where(provider => provider.Metadata.ContentTypes.Any(contentType => buffer.ContentType.IsOfType(contentType)));
 
-            return new EditorNavigationDropdownBar(codeWindow, editorAdaptersFactory, sources, EditorNavigationTypeRegistryService);
+                var bufferSources =
+                    bufferProviders
+                    .Select(provider => provider.Value.TryCreateEditorNavigationSource(buffer))
+                    .Where(source => source != null);
+
+                sources.AddRange(bufferSources);
+            }
+
+            return new EditorNavigationDropdownBar(codeWindow, editorAdaptersFactory, sources, BufferGraphFactoryService, EditorNavigationTypeRegistryService);
         }
     }
 }

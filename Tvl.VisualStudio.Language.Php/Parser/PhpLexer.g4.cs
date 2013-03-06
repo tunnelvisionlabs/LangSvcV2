@@ -1,0 +1,89 @@
+﻿namespace Tvl.VisualStudio.Language.Php.Parser
+{
+    using System;
+    using Antlr4.Runtime;
+
+    partial class PhpLexer
+    {
+        private const string DocCommentStartSymbols = "$@&~<>#%\"\\";
+
+        private int _stringBraceLevel;
+        private string _heredocIdentifier;
+
+        public int StringBraceLevel
+        {
+            get
+            {
+                return _stringBraceLevel;
+            }
+
+            set
+            {
+                _stringBraceLevel = value;
+            }
+        }
+
+        public string HeredocIdentifier
+        {
+            get
+            {
+                return _heredocIdentifier;
+            }
+
+            set
+            {
+                _heredocIdentifier = value;
+            }
+        }
+
+        public ICharStream CharStream
+        {
+            get
+            {
+                return (ICharStream)InputStream;
+            }
+        }
+
+        public override IToken NextToken()
+        {
+            IToken token = base.NextToken();
+            while (token.Type == NEWLINE)
+                token = base.NextToken();
+
+            switch (token.Type)
+            {
+            case PHP_HEREDOC_START:
+                // <<<identifier
+                _heredocIdentifier = token.Text.Substring(3);
+                break;
+
+            case PHP_HEREDOC_END:
+                _heredocIdentifier = null;
+                break;
+
+            default:
+                break;
+            }
+
+            return token;
+        }
+
+        private bool CheckHeredocEnd(int la1, string text)
+        {
+            // identifier
+            //  - or -
+            // identifier;
+            bool semi = text[text.Length - 1] == ';';
+            string identifier = semi ? text.Substring(0, text.Length - 1) : text;
+            return string.Equals(identifier, HeredocIdentifier, StringComparison.Ordinal);
+        }
+
+        private static bool IsDocCommentStartCharacter(int c)
+        {
+            if (char.IsLetter((char)c))
+                return true;
+
+            return DocCommentStartSymbols.IndexOf((char)c) >= 0;
+        }
+    }
+}

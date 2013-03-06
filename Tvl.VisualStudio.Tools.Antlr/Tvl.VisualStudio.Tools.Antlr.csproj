@@ -100,6 +100,10 @@
       <HintPath>..\External\Antlr\Antlr3.Runtime.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Antlr4.Runtime.v4.0, Version=1.0.1.0, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\External\Antlr4\Antlr4.Runtime.v4.0.dll</HintPath>
+    </Reference>
     <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PublicAssemblies\EnvDTE.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
@@ -260,11 +264,13 @@
   <ItemGroup>
     <Compile Include="AntlrToolsPackage.cs" />
     <Compile Include="AstExplorer\AstExplorerControl.cs" />
+    <Compile Include="AstExplorer\AstExplorerControl.V4.cs" />
     <Compile Include="AstExplorer\AstExplorerToolWindowPane.cs" />
     <Compile Include="AstExplorer\AstExplorerTreeControl.xaml.cs">
       <DependentUpon>AstExplorerTreeControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="AstExplorer\AstReferenceTaggerProvider.cs" />
+    <Compile Include="AstExplorer\AstExplorerControl.V3.cs" />
     <Compile Include="AstExplorer\IAstReferenceTaggerProvider.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

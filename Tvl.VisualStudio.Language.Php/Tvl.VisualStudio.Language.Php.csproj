@@ -91,6 +91,9 @@
     <Reference Include="Antlr3.Runtime">
       <HintPath>..\External\Antlr\Antlr3.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="Antlr4.Runtime.v4.0">
+      <HintPath>..\External\Antlr4\Antlr4.Runtime.v4.0.dll</HintPath>
+    </Reference>
     <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PublicAssemblies\EnvDTE.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
@@ -238,50 +241,54 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classification\V4PhpClassifier.cs" />
+    <Compile Include="Classification\V4PhpClassifierLexer.g4.cs">
+      <DependentUpon>V4PhpClassifierLexer.g4</DependentUpon>
+    </Compile>
+    <Compile Include="Classification\V4PhpClassifierLexerState.cs" />
+    <Compile Include="CustomTrackingSpan.cs" />
+    <Compile Include="HtmlCompletionSource.cs" />
+    <Compile Include="HtmlCompletionSourceProvider.cs" />
+    <Compile Include="HtmlIntellisenseController.cs" />
+    <Compile Include="HtmlIntellisenseControllerProvider.cs" />
+    <Compile Include="Parser\PhpLexer.g4.cs">
+      <DependentUpon>PhpLexer.g4</DependentUpon>
+    </Compile>
+    <Compile Include="Parser\PhpParser.g4.cs">
+      <DependentUpon>PhpParser.g4</DependentUpon>
+    </Compile>
+    <Compile Include="PhpBlock.cs" />
+    <Compile Include="PhpEditorFactory.cs" />
+    <Compile Include="PhpEditorFactoryWithEncoding.cs" />
+    <Compile Include="PhpProjectionBuffer.cs" />
     <Compile Include="PhpTextStructureNavigator.cs" />
     <Compile Include="PhpTextStructureNavigatorProvider.cs" />
     <Compile Include="Classification\PhpClassifierConstants.cs" />
     <Compile Include="Navigation\PhpEditorNavigationBackgroundParser.cs" />
-    <Compile Include="Navigation\PhpEditorNavigationParser.g3.cs">
-      <DependentUpon>PhpEditorNavigationParser.g3</DependentUpon>
-    </Compile>
     <Compile Include="Navigation\PhpEditorNavigationParseResultEventArgs.cs" />
     <Compile Include="Navigation\PhpEditorNavigationSource.cs" />
     <Compile Include="Navigation\PhpEditorNavigationSourceProvider.cs" />
-    <Compile Include="Outlining\PhpOutliningLexer.cs" />
     <Compile Include="Outlining\PhpOutliningParseResultEventArgs.cs" />
     <Compile Include="PhpBraceMatchingTaggerProvider.cs" />
     <Compile Include="Classification\PhpClassificationTypeNames.cs" />
     <Compile Include="Classification\PhpClassificationTypes.cs" />
-    <Compile Include="Classification\PhpClassifier.cs" />
-    <Compile Include="Classification\PhpClassifierLexer.cs" />
-    <Compile Include="Classification\PhpClassifierLexerMode.cs" />
-    <Compile Include="Classification\PhpClassifierLexerState.cs" />
     <Compile Include="Classification\PhpClassifierProvider.cs" />
-    <Compile Include="Classification\PhpCodeClassifierLexer.g3.cs">
-      <DependentUpon>PhpCodeClassifierLexer.g3</DependentUpon>
-    </Compile>
     <Compile Include="PhpCommenterProvider.cs" />
     <Compile Include="PhpConstants.cs" />
-    <Compile Include="Classification\PhpDocCommentClassifierLexer.g3.cs">
-      <DependentUpon>PhpDocCommentClassifierLexer.g3</DependentUpon>
-    </Compile>
-    <Compile Include="Classification\PhpHtmlTagClassifierLexer.g3.cs">
-      <DependentUpon>PhpHtmlTagClassifierLexer.g3</DependentUpon>
-    </Compile>
-    <Compile Include="Classification\PhpHtmlTextClassifierLexer.g3.cs">
-      <DependentUpon>PhpHtmlTextClassifierLexer.g3</DependentUpon>
-    </Compile>
     <Compile Include="Outlining\PhpOutliningBackgroundParser.cs" />
-    <Compile Include="Outlining\PhpOutliningParser.g3.cs">
-      <DependentUpon>PhpOutliningParser.g3</DependentUpon>
-    </Compile>
     <Compile Include="Outlining\PhpOutliningTagger.cs" />
     <Compile Include="Outlining\PhpOutliningTaggerProvider.cs" />
     <Compile Include="PhpServices.cs" />
+    <Compile Include="ProjectionClassifier.cs" />
+    <Compile Include="ProjectionClassifierProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PhpLanguageInfo.cs" />
     <Compile Include="PhpLanguagePackage.cs" />
+    <Compile Include="SnapshotSpanSourceCodeReader.cs" />
+    <Compile Include="TemplateRegion.cs" />
+    <Compile Include="TemplateToken.cs" />
+    <Compile Include="TemplateTokenizer.cs" />
+    <Compile Include="TemplateTokenKind.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\External\Eula.rtf">
@@ -291,26 +298,18 @@
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
     </None>
-    <Antlr3 Include="Classification\PhpHtmlTextClassifierLexer.g3">
+    <Antlr4 Include="Classification\V4PhpClassifierLexer.g4">
       <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <Antlr3 Include="Classification\PhpHtmlTagClassifierLexer.g3">
+      <CustomToolNamespace>Tvl.VisualStudio.Language.Php.Classification</CustomToolNamespace>
+    </Antlr4>
+    <Antlr4 Include="Parser\PhpLexer.g4">
       <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <Antlr3 Include="Classification\PhpDocCommentClassifierLexer.g3">
+      <CustomToolNamespace>Tvl.VisualStudio.Language.Php.Parser</CustomToolNamespace>
+    </Antlr4>
+    <Antlr4 Include="Parser\PhpParser.g4">
       <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <Antlr3 Include="Classification\PhpCodeClassifierLexer.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <Antlr3 Include="Outlining\PhpOutliningParser.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <Antlr3 Include="Navigation\PhpEditorNavigationParser.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <AntlrTokens Include="Classification\PhpClassifierConstants.tokens" />
-    <None Include="Classification\PhpClassifierConstants.xlsx" />
+      <CustomToolNamespace>Tvl.VisualStudio.Language.Php.Parser</CustomToolNamespace>
+    </Antlr4>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -371,6 +370,10 @@
     <AntlrBuildTaskPath>$(SolutionDir)External\Antlr</AntlrBuildTaskPath>
     <!-- Path to the ANTLR Tool itself. -->
     <AntlrToolPath>$(SolutionDir)External\Antlr\Antlr3.exe</AntlrToolPath>
+    <!-- Folder containing Antlr4BuildTasks.dll -->
+    <Antlr4BuildTaskPath>$(SolutionDir)External\Antlr4</Antlr4BuildTaskPath>
+    <!-- Path to the ANTLR Tool itself. -->
+    <Antlr4ToolPath>$(SolutionDir)External\Antlr4\antlr4-csharp-4.0.1-SNAPSHOT-complete.jar</Antlr4ToolPath>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -386,6 +389,7 @@
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets" Condition="false" />
   <Import Project="$(SolutionDir)External\Antlr\Antlr3.targets" />
+  <Import Project="$(SolutionDir)External\Antlr4\Antlr4.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

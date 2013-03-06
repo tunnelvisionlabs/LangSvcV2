@@ -121,6 +121,12 @@
     <value>PHP</value>
     <comment>PHP language name</comment>
   </data>
+  <data name="101" xml:space="preserve">
+    <value>PHP Editor</value>
+  </data>
+  <data name="102" xml:space="preserve">
+    <value>PHP Editor with Encoding</value>
+  </data>
   <data name="110" xml:space="preserve">
     <value>PHP language support for Visual Studio</value>
     <comment>Package name</comment>

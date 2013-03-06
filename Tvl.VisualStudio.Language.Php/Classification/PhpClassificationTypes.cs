@@ -58,44 +58,9 @@ namespace Tvl.VisualStudio.Language.Php.Classification
         private static readonly ClassificationTypeDefinition DocCommentInvalidTag;
 
         [Export]
-        [BaseDefinition("HTML ATTRIBUTE NAME")]
-        [Name(PhpClassificationTypeNames.HtmlAttributeName)]
-        private static readonly ClassificationTypeDefinition HtmlAttributeName;
-
-        [Export]
-        [BaseDefinition("HTML ATTRIBUTE VALUE")]
-        [Name(PhpClassificationTypeNames.HtmlAttributeValue)]
-        private static readonly ClassificationTypeDefinition HtmlAttributeValue;
-
-        [Export]
-        [BaseDefinition("HTML COMMENT")]
-        [Name(PhpClassificationTypeNames.HtmlComment)]
-        private static readonly ClassificationTypeDefinition HtmlComment;
-
-        [Export]
-        [BaseDefinition("HTML ELEMENT NAME")]
-        [Name(PhpClassificationTypeNames.HtmlElementName)]
-        private static readonly ClassificationTypeDefinition HtmlElementName;
-
-        [Export]
-        [BaseDefinition("HTML ENTITY")]
-        [Name(PhpClassificationTypeNames.HtmlEntity)]
-        private static readonly ClassificationTypeDefinition HtmlEntity;
-
-        [Export]
-        [BaseDefinition("HTML OPERATOR")]
-        [Name(PhpClassificationTypeNames.HtmlOperator)]
-        private static readonly ClassificationTypeDefinition HtmlOperator;
-
-        [Export]
         [BaseDefinition("HTML SERVER-SIDE SCRIPT")]
         [Name(PhpClassificationTypeNames.HtmlServerSideScript)]
         private static readonly ClassificationTypeDefinition HtmlServerSideScript;
-
-        [Export]
-        [BaseDefinition("HTML TAG DELIMITER")]
-        [Name(PhpClassificationTypeNames.HtmlTagDelimiter)]
-        private static readonly ClassificationTypeDefinition HtmlTagDelimiter;
 
         [Export(typeof(EditorFormatDefinition))]
         [Name(PhpClassificationTypeNames.DocCommentText + ".format")]

@@ -6,6 +6,8 @@
     using Tvl.VisualStudio.Shell;
 
     using IServiceContainer = System.ComponentModel.Design.IServiceContainer;
+    using MessageBox = System.Windows.MessageBox;
+    using RuleDependencyChecker = Antlr4.Runtime.Misc.RuleDependencyChecker;
 
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration(PhpConstants.PhpLanguagePackageNameResourceString, PhpConstants.PhpLanguagePackageDetailsResourceString, PhpConstants.PhpLanguagePackageProductVersionString/*, IconResourceID = 400*/)]
@@ -26,6 +28,10 @@
         EnableLineNumbers = true,
         //CodeSense = true,
         RequestStockColors = true)]
+    [ProvideEditorExtension(typeof(PhpEditorFactory), PhpConstants.PhpFileExtension, 50, NameResourceID = 101)]
+    [ProvideEditorExtension(typeof(PhpEditorFactory), PhpConstants.Php5FileExtension, 50, NameResourceID = 101)]
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.PhpFileExtension, 50, NameResourceID = 102)]
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.Php5FileExtension, 50, NameResourceID = 102)]
     [ProvideLanguageExtension(typeof(PhpLanguageInfo), PhpConstants.PhpFileExtension)]
     [ProvideLanguageExtension(typeof(PhpLanguageInfo), PhpConstants.Php5FileExtension)]
     [ProvideBindingPath]
@@ -46,6 +52,18 @@
             // register the language service
             _languageInfo = new PhpLanguageInfo(this.AsVsServiceProvider());
             ((IServiceContainer)this).AddService(typeof(PhpLanguageInfo), _languageInfo, true);
+
+            RegisterEditorFactory(new PhpEditorFactory(this));
+            RegisterEditorFactory(new PhpEditorFactoryWithEncoding(this));
+
+            try
+            {
+                RuleDependencyChecker.CheckDependencies(typeof(PhpLanguagePackage).Assembly);
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show(ex.Message, "Error validating ANTLR rule dependencies");
+            }
         }
 
         protected override void Dispose(bool disposing)

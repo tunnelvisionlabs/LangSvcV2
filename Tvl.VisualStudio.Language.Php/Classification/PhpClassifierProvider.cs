@@ -10,9 +10,19 @@
     [ContentType(PhpConstants.PhpContentType)]
     public sealed class PhpClassifierProvider : LanguageClassifierProvider<PhpLanguagePackage>
     {
+        [Import]
+        public ITextDocumentFactoryService TextDocumentFactoryService
+        {
+            get;
+            private set;
+        }
+
         protected override IClassifier GetClassifierImpl(ITextBuffer textBuffer)
         {
-            return new PhpClassifier(textBuffer, StandardClassificationService, ClassificationTypeRegistryService);
+            if (!textBuffer.ContentType.IsOfType(PhpConstants.PhpContentType))
+                return null;
+
+            return new V4PhpClassifier(textBuffer, StandardClassificationService, ClassificationTypeRegistryService);
         }
     }
 }

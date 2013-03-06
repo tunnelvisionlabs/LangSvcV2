@@ -255,6 +255,7 @@
   <ItemGroup>
     <Compile Include="Parsing4\AntlrClassifierBase`1.cs" />
     <Compile Include="Parsing4\AntlrParseResultEventArgs.cs" />
+    <Compile Include="Parsing4\AntlrTaggerBaseOld`2.cs" />
     <Compile Include="Parsing4\AntlrTaggerBase`2.cs" />
     <Compile Include="Parsing4\ITokenSourceWithState`1.cs" />
     <Compile Include="Parsing4\SimpleLexerState.cs" />

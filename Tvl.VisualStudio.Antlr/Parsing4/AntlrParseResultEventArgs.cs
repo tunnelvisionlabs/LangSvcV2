@@ -5,7 +5,8 @@
     using System.Collections.ObjectModel;
     using Antlr4.Runtime;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Language.Parsing;
+    using ParseErrorEventArgs = Tvl.VisualStudio.Language.Parsing.ParseErrorEventArgs;
+    using ParseResultEventArgs = Tvl.VisualStudio.Language.Parsing.ParseResultEventArgs;
 
     public class AntlrParseResultEventArgs : ParseResultEventArgs
     {
