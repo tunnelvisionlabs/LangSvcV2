@@ -172,18 +172,11 @@ mode PhpCode;
 
 	PHP_COMMENT
 		:	'//' (~('\r' | '\n'))*
-		;
-
-	EMPTY_BLOCK_COMMENT
-		:	'/**/' -> type(PHP_ML_COMMENT)
-		;
-
-	DOC_COMMENT_START
-		:	'/**' -> type(DOC_COMMENT_TEXT), pushMode(DocComment)
+			-> channel(HIDDEN)
 		;
 
 	PHP_ML_COMMENT
-		:	'/*' -> pushMode(BlockComment)
+		:	'/*' .*? ('*/' | EOF) -> channel(HIDDEN)
 		;
 
 	PHP_SINGLE_STRING_LITERAL
@@ -277,39 +270,3 @@ mode PhpDoubleString;
 	END_DOUBLE_STRING
 		:	'"' -> type(PHP_DOUBLE_STRING_LITERAL), popMode
 		;
-
-mode DocComment;
-
-	DocComment_NEWLINE : NEWLINE -> type(NEWLINE);
-
-	END_COMMENT
-		:	'*/' -> type(DOC_COMMENT_TEXT), popMode
-		;
-
-	fragment // disables this rule for now without breaking references to the token type in code
-	SVN_REFERENCE
-		:	'$'
-			(	~('$'|'\n'|'\r'|'*')
-			|	{_input.La(2) != '/'}? '*'
-			)*
-			'$'
-		;
-
-	DOC_COMMENT_TEXT
-		:	//'$'? // this is a stray '$' that couldn't be made into an SVN_REFERENCE
-			(	~('@' | '\\' | '\r' | '\n' | '*' /*| '$'*/)
-			|	{_input.La(2) != '/'}? '*'
-			|	{!IsDocCommentStartCharacter(_input.La(2))}? ('\\' | '@')
-			)+
-		;
-
-	DOC_COMMENT_TAG
-		:	('\\' | '@')
-			(	('$' | '@' | '&' | '~' | '<' | '>' | '#' | '%' | '"')
-			|	'\\' '::'?
-			|	'f' ('$' | '[' | ']' | '{' | '}')
-			|	('a'..'z' | 'A'..'Z')+
-			)
-		;
-
-	DocComment_ANYCHAR : ANYCHAR -> type(ANYCHAR);
