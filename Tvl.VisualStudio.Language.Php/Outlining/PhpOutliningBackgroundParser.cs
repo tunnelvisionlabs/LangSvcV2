@@ -15,6 +15,7 @@
     using CommonTokenStream = Antlr4.Runtime.CommonTokenStream;
     using ParseErrorEventArgs = Tvl.VisualStudio.Language.Parsing.ParseErrorEventArgs;
     using SnapshotCharStream = Tvl.VisualStudio.Language.Parsing4.SnapshotCharStream;
+    using SnapshotTokenFactory = Tvl.VisualStudio.Language.Parsing4.SnapshotTokenFactory;
     using Stopwatch = System.Diagnostics.Stopwatch;
 
     public class PhpOutliningBackgroundParser : BackgroundParser
@@ -53,6 +54,7 @@
             var snapshot = TextBuffer.CurrentSnapshot;
             var input = new SnapshotCharStream(snapshot, new Span(0, snapshot.Length));
             var lexer = new PhpLexer(input);
+            lexer.TokenFactory = new SnapshotTokenFactory(lexer);
             var tokens = new CommonTokenStream(lexer);
 
             var parser = new PhpParser(tokens);
