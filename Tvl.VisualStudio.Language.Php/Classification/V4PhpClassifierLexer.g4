@@ -259,6 +259,8 @@ mode PhpSingleString;
 
 mode PhpDoubleString;
 
+	PhpDoubleString_NEWLINE : NEWLINE -> type(NEWLINE);
+
 	PhpDoubleString_ARROW : ARROW -> type(ARROW);
 	PhpDoubleString_LBRACK : LBRACK -> type(LBRACK);
 	PhpDoubleString_RBRACK : RBRACK -> type(RBRACK);
