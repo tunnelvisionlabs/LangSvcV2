@@ -72,9 +72,11 @@ functionParameter
 	;
 
 parameterDefaultValue
+@version{1}
 	:	EQ
 		(	~(COMMA|LPAREN|RPAREN)
 		|	nestedParens
+		|	stringLiteral
 		)*
 	;
 
@@ -84,4 +86,25 @@ nestedParens
 			|	nestedParens
 			)*
 		RPAREN
+	;
+
+stringLiteral
+@version{1}
+	:	PHP_SINGLE_STRING_LITERAL
+	|	doubleStringLiteral
+	|	hereDocStringLiteral
+	;
+
+doubleStringLiteral
+@version{1}
+	:	START_DOUBLE_STRING
+			~END_DOUBLE_STRING*
+		END_DOUBLE_STRING
+	;
+
+hereDocStringLiteral
+@version{1}
+	:	PHP_HEREDOC_START
+			PHP_HEREDOC_TEXT*
+		PHP_HEREDOC_END
 	;

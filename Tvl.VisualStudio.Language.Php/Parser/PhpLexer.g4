@@ -183,12 +183,12 @@ mode PhpCode;
 		:	'\''
 			(	~['\\]
 			|	'\\\''
-			|	{_input.LA(1) != '\''}? '\\'
+			|	{_input.La(1) != '\''}? '\\'
 			)*
 			'\''?
 		;
 
-	PHP_DOUBLE_STRING_LITERAL
+	START_DOUBLE_STRING
 		:	'"' -> pushMode(PhpDoubleString)
 		;
 
@@ -199,23 +199,9 @@ mode PhpCode;
 
 	PhpCode_ANYCHAR : ANYCHAR -> type(ANYCHAR);
 
-mode BlockComment;
-
-	BlockComment_NEWLINE : NEWLINE -> type(NEWLINE);
-
-	BlockComment_TEXT
-		:	(	~[\r\n*]
-			|	'*' ~[\r\n/]
-			)+
-			-> type(PHP_ML_COMMENT)
-		;
-	BlockComment_STAR : '*' -> type(PHP_ML_COMMENT);
-
-	END_BLOCK_COMMENT : '*/' -> type(PHP_ML_COMMENT), popMode;
-
 mode PhpHereDoc;
 
-	PhpHereDoc_NEWLINE : NEWLINE -> type(NEWLINE);
+	PhpHereDoc_NEWLINE : NEWLINE -> type(PHP_HEREDOC_TEXT);
 
 	PHP_HEREDOC_END
 		:	{_input.La(-1) == '\n'}?
@@ -239,6 +225,7 @@ mode PhpDoubleString;
 	PhpDoubleString_LBRACE : LBRACE {_input.La(1) == '\$'}? -> type(LBRACE);
 	PhpDoubleString_RBRACE : RBRACE {StringBraceLevel > 0}? -> type(RBRACE);
 
+	fragment
 	DOUBLE_STRING_ESCAPE
 		:	'\\'
 			(	('n' | 'r' | 't' | 'v' | 'f' | '\\' | '$' | '"')
@@ -249,19 +236,21 @@ mode PhpDoubleString;
 			)
 		;
 
+	fragment
 	DOUBLE_STRING_INVALID_ESCAPE
-		:	'\\' -> type(PHP_DOUBLE_STRING_LITERAL)
+		:	'\\'
 		;
 
-	CONTINUE_DOUBLE_STRING
-		:	(	~('\r' | '\n' | '"' | '\\' | '$' | '-' | '[' | ']' | '{' | '}' | ' ' | '\t')
+	DOUBLE_STRING_TEXT
+		:	(	~[-"${} [\]\t\r\n\\]
 			|	'-' {_input.La(1) != '>'}?
 			|	'{' {_input.La(1) != '\$'}?
 			|	'}' {StringBraceLevel == 0}?
+			|	DOUBLE_STRING_ESCAPE
+			|	DOUBLE_STRING_INVALID_ESCAPE
 			)+
-			-> type(PHP_DOUBLE_STRING_LITERAL)
 		;
 
 	END_DOUBLE_STRING
-		:	'"' -> type(PHP_DOUBLE_STRING_LITERAL), popMode
+		:	'"' -> popMode
 		;
