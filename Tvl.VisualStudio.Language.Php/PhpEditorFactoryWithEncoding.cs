@@ -25,7 +25,7 @@ namespace Tvl.VisualStudio.Language.Php
     public class PhpEditorFactoryWithEncoding : PhpEditorFactory
     {
         public PhpEditorFactoryWithEncoding(PhpLanguagePackage package)
-            : base(package)
+            : base(package, true)
         {
         }
 
