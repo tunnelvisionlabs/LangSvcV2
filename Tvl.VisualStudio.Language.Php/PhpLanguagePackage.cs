@@ -6,6 +6,8 @@
     using Tvl.VisualStudio.Shell;
 
     using IServiceContainer = System.ComponentModel.Design.IServiceContainer;
+    using MessageBox = System.Windows.MessageBox;
+    using RuleDependencyChecker = Antlr4.Runtime.Misc.RuleDependencyChecker;
 
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration(PhpConstants.PhpLanguagePackageNameResourceString, PhpConstants.PhpLanguagePackageDetailsResourceString, PhpConstants.PhpLanguagePackageProductVersionString/*, IconResourceID = 400*/)]
@@ -53,6 +55,15 @@
 
             RegisterEditorFactory(new PhpEditorFactory(this));
             RegisterEditorFactory(new PhpEditorFactoryWithEncoding(this));
+
+            try
+            {
+                RuleDependencyChecker.CheckDependencies(typeof(PhpLanguagePackage).Assembly);
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show(ex.Message, "Error validating ANTLR rule dependencies");
+            }
         }
 
         protected override void Dispose(bool disposing)
