@@ -26,10 +26,12 @@ code
 	;
 
 codeElement
+@version{5}
 	:	classOrInterfaceDefinition
 	|	functionDefinition
 	|	codeBlock
-	|	~(CLOSE_PHP_TAG|'function'|LBRACE|RBRACE|'class'|'interface')
+	|	stringLiteral
+	|	~(CLOSE_PHP_TAG|'function'|LBRACE|RBRACE|'class'|'interface'|PHP_SINGLE_STRING_LITERAL|START_DOUBLE_STRING|PHP_HEREDOC_START)
 	;
 
 codeBlock
