@@ -10,7 +10,9 @@ options {
 }
 
 compileUnit
-	:	(htmlText | code)*
+@version{4}
+	:	(htmlText? code)*
+		htmlText?
 		EOF
 	;
 
@@ -19,7 +21,8 @@ htmlText
 	;
 
 code
-	:	HTML_START_CODE codeElement* CLOSE_PHP_TAG
+@version{3}
+	:	HTML_START_CODE codeElement* (CLOSE_PHP_TAG | EOF)
 	;
 
 codeElement
