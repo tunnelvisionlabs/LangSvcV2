@@ -164,8 +164,7 @@
 
             IVsTextLines textLines;
             ErrorHandler.ThrowOnFailure(pCodeWin.GetBuffer(out textLines));
-            IVsTextBuffer bufferAdapter = (IVsTextBuffer)textLines;
-            ITextBuffer textBuffer = adaptersFactory.GetDataBuffer(bufferAdapter);
+            ITextBuffer textBuffer = adaptersFactory.GetDataBuffer(textLines);
             if (textBuffer == null)
             {
                 ppCodeWinMgr = null;
