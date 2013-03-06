@@ -245,7 +245,8 @@ mode PhpDoubleString;
 	PhpDoubleString_PHP_IDENTIFIER : PHP_IDENTIFIER -> type(PHP_IDENTIFIER);
 	PhpDoubleString_WS : WS -> type(WS);
 
-	PhpDoubleString_LBRACE : LBRACE {_input.La(1) == '\$'}? -> type(LBRACE);
+	PhpDoubleString_LBRACE : LBRACE {StringBraceLevel > 0 || _input.La(1) == '\$'}? -> type(LBRACE);
+	PhpDoubleString_LBRACE2 : {_input.La(-1) == '\$'}? LBRACE -> type(LBRACE);
 	PhpDoubleString_RBRACE : RBRACE {StringBraceLevel > 0}? -> type(RBRACE);
 
 	DOUBLE_STRING_ESCAPE

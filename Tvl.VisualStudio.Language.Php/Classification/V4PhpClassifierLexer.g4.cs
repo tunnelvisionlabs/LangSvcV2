@@ -62,11 +62,31 @@
                 _heredocIdentifier = null;
                 break;
 
+            case LBRACE:
+                if (_mode == PhpDoubleString)
+                    StringBraceLevel++;
+
+                break;
+
+            case RBRACE:
+                if (_mode == PhpDoubleString)
+                    StringBraceLevel--;
+
+                break;
+
             default:
                 break;
             }
 
             return token;
+        }
+
+        public override int PopMode()
+        {
+            if (_mode == PhpDoubleString)
+                StringBraceLevel = 0;
+
+            return base.PopMode();
         }
 
         private bool CheckHeredocEnd(int la1, string text)
