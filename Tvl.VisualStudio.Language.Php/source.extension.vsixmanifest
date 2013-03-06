@@ -3,7 +3,7 @@
   <Identifier Id="Tvl.VisualStudio.Language.Php.ece72f50-0b6f-4363-9986-e38af13f6aa5">
     <Name>PHP Language Support</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0.7.594</Version>
+    <Version>1.0.8</Version>
     <Description xml:space="preserve">Basic support for the PHP programming language.</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
@@ -26,7 +26,7 @@
     <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.5" />
   </Identifier>
   <References>
-    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.0.10">
+    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.0.11">
       <Name>Visual Studio Extensibility Framework</Name>
       <VsixPath>Tvl.VisualStudio.Framework.vsix</VsixPath>
     </Reference>
