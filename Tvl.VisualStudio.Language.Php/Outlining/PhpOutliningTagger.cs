@@ -10,6 +10,7 @@
     using Microsoft.VisualStudio.Text.Tagging;
 
     using ParseResultEventArgs = Tvl.VisualStudio.Language.Parsing.ParseResultEventArgs;
+    using PhpParser = Tvl.VisualStudio.Language.Php.Parser.PhpParser;
 
     internal sealed class PhpOutliningTagger : ITagger<IOutliningRegionTag>
     {
@@ -71,6 +72,7 @@
             UpdateTags(antlrParseResultArgs);
         }
 
+        [RuleDependency(typeof(PhpParser), PhpParser.RULE_code, 0, Dependents.Self)]
         private void UpdateTags(PhpOutliningParseResultEventArgs antlrParseResultArgs)
         {
             List<ITagSpan<IOutliningRegionTag>> outliningRegions = new List<ITagSpan<IOutliningRegionTag>>();
@@ -87,6 +89,10 @@
 
                     var startToken = antlrParseResultArgs.Tokens[sourceInterval.a];
                     var stopToken = antlrParseResultArgs.Tokens[sourceInterval.b];
+                    PhpParser.CodeContext codeContext = child as PhpParser.CodeContext;
+                    if (codeContext != null && codeContext.EOF() != null)
+                        stopToken = antlrParseResultArgs.Tokens.Last();
+
                     Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
                     if (snapshot.GetLineNumberFromPosition(span.Start) == snapshot.GetLineNumberFromPosition(span.End))
                         continue;
