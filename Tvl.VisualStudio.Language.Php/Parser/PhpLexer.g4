@@ -180,7 +180,12 @@ mode PhpCode;
 		;
 
 	PHP_SINGLE_STRING_LITERAL
-		:	'\'' -> pushMode(PhpSingleString)
+		:	'\''
+			(	~['\\]
+			|	'\\\''
+			|	{_input.LA(1) != '\''}? '\\'
+			)*
+			'\''?
 		;
 
 	PHP_DOUBLE_STRING_LITERAL
@@ -222,16 +227,6 @@ mode PhpHereDoc;
 	PHP_HEREDOC_TEXT
 		:	~[\r\n]+
 		;
-
-mode PhpSingleString;
-
-	PhpSingleString_NEWLINE : NEWLINE -> type(NEWLINE), popMode;
-
-	PhpSingleString_ESCAPE : '\\' ('\'' | '\\')? -> type(PHP_SINGLE_STRING_LITERAL);
-
-	PhpSingleString_TEXT : ~('\r' | '\n' | '\'' | '\\')+ -> type(PHP_SINGLE_STRING_LITERAL);
-
-	END_SINGLE_STRING : '\'' -> type(PHP_SINGLE_STRING_LITERAL), popMode;
 
 mode PhpDoubleString;
 
