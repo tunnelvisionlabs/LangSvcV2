@@ -272,25 +272,9 @@
     <Compile Include="PhpBraceMatchingTaggerProvider.cs" />
     <Compile Include="Classification\PhpClassificationTypeNames.cs" />
     <Compile Include="Classification\PhpClassificationTypes.cs" />
-    <Compile Include="Classification\PhpClassifier.cs" />
-    <Compile Include="Classification\PhpClassifierLexer.cs" />
-    <Compile Include="Classification\PhpClassifierLexerMode.cs" />
-    <Compile Include="Classification\PhpClassifierLexerState.cs" />
     <Compile Include="Classification\PhpClassifierProvider.cs" />
-    <Compile Include="Classification\PhpCodeClassifierLexer.g3.cs">
-      <DependentUpon>PhpCodeClassifierLexer.g3</DependentUpon>
-    </Compile>
     <Compile Include="PhpCommenterProvider.cs" />
     <Compile Include="PhpConstants.cs" />
-    <Compile Include="Classification\PhpDocCommentClassifierLexer.g3.cs">
-      <DependentUpon>PhpDocCommentClassifierLexer.g3</DependentUpon>
-    </Compile>
-    <Compile Include="Classification\PhpHtmlTagClassifierLexer.g3.cs">
-      <DependentUpon>PhpHtmlTagClassifierLexer.g3</DependentUpon>
-    </Compile>
-    <Compile Include="Classification\PhpHtmlTextClassifierLexer.g3.cs">
-      <DependentUpon>PhpHtmlTextClassifierLexer.g3</DependentUpon>
-    </Compile>
     <Compile Include="Outlining\PhpOutliningBackgroundParser.cs" />
     <Compile Include="Outlining\PhpOutliningTagger.cs" />
     <Compile Include="Outlining\PhpOutliningTaggerProvider.cs" />
@@ -314,20 +298,6 @@
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
     </None>
-    <Antlr3 Include="Classification\PhpHtmlTextClassifierLexer.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <Antlr3 Include="Classification\PhpHtmlTagClassifierLexer.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <Antlr3 Include="Classification\PhpDocCommentClassifierLexer.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <Antlr3 Include="Classification\PhpCodeClassifierLexer.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <AntlrTokens Include="Classification\PhpClassifierConstants.tokens" />
-    <None Include="Classification\PhpClassifierConstants.xlsx" />
     <Antlr4 Include="Classification\V4PhpClassifierLexer.g4">
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>Tvl.VisualStudio.Language.Php.Classification</CustomToolNamespace>
