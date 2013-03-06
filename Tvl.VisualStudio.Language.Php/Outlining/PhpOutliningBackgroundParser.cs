@@ -38,7 +38,7 @@
             return new PhpOutliningBackgroundParser(textBuffer, taskScheduler, outputWindowService, textDocumentFactoryService);
         }
 
-        [RuleDependency(typeof(PhpParser), PhpParser.RULE_compileUnit, 1, Dependents.Parents)]
+        [RuleDependency(typeof(PhpParser), PhpParser.RULE_compileUnit, 0, Dependents.Parents)]
         protected override void ReParseImpl()
         {
             var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
