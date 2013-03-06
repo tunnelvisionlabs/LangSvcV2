@@ -53,12 +53,18 @@
 
             switch (token.Type)
             {
+            case PHP_NOWDOC_START:
+                // <<<'identifier'
+                _heredocIdentifier = token.Text.Substring(3).Trim('\'');
+                break;
+
             case PHP_HEREDOC_START:
                 // <<<identifier
                 _heredocIdentifier = token.Text.Substring(3);
                 break;
 
             case PHP_HEREDOC_END:
+            case PHP_NOWDOC_END:
                 _heredocIdentifier = null;
                 break;
 

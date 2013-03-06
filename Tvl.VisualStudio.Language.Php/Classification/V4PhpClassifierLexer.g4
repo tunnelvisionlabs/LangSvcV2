@@ -100,6 +100,11 @@ mode PhpCode;
 
 	LSHIFTEQ: '<<=';
 
+	PHP_NOWDOC_START
+		:	'<<<\'' PHP_IDENTIFIER '\'' {_input.La(1) == '\r' || _input.La(1) == '\n'}?
+			-> pushMode(PhpNowDoc)
+		;
+
 	PHP_HEREDOC_START
 		:	'<<<' PHP_IDENTIFIER {_input.La(1) == '\r' || _input.La(1) == '\n'}?
 			-> pushMode(PhpHereDoc)
@@ -211,6 +216,21 @@ mode BlockComment;
 	BlockComment_STAR : '*' -> type(PHP_ML_COMMENT);
 
 	END_BLOCK_COMMENT : '*/' -> type(PHP_ML_COMMENT), popMode;
+
+mode PhpNowDoc;
+
+	PhpNowDoc_NEWLINE : NEWLINE -> type(NEWLINE);
+
+	PHP_NOWDOC_END
+		:	{_input.La(-1) == '\n'}?
+			PHP_IDENTIFIER ';'?
+			{CheckHeredocEnd(_input.La(1), Text);}?
+			-> popMode
+		;
+
+	PHP_NOWDOC_TEXT
+		:	~[\r\n]+
+		;
 
 mode PhpHereDoc;
 

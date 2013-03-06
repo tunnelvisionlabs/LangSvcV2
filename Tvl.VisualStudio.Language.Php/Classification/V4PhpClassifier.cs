@@ -57,6 +57,7 @@
             case V4PhpClassifierLexer.PHP_SINGLE_STRING_LITERAL:
             case V4PhpClassifierLexer.PHP_DOUBLE_STRING_LITERAL:
             case V4PhpClassifierLexer.PHP_HEREDOC_TEXT:
+            case V4PhpClassifierLexer.PHP_NOWDOC_TEXT:
                 return _standardClassificationService.StringLiteral;
 
             case V4PhpClassifierLexer.PHP_NUMBER:
