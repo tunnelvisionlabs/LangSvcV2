@@ -98,7 +98,7 @@
                     if (msg.Length > 100)
                         msg = msg.Substring(0, 100) + " ...";
 
-                    _outputWindow.WriteLine(string.Format("{0}({1}:{2}): {3}", _fileName ?? recognizer.InputStream.SourceName, line, charPositionInLine, msg));
+                    _outputWindow.WriteLine(string.Format("{0}({1},{2}): {3}", _fileName ?? recognizer.InputStream.SourceName, line, charPositionInLine + 1, msg));
                 }
 
                 if (_errors.Count > 100)
