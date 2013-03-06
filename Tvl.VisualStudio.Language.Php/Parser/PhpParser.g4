@@ -56,7 +56,8 @@ implementsList
 	;
 
 functionDefinition
-	:	'function' PHP_IDENTIFIER functionParameterList codeBlock
+@version{2}
+	:	'function' AND? PHP_IDENTIFIER functionParameterList codeBlock
 	;
 
 functionParameterList
