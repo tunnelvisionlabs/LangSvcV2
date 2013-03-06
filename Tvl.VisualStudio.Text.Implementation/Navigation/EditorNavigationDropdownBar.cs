@@ -349,7 +349,7 @@
                     seek = MapTo(seek, _currentTextView.TextSnapshot, SpanTrackingMode.EdgeInclusive);
                     _currentTextView.Caret.MoveTo(seek.Start);
                     _currentTextView.Selection.Select(seek, false);
-                    _currentTextView.ViewScroller.EnsureSpanVisible(seek);
+                    _currentTextView.ViewScroller.EnsureSpanVisible(seek, EnsureSpanVisibleOptions.MinimumScroll | EnsureSpanVisibleOptions.ShowStart);
                     Keyboard.Focus(_currentTextView.VisualElement);
                 }
             }
