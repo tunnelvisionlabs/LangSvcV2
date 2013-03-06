@@ -69,13 +69,13 @@
                 break;
 
             case LBRACE:
-                if (_mode == PhpDoubleString)
+                if (_mode == PhpDoubleString || _mode == PhpHereDoc)
                     StringBraceLevel++;
 
                 break;
 
             case RBRACE:
-                if (_mode == PhpDoubleString)
+                if (_mode == PhpDoubleString || _mode == PhpHereDoc)
                     StringBraceLevel--;
 
                 break;
@@ -89,7 +89,7 @@
 
         public override int PopMode()
         {
-            if (_mode == PhpDoubleString)
+            if (_mode == PhpDoubleString || _mode == PhpHereDoc)
                 StringBraceLevel = 0;
 
             return base.PopMode();

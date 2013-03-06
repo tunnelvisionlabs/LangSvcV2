@@ -243,8 +243,36 @@ mode PhpHereDoc;
 			-> popMode
 		;
 
+	PhpHereDoc_ARROW : ARROW -> type(ARROW);
+	PhpHereDoc_LBRACK : LBRACK -> type(LBRACK);
+	PhpHereDoc_RBRACK : RBRACK -> type(RBRACK);
+	PhpHereDoc_PHP_IDENTIFIER : PHP_IDENTIFIER -> type(PHP_IDENTIFIER);
+	PhpHereDoc_WS : WS -> type(WS);
+
+	PhpHereDoc_LBRACE : LBRACE {StringBraceLevel > 0 || _input.La(1) == '\$'}? -> type(LBRACE);
+	PhpHereDoc_LBRACE2 : {_input.La(-1) == '\$'}? LBRACE -> type(LBRACE);
+	PhpHereDoc_RBRACE : RBRACE {StringBraceLevel > 0}? -> type(RBRACE);
+
+	PhpHereDoc_DOUBLE_STRING_ESCAPE
+		:	'\\'
+			(	('n' | 'r' | 't' | 'v' | 'f' | '\\' | '$' | '"')
+			|	'0'..'7' ('0'..'7' ('0'..'7')?)?
+			|	'x'
+				(	HEXDIGIT HEXDIGIT?
+				)
+			)
+		;
+
+	PhpHereDoc_DOUBLE_STRING_INVALID_ESCAPE
+		:	'\\' -> type(PHP_DOUBLE_STRING_LITERAL)
+		;
+
 	PHP_HEREDOC_TEXT
-		:	~[\r\n]+
+		:	(	~('\r' | '\n' | '\\' | '$' | '-' | '[' | ']' | '{' | '}' | ' ' | '\t')
+			|	'-' {_input.La(1) != '>'}?
+			|	'{' {_input.La(1) != '\$'}?
+			|	'}' {StringBraceLevel == 0}?
+			)+
 		;
 
 mode PhpSingleString;
