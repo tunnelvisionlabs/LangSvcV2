@@ -265,13 +265,9 @@
     <Compile Include="PhpTextStructureNavigatorProvider.cs" />
     <Compile Include="Classification\PhpClassifierConstants.cs" />
     <Compile Include="Navigation\PhpEditorNavigationBackgroundParser.cs" />
-    <Compile Include="Navigation\PhpEditorNavigationParser.g3.cs">
-      <DependentUpon>PhpEditorNavigationParser.g3</DependentUpon>
-    </Compile>
     <Compile Include="Navigation\PhpEditorNavigationParseResultEventArgs.cs" />
     <Compile Include="Navigation\PhpEditorNavigationSource.cs" />
     <Compile Include="Navigation\PhpEditorNavigationSourceProvider.cs" />
-    <Compile Include="Outlining\PhpOutliningLexer.cs" />
     <Compile Include="Outlining\PhpOutliningParseResultEventArgs.cs" />
     <Compile Include="PhpBraceMatchingTaggerProvider.cs" />
     <Compile Include="Classification\PhpClassificationTypeNames.cs" />
@@ -296,9 +292,6 @@
       <DependentUpon>PhpHtmlTextClassifierLexer.g3</DependentUpon>
     </Compile>
     <Compile Include="Outlining\PhpOutliningBackgroundParser.cs" />
-    <Compile Include="Outlining\PhpOutliningParser.g3.cs">
-      <DependentUpon>PhpOutliningParser.g3</DependentUpon>
-    </Compile>
     <Compile Include="Outlining\PhpOutliningTagger.cs" />
     <Compile Include="Outlining\PhpOutliningTaggerProvider.cs" />
     <Compile Include="PhpServices.cs" />
@@ -331,12 +324,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
     <Antlr3 Include="Classification\PhpCodeClassifierLexer.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <Antlr3 Include="Outlining\PhpOutliningParser.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <Antlr3 Include="Navigation\PhpEditorNavigationParser.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
     <AntlrTokens Include="Classification\PhpClassifierConstants.tokens" />

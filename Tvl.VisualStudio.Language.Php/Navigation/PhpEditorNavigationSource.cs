@@ -4,13 +4,16 @@
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Linq;
+    using Antlr4.Runtime;
+    using Antlr4.Runtime.Tree;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Language.Parsing4;
+    using Tvl.VisualStudio.Language.Php.Parser;
     using Tvl.VisualStudio.Text.Navigation;
     using ImageSource = System.Windows.Media.ImageSource;
+    using ParseResultEventArgs = Tvl.VisualStudio.Language.Parsing.ParseResultEventArgs;
     using StandardGlyphGroup = Microsoft.VisualStudio.Language.Intellisense.StandardGlyphGroup;
     using StandardGlyphItem = Microsoft.VisualStudio.Language.Intellisense.StandardGlyphItem;
-    using Antlr.Runtime.Tree;
 
     internal sealed class PhpEditorNavigationSource : IEditorNavigationSource
     {
@@ -98,84 +101,11 @@
             {
                 ITextSnapshot snapshot = antlrParseResultArgs.Snapshot;
 
+                Listener listener = new Listener(Provider, snapshot, antlrParseResultArgs, navigationTargets);
+
                 foreach (var tree in antlrParseResultArgs.NavigationTrees)
                 {
-                    switch (tree.Type)
-                    {
-                    case PhpEditorNavigationParser.CLASS_IDENTIFIER:
-                    case PhpEditorNavigationParser.INTERFACE_IDENTIFIER:
-                        {
-                            CommonTree child = tree;
-                            if (child != null)
-                            {
-                                string name = child.Token.Text;
-                                for (ITree parent = child.Parent; parent != null; parent = parent.Parent)
-                                {
-                                    switch (parent.Type)
-                                    {
-                                    case PhpEditorNavigationParser.INTERFACE_IDENTIFIER:
-                                    case PhpEditorNavigationParser.CLASS_IDENTIFIER:
-                                        name = parent.Text + "." + name;
-                                        continue;
-
-                                    default:
-                                        continue;
-                                    }
-                                }
-
-                                IEditorNavigationType navigationType = Provider.EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Types);
-                                var startToken = antlrParseResultArgs.Tokens[child.TokenStartIndex];
-                                var stopToken = antlrParseResultArgs.Tokens[child.TokenStopIndex];
-                                SnapshotSpan span = new SnapshotSpan(snapshot, new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1));
-                                SnapshotSpan seek = new SnapshotSpan(snapshot, new Span(child.Token.StartIndex, 0));
-
-                                StandardGlyphGroup glyphGroup;
-                                switch (child.Type)
-                                {
-                                //case PhpEditorNavigationParser.ENUM_IDENTIFIER:
-                                //    glyphGroup = StandardGlyphGroup.GlyphGroupEnum;
-                                //    break;
-
-                                case PhpEditorNavigationParser.INTERFACE_IDENTIFIER:
-                                    glyphGroup = StandardGlyphGroup.GlyphGroupInterface;
-                                    break;
-
-                                case PhpEditorNavigationParser.CLASS_IDENTIFIER:
-                                default:
-                                    glyphGroup = StandardGlyphGroup.GlyphGroupClass;
-                                    break;
-                                }
-
-                                //StandardGlyphItem glyphItem = GetGlyphItemFromChildModifier(child);
-                                StandardGlyphItem glyphItem = StandardGlyphItem.GlyphItemPublic;
-                                ImageSource glyph = _provider.GlyphService.GetGlyph(glyphGroup, glyphItem);
-                                NavigationTargetStyle style = NavigationTargetStyle.None;
-                                navigationTargets.Add(new EditorNavigationTarget(name, navigationType, span, seek, glyph, style));
-                            }
-                        }
-
-                        break;
-
-                    case PhpEditorNavigationParser.FUNCTION_IDENTIFIER:
-                        {
-                            string name = tree.Token.Text;
-                            IEnumerable<string> args = ProcessArguments((CommonTree)tree.GetFirstChildWithType(PhpEditorNavigationParser.FORMAL_PARAMETERS));
-                            string sig = string.Format("{0}({1})", name, string.Join(", ", args));
-                            IEditorNavigationType navigationType = Provider.EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Members);
-                            var startToken = antlrParseResultArgs.Tokens[tree.TokenStartIndex];
-                            var stopToken = antlrParseResultArgs.Tokens[tree.TokenStopIndex];
-                            SnapshotSpan span = new SnapshotSpan(snapshot, new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1));
-                            SnapshotSpan seek = new SnapshotSpan(snapshot, new Span(tree.Token.StartIndex, 0));
-                            StandardGlyphGroup glyphGroup = StandardGlyphGroup.GlyphGroupMethod;
-                            //StandardGlyphItem glyphItem = GetGlyphItemFromChildModifier(tree);
-                            StandardGlyphItem glyphItem = StandardGlyphItem.GlyphItemPublic;
-                            ImageSource glyph = _provider.GlyphService.GetGlyph(glyphGroup, glyphItem);
-                            NavigationTargetStyle style = NavigationTargetStyle.None;
-                            navigationTargets.Add(new EditorNavigationTarget(sig, navigationType, span, seek, glyph, style));
-                        }
-
-                        break;
-                    }
+                    ParseTreeWalkers.SingleTree.Walk(listener, tree);
                 }
 #if false
                 IAstRuleReturnScope resultArgs = antlrParseResultArgs.Result as IAstRuleReturnScope;
@@ -251,21 +181,192 @@
             OnNavigationTargetsChanged(EventArgs.Empty);
         }
 
-        private IEnumerable<string> ProcessArguments(CommonTree tree)
+        private class Listener : PhpParserBaseListener
         {
-            foreach (CommonTree argTree in tree.Children)
+            private readonly PhpEditorNavigationSourceProvider _provider;
+            private readonly ITextSnapshot _snapshot;
+            private readonly AntlrParseResultEventArgs _antlrParseResultArgs;
+            private readonly ICollection<IEditorNavigationTarget> _navigationTargets;
+
+            public Listener(PhpEditorNavigationSourceProvider provider, ITextSnapshot snapshot, AntlrParseResultEventArgs antlrParseResultArgs, ICollection<IEditorNavigationTarget> navigationTargets)
             {
-                if (argTree.Type != PhpEditorNavigationParser.PARAMETER_IDENTIFIER)
-                    continue;
+                Contract.Requires<ArgumentNullException>(provider != null, "provider");
+                Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
+                Contract.Requires<ArgumentNullException>(antlrParseResultArgs != null, "antlrParseResultArgs");
+                Contract.Requires<ArgumentNullException>(navigationTargets != null, "navigationTargets");
 
-                bool byRef = false;
-                if (argTree.ChildCount > 0 && argTree.GetChild(0).Type == PhpEditorNavigationParser.AND)
-                    byRef = true;
+                _provider = provider;
+                _snapshot = snapshot;
+                _antlrParseResultArgs = antlrParseResultArgs;
+                _navigationTargets = navigationTargets;
+            }
 
-                if (byRef)
-                    yield return "&" + argTree.Text;
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_classOrInterfaceDefinition, 0, Dependents.Parents)]
+            public override void EnterClassOrInterfaceDefinition(PhpParser.ClassOrInterfaceDefinitionContext context)
+            {
+                string name = GetQualifiedName(context);
+
+                IEditorNavigationType navigationType = _provider.EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Types);
+                var startToken = _antlrParseResultArgs.Tokens[context.SourceInterval.a];
+                var stopToken = _antlrParseResultArgs.Tokens[context.SourceInterval.b];
+                SnapshotSpan span = new SnapshotSpan(_snapshot, new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1));
+                SnapshotSpan seek = span;
+                if (context.PHP_IDENTIFIER() != null)
+                    seek = new SnapshotSpan(_snapshot, new Span(context.PHP_IDENTIFIER().Symbol.StartIndex, 0));
+
+                StandardGlyphGroup glyphGroup;
+                if (context.KW_INTERFACE() != null)
+                {
+                    glyphGroup = StandardGlyphGroup.GlyphGroupInterface;
+                }
                 else
-                    yield return argTree.Text;
+                {
+                    glyphGroup = StandardGlyphGroup.GlyphGroupClass;
+                }
+
+                //StandardGlyphItem glyphItem = GetGlyphItemFromChildModifier(child);
+                StandardGlyphItem glyphItem = StandardGlyphItem.GlyphItemPublic;
+                ImageSource glyph = _provider.GlyphService.GetGlyph(glyphGroup, glyphItem);
+                NavigationTargetStyle style = NavigationTargetStyle.None;
+                _navigationTargets.Add(new EditorNavigationTarget(name, navigationType, span, seek, glyph, style));
+            }
+
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionDefinition, 0, Dependents.Parents)]
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionParameterList, 0, Dependents.Self)]
+            public override void EnterFunctionDefinition(PhpParser.FunctionDefinitionContext context)
+            {
+                string name = GetName(context);
+                IEnumerable<string> args = ProcessArguments(context.functionParameterList());
+                string sig = string.Format("{0}({1})", name, string.Join(", ", args));
+                IEditorNavigationType navigationType = _provider.EditorNavigationTypeRegistryService.GetEditorNavigationType(PredefinedEditorNavigationTypes.Members);
+                var startToken = _antlrParseResultArgs.Tokens[context.SourceInterval.a];
+                var stopToken = _antlrParseResultArgs.Tokens[context.SourceInterval.b];
+                SnapshotSpan span = new SnapshotSpan(_snapshot, new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1));
+                SnapshotSpan seek = span;
+                if (context.PHP_IDENTIFIER() != null)
+                    new SnapshotSpan(_snapshot, new Span(context.PHP_IDENTIFIER().Symbol.StartIndex, 0));
+
+                StandardGlyphGroup glyphGroup = StandardGlyphGroup.GlyphGroupMethod;
+                //StandardGlyphItem glyphItem = GetGlyphItemFromChildModifier(tree);
+                StandardGlyphItem glyphItem = StandardGlyphItem.GlyphItemPublic;
+                ImageSource glyph = _provider.GlyphService.GetGlyph(glyphGroup, glyphItem);
+                NavigationTargetStyle style = NavigationTargetStyle.None;
+                _navigationTargets.Add(new EditorNavigationTarget(sig, navigationType, span, seek, glyph, style));
+            }
+
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_classOrInterfaceDefinition, 0, Dependents.Ancestors)]
+            private static string GetQualifiedName(PhpParser.ClassOrInterfaceDefinitionContext context)
+            {
+                string name = GetName(context);
+                for (RuleContext parent = context.Parent; parent != null; parent = parent.Parent)
+                {
+                    var defContext = parent as PhpParser.ClassOrInterfaceDefinitionContext;
+                    if (defContext != null)
+                    {
+                        name = GetName(defContext) + "." + name;
+                    }
+                }
+
+                return name;
+            }
+
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_classOrInterfaceDefinition, 0, Dependents.Self)]
+            private static string GetName(PhpParser.ClassOrInterfaceDefinitionContext context)
+            {
+                Contract.Requires(context != null);
+
+                ITerminalNode nameNode = context.PHP_IDENTIFIER();
+                if (nameNode == null)
+                    return "?";
+
+                string name = nameNode.Symbol.Text;
+                if (string.IsNullOrEmpty(name))
+                    return "?";
+
+                return name;
+            }
+
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionDefinition, 0, Dependents.Self)]
+            private static string GetName(PhpParser.FunctionDefinitionContext context)
+            {
+                Contract.Requires(context != null);
+
+                ITerminalNode nameNode = context.PHP_IDENTIFIER();
+                if (nameNode == null)
+                    return "?";
+
+                string name = nameNode.Symbol.Text;
+                if (string.IsNullOrEmpty(name))
+                    return "?";
+
+                return name;
+            }
+
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionParameter, 0, Dependents.Self)]
+            private static string GetName(PhpParser.FunctionParameterContext context)
+            {
+                Contract.Requires(context != null);
+
+                ITerminalNode nameNode = context.PHP_IDENTIFIER();
+                if (nameNode == null)
+                    return "?";
+
+                string name = nameNode.Symbol.Text;
+                if (string.IsNullOrEmpty(name))
+                    return "?";
+
+                return name;
+            }
+
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionParameterList, 0, Dependents.Parents)]
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionParameters, 0, Dependents.Self)]
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionParameter, 0, Dependents.Self)]
+            private IEnumerable<string> ProcessArguments(PhpParser.FunctionParameterListContext context)
+            {
+                if (context == null)
+                    yield break;
+
+                PhpParser.FunctionParametersContext functionParametersContext = context.functionParameters();
+                if (functionParametersContext == null)
+                    yield break;
+
+                foreach (PhpParser.FunctionParameterContext argTree in functionParametersContext.functionParameter())
+                {
+                    bool byRef = argTree.AND() != null;
+                    if (byRef)
+                        yield return "&" + GetName(argTree);
+                    else
+                        yield return GetName(argTree);
+                }
+            }
+        }
+
+        public static class ParseTreeWalkers
+        {
+            public static ParseTreeWalker SingleTree
+            {
+                get
+                {
+                    return SingleTreeParseTreeWalker.SingleTreeParseTreeWalkerInstance;
+                }
+            }
+
+            private sealed class SingleTreeParseTreeWalker : ParseTreeWalker
+            {
+                public static readonly SingleTreeParseTreeWalker SingleTreeParseTreeWalkerInstance = new SingleTreeParseTreeWalker();
+
+                public override void Walk(IParseTreeListener listener, IParseTree t)
+                {
+                    IRuleNode ruleNode = t as IRuleNode;
+                    if (ruleNode != null)
+                    {
+                        EnterRule(listener, ruleNode);
+                        ExitRule(listener, ruleNode);
+                        return;
+                    }
+
+                    base.Walk(listener, t);
+                }
             }
         }
     }

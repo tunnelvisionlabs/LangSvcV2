@@ -4,16 +4,17 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
-    using Antlr.Runtime;
-    using Antlr.Runtime.Tree;
+    using Antlr4.Runtime;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Language.Parsing;
+
+    using AntlrParseResultEventArgs = Tvl.VisualStudio.Language.Parsing4.AntlrParseResultEventArgs;
+    using ParseErrorEventArgs = Tvl.VisualStudio.Language.Parsing.ParseErrorEventArgs;
 
     internal class PhpOutliningParseResultEventArgs : AntlrParseResultEventArgs
     {
-        private readonly ReadOnlyCollection<CommonTree> _outliningTrees;
+        private readonly ReadOnlyCollection<ParserRuleContext> _outliningTrees;
 
-        public PhpOutliningParseResultEventArgs(ITextSnapshot snapshot, IList<ParseErrorEventArgs> errors, TimeSpan elapsedTime, IList<IToken> tokens, IRuleReturnScope result, ReadOnlyCollection<CommonTree> outliningTrees)
+        public PhpOutliningParseResultEventArgs(ITextSnapshot snapshot, IList<ParseErrorEventArgs> errors, TimeSpan elapsedTime, IList<IToken> tokens, ParserRuleContext result, ReadOnlyCollection<ParserRuleContext> outliningTrees)
             : base(snapshot, errors, elapsedTime, tokens, result)
         {
             Contract.Requires<ArgumentNullException>(outliningTrees != null, "outliningTrees");
@@ -21,7 +22,7 @@
             _outliningTrees = outliningTrees;
         }
 
-        public ReadOnlyCollection<CommonTree> OutliningTrees
+        public ReadOnlyCollection<ParserRuleContext> OutliningTrees
         {
             get
             {

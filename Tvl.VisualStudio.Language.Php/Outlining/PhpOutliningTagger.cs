@@ -4,13 +4,12 @@
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Linq;
-    using Antlr.Runtime.Tree;
+    using Antlr4.Runtime;
+    using Antlr4.Runtime.Misc;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
-    using Tvl.VisualStudio.Language.Parsing;
 
-    using CharStreamConstants = Antlr.Runtime.CharStreamConstants;
-    using IAstRuleReturnScope = Antlr.Runtime.IAstRuleReturnScope;
+    using ParseResultEventArgs = Tvl.VisualStudio.Language.Parsing.ParseResultEventArgs;
 
     internal sealed class PhpOutliningTagger : ITagger<IOutliningRegionTag>
     {
@@ -80,13 +79,14 @@
             {
                 ITextSnapshot snapshot = antlrParseResultArgs.Snapshot;
 
-                foreach (CommonTree child in antlrParseResultArgs.OutliningTrees)
+                foreach (ParserRuleContext child in antlrParseResultArgs.OutliningTrees)
                 {
-                    if (child.Type == CharStreamConstants.EndOfFile)
+                    Interval sourceInterval = child.SourceInterval;
+                    if (sourceInterval.a < 0 || sourceInterval.b < 0 || sourceInterval.Length <= 0)
                         continue;
 
-                    var startToken = antlrParseResultArgs.Tokens[child.TokenStartIndex];
-                    var stopToken = antlrParseResultArgs.Tokens[child.TokenStopIndex];
+                    var startToken = antlrParseResultArgs.Tokens[sourceInterval.a];
+                    var stopToken = antlrParseResultArgs.Tokens[sourceInterval.b];
                     Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
                     if (snapshot.GetLineNumberFromPosition(span.Start) == snapshot.GetLineNumberFromPosition(span.End))
                         continue;
