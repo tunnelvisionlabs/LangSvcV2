@@ -91,6 +91,19 @@
             return VSConstants.E_FAIL;
         }
 
+        /// <summary>
+        /// Returns the corresponding debugger back-end "language ID".
+        /// </summary>
+        /// <remarks>
+        /// Return the corresponding debugger back-end language identifier. This is not the debug engine
+        /// identifier, which should be obtained by the current project or somewhere else that knows how
+        /// the sources for this language are being built.
+        /// </remarks>
+        /// <param name="buffer">[in] The <see cref="IVsTextBuffer"/> interface for which the language identifier is required.</param>
+        /// <param name="line">[in] Integer containing the line index.</param>
+        /// <param name="col">[in] Integer containing the column index.</param>
+        /// <param name="languageId">[out] Returns a GUID specifying the language identifier.</param>
+        /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
         public virtual int GetLanguageID(IVsTextBuffer buffer, int line, int col, out Guid languageId)
         {
             Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
@@ -99,6 +112,13 @@
             return VSConstants.S_OK;
         }
 
+        /// <summary>
+        /// Deprecated. Do not use.
+        /// </summary>
+        /// <param name="name">Do not use.</param>
+        /// <param name="pbstrMkDoc">Do not use.</param>
+        /// <param name="spans">Do not use.</param>
+        /// <returns></returns>
         [Obsolete]
         public virtual int GetLocationOfName(string name, out string pbstrMkDoc, TextSpan[] spans)
         {
@@ -109,6 +129,21 @@
             return VSConstants.E_NOTIMPL;
         }
 
+        /// <summary>
+        /// Generates a name for the given location in the file.
+        /// </summary>
+        /// <remarks>
+        /// This method generates a name for the given location in the given file. This name represents
+        /// the "innermost named entity" in the source. If non-null, the <paramref name="lineOffset"/>
+        /// parameter is filled with the offset from the first line of the named entity. Returns S_FALSE
+        /// if the position doesn't fall within anything interesting.
+        /// </remarks>
+        /// <param name="buffer">[in] Returns the text buffer (<see cref="IVsTextBuffer"/> object) that contains the location.</param>
+        /// <param name="line">[in] Number of the line containing the location.</param>
+        /// <param name="col">[in] Column containing the location in the line.</param>
+        /// <param name="name">[out] Returns a string containing the name of the location.</param>
+        /// <param name="lineOffset">[out] Returns an integer containing the line offset from <paramref name="line"/>.</param>
+        /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
         public virtual int GetNameOfLocation(IVsTextBuffer buffer, int line, int col, out string name, out int lineOffset)
         {
             Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
@@ -118,6 +153,23 @@
             return VSConstants.S_OK;
         }
 
+        /// <summary>
+        /// Generates proximity expressions.
+        /// </summary>
+        /// <remarks>
+        /// This method is implemented by a language service to provide information needed to populate the
+        /// <strong>Autos</strong> debugging window. When the debugger calls this method, the debugger is
+        /// requesting the names of any parameters and variables in a span of lines beginning with the
+        /// starting position identified by the <paramref name="line"/> and <paramref name="col"/> parameters
+        /// in the specified text buffer. The extent of lines beyond this point is specified by the
+        /// <paramref name="cLines"/> parameter.
+        /// </remarks>
+        /// <param name="buffer">[in] The <see cref="IVsTextBuffer"/> interface for the text buffer containing the expression.</param>
+        /// <param name="line">[in] Number of the line containing the start of the expression.</param>
+        /// <param name="col">[in] Column position within the line.</param>
+        /// <param name="cLines">[in] Number of lines within the expression.</param>
+        /// <param name="expressions">[out] Returns an IVsEnumBSTR object that is used to enumerate BSTRs.</param>
+        /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
         public virtual int GetProximityExpressions(IVsTextBuffer buffer, int line, int col, int cLines, out IVsEnumBSTR expressions)
         {
             Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
@@ -126,12 +178,34 @@
             return VSConstants.S_FALSE;
         }
 
+        /// <summary>
+        /// Returns whether the location contains code that is mapped to another document, for example,
+        /// client-side script code.
+        /// </summary>
+        /// <remarks>
+        /// Return whether the location contains code that is mapped to another document, for example client-side script code.
+        /// </remarks>
+        /// <param name="buffer">[in] The IVsTextBuffer interface that contains the location in question.</param>
+        /// <param name="line">[in] Integer containing the line index.</param>
+        /// <param name="col">[in] Integer containing the column index.</param>
+        /// <returns>If the method succeeds, returns S_OK indicating the location contains mapped code.
+        /// If the location does not contain mapped code, returns S_FALSE. Otherwise, returns an error code.</returns>
         public virtual int IsMappedLocation(IVsTextBuffer buffer, int line, int col)
         {
             Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
             return VSConstants.S_FALSE;
         }
 
+        /// <summary>
+        /// Disambiguates the given name, providing non-ambiguous names for all entities that "match" the name.
+        /// </summary>
+        /// <remarks>
+        /// This method disambiguates the given name, providing non-ambiguous names for all entities that "match" the name.
+        /// </remarks>
+        /// <param name="name">[in] String containing the name.</param>
+        /// <param name="flags">[in] Flags. For more information, see RESOLVENAMEFLAGS.</param>
+        /// <param name="names">[out] Returns an object containing a list of names. For more information, see IVsEnumDebugName.</param>
+        /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
         public virtual int ResolveName(string name, RESOLVENAMEFLAGS flags, out IVsEnumDebugName names)
         {
             Contract.Requires<ArgumentNullException>(name != null, "name");
@@ -141,6 +215,26 @@
             return VSConstants.E_NOTIMPL;
         }
 
+        /// <summary>
+        /// Validates the given position as a place to set a breakpoint.
+        /// </summary>
+        /// <remarks>
+        /// This method validates the given position as a place to set a breakpoint without having to load the
+        /// debugger. If the location is valid, then the span is filled in with the extent of the statement at
+        /// which execution would stop. If the position is known to not contain code, this method returns S_FALSE.
+        /// If the method fails, the breakpoint is set, pending validation during the debugger startup.
+        /// 
+        /// Even if you do not intend to support the ValidateBreakpointLocation method but your language does
+        /// support breakpoints, you must implement this method and return a span that contains the specified
+        /// line and column; otherwise, breakpoints cannot be set anywhere except line 1. You can return E_NOTIMPL
+        /// to indicate that you do not otherwise support this method but the span must always be set. The example
+        /// shows how this can be done.
+        /// </remarks>
+        /// <param name="buffer">[in] The IVsTextBuffer interface for the text buffer containing the breakpoint.</param>
+        /// <param name="line">[in] Number of the line containing the breakpoint.</param>
+        /// <param name="col">[in] Number of the column containing the breakpoint.</param>
+        /// <param name="pCodeSpan">[out] Returns a span of text containing the extent of the statement at which execution would stop if the breakpoint were set.</param>
+        /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
         public virtual int ValidateBreakpointLocation(IVsTextBuffer buffer, int line, int col, TextSpan[] pCodeSpan)
         {
             Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
