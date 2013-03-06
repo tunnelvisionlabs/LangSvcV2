@@ -1,7 +1,6 @@
 ﻿namespace Tvl.VisualStudio.Text
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel.Composition;
@@ -19,18 +18,16 @@
     public sealed class TextViewMappingService : ITextViewMappingService, IWpfTextViewConnectionListener
     {
         private static readonly IWpfTextView[] EmptyViews = new IWpfTextView[0];
-        private readonly ConcurrentDictionary<WeakReference<ITextBuffer>, List<WeakReference<IWpfTextView>>> _bufferToViewsMap =
-            new ConcurrentDictionary<WeakReference<ITextBuffer>, List<WeakReference<IWpfTextView>>>();
+        private readonly ConditionalWeakTable<ITextBuffer, List<WeakReference<IWpfTextView>>> _bufferToViewsMap =
+            new ConditionalWeakTable<ITextBuffer, List<WeakReference<IWpfTextView>>>();
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         #region ITextViewMappingService Members
 
         public IEnumerable<IWpfTextView> GetViewsForBuffer(ITextBuffer buffer)
         {
-            WeakReference<ITextBuffer> weakBuffer = new WeakReference<ITextBuffer>(buffer);
-
             List<WeakReference<IWpfTextView>> views;
-            if (!_bufferToViewsMap.TryGetValue(weakBuffer, out views))
+            if (!_bufferToViewsMap.TryGetValue(buffer, out views))
                 return EmptyViews;
 
             lock (views)
@@ -48,8 +45,7 @@
             WeakReference<IWpfTextView> weakView = new WeakReference<IWpfTextView>(textView);
             foreach (var buffer in subjectBuffers)
             {
-                var key = new WeakReference<ITextBuffer>(buffer);
-                List<WeakReference<IWpfTextView>> views = _bufferToViewsMap.GetOrAdd(key, CreateViewList);
+                List<WeakReference<IWpfTextView>> views = _bufferToViewsMap.GetOrCreateValue(buffer);
                 lock (views)
                 {
                     if (!views.Contains(weakView))
@@ -64,8 +60,7 @@
             foreach (var buffer in subjectBuffers)
             {
                 List<WeakReference<IWpfTextView>> views;
-                var key = new WeakReference<ITextBuffer>(buffer);
-                if (_bufferToViewsMap.TryGetValue(key, out views))
+                if (_bufferToViewsMap.TryGetValue(buffer, out views))
                 {
                     lock (views)
                     {
@@ -74,28 +69,11 @@
                     }
                 }
             }
-
-            RemoveDeadReferences(_bufferToViewsMap);
-        }
-
-        private static void RemoveDeadReferences(ConcurrentDictionary<WeakReference<ITextBuffer>, List<WeakReference<IWpfTextView>>> dictionary)
-        {
-            foreach (var key in dictionary.Keys.ToArray())
-            {
-                List<WeakReference<IWpfTextView>> value;
-                if (!key.IsAlive)
-                    dictionary.TryRemove(key, out value);
-            }
         }
 
         private static void RemoveDeadReferences(List<WeakReference<IWpfTextView>> list)
         {
             list.RemoveAll(reference => !reference.IsAlive);
-        }
-
-        private static List<WeakReference<IWpfTextView>> CreateViewList(WeakReference<ITextBuffer> buffer)
-        {
-            return new List<WeakReference<IWpfTextView>>();
         }
 
         #endregion
