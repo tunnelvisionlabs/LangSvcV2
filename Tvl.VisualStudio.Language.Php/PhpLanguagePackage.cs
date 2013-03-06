@@ -11,8 +11,6 @@
 
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration(PhpConstants.PhpLanguagePackageNameResourceString, PhpConstants.PhpLanguagePackageDetailsResourceString, PhpConstants.PhpLanguagePackageProductVersionString/*, IconResourceID = 400*/)]
-    //[ProvideAutoLoad(PhpConstants.UIContextNoSolution)]
-    //[ProvideAutoLoad(PhpConstants.UIContextSolutionExists)]
     [Guid(PhpConstants.PhpLanguagePackageGuidString)]
     [ProvideLanguageService(typeof(PhpLanguageInfo), PhpConstants.PhpLanguageName, PhpConstants.PhpLanguageResourceId,
         //AutoOutlining = true,

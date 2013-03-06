@@ -23,8 +23,5 @@
 
         public const string PhpLanguageGuidString = "E7C2D503-A41B-4CD7-B257-2CB71E51D742";
         public static readonly Guid PhpLanguageGuid = new Guid("{" + PhpLanguageGuidString + "}");
-
-        public const string UIContextNoSolution = "ADFC4E64-0397-11D1-9F4E-00A0C911004F";
-        public const string UIContextSolutionExists = "f1536ef8-92ec-443c-9ed7-fdadf150da82";
     }
 }
