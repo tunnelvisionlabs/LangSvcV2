@@ -185,6 +185,9 @@ namespace Tvl.VisualStudio.Language.Php
                 return VSConstants.E_INVALIDARG;
             }
 
+            if (docDataExisting != IntPtr.Zero && _promptEncodingOnLoad)
+                return VSConstants.VS_E_INCOMPATIBLEDOCDATA;
+
             // Get a text buffer
             IVsTextLines textLines = GetTextBuffer(docDataExisting, documentMoniker);
 
