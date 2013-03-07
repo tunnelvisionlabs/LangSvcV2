@@ -50,8 +50,7 @@ namespace Tvl.VisualStudio.Language.Php
     using System.Runtime.InteropServices;
     using Path = System.IO.Path;
 
-    [Guid("F25F5E78-96E7-4B63-9782-A81F7B0C3DE5")]
-    public class PhpEditorFactory : IVsEditorFactory
+    public abstract class PhpEditorFactory : IVsEditorFactory
     {
         private PhpLanguagePackage _package;
         private ServiceProvider _serviceProvider;

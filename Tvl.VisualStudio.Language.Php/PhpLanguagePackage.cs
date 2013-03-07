@@ -26,8 +26,8 @@
         EnableLineNumbers = true,
         //CodeSense = true,
         RequestStockColors = true)]
-    [ProvideEditorExtension(typeof(PhpEditorFactory), PhpConstants.PhpFileExtension, 50, NameResourceID = 101)]
-    [ProvideEditorExtension(typeof(PhpEditorFactory), PhpConstants.Php5FileExtension, 50, NameResourceID = 101)]
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithoutEncoding), PhpConstants.PhpFileExtension, 50, NameResourceID = 101)]
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithoutEncoding), PhpConstants.Php5FileExtension, 50, NameResourceID = 101)]
     [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.PhpFileExtension, 40, NameResourceID = 102)]
     [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.Php5FileExtension, 40, NameResourceID = 102)]
     [ProvideLanguageExtension(typeof(PhpLanguageInfo), PhpConstants.PhpFileExtension)]
@@ -51,7 +51,7 @@
             _languageInfo = new PhpLanguageInfo(this.AsVsServiceProvider());
             ((IServiceContainer)this).AddService(typeof(PhpLanguageInfo), _languageInfo, true);
 
-            RegisterEditorFactory(new PhpEditorFactory(this));
+            RegisterEditorFactory(new PhpEditorFactoryWithoutEncoding(this));
             RegisterEditorFactory(new PhpEditorFactoryWithEncoding(this));
 
             try
