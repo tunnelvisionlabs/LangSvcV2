@@ -165,9 +165,9 @@ namespace Tvl.VisualStudio.Language.Php
                         string physicalView,
                         IVsHierarchy hierarchy,
                         uint itemid,
-                        System.IntPtr docDataExisting,
-                        out System.IntPtr docView,
-                        out System.IntPtr docData,
+                        IntPtr docDataExisting,
+                        out IntPtr docView,
+                        out IntPtr docData,
                         out string editorCaption,
                         out Guid commandUIGuid,
                         out int createDocumentWindowFlags)
@@ -175,12 +175,12 @@ namespace Tvl.VisualStudio.Language.Php
             // Initialize output parameters
             docView = IntPtr.Zero;
             docData = IntPtr.Zero;
-            commandUIGuid = this.GetType().GUID;
+            commandUIGuid = Guid.Empty;
             createDocumentWindowFlags = 0;
             editorCaption = null;
 
             // Validate inputs
-            if ((createEditorFlags & (VSConstants.CEF_OPENFILE | VSConstants.CEF_SILENT)) == 0)
+            if ((createEditorFlags & (uint)(VSConstants.CEF.OpenFile | VSConstants.CEF.Silent)) == 0)
             {
                 return VSConstants.E_INVALIDARG;
             }
@@ -254,7 +254,7 @@ namespace Tvl.VisualStudio.Language.Php
                 if (textLines == null)
                 {
                     // Unknown docData type then, so we have to force VS to close the other editor.
-                    ErrorHandler.ThrowOnFailure((int)VSConstants.VS_E_INCOMPATIBLEDOCDATA);
+                    throw Marshal.GetExceptionForHR(VSConstants.VS_E_INCOMPATIBLEDOCDATA);
                 }
 
             }
@@ -275,9 +275,7 @@ namespace Tvl.VisualStudio.Language.Php
 
             // We couldn't create the view
             // Return special error code so VS can try another editor factory.
-            ErrorHandler.ThrowOnFailure((int)VSConstants.VS_E_UNSUPPORTEDFORMAT);
-
-            return IntPtr.Zero;
+            throw Marshal.GetExceptionForHR(VSConstants.VS_E_UNSUPPORTEDFORMAT);
         }
 
         private IntPtr CreateCodeView(string documentMoniker, IVsTextLines textLines, bool createdDocData, ref string editorCaption, ref Guid cmdUI)
