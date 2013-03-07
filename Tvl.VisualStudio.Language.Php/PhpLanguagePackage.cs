@@ -8,6 +8,7 @@
     using IServiceContainer = System.ComponentModel.Design.IServiceContainer;
     using MessageBox = System.Windows.MessageBox;
     using RuleDependencyChecker = Antlr4.Runtime.Misc.RuleDependencyChecker;
+    using VSConstants = Microsoft.VisualStudio.VSConstants;
 
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration(PhpConstants.PhpLanguagePackageNameResourceString, PhpConstants.PhpLanguagePackageDetailsResourceString, PhpConstants.PhpLanguagePackageProductVersionString/*, IconResourceID = 400*/)]
@@ -35,6 +36,13 @@
     [ProvideEditorExtension(typeof(PhpEditorFactoryWithoutEncoding), PhpConstants.Php5FileExtension, 50)]
     [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.PhpFileExtension, 40)]
     [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.Php5FileExtension, 40)]
+
+    /* If this is missing, then double-clicking on a line in the TVL IntelliSense output
+     * window with a PHP file name will open a new window using a different factory rather
+     * than reusing the window that's already open for the document.
+     */
+    [ProvideEditorLogicalView(typeof(PhpEditorFactoryWithoutEncoding), VSConstants.LOGVIEWID.TextView_string)]
+    [ProvideEditorLogicalView(typeof(PhpEditorFactoryWithEncoding), VSConstants.LOGVIEWID.TextView_string)]
 
     [ProvideLanguageExtension(typeof(PhpLanguageInfo), PhpConstants.PhpFileExtension)]
     [ProvideLanguageExtension(typeof(PhpLanguageInfo), PhpConstants.Php5FileExtension)]
