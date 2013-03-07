@@ -122,9 +122,7 @@
                 return _standardClassificationService.Keyword;
 
             case V4PhpClassifierLexer.PHP_IDENTIFIER:
-                if (PhpClassifierConstants.Keywords.Contains(token.Text))
-                    return _standardClassificationService.Keyword;
-                else if (PhpClassifierConstants.BuiltinFunctions.Contains(token.Text))
+                if (PhpClassifierConstants.BuiltinFunctions.Contains(token.Text))
                     return _globalFunction;
                 else if (PhpClassifierConstants.BuiltinObjects.Contains(token.Text) || PhpClassifierConstants.PredefinedConstants.Contains(token.Text))
                     return _globalObject;
