@@ -52,13 +52,31 @@
 
             switch (token.Type)
             {
+            case PHP_NOWDOC_START:
+                // <<<'identifier'
+                _heredocIdentifier = token.Text.Substring(3);
+                break;
+
             case PHP_HEREDOC_START:
                 // <<<identifier
                 _heredocIdentifier = token.Text.Substring(3);
                 break;
 
             case PHP_HEREDOC_END:
+            case PHP_NOWDOC_END:
                 _heredocIdentifier = null;
+                break;
+
+            case LBRACE:
+                if (_mode == PhpDoubleString || _mode == PhpHereDoc)
+                    StringBraceLevel++;
+
+                break;
+
+            case RBRACE:
+                if (_mode == PhpDoubleString || _mode == PhpHereDoc)
+                    StringBraceLevel--;
+
                 break;
 
             default:
@@ -66,6 +84,14 @@
             }
 
             return token;
+        }
+
+        public override int PopMode()
+        {
+            if (_mode == PhpDoubleString || _mode == PhpHereDoc)
+                StringBraceLevel = 0;
+
+            return base.PopMode();
         }
 
         private bool CheckHeredocEnd(int la1, string text)
