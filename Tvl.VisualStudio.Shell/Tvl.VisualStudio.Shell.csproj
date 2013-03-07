@@ -279,6 +279,7 @@
     <Compile Include="IMonitorSelectionService.cs" />
     <Compile Include="IOpenedViewTrackerService.cs" />
     <Compile Include="MetricTypes.cs" />
+    <Compile Include="EditorFactory.cs" />
     <Compile Include="PredefinedTaskSchedulers.cs" />
     <Compile Include="PriorityCommandFilter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
