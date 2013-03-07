@@ -247,6 +247,7 @@ mode PhpHereDoc;
 	PhpHereDoc_LBRACK : LBRACK -> type(LBRACK);
 	PhpHereDoc_RBRACK : RBRACK -> type(RBRACK);
 	PhpHereDoc_PHP_IDENTIFIER : PHP_IDENTIFIER -> type(PHP_IDENTIFIER);
+	PhpHereDoc_PHP_NUMBER : PHP_NUMBER -> type(PHP_NUMBER);
 	PhpHereDoc_WS : WS -> type(WS);
 
 	PhpHereDoc_LBRACE : LBRACE {StringBraceLevel > 0 || _input.La(1) == '\$'}? -> type(LBRACE);
@@ -264,11 +265,11 @@ mode PhpHereDoc;
 		;
 
 	PhpHereDoc_DOUBLE_STRING_INVALID_ESCAPE
-		:	'\\' -> type(PHP_DOUBLE_STRING_LITERAL)
+		:	'\\' -> type(PHP_HEREDOC_TEXT)
 		;
 
 	PHP_HEREDOC_TEXT
-		:	(	~('\r' | '\n' | '\\' | '$' | '-' | '[' | ']' | '{' | '}' | ' ' | '\t')
+		:	(	~('\r' | '\n' | '\\' | '$' | '-' | '[' | ']' | '{' | '}' | ' ' | '\t' | [a-zA-Z0-9_])
 			|	'-' {_input.La(1) != '>'}?
 			|	'{' {_input.La(1) != '\$'}?
 			|	'}' {StringBraceLevel == 0}?
@@ -293,6 +294,7 @@ mode PhpDoubleString;
 	PhpDoubleString_LBRACK : LBRACK -> type(LBRACK);
 	PhpDoubleString_RBRACK : RBRACK -> type(RBRACK);
 	PhpDoubleString_PHP_IDENTIFIER : PHP_IDENTIFIER -> type(PHP_IDENTIFIER);
+	PhpDoubleString_PHP_NUMBER : PHP_NUMBER -> type(PHP_NUMBER);
 	PhpDoubleString_WS : WS -> type(WS);
 
 	PhpDoubleString_LBRACE : LBRACE {StringBraceLevel > 0 || _input.La(1) == '\$'}? -> type(LBRACE);
@@ -314,7 +316,7 @@ mode PhpDoubleString;
 		;
 
 	CONTINUE_DOUBLE_STRING
-		:	(	~('\r' | '\n' | '"' | '\\' | '$' | '-' | '[' | ']' | '{' | '}' | ' ' | '\t')
+		:	(	~('\r' | '\n' | '"' | '\\' | '$' | '-' | '[' | ']' | '{' | '}' | ' ' | '\t' | [a-zA-Z0-9_])
 			|	'-' {_input.La(1) != '>'}?
 			|	'{' {_input.La(1) != '\$'}?
 			|	'}' {StringBraceLevel == 0}?

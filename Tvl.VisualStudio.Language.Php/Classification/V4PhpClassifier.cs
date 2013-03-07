@@ -56,8 +56,16 @@
             {
             case V4PhpClassifierLexer.PHP_SINGLE_STRING_LITERAL:
             case V4PhpClassifierLexer.PHP_DOUBLE_STRING_LITERAL:
+            case V4PhpClassifierLexer.PHP_HEREDOC_START:
             case V4PhpClassifierLexer.PHP_HEREDOC_TEXT:
+            case V4PhpClassifierLexer.PHP_HEREDOC_END:
+            case V4PhpClassifierLexer.PHP_NOWDOC_START:
             case V4PhpClassifierLexer.PHP_NOWDOC_TEXT:
+            case V4PhpClassifierLexer.PHP_NOWDOC_END:
+                return _standardClassificationService.StringLiteral;
+
+            case V4PhpClassifierLexer.PhpHereDoc_DOUBLE_STRING_ESCAPE:
+            case V4PhpClassifierLexer.DOUBLE_STRING_ESCAPE:
                 return _standardClassificationService.StringLiteral;
 
             case V4PhpClassifierLexer.PHP_NUMBER:
