@@ -26,6 +26,10 @@
         EnableLineNumbers = true,
         //CodeSense = true,
         RequestStockColors = true)]
+
+    [ProvideEditorFactory(typeof(PhpEditorFactoryWithoutEncoding), 101)]
+    [ProvideLinkedEditorFactory(typeof(PhpEditorFactoryWithEncoding), typeof(PhpEditorFactoryWithoutEncoding), 102)]
+
     [ProvideEditorExtension(typeof(PhpEditorFactoryWithoutEncoding), PhpConstants.PhpFileExtension, 50, NameResourceID = 101)]
     [ProvideEditorExtension(typeof(PhpEditorFactoryWithoutEncoding), PhpConstants.Php5FileExtension, 50, NameResourceID = 101)]
     [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.PhpFileExtension, 40, NameResourceID = 102)]
