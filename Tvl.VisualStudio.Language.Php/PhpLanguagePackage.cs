@@ -37,6 +37,10 @@
     [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.PhpFileExtension, 49)]
     [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.Php5FileExtension, 49)]
 
+    // registering a wildcard extension allows the user to customize file extensions
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithoutEncoding), ".*", 2)]
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), ".*", 1)]
+
     /* If this is missing, then double-clicking on a line in the TVL IntelliSense output
      * window with a PHP file name will open a new window using a different factory rather
      * than reusing the window that's already open for the document.
