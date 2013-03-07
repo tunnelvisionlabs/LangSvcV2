@@ -8,6 +8,7 @@
     using IServiceContainer = System.ComponentModel.Design.IServiceContainer;
     using MessageBox = System.Windows.MessageBox;
     using RuleDependencyChecker = Antlr4.Runtime.Misc.RuleDependencyChecker;
+    using VSConstants = Microsoft.VisualStudio.VSConstants;
 
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration(PhpConstants.PhpLanguagePackageNameResourceString, PhpConstants.PhpLanguagePackageDetailsResourceString, PhpConstants.PhpLanguagePackageProductVersionString/*, IconResourceID = 400*/)]
@@ -26,10 +27,27 @@
         EnableLineNumbers = true,
         //CodeSense = true,
         RequestStockColors = true)]
-    [ProvideEditorExtension(typeof(PhpEditorFactoryWithoutEncoding), PhpConstants.PhpFileExtension, 50, NameResourceID = 101)]
-    [ProvideEditorExtension(typeof(PhpEditorFactoryWithoutEncoding), PhpConstants.Php5FileExtension, 50, NameResourceID = 101)]
-    [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.PhpFileExtension, 40, NameResourceID = 102)]
-    [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.Php5FileExtension, 40, NameResourceID = 102)]
+
+    [ProvideEditorFactory(typeof(PhpEditorFactoryWithoutEncoding), 101)]
+    [ProvideLinkedEditorFactory(typeof(PhpEditorFactoryWithEncoding), typeof(PhpEditorFactoryWithoutEncoding), 102)]
+
+    // don't need to include NameResourceID because it's handled by ProvideEditorFactory
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithoutEncoding), PhpConstants.PhpFileExtension, 50)]
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithoutEncoding), PhpConstants.Php5FileExtension, 50)]
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.PhpFileExtension, 49)]
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.Php5FileExtension, 49)]
+
+    // registering a wildcard extension allows the user to customize file extensions
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithoutEncoding), ".*", 2)]
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), ".*", 1)]
+
+    /* If this is missing, then double-clicking on a line in the TVL IntelliSense output
+     * window with a PHP file name will open a new window using a different factory rather
+     * than reusing the window that's already open for the document.
+     */
+    [ProvideEditorLogicalView(typeof(PhpEditorFactoryWithoutEncoding), VSConstants.LOGVIEWID.TextView_string)]
+    [ProvideEditorLogicalView(typeof(PhpEditorFactoryWithEncoding), VSConstants.LOGVIEWID.TextView_string)]
+
     [ProvideLanguageExtension(typeof(PhpLanguageInfo), PhpConstants.PhpFileExtension)]
     [ProvideLanguageExtension(typeof(PhpLanguageInfo), PhpConstants.Php5FileExtension)]
     [ProvideBindingPath]
