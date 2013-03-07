@@ -34,8 +34,8 @@
     // don't need to include NameResourceID because it's handled by ProvideEditorFactory
     [ProvideEditorExtension(typeof(PhpEditorFactoryWithoutEncoding), PhpConstants.PhpFileExtension, 50)]
     [ProvideEditorExtension(typeof(PhpEditorFactoryWithoutEncoding), PhpConstants.Php5FileExtension, 50)]
-    [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.PhpFileExtension, 40)]
-    [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.Php5FileExtension, 40)]
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.PhpFileExtension, 49)]
+    [ProvideEditorExtension(typeof(PhpEditorFactoryWithEncoding), PhpConstants.Php5FileExtension, 49)]
 
     /* If this is missing, then double-clicking on a line in the TVL IntelliSense output
      * window with a PHP file name will open a new window using a different factory rather
