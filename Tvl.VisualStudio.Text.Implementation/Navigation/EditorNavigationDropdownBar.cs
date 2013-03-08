@@ -549,6 +549,15 @@
         {
             Contract.Requires<ArgumentNullException>(targets != null, "targets");
 
+            foreach (var control in _navigationControls)
+            {
+                List<IEditorNavigationTarget> combo = control.Item2;
+                lock (combo)
+                {
+                    control.Item2.Clear();
+                }
+            }
+
             foreach (var group in targets.GroupBy(target => target.EditorNavigationType))
             {
                 var navigationControl = this._navigationControls.FirstOrDefault(control => control.Item1 == group.Key);
@@ -558,7 +567,6 @@
                 var combo = navigationControl.Item2;
                 lock (combo)
                 {
-                    combo.Clear();
                     combo.AddRange(group.OrderBy(i => i.Name, StringComparer.CurrentCultureIgnoreCase));
                 }
             }
