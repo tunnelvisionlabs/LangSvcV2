@@ -4,11 +4,12 @@
 
     public static class PhpConstants
     {
-        /* The language name (used for the language service) and content type must be the same
-         * due to the way Visual Studio internally registers file extensions and content types.
+        /* Since we have a custom editor factory, the language name and content type
+         * *cannot* be the same. We only want the content type associated with a text
+         * buffer when explicitly requested in the PhpProjectionBuffer implementation.
          */
         public const string PhpLanguageName = "PHP";
-        public const string PhpContentType = PhpLanguageName;
+        public const string PhpContentType = "PHPCode";
         public const string PhpFileExtension = ".php";
         public const string Php5FileExtension = ".php5";
 

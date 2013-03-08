@@ -258,7 +258,6 @@
     <Compile Include="Parser\PhpParser.g4.cs">
       <DependentUpon>PhpParser.g4</DependentUpon>
     </Compile>
-    <Compile Include="PhpBlock.cs" />
     <Compile Include="PhpEditorFactory.cs" />
     <Compile Include="PhpEditorFactoryWithEncoding.cs" />
     <Compile Include="PhpProjectionBuffer.cs" />
@@ -294,9 +293,6 @@
     <Compile Include="PhpLanguageInfo.cs" />
     <Compile Include="PhpLanguagePackage.cs" />
     <Compile Include="SnapshotSpanSourceCodeReader.cs" />
-    <Compile Include="TemplateRegion.cs" />
-    <Compile Include="TemplateToken.cs" />
-    <Compile Include="TemplateTokenizer.cs" />
     <Compile Include="TemplateTokenKind.cs" />
   </ItemGroup>
   <ItemGroup>
