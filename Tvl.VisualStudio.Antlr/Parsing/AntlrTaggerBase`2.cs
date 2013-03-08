@@ -10,7 +10,7 @@
     using Microsoft.VisualStudio.Text.Tagging;
 
     public abstract class AntlrTaggerBase<TState, TTag> : ITagger<TTag>
-        where TState : struct, ITextLineState<TState>
+        where TState : ITextLineState<TState>
         where TTag : ITag
     {
         private readonly ITextBuffer _textBuffer;
@@ -121,7 +121,7 @@
                                 extendMultilineSpanToLine = i + 1;
 
                             if (inBounds)
-                                SetLineState(i, new TState().CreateMultilineState());
+                                SetLineState(i, GetStartState().CreateMultilineState());
                         }
                     }
                 }
@@ -142,7 +142,7 @@
                             extendMultilineSpanToLine = i + 1;
 
                         if (inBounds)
-                            SetLineState(i, new TState().CreateMultilineState());
+                            SetLineState(i, GetStartState().CreateMultilineState());
                     }
                 }
 
@@ -240,6 +240,7 @@
                 start = Math.Min(start, firstDirtyLine.Start.Position);
             }
 
+            bool haveState = false;
             TState state = default(TState);
             int startLine = span.Snapshot.GetLineNumberFromPosition(start);
             while (startLine > 0)
@@ -247,6 +248,7 @@
                 TState lineState = _lineStates[startLine - 1];
                 if (!lineState.IsMultiline)
                 {
+                    haveState = true;
                     state = lineState;
                     break;
                 }
@@ -256,12 +258,14 @@
 
             if (startLine == 0)
             {
+                haveState = true;
                 state = GetStartState();
             }
 
             start = span.Snapshot.GetLineFromLineNumber(startLine).Start;
             int length = endPosition - start;
             span = new SnapshotSpan(span.Snapshot, start, length);
+            Contract.Assert(haveState);
             return state;
         }
 

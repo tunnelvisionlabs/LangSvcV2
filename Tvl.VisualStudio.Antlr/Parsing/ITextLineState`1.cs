@@ -1,7 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing
 {
     public interface ITextLineState<T>
-        where T : struct, ITextLineState<T>
+        where T : ITextLineState<T>
     {
         bool IsDirty
         {

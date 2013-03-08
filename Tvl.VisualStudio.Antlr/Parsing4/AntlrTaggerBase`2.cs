@@ -20,7 +20,6 @@
     using VsShellUtilities = Microsoft.VisualStudio.Shell.VsShellUtilities;
 
     public abstract class AntlrTaggerBase<TState, TTag> : ITagger<TTag>
-        where TState : struct
         where TTag : ITag
     {
         private static bool _timeoutReported;
@@ -278,10 +277,7 @@
             return state;
         }
 
-        protected virtual TState GetStartState()
-        {
-            return default(TState);
-        }
+        protected abstract TState GetStartState();
 
         protected virtual TState AdjustParseSpan(TaggerState taggerState, ref SnapshotSpan span)
         {
@@ -295,6 +291,7 @@
                 start = Math.Min(start, firstDirtyLine.Start.Position);
             }
 
+            bool haveState = false;
             TState state = default(TState);
             int startLine = span.Snapshot.GetLineNumberFromPosition(start);
             while (startLine > 0)
@@ -302,6 +299,7 @@
                 LineStateInfo lineState = taggerState._lineStates[startLine - 1];
                 if (!lineState.MultilineToken)
                 {
+                    haveState = true;
                     state = lineState.EndLineState;
                     break;
                 }
@@ -311,12 +309,14 @@
 
             if (startLine == 0)
             {
+                haveState = true;
                 state = GetStartState();
             }
 
             start = span.Snapshot.GetLineFromLineNumber(startLine).Start;
             int length = endPosition - start;
             span = new SnapshotSpan(span.Snapshot, start, length);
+            Contract.Assert(haveState);
             return state;
         }
 
@@ -530,21 +530,12 @@
         // TODO: need to consider lookahead distance as well
         protected struct LineStateInfo
         {
-            public static readonly LineStateInfo Multiline =
-                new LineStateInfo()
-                {
-                    MultilineToken = true
-                };
+            public static readonly LineStateInfo Multiline = new LineStateInfo(multilineToken: true);
+            public static readonly LineStateInfo Dirty = new LineStateInfo(isDirty: true);
 
-            public static readonly LineStateInfo Dirty =
-                new LineStateInfo()
-                {
-                    IsDirty = true
-                };
-
-            public TState EndLineState;
-            public bool IsDirty;
-            public bool MultilineToken;
+            public readonly TState EndLineState;
+            public readonly bool IsDirty;
+            public readonly bool MultilineToken;
 
             public LineStateInfo(TState endLineState)
             {
@@ -558,6 +549,13 @@
                 EndLineState = endLineState;
                 IsDirty = isDirty;
                 MultilineToken = false;
+            }
+
+            private LineStateInfo(bool isDirty = false, bool multilineToken = false)
+            {
+                EndLineState = default(TState);
+                IsDirty = isDirty;
+                MultilineToken = multilineToken;
             }
         }
 
