@@ -97,6 +97,19 @@
                     if (snapshot.GetLineNumberFromPosition(span.Start) == snapshot.GetLineNumberFromPosition(span.End))
                         continue;
 
+                    if (codeContext != null)
+                    {
+                        int start = span.Start;
+                        int end = span.End;
+                        if (codeContext.HTML_START_CODE() != null)
+                            start = codeContext.HTML_START_CODE().Symbol.StopIndex + 1;
+
+                        if (codeContext.CLOSE_PHP_TAG() != null)
+                            end = codeContext.CLOSE_PHP_TAG().Symbol.StartIndex;
+
+                        span = Span.FromBounds(start, end);
+                    }
+
                     SnapshotSpan snapshotSpan = new SnapshotSpan(antlrParseResultArgs.Snapshot, span);
                     IOutliningRegionTag tag = new OutliningRegionTag("...", string.Empty);
                     TagSpan<IOutliningRegionTag> tagSpan = new TagSpan<IOutliningRegionTag>(snapshotSpan, tag);
