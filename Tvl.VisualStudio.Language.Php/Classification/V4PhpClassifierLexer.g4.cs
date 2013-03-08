@@ -87,6 +87,35 @@
             return token;
         }
 
+        public override IToken Emit()
+        {
+            if (_mode == PhpDoubleString || _mode == PhpHereDoc)
+            {
+                if (StringBraceLevel == 0)
+                {
+                    switch (_type)
+                    {
+                    case PHP_HEREDOC_START:
+                    case PHP_HEREDOC_END:
+                    case LBRACE:
+                        break;
+
+                    case PHP_IDENTIFIER:
+                        if (!Text.StartsWith("$"))
+                            goto default;
+
+                        break;
+
+                    default:
+                        _type = _mode == PhpDoubleString ? PHP_DOUBLE_STRING_LITERAL : PHP_HEREDOC_TEXT;
+                        break;
+                    }
+                }
+            }
+
+            return base.Emit();
+        }
+
         public override int PopMode()
         {
             if (_mode == PhpDoubleString || _mode == PhpHereDoc)
