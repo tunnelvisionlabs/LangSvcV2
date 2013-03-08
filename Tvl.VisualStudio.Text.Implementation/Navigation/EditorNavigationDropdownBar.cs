@@ -616,7 +616,7 @@
             }
             catch (Exception ex)
             {
-                if (!ex.IsCritical())
+                if (ex.IsCritical())
                     throw;
             }
         }
