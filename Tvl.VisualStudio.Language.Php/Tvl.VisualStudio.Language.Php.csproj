@@ -282,6 +282,14 @@
     <Compile Include="PhpServices.cs" />
     <Compile Include="ProjectionClassifier.cs" />
     <Compile Include="ProjectionClassifierProvider.cs" />
+    <Compile Include="Projection\ContentTypeTag.cs" />
+    <Compile Include="Projection\ContentTypeTagger.cs" />
+    <Compile Include="Projection\ContentTypeTaggerProvider.cs" />
+    <Compile Include="Projection\PhpContentTypeLexer.g4.cs">
+      <DependentUpon>PhpContentTypeLexer.g4</DependentUpon>
+    </Compile>
+    <Compile Include="Projection\PhpContentTypeLexerState.cs" />
+    <Compile Include="Projection\RegionType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PhpLanguageInfo.cs" />
     <Compile Include="PhpLanguagePackage.cs" />
@@ -310,6 +318,11 @@
     <Antlr4 Include="Parser\PhpParser.g4">
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>Tvl.VisualStudio.Language.Php.Parser</CustomToolNamespace>
+    </Antlr4>
+    <Antlr4 Include="Projection\PhpContentTypeLexer.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Tvl.VisualStudio.Language.Php.Projection</CustomToolNamespace>
+      <TargetLanguage>CSharp_v4_0</TargetLanguage>
     </Antlr4>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
