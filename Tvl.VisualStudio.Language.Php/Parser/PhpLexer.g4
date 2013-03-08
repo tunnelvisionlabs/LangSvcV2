@@ -25,6 +25,10 @@ HTML_START_CODE
 		-> pushMode(PhpCode)
 	;
 
+HTML_LT
+	:	'<' {true}? -> type(TEXT), channel(HIDDEN)
+	;
+
 TEXT
 	:	~[<\r\n]+
 		-> channel(HIDDEN)
