@@ -19,7 +19,7 @@ NEWLINE
 	;
 
 HTML_START_CODE
-	:	('<?php' | '<?=')
+	:	('<?' [pP] [hH] [pP] | '<?=')
 		-> pushMode(PhpCode)
 	;
 
