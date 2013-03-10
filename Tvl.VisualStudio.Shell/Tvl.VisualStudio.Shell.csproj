@@ -254,9 +254,6 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="ComponentSelectorData.cs" />
-    <Compile Include="Contracts\IActiveViewTrackerServiceContracts.cs" />
-    <Compile Include="Contracts\IMonitorSelectionServiceContracts.cs" />
-    <Compile Include="Contracts\IOpenedViewTrackerServiceContracts.cs" />
     <Compile Include="DebuggerRegistrationAttribute.cs" />
     <Compile Include="DebugMetricAttribute.cs" />
     <Compile Include="Extensions\DebugTargetInfo.cs" />
@@ -275,9 +272,6 @@
     <Compile Include="Extensions\IVsUIShellExtensions.cs" />
     <Compile Include="Extensions\ServiceProviderExtensions.cs" />
     <Compile Include="Extensions\VsServiceProviderExtensions.cs" />
-    <Compile Include="IActiveViewTrackerService.cs" />
-    <Compile Include="IMonitorSelectionService.cs" />
-    <Compile Include="IOpenedViewTrackerService.cs" />
     <Compile Include="MetricTypes.cs" />
     <Compile Include="EditorFactory.cs" />
     <Compile Include="PredefinedTaskSchedulers.cs" />
@@ -290,7 +284,6 @@
     <Compile Include="ProvideDebuggerExceptionAttribute.cs" />
     <Compile Include="ProvideLinkedEditorFactoryAttribute.cs" />
     <Compile Include="WpfToolWindowPane.cs" />
-    <Compile Include="ViewChangedEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">

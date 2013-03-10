@@ -103,6 +103,8 @@
 /Tvl.VisualStudio.Shell.OutputWindow.Implementation/obj/
 /Tvl.VisualStudio.Shell/bin/
 /Tvl.VisualStudio.Shell/obj/
+/Tvl.VisualStudio.Shell.Interfaces/bin/
+/Tvl.VisualStudio.Shell.Interfaces/obj/
 /Tvl.VisualStudio.Text.Antlr/bin/
 /Tvl.VisualStudio.Text.Antlr/obj/
 /Tvl.VisualStudio.Text.Implementation/bin/

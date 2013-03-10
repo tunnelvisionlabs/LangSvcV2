@@ -332,6 +332,10 @@
       <Project>{90E28BCA-BD13-475B-B051-7A7D852A6206}</Project>
       <Name>Tvl.VisualStudio.Language</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.Shell.Interfaces\Tvl.VisualStudio.Shell.Interfaces.csproj">
+      <Project>{c8450e39-55b4-4bbf-a08f-f1e38b76ddef}</Project>
+      <Name>Tvl.VisualStudio.Shell.Interfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Shell.OutputWindow.Interfaces\Tvl.VisualStudio.Shell.OutputWindow.Interfaces.csproj">
       <Project>{56D7EB29-6705-4C37-A7B1-E8780B4350EA}</Project>
       <Name>Tvl.VisualStudio.Shell.OutputWindow.Interfaces</Name>

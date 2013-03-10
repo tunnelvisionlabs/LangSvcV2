@@ -41,9 +41,23 @@
             {
                 MonitorSelectionService.ViewChanged += value;
             }
+
             remove
             {
                 MonitorSelectionService.ViewChanged -= value;
+            }
+        }
+
+        public event EventHandler<ViewChangedEventArgs> ViewWithMouseChanged
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
             }
         }
 
@@ -55,13 +69,13 @@
             }
         }
 
-        //public ITextView ViewWithMouse
-        //{
-        //    get
-        //    {
-        //        throw new NotImplementedException();
-        //    }
-        //}
+        public ITextView ViewWithMouse
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         public ITextView GetViewUnderPosition(Point screenCoordinates)
         {
