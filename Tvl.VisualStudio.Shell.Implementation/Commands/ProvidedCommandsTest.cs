@@ -1,4 +1,6 @@
-﻿// Field 'field name' is never assigned to, and will always have its default value null
+﻿#if DEBUG
+
+// Field 'field name' is never assigned to, and will always have its default value null
 #pragma warning disable 649
 
 namespace Tvl.VisualStudio.Shell.Commands
@@ -423,3 +425,5 @@ namespace Tvl.VisualStudio.Shell.Commands
     //    override 
     //}
 }
+
+#endif
