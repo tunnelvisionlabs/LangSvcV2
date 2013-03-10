@@ -247,7 +247,6 @@
     </Compile>
     <Compile Include="Classification\V4PhpClassifierLexerState.cs" />
     <Compile Include="PhpEditorFactoryWithoutEncoding.cs" />
-    <Compile Include="CustomTrackingSpan.cs" />
     <Compile Include="HtmlCompletionSource.cs" />
     <Compile Include="HtmlCompletionSourceProvider.cs" />
     <Compile Include="HtmlIntellisenseController.cs" />

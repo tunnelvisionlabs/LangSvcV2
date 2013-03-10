@@ -155,16 +155,8 @@ namespace Tvl.VisualStudio.Language.Php
                 case RegionType.End:
                     {
                         // handle the code region that ended where this tag ended
-                        ITrackingSpan projectionSpan = new CustomTrackingSpan(
-                            phpSnapshot,
-                            sourceSpan,
-                            PointTrackingMode.Positive,
-                            PointTrackingMode.Negative);
-                        ITrackingSpan diskBufferSpan = new CustomTrackingSpan(
-                            snapshot,
-                            sourceSpan,
-                            PointTrackingMode.Positive,
-                            PointTrackingMode.Negative);
+                        ITrackingSpan projectionSpan = phpSnapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgeExclusive);
+                        ITrackingSpan diskBufferSpan = snapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgeExclusive);
 
                         projectionSpans.Add(projectionSpan);
                         spans.Add(new SpanInfo(diskBufferSpan, TemplateTokenKind.Block));
@@ -196,16 +188,8 @@ namespace Tvl.VisualStudio.Language.Php
                 case RegionType.Begin:
                     {
                         // handle the code region that ended at the end of the document
-                        ITrackingSpan projectionSpan = new CustomTrackingSpan(
-                            phpSnapshot,
-                            sourceSpan,
-                            PointTrackingMode.Positive,
-                            PointTrackingMode.Positive);
-                        ITrackingSpan diskBufferSpan = new CustomTrackingSpan(
-                            snapshot,
-                            sourceSpan,
-                            PointTrackingMode.Positive,
-                            PointTrackingMode.Positive);
+                        ITrackingSpan projectionSpan = phpSnapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgePositive);
+                        ITrackingSpan diskBufferSpan = snapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgePositive);
 
                         projectionSpans.Add(projectionSpan);
                         spans.Add(new SpanInfo(diskBufferSpan, TemplateTokenKind.Block));
