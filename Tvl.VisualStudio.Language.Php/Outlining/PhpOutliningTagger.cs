@@ -72,7 +72,7 @@
             UpdateTags(antlrParseResultArgs);
         }
 
-        [RuleDependency(typeof(PhpParser), PhpParser.RULE_code, 0, Dependents.Self)]
+        [RuleDependency(typeof(PhpParser), PhpParser.RULE_code, 3, Dependents.Self)]
         private void UpdateTags(PhpOutliningParseResultEventArgs antlrParseResultArgs)
         {
             List<ITagSpan<IOutliningRegionTag>> outliningRegions = new List<ITagSpan<IOutliningRegionTag>>();

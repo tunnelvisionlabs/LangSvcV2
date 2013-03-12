@@ -201,7 +201,7 @@
                 _navigationTargets = navigationTargets;
             }
 
-            [RuleDependency(typeof(PhpParser), PhpParser.RULE_classOrInterfaceDefinition, 0, Dependents.Parents)]
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_classOrInterfaceDefinition, 5, Dependents.Parents)]
             public override void EnterClassOrInterfaceDefinition(PhpParser.ClassOrInterfaceDefinitionContext context)
             {
                 string name = GetQualifiedName(context);
@@ -231,7 +231,7 @@
                 _navigationTargets.Add(new EditorNavigationTarget(name, navigationType, span, seek, glyph, style));
             }
 
-            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionDefinition, 0, Dependents.Parents)]
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionDefinition, 5, Dependents.Parents)]
             [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionParameterList, 0, Dependents.Self)]
             public override void EnterFunctionDefinition(PhpParser.FunctionDefinitionContext context)
             {
@@ -254,7 +254,7 @@
                 _navigationTargets.Add(new EditorNavigationTarget(sig, navigationType, span, seek, glyph, style));
             }
 
-            [RuleDependency(typeof(PhpParser), PhpParser.RULE_classOrInterfaceDefinition, 0, Dependents.Ancestors)]
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_classOrInterfaceDefinition, 5, Dependents.Ancestors)]
             private static string GetQualifiedName(PhpParser.ClassOrInterfaceDefinitionContext context)
             {
                 string name = GetName(context);
@@ -286,7 +286,7 @@
                 return name;
             }
 
-            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionDefinition, 0, Dependents.Self)]
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionDefinition, 2, Dependents.Self)]
             private static string GetName(PhpParser.FunctionDefinitionContext context)
             {
                 Contract.Requires(context != null);
@@ -318,7 +318,7 @@
                 return name;
             }
 
-            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionParameterList, 0, Dependents.Parents)]
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionParameterList, 2, Dependents.Parents)]
             [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionParameters, 0, Dependents.Self)]
             [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionParameter, 0, Dependents.Self)]
             private IEnumerable<string> ProcessArguments(PhpParser.FunctionParameterListContext context)

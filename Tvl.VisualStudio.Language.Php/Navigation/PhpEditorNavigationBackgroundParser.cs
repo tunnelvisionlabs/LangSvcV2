@@ -80,13 +80,13 @@
                 }
             }
 
-            [RuleDependency(typeof(PhpParser), PhpParser.RULE_classOrInterfaceDefinition, 0, Dependents.Parents)]
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_classOrInterfaceDefinition, 5, Dependents.Parents)]
             public override void EnterClassOrInterfaceDefinition(PhpParser.ClassOrInterfaceDefinitionContext context)
             {
                 _navigationTrees.Add(context);
             }
 
-            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionDefinition, 0, Dependents.Parents)]
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionDefinition, 5, Dependents.Parents)]
             public override void EnterFunctionDefinition(PhpParser.FunctionDefinitionContext context)
             {
                 _navigationTrees.Add(context);

@@ -39,7 +39,7 @@
             return new PhpOutliningBackgroundParser(textBuffer, taskScheduler, outputWindowService, textDocumentFactoryService);
         }
 
-        [RuleDependency(typeof(PhpParser), PhpParser.RULE_compileUnit, 0, Dependents.Parents)]
+        [RuleDependency(typeof(PhpParser), PhpParser.RULE_compileUnit, 4, Dependents.Parents)]
         protected override void ReParseImpl()
         {
             var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
@@ -119,13 +119,13 @@
                 }
             }
 
-            [RuleDependency(typeof(PhpParser), PhpParser.RULE_code, 0, Dependents.Parents)]
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_code, 4, Dependents.Parents)]
             public override void EnterCode(PhpParser.CodeContext context)
             {
                 _outliningTrees.Add(context);
             }
 
-            [RuleDependency(typeof(PhpParser), PhpParser.RULE_classOrInterfaceDefinition, 0, Dependents.Parents)]
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_classOrInterfaceDefinition, 5, Dependents.Parents)]
             [RuleDependency(typeof(PhpParser), PhpParser.RULE_codeBlock, 0, Dependents.Self)]
             public override void EnterClassOrInterfaceDefinition(PhpParser.ClassOrInterfaceDefinitionContext context)
             {
@@ -134,7 +134,7 @@
                     _outliningTrees.Add(context.codeBlock());
             }
 
-            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionDefinition, 0, Dependents.Parents)]
+            [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionDefinition, 5, Dependents.Parents)]
             [RuleDependency(typeof(PhpParser), PhpParser.RULE_codeBlock, 0, Dependents.Self)]
             public override void EnterFunctionDefinition(PhpParser.FunctionDefinitionContext context)
             {
