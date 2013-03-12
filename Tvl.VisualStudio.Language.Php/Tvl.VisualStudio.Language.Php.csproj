@@ -364,6 +364,10 @@
       <Project>{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}</Project>
       <Name>Tvl.VisualStudio.Shell</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.Text.Interfaces\Tvl.VisualStudio.Text.Interfaces.csproj">
+      <Project>{36884750-a681-412c-9ebf-801847f38df1}</Project>
+      <Name>Tvl.VisualStudio.Text.Interfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj">
       <Project>{2B913C3A-3FD8-4633-81C8-683AF66741A8}</Project>
       <Name>Tvl.VisualStudio.Text</Name>
