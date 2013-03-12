@@ -23,17 +23,15 @@ namespace Tvl.VisualStudio.Language.Php
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Differencing;
     using Microsoft.VisualStudio.Text.Projection;
+    using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.TextManager.Interop;
     using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Language.Php.Projection;
     using Debug = System.Diagnostics.Debug;
-    using StringReader = System.IO.StringReader;
-    using TextReader = System.IO.TextReader;
 
     internal class PhpProjectionBuffer : IProjectionEditResolver
     {
-        private static readonly string[] _templateTags = new string[] { "<?php", "<?=", "?>" };
         private static readonly EditOptions _editOptions = new EditOptions(true, new StringDifferenceOptions(StringDifferenceTypes.Character, 0, false));
-        private static readonly int _maxTemplateTagLength = _templateTags.Select(i => i.Length).Max();
 
         private readonly ITextBuffer _diskBuffer;           // the buffer as it appears on disk.
         private readonly IProjectionBuffer _projBuffer; // the buffer we project into        
@@ -44,23 +42,28 @@ namespace Tvl.VisualStudio.Language.Php
         private readonly IElisionBuffer _htmlBuffer;
         private readonly IProjectionBuffer _templateBuffer;
 
-        public PhpProjectionBuffer(IContentTypeRegistryService contentRegistry, IProjectionBufferFactoryService bufferFactory, ITextBuffer diskBuffer, IBufferGraphFactoryService bufferGraphFactory, IContentType contentType)
+        private readonly ITagAggregator<ContentTypeTag> _contentTypeTagger;
+
+        public PhpProjectionBuffer(
+            IContentTypeRegistryService contentRegistry,
+            IProjectionBufferFactoryService bufferFactory,
+            IBufferTagAggregatorFactoryService bufferTagAggregatorFactory,
+            ITextBuffer diskBuffer,
+            IBufferGraphFactoryService bufferGraphFactory,
+            IContentType contentType)
         {
             _diskBuffer = diskBuffer;
             _contentRegistry = contentRegistry;
             _contentType = contentType;
 
-            _projBuffer = bufferFactory.CreateProjectionBuffer(
-                this,
-                new object[0],
-                ProjectionBufferOptions.None
-            );
-            _projBuffer.Properties.AddProperty(typeof(PhpProjectionBuffer), this);
+            _projBuffer = CreateProjectionBuffer(bufferFactory);
+            _htmlBuffer = CreateHtmlBuffer(bufferFactory);
+            _templateBuffer = CreateTemplateBuffer(bufferFactory);
 
             _bufferGraph = bufferGraphFactory.CreateBufferGraph(_projBuffer);
 
-            _htmlBuffer = CreateHtmlBuffer(bufferFactory);
-            _templateBuffer = CreateTemplateBuffer(bufferFactory);
+            _contentTypeTagger = bufferTagAggregatorFactory.CreateTagAggregator<ContentTypeTag>(_diskBuffer);
+            _contentTypeTagger.TagsChanged += HandleContentTypeTagsChanged;
 
             IVsTextBuffer buffer;
             if (_diskBuffer.Properties.TryGetProperty<IVsTextBuffer>(typeof(IVsTextBuffer), out buffer))
@@ -68,9 +71,6 @@ namespace Tvl.VisualStudio.Language.Php
                 // keep the Venus HTML classifier happy - it wants to find a site via IVsTextBuffer
                 _htmlBuffer.Properties.AddProperty(typeof(IVsTextBuffer), buffer);
             }
-
-            var reader = new SnapshotSpanSourceCodeReader(new SnapshotSpan(diskBuffer.CurrentSnapshot, new Span(0, diskBuffer.CurrentSnapshot.Length)));
-            UpdateTemplateSpans(reader);
         }
 
         public List<SpanInfo> Spans
@@ -81,6 +81,170 @@ namespace Tvl.VisualStudio.Language.Php
             }
         }
 
+        private void HandleContentTypeTagsChanged(object sender, TagsChangedEventArgs e)
+        {
+            ITextSnapshot snapshot = DiskBuffer.CurrentSnapshot;
+            ITextSnapshot htmlSnapshot = _htmlBuffer.CurrentSnapshot;
+            ITextSnapshot phpSnapshot = TemplateBuffer.CurrentSnapshot;
+
+            SnapshotSpan completeSnapshot = new SnapshotSpan(snapshot, 0, snapshot.Length);
+
+            IMappingTagSpan<ContentTypeTag>[] tags = _contentTypeTagger.GetTags(completeSnapshot).ToArray();
+
+            IMappingPoint[] trackingPoints = new IMappingPoint[tags.Length];
+            for (int i = 0; i < tags.Length; i++)
+            {
+                IMappingTagSpan<ContentTypeTag> tag = tags[i];
+                switch (tag.Tag.RegionType)
+                {
+                case RegionType.Begin:
+                    trackingPoints[i] = tag.Span.Start;
+                    break;
+
+                case RegionType.End:
+                    trackingPoints[i] = tag.Span.End;
+                    break;
+
+                default:
+                    throw new NotSupportedException();
+                }
+            }
+
+            List<ITrackingSpan> projectionSpans = new List<ITrackingSpan>();
+            List<SpanInfo> spans = new List<SpanInfo>();
+            for (int i = 0; i < tags.Length; i++)
+            {
+                IMappingTagSpan<ContentTypeTag> tag = tags[i];
+
+                Span sourceSpan;
+                if (i == 0)
+                {
+                    sourceSpan = new Span(0, trackingPoints[0].GetPoint(snapshot, PositionAffinity.Successor) ?? 0);
+                }
+                else
+                {
+                    SnapshotPoint? startPoint = trackingPoints[i - 1].GetPoint(snapshot, PositionAffinity.Successor);
+                    SnapshotPoint? endPoint = trackingPoints[i].GetPoint(snapshot, PositionAffinity.Successor);
+                    if (!startPoint.HasValue || !endPoint.HasValue)
+                        throw new InvalidOperationException();
+
+                    sourceSpan = Span.FromBounds(startPoint.Value.Position, endPoint.Value.Position);
+                }
+
+                switch (tag.Tag.RegionType)
+                {
+                case RegionType.Begin:
+                    {
+                        // handle the Text region that ended where this tag started
+                        ITrackingSpan projectionSpan = htmlSnapshot.Version.CreateCustomTrackingSpan(
+                            sourceSpan,
+                            TrackingFidelityMode.Forward,
+                            new LanguageSpanCustomState(sourceSpan),
+                            TrackToVersion);
+                        ITrackingSpan diskBufferSpan = snapshot.Version.CreateCustomTrackingSpan(
+                            sourceSpan,
+                            TrackingFidelityMode.Forward,
+                            new LanguageSpanCustomState(sourceSpan),
+                            TrackToVersion);
+
+                        projectionSpans.Add(projectionSpan);
+                        spans.Add(new SpanInfo(diskBufferSpan, TemplateTokenKind.Text));
+                        break;
+                    }
+
+                case RegionType.End:
+                    {
+                        // handle the code region that ended where this tag ended
+                        ITrackingSpan projectionSpan = phpSnapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgeExclusive);
+                        ITrackingSpan diskBufferSpan = snapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgeExclusive);
+
+                        projectionSpans.Add(projectionSpan);
+                        spans.Add(new SpanInfo(diskBufferSpan, TemplateTokenKind.Block));
+                        break;
+                    }
+
+                default:
+                    throw new NotSupportedException();
+                }
+            }
+
+            if (true)
+            {
+                int startPosition = 0;
+                if (tags.Length > 0)
+                {
+                    SnapshotPoint? startPoint = trackingPoints.Last().GetPoint(snapshot, PositionAffinity.Successor);
+                    if (!startPoint.HasValue)
+                        throw new InvalidOperationException();
+
+                    startPosition = startPoint.Value.Position;
+                }
+
+                Span sourceSpan = Span.FromBounds(startPosition, snapshot.Length);
+
+                RegionType finalRegionType = tags.Length > 0 ? tags.Last().Tag.RegionType : RegionType.End;
+                switch (finalRegionType)
+                {
+                case RegionType.Begin:
+                    {
+                        // handle the code region that ended at the end of the document
+                        ITrackingSpan projectionSpan = phpSnapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgePositive);
+                        ITrackingSpan diskBufferSpan = snapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgePositive);
+
+                        projectionSpans.Add(projectionSpan);
+                        spans.Add(new SpanInfo(diskBufferSpan, TemplateTokenKind.Block));
+                        break;
+                    }
+
+                case RegionType.End:
+                    {
+                        // handle the Text region that ended at the end of the document
+                        ITrackingSpan projectionSpan = htmlSnapshot.Version.CreateCustomTrackingSpan(
+                            sourceSpan,
+                            TrackingFidelityMode.Forward,
+                            new LanguageSpanCustomState(sourceSpan),
+                            TrackToVersion);
+                        ITrackingSpan diskBufferSpan = snapshot.Version.CreateCustomTrackingSpan(
+                            sourceSpan,
+                            TrackingFidelityMode.Forward,
+                            new LanguageSpanCustomState(sourceSpan),
+                            TrackToVersion);
+
+                        projectionSpans.Add(projectionSpan);
+                        spans.Add(new SpanInfo(diskBufferSpan, TemplateTokenKind.Text));
+                        break;
+                    }
+
+                default:
+                    throw new NotSupportedException();
+                }
+            }
+
+            int startSpan = 0;
+            int oldSpanCount = _spans.Count;
+            _spans.RemoveRange(startSpan, oldSpanCount - startSpan);
+            _spans.AddRange(spans);
+
+            _projBuffer.ReplaceSpans(startSpan, oldSpanCount - startSpan, projectionSpans.ToArray(), _editOptions, null);
+
+            ProjectionClassifier classifier;
+            if (spans.Count > 0 &&
+                _projBuffer.Properties.TryGetProperty<ProjectionClassifier>(typeof(ProjectionClassifier), out classifier))
+            {
+                classifier.RaiseClassificationChanged(
+                    spans[0].DiskBufferSpan.GetStartPoint(_diskBuffer.CurrentSnapshot),
+                    spans[spans.Count - 1].DiskBufferSpan.GetEndPoint(_diskBuffer.CurrentSnapshot)
+                );
+            }
+        }
+
+        private IProjectionBuffer CreateProjectionBuffer(IProjectionBufferFactoryService bufferFactory)
+        {
+            var res = bufferFactory.CreateProjectionBuffer(this, new object[0], ProjectionBufferOptions.None);
+            res.Properties.AddProperty(typeof(PhpProjectionBuffer), this);
+            return res;
+        }
+
         private IProjectionBuffer CreateTemplateBuffer(IProjectionBufferFactoryService bufferFactory)
         {
             var res = bufferFactory.CreateProjectionBuffer(
@@ -88,8 +252,8 @@ namespace Tvl.VisualStudio.Language.Php
                 new object[] { 
                     _diskBuffer.CurrentSnapshot.CreateTrackingSpan(
                         0,
-                        0,
-                        SpanTrackingMode.EdgeExclusive,
+                        _diskBuffer.CurrentSnapshot.Length,
+                        SpanTrackingMode.EdgeInclusive,
                         TrackingFidelityMode.Forward
                     )
                 },
@@ -149,303 +313,17 @@ namespace Tvl.VisualStudio.Language.Php
             }
         }
 
-        public void DiskBufferChanged(object sender, TextContentChangedEventArgs e)
-        {
-            foreach (var change in e.Changes)
-            {
-                int closest;
-
-                if (TryGetSingleStartSpan(e, change, out closest))
-                {
-                    var closestSpan = _spans[closest];
-                    int recalcPosition = -1;
-                    bool recalc = false;
-
-                    if (closestSpan.Kind == TemplateTokenKind.Text)
-                    {
-                        // we're in a section of HTML or whatever language the actual template is being applied to.
-
-                        // First, check and see if the user has just pasted some code which includes a template,
-                        // in which case we'll recalculate everything.
-
-                        if (!(recalc = ContainsTemplateMarkup(change)))
-                        {
-                            // Then see if they inserted/deleted text creates a template tag by being merged
-                            // with the text around us.
-
-                            int changeBoundStart = Math.Max(0, change.NewSpan.Start - (_maxTemplateTagLength - 1));
-                            int changeBoundEnd = Math.Min(e.After.Length, change.NewSpan.End + (_maxTemplateTagLength - 1));
-                            Span changeBounds = Span.FromBounds(changeBoundStart, changeBoundEnd);
-
-                            var newText = e.After.GetText(changeBounds);
-                            foreach (var tag in _templateTags)
-                            {
-                                if (newText.Contains(tag))
-                                {
-                                    recalc = true;
-                                    break;
-                                }
-                            }
-
-                            if (recalc)
-                            {
-                                if (closest != 0)
-                                {
-                                    recalcPosition = _spans[--closest].DiskBufferSpan.GetStartPoint(e.After);
-                                }
-                                else
-                                {
-                                    recalcPosition = _spans[closest].DiskBufferSpan.GetStartPoint(e.After);
-                                }
-                            }
-                        }
-
-                        if (!recalc &&
-                            change.NewSpan.Start == closestSpan.DiskBufferSpan.GetStartPoint(e.After) &&
-                            change.NewSpan.Length == 0)
-                        {
-                            // finally, if we are just deleting code (change.NewSpan.Length == 0 indicates there's no insertions) from
-                            // the start of the buffer then we are definitely deleting a } which means we need to re-calc.  We know
-                            // we're deleting the } because it's the last char in the buffer before us because it has
-                            // to be the end of a template.
-                            closestSpan = _spans[0];
-                            closest = 0;
-                            recalc = true;
-                        }
-                    }
-                    else
-                    {
-                        // check if the newly inserted text makes a tag, we include the character before
-                        // our span and the character after.
-                        int changeBoundStart = Math.Max(0, change.NewSpan.Start - (_maxTemplateTagLength - 1));
-                        int changeBoundEnd = Math.Min(e.After.Length, change.NewSpan.End + (_maxTemplateTagLength - 1));
-                        Span changeBounds = Span.FromBounds(changeBoundStart, changeBoundEnd);
-
-                        var newText = e.After.GetText(changeBounds);
-                        foreach (var tag in _templateTags)
-                        {
-                            if (newText.Contains(tag))
-                            {
-                                recalc = true;
-                                break;
-                            }
-                        }
-
-                        if (!recalc)
-                        {
-                            var templateStart = closestSpan.DiskBufferSpan.GetStartPoint(e.After);
-
-                            if (change.NewSpan.Start <= templateStart + (_maxTemplateTagLength - 1) ||
-                                change.NewSpan.End == closestSpan.DiskBufferSpan.GetEndPoint(e.After) - (_maxTemplateTagLength - 1))
-                            {
-                                // we are altering one of the 1st two characters or the last character.  
-                                // Because we're a template that could be messing us up.  
-                                // We recalcuate from the previous text buffer
-                                // because the act of deleting this character could have turned us into a text
-                                // buffer, and we need to replace and extend the previous text buffer.
-                                recalcPosition = _spans[--closest].DiskBufferSpan.GetStartPoint(e.After);
-                                recalc = true;
-                            }
-                        }
-                    }
-
-                    if (recalc)
-                    {
-                        var start = recalcPosition != -1 ? recalcPosition : closestSpan.DiskBufferSpan.GetStartPoint(e.After).Position;
-                        var reader = new SnapshotSpanSourceCodeReader(new SnapshotSpan(e.After, Span.FromBounds(start, e.After.Length)));
-
-                        UpdateTemplateSpans(reader, closest, start);
-                    }
-                    else if (closestSpan.Kind == TemplateTokenKind.Block)
-                    {
-                        // re-parse the block
-                        _spans[closest] = new SpanInfo(
-                            closestSpan.DiskBufferSpan,
-                            closestSpan.Kind,
-                            PhpBlock.Parse(closestSpan.DiskBufferSpan.GetText(closestSpan.DiskBufferSpan.TextBuffer.CurrentSnapshot))
-                        );
-                    }
-                }
-                else
-                {
-                    UpdateTemplateSpans(new StringReader(e.After.GetText()));
-                }
-            }
-        }
-
-        private static bool ContainsTemplateMarkup(ITextChange change)
-        {
-            bool recalc = false;
-            foreach (var tag in _templateTags)
-            {
-                if (change.NewText.Contains(tag))
-                {
-                    recalc = true;
-                    break;
-                }
-            }
-            return recalc;
-        }
-
-        private bool TryGetSingleStartSpan(TextContentChangedEventArgs e, ITextChange change, out int closest)
-        {
-            // find the closest region
-            var index = _spans.BinarySearch(
-                new SpanInfo(new ComparisonTrackingSpan(change.NewSpan.Start, change.NewSpan.End), TemplateTokenKind.None),
-                new TrackingSpanComparer(e.After)
-            );
-
-            if (index < 0)
-            {
-                // no exact match
-                closest = ~index;
-                if (closest < _spans.Count)
-                {
-                    // we're less than some element
-                    if (closest != 0 && _spans[closest - 1].DiskBufferSpan.GetStartPoint(e.After) <= change.NewSpan.Start)
-                    {
-                        // we start in the previous span
-                        closest--;
-                    }
-                }
-                else
-                {
-                    // we are in the very last span.
-                    closest = _spans.Count - 1;
-                }
-            }
-            else
-            {
-                // exact match, entering at the start of a span...
-                closest = index;
-            }
-
-            if (closest + 1 < _spans.Count &&
-                _spans[closest + 1].DiskBufferSpan.GetStartPoint(e.After).Position <= change.NewSpan.End)
-            {
-                // we go across multiple spans (the user is doing a paste with a selection)
-                return false;
-            }
-
-            return true;
-        }
-
-        private void UpdateTemplateSpans(TextReader reader, int startSpan = 0, int offset = 0)
-        {
-            var tokenizer = new TemplateTokenizer(reader);
-            TemplateToken? token;
-            List<object> newProjectionSpans = new List<object>();   // spans in the projection buffer
-            List<SpanInfo> newSpanInfos = new List<SpanInfo>();     // our SpanInfo's, with spans in the on-disk buffer
-
-            while ((token = tokenizer.GetNextToken()) != null)
-            {
-                var curToken = token.Value;
-                var sourceSpan = Span.FromBounds(curToken.Start + offset, curToken.End + offset + 1);
-
-                switch (curToken.Kind)
-                {
-                case TemplateTokenKind.Block:
-                case TemplateTokenKind.Comment:
-                case TemplateTokenKind.Variable:
-                    // template spans are setup to not grow.  We'll track the edits and update their
-                    // text if something causes them to grow.
-                    if (newSpanInfos.Count == 0 && startSpan == 0)
-                    {
-                        // insert a zero-length span which will grow if the user inserts before the template tag
-                        var emptySpan = new CustomTrackingSpan(
-                            _diskBuffer.CurrentSnapshot,
-                            new Span(0, 0),
-                            PointTrackingMode.Negative,
-                            PointTrackingMode.Positive
-                        );
-                        newProjectionSpans.Add(emptySpan);
-                        newSpanInfos.Add(new SpanInfo(emptySpan, TemplateTokenKind.Text));
-                    }
-
-                    newSpanInfos.Add(
-                        new SpanInfo(
-                            new CustomTrackingSpan(
-                                _diskBuffer.CurrentSnapshot,
-                                sourceSpan,
-                                PointTrackingMode.Positive,
-                                PointTrackingMode.Negative
-                            ),
-                            curToken.Kind,
-                            curToken.Kind == TemplateTokenKind.Block ?
-                                PhpBlock.Parse(_diskBuffer.CurrentSnapshot.GetText(sourceSpan)) :
-                                null
-                        )
-                    );
-
-                    newProjectionSpans.Add(
-                        new CustomTrackingSpan(
-                            _diskBuffer.CurrentSnapshot,
-                            sourceSpan,
-                            PointTrackingMode.Positive,
-                            PointTrackingMode.Negative
-                        )
-                    );
-                    break;
-                case TemplateTokenKind.Text:
-                    var htmlSpan = _htmlBuffer.CurrentSnapshot.Version.CreateCustomTrackingSpan(
-                        sourceSpan,
-                        TrackingFidelityMode.Forward,
-                        new LanguageSpanCustomState(sourceSpan.Start, sourceSpan.End),
-                        TrackToVersion
-                    );
-                    var diskSpan = _diskBuffer.CurrentSnapshot.Version.CreateCustomTrackingSpan(
-                        sourceSpan,
-                        TrackingFidelityMode.Forward,
-                        new LanguageSpanCustomState(sourceSpan.Start, sourceSpan.End),
-                        TrackToVersion
-                    );
-
-                    newProjectionSpans.Add(htmlSpan);
-                    newSpanInfos.Add(new SpanInfo(diskSpan, TemplateTokenKind.Text));
-                    break;
-                }
-            }
-
-            if (newSpanInfos.Count == 0 || newSpanInfos[newSpanInfos.Count - 1].Kind != TemplateTokenKind.Text)
-            {
-                // insert an empty span at the end which will receive new text.
-                var emptySpan = _diskBuffer.CurrentSnapshot.Version.CreateCustomTrackingSpan(
-                    new Span(_diskBuffer.CurrentSnapshot.Length, 0),
-                    TrackingFidelityMode.Forward,
-                    new LanguageSpanCustomState(_diskBuffer.CurrentSnapshot.Length, _diskBuffer.CurrentSnapshot.Length),
-                    TrackToVersion
-                );
-                newProjectionSpans.Add(emptySpan);
-                newSpanInfos.Add(new SpanInfo(emptySpan, TemplateTokenKind.Text));
-            }
-
-            var oldSpanCount = _spans.Count;
-            _spans.RemoveRange(startSpan, oldSpanCount - startSpan);
-            _spans.AddRange(newSpanInfos);
-
-            _projBuffer.ReplaceSpans(startSpan, oldSpanCount - startSpan, newProjectionSpans, _editOptions, null);
-
-            ProjectionClassifier classifier;
-            if (newSpanInfos.Count > 0 &&
-                _projBuffer.Properties.TryGetProperty<ProjectionClassifier>(typeof(ProjectionClassifier), out classifier))
-            {
-                classifier.RaiseClassificationChanged(
-                    newSpanInfos[0].DiskBufferSpan.GetStartPoint(_diskBuffer.CurrentSnapshot),
-                    newSpanInfos[newSpanInfos.Count - 1].DiskBufferSpan.GetEndPoint(_diskBuffer.CurrentSnapshot)
-                );
-            }
-        }
-
         private class LanguageSpanCustomState
         {
             public int start;       // current start of span
             public int end;         // current end of span
             public bool inelastic;  // when a span becomes inelastic, it will no longer grow due
+
             // to insertions at its edges
-            public LanguageSpanCustomState(int start, int end)
+            public LanguageSpanCustomState(Span span)
             {
-                this.start = start;
-                this.end = end;
+                this.start = span.Start;
+                this.end = span.End;
             }
         }
 
@@ -551,20 +429,11 @@ namespace Tvl.VisualStudio.Language.Php
         {
             public readonly ITrackingSpan DiskBufferSpan;
             public readonly TemplateTokenKind Kind;
-            public readonly PhpBlock Block;
 
             public SpanInfo(ITrackingSpan diskBufferSpan, TemplateTokenKind kind)
             {
                 DiskBufferSpan = diskBufferSpan;
                 Kind = kind;
-                Block = null;
-            }
-
-            public SpanInfo(ITrackingSpan diskBufferSpan, TemplateTokenKind kind, PhpBlock phpBlock)
-            {
-                DiskBufferSpan = diskBufferSpan;
-                Kind = kind;
-                Block = phpBlock;
             }
         }
 
@@ -686,100 +555,5 @@ namespace Tvl.VisualStudio.Language.Php
         }
 
         #endregion
-
-        /// <summary>
-        /// Given a point in the template buffer gets the text for that template tag.
-        /// </summary>
-        internal string GetTemplateText(SnapshotPoint point, out TemplateTokenKind kind, out int start)
-        {
-            Debug.Assert(point.Snapshot.TextBuffer == _templateBuffer);
-
-            var realPoint = _bufferGraph.MapDownToBuffer(
-                point,
-                PointTrackingMode.Positive,
-                _diskBuffer,
-                PositionAffinity.Successor);
-
-            if (realPoint != null)
-            {
-                // TODO: Binary search would be better
-                var pointVal = realPoint.Value;
-                for (int i = 0; i < _spans.Count; i++)
-                {
-                    var startPoint = _spans[i].DiskBufferSpan.GetSpan(_diskBuffer.CurrentSnapshot);
-                    if (startPoint.Start <= pointVal.Position && startPoint.End >= pointVal.Position)
-                    {
-                        kind = _spans[i].Kind;
-                        start = startPoint.Start;
-                        return _spans[i].DiskBufferSpan.GetText(_diskBuffer.CurrentSnapshot);
-                    }
-                }
-            }
-            kind = TemplateTokenKind.None;
-            start = 0;
-            return null;
-        }
-
-        /// <summary>
-        /// Given a span in the template buffer gets all of the associated template tags which
-        /// overlap with that span.
-        /// </summary>
-        internal IEnumerable<TemplateRegion> GetTemplateRegions(SnapshotSpan span, bool reversed = false)
-        {
-            Debug.Assert(span.Snapshot.TextBuffer == _templateBuffer);
-
-            var startPoint = _bufferGraph.MapDownToBuffer(span.Start, PointTrackingMode.Positive, _diskBuffer, PositionAffinity.Successor);
-            var endPoint = _bufferGraph.MapDownToBuffer(span.End, PointTrackingMode.Positive, _diskBuffer, PositionAffinity.Predecessor);
-            if (startPoint != null && endPoint != null)
-            {
-                // TODO: Binary search would be better
-                var templateRegionOnDisk = new SnapshotSpan(startPoint.Value, endPoint.Value);
-
-                for (int i = reversed ? _spans.Count - 1 : 0;
-                    reversed ? (i >= 0) : (i < _spans.Count);
-                    IncOrDec(ref i, reversed))
-                {
-
-                    if (_spans[i].Kind == TemplateTokenKind.Text)
-                    {
-                        continue;
-                    }
-
-                    var diskSpan = _spans[i].DiskBufferSpan.GetSpan(_diskBuffer.CurrentSnapshot);
-
-                    if (diskSpan.OverlapsWith(templateRegionOnDisk))
-                    {
-                        yield return new TemplateRegion(
-                            _spans[i].DiskBufferSpan.GetText(_diskBuffer.CurrentSnapshot),
-                            _spans[i].Kind,
-                            _spans[i].Block,
-                            _bufferGraph.MapUpToBuffer(
-                                diskSpan.Start,
-                                PointTrackingMode.Positive,
-                                PositionAffinity.Successor,
-                                _templateBuffer
-                            ).Value
-                        );
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Handles the inc or dec depending on if we're reversed or not - because
-        /// we can't use the conditional ternary operator as the last portion of a
-        /// for loop.
-        /// </summary>
-        private void IncOrDec(ref int i, bool reversed)
-        {
-            if (reversed)
-            {
-                i--;
-            }
-            else
-            {
-                i++;
-            }
-        }
     }
 }

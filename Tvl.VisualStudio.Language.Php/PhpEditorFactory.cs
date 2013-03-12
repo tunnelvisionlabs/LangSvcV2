@@ -19,6 +19,7 @@ namespace Tvl.VisualStudio.Language.Php
     using System;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Projection;
+    using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Shell;
     using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
@@ -102,12 +103,12 @@ namespace Tvl.VisualStudio.Language.Php
 
                 var contentRegistry = _compModel.GetService<IContentTypeRegistryService>();
 
+                var bufferTagAggregatorFactory = _compModel.GetService<IBufferTagAggregatorFactoryService>();
 
                 IContentType contentType = SniffContentType(diskBuffer) ??
                                            contentRegistry.GetContentType("HTML");
 
-                var projBuffer = new PhpProjectionBuffer(contentRegistry, factService, diskBuffer, _compModel.GetService<IBufferGraphFactoryService>(), contentType);
-                diskBuffer.ChangedHighPriority += projBuffer.DiskBufferChanged;
+                var projBuffer = new PhpProjectionBuffer(contentRegistry, factService, bufferTagAggregatorFactory, diskBuffer, _compModel.GetService<IBufferGraphFactoryService>(), contentType);
                 diskBuffer.Properties.AddProperty(typeof(PhpProjectionBuffer), projBuffer);
 
                 Guid langSvcGuid = typeof(PhpLanguageInfo).GUID;

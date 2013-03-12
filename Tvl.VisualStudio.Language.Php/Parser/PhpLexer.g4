@@ -21,8 +21,12 @@ NEWLINE
 	;
 
 HTML_START_CODE
-	:	('<?php' | '<?=')
+	:	('<?' [pP] [hH] [pP] | '<?=')
 		-> pushMode(PhpCode)
+	;
+
+HTML_LT
+	:	'<' {true}? -> type(TEXT), channel(HIDDEN)
 	;
 
 TEXT
@@ -165,7 +169,7 @@ mode PhpCode;
 	EQ		: '=';
 
 	PHP_IDENTIFIER
-		:	[a-zA-Z_$] [a-zA-Z0-9_$]*
+		:	'$'? [a-zA-Z_] [a-zA-Z0-9_]*
 		;
 
 	PHP_NUMBER
