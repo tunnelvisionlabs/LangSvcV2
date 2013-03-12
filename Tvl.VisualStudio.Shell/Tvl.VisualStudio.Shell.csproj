@@ -256,6 +256,7 @@
     <Compile Include="ComponentSelectorData.cs" />
     <Compile Include="DebuggerRegistrationAttribute.cs" />
     <Compile Include="DebugMetricAttribute.cs" />
+    <Compile Include="EditorFactoryRegistrationAttribute.cs" />
     <Compile Include="Extensions\DebugTargetInfo.cs" />
     <Compile Include="Extensions\IConnectionPointContainerExtensions.cs" />
     <Compile Include="Extensions\IVsCmdNameMappingExtensions.cs" />
@@ -282,6 +283,7 @@
     <Compile Include="ProvideComponentSelectorTabAttribute.cs" />
     <Compile Include="ProvideDebugEngineAttribute.cs" />
     <Compile Include="ProvideDebuggerExceptionAttribute.cs" />
+    <Compile Include="ProvideEditorFactory2Attribute.cs" />
     <Compile Include="ProvideLinkedEditorFactoryAttribute.cs" />
     <Compile Include="WpfToolWindowPane.cs" />
   </ItemGroup>
