@@ -2,10 +2,13 @@
 {
     using System.Collections.Generic;
     using System.Linq;
-    using System.Windows.Input;
-    using Microsoft.VisualStudio.Text.Editor;
     using DragEventArgs = System.Windows.DragEventArgs;
     using GiveFeedbackEventArgs = System.Windows.GiveFeedbackEventArgs;
+    using IMouseProcessor = Microsoft.VisualStudio.Text.Editor.IMouseProcessor;
+    using ITextView = Microsoft.VisualStudio.Text.Editor.ITextView;
+    using MouseButtonEventArgs = System.Windows.Input.MouseButtonEventArgs;
+    using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+    using MouseWheelEventArgs = System.Windows.Input.MouseWheelEventArgs;
     using QueryContinueDragEventArgs = System.Windows.QueryContinueDragEventArgs;
 
     public class IntellisenseMouseProcessor : IMouseProcessor
@@ -25,7 +28,7 @@
             }
         }
 
-        public void DefaultPreprocessMouseLeftButtonDown(IntellisenseController controller, MouseButtonEventArgs e)
+        public void DefaultPreprocessMouseLeftButtonDown(ITvlIntellisenseController controller, MouseButtonEventArgs e)
         {
             if (controller != null)
             {
@@ -34,7 +37,7 @@
             }
         }
 
-        public void DefaultPreprocessMouseRightButtonDown(IntellisenseController controller, MouseButtonEventArgs e)
+        public void DefaultPreprocessMouseRightButtonDown(ITvlIntellisenseController controller, MouseButtonEventArgs e)
         {
             if (controller != null)
             {
@@ -371,17 +374,17 @@
 
         #endregion
 
-        private static IEnumerable<IntellisenseController> GetControllersForView(ITextView textView)
+        private static IEnumerable<ITvlIntellisenseController> GetControllersForView(ITextView textView)
         {
             object controllersObject;
-            if (!textView.Properties.TryGetProperty(typeof(IntellisenseController), out controllersObject))
-                return Enumerable.Empty<IntellisenseController>();
+            if (!textView.Properties.TryGetProperty(typeof(ITvlIntellisenseController), out controllersObject))
+                return Enumerable.Empty<ITvlIntellisenseController>();
 
-            IEnumerable<IntellisenseController> controllers = controllersObject as IEnumerable<IntellisenseController>;
+            IEnumerable<ITvlIntellisenseController> controllers = controllersObject as IEnumerable<ITvlIntellisenseController>;
             if (controllers == null)
-                return Enumerable.Empty<IntellisenseController>();
+                return Enumerable.Empty<ITvlIntellisenseController>();
 
-            return controllers.OfType<IntellisenseController>();
+            return controllers.OfType<ITvlIntellisenseController>();
         }
     }
 }

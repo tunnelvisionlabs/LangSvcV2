@@ -17,7 +17,7 @@
     using VsMenus = Microsoft.VisualStudio.Shell.VsMenus;
     using VSOBJGOTOSRCTYPE = Microsoft.VisualStudio.Shell.Interop.VSOBJGOTOSRCTYPE;
 
-    public class IntellisenseController : IIntellisenseController
+    public class IntellisenseController : ITvlIntellisenseController, IIntellisenseController
     {
         private readonly IntellisenseControllerProvider _provider;
 
@@ -225,22 +225,17 @@
 
         public virtual void GoToSource(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
         {
-            Contract.Requires<ArgumentNullException>(triggerPoint != null, "triggerPoint");
-
             Task<IEnumerable<INavigateToTarget>> task = GoToSourceAsync(gotoSourceType, triggerPoint).HandleNonCriticalExceptions();
             var resultContinuation = task.ContinueWith(HandleGoToSourceResult, TaskContinuationOptions.OnlyOnRanToCompletion).HandleNonCriticalExceptions();
         }
 
         public virtual Task<IEnumerable<INavigateToTarget>> GoToSourceAsync(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
         {
-            Contract.Requires<ArgumentNullException>(triggerPoint != null, "triggerPoint");
-
             return Task.Factory.StartNew(() => GoToSourceImpl(gotoSourceType, triggerPoint));
         }
 
         public virtual IEnumerable<INavigateToTarget> GoToSourceImpl(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
         {
-            Contract.Requires<ArgumentNullException>(triggerPoint != null, "triggerPoint");
             Contract.Ensures(Contract.Result<IEnumerable<INavigateToTarget>>() != null);
 
             return new INavigateToTarget[0];
@@ -248,8 +243,6 @@
 
         protected virtual void HandleGoToSourceResult(Task<IEnumerable<INavigateToTarget>> task)
         {
-            Contract.Requires<ArgumentNullException>(task != null, "task");
-
             INavigateToTarget target = task.Result.FirstOrDefault();
             if (target != null)
                 target.NavigateTo();
@@ -262,8 +255,6 @@
 
         public virtual void TriggerCompletion(ITrackingPoint triggerPoint, CompletionInfoType completionInfoType, IntellisenseInvocationType intellisenseInvocationType)
         {
-            Contract.Requires<ArgumentNullException>(triggerPoint != null, "triggerPoint");
-
             DismissCompletion();
             CompletionInfo.InfoType = completionInfoType;
             CompletionInfo.InvocationType = intellisenseInvocationType;
@@ -286,8 +277,6 @@
 
         public virtual void TriggerSignatureHelp(ITrackingPoint triggerPoint)
         {
-            Contract.Requires<ArgumentNullException>(triggerPoint != null, "triggerPoint");
-
             DismissSignatureHelp();
             ISignatureHelpSession session = Provider.SignatureHelpBroker.TriggerSignatureHelp(TextView, triggerPoint, true);
             if (session != null)
@@ -299,8 +288,6 @@
 
         public virtual void TriggerQuickInfo(ITrackingPoint triggerPoint)
         {
-            Contract.Requires<ArgumentNullException>(triggerPoint != null, "triggerPoint");
-
             DismissQuickInfo();
             IQuickInfoSession session = Provider.QuickInfoBroker.TriggerQuickInfo(TextView, triggerPoint, true);
             if (session != null)
@@ -312,8 +299,6 @@
 
         public virtual void TriggerSmartTag(ITrackingPoint triggerPoint, SmartTagType type, SmartTagState state)
         {
-            Contract.Requires<ArgumentNullException>(triggerPoint != null, "triggerPoint");
-
             DismissSmartTag();
             ISmartTagSession session = Provider.SmartTagBroker.CreateSmartTagSession(TextView, type, triggerPoint, state);
             if (session != null)

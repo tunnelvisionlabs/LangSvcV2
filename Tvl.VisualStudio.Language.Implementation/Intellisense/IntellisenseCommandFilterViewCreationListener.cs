@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
+    using System.Linq;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Utilities;
     using IVsEditorAdaptersFactoryService = Microsoft.VisualStudio.Editor.IVsEditorAdaptersFactoryService;
@@ -27,11 +28,11 @@
             ITextView textView = EditorAdaptersFactoryService.GetWpfTextView(textViewAdapter);
             if (textView != null)
             {
-                List<IntellisenseController> controllers;
-                if (textView.Properties.TryGetProperty<List<IntellisenseController>>(typeof(IntellisenseController), out controllers))
+                IEnumerable<ITvlIntellisenseController> controllers;
+                if (textView.Properties.TryGetProperty<IEnumerable<ITvlIntellisenseController>>(typeof(ITvlIntellisenseController), out controllers))
                 {
-                    foreach (var controller in controllers)
-                        controller.OnVsTextViewCreated(textViewAdapter);
+                    foreach (var controller in controllers.OfType<IVsTextViewCreationListener>())
+                        controller.VsTextViewCreated(textViewAdapter);
                 }
             }
         }

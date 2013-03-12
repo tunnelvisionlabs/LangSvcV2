@@ -683,10 +683,10 @@
         private static IntellisenseController GetControllerForView(ITextView view)
         {
             object controllerList;
-            if (!view.Properties.TryGetProperty(typeof(IntellisenseController), out controllerList))
+            if (!view.Properties.TryGetProperty(typeof(ITvlIntellisenseController), out controllerList))
                 return null;
 
-            IEnumerable<IntellisenseController> controllers = controllerList as IEnumerable<IntellisenseController>;
+            IEnumerable<ITvlIntellisenseController> controllers = controllerList as IEnumerable<ITvlIntellisenseController>;
             if (controllers == null)
                 return null;
 

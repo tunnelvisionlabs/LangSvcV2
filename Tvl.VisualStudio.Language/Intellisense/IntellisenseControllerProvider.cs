@@ -58,7 +58,7 @@
             IntellisenseController controller = TryCreateIntellisenseController(textView, subjectBuffers);
             if (controller != null)
             {
-                List<IntellisenseController> controllers = textView.Properties.GetOrCreateSingletonProperty<List<IntellisenseController>>(typeof(IntellisenseController), () => new List<IntellisenseController>());
+                List<ITvlIntellisenseController> controllers = textView.Properties.GetOrCreateSingletonProperty<List<ITvlIntellisenseController>>(typeof(ITvlIntellisenseController), () => new List<ITvlIntellisenseController>());
                 controllers.Add(controller);
             }
 

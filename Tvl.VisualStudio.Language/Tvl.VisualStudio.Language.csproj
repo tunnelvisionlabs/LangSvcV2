@@ -249,31 +249,25 @@
     <Compile Include="Intellisense\CompletionDisplayNameComparer.cs" />
     <Compile Include="Intellisense\CompletionHelper.cs" />
     <Compile Include="Intellisense\CompletionInfo.cs" />
-    <Compile Include="Intellisense\CompletionInfoType.cs" />
     <Compile Include="Intellisense\CompletionSource.cs" />
     <Compile Include="Intellisense\CompletionSourceProvider.cs" />
     <Compile Include="Intellisense\FileSystemNavigateToTarget.cs" />
-    <Compile Include="Intellisense\IDispatcherGlyphService.cs" />
-    <Compile Include="Intellisense\INavigateToTarget.cs" />
     <Compile Include="Intellisense\IntellisenseCommandFilter.cs" />
     <Compile Include="Intellisense\IntellisenseController.cs" />
     <Compile Include="Intellisense\IntellisenseControllerProvider.cs" />
-    <Compile Include="Intellisense\IntellisenseInvocationType.cs" />
     <Compile Include="Intellisense\SnapshotSpanNavigateToTarget.cs" />
     <Compile Include="Parsing\BackgroundParserErrorTagger.cs" />
-    <Compile Include="Parsing\IBackgroundParser.cs" />
-    <Compile Include="Parsing\IBackgroundParserFactoryService.cs" />
-    <Compile Include="Parsing\IBackgroundParserFactoryServiceContracts.cs" />
-    <Compile Include="Parsing\IBackgroundParserProvider.cs" />
     <Compile Include="Parsing\BackgroundParser.cs" />
-    <Compile Include="Parsing\ParseErrorEventArgs.cs" />
-    <Compile Include="Parsing\ParseResultEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
       <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
       <Name>Tvl.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.Language.Interfaces\Tvl.VisualStudio.Language.Interfaces.csproj">
+      <Project>{4599ac99-de26-4686-8821-67cf461c6b26}</Project>
+      <Name>Tvl.VisualStudio.Language.Interfaces</Name>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Shell.OutputWindow.Interfaces\Tvl.VisualStudio.Shell.OutputWindow.Interfaces.csproj">
       <Project>{56D7EB29-6705-4C37-A7B1-E8780B4350EA}</Project>
