@@ -5,6 +5,7 @@
     using Microsoft.VisualStudio.Shell;
     using Tvl.VisualStudio.Shell;
 
+    using __VSPHYSICALVIEWATTRIBUTES = Microsoft.VisualStudio.Shell.Interop.__VSPHYSICALVIEWATTRIBUTES;
     using IServiceContainer = System.ComponentModel.Design.IServiceContainer;
     using MessageBox = System.Windows.MessageBox;
     using RuleDependencyChecker = Antlr4.Runtime.Misc.RuleDependencyChecker;
@@ -28,8 +29,8 @@
         //CodeSense = true,
         RequestStockColors = true)]
 
-    [ProvideEditorFactory(typeof(PhpEditorFactoryWithoutEncoding), 101)]
-    [ProvideLinkedEditorFactory(typeof(PhpEditorFactoryWithEncoding), typeof(PhpEditorFactoryWithoutEncoding), 102)]
+    [ProvideEditorFactory2(typeof(PhpEditorFactoryWithoutEncoding), 101, CommonPhysicalViewAttributes = (int)__VSPHYSICALVIEWATTRIBUTES.PVA_SupportsPreview)]
+    [ProvideLinkedEditorFactory(typeof(PhpEditorFactoryWithEncoding), typeof(PhpEditorFactoryWithoutEncoding), 102, CommonPhysicalViewAttributes = (int)__VSPHYSICALVIEWATTRIBUTES.PVA_None)]
 
     // don't need to include NameResourceID because it's handled by ProvideEditorFactory
     [ProvideEditorExtension(typeof(PhpEditorFactoryWithoutEncoding), PhpConstants.PhpFileExtension, 50)]
