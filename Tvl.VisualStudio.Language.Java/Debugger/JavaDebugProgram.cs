@@ -293,17 +293,38 @@
             if (pDocPos == null)
                 throw new ArgumentNullException("pDocPos");
 
-            ppEnum = null;
+            string fileName = pDocPos.GetFileName();
+            int lineNumber = pDocPos.GetRange().iStartLine + 1;
 
-            string fileName;
-            int error = pDocPos.GetFileName(out fileName);
-            if (error != VSConstants.S_OK)
-                return error;
+            List<IDebugCodeContext2> codeContexts = new List<IDebugCodeContext2>();
+            IEnumerable<JavaDebugProgram> programs = DebugEngine.Programs.ToArray();
+            foreach (var program in programs)
+            {
+                if (!program.IsLoaded)
+                    continue;
 
-            if (!Path.GetExtension(fileName).Equals(".java", StringComparison.OrdinalIgnoreCase))
+                IVirtualMachine virtualMachine = program.VirtualMachine;
+                ReadOnlyCollection<IReferenceType> classes = virtualMachine.GetAllClasses();
+                foreach (var @class in classes)
+                {
+                    if (!@class.GetIsPrepared())
+                        continue;
+
+                    ReadOnlyCollection<ILocation> locations = @class.GetLocationsOfLine(@class.GetDefaultStratum(), Path.GetFileName(fileName), lineNumber);
+                    ILocation bindLocation = locations.OrderBy(i => i.GetCodeIndex()).FirstOrDefault();
+                    if (bindLocation != null)
+                        codeContexts.Add(new JavaDebugCodeContext(this, bindLocation));
+                }
+            }
+
+            if (codeContexts.Count == 0)
+            {
+                ppEnum = null;
                 return VSConstants.E_FAIL;
+            }
 
-            throw new NotImplementedException();
+            ppEnum = new EnumDebugCodeContexts(codeContexts);
+            return VSConstants.S_OK;
         }
 
         public int EnumCodePaths(string pszHint, IDebugCodeContext2 pStart, IDebugStackFrame2 pFrame, int fSource, out IEnumCodePaths2 ppEnum, out IDebugCodeContext2 ppSafety)
