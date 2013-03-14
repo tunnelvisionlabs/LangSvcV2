@@ -54,6 +54,16 @@ namespace Microsoft.VisualStudio.Project.Automation
             }
         }
 
+        /// <summary>
+        /// Gets the temporary portable executable (PE) monikers for a project.
+        /// </summary>
+        /// <remarks>
+        /// The design-time, output monikers are the names of all the PEs that can be generated from
+        /// the project. The project system assigns PE monikers based on the project hierarchy. For
+        /// example, if there is an XML Designer file, SomeData.xsd, in Folder1 of Project1 that
+        /// generates output, SomeData.cs, then the moniker would be <c>"Project1\Folder1\SomeData.cs"</c>.
+        /// Whitespace characters in the project name remain as spaces in the moniker.
+        /// </remarks>
         [SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
         public virtual object DesignTimeOutputMonikers
         {

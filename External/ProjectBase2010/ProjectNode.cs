@@ -1092,10 +1092,15 @@ namespace Microsoft.VisualStudio.Project
             // walk the expanded folders of the hierarchy looking for visible non-member items
             List<HierarchyNode> visibleNonMemberItems = GetVisibleNonMemberItems();
             foreach (var node in visibleNonMemberItems)
-                OnItemAdded(node.Parent, node);
+            {
+                if (node.Parent.IsExpanded)
+                    OnItemAdded(node.Parent, node);
+                else
+                    OnInvalidateItems(node.Parent);
+            }
         }
 
-        private List<HierarchyNode> GetVisibleNonMemberItems()
+        protected virtual List<HierarchyNode> GetVisibleNonMemberItems()
         {
             List<HierarchyNode> result = new List<HierarchyNode>();
             Queue<HierarchyNode> workList = new Queue<HierarchyNode>();
@@ -1106,7 +1111,7 @@ namespace Microsoft.VisualStudio.Project
                 HierarchyNode node = workList.Dequeue();
                 for (HierarchyNode child = node.FirstChild; child != null; child = child.NextSibling)
                 {
-                    if (child.IsExpanded)
+                    if (child.IsExpanded || (child.Parent != null && child.Parent.IsExpanded))
                         workList.Enqueue(child);
 
                     object nonMemberItem = child.GetProperty((int)__VSHPROPID.VSHPROPID_IsNonMemberItem);

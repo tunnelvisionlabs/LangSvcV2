@@ -288,7 +288,10 @@
             else if (singleLine.StartsWith("[wrote "))
             {
                 int startIndex = "[wrote ".Length;
-                string outputFile = singleLine.Substring(startIndex, singleLine.Length - startIndex - 1);
+                string writeDetail = singleLine.Substring(startIndex, singleLine.Length - startIndex - 1);
+
+                startIndex = writeDetail.IndexOf('[');
+                string outputFile = writeDetail.Substring(startIndex + 1, writeDetail.Length - startIndex - 2);
 
                 TaskItem generated = new TaskItem(outputFile);
                 generated.SetMetadata("BaseOutputDirectory", OutputPath);
