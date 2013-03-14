@@ -86,7 +86,7 @@ EMPTY_BLOCK_COMMENT
 	;
 
 ML_COMMENT
-	:	{input.LA(3) != '*'}? => '/*' CONTINUE_COMMENT {$type = state.type;}
+	:	{input.LA(3) != '*'}? => '/*' {$type = CONTINUE_COMMENT;}
 	;
 
 fragment END_COMMENT : ;
@@ -95,10 +95,9 @@ fragment
 CONTINUE_COMMENT
 	:	(	~('\r'|'\n'|'*')
 		|	{input.LA(2) != '/'}? => '*'
-		)*
-		(	'*/' {state.type = END_COMMENT;}
-		|	{state.type = CONTINUE_COMMENT;}
-		)
+		)+
+		{state.type = CONTINUE_COMMENT;}
+	|	'*/' {state.type = END_COMMENT;}
 	;
 
 CHAR_LITERAL

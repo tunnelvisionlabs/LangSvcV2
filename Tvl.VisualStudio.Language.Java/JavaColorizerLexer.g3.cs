@@ -58,9 +58,16 @@
         protected override void ParseNextToken()
         {
             if (InComment)
-                mCONTINUE_COMMENT();
-            else
-                base.ParseNextToken();
+            {
+                int la1 = input.LA(1);
+                if (la1 != '\n' && la1 != '\r')
+                {
+                    mCONTINUE_COMMENT();
+                    return;
+                }
+            }
+
+            base.ParseNextToken();
         }
 
         public override void Recover(IIntStream input, RecognitionException re)
