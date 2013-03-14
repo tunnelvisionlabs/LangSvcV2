@@ -178,7 +178,7 @@
             pendingBreakpoint = null;
 
             BreakpointRequestInfo requestInfo = new BreakpointRequestInfo(breakpointRequest);
-            if (requestInfo.LanguageGuid != Constants.JavaLanguageGuid)
+            if (requestInfo.LanguageGuid != Constants.JavaLanguageGuid && requestInfo.LanguageGuid != Guid.Empty)
                 return VSConstants.E_FAIL;
 
             if (requestInfo.Location.LocationType == enum_BP_LOCATION_TYPE.BPLT_CODE_FILE_LINE)
