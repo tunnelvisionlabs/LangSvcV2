@@ -312,10 +312,16 @@
     <Compile Include="Debugger\Events\DebugBreakpointEvent.cs" />
     <Compile Include="Debugger\Events\DebugBreakpointUnboundEvent.cs" />
     <Compile Include="Debugger\Events\DebugCanStopEvent.cs" />
+    <Compile Include="Debugger\Events\DebugCurrentThreadChangedEvent.cs" />
     <Compile Include="Debugger\Events\DebugEngineCreateEvent.cs" />
     <Compile Include="Debugger\Events\DebugEntryPointEvent.cs" />
     <Compile Include="Debugger\Events\DebugErrorEvent.cs" />
     <Compile Include="Debugger\Events\DebugEvent.cs" />
+    <Compile Include="Debugger\Events\DebugModuleReloadOperationCompleteEvent.cs" />
+    <Compile Include="Debugger\Events\DebugProcessContinueEvent.cs" />
+    <Compile Include="Debugger\Events\DebugThreadDisplayNameChangeEvent.cs" />
+    <Compile Include="Debugger\Events\DebugThreadFlagChangeEvent.cs" />
+    <Compile Include="Debugger\Events\DebugThreadSuspendChangeEvent.cs" />
     <Compile Include="Debugger\Events\JavaDebugExceptionEvent.cs" />
     <Compile Include="Debugger\Events\DebugExpressionEvaluationCompleteEvent.cs" />
     <Compile Include="Debugger\Events\DebugInterceptExceptionCompleteEvent.cs" />
