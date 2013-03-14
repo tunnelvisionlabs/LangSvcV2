@@ -9,7 +9,7 @@
     [Guid(JavaDebuggerConstants.JavaDebuggerPackageGuidString)]
     [ProvideDebugEngine(typeof(JavaDebugEngine), Constants.JavaLanguageName,
         PortSuppliers = new string[] { "{708C1ECA-FF48-11D2-904F-00C04FA302A1}" },
-        ProgramProvider = JavaDebuggerConstants.JavaProgramProviderGuidString,
+        ProgramProvider = "{" + JavaDebuggerConstants.JavaProgramProviderGuidString + "}",
         // basic configuration
         AlwaysLoadProgramProviderLocal = true,
         AlwaysLoadLocal = true,
