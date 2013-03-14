@@ -10,15 +10,15 @@
     using _PersistStorageType = Microsoft.VisualStudio.Shell.Interop._PersistStorageType;
     using CommandLineBuilder = Microsoft.Build.Utilities.CommandLineBuilder;
     using DEBUG_LAUNCH_OPERATION = Microsoft.VisualStudio.Shell.Interop.DEBUG_LAUNCH_OPERATION;
-    using Directory = System.IO.Directory;
     using File = System.IO.File;
     using IVsDebugger2 = Microsoft.VisualStudio.Shell.Interop.IVsDebugger2;
     using IVsUIShell = Microsoft.VisualStudio.Shell.Interop.IVsUIShell;
     using JavaDebugEngine = Tvl.VisualStudio.Language.Java.Debugger.JavaDebugEngine;
     using Path = System.IO.Path;
-    using Registry = Microsoft.Win32.Registry;
+    using RegistryHive = Microsoft.Win32.RegistryHive;
     using RegistryKey = Microsoft.Win32.RegistryKey;
     using RegistryKeyPermissionCheck = Microsoft.Win32.RegistryKeyPermissionCheck;
+    using RegistryView = Microsoft.Win32.RegistryView;
     using SecurityException = System.Security.SecurityException;
     using StringComparison = System.StringComparison;
     using SVsShellDebugger = Microsoft.VisualStudio.Shell.Interop.SVsShellDebugger;
@@ -46,67 +46,86 @@
         public string FindJavaBinary(string fileName, bool developmentKit)
         {
             string vendorBase = GetConfigurationProperty("JvmRegistryBase", _PersistStorageType.PST_PROJECT_FILE, false);
+            string installation = developmentKit ? "Java Development Kit" : "Java Runtime Environment";
 
             bool allow64bit = Platform.EndsWith("X64", StringComparison.OrdinalIgnoreCase) || Platform.EndsWith("Any CPU", StringComparison.OrdinalIgnoreCase);
             bool allow32bit = Platform.EndsWith("X86", StringComparison.OrdinalIgnoreCase) || Platform.EndsWith("Any CPU", StringComparison.OrdinalIgnoreCase);
 
-            string softwareRegKey64 = Environment.Is64BitOperatingSystem ? @"SOFTWARE\" : null;
-            string softwareRegKey32 = Environment.Is64BitOperatingSystem ? @"SOFTWARE\Wow6432Node\" : @"SOFTWARE\";
-
-            string installation = developmentKit ? "Java Development Kit" : "Java Runtime Environment";
-
-            if (allow64bit && softwareRegKey64 != null)
+            string javaBinary;
+            if (allow64bit && TryFindJavaPath(vendorBase, installation, fileName, RegistryView.Registry64, out javaBinary))
             {
-                string registryRoot = softwareRegKey64 + vendorBase + @"\" + installation;
-                string path = FindJavaPath(registryRoot, fileName);
-                if (!string.IsNullOrEmpty(path))
-                    return path;
+                return javaBinary;
             }
 
-            if (allow32bit)
+            if (allow32bit && TryFindJavaPath(vendorBase, installation, fileName, RegistryView.Registry32, out javaBinary))
             {
-                string registryRoot = softwareRegKey32 + vendorBase + @"\" + installation;
-                string path = FindJavaPath(registryRoot, fileName);
-                if (!string.IsNullOrEmpty(path))
-                    return path;
+                return javaBinary;
             }
 
             return null;
         }
 
-        private static string FindJavaPath(string registryRoot, string fileName)
+        private static bool TryFindJavaPath(string vendor, string installation, string fileName, RegistryView registryView, out string javaBinary)
         {
+            javaBinary = null;
+
             try
             {
-                using (RegistryKey jdk = Registry.LocalMachine.OpenSubKey(registryRoot, RegistryKeyPermissionCheck.ReadSubTree))
+                string javaHome;
+                if (TryGetJavaHome(vendor, installation, registryView, out javaHome))
                 {
-                    if (jdk == null)
-                        return null;
+                    string binary = Path.Combine(javaHome, "bin", fileName);
+                    if (!File.Exists(binary))
+                        return false;
 
-                    string currentVersion = jdk.GetValue("CurrentVersion") as string;
-                    if (currentVersion == null)
-                        return null;
-
-                    using (RegistryKey jdkVersion = jdk.OpenSubKey(currentVersion, RegistryKeyPermissionCheck.ReadSubTree))
-                    {
-                        if (jdkVersion == null)
-                            return null;
-
-                        string javaHome = jdkVersion.GetValue("JavaHome") as string;
-                        if (!Directory.Exists(javaHome))
-                            return null;
-
-                        string javac = Path.Combine(javaHome, "bin", fileName);
-                        if (!File.Exists(javac))
-                            return null;
-
-                        return javac;
-                    }
+                    javaBinary = binary;
+                    return true;
                 }
+
+                return false;
             }
             catch (SecurityException)
             {
-                return null;
+                return false;
+            }
+        }
+
+        private static bool TryGetJavaHome(string vendor, string installation, RegistryView registryView, out string javaHome)
+        {
+            Contract.Requires<ArgumentNullException>(vendor != null, "vendor");
+            Contract.Requires<ArgumentNullException>(installation != null, "installation");
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(vendor));
+            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(installation));
+
+            javaHome = null;
+
+            if (registryView == RegistryView.Registry64 && !Environment.Is64BitOperatingSystem)
+            {
+                // without this check, Registry64 defaults to returning values from the 32-bit registry.
+                return false;
+            }
+
+            string javaKeyName = "SOFTWARE\\" + vendor + "\\" + installation;
+            using (var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, registryView))
+            {
+                using (RegistryKey javaKey = baseKey.OpenSubKey(javaKeyName, RegistryKeyPermissionCheck.ReadSubTree))
+                {
+                    if (javaKey == null)
+                        return false;
+
+                    object currentVersion = javaKey.GetValue("CurrentVersion");
+                    if (currentVersion == null)
+                        return false;
+
+                    using (var homeKey = javaKey.OpenSubKey(currentVersion.ToString()))
+                    {
+                        if (homeKey == null || homeKey.GetValue("JavaHome") == null)
+                            return false;
+
+                        javaHome = homeKey.GetValue("JavaHome").ToString();
+                        return !string.IsNullOrEmpty(javaHome);
+                    }
+                }
             }
         }
 
