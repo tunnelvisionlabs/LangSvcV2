@@ -170,8 +170,8 @@ namespace Microsoft.VisualStudio.Project
         {
             if(!deleted && Item != null)
             {
-                deleted = true;
                 ProjectManager.BuildProject.RemoveItem(Item);
+                deleted = true;
             }
 
             item = null;
