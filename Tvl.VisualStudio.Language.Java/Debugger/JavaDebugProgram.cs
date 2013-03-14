@@ -39,6 +39,7 @@
         , IDebugProviderProgramNode2
         , IDebugProgramNodeAttach2
         , IDebugProgramEngines2
+        , IDebugProgramEnhancedStep90
         , IDebugQueryEngine2
     {
         private readonly IDebugProcess2 _process;
@@ -327,7 +328,17 @@
             return VSConstants.S_OK;
         }
 
-        public int EnumCodePaths(string pszHint, IDebugCodeContext2 pStart, IDebugStackFrame2 pFrame, int fSource, out IEnumCodePaths2 ppEnum, out IDebugCodeContext2 ppSafety)
+        int IDebugProgram2.EnumCodePaths(string pszHint, IDebugCodeContext2 pStart, IDebugStackFrame2 pFrame, int fSource, out IEnumCodePaths2 ppEnum, out IDebugCodeContext2 ppSafety)
+        {
+            throw new NotSupportedException("This method has been replaced by IDebugProgramEnhancedStep90.EnumCodePaths.");
+        }
+
+        int IDebugProgram3.EnumCodePaths(string pszHint, IDebugCodeContext2 pStart, IDebugStackFrame2 pFrame, int fSource, out IEnumCodePaths2 ppEnum, out IDebugCodeContext2 ppSafety)
+        {
+            throw new NotSupportedException("This method has been replaced by IDebugProgramEnhancedStep90.EnumCodePaths.");
+        }
+
+        public int EnumCodePaths(IDebugThread2 pThread, IDebugCodeContext2 pStart, /*enum_STEPUNIT*/uint stepUnit, out IEnumDebugCodePaths90 ppEnum)
         {
             throw new NotImplementedException();
         }
