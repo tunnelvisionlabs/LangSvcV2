@@ -16,6 +16,7 @@
     using Tvl.VisualStudio.Language.Java.Debugger.Events;
 
     using EnumDebugPrograms = Tvl.VisualStudio.Language.Java.Debugger.Collections.EnumDebugPrograms;
+    using Trace = System.Diagnostics.Trace;
 
     [ComVisible(true)]
     [Guid(JavaDebuggerConstants.JavaDebugEngineGuidString)]
@@ -243,7 +244,8 @@
 
         public int SetMetric(string pszMetric, object varValue)
         {
-            throw new NotImplementedException();
+            Trace.WriteLine(string.Format("  {0}.SetMetric: {1}={2}", GetType().Name, pszMetric, varValue));
+            return VSConstants.S_OK;
         }
 
         public int SetRegistryRoot(string pszRegistryRoot)
