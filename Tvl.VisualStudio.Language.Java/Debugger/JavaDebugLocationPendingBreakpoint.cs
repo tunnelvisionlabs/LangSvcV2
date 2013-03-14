@@ -240,6 +240,47 @@
                 return AD7Constants.E_BP_DELETED;
             }
 
+            string fileName = RequestLocation.DocumentPosition.GetFileName();
+            int lineNumber = RequestLocation.DocumentPosition.GetRange().iStartLine + 1;
+
+            IEnumerable<JavaDebugProgram> programs = DebugEngine.Programs.ToArray();
+            foreach (var program in programs)
+            {
+                if (!program.IsLoaded)
+                    continue;
+
+                IVirtualMachine virtualMachine = program.VirtualMachine;
+                ReadOnlyCollection<IReferenceType> classes = virtualMachine.GetAllClasses();
+                foreach (var @class in classes)
+                {
+                    if (!@class.GetIsPrepared())
+                        continue;
+
+                    ReadOnlyCollection<ILocation> locations = @class.GetLocationsOfLine(@class.GetDefaultStratum(), Path.GetFileName(fileName), lineNumber);
+                    ILocation bindLocation = locations.OrderBy(i => i.GetCodeIndex()).FirstOrDefault();
+                    if (bindLocation != null)
+                    {
+                        ppErrorEnum = null;
+                        return VSConstants.S_OK;
+                    }
+                }
+            }
+
+            foreach (var program in programs)
+            {
+                JavaDebugThread thread = null;
+                IDebugCodeContext2 codeContext = new DebugDocumentCodeContext(RequestLocation.DocumentPosition);
+                BreakpointResolutionLocation location = new BreakpointResolutionLocationCode(codeContext);
+                string message = "The class is not yet loaded, or the location is not present in the debug symbols for this document.";
+
+                DebugErrorBreakpointResolution resolution = new DebugErrorBreakpointResolution(program, thread, enum_BP_TYPE.BPT_CODE, location, enum_BP_ERROR_TYPE.BPET_GENERAL_WARNING, message);
+                DebugErrorBreakpoint errorBreakpoint = new DebugErrorBreakpoint(this, resolution);
+                _errorBreakpoints.Add(errorBreakpoint);
+
+                DebugEvent debugEvent = new DebugBreakpointErrorEvent(enum_EVENTATTRIBUTES.EVENT_ASYNCHRONOUS, errorBreakpoint);
+                program.Callback.Event(DebugEngine, program.Process, program, null, debugEvent);
+            }
+
             if (_errorBreakpoints.Count == 0)
             {
                 JavaDebugProgram program = null;
