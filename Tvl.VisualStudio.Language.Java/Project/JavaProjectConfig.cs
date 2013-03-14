@@ -167,6 +167,9 @@
                 if (!string.IsNullOrEmpty(jvmArguments))
                     commandLine.AppendTextUnquoted(" " + jvmArguments);
 
+                commandLine.AppendSwitch("-cp");
+                commandLine.AppendFileNameIfNotNull(GetConfigurationProperty("TargetPath", _PersistStorageType.PST_PROJECT_FILE, false));
+
                 string startupObject = GetConfigurationProperty(JavaConfigConstants.DebugStartClass, _PersistStorageType.PST_USER_FILE, false);
                 if (!string.IsNullOrEmpty(startupObject))
                     commandLine.AppendFileNameIfNotNull(startupObject);
