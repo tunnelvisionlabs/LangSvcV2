@@ -871,6 +871,7 @@ LSHIFTEQ	:'<<=';
 RSHIFTEQ	:'>>=';
 ROR			:'>>>';
 ROREQ		:'>>>=';
+ELLIPSIS	:'...';
 
 ABSTRACT
     :   'abstract'
