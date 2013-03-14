@@ -16,6 +16,7 @@
     using Tvl.VisualStudio.Language.Java.Debugger.Events;
 
     using EnumDebugPrograms = Tvl.VisualStudio.Language.Java.Debugger.Collections.EnumDebugPrograms;
+    using Trace = System.Diagnostics.Trace;
 
     [ComVisible(true)]
     [Guid(JavaDebuggerConstants.JavaDebugEngineGuidString)]
@@ -177,7 +178,7 @@
             pendingBreakpoint = null;
 
             BreakpointRequestInfo requestInfo = new BreakpointRequestInfo(breakpointRequest);
-            if (requestInfo.LanguageGuid != Constants.JavaLanguageGuid)
+            if (requestInfo.LanguageGuid != Constants.JavaLanguageGuid && requestInfo.LanguageGuid != Guid.Empty)
                 return VSConstants.E_FAIL;
 
             if (requestInfo.Location.LocationType == enum_BP_LOCATION_TYPE.BPLT_CODE_FILE_LINE)
@@ -243,7 +244,8 @@
 
         public int SetMetric(string pszMetric, object varValue)
         {
-            throw new NotImplementedException();
+            Trace.WriteLine(string.Format("  {0}.SetMetric: {1}={2}", GetType().Name, pszMetric, varValue));
+            return VSConstants.S_OK;
         }
 
         public int SetRegistryRoot(string pszRegistryRoot)

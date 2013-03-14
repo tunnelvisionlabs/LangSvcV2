@@ -29,6 +29,7 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
         private IMethod _getIdMethod;
         private IMethod _getPriorityMethod;
+        private IMethod _setThreadNameMethod;
 
         public JavaDebugThread(JavaDebugProgram program, IThreadReference thread, ThreadCategory category)
         {
@@ -369,7 +370,26 @@ namespace Tvl.VisualStudio.Language.Java.Debugger
 
         public int SetThreadName(string pszName)
         {
-            throw new NotImplementedException();
+#if HIDE_THREADS
+            return VSConstants.S_OK;
+#endif
+
+            if (_setThreadNameMethod == null)
+            {
+                IClassType type = (IClassType)_thread.GetReferenceType();
+                _setThreadNameMethod = type.GetConcreteMethod("setName", "(Ljava/lang/String;)V");
+            }
+
+            if (_setThreadNameMethod == null)
+                return VSConstants.E_FAIL;
+
+            using (var stringValue = _program.VirtualMachine.GetMirrorOf(pszName))
+            {
+                using (_thread.InvokeMethod(null, _setThreadNameMethod, InvokeOptions.None, stringValue.Value))
+                {
+                    return VSConstants.S_OK;
+                }
+            }
         }
 
         public int Suspend(out uint pdwSuspendCount)

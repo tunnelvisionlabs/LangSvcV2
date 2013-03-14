@@ -287,6 +287,7 @@
     <Compile Include="Debugger\BreakpointResolutionLocation.cs" />
     <Compile Include="Debugger\BreakpointResolutionLocationCode.cs" />
     <Compile Include="Debugger\BreakpointResolutionLocationData.cs" />
+    <Compile Include="Debugger\Collections\EnumDebugCodePaths.cs" />
     <Compile Include="Debugger\Collections\EnumDebugErrorBreakpoints.cs" />
     <Compile Include="Debugger\Collections\DebugEnumerator`2.cs" />
     <Compile Include="Debugger\Collections\EnumCodePaths.cs" />
@@ -312,10 +313,16 @@
     <Compile Include="Debugger\Events\DebugBreakpointEvent.cs" />
     <Compile Include="Debugger\Events\DebugBreakpointUnboundEvent.cs" />
     <Compile Include="Debugger\Events\DebugCanStopEvent.cs" />
+    <Compile Include="Debugger\Events\DebugCurrentThreadChangedEvent.cs" />
     <Compile Include="Debugger\Events\DebugEngineCreateEvent.cs" />
     <Compile Include="Debugger\Events\DebugEntryPointEvent.cs" />
     <Compile Include="Debugger\Events\DebugErrorEvent.cs" />
     <Compile Include="Debugger\Events\DebugEvent.cs" />
+    <Compile Include="Debugger\Events\DebugModuleReloadOperationCompleteEvent.cs" />
+    <Compile Include="Debugger\Events\DebugProcessContinueEvent.cs" />
+    <Compile Include="Debugger\Events\DebugThreadDisplayNameChangeEvent.cs" />
+    <Compile Include="Debugger\Events\DebugThreadFlagChangeEvent.cs" />
+    <Compile Include="Debugger\Events\DebugThreadSuspendChangeEvent.cs" />
     <Compile Include="Debugger\Events\JavaDebugExceptionEvent.cs" />
     <Compile Include="Debugger\Events\DebugExpressionEvaluationCompleteEvent.cs" />
     <Compile Include="Debugger\Events\DebugInterceptExceptionCompleteEvent.cs" />
