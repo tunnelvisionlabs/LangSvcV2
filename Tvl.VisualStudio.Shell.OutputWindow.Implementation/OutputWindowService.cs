@@ -58,6 +58,9 @@
         public IOutputWindowPane TryGetPane(string name)
         {
             var olesp = (IOleServiceProvider)GlobalServiceProvider.GetService(typeof(IOleServiceProvider));
+            if (olesp == null)
+                return null;
+
             var outputWindow = olesp.TryGetGlobalService<SVsOutputWindow, IVsOutputWindow>();
             if (outputWindow == null)
                 return null;
