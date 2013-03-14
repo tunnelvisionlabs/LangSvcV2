@@ -412,6 +412,12 @@
     <Compile Include="Experimental\JavaAtnBuilder.cs" />
     <Compile Include="Experimental\JavaTopLevelSymbolTaggerAtnBuilder.cs" />
     <Compile Include="Experimental\ScopeAnchorTag.cs" />
+    <Compile Include="Java.g4.lexer.cs">
+      <DependentUpon>Java.g4</DependentUpon>
+    </Compile>
+    <Compile Include="Java.g4.parser.cs">
+      <DependentUpon>Java.g4</DependentUpon>
+    </Compile>
     <Compile Include="Java2.g3.lexer.cs">
       <DependentUpon>Java2.g3</DependentUpon>
     </Compile>
@@ -648,6 +654,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
     <Antlr4 Include="JavaColorizerLexer2.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Tvl.VisualStudio.Language.Java</CustomToolNamespace>
+    </Antlr4>
+    <Antlr4 Include="Java.g4">
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>Tvl.VisualStudio.Language.Java</CustomToolNamespace>
     </Antlr4>
