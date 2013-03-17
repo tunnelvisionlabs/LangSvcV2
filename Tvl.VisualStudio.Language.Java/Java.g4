@@ -628,25 +628,25 @@ variableModifiers
 statement
 //@leftfactor{catches}
     : block
-    |   ASSERT expression (':' expression)? ';'
-    |   'if' parExpression statement ('else' statement)?
-    |   'for' '(' forControl ')' statement
-    |   'while' parExpression statement
-    |   'do' statement 'while' parExpression ';'
-    |   'try' block
-        ( catches 'finally' block
+    |   ASSERT expression (COLON expression)? SEMI
+    |   IF parExpression statement (ELSE statement)?
+    |   FOR LPAREN forControl RPAREN statement
+    |   WHILE parExpression statement
+    |   DO statement WHILE parExpression SEMI
+    |   TRY block
+        ( catches FINALLY block
         | catches
-        |   'finally' block
+        |   FINALLY block
         )
-    |   'switch' parExpression '{' switchBlockStatementGroups '}'
-    |   'synchronized' parExpression block
-    |   'return' expression? ';'
-    |   'throw' expression ';'
-    |   'break' Identifier? ';'
-    |   'continue' Identifier? ';'
-    |   ';' 
-    |   statementExpression ';'
-    |   Identifier ':' statement
+    |   SWITCH parExpression LBRACE switchBlockStatementGroups RBRACE
+    |   SYNCHRONIZED parExpression block
+    |   RETURN expression? SEMI
+    |   THROW expression SEMI
+    |   BREAK Identifier? SEMI
+    |   CONTINUE Identifier? SEMI
+    |   SEMI 
+    |   statementExpression SEMI
+    |   Identifier COLON statement
     ;
     
 catches
@@ -681,7 +681,7 @@ switchLabel
     
 forControl
     :   enhancedForControl
-    |   forInit? ';' expression? ';' forUpdate?
+    |   forInit? SEMI expression? SEMI forUpdate?
     ;
 
 forInit
