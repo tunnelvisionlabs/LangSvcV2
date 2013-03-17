@@ -33,7 +33,7 @@
 
         protected override ITokenSourceWithState<SimpleLexerState> CreateLexer(ICharStream input, SimpleLexerState state)
         {
-            var lexer = new JavaColorizerLexer2(input);
+            var lexer = new JavaColorizerLexer2(new JavaUnicodeStreamV4(input));
             state.Apply(lexer);
             return lexer;
         }

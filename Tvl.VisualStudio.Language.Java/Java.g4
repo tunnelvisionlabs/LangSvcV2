@@ -1120,7 +1120,6 @@ StringLiteral
 fragment
 EscapeSequence
     :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
-    |   UnicodeEscape
     |   OctalEscape
     ;
 
@@ -1131,11 +1130,6 @@ OctalEscape
     |   '\\' ('0'..'7')
     ;
 
-fragment
-UnicodeEscape
-    :   '\\' 'u' HexDigit HexDigit HexDigit HexDigit
-    ;
-    
 Identifier 
     :   Letter (Letter|JavaIDDigit)*
     ;
