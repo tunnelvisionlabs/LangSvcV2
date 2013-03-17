@@ -144,6 +144,9 @@
             Contract.Requires<ArgumentNullException>(constantPool != null, "constantPool");
             Contract.Requires<ArgumentNullException>(exceptionTable != null, "exceptionTable");
 
+            Contract.Ensures(Contract.Result<ImmutableList<int?>>() != null);
+            Contract.Ensures(Contract.Result<ImmutableList<int?>>().Count == disassembledMethod.Instructions.Count);
+
             int?[] depths = new int?[disassembledMethod.Instructions.Count];
             Queue<int> workQueue = new Queue<int>();
 
