@@ -97,9 +97,42 @@
             }
         }
 
+        /// <summary>
+        /// Gets the source code range of this document context.
+        /// </summary>
+        /// <param name="pBegPosition">[in, out] A TEXT_POSITION structure that is filled in with the starting position. Set this argument to a null value if this information is not needed.</param>
+        /// <param name="pEndPosition">[in, out] A TEXT_POSITION structure that is filled in with the ending position. Set this argument to a null value if this information is not needed.</param>
+        /// <returns>If successful, returns S_OK; otherwise, returns an error code.</returns>
+        /// <remarks>
+        /// A source range is the entire range of source code, from the current statement back to just
+        /// after the previous statement that contributed code. The source range is typically used for
+        /// mixing source statements, including comments, with code in the disassembly window.
+        /// 
+        /// To get the range for just the code statements contained within this document context, call
+        /// the IDebugDocumentContext2.GetStatementRange method.
+        /// </remarks>
         public int GetSourceRange(TEXT_POSITION[] pBegPosition, TEXT_POSITION[] pEndPosition)
         {
-            throw new NotImplementedException();
+            // TODO: also includes lines leading up to this one which do not contain executable code
+            if (pBegPosition != null && pBegPosition.Length == 0)
+                throw new ArgumentException("pBegPosition");
+            if (pEndPosition != null && pEndPosition.Length == 0)
+                throw new ArgumentException("pEndPosition");
+
+            TEXT_POSITION begin = new TEXT_POSITION();
+            TEXT_POSITION end = new TEXT_POSITION();
+
+            begin.dwLine = (uint)_location.GetLineNumber() - 1;
+            begin.dwColumn = 0;
+            end = begin;
+
+            if (pBegPosition != null)
+                pBegPosition[0] = begin;
+
+            if (pEndPosition != null)
+                pEndPosition[0] = end;
+
+            return VSConstants.S_OK;
         }
 
         public int GetStatementRange(TEXT_POSITION[] pBegPosition, TEXT_POSITION[] pEndPosition)
