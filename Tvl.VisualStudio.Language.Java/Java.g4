@@ -847,8 +847,6 @@ DIV			:'/';
 DIVEQ		:'/=';
 LT			:'<';
 GT			:'>';
-LE			:'<=';
-GE			:'>=';
 NOT			:'!';
 BITNOT		:'~';
 AND			:'&&';
@@ -865,12 +863,6 @@ XOR			:'^';
 XOREQ		:'^=';
 MOD			:'%';
 MODEQ		:'%=';
-LSHIFT		:'<<';
-RSHIFT		:'>>';
-LSHIFTEQ	:'<<=';
-RSHIFTEQ	:'>>=';
-ROR			:'>>>';
-ROREQ		:'>>>=';
 ELLIPSIS	:'...';
 
 ABSTRACT
