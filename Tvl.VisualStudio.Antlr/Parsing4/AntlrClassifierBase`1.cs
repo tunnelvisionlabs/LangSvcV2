@@ -249,15 +249,17 @@
 
         protected virtual void SetLineState(ClassifierState classifierState, int line, LineStateInfo state)
         {
+            Contract.Requires(state.IsDirty || !classifierState._firstDirtyLine.HasValue || line <= classifierState._firstDirtyLine);
+
             using (_lock.WriteLock())
             {
                 classifierState._lineStates[line] = state;
-                if (!state.IsDirty && classifierState._firstDirtyLine.HasValue && classifierState._firstDirtyLine == line)
+                if (!state.IsDirty && classifierState._firstDirtyLine == line)
                 {
                     classifierState._firstDirtyLine++;
                 }
 
-                if (!state.IsDirty && classifierState._lastDirtyLine.HasValue && classifierState._lastDirtyLine == line)
+                if (!state.IsDirty && classifierState._lastDirtyLine == line)
                 {
                     classifierState._firstDirtyLine = null;
                     classifierState._lastDirtyLine = null;
@@ -267,9 +269,7 @@
 
         private ClassifierState CreateClassifierState(ITextSnapshot snapshot)
         {
-            ClassifierState state = new ClassifierState(snapshot);
-            _lineStatesCache.Add(snapshot, state);
-            return state;
+            return new ClassifierState(snapshot);
         }
 
         protected abstract TState GetStartState();
@@ -400,8 +400,8 @@
 
         protected virtual void ForceReclassifyLines(ClassifierState classifierState, int startLine, int endLine)
         {
-            classifierState._firstDirtyLine = classifierState._firstDirtyLine.HasValue ? Math.Min(classifierState._firstDirtyLine.Value, startLine) : startLine;
-            classifierState._lastDirtyLine = classifierState._lastDirtyLine.HasValue ? Math.Max(classifierState._lastDirtyLine.Value, endLine) : endLine;
+            classifierState._firstDirtyLine = Math.Min(classifierState._firstDirtyLine ?? startLine, startLine);
+            classifierState._lastDirtyLine = Math.Max(classifierState._lastDirtyLine ?? endLine, endLine);
 
             ITextSnapshot snapshot = _textBuffer.CurrentSnapshot;
             int start = snapshot.GetLineFromLineNumber(startLine).Start;
@@ -491,12 +491,12 @@
                             lineStates.InsertRange(lineNumberFromPosition, Enumerable.Repeat(element, change.LineCountDelta));
                         }
 
-                        if (afterState._lastDirtyLine.HasValue && afterState._lastDirtyLine.Value > lineNumberFromPosition)
+                        if (afterState._lastDirtyLine > lineNumberFromPosition)
                         {
                             afterState._lastDirtyLine += change.LineCountDelta;
                         }
 
-                        if (afterState._lastChangedLine.HasValue && afterState._lastChangedLine.Value > lineNumberFromPosition)
+                        if (afterState._lastChangedLine > lineNumberFromPosition)
                         {
                             afterState._lastChangedLine += change.LineCountDelta;
                         }
@@ -508,8 +508,8 @@
                             lineStates[i] = info2;
                         }
 
-                        afterState._firstChangedLine = afterState._firstChangedLine.HasValue ? Math.Min(afterState._firstChangedLine.Value, lineNumberFromPosition) : lineNumberFromPosition;
-                        afterState._lastChangedLine = afterState._lastChangedLine.HasValue ? Math.Max(afterState._lastChangedLine.Value, num2) : num2;
+                        afterState._firstChangedLine = Math.Min(afterState._firstChangedLine ?? lineNumberFromPosition, lineNumberFromPosition);
+                        afterState._lastChangedLine = Math.Max(afterState._lastChangedLine ?? num2, num2);
                     }
 
                     Contract.Assert(lineStates.Count == afterState._lineStates.Length);
@@ -553,6 +553,16 @@
                 IsDirty = isDirty;
                 MultilineToken = multilineToken;
             }
+
+            public override string ToString()
+            {
+                if (IsDirty)
+                    return "Dirty";
+                else if (MultilineToken)
+                    return "Multiline";
+                else
+                    return EndLineState.ToString();
+            }
         }
 
         protected sealed class ClassifierState
@@ -573,7 +583,27 @@
                 _lineStates = new LineStateInfo[snapshot.LineCount];
                 for (int i = 0; i < _lineStates.Length; i++)
                     _lineStates[i] = LineStateInfo.Dirty;
+
+                _firstDirtyLine = 0;
+                _lastDirtyLine = _lineStates.Length - 1;
             }
+
+#if false
+            [ContractInvariantMethod]
+            private void ObjectInvariant()
+            {
+                Contract.Invariant(!_firstDirtyLine.HasValue || _lastDirtyLine.HasValue);
+                Contract.Invariant(!_firstChangedLine.HasValue || _lastChangedLine.HasValue);
+
+                Contract.Invariant(!_firstDirtyLine.HasValue || _firstDirtyLine <= _lastDirtyLine);
+                Contract.Invariant(!_firstChangedLine.HasValue || _firstChangedLine <= _lastChangedLine);
+
+                Contract.Invariant(!_firstDirtyLine.HasValue || Contract.ForAll(_lineStates, x => !x.IsDirty));
+
+                Contract.Invariant(Contract.ForAll(0, _lineStates.Length, i => !_lineStates[i].IsDirty || _firstDirtyLine <= i));
+                Contract.Invariant(Contract.ForAll(0, _lineStates.Length, i => !_lineStates[i].IsDirty || _lastDirtyLine >= i));
+            }
+#endif
         }
 
         #endregion Line state information

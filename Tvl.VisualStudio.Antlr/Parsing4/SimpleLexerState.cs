@@ -3,7 +3,7 @@
     using System;
     using Antlr4.Runtime;
     using Tvl.Collections;
-    using Debug = System.Diagnostics.Debug;
+    using Contract = System.Diagnostics.Contracts.Contract;
 
     public struct SimpleLexerState : IEquatable<SimpleLexerState>
     {
@@ -60,7 +60,7 @@
         public void Apply(Lexer lexer)
         {
             lexer._mode = this.Mode;
-            Debug.Assert(_modeStack != null);
+            Contract.Assert(_modeStack != null);
             lexer._modeStack.AddRange(_modeStack ?? EmptyModeStack);
         }
 

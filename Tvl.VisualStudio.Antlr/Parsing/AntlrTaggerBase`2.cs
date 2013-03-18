@@ -216,12 +216,12 @@
         protected virtual void SetLineState(int line, TState state)
         {
             _lineStates[line] = state;
-            if (!state.IsDirty && _firstDirtyLine.HasValue && _firstDirtyLine == line)
+            if (!state.IsDirty && _firstDirtyLine == line)
             {
                 _firstDirtyLine++;
             }
 
-            if (!state.IsDirty && _lastDirtyLine.HasValue && _lastDirtyLine == line)
+            if (!state.IsDirty && _lastDirtyLine == line)
             {
                 _firstDirtyLine = null;
                 _lastDirtyLine = null;
@@ -386,8 +386,8 @@
 
         public virtual void ForceRetagLines(int startLine, int endLine)
         {
-            _firstDirtyLine = _firstDirtyLine.HasValue ? Math.Min(_firstDirtyLine.Value, startLine) : startLine;
-            _lastDirtyLine = _lastDirtyLine.HasValue ? Math.Max(_lastDirtyLine.Value, endLine) : endLine;
+            _firstDirtyLine = Math.Min(_firstDirtyLine ?? startLine, startLine);
+            _lastDirtyLine = Math.Max(_lastDirtyLine ?? endLine, endLine);
 
             ITextSnapshot snapshot = _textBuffer.CurrentSnapshot;
             int start = snapshot.GetLineFromLineNumber(startLine).Start;
@@ -441,12 +441,12 @@
                     _lineStates.InsertRange(lineNumberFromPosition, Enumerable.Repeat(endLineState, change.LineCountDelta));
                 }
 
-                if (_lastDirtyLine.HasValue && _lastDirtyLine.Value > lineNumberFromPosition)
+                if (_lastDirtyLine > lineNumberFromPosition)
                 {
                     _lastDirtyLine += change.LineCountDelta;
                 }
 
-                if (_lastChangedLine.HasValue && _lastChangedLine.Value > lineNumberFromPosition)
+                if (_lastChangedLine > lineNumberFromPosition)
                 {
                     _lastChangedLine += change.LineCountDelta;
                 }
@@ -456,8 +456,8 @@
                     _lineStates[i] = _lineStates[i].CreateDirtyState();
                 }
 
-                _firstChangedLine = _firstChangedLine.HasValue ? Math.Min(_firstChangedLine.Value, lineNumberFromPosition) : lineNumberFromPosition;
-                _lastChangedLine = _lastChangedLine.HasValue ? Math.Max(_lastChangedLine.Value, num2) : num2;
+                _firstChangedLine = Math.Min(_firstChangedLine ?? lineNumberFromPosition, lineNumberFromPosition);
+                _lastChangedLine = Math.Max(_lastChangedLine ?? num2, num2);
             }
 
             _lineStatesVersion = e.AfterVersion;
