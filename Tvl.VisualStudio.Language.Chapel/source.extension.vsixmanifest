@@ -3,7 +3,7 @@
   <Identifier Id="Tvl.VisualStudio.Language.Chapel.68c0f3a0-30b1-4e27-a8b4-436e9a03eaee">
     <Name>Chapel Language Support</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0.1.594</Version>
+    <Version>1.0.2</Version>
     <Description xml:space="preserve">Basic support for the Chapel high-performance programming language.</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
@@ -25,7 +25,7 @@
     <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.5" />
   </Identifier>
   <References>
-    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.0.10">
+    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.1.0">
       <Name>Visual Studio Extensibility Framework</Name>
       <VsixPath>Tvl.VisualStudio.Framework.vsix</VsixPath>
     </Reference>
