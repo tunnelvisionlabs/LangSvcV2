@@ -31,9 +31,11 @@
             return SimpleLexerState.Initial;
         }
 
-        protected override ITokenSourceWithState<SimpleLexerState> CreateLexer(ICharStream input, SimpleLexerState state)
+        protected override ITokenSourceWithState<SimpleLexerState> CreateLexer(ICharStream input, int startLine, SimpleLexerState state)
         {
             var lexer = new JavaColorizerLexer2(new JavaUnicodeStreamV4(input));
+            lexer.Line = startLine;
+            lexer.Column = 0;
             state.Apply(lexer);
             return lexer;
         }
