@@ -51,7 +51,7 @@
                     int column = e.Span.Start - startLine.Start;
 
                     if (outputWindow != null)
-                        outputWindow.WriteLine(string.Format("{0}({1}:{2}): {3}", filename, line, column, message));
+                        outputWindow.WriteLine(string.Format("{0}({1},{2}): {3}", filename, line + 1, column + 1, message));
 
                     if (errors.Count > 100)
                         throw new OperationCanceledException();
