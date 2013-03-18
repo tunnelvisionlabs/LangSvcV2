@@ -257,12 +257,12 @@
             using (_lock.WriteLock())
             {
                 taggerState._lineStates[line] = state;
-                if (!state.IsDirty && taggerState._firstDirtyLine.HasValue && taggerState._firstDirtyLine == line)
+                if (!state.IsDirty && taggerState._firstDirtyLine == line)
                 {
                     taggerState._firstDirtyLine++;
                 }
 
-                if (!state.IsDirty && taggerState._lastDirtyLine.HasValue && taggerState._lastDirtyLine == line)
+                if (!state.IsDirty && taggerState._lastDirtyLine == line)
                 {
                     taggerState._firstDirtyLine = null;
                     taggerState._lastDirtyLine = null;
@@ -493,12 +493,12 @@
                             lineStates.InsertRange(lineNumberFromPosition, Enumerable.Repeat(element, change.LineCountDelta));
                         }
 
-                        if (afterState._lastDirtyLine.HasValue && afterState._lastDirtyLine.Value > lineNumberFromPosition)
+                        if (afterState._lastDirtyLine > lineNumberFromPosition)
                         {
                             afterState._lastDirtyLine += change.LineCountDelta;
                         }
 
-                        if (afterState._lastChangedLine.HasValue && afterState._lastChangedLine.Value > lineNumberFromPosition)
+                        if (afterState._lastChangedLine > lineNumberFromPosition)
                         {
                             afterState._lastChangedLine += change.LineCountDelta;
                         }

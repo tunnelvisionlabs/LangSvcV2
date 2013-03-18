@@ -216,12 +216,12 @@
         protected virtual void SetLineState(int line, TState state)
         {
             _lineStates[line] = state;
-            if (!state.IsDirty && _firstDirtyLine.HasValue && _firstDirtyLine == line)
+            if (!state.IsDirty && _firstDirtyLine == line)
             {
                 _firstDirtyLine++;
             }
 
-            if (!state.IsDirty && _lastDirtyLine.HasValue && _lastDirtyLine == line)
+            if (!state.IsDirty && _lastDirtyLine == line)
             {
                 _firstDirtyLine = null;
                 _lastDirtyLine = null;
@@ -441,12 +441,12 @@
                     _lineStates.InsertRange(lineNumberFromPosition, Enumerable.Repeat(endLineState, change.LineCountDelta));
                 }
 
-                if (_lastDirtyLine.HasValue && _lastDirtyLine.Value > lineNumberFromPosition)
+                if (_lastDirtyLine > lineNumberFromPosition)
                 {
                     _lastDirtyLine += change.LineCountDelta;
                 }
 
-                if (_lastChangedLine.HasValue && _lastChangedLine.Value > lineNumberFromPosition)
+                if (_lastChangedLine > lineNumberFromPosition)
                 {
                     _lastChangedLine += change.LineCountDelta;
                 }

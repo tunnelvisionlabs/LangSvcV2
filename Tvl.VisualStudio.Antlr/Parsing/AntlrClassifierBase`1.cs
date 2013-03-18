@@ -250,12 +250,12 @@
             using (_lock.WriteLock())
             {
                 classifierState._lineStates[line] = state;
-                if (!state.IsDirty && classifierState._firstDirtyLine.HasValue && classifierState._firstDirtyLine == line)
+                if (!state.IsDirty && classifierState._firstDirtyLine == line)
                 {
                     classifierState._firstDirtyLine++;
                 }
 
-                if (!state.IsDirty && classifierState._lastDirtyLine.HasValue && classifierState._lastDirtyLine == line)
+                if (!state.IsDirty && classifierState._lastDirtyLine == line)
                 {
                     classifierState._firstDirtyLine = null;
                     classifierState._lastDirtyLine = null;
@@ -486,12 +486,12 @@
                             lineStates.InsertRange(lineNumberFromPosition, Enumerable.Repeat(element, change.LineCountDelta));
                         }
 
-                        if (afterState._lastDirtyLine.HasValue && afterState._lastDirtyLine.Value > lineNumberFromPosition)
+                        if (afterState._lastDirtyLine > lineNumberFromPosition)
                         {
                             afterState._lastDirtyLine += change.LineCountDelta;
                         }
 
-                        if (afterState._lastChangedLine.HasValue && afterState._lastChangedLine.Value > lineNumberFromPosition)
+                        if (afterState._lastChangedLine > lineNumberFromPosition)
                         {
                             afterState._lastChangedLine += change.LineCountDelta;
                         }
