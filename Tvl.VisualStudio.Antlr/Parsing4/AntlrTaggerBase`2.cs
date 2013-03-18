@@ -557,6 +557,16 @@
                 IsDirty = isDirty;
                 MultilineToken = multilineToken;
             }
+
+            public override string ToString()
+            {
+                if (IsDirty)
+                    return "Dirty";
+                else if (MultilineToken)
+                    return "Multiline";
+                else
+                    return EndLineState.ToString();
+            }
         }
 
         protected sealed class TaggerState
