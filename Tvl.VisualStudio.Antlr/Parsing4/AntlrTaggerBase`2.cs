@@ -272,9 +272,7 @@
 
         private TaggerState CreateTaggerState(ITextSnapshot snapshot)
         {
-            TaggerState state = new TaggerState(snapshot);
-            _lineStatesCache.Add(snapshot, state);
-            return state;
+            return new TaggerState(snapshot);
         }
 
         protected abstract TState GetStartState();

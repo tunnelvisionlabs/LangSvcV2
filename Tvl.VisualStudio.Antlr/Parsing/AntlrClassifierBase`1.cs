@@ -265,9 +265,7 @@
 
         private ClassifierState CreateClassifierState(ITextSnapshot snapshot)
         {
-            ClassifierState state = new ClassifierState(snapshot);
-            _lineStatesCache.Add(snapshot, state);
-            return state;
+            return new ClassifierState(snapshot);
         }
 
         protected abstract TState GetStartState();
