@@ -30,5 +30,14 @@
         {
             return new SimpleLexerState(this);
         }
+
+        public override IToken NextToken()
+        {
+            IToken token = base.NextToken();
+            while (token.Type == NEWLINE)
+                token = base.NextToken();
+
+            return token;
+        }
     }
 }
