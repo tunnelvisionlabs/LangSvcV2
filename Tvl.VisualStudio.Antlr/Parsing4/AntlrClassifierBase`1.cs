@@ -103,7 +103,7 @@
 
                 ICharStream input = CreateInputStream(span);
                 ITokenSourceWithState<TState> lexer = CreateLexer(input, startState);
-                lexer.TokenFactory = new SnapshotTokenFactory(GetEffectiveTokenSource(lexer));
+                lexer.TokenFactory = new SnapshotTokenFactory(snapshot, GetEffectiveTokenSource(lexer));
 
                 IToken previousToken = null;
                 bool previousTokenEndsLine = false;

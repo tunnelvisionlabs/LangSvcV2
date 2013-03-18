@@ -2,23 +2,17 @@
 {
     using System;
     using Antlr4.Runtime;
-    using Microsoft.VisualStudio.Text;
+    using ITextSnapshot = Microsoft.VisualStudio.Text.ITextSnapshot;
+    using ITextSnapshotLine = Microsoft.VisualStudio.Text.ITextSnapshotLine;
 
     public class SnapshotToken : CommonToken
     {
         private readonly ITextSnapshot snapshot;
 
-        public SnapshotToken(Tuple<ITokenSource, ICharStream> source, int type, int channel, int start, int stop)
+        public SnapshotToken(ITextSnapshot snapshot, Tuple<ITokenSource, ICharStream> source, int type, int channel, int start, int stop)
             : base(source, type, channel, start, stop)
         {
-            ICharStream inputStream = source.Item2;
-            SnapshotCharStream charStream = inputStream as SnapshotCharStream;
-            if (charStream == null)
-            {
-                throw new ArgumentException(string.Format("Expected a {0} backed by a {1}.", typeof(ITokenSource).FullName, typeof(SnapshotCharStream).FullName));
-            }
-
-            snapshot = charStream.Snapshot;
+            this.snapshot = snapshot;
         }
 
         public SnapshotToken(int type, string text)

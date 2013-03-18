@@ -2,18 +2,22 @@
 {
     using System;
     using Antlr4.Runtime;
+    using ITextSnapshot = Microsoft.VisualStudio.Text.ITextSnapshot;
 
     public class SnapshotTokenFactory : ITokenFactory
     {
+        private readonly ITextSnapshot snapshot;
         private readonly Tuple<ITokenSource, ICharStream> effectiveSource;
 
-        public SnapshotTokenFactory(ITokenSource effectiveSource)
+        public SnapshotTokenFactory(ITextSnapshot snapshot, ITokenSource effectiveSource)
         {
+            this.snapshot = snapshot;
             this.effectiveSource = Tuple.Create(effectiveSource, effectiveSource.InputStream);
         }
 
-        public SnapshotTokenFactory(Tuple<ITokenSource, ICharStream> effectiveSource)
+        public SnapshotTokenFactory(ITextSnapshot snapshot, Tuple<ITokenSource, ICharStream> effectiveSource)
         {
+            this.snapshot = snapshot;
             this.effectiveSource = effectiveSource;
         }
 
@@ -24,7 +28,7 @@
                 source = effectiveSource;
             }
 
-            SnapshotToken t = new SnapshotToken(source, type, channel, start, stop);
+            SnapshotToken t = new SnapshotToken(snapshot, source, type, channel, start, stop);
             t.Line = line;
             t.Column = charPositionInLine;
             if (text != null)
