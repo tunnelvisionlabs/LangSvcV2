@@ -591,6 +591,23 @@
                 _firstDirtyLine = 0;
                 _lastDirtyLine = _lineStates.Length - 1;
             }
+
+#if false
+            [ContractInvariantMethod]
+            private void ObjectInvariant()
+            {
+                Contract.Invariant(!_firstDirtyLine.HasValue || _lastDirtyLine.HasValue);
+                Contract.Invariant(!_firstChangedLine.HasValue || _lastChangedLine.HasValue);
+
+                Contract.Invariant(!_firstDirtyLine.HasValue || _firstDirtyLine <= _lastDirtyLine);
+                Contract.Invariant(!_firstChangedLine.HasValue || _firstChangedLine <= _lastChangedLine);
+
+                Contract.Invariant(!_firstDirtyLine.HasValue || Contract.ForAll(_lineStates, x => !x.IsDirty));
+
+                Contract.Invariant(Contract.ForAll(0, _lineStates.Length, i => !_lineStates[i].IsDirty || _firstDirtyLine <= i));
+                Contract.Invariant(Contract.ForAll(0, _lineStates.Length, i => !_lineStates[i].IsDirty || _lastDirtyLine >= i));
+            }
+#endif
         }
 
         #endregion Line state information
