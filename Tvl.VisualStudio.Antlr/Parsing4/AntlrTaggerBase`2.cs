@@ -587,6 +587,9 @@
                 _lineStates = new LineStateInfo[snapshot.LineCount];
                 for (int i = 0; i < _lineStates.Length; i++)
                     _lineStates[i] = LineStateInfo.Dirty;
+
+                _firstDirtyLine = 0;
+                _lastDirtyLine = _lineStates.Length - 1;
             }
         }
 
