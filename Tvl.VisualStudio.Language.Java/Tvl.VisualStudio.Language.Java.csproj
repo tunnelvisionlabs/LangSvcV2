@@ -97,6 +97,10 @@
     <Reference Include="Antlr3.Runtime">
       <HintPath>..\External\Antlr\Antlr3.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="Antlr4.Runtime.v4.0, Version=1.0.1.0, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\External\Antlr4\Antlr4.Runtime.v4.0.dll</HintPath>
+    </Reference>
     <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PublicAssemblies\EnvDTE.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
@@ -274,6 +278,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BraceMatchingTaggerProvider.cs" />
+    <Compile Include="JavaUnicodeStreamV4.cs" />
     <Compile Include="Debugger\AD7Constants.cs" />
     <Compile Include="Debugger\BreakpointLocation.cs" />
     <Compile Include="Debugger\BreakpointLocationCodeAddress.cs" />
@@ -408,6 +413,12 @@
     <Compile Include="Experimental\JavaAtnBuilder.cs" />
     <Compile Include="Experimental\JavaTopLevelSymbolTaggerAtnBuilder.cs" />
     <Compile Include="Experimental\ScopeAnchorTag.cs" />
+    <Compile Include="Java.g4.lexer.cs">
+      <DependentUpon>Java.g4</DependentUpon>
+    </Compile>
+    <Compile Include="Java.g4.parser.cs">
+      <DependentUpon>Java.g4</DependentUpon>
+    </Compile>
     <Compile Include="Java2.g3.lexer.cs">
       <DependentUpon>Java2.g3</DependentUpon>
     </Compile>
@@ -420,6 +431,9 @@
     <Compile Include="JavaClassifierLexer.cs" />
     <Compile Include="JavaClassifierLexerMode.cs" />
     <Compile Include="JavaClassifierLexerState.cs" />
+    <Compile Include="JavaColorizerLexer2.g4.cs">
+      <DependentUpon>JavaColorizerLexer2.g4</DependentUpon>
+    </Compile>
     <Compile Include="JavaErrorTaggerProvider.cs" />
     <Content Include="..\External\Eula.rtf">
       <Link>Eula.rtf</Link>
@@ -640,6 +654,14 @@
     <Antlr3 Include="SourceData\ExpressionEvaluatorWalker.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
+    <Antlr4 Include="JavaColorizerLexer2.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Tvl.VisualStudio.Language.Java</CustomToolNamespace>
+    </Antlr4>
+    <Antlr4 Include="Java.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Tvl.VisualStudio.Language.Java</CustomToolNamespace>
+    </Antlr4>
     <None Include="Text\Tagger`1.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -817,8 +839,13 @@
     <AntlrBuildTaskPath>$(ProjectDir)..\External\Antlr</AntlrBuildTaskPath>
     <!-- Path to the ANTLR Tool itself. -->
     <AntlrToolPath>$(ProjectDir)..\External\Antlr\Antlr3.exe</AntlrToolPath>
+    <!-- Folder containing Antlr4BuildTasks.dll -->
+    <Antlr4BuildTaskPath>$(ProjectDir)..\External\Antlr4</Antlr4BuildTaskPath>
+    <!-- Path to the ANTLR 4 Tool itself. -->
+    <Antlr4ToolPath>$(ProjectDir)..\External\Antlr4\antlr4-csharp-4.0.1-SNAPSHOT-complete.jar</Antlr4ToolPath>
   </PropertyGroup>
   <Import Project="$(ProjectDir)..\External\Antlr\Antlr3.targets" />
+  <Import Project="$(ProjectDir)..\External\Antlr4\Antlr4.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -57,7 +57,7 @@
 
         protected abstract TState GetStartState();
 
-        protected abstract ITokenSourceWithState<TState> CreateLexer(SnapshotSpan span, TState startState);
+        protected abstract ITokenSourceWithState<TState> CreateLexer(SnapshotSpan span, int startLine, TState startState);
 
         protected virtual IEnumerable<ITagSpan<TTag>> GetTags(SnapshotSpan span)
         {
@@ -73,7 +73,7 @@
             Span requestedSpan = span;
             TState startState = AdjustParseSpan(ref span);
 
-            ITokenSourceWithState<TState> lexer = CreateLexer(span, startState);
+            ITokenSourceWithState<TState> lexer = CreateLexer(span, span.Start.GetContainingLine().LineNumber + 1, startState);
 
             IToken previousToken = null;
             bool previousTokenEndsLine = false;

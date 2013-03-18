@@ -361,7 +361,7 @@ primitiveType
     ;
 
 typeArguments
-    :   ^('<' typeArgument+)
+    :   ^('<' typeArgument*)
     ;
 
 typeArgument

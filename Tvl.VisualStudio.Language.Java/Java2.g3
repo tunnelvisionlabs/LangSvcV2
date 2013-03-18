@@ -719,7 +719,7 @@ primitiveType
     ;
 
 typeArguments
-    :   '<'^ typeArgument (','! typeArgument)* '>'!
+    :   '<'^ (typeArgument (','! typeArgument)*)? '>'!
     ;
 
 typeArgument

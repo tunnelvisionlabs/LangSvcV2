@@ -107,8 +107,8 @@
                 TState startState = AdjustParseSpan(taggerState, ref span);
 
                 ICharStream input = CreateInputStream(span);
-                ITokenSourceWithState<TState> lexer = CreateLexer(input, startState);
-                lexer.TokenFactory = new SnapshotTokenFactory(GetEffectiveTokenSource(lexer));
+                ITokenSourceWithState<TState> lexer = CreateLexer(input, span.Start.GetContainingLine().LineNumber + 1, startState);
+                lexer.TokenFactory = new SnapshotTokenFactory(snapshot, GetEffectiveTokenSource(lexer));
 
                 IToken previousToken = null;
                 bool previousTokenEndsLine = false;
@@ -357,7 +357,7 @@
             return input;
         }
 
-        protected abstract ITokenSourceWithState<TState> CreateLexer(ICharStream input, TState startState);
+        protected abstract ITokenSourceWithState<TState> CreateLexer(ICharStream input, int startLine, TState startState);
 
         protected virtual IEnumerable<ITagSpan<TTag>> GetTagSpansForToken(IToken token, ITextSnapshot snapshot)
         {

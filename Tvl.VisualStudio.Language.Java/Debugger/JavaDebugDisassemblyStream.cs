@@ -41,13 +41,18 @@
         /// <summary>
         /// Returns a code context object corresponding to a specified code location identifier.
         /// </summary>
-        /// <param name="uCodeLocationId">[in] Specifies the code location identifier. See the Remarks section for the IDebugDisassemblyStream2.GetCodeLocationId method for a description of a code location identifier.</param>
+        /// <param name="uCodeLocationId">
+        /// [in] Specifies the code location identifier. See the Remarks section for the
+        /// IDebugDisassemblyStream2.GetCodeLocationId method for a description of a code location identifier.
+        /// </param>
         /// <param name="ppCodeContext">[out] Returns an IDebugCodeContext2 object that represents the associated code context.</param>
         /// <returns>If successful, returns S_OK; otherwise, returns an error code.</returns>
         /// <remarks>
-        /// The code location identifier can be returned from a call to the IDebugDisassemblyStream2.GetCurrentLocation method and can appear in the DisassemblyData structure.
+        /// The code location identifier can be returned from a call to the IDebugDisassemblyStream2.GetCurrentLocation
+        /// method and can appear in the DisassemblyData structure.
         /// 
-        /// To convert a code context into a code location identifier, call the IDebugDisassemblyStream2.GetCodeLocationId method.
+        /// To convert a code context into a code location identifier, call the IDebugDisassemblyStream2.GetCodeLocationId
+        /// method.
         /// </remarks>
         public int GetCodeContext(ulong uCodeLocationId, out IDebugCodeContext2 ppCodeContext)
         {
@@ -64,7 +69,10 @@
         /// </summary>
         /// <param name="pCodeContext">[in] An IDebugCodeContext2 object to be converted to an identifier.</param>
         /// <param name="puCodeLocationId">[out] Returns the code location identifier. See Remarks.</param>
-        /// <returns>If successful, returns S_OK; otherwise, returns an error code. Returns E_CODE_CONTEXT_OUT_OF_SCOPE if the code context is valid but outside the scope.</returns>
+        /// <returns>
+        /// If successful, returns S_OK; otherwise, returns an error code. Returns E_CODE_CONTEXT_OUT_OF_SCOPE if
+        /// the code context is valid but outside the scope.
+        /// </returns>
         /// <remarks>
         /// The code location identifier is specific to the debug engine (DE) supporting the disassembly. This
         /// location identifier is used internally by the DE to track positions in the code and is typically an
@@ -123,7 +131,8 @@
         /// <param name="pnSize">[out] Returns the size, in instructions.</param>
         /// <returns>If successful, returns S_OK; otherwise, returns an error code.</returns>
         /// <remarks>
-        /// The value returned from this method can be used to allocate an array of DisassemblyData structures which is then passed to the IDebugDisassemblyStream2.Read method.
+        /// The value returned from this method can be used to allocate an array of DisassemblyData
+        /// structures which is then passed to the IDebugDisassemblyStream2.Read method.
         /// </remarks>
         public int GetSize(out ulong pnSize)
         {
@@ -179,11 +188,13 @@
                 int instructionStart = instruction.Offset;
                 int instructionSize = instruction.Size;
 
+#if false // bstrAddress is supposed to refer to an absolute offset
                 if (dwFields.GetAddress())
                 {
                     prgDisassembly[i].bstrAddress = string.Format("{0," + addressFieldWidth + "}", instructionStart);
                     prgDisassembly[i].dwFields |= enum_DISASSEMBLY_STREAM_FIELDS.DSF_ADDRESS;
                 }
+#endif
 
                 if (dwFields.GetCodeBytes())
                 {
@@ -203,9 +214,36 @@
                     prgDisassembly[i].dwFields |= enum_DISASSEMBLY_STREAM_FIELDS.DSF_OPCODE;
                 }
 
+                if (dwFields.GetAddressOffset())
+                {
+                    prgDisassembly[i].bstrAddressOffset = string.Format("{0," + addressFieldWidth + "}", instructionStart);
+                    prgDisassembly[i].dwFields |= enum_DISASSEMBLY_STREAM_FIELDS.DSF_ADDRESSOFFSET;
+                }
+
+                if (dwFields.GetDocumentUrl())
+                {
+                    // "For text documents that can be represented as file names, the bstrDocumentUrl
+                    // field is filled in with the file name where the source can be found, using the
+                    // format file://file name."
+                    string sourcePath = _executionContext.Location.GetSourcePath();
+                    if (!string.IsNullOrEmpty(sourcePath))
+                    {
+                        prgDisassembly[i].bstrDocumentUrl = new Uri(sourcePath).AbsoluteUri;
+                        // if it starts with file:/// one of the / characters will show in disassembly view
+                        if (prgDisassembly[i].bstrDocumentUrl.StartsWith("file:///"))
+                            prgDisassembly[i].bstrDocumentUrl = "file://" + prgDisassembly[i].bstrDocumentUrl.Substring("file:///".Length);
+
+                        prgDisassembly[i].dwFields |= enum_DISASSEMBLY_STREAM_FIELDS.DSF_DOCUMENTURL;
+                    }
+                }
+
                 if (dwFields.GetOperands())
                 {
                     prgDisassembly[i].dwFields |= enum_DISASSEMBLY_STREAM_FIELDS.DSF_OPERANDS;
+
+                    bool includeSymbolNames = dwFields.GetOperandsSymbols();
+                    if (includeSymbolNames)
+                        prgDisassembly[i].dwFields |= enum_DISASSEMBLY_STREAM_FIELDS.DSF_OPERANDS_SYMBOLS;
 
                     // operand 0
                     switch (instruction.OpCode.OperandType)
@@ -233,104 +271,7 @@
 
                     case JavaOperandType.InlineVar:
                     case JavaOperandType.InlineVar_I1:
-                        prgDisassembly[i].bstrOperands = "#" + instruction.Operands.VariableSlot.ToString();
-                        break;
-
-                    case JavaOperandType.InlineShortConst:
-                    case JavaOperandType.InlineConst:
-                    case JavaOperandType.InlineField:
-                    case JavaOperandType.InlineMethod:
-                    case JavaOperandType.InlineMethod_U1_0:
-                    case JavaOperandType.InlineType:
-                    case JavaOperandType.InlineType_U1:
-                        prgDisassembly[i].bstrOperands = "#" + instruction.Operands.ConstantPoolIndex.ToString();
-                        break;
-
-                    case JavaOperandType.InlineArrayType:
-                        prgDisassembly[i].bstrOperands = "T_" + instruction.Operands.ArrayType.ToString().ToUpperInvariant();
-                        break;
-
-                    default:
-                        prgDisassembly[i].bstrOperands = string.Empty;
-                        break;
-                    }
-
-                    // operand 1
-                    switch (instruction.OpCode.OperandType)
-                    {
-                    case JavaOperandType.InlineVar_I1:
-                        prgDisassembly[i].bstrOperands += " " + instruction.Operands.Increment.ToString();
-                        break;
-
-                    case JavaOperandType.InlineMethod_U1_0:
-                        prgDisassembly[i].bstrOperands += " " + instruction.Operands.Operand2.ToString();
-                        break;
-
-                    case JavaOperandType.InlineType_U1:
-                        prgDisassembly[i].bstrOperands += " " + instruction.Operands.Dimensions.ToString();
-                        break;
-
-                    default:
-                        break;
-                    }
-
-                    // operand 2
-                    if (instruction.OpCode.OperandType == JavaOperandType.InlineMethod_U1_0)
-                    {
-                        prgDisassembly[i].bstrOperands += " 0";
-                    }
-                }
-
-                if (dwFields.GetPosition())
-                {
-                    try
-                    {
-                        ILocation location = _executionContext.Location.GetMethod().GetLocationOfCodeIndex(instructionStart);
-                        prgDisassembly[i].posBeg.dwLine = (uint)location.GetLineNumber();
-                        prgDisassembly[i].posBeg.dwColumn = 0;
-                        prgDisassembly[i].posEnd = prgDisassembly[i].posBeg;
-                        prgDisassembly[i].posEnd.dwLine++;
-                        prgDisassembly[i].dwFields |= enum_DISASSEMBLY_STREAM_FIELDS.DSF_POSITION;
-                    }
-                    catch (Exception e)
-                    {
-                        if (ErrorHandler.IsCriticalException(e))
-                            throw;
-
-                        prgDisassembly[i].posBeg = default(TEXT_POSITION);
-                        prgDisassembly[i].posEnd = default(TEXT_POSITION);
-                        prgDisassembly[i].dwFields &= ~enum_DISASSEMBLY_STREAM_FIELDS.DSF_POSITION;
-                    }
-                }
-
-                if (dwFields.GetSymbol())
-                {
-                    switch (instruction.OpCode.OperandType)
-                    {
-                    case JavaOperandType.InlineLookupSwitch:
-                        prgDisassembly[i].bstrSymbol = "// switch";
-                        break;
-
-                    case JavaOperandType.InlineTableSwitch:
-                        prgDisassembly[i].bstrSymbol = "// table switch";
-                        break;
-
-                    case JavaOperandType.InlineShortConst:
-                    case JavaOperandType.InlineConst:
-                    case JavaOperandType.InlineField:
-                    case JavaOperandType.InlineMethod:
-                    case JavaOperandType.InlineMethod_U1_0:
-                    case JavaOperandType.InlineType:
-                    case JavaOperandType.InlineType_U1:
-                        {
-                            int index = instruction.Operands.ConstantPoolIndex;
-                            var entry = constantPool[index - 1];
-                            prgDisassembly[i].bstrSymbol = "// " + entry.ToString(constantPool);
-                            break;
-                        }
-
-                    case JavaOperandType.InlineVar:
-                    case JavaOperandType.InlineVar_I1:
+                        if (includeSymbolNames)
                         {
                             int localIndex = _bytecode[instructionStart + 1];
                             int testLocation = instructionStart;
@@ -342,17 +283,46 @@
 
                             ILocation currentLocation = _executionContext.Location.GetMethod().GetLocationOfCodeIndex(testLocation);
                             var local = localVariables.SingleOrDefault(variable => variable.GetSlot() == localIndex && variable.GetIsVisible(currentLocation));
-
                             if (local != null)
                             {
-                                prgDisassembly[i].bstrSymbol = "// local";
-                                prgDisassembly[i].bstrSymbol += string.Format(" {0} {1}", local.GetLocalTypeName(), local.GetName());
+                                prgDisassembly[i].bstrOperands = local.GetName();
                             }
-
-                            break;
                         }
 
+                        if (string.IsNullOrEmpty(prgDisassembly[i].bstrOperands))
+                        {
+                            prgDisassembly[i].bstrOperands = "#" + instruction.Operands.VariableSlot.ToString();
+                        }
+
+                        break;
+
+                    case JavaOperandType.InlineShortConst:
+                    case JavaOperandType.InlineConst:
+                    case JavaOperandType.InlineField:
+                    case JavaOperandType.InlineMethod:
+                    case JavaOperandType.InlineMethod_U1_0:
+                    case JavaOperandType.InlineType:
+                    case JavaOperandType.InlineType_U1:
+                        if (includeSymbolNames)
+                        {
+                            int index = instruction.Operands.ConstantPoolIndex;
+                            var entry = constantPool[index - 1];
+                            prgDisassembly[i].bstrOperands = entry.ToString(constantPool);
+                        }
+
+                        if (string.IsNullOrEmpty(prgDisassembly[i].bstrOperands))
+                        {
+                            prgDisassembly[i].bstrOperands = "#" + instruction.Operands.ConstantPoolIndex.ToString();
+                        }
+
+                        break;
+
+                    case JavaOperandType.InlineArrayType:
+                        prgDisassembly[i].bstrOperands = "T_" + instruction.Operands.ArrayType.ToString().ToUpperInvariant();
+                        break;
+
                     case JavaOperandType.InlineNone:
+                        if (includeSymbolNames)
                         {
                             int? localIndex = null;
 
@@ -422,15 +392,145 @@
 
                                 ILocation currentLocation = _executionContext.Location.GetMethod().GetLocationOfCodeIndex(testLocation);
                                 var local = localVariables.SingleOrDefault(variable => variable.GetSlot() == localIndex && variable.GetIsVisible(currentLocation));
-
                                 if (local != null)
                                 {
-                                    prgDisassembly[i].bstrSymbol = "// local";
-                                    prgDisassembly[i].bstrSymbol += string.Format(" {0} {1}", local.GetLocalTypeName(), local.GetName());
+                                    prgDisassembly[i].bstrOperands = local.GetName();
                                 }
                             }
                         }
 
+                        break;
+
+                    default:
+                        prgDisassembly[i].bstrOperands = string.Empty;
+                        break;
+                    }
+
+                    // operand 1
+                    switch (instruction.OpCode.OperandType)
+                    {
+                    case JavaOperandType.InlineVar_I1:
+                        prgDisassembly[i].bstrOperands += " " + instruction.Operands.Increment.ToString();
+                        break;
+
+                    case JavaOperandType.InlineMethod_U1_0:
+                        prgDisassembly[i].bstrOperands += " " + instruction.Operands.Operand2.ToString();
+                        break;
+
+                    case JavaOperandType.InlineType_U1:
+                        prgDisassembly[i].bstrOperands += " " + instruction.Operands.Dimensions.ToString();
+                        break;
+
+                    default:
+                        break;
+                    }
+
+                    // operand 2
+                    if (instruction.OpCode.OperandType == JavaOperandType.InlineMethod_U1_0)
+                    {
+                        prgDisassembly[i].bstrOperands += " 0";
+                    }
+                }
+
+                if (dwFields.GetPosition())
+                {
+                    try
+                    {
+                        ILocation location = _executionContext.Location.GetMethod().GetLocationOfCodeIndex(instructionStart);
+                        prgDisassembly[i].posBeg.dwLine = (uint)location.GetLineNumber();
+                        prgDisassembly[i].posBeg.dwColumn = 0;
+                        prgDisassembly[i].posEnd = prgDisassembly[i].posBeg;
+                        prgDisassembly[i].dwFields |= enum_DISASSEMBLY_STREAM_FIELDS.DSF_POSITION;
+                    }
+                    catch (Exception e)
+                    {
+                        if (ErrorHandler.IsCriticalException(e))
+                            throw;
+
+                        prgDisassembly[i].posBeg = default(TEXT_POSITION);
+                        prgDisassembly[i].posEnd = default(TEXT_POSITION);
+                        prgDisassembly[i].dwFields &= ~enum_DISASSEMBLY_STREAM_FIELDS.DSF_POSITION;
+                    }
+                }
+
+                if (dwFields.GetFlags())
+                {
+                    // TODO: determine when the following condition is met?
+                    //   "Indicates that this instruction is one of the next instructions to be executed (there may be more than one)."
+                    bool active = false;
+                    if (active)
+                        prgDisassembly[i].dwFlags |= enum_DISASSEMBLY_FLAGS.DF_INSTRUCTION_ACTIVE;
+
+                    // Check for location information to determine when this condition is met:
+                    //   "Indicates that this instruction has source. Some instructions, such as profiling or garbage collection code, have no corresponding source."
+                    bool hasSource = prgDisassembly[i].dwFields.GetPosition();
+                    if (hasSource)
+                        prgDisassembly[i].dwFlags |= enum_DISASSEMBLY_FLAGS.DF_HASSOURCE;
+
+                    // The current single-method disassembly only includes source from a single file, so this is for all but the first line:
+                    //   "Indicates that this instruction is in a different document than the previous one."
+                    bool documentChange = i == 0 && _currentInstructionIndex == 0;
+                    if (documentChange)
+                        prgDisassembly[i].dwFlags |= enum_DISASSEMBLY_FLAGS.DF_DOCUMENTCHANGE;
+
+                    // Javac removes code that is statically determined to be unreachable (even in debug mode), so this is false:
+                    //   "Indicates that this instruction will not be executed."
+                    bool disabled = false;
+                    if (disabled)
+                        prgDisassembly[i].dwFlags |= enum_DISASSEMBLY_FLAGS.DF_DISABLED;
+
+                    // This is always false in bytecode:
+                    //   "Indicates that this instruction is really data (not code)."
+                    bool data = false;
+                    if (data)
+                        prgDisassembly[i].dwFlags |= enum_DISASSEMBLY_FLAGS.DF_DATA;
+
+                    // The Java debugging information format does not include document checksum information
+                    bool documentChecksum = false;
+                    if (documentChecksum)
+                        prgDisassembly[i].dwFlags |= enum_DISASSEMBLY_FLAGS.DF_DOCUMENT_CHECKSUM;
+
+                    prgDisassembly[i].dwFields |= enum_DISASSEMBLY_STREAM_FIELDS.DSF_FLAGS;
+                }
+
+                if (dwFields.GetByteOffset() && prgDisassembly[i].dwFields.GetPosition())
+                {
+                    //   "The number of bytes the instruction is from the beginning of the code line."
+                    int byteOffset = 0;
+                    for (int j = _currentInstructionIndex + i - 1; j >= 0; j--)
+                    {
+                        JavaInstruction priorInstruction = _disassembledMethod.Instructions[j];
+                        try
+                        {
+                            ILocation location = _executionContext.Location.GetMethod().GetLocationOfCodeIndex(priorInstruction.Offset);
+                            if (location.GetLineNumber() != prgDisassembly[i].posBeg.dwLine)
+                                break;
+
+                            byteOffset = instruction.Offset - priorInstruction.Offset;
+                        }
+                        catch (Exception e)
+                        {
+                            if (ErrorHandler.IsCriticalException(e))
+                                throw;
+
+                            break;
+                        }
+                    }
+
+                    prgDisassembly[i].dwByteOffset = (uint)Math.Max(0, byteOffset);
+                    prgDisassembly[i].dwFields |= enum_DISASSEMBLY_STREAM_FIELDS.DSF_BYTEOFFSET;
+                }
+
+                if (dwFields.GetSymbol())
+                {
+                    switch (instruction.OpCode.OperandType)
+                    {
+                    case JavaOperandType.InlineLookupSwitch:
+                        prgDisassembly[i].bstrSymbol = "// switch";
+                        break;
+
+                    case JavaOperandType.InlineTableSwitch:
+                        prgDisassembly[i].bstrSymbol = "// table switch";
                         break;
 
                     default:

@@ -239,6 +239,8 @@
                 var tokenStream = new CommonTokenStream(lexer);
                 var parser = new Java2Parser(tokenStream);
 
+                int[] lineOffsets = null;
+
                 var outputWindow = OutputWindowService.TryGetPane(PredefinedOutputWindowPanes.TvlIntellisense);
                 List<ParseErrorEventArgs> errors = new List<ParseErrorEventArgs>();
                 parser.ParseError += (sender, e) =>
@@ -249,14 +251,21 @@
                         if (message.Length > 100)
                             message = message.Substring(0, 100) + " ...";
 
-                        //ITextSnapshotLine startLine = snapshot.GetLineFromPosition(e.Span.Start);
-                        //int line = startLine.LineNumber;
-                        //int column = e.Span.Start - startLine.Start;
-                        string line = "?";
-                        string column = "?";
+                        if (lineOffsets == null)
+                            lineOffsets = FindLineOffsets(sourceText);
+
+                        int line = Array.BinarySearch(lineOffsets, e.Span.Start);
+                        if (line < 0)
+                            line = -line - 2;
+
+                        int column;
+                        if (line >= lineOffsets.Length)
+                            column = 0;
+                        else
+                            column = e.Span.Start - lineOffsets[line];
 
                         if (outputWindow != null)
-                            outputWindow.WriteLine(string.Format("{0}({1}:{2}): {3}", fileName, line, column, message));
+                            outputWindow.WriteLine(string.Format("{0}({1},{2}): {3}", fileName, line + 1, column + 1, message));
 
                         if (errors.Count > 20)
                             throw new OperationCanceledException();
@@ -268,6 +277,35 @@
                 var treeNodeStream = new CommonTreeNodeStream(result.Tree);
                 treeNodeStream.TokenStream = tokenStream;
                 var walker = new IntelliSenseCacheWalker(treeNodeStream);
+                List<ParseErrorEventArgs> walkerErrors = new List<ParseErrorEventArgs>();
+                walker.ParseError += (sender, e) =>
+                {
+                    walkerErrors.Add(e);
+
+                    string message = e.Message;
+                    if (message.Length > 100)
+                        message = message.Substring(0, 100) + " ...";
+
+                    if (lineOffsets == null)
+                        lineOffsets = FindLineOffsets(sourceText);
+
+                    int line = Array.BinarySearch(lineOffsets, e.Span.Start);
+                    if (line < 0)
+                        line = -line - 2;
+
+                    int column;
+                    if (line >= lineOffsets.Length)
+                        column = 0;
+                    else
+                        column = e.Span.Start - lineOffsets[line];
+
+                    if (outputWindow != null)
+                        outputWindow.WriteLine(string.Format("{0}({1},{2}): {3}", fileName, line + 1, column + 1, message));
+
+                    if (walkerErrors.Count > 20)
+                        throw new OperationCanceledException();
+                };
+
                 walker.compilationUnit(fileBuilder);
 
                 UpdateFile(fileBuilder);
@@ -277,6 +315,26 @@
                 if (ErrorHandler.IsCriticalException(e))
                     throw;
             }
+        }
+
+        private int[] FindLineOffsets(string sourceText)
+        {
+            List<int> offsets = new List<int>();
+            offsets.Add(0);
+
+            for (int i = 0; i < sourceText.Length; i++)
+            {
+                char c = sourceText[i];
+                if (c != '\r' && c != '\n')
+                    continue;
+
+                if (c == '\r' && i < sourceText.Length - 1 && sourceText[i + 1] == '\n')
+                    i++;
+
+                offsets.Add(i + 1);
+            }
+
+            return offsets.ToArray();
         }
 
         private void UpdateFile(CodeFileBuilder fileBuilder)
