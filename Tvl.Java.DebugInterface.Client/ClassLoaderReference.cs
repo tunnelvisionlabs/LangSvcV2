@@ -8,7 +8,13 @@
     internal class ClassLoaderReference : ObjectReference, IClassLoaderReference
     {
         internal ClassLoaderReference(VirtualMachine virtualMachine, ClassLoaderId classLoaderId)
-            : base(virtualMachine, classLoaderId)
+            : base(virtualMachine, classLoaderId, null)
+        {
+            Contract.Requires(virtualMachine != null);
+        }
+
+        internal ClassLoaderReference(VirtualMachine virtualMachine, ClassLoaderId classLoaderId, IReferenceType classLoaderType)
+            : base(virtualMachine, classLoaderId, classLoaderType)
         {
             Contract.Requires(virtualMachine != null);
         }

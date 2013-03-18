@@ -12,7 +12,13 @@
         private int? _length;
 
         internal ArrayReference(VirtualMachine virtualMachine, ArrayId arrayId)
-            : base(virtualMachine, arrayId)
+            : base(virtualMachine, arrayId, null)
+        {
+            Contract.Requires(virtualMachine != null);
+        }
+
+        internal ArrayReference(VirtualMachine virtualMachine, ArrayId arrayId, IReferenceType arrayType)
+            : base(virtualMachine, arrayId, arrayType)
         {
             Contract.Requires(virtualMachine != null);
         }

@@ -586,11 +586,12 @@
         internal TaggedObjectId TrackLocalObjectReference(jobject @object, JvmtiEnvironment environment, JniEnvironment nativeEnvironment, bool freeLocalReference)
         {
             if (@object == jobject.Null)
-                return new TaggedObjectId(Tag.Object, new ObjectId(0));
+                return new TaggedObjectId(Tag.Object, new ObjectId(0), default(TaggedReferenceTypeId));
 
             long tag;
             JvmtiErrorHandler.ThrowOnFailure(environment.GetTag(@object, out tag));
 
+            TaggedReferenceTypeId type = default(TaggedReferenceTypeId);
             Tag objectKind;
             if (tag == 0)
             {
@@ -610,8 +611,9 @@
                 jclass objectClass = nativeEnvironment.GetObjectClass(@object);
                 try
                 {
-                    bool isArray;
-                    JvmtiErrorHandler.ThrowOnFailure(environment.IsArrayClass(objectClass, out isArray));
+                    type = TrackLocalClassReference(objectClass, environment, nativeEnvironment, false);
+
+                    bool isArray = type.TypeTag == TypeTag.Array;
                     if (isArray)
                     {
                         objectKind = Tag.Array;
@@ -645,12 +647,17 @@
                     _objects.Add(new ObjectId(tag), nativeEnvironment.NewWeakGlobalReference(@object));
                 }
             }
+            else
+            {
+                jclass objectClass = nativeEnvironment.GetObjectClass(@object);
+                type = TrackLocalClassReference(objectClass, environment, nativeEnvironment, true);
+            }
 
             if (freeLocalReference)
                 nativeEnvironment.DeleteLocalReference(@object);
 
             objectKind = (Tag)(tag & 0xFF);
-            return new TaggedObjectId(objectKind, new ObjectId(tag));
+            return new TaggedObjectId(objectKind, new ObjectId(tag), type);
         }
 
         internal void HandleVMInit(JvmtiEnvironment environment, JniEnvironment nativeEnvironment, jthread thread)

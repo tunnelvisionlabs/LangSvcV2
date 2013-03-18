@@ -1114,10 +1114,23 @@
     </xs:annotation>
     <xs:sequence>
       <xs:element name="Data" type="xs:long" />
+      <xs:element name="ReferenceType" type="tns:TaggedReferenceTypeId" />
       <xs:element name="Tag" type="tns:Tag" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="Value" nillable="true" type="tns:Value" />
+  <xs:complexType name="TaggedReferenceTypeId">
+    <xs:annotation>
+      <xs:appinfo>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="TypeId" type="tns:ReferenceTypeId" />
+      <xs:element name="TypeTag" type="tns:TypeTag" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="TaggedReferenceTypeId" nillable="true" type="tns:TaggedReferenceTypeId" />
   <xs:simpleType name="Tag">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Invalid" />
@@ -1242,18 +1255,6 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="ArrayOfTaggedReferenceTypeId" nillable="true" type="tns:ArrayOfTaggedReferenceTypeId" />
-  <xs:complexType name="TaggedReferenceTypeId">
-    <xs:annotation>
-      <xs:appinfo>
-        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
-      </xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="TypeId" type="tns:ReferenceTypeId" />
-      <xs:element name="TypeTag" type="tns:TypeTag" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="TaggedReferenceTypeId" nillable="true" type="tns:TaggedReferenceTypeId" />
   <xs:complexType name="ArrayOfInterfaceId">
     <xs:sequence>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="InterfaceId" type="tns:InterfaceId" />
@@ -1297,6 +1298,7 @@
     <xs:sequence>
       <xs:element name="ObjectId" type="tns:ObjectId" />
       <xs:element name="Tag" type="tns:Tag" />
+      <xs:element name="Type" type="tns:TaggedReferenceTypeId" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="TaggedObjectId" nillable="true" type="tns:TaggedObjectId" />
