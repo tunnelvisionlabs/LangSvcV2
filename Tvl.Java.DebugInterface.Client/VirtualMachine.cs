@@ -135,6 +135,7 @@
         {
             var binding = new NetNamedPipeBinding(NetNamedPipeSecurityMode.None)
             {
+                MaxReceivedMessageSize = 10 * 1024 * 1024,
                 ReceiveTimeout = TimeSpan.MaxValue,
                 SendTimeout = TimeSpan.MaxValue
             };
