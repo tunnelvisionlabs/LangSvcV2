@@ -247,6 +247,8 @@
 
         protected virtual void SetLineState(ClassifierState classifierState, int line, LineStateInfo state)
         {
+            Contract.Requires(state.IsDirty || !classifierState._firstDirtyLine.HasValue || line <= classifierState._firstDirtyLine);
+
             using (_lock.WriteLock())
             {
                 classifierState._lineStates[line] = state;

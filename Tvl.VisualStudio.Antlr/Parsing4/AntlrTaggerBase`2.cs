@@ -254,6 +254,8 @@
 
         protected virtual void SetLineState(TaggerState taggerState, int line, LineStateInfo state)
         {
+            Contract.Requires(state.IsDirty || !taggerState._firstDirtyLine.HasValue || line <= taggerState._firstDirtyLine);
+
             using (_lock.WriteLock())
             {
                 taggerState._lineStates[line] = state;
