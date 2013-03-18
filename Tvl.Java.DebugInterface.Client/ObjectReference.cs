@@ -13,6 +13,7 @@
         private readonly ObjectId _objectId;
 
         private bool _collectionDisabled;
+        private IReferenceType _referenceType;
 
         internal ObjectReference(VirtualMachine virtualMachine, ObjectId objectId)
             : base(virtualMachine)
@@ -137,10 +138,15 @@
 
         public IReferenceType GetReferenceType()
         {
-            TypeTag typeTag;
-            ReferenceTypeId typeId;
-            DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetObjectReferenceType(out typeTag, out typeId, ObjectId));
-            return VirtualMachine.GetMirrorOf(typeTag, typeId);
+            if (_referenceType == null)
+            {
+                TypeTag typeTag;
+                ReferenceTypeId typeId;
+                DebugErrorHandler.ThrowOnFailure(VirtualMachine.ProtocolService.GetObjectReferenceType(out typeTag, out typeId, ObjectId));
+                _referenceType = VirtualMachine.GetMirrorOf(typeTag, typeId);
+            }
+
+            return _referenceType;
         }
 
         public ReadOnlyCollection<IObjectReference> GetReferringObjects(long maxReferrers)
