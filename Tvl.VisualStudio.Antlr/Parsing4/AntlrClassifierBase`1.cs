@@ -398,8 +398,8 @@
 
         protected virtual void ForceReclassifyLines(ClassifierState classifierState, int startLine, int endLine)
         {
-            classifierState._firstDirtyLine = classifierState._firstDirtyLine.HasValue ? Math.Min(classifierState._firstDirtyLine.Value, startLine) : startLine;
-            classifierState._lastDirtyLine = classifierState._lastDirtyLine.HasValue ? Math.Max(classifierState._lastDirtyLine.Value, endLine) : endLine;
+            classifierState._firstDirtyLine = Math.Min(classifierState._firstDirtyLine ?? startLine, startLine);
+            classifierState._lastDirtyLine = Math.Max(classifierState._lastDirtyLine ?? endLine, endLine);
 
             ITextSnapshot snapshot = _textBuffer.CurrentSnapshot;
             int start = snapshot.GetLineFromLineNumber(startLine).Start;
@@ -506,8 +506,8 @@
                             lineStates[i] = info2;
                         }
 
-                        afterState._firstChangedLine = afterState._firstChangedLine.HasValue ? Math.Min(afterState._firstChangedLine.Value, lineNumberFromPosition) : lineNumberFromPosition;
-                        afterState._lastChangedLine = afterState._lastChangedLine.HasValue ? Math.Max(afterState._lastChangedLine.Value, num2) : num2;
+                        afterState._firstChangedLine = Math.Min(afterState._firstChangedLine ?? lineNumberFromPosition, lineNumberFromPosition);
+                        afterState._lastChangedLine = Math.Max(afterState._lastChangedLine ?? num2, num2);
                     }
 
                     Contract.Assert(lineStates.Count == afterState._lineStates.Length);

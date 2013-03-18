@@ -402,8 +402,8 @@
 
         protected virtual void ForceRetagLines(TaggerState taggerState, int startLine, int endLine)
         {
-            taggerState._firstDirtyLine = taggerState._firstDirtyLine.HasValue ? Math.Min(taggerState._firstDirtyLine.Value, startLine) : startLine;
-            taggerState._lastDirtyLine = taggerState._lastDirtyLine.HasValue ? Math.Max(taggerState._lastDirtyLine.Value, endLine) : endLine;
+            taggerState._firstDirtyLine = Math.Min(taggerState._firstDirtyLine ?? startLine, startLine);
+            taggerState._lastDirtyLine = Math.Max(taggerState._lastDirtyLine ?? endLine, endLine);
 
             ITextSnapshot snapshot = _textBuffer.CurrentSnapshot;
             int start = snapshot.GetLineFromLineNumber(startLine).Start;
@@ -510,8 +510,8 @@
                             lineStates[i] = info2;
                         }
 
-                        afterState._firstChangedLine = afterState._firstChangedLine.HasValue ? Math.Min(afterState._firstChangedLine.Value, lineNumberFromPosition) : lineNumberFromPosition;
-                        afterState._lastChangedLine = afterState._lastChangedLine.HasValue ? Math.Max(afterState._lastChangedLine.Value, num2) : num2;
+                        afterState._firstChangedLine = Math.Min(afterState._firstChangedLine ?? lineNumberFromPosition, lineNumberFromPosition);
+                        afterState._lastChangedLine = Math.Max(afterState._lastChangedLine ?? num2, num2);
                     }
 
                     Contract.Assert(lineStates.Count == afterState._lineStates.Length);
