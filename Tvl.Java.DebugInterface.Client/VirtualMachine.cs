@@ -789,6 +789,9 @@
 
         internal Location GetMirrorOf(Types.Location location)
         {
+            if (location.Method.Handle == 0 && location.Index == 0)
+                return null;
+
             ReferenceType type = GetMirrorOf(location.TypeTag, location.Class);
             Method method = GetMirrorOf(type, location.Method);
             long codeIndex = (long)location.Index;
