@@ -371,20 +371,46 @@
         /// These entries are a number (0, 1, 2, and so on) with a GUID expressed as a string.
         /// </summary>
         [DebugMetric("AutoSelectIncompatibleList")]
-        public Guid[] AutoSelectIncompatibleList
+        public Guid[] AutoSelectIncompatibleListGuids
         {
             get;
             set;
+        }
+
+        public string[] AutoSelectIncompatibleList
+        {
+            get
+            {
+                return AutoSelectIncompatibleListGuids.Select(g => g.ToString("B")).ToArray();
+            }
+
+            set
+            {
+                AutoSelectIncompatibleListGuids = value.Select(s => new Guid(s)).ToArray();
+            }
         }
 
         /// <summary>
         /// Registry key containing entries that specify GUIDs for debug engines that are incompatible with this debug engine.
         /// </summary>
         [DebugMetric("IncompatibleList")]
-        public Guid[] IncompatibleList
+        public Guid[] IncompatibleListGuids
         {
             get;
             set;
+        }
+
+        public string[] IncompatibleList
+        {
+            get
+            {
+                return IncompatibleListGuids.Select(g => g.ToString("B")).ToArray();
+            }
+
+            set
+            {
+                IncompatibleListGuids = value.Select(s => new Guid(s)).ToArray();
+            }
         }
 
         /// <summary>
@@ -399,9 +425,9 @@
 
         public override void Register(RegistrationContext context)
         {
-            if (AutoSelectIncompatibleList != null)
+            if (AutoSelectIncompatibleListGuids != null)
                 throw new NotImplementedException("registry has name/guid pairs for this list?");
-            if (IncompatibleList != null)
+            if (IncompatibleListGuids != null)
                 throw new NotImplementedException("registry has name/guid pairs for this list?");
 
             base.Register(context);
