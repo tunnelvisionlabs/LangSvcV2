@@ -284,6 +284,7 @@
     <Compile Include="ProvideComponentSelectorTabAttribute.cs" />
     <Compile Include="ProvideDebugEngineAttribute.cs" />
     <Compile Include="ProvideDebuggerExceptionAttribute.cs" />
+    <Compile Include="ProvideDebuggerExceptionKindAttribute.cs" />
     <Compile Include="ProvideEditorFactory2Attribute.cs" />
     <Compile Include="ProvideLinkedEditorFactoryAttribute.cs" />
     <Compile Include="WpfToolWindowPane.cs" />
