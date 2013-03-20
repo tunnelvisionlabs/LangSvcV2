@@ -976,22 +976,39 @@
                 this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
             }
 
-            //DebugEvent debugEvent = new DebugExceptionEvent(GetAttributesForEvent(e), this, e.Exception);
+            bool stop;
+            bool firstChance = e.CatchLocation != null;
+            EXCEPTION_INFO exceptionInfo;
+            if (DebugEngine.TryGetException(e.Exception.GetReferenceType().GetName(), out exceptionInfo))
+            {
+                if (firstChance && (exceptionInfo.dwState & enum_EXCEPTION_STATE.EXCEPTION_STOP_FIRST_CHANCE) != 0)
+                    stop = true;
+                else if (!firstChance && (exceptionInfo.dwState & enum_EXCEPTION_STATE.EXCEPTION_STOP_SECOND_CHANCE) != 0)
+                    stop = true;
+                else
+                    stop = !firstChance;
+            }
+            else
+            {
+                stop = !firstChance;
+            }
 
-            string message;
-            string messageFormat = "A first chance exception of type '{0}' occurred in {1}.{2}\n";
-            string type = e.Exception.GetReferenceType().GetName();
-            IMethod method = e.Thread.GetFrame(0).GetLocation().GetMethod();
-            string locationClass = method.GetDeclaringType().GetName();
-            string locationMethod = method.GetName();
-            message = string.Format(messageFormat, type, locationClass, locationMethod);
-            //string message = "A first chance exception occurred\n";
+            JavaDebugExceptionEvent exceptionEvent = new JavaDebugExceptionEvent(GetAttributesForEvent(e), this, e.Thread, e.Exception, e.Location, e.CatchLocation);
 
-            DebugEvent debugEvent = new DebugOutputStringEvent(GetAttributesForEvent(e), message);
-            SetEventProperties(debugEvent, e, true);
-            Callback.Event(DebugEngine, Process, this, thread, debugEvent);
+            if (stop)
+            {
+                SetEventProperties(exceptionEvent, e, false);
+                Callback.Event(DebugEngine, Process, this, thread, exceptionEvent);
+            }
+            else
+            {
+                string message = exceptionEvent.GetDescription() + Environment.NewLine;
+                DebugEvent debugEvent = new DebugOutputStringEvent(GetAttributesForEvent(e), message);
+                SetEventProperties(debugEvent, e, true);
+                Callback.Event(DebugEngine, Process, this, thread, debugEvent);
 
-            ManualContinueFromEvent(e);
+                ManualContinueFromEvent(e);
+            }
         }
 
         private void HandleThreadStart(object sender, ThreadEventArgs e)
