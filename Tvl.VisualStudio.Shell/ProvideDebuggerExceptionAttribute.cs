@@ -1,22 +1,24 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Shell;
-    using Microsoft.VisualStudio;
-    using System.Diagnostics.Contracts;
+    using Contract = System.Diagnostics.Contracts.Contract;
+    using enum_EXCEPTION_STATE = Microsoft.VisualStudio.Debugger.Interop.enum_EXCEPTION_STATE;
+    using RegistrationAttribute = Microsoft.VisualStudio.Shell.RegistrationAttribute;
+    using VSConstants = Microsoft.VisualStudio.VSConstants;
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public class ProvideDebuggerExceptionAttribute : RegistrationAttribute
     {
+        public const enum_EXCEPTION_STATE DefaultState =
+            enum_EXCEPTION_STATE.EXCEPTION_STOP_USER_UNCAUGHT
+            | enum_EXCEPTION_STATE.EXCEPTION_STOP_SECOND_CHANCE;
+
         private readonly Guid _debugEngine;
         private readonly string _exceptionKind;
         private readonly string _exceptionNamespace;
         private readonly string _exceptionName;
         private int _code;
-        private int _state = 0x00004022;
+        private enum_EXCEPTION_STATE _state = DefaultState;
 
         public ProvideDebuggerExceptionAttribute(string debugEngine, string exceptionKind, string exceptionName)
             : this(debugEngine, exceptionKind, null, exceptionName)
@@ -26,6 +28,7 @@
         public ProvideDebuggerExceptionAttribute(Type exception)
             : this(VSConstants.DebugEnginesGuids.ManagedOnly_string, "Common Language Runtime Exceptions", exception.Namespace, exception.FullName)
         {
+            _state = DefaultState | enum_EXCEPTION_STATE.EXCEPTION_JUST_MY_CODE_SUPPORTED;
         }
 
         public ProvideDebuggerExceptionAttribute(string debugEngineGuid, string exceptionKind, string exceptionNamespace, string exceptionName)
@@ -85,7 +88,7 @@
             }
         }
 
-        public int State
+        public enum_EXCEPTION_STATE State
         {
             get
             {
@@ -119,13 +122,13 @@
                     if (!string.IsNullOrEmpty(ExceptionNamespace))
                     {
                         parentKey.SetValue("Code", 0);
-                        parentKey.SetValue("State", 0x4022);
+                        parentKey.SetValue("State", (int)DefaultState);
                     }
 
                     using (Key child = parentKey.CreateSubkey(ExceptionName))
                     {
                         child.SetValue("Code", Code);
-                        child.SetValue("State", State);
+                        child.SetValue("State", (int)State);
                     }
                 }
                 finally
