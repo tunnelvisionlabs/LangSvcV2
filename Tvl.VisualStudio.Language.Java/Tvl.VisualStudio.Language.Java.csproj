@@ -278,6 +278,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BraceMatchingTaggerProvider.cs" />
+    <Compile Include="Debugger\LineStatementAnalyzer.cs" />
     <Compile Include="JavaUnicodeStreamV4.cs" />
     <Compile Include="Debugger\AD7Constants.cs" />
     <Compile Include="Debugger\BreakpointLocation.cs" />

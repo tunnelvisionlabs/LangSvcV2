@@ -2,7 +2,10 @@
 {
     using System.Collections.Generic;
     using System.Runtime.InteropServices;
+    using Antlr4.Runtime;
+    using Antlr4.Runtime.Tree;
     using Microsoft.VisualStudio.Text;
+    using Tvl.VisualStudio.Language.Java.Debugger;
     using Tvl.VisualStudio.Shell;
     using Tvl.VisualStudio.Text;
 
@@ -46,11 +49,39 @@
             ITextSnapshotLine snapshotLine = snapshot.GetLineFromLineNumber(line);
             string lineText = snapshotLine.GetText();
 
-            // allow any single line to have a breakpoint (no parser-based location validation)
-            pCodeSpan[0].iStartLine = line;
-            pCodeSpan[0].iStartIndex = snapshotLine.Length - lineText.TrimStart().Length;
-            pCodeSpan[0].iEndLine = line;
-            pCodeSpan[0].iEndIndex = snapshotLine.Length;
+            IList<IParseTree> statementTrees;
+            IList<IToken> tokens;
+            if (!LineStatementAnalyzer.TryGetLineStatements(textBuffer, line, out statementTrees, out tokens))
+                return VSConstants.E_FAIL;
+
+            IParseTree tree = null;
+            for (int i = statementTrees.Count - 1; i >= 0; i--)
+            {
+                // want the last tree ending at or after col
+                IParseTree current = statementTrees[i];
+                if (current.SourceInterval.Length == 0)
+                    continue;
+
+                IToken token = tokens[current.SourceInterval.b];
+                if (token.Line - 1 < line)
+                    break;
+
+                if (token.Line - 1 == line && (token.Column + token.StopIndex - token.StartIndex + 1) < col)
+                    break;
+
+                tree = current;
+            }
+
+            if (tree == null)
+                return VSConstants.E_FAIL;
+
+            IToken startToken = tokens[tree.SourceInterval.a];
+            IToken stopToken = tokens[tree.SourceInterval.b];
+
+            pCodeSpan[0].iStartLine = startToken.Line - 1;
+            pCodeSpan[0].iStartIndex = startToken.Column;
+            pCodeSpan[0].iEndLine = stopToken.Line - 1;
+            pCodeSpan[0].iEndIndex = stopToken.Column + stopToken.StopIndex - stopToken.StartIndex + 1;
             return VSConstants.S_OK;
         }
     }
