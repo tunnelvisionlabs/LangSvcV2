@@ -776,7 +776,7 @@
             classPrepareRequest.IsEnabled = true;
 
             var exceptionRequest = requestManager.CreateExceptionRequest(null, true, true);
-            exceptionRequest.SuspendPolicy = SuspendPolicy.EventThread;
+            exceptionRequest.SuspendPolicy = SuspendPolicy.All;
             exceptionRequest.IsEnabled = true;
 
             var virtualMachineDeathRequest = requestManager.CreateVirtualMachineDeathRequest();
