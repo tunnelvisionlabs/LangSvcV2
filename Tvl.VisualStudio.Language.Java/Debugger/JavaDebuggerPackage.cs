@@ -15,20 +15,24 @@
         AlwaysLoadLocal = true,
         AutoSelectPriority = 0,
         ExcludeManualSelect = true,
-        // feature support
-        Attach = false,
+        EngineCanWatchProcess = false,
+        // feature support (supported)
         Disassembly = true,
         SuspendThread = true,
-        SetNextStatement = false,
-        JustInTimeDebugging = false,
+        // feature support (not supported by DE / "easy")
         Exceptions = true,
         HitCountBreakpoints = false,
         FunctionBreakpoints = false,
-        EditAndContinue = false,
-        DumpWriting = false,
         DataBreakpoints = false,
         ConditionalBreakpoints = false,
-        RemoteDebugging = false
+        // feature support (not supported by DE / "harder")
+        Attach = false,
+        JustInTimeDebugging = false,
+        EditAndContinue = false,
+        DumpWriting = false,
+        RemoteDebugging = false,
+        // feature support (not supported / VM)
+        SetNextStatement = false
         )]
     [ProvideObject(typeof(JavaDebugEngine))]
     [ProvideObject(typeof(JavaDebugProgramProvider))]
