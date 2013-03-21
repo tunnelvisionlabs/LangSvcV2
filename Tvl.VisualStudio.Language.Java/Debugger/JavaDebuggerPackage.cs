@@ -33,6 +33,18 @@
         RemoteDebugging = false,
         // feature support (not supported / VM)
         SetNextStatement = false
+        // other
+        //AddressBreakpoints = false,
+        //CallStackBreakpoints = false,
+        //AutoSelectIncompatibleList = new string[] { },
+        //DisableJitOptimization = false,
+        //EditAndContinueUseNativeBuilder = false,
+        //IncompatibleList = new string[] { },
+        //LoadProgramProviderUnderWOW64 = false,
+        //LoadUnderWOW64 = false,
+        //LoadedByDebuggee = false,
+        //StopOnExceptionCrossingManagedBoundary = false,
+        //WarnIfNoSymbols = false
         )]
     [ProvideObject(typeof(JavaDebugEngine))]
     [ProvideObject(typeof(JavaDebugProgramProvider))]
