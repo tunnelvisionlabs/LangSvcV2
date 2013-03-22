@@ -12,10 +12,14 @@
         [DataMember(IsRequired = true)]
         public ObjectId ObjectId;
 
-        public TaggedObjectId(Tag tag, ObjectId objectId)
+        [DataMember(IsRequired = true)]
+        public TaggedReferenceTypeId Type;
+
+        public TaggedObjectId(Tag tag, ObjectId objectId, TaggedReferenceTypeId type)
         {
             Tag = tag;
             ObjectId = objectId;
+            Type = type;
         }
 
         public static bool operator ==(TaggedObjectId x, TaggedObjectId y)
@@ -31,7 +35,8 @@
         public bool Equals(TaggedObjectId other)
         {
             return this.Tag == other.Tag
-                && this.ObjectId == other.ObjectId;
+                && this.ObjectId == other.ObjectId
+                && this.Type == other.Type;
         }
 
         public override bool Equals(object obj)
@@ -44,7 +49,11 @@
 
         public override int GetHashCode()
         {
-            return Tag.GetHashCode() ^ ObjectId.GetHashCode();
+            int hashCode = 1;
+            hashCode = hashCode * 7 ^ Tag.GetHashCode();
+            hashCode = hashCode * 7 ^ ObjectId.GetHashCode();
+            hashCode = hashCode * 7 ^ Type.GetHashCode();
+            return hashCode;
         }
     }
 }

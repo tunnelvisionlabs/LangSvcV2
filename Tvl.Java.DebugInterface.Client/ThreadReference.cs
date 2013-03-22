@@ -12,7 +12,13 @@
     internal sealed class ThreadReference : ObjectReference, IThreadReference
     {
         internal ThreadReference(VirtualMachine virtualMachine, ThreadId threadId)
-            : base(virtualMachine, threadId)
+            : base(virtualMachine, threadId, null)
+        {
+            Contract.Requires(virtualMachine != null);
+        }
+
+        internal ThreadReference(VirtualMachine virtualMachine, ThreadId threadId, IReferenceType threadType)
+            : base(virtualMachine, threadId, threadType)
         {
             Contract.Requires(virtualMachine != null);
         }

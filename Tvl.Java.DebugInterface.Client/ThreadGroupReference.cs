@@ -11,7 +11,13 @@
     internal class ThreadGroupReference : ObjectReference, IThreadGroupReference
     {
         internal ThreadGroupReference(VirtualMachine virtualMachine, ThreadGroupId threadGroupId)
-            : base(virtualMachine, threadGroupId)
+            : base(virtualMachine, threadGroupId, null)
+        {
+            Contract.Requires(virtualMachine != null);
+        }
+
+        internal ThreadGroupReference(VirtualMachine virtualMachine, ThreadGroupId threadGroupId, IReferenceType threadGroupType)
+            : base(virtualMachine, threadGroupId, threadGroupType)
         {
             Contract.Requires(virtualMachine != null);
         }

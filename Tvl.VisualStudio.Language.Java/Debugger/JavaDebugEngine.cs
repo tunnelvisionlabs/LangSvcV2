@@ -34,6 +34,9 @@
         private readonly List<IDebugPendingBreakpoint2> _pendingBreakpoints = new List<IDebugPendingBreakpoint2>();
         private readonly HashSet<IJavaVirtualizableBreakpoint> _virtualizedBreakpoints = new HashSet<IJavaVirtualizableBreakpoint>();
 
+        private readonly Dictionary<string, EXCEPTION_INFO> _exceptions =
+            new Dictionary<string, EXCEPTION_INFO>();
+
         public JavaDebugEngine()
         {
         }
@@ -223,17 +226,50 @@
 
         public int RemoveAllSetExceptions(ref Guid guidType)
         {
-            throw new NotImplementedException();
+            if (guidType != JavaDebuggerConstants.JavaDebugEngineGuid && guidType != Constants.JavaLanguageGuid)
+                return VSConstants.E_INVALIDARG;
+
+            _exceptions.Clear();
+            return VSConstants.S_OK;
         }
 
         public int RemoveSetException(EXCEPTION_INFO[] pException)
         {
-            throw new NotImplementedException();
+            if (pException == null)
+                throw new ArgumentNullException("pException");
+            if (pException.Length != 1)
+                throw new ArgumentException();
+
+            if (pException[0].guidType != JavaDebuggerConstants.JavaDebugEngineGuid)
+                return VSConstants.E_INVALIDARG;
+
+            _exceptions.Remove(pException[0].bstrExceptionName);
+            return VSConstants.S_OK;
         }
 
+        /// <summary>
+        /// Specifies how the debug engine (DE) should handle a given exception.
+        /// </summary>
+        /// <param name="pException">[in] An EXCEPTION_INFO structure that describes the exception and how to debug it.</param>
+        /// <returns>If successful, returns S_OK; otherwise, returns an error code.</returns>
+        /// <remarks>A DE could be instructed to stop the program generating an exception at first chance, second chance, or not at all.</remarks>
         public int SetException(EXCEPTION_INFO[] pException)
         {
-            throw new NotImplementedException();
+            if (pException == null)
+                throw new ArgumentNullException("pException");
+            if (pException.Length != 1)
+                throw new ArgumentException();
+
+            if (pException[0].guidType != JavaDebuggerConstants.JavaDebugEngineGuid)
+                return VSConstants.E_INVALIDARG;
+
+            _exceptions[pException[0].bstrExceptionName] = pException[0];
+            return VSConstants.S_OK;
+        }
+
+        public bool TryGetException(string exceptionName, out EXCEPTION_INFO exceptionInfo)
+        {
+            return _exceptions.TryGetValue(exceptionName, out exceptionInfo);
         }
 
         public int SetLocale(ushort wLangID)

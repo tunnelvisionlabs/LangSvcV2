@@ -135,6 +135,7 @@
         {
             var binding = new NetNamedPipeBinding(NetNamedPipeSecurityMode.None)
             {
+                MaxReceivedMessageSize = 10 * 1024 * 1024,
                 ReceiveTimeout = TimeSpan.MaxValue,
                 SendTimeout = TimeSpan.MaxValue
             };
@@ -559,10 +560,11 @@
             if (@object == default(TaggedObjectId))
                 return null;
 
-            return GetMirrorOf(@object.Tag, @object.ObjectId);
+            ReferenceType type = GetMirrorOf(@object.Type);
+            return GetMirrorOf(@object.Tag, @object.ObjectId, type);
         }
 
-        internal ObjectReference GetMirrorOf(Tag tag, ObjectId objectId)
+        internal ObjectReference GetMirrorOf(Tag tag, ObjectId objectId, ReferenceType type)
         {
             if (tag == default(Tag) && objectId == default(ObjectId))
                 return null;
@@ -570,25 +572,25 @@
             switch (tag)
             {
             case Tag.Array:
-                return new ArrayReference(this, (ArrayId)objectId);
+                return new ArrayReference(this, (ArrayId)objectId, type);
 
             case Tag.Object:
-                return new ObjectReference(this, (ArrayId)objectId);
+                return new ObjectReference(this, objectId, type);
 
             case Tag.String:
-                return new StringReference(this, (StringId)objectId);
+                return new StringReference(this, (StringId)objectId, type);
 
             case Tag.Thread:
-                return new ThreadReference(this, (ThreadId)objectId);
+                return new ThreadReference(this, (ThreadId)objectId, type);
 
             case Tag.ThreadGroup:
-                return new ThreadGroupReference(this, (ThreadGroupId)objectId);
+                return new ThreadGroupReference(this, (ThreadGroupId)objectId, type);
 
             case Tag.ClassLoader:
-                return new ClassLoaderReference(this, (ClassLoaderId)objectId);
+                return new ClassLoaderReference(this, (ClassLoaderId)objectId, type);
 
             case Tag.ClassObject:
-                return new ClassObjectReference(this, (ClassObjectId)objectId);
+                return new ClassObjectReference(this, (ClassObjectId)objectId, type);
 
             case Tag.Invalid:
             case Tag.Byte:
@@ -676,7 +678,8 @@
                 if (value.Data == 0)
                     return null;
 
-                return new ObjectReference(this, new ObjectId(value.Data));
+                IReferenceType referenceType = GetMirrorOf(value.ReferenceType);
+                return new ObjectReference(this, new ObjectId(value.Data), referenceType);
 
             case Tag.Float:
                 return GetMirrorOf(ValueHelper.Int32BitsToSingle((int)value.Data));
@@ -786,6 +789,9 @@
 
         internal Location GetMirrorOf(Types.Location location)
         {
+            if (location.Method.Handle == 0 && location.Index == 0)
+                return null;
+
             ReferenceType type = GetMirrorOf(location.TypeTag, location.Class);
             Method method = GetMirrorOf(type, location.Method);
             long codeIndex = (long)location.Index;

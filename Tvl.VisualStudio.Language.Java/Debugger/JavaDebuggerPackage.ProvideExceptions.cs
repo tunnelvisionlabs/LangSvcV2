@@ -1,5 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger
 {
+    using Tvl.VisualStudio.Shell;
+
+    [ProvideDebuggerExceptionKind(JavaDebuggerConstants.JavaDebugEngineGuidString, JavaDebuggerConstants.JvmExceptionKind)]
     [ProvideJvmException("com.sun.activation.registries.MailcapParseException")]
     [ProvideJvmException("com.sun.corba.se.impl.io.OptionalDataException")]
     [ProvideJvmException("com.sun.corba.se.impl.io.TypeMismatchException")]

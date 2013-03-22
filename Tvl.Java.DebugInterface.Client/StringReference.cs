@@ -6,7 +6,13 @@
     internal class StringReference : ObjectReference, IStringReference
     {
         internal StringReference(VirtualMachine virtualMachine, StringId stringId)
-            : base(virtualMachine, stringId)
+            : base(virtualMachine, stringId, null)
+        {
+            Contract.Requires(virtualMachine != null);
+        }
+
+        internal StringReference(VirtualMachine virtualMachine, StringId stringId, IReferenceType stringType)
+            : base(virtualMachine, stringId, stringType)
         {
             Contract.Requires(virtualMachine != null);
         }

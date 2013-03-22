@@ -12,6 +12,9 @@
     using System.Diagnostics.Contracts;
     using System.Collections.ObjectModel;
 
+    using Stopwatch = System.Diagnostics.Stopwatch;
+    using Timeout = System.Threading.Timeout;
+
     [ComVisible(true)]
     public class JavaDebugProperty : IDebugProperty3, IDebugProperty2
     {
@@ -102,6 +105,10 @@
 
         public int EnumChildren(enum_DEBUGPROP_INFO_FLAGS dwFields, uint dwRadix, ref Guid guidFilter, enum_DBG_ATTRIB_FLAGS dwAttribFilter, string pszNameFilter, uint dwTimeout, out IEnumDebugPropertyInfo2 ppEnum)
         {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            bool infinite = dwTimeout == unchecked((uint)Timeout.Infinite);
+            TimeSpan timeout = infinite ? TimeSpan.Zero : TimeSpan.FromMilliseconds(dwTimeout);
+
             IObjectReference objectReference = _evaluatedExpression.Value as IObjectReference;
             IReferenceType referenceType = _evaluatedExpression.ValueType as IReferenceType;
             if (objectReference == null || referenceType == null)
@@ -154,9 +161,18 @@
                         IType propertyType = componentType;
                         IValue value = collectionValues[i];
                         JavaDebugProperty property = new JavaDebugProperty(this, name, _evaluatedExpression.FullName + name, propertyType, value, _evaluatedExpression.HasSideEffects);
-                        int hr = property.GetPropertyInfo(dwFields, dwRadix, dwTimeout, null, 0, propertyInfo);
+
+                        bool timedout = !infinite && timeout < stopwatch.Elapsed;
+                        enum_DEBUGPROP_INFO_FLAGS fields = dwFields;
+                        if (timedout)
+                            fields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_VALUE_NO_TOSTRING;
+
+                        int hr = property.GetPropertyInfo(fields, dwRadix, dwTimeout, null, 0, propertyInfo);
                         if (ErrorHandler.Failed(hr))
                             return hr;
+
+                        if (timedout)
+                            propertyInfo[0].dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_VALUE_TIMEOUT;
 
                         properties.Add(propertyInfo[0]);
                         continue;

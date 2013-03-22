@@ -6,7 +6,13 @@
     internal sealed class ClassObjectReference : ObjectReference, IClassObjectReference
     {
         internal ClassObjectReference(VirtualMachine virtualMachine, ClassObjectId objectId)
-            : base(virtualMachine, objectId)
+            : base(virtualMachine, objectId, null)
+        {
+            Contract.Requires(virtualMachine != null);
+        }
+
+        internal ClassObjectReference(VirtualMachine virtualMachine, ClassObjectId objectId, IReferenceType classObjectType)
+            : base(virtualMachine, objectId, classObjectType)
         {
             Contract.Requires(virtualMachine != null);
         }

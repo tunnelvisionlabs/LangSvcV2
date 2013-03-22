@@ -839,10 +839,18 @@
                 JvmtiErrorHandler.ThrowOnFailure(environment.GetMethodDeclaringClass(nativeEnvironment, method, out declaringClass));
                 Location location = new Location(declaringClass, method, index);
 
+                Location catchLocation;
                 method = new MethodId(catchMethodId.Handle);
                 index = (ulong)catchjLocation.Value;
-                JvmtiErrorHandler.ThrowOnFailure(environment.GetMethodDeclaringClass(nativeEnvironment, method, out declaringClass));
-                Location catchLocation = new Location(declaringClass, method, index);
+                if (catchMethodId.Handle != IntPtr.Zero)
+                {
+                    JvmtiErrorHandler.ThrowOnFailure(environment.GetMethodDeclaringClass(nativeEnvironment, method, out declaringClass));
+                    catchLocation = new Location(declaringClass, method, index);
+                }
+                else
+                {
+                    catchLocation = default(Location);
+                }
 
                 TaggedObjectId exceptionId = VirtualMachine.TrackLocalObjectReference(exceptionHandle, environment, nativeEnvironment, false);
 
