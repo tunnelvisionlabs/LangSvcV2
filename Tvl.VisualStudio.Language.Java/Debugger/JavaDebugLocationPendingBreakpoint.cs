@@ -5,6 +5,8 @@
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Linq;
+    using Antlr4.Runtime;
+    using Antlr4.Runtime.Tree;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
     using Tvl.Java.DebugInterface;
@@ -12,6 +14,7 @@
     using Tvl.VisualStudio.Language.Java.Debugger.Collections;
     using Tvl.VisualStudio.Language.Java.Debugger.Events;
 
+    using File = System.IO.File;
     using Path = System.IO.Path;
     using TextSpan = Microsoft.VisualStudio.TextManager.Interop.TextSpan;
 
@@ -29,6 +32,8 @@
         private bool _virtualized;
         private bool _disabled;
         private bool _deleted;
+
+        private bool? _firstOnLine;
 
         public JavaDebugLocationPendingBreakpoint(JavaDebugEngine engine, BreakpointRequestInfo requestInfo)
         {
@@ -60,6 +65,44 @@
             }
         }
 
+        private bool IsFirstOnLine()
+        {
+            if (_firstOnLine != null)
+                return _firstOnLine.Value;
+
+            try
+            {
+                string fileName = RequestLocation.DocumentPosition.GetFileName();
+                string text = File.ReadAllText(fileName);
+
+                IList<IParseTree> statementTrees;
+                IList<IToken> tokens;
+                if (!LineStatementAnalyzer.TryGetLineStatements(text, RequestLocation.DocumentPosition.GetRange().iStartLine, out statementTrees, out tokens))
+                {
+                    _firstOnLine = false;
+                    return _firstOnLine.Value;
+                }
+
+                if (statementTrees.Count <= 1)
+                {
+                    _firstOnLine = true;
+                    return _firstOnLine.Value;
+                }
+
+                IToken endToken = tokens[statementTrees[0].SourceInterval.b];
+                _firstOnLine = RequestLocation.DocumentPosition.GetRange().iStartIndex <= endToken.Column + 1;
+                return _firstOnLine.Value;
+            }
+            catch (Exception ex)
+            {
+                if (ErrorHandler.IsCriticalException(ex))
+                    throw;
+
+                _firstOnLine = false;
+                return _firstOnLine.Value;
+            }
+        }
+
         #region IVirtualizableBreakpoint Members
 
         public void Bind(JavaDebugProgram program, JavaDebugThread thread, IReferenceType type, IEnumerable<string> sourcePaths)
@@ -77,7 +120,7 @@
                 {
                     ReadOnlyCollection<ILocation> locations = type.GetLocationsOfLine(range.iStartLine + 1);
                     ILocation bindLocation = locations.OrderBy(i => i.GetCodeIndex()).FirstOrDefault();
-                    if (bindLocation != null)
+                    if (bindLocation != null && IsFirstOnLine())
                     {
                         IEventRequestManager eventRequestManager = virtualMachine.GetEventRequestManager();
 
@@ -142,6 +185,7 @@
 
             string fileName = RequestLocation.DocumentPosition.GetFileName();
             int lineNumber = RequestLocation.DocumentPosition.GetRange().iStartLine + 1;
+            bool errorNotFirstOnLine = false;
 
             List<JavaDebugBoundBreakpoint> boundBreakpoints = new List<JavaDebugBoundBreakpoint>();
             IEnumerable<JavaDebugProgram> programs = DebugEngine.Programs.ToArray();
@@ -161,6 +205,12 @@
                     ILocation bindLocation = locations.OrderBy(i => i.GetCodeIndex()).FirstOrDefault();
                     if (bindLocation != null)
                     {
+                        if (!IsFirstOnLine())
+                        {
+                            errorNotFirstOnLine = true;
+                            break;
+                        }
+
                         IEventRequestManager eventRequestManager = virtualMachine.GetEventRequestManager();
                         IBreakpointRequest eventRequest = eventRequestManager.CreateBreakpointRequest(bindLocation);
                         eventRequest.SuspendPolicy = SuspendPolicy.All;
@@ -175,6 +225,9 @@
                         boundBreakpoints.Add(boundBreakpoint);
                     }
                 }
+
+                if (errorNotFirstOnLine)
+                    break;
             }
 
             _boundBreakpoints.AddRange(boundBreakpoints);
@@ -187,6 +240,8 @@
                     IDebugCodeContext2 codeContext = new DebugDocumentCodeContext(RequestLocation.DocumentPosition);
                     BreakpointResolutionLocation location = new BreakpointResolutionLocationCode(codeContext);
                     string message = "The class is not yet loaded, or the location is not present in the debug symbols for this document.";
+                    if (errorNotFirstOnLine)
+                        message = "Only breakpoints on the first statement on a line can be bound at this time.";
 
                     DebugErrorBreakpointResolution resolution = new DebugErrorBreakpointResolution(program, thread, enum_BP_TYPE.BPT_CODE, location, enum_BP_ERROR_TYPE.BPET_GENERAL_WARNING, message);
                     DebugErrorBreakpoint errorBreakpoint = new DebugErrorBreakpoint(this, resolution);
@@ -242,6 +297,7 @@
 
             string fileName = RequestLocation.DocumentPosition.GetFileName();
             int lineNumber = RequestLocation.DocumentPosition.GetRange().iStartLine + 1;
+            bool errorNotFirstOnLine = false;
 
             IEnumerable<JavaDebugProgram> programs = DebugEngine.Programs.ToArray();
             foreach (var program in programs)
@@ -260,10 +316,21 @@
                     ILocation bindLocation = locations.OrderBy(i => i.GetCodeIndex()).FirstOrDefault();
                     if (bindLocation != null)
                     {
-                        ppErrorEnum = null;
-                        return VSConstants.S_OK;
+                        if (IsFirstOnLine())
+                        {
+                            ppErrorEnum = null;
+                            return VSConstants.S_OK;
+                        }
+                        else
+                        {
+                            errorNotFirstOnLine = true;
+                            break;
+                        }
                     }
                 }
+
+                if (errorNotFirstOnLine)
+                    break;
             }
 
             foreach (var program in programs)
@@ -272,6 +339,8 @@
                 IDebugCodeContext2 codeContext = new DebugDocumentCodeContext(RequestLocation.DocumentPosition);
                 BreakpointResolutionLocation location = new BreakpointResolutionLocationCode(codeContext);
                 string message = "The class is not yet loaded, or the location is not present in the debug symbols for this document.";
+                if (errorNotFirstOnLine)
+                    message = "Only breakpoints on the first statement on a line can be bound at this time.";
 
                 DebugErrorBreakpointResolution resolution = new DebugErrorBreakpointResolution(program, thread, enum_BP_TYPE.BPT_CODE, location, enum_BP_ERROR_TYPE.BPET_GENERAL_WARNING, message);
                 DebugErrorBreakpoint errorBreakpoint = new DebugErrorBreakpoint(this, resolution);

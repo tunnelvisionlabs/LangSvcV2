@@ -17,9 +17,18 @@
             Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
             Contract.Requires<ArgumentOutOfRangeException>(lineNumber >= 0);
 
+            string text = textBuffer.CurrentSnapshot.GetText();
+            return TryGetLineStatements(text, lineNumber, out statementTrees, out tokens);
+        }
+
+        [RuleDependency(typeof(JavaParser), JavaParser.RULE_compilationUnit, 0, Dependents.Ancestors)]
+        public static bool TryGetLineStatements(string text, int lineNumber, out IList<IParseTree> statementTrees, out IList<IToken> tokens)
+        {
+            Contract.Requires<ArgumentNullException>(text != null, "text");
+            Contract.Requires<ArgumentOutOfRangeException>(lineNumber >= 0);
+
             try
             {
-                string text = textBuffer.CurrentSnapshot.GetText();
                 AntlrInputStream input = new AntlrInputStream(text);
                 JavaLexer lexer = new JavaLexer(new JavaUnicodeStreamV4(input));
                 CommonTokenStream tokenStream = new CommonTokenStream(lexer);
