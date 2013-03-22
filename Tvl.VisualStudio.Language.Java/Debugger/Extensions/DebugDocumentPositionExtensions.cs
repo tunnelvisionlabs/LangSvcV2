@@ -11,6 +11,15 @@
 
     public static class DebugDocumentPositionExtensions
     {
+        public static IDebugDocument2 GetDocument(this IDebugDocumentPosition2 documentPosition)
+        {
+            Contract.Requires<ArgumentNullException>(documentPosition != null, "documentPosition");
+
+            IDebugDocument2 document;
+            ErrorHandler.ThrowOnFailure(documentPosition.GetDocument(out document));
+            return document;
+        }
+
         public static string GetFileName(this IDebugDocumentPosition2 documentPosition)
         {
             Contract.Requires<ArgumentNullException>(documentPosition != null, "documentPosition");
