@@ -6,8 +6,8 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Projection;
     using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
-
     using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
     using Path = System.IO.Path;
     using Timer = System.Threading.Timer;
@@ -72,6 +72,22 @@
             get
             {
                 return _textBuffer.Target;
+            }
+        }
+
+        public ITextDocument TextDocument
+        {
+            get
+            {
+                ITextBuffer textBuffer = TextBuffer;
+                if (textBuffer == null)
+                    return null;
+
+                ITextDocument textDocument;
+                if (!TextDocumentFactoryService.TryGetTextDocument(textBuffer, out textDocument))
+                    return null;
+
+                return textDocument;
             }
         }
 
@@ -229,8 +245,8 @@
                     name = "(" + name + ") ";
 
                 string filename = "<Unknown File>";
-                ITextDocument textDocument;
-                if (_textDocumentFactoryService.TryGetTextDocument(TextBuffer, out textDocument))
+                ITextDocument textDocument = TextDocument;
+                if (textDocument != null)
                 {
                     filename = textDocument.FilePath;
                     if (filename != null)

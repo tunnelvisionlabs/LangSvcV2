@@ -47,8 +47,8 @@
             Stopwatch stopwatch = Stopwatch.StartNew();
 
             string filename = "<Unknown File>";
-            ITextDocument textDocument;
-            if (TextDocumentFactoryService.TryGetTextDocument(TextBuffer, out textDocument))
+            ITextDocument textDocument = TextDocument;
+            if (textDocument != null)
                 filename = textDocument.FilePath;
 
             var snapshot = TextBuffer.CurrentSnapshot;

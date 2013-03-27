@@ -221,10 +221,7 @@
 
             try
             {
-                ITextDocument textDocument;
-                if (!TextDocumentFactoryService.TryGetTextDocument(TextBuffer, out textDocument))
-                    textDocument = null;
-
+                ITextDocument textDocument = TextDocument;
                 string fileName = textDocument != null ? textDocument.FilePath : null;
                 IDECompilerHost host = new IDECompilerHost();
                 IProject project = null;
