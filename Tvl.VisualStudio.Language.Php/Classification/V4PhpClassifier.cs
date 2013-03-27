@@ -43,9 +43,11 @@
             return V4PhpClassifierLexerState.Initial;
         }
 
-        protected override ITokenSourceWithState<V4PhpClassifierLexerState> CreateLexer(ICharStream input, V4PhpClassifierLexerState state)
+        protected override ITokenSourceWithState<V4PhpClassifierLexerState> CreateLexer(ICharStream input, int startLine, V4PhpClassifierLexerState state)
         {
             V4PhpClassifierLexer lexer = new V4PhpClassifierLexer(input);
+            lexer.Line = startLine;
+            lexer.Column = 0;
             state.Apply(lexer);
             return lexer;
         }

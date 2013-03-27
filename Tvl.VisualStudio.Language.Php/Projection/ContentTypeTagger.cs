@@ -20,10 +20,11 @@
             return PhpContentTypeLexerState.Initial;
         }
 
-        protected override ITokenSourceWithState<PhpContentTypeLexerState> CreateLexer(ICharStream input, PhpContentTypeLexerState startState)
+        protected override ITokenSourceWithState<PhpContentTypeLexerState> CreateLexer(ICharStream input, int startLine, PhpContentTypeLexerState startState)
         {
             PhpContentTypeLexer lexer = new PhpContentTypeLexer(input);
-            lexer.TokenFactory = new SnapshotTokenFactory(lexer);
+            lexer.Line = startLine;
+            lexer.Column = 0;
             startState.Apply(lexer);
             return lexer;
         }

@@ -54,7 +54,7 @@
             var snapshot = TextBuffer.CurrentSnapshot;
             var input = new SnapshotCharStream(snapshot, new Span(0, snapshot.Length));
             var lexer = new PhpLexer(input);
-            lexer.TokenFactory = new SnapshotTokenFactory(lexer);
+            lexer.TokenFactory = new SnapshotTokenFactory(snapshot, lexer);
             var tokens = new CommonTokenStream(lexer);
 
             var parser = new PhpParser(tokens);
