@@ -54,7 +54,7 @@
             {
             case PHP_NOWDOC_START:
                 // <<<'identifier'
-                _heredocIdentifier = token.Text.Substring(3);
+                _heredocIdentifier = token.Text.Substring(3).Trim('\'');
                 break;
 
             case PHP_HEREDOC_START:
