@@ -14,9 +14,9 @@
 
         public ReadOnlyCollection<IReferenceType> GetAllClasses()
         {
-            Contract.Ensures(Contract.Result<ReadOnlyCollection<IClassType>>() != null);
+            Contract.Ensures(Contract.Result<ReadOnlyCollection<IReferenceType>>() != null);
 #if CONTRACTS_FORALL
-            Contract.Ensures(Contract.ForAll(Contract.Result<ReadOnlyCollection<IClassType>>(), type => type != null && this.GetVirtualMachine().Equals(type.GetVirtualMachine())));
+            Contract.Ensures(Contract.ForAll(Contract.Result<ReadOnlyCollection<IReferenceType>>(), type => type != null && this.GetVirtualMachine().Equals(type.GetVirtualMachine())));
 #endif
 
             throw new NotImplementedException();
