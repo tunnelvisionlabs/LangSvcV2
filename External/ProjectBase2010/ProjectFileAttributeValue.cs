@@ -9,9 +9,6 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System.Diagnostics.CodeAnalysis;
-using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
-
 namespace Microsoft.VisualStudio.Project
 {
 	public static class ProjectFileAttributeValue

@@ -1,9 +1,5 @@
 ﻿namespace Tvl.Java.DebugInterface.Client
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Diagnostics.Contracts;
     using Tvl.Java.DebugInterface.Types;
     using AccessModifiers = Tvl.Java.DebugInterface.AccessModifiers;

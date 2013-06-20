@@ -1,13 +1,10 @@
 ﻿namespace Tvl.VisualStudio.Language.Java
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Text.Operations;
-    using Microsoft.VisualStudio.Text;
-    using Microsoft.VisualStudio.Utilities;
     using System.ComponentModel.Composition;
+    using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Operations;
+    using Microsoft.VisualStudio.Utilities;
 
     //[Export(typeof(ITextStructureNavigatorProvider))]
     [ContentType(Constants.JavaContentType)]

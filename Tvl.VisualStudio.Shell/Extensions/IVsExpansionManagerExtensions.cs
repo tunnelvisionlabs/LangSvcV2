@@ -1,13 +1,10 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.TextManager.Interop;
-    using Microsoft.VisualStudio;
-    using System.Runtime.InteropServices;
     using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.TextManager.Interop;
 
     public static class IVsExpansionManagerExtensions
     {

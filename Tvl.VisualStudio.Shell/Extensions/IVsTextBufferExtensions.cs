@@ -1,12 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using IVsTextBuffer = Microsoft.VisualStudio.TextManager.Interop.IVsTextBuffer;
     using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
+    using IVsTextBuffer = Microsoft.VisualStudio.TextManager.Interop.IVsTextBuffer;
 
     public static class IVsTextBufferExtensions
     {

@@ -1,16 +1,8 @@
 ﻿namespace Tvl.Java.BuildTasks
 {
-    using Directory = System.IO.Directory;
-    using SecurityException = System.Security.SecurityException;
-    using File = System.IO.File;
-    using Path = System.IO.Path;
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using Microsoft.Build.Utilities;
     using Microsoft.Build.Framework;
-    using Microsoft.Win32;
     using Microsoft.Build.Tasks;
 
     public class Jar : JavaToolTask

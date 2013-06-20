@@ -1,13 +1,13 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System.Runtime.InteropServices;
-    using VSCOMPONENTSELECTORDATA = Microsoft.VisualStudio.Shell.Interop.VSCOMPONENTSELECTORDATA;
     using Convert = System.Convert;
     using IntPtr = System.IntPtr;
     using Message = System.Windows.Forms.Message;
     using Padding = System.Windows.Forms.Padding;
     using Size = System.Drawing.Size;
     using UserControl = System.Windows.Forms.UserControl;
+    using VSCOMPONENTSELECTORDATA = Microsoft.VisualStudio.Shell.Interop.VSCOMPONENTSELECTORDATA;
     using VSConstants = Microsoft.VisualStudio.VSConstants;
 
     public class ComponentSelectorControl : UserControl

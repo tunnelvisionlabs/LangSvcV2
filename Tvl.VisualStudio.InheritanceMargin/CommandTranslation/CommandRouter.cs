@@ -5,7 +5,6 @@
 
     using Application = System.Windows.Application;
     using COMException = System.Runtime.InteropServices.COMException;
-    using RoutedCommand = System.Windows.Input.RoutedCommand;
     using IInputElement = System.Windows.IInputElement;
     using IOleCommandTarget = Microsoft.VisualStudio.OLE.Interop.IOleCommandTarget;
     using IVsUIShell = Microsoft.VisualStudio.Shell.Interop.IVsUIShell;
@@ -18,6 +17,7 @@
     using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
     using Point = System.Windows.Point;
     using POINTS = Microsoft.VisualStudio.Shell.Interop.POINTS;
+    using RoutedCommand = System.Windows.Input.RoutedCommand;
     using SVsServiceProvider = Microsoft.VisualStudio.Shell.SVsServiceProvider;
     using VSConstants = Microsoft.VisualStudio.VSConstants;
 

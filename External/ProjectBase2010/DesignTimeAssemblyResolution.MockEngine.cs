@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
 using System.Text;
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Execution;
-using System.IO;
-using System.Globalization;
 
 namespace Microsoft.VisualStudio.Project
 {

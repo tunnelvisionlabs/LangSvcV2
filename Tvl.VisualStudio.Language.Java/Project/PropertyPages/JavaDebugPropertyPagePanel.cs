@@ -2,8 +2,6 @@
 {
     using System;
     using CommandLineBuilder = Microsoft.Build.Utilities.CommandLineBuilder;
-    using Path = System.IO.Path;
-    using Microsoft.VisualStudio.Project;
 
     public partial class JavaDebugPropertyPagePanel : JavaPropertyPagePanel
     {

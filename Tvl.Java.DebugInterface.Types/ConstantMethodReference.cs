@@ -1,8 +1,8 @@
 ﻿namespace Tvl.Java.DebugInterface.Types
 {
     using System.Collections.ObjectModel;
-    using System.Runtime.Serialization;
     using System.Diagnostics;
+    using System.Runtime.Serialization;
 
     [DataContract]
     [DebuggerDisplay("Constant Method: Class #{ClassIndex}, Name and Type #{NameAndTypeIndex}")]

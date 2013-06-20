@@ -1,23 +1,22 @@
 ﻿namespace Tvl.Java.DebugInterface.Client
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Collections.ObjectModel;
-    using Tvl.Java.DebugInterface.Request;
-    using Tvl.Java.DebugInterface.Events;
-    using Tvl.Java.DebugInterface.Client.Request;
+    using System.Diagnostics.Contracts;
+    using System.Linq;
+    using System.ServiceModel;
     using Tvl.Java.DebugInterface.Client.DebugProtocol;
+    using Tvl.Java.DebugInterface.Client.Events;
+    using Tvl.Java.DebugInterface.Client.Request;
+    using Tvl.Java.DebugInterface.Events;
+    using Tvl.Java.DebugInterface.Request;
     using Tvl.Java.DebugInterface.Types;
     using AccessModifiers = Tvl.Java.DebugInterface.AccessModifiers;
-    using EventWaitHandle = System.Threading.EventWaitHandle;
     using EventResetMode = System.Threading.EventResetMode;
-    using System.ServiceModel;
-    using Tvl.Java.DebugInterface.Client.Events;
-    using System.Diagnostics.Contracts;
+    using EventWaitHandle = System.Threading.EventWaitHandle;
     using Task = System.Threading.Tasks.Task;
-    using System.Collections.Concurrent;
 
     internal partial class VirtualMachine : IVirtualMachine
     {

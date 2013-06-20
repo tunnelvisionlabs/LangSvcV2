@@ -1,18 +1,12 @@
 ﻿namespace Tvl.VisualStudio.Language.StringTemplate4
 {
-    using System.Collections.Generic;
     using System.ComponentModel.Composition;
-    using System.Windows.Threading;
-    using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Text.Navigation;
-    using Action = System.Action;
-    using ImageSource = System.Windows.Media.ImageSource;
-    using IOutputWindowService = Tvl.VisualStudio.Shell.OutputWindow.Interfaces.IOutputWindowService;
-    using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;
     using IDispatcherGlyphService = Tvl.VisualStudio.Language.Intellisense.IDispatcherGlyphService;
+    using IOutputWindowService = Tvl.VisualStudio.Shell.OutputWindow.Interfaces.IOutputWindowService;
 
     [Export(typeof(IEditorNavigationSourceProvider))]
     [ContentType(StringTemplateConstants.StringTemplateContentType)]

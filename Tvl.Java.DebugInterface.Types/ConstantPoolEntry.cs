@@ -1,9 +1,9 @@
 ﻿namespace Tvl.Java.DebugInterface.Types
 {
     using System;
+    using System.Collections.ObjectModel;
     using System.Runtime.InteropServices;
     using System.Runtime.Serialization;
-    using System.Collections.ObjectModel;
 
     [DataContract]
     public abstract class ConstantPoolEntry

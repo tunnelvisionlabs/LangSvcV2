@@ -1,9 +1,8 @@
 ﻿namespace Tvl.Java.DebugInterface.Client.Request
 {
-    using System;
-    using Tvl.Java.DebugInterface.Request;
-    using System.Diagnostics.Contracts;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
+    using Tvl.Java.DebugInterface.Request;
 
     internal abstract class EventRequest : Mirror, IEventRequest
     {

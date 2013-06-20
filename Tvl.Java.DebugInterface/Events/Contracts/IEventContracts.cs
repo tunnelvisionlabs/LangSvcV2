@@ -2,7 +2,6 @@
 {
     using System;
     using System.Diagnostics.Contracts;
-    using Tvl.Java.DebugInterface.Contracts;
     using Tvl.Java.DebugInterface.Request;
 
     [ContractClassFor(typeof(IEvent))]

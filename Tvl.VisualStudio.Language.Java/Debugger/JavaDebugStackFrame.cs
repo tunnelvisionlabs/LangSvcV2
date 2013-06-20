@@ -2,14 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
-    using Tvl.Java.DebugInterface;
-    using System.Diagnostics.Contracts;
-    using Microsoft.VisualStudio;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Debugger.Interop;
+    using Tvl.Java.DebugInterface;
     using Tvl.VisualStudio.Language.Java.Debugger.Collections;
 
     [ComVisible(true)]

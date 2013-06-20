@@ -1,13 +1,12 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Experimental
 {
+    using System.Collections.Generic;
     using Antlr.Runtime;
+    using Antlr.Runtime.Misc;
+    using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
-    using System.Linq;
-    using System.Collections.Generic;
-    using Antlr.Runtime.Tree;
-    using Antlr.Runtime.Misc;
 
     internal class ClassAnchorTracker : AntlrTaggerBase<ClassAnchorTracker.ClassAnchorState, ScopeAnchorTag>
     {

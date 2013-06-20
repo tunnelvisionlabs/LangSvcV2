@@ -11,11 +11,7 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
 using ObjectExtenders = EnvDTE.ObjectExtenders;
 
 namespace Microsoft.VisualStudio.Project

@@ -1,7 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.SourceData
 {
-    using System.Diagnostics.Contracts;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
 
     public class CodeParameter : CodeElement
     {

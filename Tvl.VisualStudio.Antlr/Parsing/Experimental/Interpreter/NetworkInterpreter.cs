@@ -2,13 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr.Runtime;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
-    using Stopwatch = System.Diagnostics.Stopwatch;
     using IntervalSet = Tvl.VisualStudio.Language.Parsing.Collections.IntervalSet;
+    using Stopwatch = System.Diagnostics.Stopwatch;
 
     public class NetworkInterpreter
     {

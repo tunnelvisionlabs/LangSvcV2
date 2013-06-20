@@ -1,7 +1,6 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy.Experimental
 {
     using System.Collections.Generic;
-    using Contract = System.Diagnostics.Contracts.Contract;
     using NetworkBuilder = Tvl.VisualStudio.Language.Parsing.Experimental.Atn.NetworkBuilder;
     using Nfa = Tvl.VisualStudio.Language.Parsing.Experimental.Atn.Nfa;
     using RuleBinding = Tvl.VisualStudio.Language.Parsing.Experimental.Atn.RuleBinding;

@@ -1,16 +1,13 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Project
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Project;
+    using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio.Project;
     using File = System.IO.File;
-    using VSCOMPONENTSELECTORDATA = Microsoft.VisualStudio.Shell.Interop.VSCOMPONENTSELECTORDATA;
-    using System.Collections.ObjectModel;
     using Path = System.IO.Path;
+    using VSCOMPONENTSELECTORDATA = Microsoft.VisualStudio.Shell.Interop.VSCOMPONENTSELECTORDATA;
 
     [ComVisible(true)]
     public class JavaReferenceContainerNode : ReferenceContainerNode

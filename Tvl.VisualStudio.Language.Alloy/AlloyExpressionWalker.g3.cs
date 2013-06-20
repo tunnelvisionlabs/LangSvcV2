@@ -1,11 +1,10 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy
 {
-    using System;
+    using System.Collections.Generic;
     using Antlr.Runtime;
     using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Alloy.IntellisenseModel;
-    using System.Collections.Generic;
 
     partial class AlloyExpressionWalker
     {

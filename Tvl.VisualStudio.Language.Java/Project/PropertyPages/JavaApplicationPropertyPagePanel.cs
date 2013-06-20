@@ -1,16 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Project.PropertyPages
 {
     using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Drawing;
-    using System.Data;
-    using System.Linq;
-    using System.Text;
-    using System.Windows.Forms;
-    using System.Collections.ObjectModel;
-    using Tvl.Collections;
     using System.Diagnostics.Contracts;
+    using System.Linq;
+    using Tvl.Collections;
 
     public partial class JavaApplicationPropertyPagePanel : JavaPropertyPagePanel
     {

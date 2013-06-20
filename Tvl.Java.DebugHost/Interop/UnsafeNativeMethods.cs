@@ -8,10 +8,10 @@ namespace Tvl.Java.DebugHost.Interop
     using IntPtr = System.IntPtr;
 
     using jboolean = System.Byte;
+    using jdouble = System.Double;
+    using jfloat = System.Single;
     using jint = System.Int32;
     using jlong = System.Int64;
-    using jfloat = System.Single;
-    using jdouble = System.Double;
     using jrawMonitorID = System.IntPtr;
 
     internal static class UnsafeNativeMethods

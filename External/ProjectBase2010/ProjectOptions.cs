@@ -10,7 +10,6 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 ***************************************************************************/
 
 using System.Collections.Specialized;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 
 namespace Microsoft.VisualStudio.Project

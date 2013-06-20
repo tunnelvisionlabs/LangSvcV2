@@ -5,10 +5,9 @@
     using System.Diagnostics.Contracts;
     using Antlr.Runtime;
     using Microsoft.VisualStudio.Text;
-    using Microsoft.VisualStudio.Text.Classification;
+    using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Language.Parsing.Collections;
-    using Microsoft.VisualStudio.Text.Tagging;
 
     internal class BraceLevelTracker : AntlrTaggerBase<BraceLevelTracker.BraceLevelAnchorState, IClassificationTag>
     {

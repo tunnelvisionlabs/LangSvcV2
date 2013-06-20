@@ -14,7 +14,6 @@ namespace Microsoft.VisualStudio.Project
     using System;
     using System.Diagnostics;
     using System.Diagnostics.Contracts;
-    using System.Globalization;
     using System.Threading;
     using System.Windows.Forms;
 

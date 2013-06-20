@@ -1,9 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental.Atn
 {
+    using Tvl.VisualStudio.Language.Parsing.Collections;
     using ArgumentNullException = System.ArgumentNullException;
     using Contract = System.Diagnostics.Contracts.Contract;
     using Interval = Tvl.VisualStudio.Language.Parsing.Collections.Interval;
-    using Tvl.VisualStudio.Language.Parsing.Collections;
 
     public class Nfa
     {

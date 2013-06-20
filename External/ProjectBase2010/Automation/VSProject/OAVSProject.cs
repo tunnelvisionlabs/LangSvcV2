@@ -12,12 +12,12 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 namespace Microsoft.VisualStudio.Project.Automation
 {
     using System;
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.InteropServices;
     using EnvDTE;
     using VSLangProj;
     using VSLangProj80;
-    using System.Diagnostics;
 
     /// <summary>
     /// Represents an automation friendly version of a language-specific project.

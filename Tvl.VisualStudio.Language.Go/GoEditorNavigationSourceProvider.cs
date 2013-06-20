@@ -1,8 +1,6 @@
 ﻿namespace Tvl.VisualStudio.Language.Go
 {
     using System.ComponentModel.Composition;
-    using System.Windows.Threading;
-    using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Language.Parsing;

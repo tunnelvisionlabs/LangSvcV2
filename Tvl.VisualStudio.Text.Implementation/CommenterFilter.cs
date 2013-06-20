@@ -1,13 +1,13 @@
 ﻿namespace Tvl.VisualStudio.Text.Implementation
 {
     using System;
+    using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.TextManager.Interop;
     using Tvl.VisualStudio.Shell;
 
     using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
-    using System.Diagnostics.Contracts;
 
     [ComVisible(true)]
     internal class CommenterFilter : TextViewCommandFilter

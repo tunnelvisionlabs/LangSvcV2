@@ -1,16 +1,13 @@
 ﻿namespace Tvl.Java.DebugInterface.Client
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Tvl.Java.DebugInterface.Client.DebugProtocol;
-    using Tvl.Java.DebugInterface.Types;
     using System.Diagnostics.Contracts;
-    using Tvl.Java.DebugInterface.Client.Events;
-    using SuspendPolicy = Tvl.Java.DebugInterface.Request.SuspendPolicy;
-    using Tvl.Java.DebugInterface.Client.Request;
     using System.ServiceModel;
+    using Tvl.Java.DebugInterface.Client.DebugProtocol;
+    using Tvl.Java.DebugInterface.Client.Events;
+    using Tvl.Java.DebugInterface.Client.Request;
+    using Tvl.Java.DebugInterface.Types;
+    using SuspendPolicy = Tvl.Java.DebugInterface.Request.SuspendPolicy;
 
     partial class VirtualMachine
     {

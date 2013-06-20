@@ -12,8 +12,8 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 namespace Microsoft.VisualStudio.Project.Automation
 {
     using System;
-    using System.Runtime.InteropServices;
     using System.Diagnostics.Contracts;
+    using System.Runtime.InteropServices;
 
     /// <summary>
     /// This object defines a so called null object that is returned as instead of null. This is because callers in VSCore usually crash if a null propery is returned for them.

@@ -1,14 +1,11 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using IVsDropdownBarClient = Microsoft.VisualStudio.TextManager.Interop.IVsDropdownBarClient;
-    using IVsDropdownBarManager = Microsoft.VisualStudio.TextManager.Interop.IVsDropdownBarManager;
-    using IVsDropdownBar = Microsoft.VisualStudio.TextManager.Interop.IVsDropdownBar;
     using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
+    using IVsDropdownBar = Microsoft.VisualStudio.TextManager.Interop.IVsDropdownBar;
+    using IVsDropdownBarClient = Microsoft.VisualStudio.TextManager.Interop.IVsDropdownBarClient;
+    using IVsDropdownBarManager = Microsoft.VisualStudio.TextManager.Interop.IVsDropdownBarManager;
 
     public static class IVsDropdownBarManagerExtensions
     {

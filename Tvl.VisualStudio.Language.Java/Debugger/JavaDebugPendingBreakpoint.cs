@@ -2,12 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Runtime.InteropServices;
     using System.Diagnostics.Contracts;
-    using EnumDebugErrorBreakpoints = Tvl.VisualStudio.Language.Java.Debugger.Collections.EnumDebugErrorBreakpoints;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio.Debugger.Interop;
 
     [ComVisible(true)]
     public class JavaDebugPendingBreakpoint

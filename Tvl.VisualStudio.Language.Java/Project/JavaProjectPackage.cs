@@ -6,14 +6,7 @@
     using Microsoft.VisualStudio.Shell;
     using Tvl.VisualStudio.Shell;
 
-    using Directory = System.IO.Directory;
-    using File = System.IO.File;
     using IVsComponentSelectorProvider = Microsoft.VisualStudio.Shell.Interop.IVsComponentSelectorProvider;
-    using Path = System.IO.Path;
-    using Registry = Microsoft.Win32.Registry;
-    using RegistryKey = Microsoft.Win32.RegistryKey;
-    using RegistryKeyPermissionCheck = Microsoft.Win32.RegistryKeyPermissionCheck;
-    using SecurityException = System.Security.SecurityException;
     using VSConstants = Microsoft.VisualStudio.VSConstants;
     using VSPROPSHEETPAGE = Microsoft.VisualStudio.Shell.Interop.VSPROPSHEETPAGE;
 

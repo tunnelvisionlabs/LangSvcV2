@@ -1,9 +1,5 @@
 ﻿namespace Tvl.Java.DebugInterface.Client
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using Tvl.Java.DebugInterface.Types;
 
     internal static class DebugErrorHandler

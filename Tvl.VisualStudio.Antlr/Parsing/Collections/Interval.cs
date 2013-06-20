@@ -1,8 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing.Collections
 {
-    using Math = System.Math;
     using ArgumentException = System.ArgumentException;
     using ArgumentOutOfRangeException = System.ArgumentOutOfRangeException;
+    using Math = System.Math;
 
     public struct Interval : System.IEquatable<Interval>
     {

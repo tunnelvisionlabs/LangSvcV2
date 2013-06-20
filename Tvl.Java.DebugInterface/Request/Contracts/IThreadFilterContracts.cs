@@ -2,7 +2,6 @@
 {
     using System;
     using System.Diagnostics.Contracts;
-    using Tvl.Java.DebugInterface.Contracts;
 
     [ContractClassFor(typeof(IThreadFilter))]
     internal abstract class IThreadFilterContracts : IThreadFilter

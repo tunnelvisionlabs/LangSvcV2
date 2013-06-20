@@ -11,7 +11,6 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 using System;
 using System.Text;
-using System.IO;
 
 namespace Microsoft.VisualStudio.Shell
 {

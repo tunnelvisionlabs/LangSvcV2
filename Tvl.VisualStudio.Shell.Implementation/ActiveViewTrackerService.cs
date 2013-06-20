@@ -2,14 +2,13 @@
 {
     using System;
     using System.ComponentModel.Composition;
-    using System.Runtime.InteropServices;
+    using System.Diagnostics.Contracts;
+    using System.Windows;
+    using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.Shell.Interop;
     using Microsoft.VisualStudio.Text.Editor;
-    using System.Windows;
-    using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.TextManager.Interop;
-    using Microsoft.VisualStudio;
-    using System.Diagnostics.Contracts;
 
     [Export(typeof(IActiveViewTrackerService))]
     internal sealed class ActiveViewTrackerService : IActiveViewTrackerService

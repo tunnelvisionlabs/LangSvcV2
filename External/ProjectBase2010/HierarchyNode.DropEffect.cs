@@ -9,26 +9,7 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 ***************************************************************************/
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
-using System.Text;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Shell;
 //#define CCI_TRACING
-using Microsoft.VisualStudio.Shell.Interop;
-using OleConstants = Microsoft.VisualStudio.OLE.Interop.Constants;
-using ShellConstants = Microsoft.VisualStudio.Shell.Interop.Constants;
-using VsCommands = Microsoft.VisualStudio.VSConstants.VSStd97CmdID;
-using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
 
 namespace Microsoft.VisualStudio.Project
 {

@@ -38,8 +38,6 @@ namespace Tvl.Go.Build.Tasks
     using System.Threading;
     using Microsoft.Build.Framework;
     using Microsoft.Build.Utilities;
-    using File = System.IO.File;
-    using Path = System.IO.Path;
 
     public class GoClassGenerationTask
         : Task

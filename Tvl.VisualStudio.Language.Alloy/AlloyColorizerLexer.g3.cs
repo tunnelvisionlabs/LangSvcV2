@@ -1,8 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy
 {
-    using Antlr.Runtime;
-    using System.Diagnostics.Contracts;
     using System;
+    using System.Diagnostics.Contracts;
+    using Antlr.Runtime;
 
     partial class AlloyColorizerLexer
     {

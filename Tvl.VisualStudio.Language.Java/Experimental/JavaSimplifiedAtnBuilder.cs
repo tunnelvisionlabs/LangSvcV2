@@ -1,11 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Experimental
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
     using Tvl.VisualStudio.Language.Parsing.Collections;
+    using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
 
     internal class JavaSimplifiedAtnBuilder : JavaAtnBuilder
     {

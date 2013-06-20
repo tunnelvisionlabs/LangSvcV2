@@ -4,7 +4,6 @@ namespace Tvl.VisualStudio.Language.Java
 {
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Utilities;
-    using Tvl.VisualStudio.Shell.OutputWindow;
 
     public static class Services
     {

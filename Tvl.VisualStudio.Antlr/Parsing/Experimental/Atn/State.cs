@@ -2,11 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Diagnostics.Contracts;
     using System.Linq;
     using IntervalSet = Tvl.VisualStudio.Language.Parsing.Collections.IntervalSet;
     using PreventContextType = Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter.PreventContextType;
-    using System.Diagnostics;
 
     public class State
     {

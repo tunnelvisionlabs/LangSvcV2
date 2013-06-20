@@ -1,9 +1,5 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.SourceData.Emit
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using Tvl.VisualStudio.Language.Parsing.Collections;
 
     public class CodeMethodBuilder : CodeMemberBuilder

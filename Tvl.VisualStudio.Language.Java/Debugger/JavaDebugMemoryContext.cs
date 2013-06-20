@@ -1,11 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Debugger.Interop;
     using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio.Debugger.Interop;
 
     [ComVisible(true)]
     public class JavaDebugMemoryContext : IDebugMemoryContext2

@@ -1,13 +1,10 @@
 ﻿namespace Tvl.VisualStudio.Language.StringTemplate4
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Antlr4.StringTemplate.Compiler;
     using Antlr.Runtime;
-    using Tvl.VisualStudio.Language.Parsing;
+    using Antlr4.StringTemplate.Compiler;
     using Microsoft.VisualStudio.Text;
+    using Tvl.VisualStudio.Language.Parsing;
 
     public class GroupParserWrapper : GroupParser
     {

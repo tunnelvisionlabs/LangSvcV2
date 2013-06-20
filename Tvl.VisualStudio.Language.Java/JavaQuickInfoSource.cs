@@ -5,7 +5,10 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Antlr.Runtime;
+    using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Tagging;
+    using Tvl.VisualStudio.Language.Java.Experimental;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
 
     using CancellationToken = System.Threading.CancellationToken;
@@ -23,11 +26,6 @@
     using PredefinedOutputWindowPanes = Tvl.VisualStudio.Shell.OutputWindow.Interfaces.PredefinedOutputWindowPanes;
     using SnapshotCharStream = Tvl.VisualStudio.Language.Parsing.SnapshotCharStream;
     using Stopwatch = System.Diagnostics.Stopwatch;
-    using System.Text.RegularExpressions;
-    using Tvl.VisualStudio.Language.Java.SourceData;
-    using Antlr.Runtime.Tree;
-    using Tvl.VisualStudio.Language.Java.Experimental;
-    using Microsoft.VisualStudio.Text.Tagging;
 
     internal class JavaQuickInfoSource : IQuickInfoSource
     {

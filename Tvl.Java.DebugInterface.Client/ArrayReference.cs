@@ -1,9 +1,9 @@
 ﻿namespace Tvl.Java.DebugInterface.Client
 {
     using System;
-    using System.Linq;
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
+    using System.Linq;
     using Tvl.Java.DebugInterface.Types;
 
     internal sealed class ArrayReference : ObjectReference, IArrayReference

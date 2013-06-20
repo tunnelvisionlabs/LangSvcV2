@@ -1,7 +1,6 @@
 ﻿namespace Tvl.Java.DebugInterface.Client
 {
     using System.Diagnostics.Contracts;
-    using System;
 
     internal sealed class ByteValue : PrimitiveValue, IByteValue
     {

@@ -1,9 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger
 {
     using System;
+    using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
-    using System.Diagnostics.Contracts;
 
     public static class DebugPortExtensions
     {

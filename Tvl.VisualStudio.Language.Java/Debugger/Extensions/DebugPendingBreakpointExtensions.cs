@@ -2,11 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Debugger.Interop;
     using System.Diagnostics.Contracts;
+    using System.Linq;
     using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Debugger.Interop;
 
     public static class DebugPendingBreakpointExtensions
     {

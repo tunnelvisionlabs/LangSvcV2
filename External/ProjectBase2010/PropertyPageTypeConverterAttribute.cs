@@ -10,9 +10,6 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 ***************************************************************************/
 
 using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Globalization;
 
 namespace Microsoft.VisualStudio.Project
 {

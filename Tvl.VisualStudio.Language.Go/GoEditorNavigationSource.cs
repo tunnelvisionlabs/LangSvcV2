@@ -3,9 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
-    using System.Threading;
-    using System.Windows.Media;
-    using System.Windows.Threading;
     using Antlr.Runtime;
     using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio.Language.Intellisense;

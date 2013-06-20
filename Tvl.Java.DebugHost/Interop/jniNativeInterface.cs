@@ -5,8 +5,8 @@
 
 namespace Tvl.Java.DebugHost.Interop
 {
-    using IntPtr = System.IntPtr;
     using System.Runtime.InteropServices;
+    using IntPtr = System.IntPtr;
 
     [StructLayout(LayoutKind.Sequential)]
     internal sealed class jniNativeInterface

@@ -1,9 +1,5 @@
 ﻿namespace Tvl.Java.DebugHost.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.ServiceModel;
 
     [ServiceContract(CallbackContract = typeof(IJvmEvents), SessionMode = SessionMode.Required)]

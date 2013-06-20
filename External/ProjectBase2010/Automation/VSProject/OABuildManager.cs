@@ -13,8 +13,8 @@ namespace Microsoft.VisualStudio.Project.Automation
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
-    using VSLangProj;
     using System.Diagnostics.Contracts;
+    using VSLangProj;
 
     public class OABuildManager : ConnectionPointContainer,
                                     IEventSource<_dispBuildManagerEvents>,

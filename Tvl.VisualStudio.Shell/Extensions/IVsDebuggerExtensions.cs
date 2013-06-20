@@ -1,11 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Shell.Interop;
     using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.Shell.Interop;
     using Marshal = System.Runtime.InteropServices.Marshal;
 
     public static class IVsDebuggerExtensions

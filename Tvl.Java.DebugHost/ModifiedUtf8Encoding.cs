@@ -2,12 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Security;
-    using System.Runtime.Serialization;
-    using System.Runtime.InteropServices;
     using System.Diagnostics.Contracts;
+    using System.Text;
 
     public class ModifiedUTF8Encoding
     {

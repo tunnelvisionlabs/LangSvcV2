@@ -5,9 +5,9 @@
 
 namespace Tvl.Java.DebugHost.Interop
 {
-    using ObsoleteAttribute = System.ObsoleteAttribute;
-    using IntPtr = System.IntPtr;
     using System.Runtime.InteropServices;
+    using IntPtr = System.IntPtr;
+    using ObsoleteAttribute = System.ObsoleteAttribute;
 
     [StructLayout(LayoutKind.Sequential)]
     internal class jvmtiInterface

@@ -6,8 +6,8 @@
     using ArgumentNullException = System.ArgumentNullException;
     using Math = System.Math;
     using NotImplementedException = System.NotImplementedException;
-    using TokenTypes = Antlr.Runtime.TokenTypes;
     using StringBuilder = System.Text.StringBuilder;
+    using TokenTypes = Antlr.Runtime.TokenTypes;
 
     /** A set of integers that relies on ranges being common to do
      *  "run-length-encoded" like compression (if you view an IntSet like

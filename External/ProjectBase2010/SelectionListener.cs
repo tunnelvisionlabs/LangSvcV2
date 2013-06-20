@@ -10,8 +10,6 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 ***************************************************************************/
 
 using System;
-using System.Diagnostics;
-using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using ShellConstants = Microsoft.VisualStudio.Shell.Interop.Constants;

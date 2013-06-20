@@ -1,28 +1,28 @@
 ﻿namespace Tvl.Java.DebugHost.Interop
 {
     using System.Runtime.InteropServices;
-    using jint = System.Int32;
-    using jboolean = System.Byte;
-    using jbyte = System.Byte;
-    using jsize = System.Int32;
-    using va_list = System.IntPtr;
-    using jchar = System.Char;
-    using jshort = System.Int16;
-    using jlong = System.Int64;
-    using jfloat = System.Single;
-    using jdouble = System.Double;
-    using jstring = jobject;
-    using jarray = jobject;
-    using jobjectArray = jobject;
-    using jbooleanArray = jobject;
-    using jintArray = jobject;
-    using jlongArray = jobject;
-    using jfloatArray = jobject;
-    using jdoubleArray = jobject;
-    using jcharArray = jobject;
-    using jshortArray = jobject;
-    using jbyteArray = jobject;
     using IntPtr = System.IntPtr;
+    using jarray = jobject;
+    using jboolean = System.Byte;
+    using jbooleanArray = jobject;
+    using jbyte = System.Byte;
+    using jbyteArray = jobject;
+    using jchar = System.Char;
+    using jcharArray = jobject;
+    using jdouble = System.Double;
+    using jdoubleArray = jobject;
+    using jfloat = System.Single;
+    using jfloatArray = jobject;
+    using jint = System.Int32;
+    using jintArray = jobject;
+    using jlong = System.Int64;
+    using jlongArray = jobject;
+    using jobjectArray = jobject;
+    using jshort = System.Int16;
+    using jshortArray = jobject;
+    using jsize = System.Int32;
+    using jstring = jobject;
+    using va_list = System.IntPtr;
 
     internal static class JniUnsafeNativeMethods
     {

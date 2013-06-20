@@ -1,6 +1,5 @@
 ﻿namespace Tvl.Java.DebugHost.Interop
 {
-    using System;
     using System.Runtime.InteropServices;
 
     public static class JavaVMUnsafeNativeMethods

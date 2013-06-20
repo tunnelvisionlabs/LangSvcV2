@@ -2,12 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.ComponentModel;
-    using VSLangProj;
     using System.Diagnostics.Contracts;
     using System.Globalization;
+    using System.Linq;
+    using VSLangProj;
 
     public class AvailableFileBuildActionConverter : EnumConverter
     {

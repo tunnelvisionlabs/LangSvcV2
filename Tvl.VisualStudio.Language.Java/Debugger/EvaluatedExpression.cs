@@ -1,11 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Tvl.Java.DebugInterface;
     using System.Diagnostics.Contracts;
+    using Tvl.Java.DebugInterface;
 
     public class EvaluatedExpression
     {

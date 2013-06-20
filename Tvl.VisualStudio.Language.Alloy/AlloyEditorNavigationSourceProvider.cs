@@ -1,17 +1,13 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy
 {
-    using System.Collections.Generic;
     using System.ComponentModel.Composition;
-    using System.Windows.Threading;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Text.Navigation;
 
     using IDispatcherGlyphService = Tvl.VisualStudio.Language.Intellisense.IDispatcherGlyphService;
-    using ImageSource = System.Windows.Media.ImageSource;
     using IOutputWindowService = Tvl.VisualStudio.Shell.OutputWindow.Interfaces.IOutputWindowService;
-    using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;
 
 #if false
     [Export(typeof(IEditorNavigationSourceProvider))]

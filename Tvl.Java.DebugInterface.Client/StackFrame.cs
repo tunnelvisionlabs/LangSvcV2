@@ -2,10 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Diagnostics.Contracts;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
+    using System.Linq;
     using FrameId = Tvl.Java.DebugInterface.Types.FrameId;
 
     internal sealed class StackFrame : Mirror, IStackFrame

@@ -1,8 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Project
 {
+    using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio.Project;
-    using System.Diagnostics.Contracts;
 
     [ComVisible(true)]
     public class JavaFolderNode : FolderNode

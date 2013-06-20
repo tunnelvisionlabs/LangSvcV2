@@ -1,12 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.Debugger.Collections
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.VisualStudio.Debugger.Interop;
     using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio.Debugger.Interop;
 
     [ComVisible(true)]
     public class EnumDebugReferenceInfo : DebugEnumerator<IEnumDebugReferenceInfo2, DEBUG_REFERENCE_INFO>, IEnumDebugReferenceInfo2

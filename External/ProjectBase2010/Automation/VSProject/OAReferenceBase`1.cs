@@ -13,13 +13,13 @@ namespace Microsoft.VisualStudio.Project.Automation
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
     using prjReferenceType = VSLangProj.prjReferenceType;
     using Reference = VSLangProj.Reference;
-    using References = VSLangProj.References;
     using Reference2 = VSLangProj2.Reference2;
     using Reference3 = VSLangProj80.Reference3;
-    using System.Diagnostics.Contracts;
+    using References = VSLangProj.References;
 
     /// <summary>
     /// Represents the automation equivalent of ReferenceNode

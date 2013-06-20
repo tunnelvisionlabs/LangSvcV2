@@ -1,7 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Text
 {
-    using Microsoft.VisualStudio.Text.Editor;
     using System.Diagnostics.Contracts;
+    using Microsoft.VisualStudio.Text.Editor;
 
     [ContractClass(typeof(Contracts.ICommenterProviderContracts))]
     public interface ICommenterProvider

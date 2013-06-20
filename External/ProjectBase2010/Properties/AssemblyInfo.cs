@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using System.Resources;
+using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Microsoft.VisualStudio.Project")]
 [assembly: AssemblyDescription("MPF Implementation of VS Projects")]

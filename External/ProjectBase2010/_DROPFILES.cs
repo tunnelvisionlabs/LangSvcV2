@@ -1,6 +1,5 @@
 ﻿namespace Microsoft.VisualStudio.Project
 {
-    using System;
     using System.Runtime.InteropServices;
 
     [StructLayout(LayoutKind.Sequential)]

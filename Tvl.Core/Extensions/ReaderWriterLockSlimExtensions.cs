@@ -1,8 +1,8 @@
 ﻿namespace Tvl
 {
     using System;
-    using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;
     using System.Diagnostics.Contracts;
+    using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;
 
     public static class ReaderWriterLockSlimExtensions
     {

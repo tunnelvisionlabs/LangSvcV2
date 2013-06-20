@@ -2,8 +2,8 @@
 {
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
-    using Tvl.VisualStudio.Language.Parsing.Collections;
     using System.Linq;
+    using Tvl.VisualStudio.Language.Parsing.Collections;
 
     public abstract class CodeElementBuilder
     {

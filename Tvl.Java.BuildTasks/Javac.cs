@@ -4,16 +4,13 @@
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Linq;
-    using System.Text;
     using System.Text.RegularExpressions;
     using Microsoft.Build.Framework;
     using Microsoft.Build.Tasks;
     using Microsoft.Build.Utilities;
-    using Microsoft.Win32;
     using Directory = System.IO.Directory;
     using File = System.IO.File;
     using Path = System.IO.Path;
-    using SecurityException = System.Security.SecurityException;
 
     public class Javac : JavaToolTask
     {

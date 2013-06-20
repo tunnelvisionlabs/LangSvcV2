@@ -1,9 +1,5 @@
 ﻿namespace Tvl.Java.DebugInterface.Client.Events
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using Tvl.Java.DebugInterface.Client.Request;
     using Tvl.Java.DebugInterface.Request;
 

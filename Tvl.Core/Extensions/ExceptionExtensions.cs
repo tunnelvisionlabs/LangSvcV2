@@ -1,8 +1,8 @@
 ﻿namespace Tvl
 {
     using System;
-    using System.Reflection;
     using System.Diagnostics.Contracts;
+    using System.Reflection;
 
     public static class ExceptionExtensions
     {

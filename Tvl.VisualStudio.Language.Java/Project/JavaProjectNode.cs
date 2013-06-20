@@ -9,13 +9,9 @@
     using __VSHPROPID = Microsoft.VisualStudio.Shell.Interop.__VSHPROPID;
     using _PersistStorageType = Microsoft.VisualStudio.Shell.Interop._PersistStorageType;
     using CultureInfo = System.Globalization.CultureInfo;
-    using DirectoryInfo = System.IO.DirectoryInfo;
-    using FileAttributes = System.IO.FileAttributes;
-    using FileInfo = System.IO.FileInfo;
     using MSBuild = Microsoft.Build.Evaluation;
     using OAVSProject = Microsoft.VisualStudio.Project.Automation.OAVSProject;
     using Path = System.IO.Path;
-    using VsCommands2K = Microsoft.VisualStudio.VSConstants.VSStd2KCmdID;
     using VSCOMPONENTSELECTORTABINIT = Microsoft.VisualStudio.Shell.Interop.VSCOMPONENTSELECTORTABINIT;
     using VSConstants = Microsoft.VisualStudio.VSConstants;
 

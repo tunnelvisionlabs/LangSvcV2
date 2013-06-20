@@ -1,9 +1,6 @@
 ﻿namespace Microsoft.VisualStudio.Project
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
 
     [Flags]
     public enum GlobalAllocFlags

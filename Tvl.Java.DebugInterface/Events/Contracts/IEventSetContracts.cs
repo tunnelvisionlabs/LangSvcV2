@@ -3,8 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
-    using Tvl.Java.DebugInterface.Contracts;
-    using ConstantPoolEntry = Tvl.Java.DebugInterface.Types.ConstantPoolEntry;
     using IEnumerator = System.Collections.IEnumerator;
     using SuspendPolicy = Tvl.Java.DebugInterface.Request.SuspendPolicy;
 

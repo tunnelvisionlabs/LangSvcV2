@@ -3,11 +3,11 @@
     using System.ComponentModel;
     using System.Diagnostics;
     using System.Windows.Forms;
-    using VsShellUtilities = Microsoft.VisualStudio.Shell.VsShellUtilities;
     using IServiceProvider = System.IServiceProvider;
-    using OLEMSGICON = Microsoft.VisualStudio.Shell.Interop.OLEMSGICON;
     using OLEMSGBUTTON = Microsoft.VisualStudio.Shell.Interop.OLEMSGBUTTON;
     using OLEMSGDEFBUTTON = Microsoft.VisualStudio.Shell.Interop.OLEMSGDEFBUTTON;
+    using OLEMSGICON = Microsoft.VisualStudio.Shell.Interop.OLEMSGICON;
+    using VsShellUtilities = Microsoft.VisualStudio.Shell.VsShellUtilities;
 
     public partial class JavaPropertyPagePanel : UserControl
     {

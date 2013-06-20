@@ -1,13 +1,10 @@
 ﻿namespace Tvl.Java.DebugHost.Interop
 {
-    using ObjectId = Tvl.Java.DebugInterface.Types.ObjectId;
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Runtime.InteropServices;
-    using Value = Tvl.Java.DebugInterface.Types.Value;
+    using ObjectId = Tvl.Java.DebugInterface.Types.ObjectId;
     using Tag = Tvl.Java.DebugInterface.Types.Tag;
+    using Value = Tvl.Java.DebugInterface.Types.Value;
 
     [StructLayout(LayoutKind.Explicit)]
     public struct jvalue

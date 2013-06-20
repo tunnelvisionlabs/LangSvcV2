@@ -1,7 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Go
 {
-    using Antlr.Runtime.Tree;
     using System;
+    using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio;
 
     partial class GoTypeFormatter

@@ -1,6 +1,5 @@
 ﻿namespace Tvl.Java.DebugInterface.Types.Analysis
 {
-    using System.Collections.Generic;
     using System.Collections.ObjectModel;
 
     public struct JavaOpCode

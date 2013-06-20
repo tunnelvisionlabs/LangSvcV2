@@ -6,7 +6,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.Text;
-    using Microsoft.VisualStudio.Text.Projection;
     using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
     using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
     using Path = System.IO.Path;

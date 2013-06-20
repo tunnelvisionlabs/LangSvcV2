@@ -1,10 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.SourceData
 {
-    using System;
-    using System.Diagnostics.Contracts;
-    using Path = System.IO.Path;
-    using System.Linq;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
+    using System.Linq;
+    using Path = System.IO.Path;
 
     public class CodePhysicalFile : CodeElement
     {

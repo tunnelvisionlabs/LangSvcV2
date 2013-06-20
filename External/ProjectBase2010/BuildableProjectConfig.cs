@@ -10,19 +10,13 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 ***************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 //#define ConfigTrace
 using Microsoft.VisualStudio.Shell.Interop;
-using MSBuildConstruction = Microsoft.Build.Construction;
-using MSBuildExecution = Microsoft.Build.Execution;
 
 namespace Microsoft.VisualStudio.Project
 {

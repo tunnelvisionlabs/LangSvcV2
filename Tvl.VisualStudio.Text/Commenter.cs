@@ -3,11 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
     using System.Linq;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Operations;
-    using System.Diagnostics.Contracts;
 
     public class Commenter : ICommenter
     {

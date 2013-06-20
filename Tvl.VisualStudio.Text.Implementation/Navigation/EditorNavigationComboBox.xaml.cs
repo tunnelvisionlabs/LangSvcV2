@@ -1,8 +1,5 @@
 ﻿namespace Tvl.VisualStudio.Text.Navigation.Implementation
 {
-    using System;
-    using System.Reflection;
-    using System.Windows;
     using System.Windows.Controls;
 
     public partial class EditorNavigationComboBox : ComboBox

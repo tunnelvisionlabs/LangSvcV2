@@ -2,14 +2,10 @@
 
 namespace Tvl.VisualStudio.Language.Alloy
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.ComponentModel.Composition;
-    using Microsoft.VisualStudio.Utilities;
     using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Text.Classification;
+    using Microsoft.VisualStudio.Utilities;
 
     public static class AlloyClassificationTypeNames
     {

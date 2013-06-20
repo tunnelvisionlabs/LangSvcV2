@@ -1,9 +1,9 @@
 ﻿namespace Tvl.Java.DebugInterface.Contracts
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.Contracts;
 
     [ContractClassFor(typeof(IStringReference))]
     internal abstract class IStringReferenceContracts : IStringReference

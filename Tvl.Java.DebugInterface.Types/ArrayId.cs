@@ -1,7 +1,7 @@
 ﻿namespace Tvl.Java.DebugInterface.Types
 {
-    using System.Runtime.Serialization;
     using System;
+    using System.Runtime.Serialization;
 
     [DataContract]
     public struct ArrayId : IEquatable<ArrayId>

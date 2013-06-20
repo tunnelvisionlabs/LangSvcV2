@@ -3,13 +3,13 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Antlr.Runtime;
+    using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
-    using Tvl.VisualStudio.Text.Navigation;
-    using Antlr.Runtime;
-    using Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
-    using Antlr.Runtime.Tree;
+    using Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter;
+    using Tvl.VisualStudio.Text.Navigation;
 
     internal sealed class AlloyAtnEditorNavigationSource : BackgroundParser, IEditorNavigationSource
     {

@@ -1,9 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Text.Navigation
 {
     using System;
-    using System.Linq;
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
+    using System.Linq;
     using Microsoft.VisualStudio.Utilities;
 
     [Export(typeof(IEditorNavigationTypeRegistryService))]

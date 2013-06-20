@@ -11,12 +11,7 @@ PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Runtime.Versioning;
-using Microsoft.VisualStudio.Shell.Interop;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.VisualStudio.Project
 {

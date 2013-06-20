@@ -2,10 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Tvl.Collections;
     using System.Diagnostics.Contracts;
+    using Tvl.Collections;
 
     public class DisassembledMethod
     {

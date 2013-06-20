@@ -2,8 +2,8 @@
 {
     using System;
     using System.Diagnostics.Contracts;
-    using SnapshotSpan = Microsoft.VisualStudio.Text.SnapshotSpan;
     using ImageSource = System.Windows.Media.ImageSource;
+    using SnapshotSpan = Microsoft.VisualStudio.Text.SnapshotSpan;
 
     public class EditorNavigationTarget : IEditorNavigationTarget
     {

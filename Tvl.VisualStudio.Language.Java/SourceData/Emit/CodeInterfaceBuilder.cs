@@ -1,11 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Java.SourceData.Emit
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Tvl.VisualStudio.Language.Parsing.Collections;
     using System.Diagnostics.Contracts;
+    using Tvl.VisualStudio.Language.Parsing.Collections;
 
     public class CodeInterfaceBuilder : CodeTypeBuilder
     {
