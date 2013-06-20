@@ -1,5 +1,4 @@
-﻿package $rootnamespace$;
+package $rootnamespace$;
 
-class $safeitemrootname$
-{
+class $safeitemrootname$ {
 }

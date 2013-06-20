@@ -1,8 +1,6 @@
-﻿package $rootnamespace$
+package $rootnamespace$;
 
-public class Program
-{
-	static void main(String[] args)
-	{
+public class Program {
+	static void main(String[] args) {
 	}
 }

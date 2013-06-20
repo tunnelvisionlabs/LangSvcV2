@@ -1,5 +1,4 @@
-﻿package $rootnamespace$;
+package $rootnamespace$;
 
-public class Class1
-{
+public class Class1 {
 }
