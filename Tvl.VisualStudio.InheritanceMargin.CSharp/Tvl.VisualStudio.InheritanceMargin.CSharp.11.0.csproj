@@ -256,7 +256,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CSharpInheritanceAnalyzer.cs" />
+    <Compile Include="CSharpMemberIdentifierEqualityComparer.cs" />
+    <Compile Include="MemberTarget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpecializedMatchingMemberCollector.cs" />
+    <Compile Include="TypeCollector.cs" />
+    <Compile Include="TypeDeclarationNodeSelector.cs" />
+    <Compile Include="TypeTarget.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\External\Key.snk">
