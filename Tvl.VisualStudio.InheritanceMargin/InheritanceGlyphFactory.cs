@@ -68,8 +68,7 @@
             BitmapSource source = new BitmapImage(new Uri("pack://application:,,,/Tvl.VisualStudio.InheritanceMargin;component/Resources/" + imageName + ".png"));
             Image image = new Image()
                 {
-                    Source = source,
-                    ToolTip = inheritanceTag.Glyph.ToString()
+                    Source = source
                 };
             image.CommandBindings.Add(new CommandBinding(InheritanceMarginPackage.InheritanceTargetsList, inheritanceTag.HandleExecutedInheritanceTargetsList, inheritanceTag.HandleCanExecuteInheritanceTargetsList));
 
