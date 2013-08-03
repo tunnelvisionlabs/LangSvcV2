@@ -16,6 +16,9 @@ namespace Microsoft.VisualStudio.Project
     using System.Diagnostics.Contracts;
     using System.Threading;
     using System.Windows.Forms;
+#if DEBUG
+    using System.Globalization;
+#endif
 
     public sealed class UIThread : IDisposable
     {
