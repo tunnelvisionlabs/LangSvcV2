@@ -9,6 +9,7 @@
     using System.Windows.Controls.Primitives;
     using System.Windows.Input;
     using System.Windows.Threading;
+    using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Formatting;
@@ -239,9 +240,9 @@
                                 Child = block
                             };
 
-                            block.SetResourceReference(TextBlock.ForegroundProperty, "VsBrush.ScreenTipText");
-                            border.SetResourceReference(Border.BorderBrushProperty, "VsBrush.ScreenTipBorder");
-                            border.SetResourceReference(Border.BackgroundProperty, "VsBrush.ScreenTipBackground");
+                            block.SetResourceReference(TextBlock.ForegroundProperty, VsBrushes.ScreenTipTextKey);
+                            border.SetResourceReference(Border.BorderBrushProperty, VsBrushes.ScreenTipBorderKey);
+                            border.SetResourceReference(Border.BackgroundProperty, VsBrushes.ScreenTipBackgroundKey);
                             _popup.Child = border;
                             _popup.Placement = PlacementMode.Relative;
                             _popup.PlacementTarget = _margin.VisualElement;
