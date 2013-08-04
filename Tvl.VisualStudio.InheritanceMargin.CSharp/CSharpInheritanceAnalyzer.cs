@@ -213,6 +213,26 @@
             return null;
         }
 
+        /// <summary>
+        /// If <paramref name="node"/> is a <see cref="FieldDeclarationNode"/>, this method selects
+        /// all <see cref="VariableDeclaratorNode"/> children of <paramref name="node"/>. Otherwise,
+        /// this method returns a collection containing <see cref="node"/> itself.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <returns>
+        /// If <paramref name="node"/> is a <see cref="FieldDeclarationNode"/>, this method returns
+        /// <see cref="FieldDeclarationNode.VariableDeclarators"/>. Otherwise, this method returns
+        /// a collection containing <see cref="node"/> itself.
+        /// </returns>
+        private static IEnumerable<ParseTreeNode> SelectDeclaratorsFromFields(ParseTreeNode node)
+        {
+            FieldDeclarationNode fieldDeclarationNode = node as FieldDeclarationNode;
+            if (fieldDeclarationNode == null)
+                return Enumerable.Repeat(node, 1);
+
+            return fieldDeclarationNode.VariableDeclarators;
+        }
+
         protected override void ReParseImpl()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -293,23 +313,25 @@
                     }
 
                     nodes = parseTree.SelectMethodsPropertiesAndFields();
+                    nodes = nodes.SelectMany(SelectDeclaratorsFromFields);
                     foreach (var node in nodes)
                     {
-                        CSharpMember member = null;
+                        if (node is AccessorDeclarationNode)
+                        {
+                            // these nodes always result in an ArgumentException in GetMemberFromMemberDeclaration
+                            continue;
+                        }
 
-                        AccessorDeclarationNode accessorNode = node as AccessorDeclarationNode;
-                        if (accessorNode != null)
+                        CSharpMember member;
+                        try
+                        {
+                            member = compilation.GetMemberFromMemberDeclaration(node);
+                        }
+                        catch (ArgumentException)
                         {
                             continue;
                         }
 
-                        FieldDeclarationNode fieldNode = node as FieldDeclarationNode;
-                        if (fieldNode != null)
-                        {
-                            continue;
-                        }
-
-                        member = compilation.GetMemberFromMemberDeclaration(node);
                         if (member == null)
                         {
                             MarkDirty(true);
