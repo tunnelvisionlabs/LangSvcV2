@@ -77,8 +77,16 @@
             }
 
             bool vs2010 = vsMajorVersion == 10;
+            bool vs2012 = vsMajorVersion == 11;
 
-            string assemblyFileName = vs2010 ? "Tvl.VisualStudio.InheritanceMargin.CSharp.10.0.dll" : "Tvl.VisualStudio.InheritanceMargin.CSharp.11.0.dll";
+            string assemblyFileName;
+            if (vs2010)
+                assemblyFileName = "Tvl.VisualStudio.InheritanceMargin.CSharp.10.0.dll";
+            else if (vs2012)
+                assemblyFileName = "Tvl.VisualStudio.InheritanceMargin.CSharp.11.0.dll";
+            else
+                assemblyFileName = "Tvl.VisualStudio.InheritanceMargin.CSharp.12.0.dll";
+
             Assembly assembly = Assembly.LoadFrom(Path.Combine(directoryName, assemblyFileName));
             return assembly.GetType("Tvl.VisualStudio.InheritanceMargin.CSharp.CSharpInheritanceAnalyzer");
         }

@@ -271,6 +271,11 @@
       <Name>Tvl.VisualStudio.InheritanceMargin.CSharp.11.0</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.InheritanceMargin.CSharp\Tvl.VisualStudio.InheritanceMargin.CSharp.12.0.csproj">
+      <Project>{fbb6e057-77da-4ff6-a867-ef741971e511}</Project>
+      <Name>Tvl.VisualStudio.InheritanceMargin.CSharp.12.0</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.InheritanceMargin.Interfaces\Tvl.VisualStudio.InheritanceMargin.Interfaces.csproj">
       <Project>{f4b709e6-8926-42e6-914a-749cb473f37b}</Project>
       <Name>Tvl.VisualStudio.InheritanceMargin.Interfaces</Name>
