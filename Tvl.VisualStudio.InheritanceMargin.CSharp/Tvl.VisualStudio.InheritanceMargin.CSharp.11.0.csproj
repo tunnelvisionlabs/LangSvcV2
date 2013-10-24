@@ -103,7 +103,7 @@
     </Reference>
     <Reference Include="Microsoft.VisualStudio.CSharp.Services.Language, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.CSharp.Services.Language.Interop, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>J:\apps\Microsoft Visual Studio 11.0\Common7\IDE\Microsoft.VisualStudio.CSharp.Services.Language.Interop.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\Microsoft.VisualStudio.CSharp.Services.Language.Interop.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
       <Private>False</Private>
     </Reference>
