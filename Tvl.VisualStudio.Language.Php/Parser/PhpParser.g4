@@ -4,11 +4,6 @@ options {
 	tokenVocab=PhpLexer;
 }
 
-@members
-{
-	protected const int EOF = Eof;
-}
-
 compileUnit
 @version{4}
 	:	code* EOF

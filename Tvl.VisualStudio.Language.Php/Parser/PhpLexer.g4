@@ -1,11 +1,5 @@
 lexer grammar PhpLexer;
 
-@members
-{
-	protected const int EOF = Eof;
-	protected const int HIDDEN = Hidden;
-}
-
 tokens {
 	DOC_COMMENT_INVALID_TAG,
 }

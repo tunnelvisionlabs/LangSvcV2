@@ -843,10 +843,10 @@
     <!-- Folder containing Antlr4BuildTasks.dll -->
     <Antlr4BuildTaskPath>$(ProjectDir)..\External\Antlr4</Antlr4BuildTaskPath>
     <!-- Path to the ANTLR 4 Tool itself. -->
-    <Antlr4ToolPath>$(ProjectDir)..\External\Antlr4\antlr4-csharp-4.0.1-SNAPSHOT-complete.jar</Antlr4ToolPath>
+    <Antlr4ToolPath>$(ProjectDir)..\External\Antlr4\antlr4-csharp-4.1-SNAPSHOT-complete.jar</Antlr4ToolPath>
   </PropertyGroup>
   <Import Project="$(ProjectDir)..\External\Antlr\Antlr3.targets" />
-  <Import Project="$(ProjectDir)..\External\Antlr4\Antlr4.targets" />
+  <Import Project="$(ProjectDir)..\External\Antlr4\Antlr4.v4.0.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

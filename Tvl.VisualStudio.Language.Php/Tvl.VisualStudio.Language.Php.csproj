@@ -393,7 +393,7 @@
     <!-- Folder containing Antlr4BuildTasks.dll -->
     <Antlr4BuildTaskPath>$(SolutionDir)External\Antlr4</Antlr4BuildTaskPath>
     <!-- Path to the ANTLR Tool itself. -->
-    <Antlr4ToolPath>$(SolutionDir)External\Antlr4\antlr4-csharp-4.0.1-SNAPSHOT-complete.jar</Antlr4ToolPath>
+    <Antlr4ToolPath>$(SolutionDir)External\Antlr4\antlr4-csharp-4.1-SNAPSHOT-complete.jar</Antlr4ToolPath>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -409,7 +409,7 @@
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets" Condition="false" />
   <Import Project="$(SolutionDir)External\Antlr\Antlr3.targets" />
-  <Import Project="$(SolutionDir)External\Antlr4\Antlr4.targets" />
+  <Import Project="$(SolutionDir)External\Antlr4\Antlr4.v4.0.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

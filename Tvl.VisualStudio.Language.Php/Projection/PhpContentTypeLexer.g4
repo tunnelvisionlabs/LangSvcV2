@@ -1,11 +1,5 @@
 lexer grammar PhpContentTypeLexer;
 
-@members
-{
-	protected const int EOF = Eof;
-	protected const int HIDDEN = Hidden;
-}
-
 NEWLINE
 	:	'\r'? '\n'
 	;

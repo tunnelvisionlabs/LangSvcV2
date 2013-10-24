@@ -170,15 +170,6 @@
  */
 grammar Java;
 
-@lexer::members {
-  protected const int EOF = Eof;
-  protected const int HIDDEN = Hidden;
-}
-
-@parser::members {
-  protected const int EOF = Eof;
-}
-
 // starting point for parsing a java file
 /* The annotations are separated out to make parsing faster, but must be associated with
    a packageDeclaration or a typeDeclaration (and not an empty one). */
