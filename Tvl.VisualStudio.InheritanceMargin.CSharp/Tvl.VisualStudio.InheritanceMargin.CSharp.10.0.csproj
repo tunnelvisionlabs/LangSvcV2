@@ -245,13 +245,6 @@
       <Project>{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}</Project>
       <Name>Tvl.VisualStudio.Shell</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.OutputWindow\Tvl.VisualStudio.OutputWindow.csproj">
-      <Project>{A899479D-F92F-462B-8492-723CE90FD1ED}</Project>
-      <Name>Tvl.VisualStudio.OutputWindow</Name>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <Private>False</Private>
-      <IncludeOutputGroupsInVSIX>CreateVsixContainer</IncludeOutputGroupsInVSIX>
-    </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj">
       <Project>{2B913C3A-3FD8-4633-81C8-683AF66741A8}</Project>
       <Name>Tvl.VisualStudio.Text</Name>
