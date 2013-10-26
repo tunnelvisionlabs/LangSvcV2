@@ -3,7 +3,7 @@
   <Identifier Id="Tvl.VisualStudio.MouseNavigation.74370A5B-33D9-4F9E-A910-D83D487A825D">
     <Name>Mouse Navigation</Name>
     <Author>Sam Harwell</Author>
-    <Version>2.1.0</Version>
+    <Version>2.2.0</Version>
     <Description xml:space="preserve">Add support for mouse navigation buttons (back and forward).</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
