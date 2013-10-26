@@ -33,7 +33,7 @@
             set;
         }
 
-        public override void PostprocessMouseDown(MouseButtonEventArgs e)
+        public override void PostprocessMouseUp(MouseButtonEventArgs e)
         {
             uint cmdId;
             switch (e.ChangedButton)
