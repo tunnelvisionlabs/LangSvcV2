@@ -71,6 +71,8 @@ namespace Tvl.VisualStudio.Language.Php
                 // keep the Venus HTML classifier happy - it wants to find a site via IVsTextBuffer
                 _htmlBuffer.Properties.AddProperty(typeof(IVsTextBuffer), buffer);
             }
+
+            HandleContentTypeTagsChanged();
         }
 
         public List<SpanInfo> Spans
@@ -82,6 +84,11 @@ namespace Tvl.VisualStudio.Language.Php
         }
 
         private void HandleContentTypeTagsChanged(object sender, TagsChangedEventArgs e)
+        {
+            HandleContentTypeTagsChanged();
+        }
+
+        private void HandleContentTypeTagsChanged()
         {
             ITextSnapshot snapshot = DiskBuffer.CurrentSnapshot;
             ITextSnapshot htmlSnapshot = _htmlBuffer.CurrentSnapshot;
@@ -155,8 +162,8 @@ namespace Tvl.VisualStudio.Language.Php
                 case RegionType.End:
                     {
                         // handle the code region that ended where this tag ended
-                        ITrackingSpan projectionSpan = phpSnapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgeExclusive);
-                        ITrackingSpan diskBufferSpan = snapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgeExclusive);
+                        ITrackingSpan projectionSpan = new CustomTrackingSpan(phpSnapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgeExclusive));
+                        ITrackingSpan diskBufferSpan = new CustomTrackingSpan(snapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgeExclusive));
 
                         projectionSpans.Add(projectionSpan);
                         spans.Add(new SpanInfo(diskBufferSpan, TemplateTokenKind.Block));
@@ -188,8 +195,8 @@ namespace Tvl.VisualStudio.Language.Php
                 case RegionType.Begin:
                     {
                         // handle the code region that ended at the end of the document
-                        ITrackingSpan projectionSpan = phpSnapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgePositive);
-                        ITrackingSpan diskBufferSpan = snapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgePositive);
+                        ITrackingSpan projectionSpan = new CustomTrackingSpan(phpSnapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgePositive));
+                        ITrackingSpan diskBufferSpan = new CustomTrackingSpan(snapshot.CreateTrackingSpan(sourceSpan, SpanTrackingMode.EdgePositive));
 
                         projectionSpans.Add(projectionSpan);
                         spans.Add(new SpanInfo(diskBufferSpan, TemplateTokenKind.Block));
