@@ -52,9 +52,11 @@
             return V4GrammarClassifierLexerState.Initial;
         }
 
-        protected override ITokenSourceWithState<V4GrammarClassifierLexerState> CreateLexer(ICharStream input, V4GrammarClassifierLexerState state)
+        protected override ITokenSourceWithState<V4GrammarClassifierLexerState> CreateLexer(ICharStream input, int startLine, V4GrammarClassifierLexerState state)
         {
             var lexer = new GrammarHighlighterLexer(input);
+            lexer.Line = startLine;
+            lexer.Column = 0;
             state.Apply(lexer);
             return lexer;
         }

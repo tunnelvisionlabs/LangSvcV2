@@ -136,6 +136,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V4ParserGrammarItemTemplate
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.InheritanceMargin.CSharp.12.0", "Tvl.VisualStudio.InheritanceMargin.CSharp\Tvl.VisualStudio.InheritanceMargin.CSharp.12.0.csproj", "{FBB6E057-77DA-4FF6-A867-EF741971E511}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{66840BE0-CE19-4FF1-99B4-4C8CE2E61D8B}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

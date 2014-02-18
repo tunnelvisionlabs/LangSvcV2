@@ -125,3 +125,6 @@
 /Tvl.VisualStudio.Language.Go/TestGenerated/
 /Tvl.VisualStudio.Language.StringTemplate4/TestGenerated/
 /Tvl.VisualStudio.Language.Php/TestGenerated/
+
+# NuGet package directory
+/packages/
