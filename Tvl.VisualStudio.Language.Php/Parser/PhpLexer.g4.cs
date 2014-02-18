@@ -5,8 +5,6 @@
 
     partial class PhpLexer
     {
-        private const int HIDDEN = Hidden;
-
         private const string DocCommentStartSymbols = "$@&~<>#%\"\\";
 
         private int _stringBraceLevel;

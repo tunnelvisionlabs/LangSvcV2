@@ -90,7 +90,7 @@
                     var startToken = antlrParseResultArgs.Tokens[sourceInterval.a];
                     var stopToken = antlrParseResultArgs.Tokens[sourceInterval.b];
                     PhpParser.CodeContext codeContext = child as PhpParser.CodeContext;
-                    if (codeContext != null && codeContext.EOF() != null)
+                    if (codeContext != null && codeContext.Eof() != null)
                         stopToken = antlrParseResultArgs.Tokens.Last();
 
                     Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
