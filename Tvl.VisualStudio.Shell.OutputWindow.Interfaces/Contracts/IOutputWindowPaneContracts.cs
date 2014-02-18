@@ -14,6 +14,8 @@
             }
             set
             {
+                Contract.Requires<ArgumentNullException>(value != null);
+                Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(value));
             }
         }
 
