@@ -20,7 +20,8 @@
 
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
-            if (buffer.Properties.GetProperty(typeof(PhpProjectionBuffer)) == null)
+            PhpProjectionBuffer projectionBuffer;
+            if (buffer.Properties.TryGetProperty(typeof(PhpProjectionBuffer), out projectionBuffer))
                 return null;
 
             return (ITagger<T>)new ContentTypeTagger(buffer, ContentTypeRegistryService);
