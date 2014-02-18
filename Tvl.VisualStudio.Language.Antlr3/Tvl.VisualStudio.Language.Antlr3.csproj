@@ -127,6 +127,7 @@
       <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\Microsoft.VisualStudio.CallHierarchy.Package.Definitions.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.Debugger.InteropA, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.VisualStudio.Language.CallHierarchy, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>C:\Windows\Microsoft.Net\assembly\GAC_MSIL\Microsoft.VisualStudio.Language.CallHierarchy\v4.0_10.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.Language.CallHierarchy.dll</HintPath>
       <Private>False</Private>
