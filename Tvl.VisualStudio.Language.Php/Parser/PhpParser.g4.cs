@@ -2,5 +2,6 @@
 {
     partial class PhpParser
     {
+        private const int EOF = Eof;
     }
 }
