@@ -71,6 +71,8 @@ namespace Tvl.VisualStudio.Language.Php
                 // keep the Venus HTML classifier happy - it wants to find a site via IVsTextBuffer
                 _htmlBuffer.Properties.AddProperty(typeof(IVsTextBuffer), buffer);
             }
+
+            HandleContentTypeTagsChanged();
         }
 
         public List<SpanInfo> Spans
@@ -82,6 +84,11 @@ namespace Tvl.VisualStudio.Language.Php
         }
 
         private void HandleContentTypeTagsChanged(object sender, TagsChangedEventArgs e)
+        {
+            HandleContentTypeTagsChanged();
+        }
+
+        private void HandleContentTypeTagsChanged()
         {
             ITextSnapshot snapshot = DiskBuffer.CurrentSnapshot;
             ITextSnapshot htmlSnapshot = _htmlBuffer.CurrentSnapshot;
