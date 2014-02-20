@@ -4108,6 +4108,7 @@ namespace Microsoft.VisualStudio.Project
             Contract.Assert(!String.IsNullOrEmpty(newFileName), "Cannot save project file for an empty or null file name");
 
             this.buildProject.FullPath = newFileName;
+            this.baseUri = null;
 
             this.FileName = newFileName;
 
@@ -7011,6 +7012,7 @@ namespace Microsoft.VisualStudio.Project
         private void SetBuildProject(MSBuild.Project project)
         {
             this.buildProject = project;
+            this.baseUri = null;
             if (this.buildProject != null)
             {
                 SetupProjectGlobalPropertiesThatAllProjectSystemsMustSet();
