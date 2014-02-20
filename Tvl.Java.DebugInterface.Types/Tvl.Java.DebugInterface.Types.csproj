@@ -127,7 +127,10 @@
     <Compile Include="ConstantFieldReference.cs" />
     <Compile Include="ConstantFloat.cs" />
     <Compile Include="ConstantInteger.cs" />
+    <Compile Include="ConstantInvokeDynamic.cs" />
     <Compile Include="ConstantLong.cs" />
+    <Compile Include="ConstantMethodHandle.cs" />
+    <Compile Include="ConstantMethodType.cs" />
     <Compile Include="ConstantNameAndType.cs" />
     <Compile Include="ConstantPoolEntry.cs" />
     <Compile Include="ConstantString.cs" />
@@ -163,6 +166,7 @@
     <Compile Include="Loader\Synthetic.cs" />
     <Compile Include="Loader\UnknownAttributeInfo.cs" />
     <Compile Include="Location.cs" />
+    <Compile Include="MethodHandleKind.cs" />
     <Compile Include="MethodId.cs" />
     <Compile Include="ModifiedUtf8Encoding.cs" />
     <Compile Include="ModifierKind.cs" />
