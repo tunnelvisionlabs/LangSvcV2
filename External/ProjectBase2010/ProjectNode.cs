@@ -2856,7 +2856,7 @@ namespace Microsoft.VisualStudio.Project
                 }
 
                 if (lastRelevantElement == null)
-                    lastRelevantElement = project.Xml.PropertyGroupsReversed.First();
+                    lastRelevantElement = project.Xml.PropertyGroupsReversed.FirstOrDefault();
 
                 destinationGroup = project.Xml.CreatePropertyGroupElement();
                 project.Xml.InsertAfterChild(destinationGroup, lastRelevantElement);
