@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Runtime.InteropServices;
     using System.Text;
     using Microsoft.VisualStudio.Project;
@@ -12,6 +13,8 @@
     using MSBuild = Microsoft.Build.Evaluation;
     using OAVSProject = Microsoft.VisualStudio.Project.Automation.OAVSProject;
     using Path = System.IO.Path;
+    using PrjKind = VSLangProj.PrjKind;
+    using StackTrace = System.Diagnostics.StackTrace;
     using VSCOMPONENTSELECTORTABINIT = Microsoft.VisualStudio.Shell.Interop.VSCOMPONENTSELECTORTABINIT;
     using VSConstants = Microsoft.VisualStudio.VSConstants;
 
@@ -53,6 +56,13 @@
         {
             get
             {
+                StackTrace trace = new StackTrace();
+                if (trace.GetFrames().Any(i => i.GetMethod().Name == "IsSupported" && i.GetMethod().DeclaringType.Name == "VsUtility" && i.GetMethod().DeclaringType.Namespace == "NuGet.VisualStudio"))
+                {
+                    // NuGet only operates with a select group of project kinds. This hook tricks it into working with Java projects.
+                    return new Guid(PrjKind.prjKindCSharpProject);
+                }
+
                 return typeof(JavaProjectFactory).GUID;
             }
         }
