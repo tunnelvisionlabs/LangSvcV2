@@ -52,7 +52,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Program.java" />
+    <Content Include="src\main\java\pkg\Program.java" />
     <None Include="ConsoleApplication.javaproj" />
     <None Include="JavaConsoleApplicationProjectTemplate.ico" />
   </ItemGroup>

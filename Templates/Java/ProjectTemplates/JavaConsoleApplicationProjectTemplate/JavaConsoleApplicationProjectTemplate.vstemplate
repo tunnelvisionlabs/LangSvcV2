@@ -14,7 +14,7 @@
   </TemplateData>
   <TemplateContent>
     <Project File="ConsoleApplication.javaproj" ReplaceParameters="true">
-      <ProjectItem ReplaceParameters="true" OpenInEditor="true">Program.java</ProjectItem>
+      <ProjectItem ReplaceParameters="true" OpenInEditor="true">src\main\java\pkg\Program.java</ProjectItem>
     </Project>
   </TemplateContent>
   <WizardExtension>

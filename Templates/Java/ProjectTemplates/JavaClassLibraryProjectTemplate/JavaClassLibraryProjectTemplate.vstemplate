@@ -14,7 +14,7 @@
   </TemplateData>
   <TemplateContent>
     <Project File="ClassLibrary.javaproj" ReplaceParameters="true">
-      <ProjectItem ReplaceParameters="true" OpenInEditor="true">Class1.java</ProjectItem>
+      <ProjectItem ReplaceParameters="true" OpenInEditor="true">src\main\java\pkg\Class1.java</ProjectItem>
     </Project>
   </TemplateContent>
   <WizardExtension>
