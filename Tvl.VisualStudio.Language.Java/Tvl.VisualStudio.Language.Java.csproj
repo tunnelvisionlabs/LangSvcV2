@@ -392,6 +392,10 @@
     <Antlr3 Include="Debugger\DebugExpressionEvaluatorWalker.g3">
       <Generator>MSBuild:Compile</Generator>
     </Antlr3>
+    <Content Include="..\Tvl.Java.BuildTasks\bin\nuget\Tvl.Java.1.0.0-alpha001.nupkg">
+      <Link>Packages\Tvl.Java.1.0.0-alpha001.nupkg</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="Debugger\JavaDebugProcess.cs" />
     <None Include="Debugger\JavaDebugPort.cs" />
     <None Include="Debugger\JavaDebugPortSupplier.cs" />
