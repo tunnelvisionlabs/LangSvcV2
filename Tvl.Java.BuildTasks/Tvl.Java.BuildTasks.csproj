@@ -117,6 +117,11 @@
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
     </None>
+    <None Include="pack.ps1" />
+    <None Include="Tvl.Java.nuspec" />
+    <None Include="Tvl.Java.props">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Tvl.Java.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

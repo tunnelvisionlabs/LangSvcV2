@@ -2002,6 +2002,13 @@ namespace Microsoft.VisualStudio.Project
                     this.buildProject = null;
                 }
 
+                if (this._userBuildProject != null)
+                {
+                    this._userBuildProject.ProjectCollection.UnloadProject(this._userBuildProject);
+                    this._userBuildProject.ProjectCollection.UnloadProject(this._userBuildProject.Xml);
+                    this._userBuildProject = null;
+                }
+
                 if (null != imageHandler)
                 {
                     imageHandler.Close();
@@ -2856,7 +2863,7 @@ namespace Microsoft.VisualStudio.Project
                 }
 
                 if (lastRelevantElement == null)
-                    lastRelevantElement = project.Xml.PropertyGroupsReversed.First();
+                    lastRelevantElement = project.Xml.PropertyGroupsReversed.FirstOrDefault();
 
                 destinationGroup = project.Xml.CreatePropertyGroupElement();
                 project.Xml.InsertAfterChild(destinationGroup, lastRelevantElement);
@@ -4108,6 +4115,7 @@ namespace Microsoft.VisualStudio.Project
             Contract.Assert(!String.IsNullOrEmpty(newFileName), "Cannot save project file for an empty or null file name");
 
             this.buildProject.FullPath = newFileName;
+            this.baseUri = null;
 
             this.FileName = newFileName;
 
@@ -6814,7 +6822,7 @@ namespace Microsoft.VisualStudio.Project
                     projectInstance = UserBuildProject.CreateProjectInstance();
             }
 
-            if (this.currentConfig == null)
+            if (projectInstance == null)
             {
                 if (storageType == _PersistStorageType.PST_PROJECT_FILE)
                     throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, SR.GetString(SR.FailedToRetrieveProperties, CultureInfo.CurrentUICulture), propertyName));
@@ -6823,7 +6831,7 @@ namespace Microsoft.VisualStudio.Project
             }
 
             // return property asked for
-            return GetMsBuildProperty(this.currentConfig, propertyName);
+            return GetMsBuildProperty(projectInstance, propertyName);
         }
 
         private static ProjectPropertyInstance GetMsBuildProperty(ProjectInstance projectInstance, string propertyName)
@@ -7011,6 +7019,7 @@ namespace Microsoft.VisualStudio.Project
         private void SetBuildProject(MSBuild.Project project)
         {
             this.buildProject = project;
+            this.baseUri = null;
             if (this.buildProject != null)
             {
                 SetupProjectGlobalPropertiesThatAllProjectSystemsMustSet();

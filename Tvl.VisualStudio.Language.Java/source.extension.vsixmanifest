@@ -36,11 +36,17 @@
       <Name>Visual Studio Extensibility Framework</Name>
       <VsixPath>Tvl.VisualStudio.Framework.vsix</VsixPath>
     </Reference>
+    <!-- Can't add a reference to NuGet because the package ID is different in Visual Studio 2013 -->
+    <!--<Reference Id="NuPackToolsVsix.Microsoft.67e54e40-0ae3-42c5-a949-fddf5739e7a5" MinVersion="2.8">
+      <Name>NuGet Package Manager</Name>
+      <MoreInfoUrl>http://docs.nuget.org/</MoreInfoUrl>
+    </Reference>-->
   </References>
   <Content>
     <MefComponent>|%CurrentProject%|</MefComponent>
     <VsPackage>|%CurrentProject%|</VsPackage>
     <ProjectTemplate>ProjectTemplates</ProjectTemplate>
     <ItemTemplate>ItemTemplates</ItemTemplate>
+    <CustomExtension Type="Tvl.Java.1.0.0-alpha001.nupkg">packages/Tvl.Java.1.0.0-alpha001.nupkg</CustomExtension>
   </Content>
 </Vsix>

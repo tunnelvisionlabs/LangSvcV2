@@ -177,7 +177,7 @@
                 break;
 
             default:
-                throw new NotImplementedException();
+                throw new NotImplementedException("This preview version of the Java debugger only supports starting execution in a named class; the class name may be configured in the project properties on the Debug tab.");
             }
 
             string debugArgs = GetConfigurationProperty(JavaConfigConstants.DebugExtraArgs, _PersistStorageType.PST_USER_FILE, false);
@@ -186,7 +186,7 @@
 
             string workingDirectory = GetConfigurationProperty(JavaConfigConstants.DebugWorkingDirectory, _PersistStorageType.PST_USER_FILE, false);
             if (string.IsNullOrEmpty(workingDirectory))
-                workingDirectory = GetConfigurationProperty(JavaConfigConstants.OutputPath, _PersistStorageType.PST_USER_FILE, false);
+                workingDirectory = GetConfigurationProperty(JavaConfigConstants.OutputPath, _PersistStorageType.PST_PROJECT_FILE, false);
 
             if (!Path.IsPathRooted(workingDirectory))
             {

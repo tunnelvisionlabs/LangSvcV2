@@ -14,5 +14,8 @@
         MethodReference = 10,
         InterfaceMethodReference = 11,
         NameAndType = 12,
+        MethodHandle = 15,
+        MethodType = 16,
+        InvokeDynamic = 18,
     }
 }

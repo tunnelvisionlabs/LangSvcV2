@@ -117,9 +117,35 @@
                     return result;
                 }
 
+            case ConstantType.MethodHandle:
+                {
+                    MethodHandleKind referenceKind = (MethodHandleKind)Marshal.ReadByte(pointer, 1);
+                    ushort referenceIndex = ByteSwap((ushort)Marshal.ReadInt16(pointer, 2));
+                    var result = new ConstantMethodHandle(referenceKind, referenceIndex);
+                    pointer += 4;
+                    return result;
+                }
+
+            case ConstantType.MethodType:
+                {
+                    ushort descriptorIndex = ByteSwap((ushort)Marshal.ReadInt16(pointer, 1));
+                    var result = new ConstantMethodType(descriptorIndex);
+                    pointer += 3;
+                    return result;
+                }
+
+            case ConstantType.InvokeDynamic:
+                {
+                    ushort bootstrapMethodAttrIndex = ByteSwap((ushort)Marshal.ReadInt16(pointer, 1));
+                    ushort nameAndTypeIndex = ByteSwap((ushort)Marshal.ReadInt16(pointer, 3));
+                    var result = new ConstantInvokeDynamic(bootstrapMethodAttrIndex, nameAndTypeIndex);
+                    pointer += 5;
+                    return result;
+                }
+
             case ConstantType.Invalid:
             default:
-                throw new ArgumentException();
+                throw new ArgumentException(string.Format("Unknown constant type: {0}", type));
             }
         }
 

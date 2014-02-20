@@ -23,6 +23,7 @@
     using Process = System.Diagnostics.Process;
     using Thread = System.Threading.Thread;
     using WaitHandle = System.Threading.WaitHandle;
+    using WaitHandleCannotBeOpenedException = System.Threading.WaitHandleCannotBeOpenedException;
 
     public static class AgentExports
     {
@@ -158,13 +159,25 @@
              */
             WaitHandle.WaitAll(waitHandles.ToArray());
 
-            EventWaitHandle.OpenExisting(string.Format("JavaDebuggerInitHandle{0}", Process.GetCurrentProcess().Id)).Set();
+            EventWaitHandle eventWaitHandle = null;
+            try
+            {
+                eventWaitHandle = EventWaitHandle.OpenExisting(string.Format("JavaDebuggerInitHandle{0}", Process.GetCurrentProcess().Id));
+            }
+            catch (WaitHandleCannotBeOpenedException)
+            {
+                // must have been launched without the debugger
+            }
 
-            Action waitAction = _debuggerAttachComplete.Wait;
-            IAsyncResult waitResult = waitAction.BeginInvoke(vm.HandleAsyncOperationComplete, null);
-            DispatcherFrame frame = new DispatcherFrame(true);
-            JvmtiEnvironment environment = debugProtocolService.Environment;
-            vm.PushDispatcherFrame(frame, environment, waitResult);
+            if (eventWaitHandle != null)
+            {
+                eventWaitHandle.Set();
+                Action waitAction = _debuggerAttachComplete.Wait;
+                IAsyncResult waitResult = waitAction.BeginInvoke(vm.HandleAsyncOperationComplete, null);
+                DispatcherFrame frame = new DispatcherFrame(true);
+                JvmtiEnvironment environment = debugProtocolService.Environment;
+                vm.PushDispatcherFrame(frame, environment, waitResult);
+            }
 
             return 0;
         }
