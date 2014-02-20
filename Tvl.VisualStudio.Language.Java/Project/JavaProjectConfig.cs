@@ -186,7 +186,7 @@
 
             string workingDirectory = GetConfigurationProperty(JavaConfigConstants.DebugWorkingDirectory, _PersistStorageType.PST_USER_FILE, false);
             if (string.IsNullOrEmpty(workingDirectory))
-                workingDirectory = GetConfigurationProperty(JavaConfigConstants.OutputPath, _PersistStorageType.PST_USER_FILE, false);
+                workingDirectory = GetConfigurationProperty(JavaConfigConstants.OutputPath, _PersistStorageType.PST_PROJECT_FILE, false);
 
             if (!Path.IsPathRooted(workingDirectory))
             {

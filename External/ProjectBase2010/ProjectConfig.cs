@@ -49,6 +49,7 @@ namespace Microsoft.VisualStudio.Project
         private string _configName;
         private string _platform;
         private MSBuildExecution.ProjectInstance currentConfig;
+        private MSBuildExecution.ProjectInstance currentUserConfig;
         private List<OutputGroup> outputGroups;
         private IProjectConfigProperties configurationProperties;
         private IVsProjectFlavorCfg flavoredCfg;
@@ -210,6 +211,7 @@ namespace Microsoft.VisualStudio.Project
         {
             // property cache will need to be updated
             this.currentConfig = null;
+            this.currentUserConfig = null;
 
             // Signal the output groups that something is changed
             foreach (OutputGroup group in this.OutputGroups)
@@ -669,23 +671,37 @@ namespace Microsoft.VisualStudio.Project
 
         private MSBuildExecution.ProjectPropertyInstance GetMsBuildProperty(string propertyName, _PersistStorageType storageType, bool resetCache)
         {
-            if (resetCache || this.currentConfig == null)
+            MSBuildExecution.ProjectInstance requestedConfig = storageType == _PersistStorageType.PST_PROJECT_FILE ? currentConfig : currentUserConfig;
+            if (resetCache || requestedConfig == null)
             {
                 // Get properties for current configuration from project file and cache it
                 this._project.SetConfiguration(this.ConfigName, this.Platform);
                 this._project.BuildProject.ReevaluateIfNecessary();
+                if (this._project.UserBuildProject != null)
+                    this._project.UserBuildProject.ReevaluateIfNecessary();
+
                 // Create a snapshot of the evaluated project in its current state
                 this.currentConfig = this._project.BuildProject.CreateProjectInstance();
+                if (this._project.UserBuildProject != null)
+                    this.currentUserConfig = this._project.UserBuildProject.CreateProjectInstance();
+
+                requestedConfig = storageType == _PersistStorageType.PST_PROJECT_FILE ? currentConfig : currentUserConfig;
 
                 // Restore configuration
                 _project.SetCurrentConfiguration();
             }
 
-            if (this.currentConfig == null)
-                throw new Exception("Failed to retrieve properties");
+            if (requestedConfig == null)
+            {
+                if (storageType == _PersistStorageType.PST_PROJECT_FILE)
+                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, SR.GetString(SR.FailedToRetrieveProperties, CultureInfo.CurrentUICulture), propertyName));
+
+                // user build projects aren't essential
+                return null;
+            }
 
             // return property asked for
-            return this.currentConfig.GetProperty(propertyName);
+            return requestedConfig.GetProperty(propertyName);
         }
 
         /// <summary>

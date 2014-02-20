@@ -23,8 +23,6 @@ Based on Microsoft.Common.targets, Copyright (C) Microsoft Corporation. All righ
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\$(MSBuildThisFile)\ImportBefore\*" Condition="'$(ImportByWildcardBeforeTvlJvmCommonTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\$(MSBuildThisFile)\ImportBefore')"/>
 
-  <Import Project="$(MSBuildProjectFullPath).user" Condition="Exists('$(MSBuildProjectFullPath).user')"/>
-
   <UsingTask Condition="'$(JavaBuildTaskPath)'==''" TaskName="Tvl.Java.BuildTasks.Jar" AssemblyFile="Tvl.Java.BuildTasks.dll" />
 
   <PropertyGroup>
