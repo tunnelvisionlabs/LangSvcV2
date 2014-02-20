@@ -177,7 +177,7 @@
                 break;
 
             default:
-                throw new NotImplementedException();
+                throw new NotImplementedException("This preview version of the Java debugger only supports starting execution in a named class; the class name may be configured in the project properties on the Debug tab.");
             }
 
             string debugArgs = GetConfigurationProperty(JavaConfigConstants.DebugExtraArgs, _PersistStorageType.PST_USER_FILE, false);
