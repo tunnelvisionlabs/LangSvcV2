@@ -1,4 +1,4 @@
-$BuildConfig = 'Debug'
+$BuildConfig = 'Release'
 $Version = '1.0.0-alpha001'
 
 if (!(Test-Path .\bin\nuget)) {

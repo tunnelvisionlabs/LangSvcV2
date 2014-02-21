@@ -55,7 +55,7 @@
     <None Include="EmptyProject.javaproj" />
   </ItemGroup>
   <ItemGroup>
-    <VSTemplate Include="JavaEmptyProjectProjectTemplate.vstemplate">
+    <VSTemplate Include="JavaEmptyProject.vstemplate">
       <OutputSubPath>Windows</OutputSubPath>
     </VSTemplate>
   </ItemGroup>

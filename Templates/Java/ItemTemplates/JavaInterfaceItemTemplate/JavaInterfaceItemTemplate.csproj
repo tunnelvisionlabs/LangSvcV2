@@ -56,7 +56,7 @@
     <None Include="JavaInterfaceItemTemplate.ico" />
   </ItemGroup>
   <ItemGroup>
-    <VSTemplate Include="JavaInterfaceItemTemplate.vstemplate">
+    <VSTemplate Include="JavaInterface.vstemplate">
       <OutputSubPath>Code</OutputSubPath>
     </VSTemplate>
   </ItemGroup>

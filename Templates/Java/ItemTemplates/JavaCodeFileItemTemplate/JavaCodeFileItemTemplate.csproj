@@ -56,7 +56,7 @@
     <None Include="JavaCodeFileItemTemplate.ico" />
   </ItemGroup>
   <ItemGroup>
-    <VSTemplate Include="JavaCodeFileItemTemplate.vstemplate">
+    <VSTemplate Include="JavaCodeFile.vstemplate">
       <OutputSubPath>Code</OutputSubPath>
     </VSTemplate>
   </ItemGroup>
