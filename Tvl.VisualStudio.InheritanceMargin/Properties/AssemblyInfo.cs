@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Tunnel Vision Laboratories, LLC")]
 [assembly: AssemblyProduct("Tvl.VisualStudio.InheritanceMargin")]
-[assembly: AssemblyCopyright("Copyright © Sam Harwell 2013")]
+[assembly: AssemblyCopyright("Copyright © Sam Harwell 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en-US")]
@@ -31,5 +31,5 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("2.0.0.0")]
-[assembly: AssemblyFileVersion("2.0.0.0")]
-[assembly: AssemblyInformationalVersion("2.0.0.0")]
+[assembly: AssemblyFileVersion("2.0.1.0")]
+[assembly: AssemblyInformationalVersion("2.0.1.0")]
