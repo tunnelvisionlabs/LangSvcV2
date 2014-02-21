@@ -57,7 +57,7 @@
     <None Include="JavaClassLibraryProjectTemplate.ico" />
   </ItemGroup>
   <ItemGroup>
-    <VSTemplate Include="JavaClassLibraryProjectTemplate.vstemplate">
+    <VSTemplate Include="JavaClassLibrary.vstemplate">
       <OutputSubPath>Windows</OutputSubPath>
     </VSTemplate>
   </ItemGroup>
