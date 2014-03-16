@@ -27,7 +27,6 @@
         //CodeSense = true,
         RequestStockColors = true)]
     [ProvideLanguageExtension(typeof(GoLanguageInfo), GoConstants.GoFileExtension)]
-    [ProvideBindingPath]
     public class GoLanguagePackage : Package
     {
         private static GoLanguagePackage _instance;

@@ -27,7 +27,6 @@
         //CodeSense = true,
         RequestStockColors = true)]
     [ProvideLanguageExtension(typeof(AlloyLanguageInfo), AlloyConstants.AlloyFileExtension)]
-    [ProvideBindingPath]
     public class AlloyLanguagePackage : Package
     {
         private static AlloyLanguagePackage _instance;

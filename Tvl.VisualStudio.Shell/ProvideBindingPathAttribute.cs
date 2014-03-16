@@ -1,19 +1,10 @@
-﻿/***************************************************************************
-
-Copyright (c) Microsoft Corporation. All rights reserved.
-This code is licensed under the Visual Studio SDK license terms.
-THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-
-***************************************************************************/
-
-using System;
-using System.Text;
-
-namespace Microsoft.VisualStudio.Shell
+﻿namespace Tvl.VisualStudio.Shell
 {
+    using System;
+    using System.Reflection;
+    using System.Runtime.InteropServices;
+    using Microsoft.VisualStudio.Shell;
+
     /// <summary>
     /// This attribute registers a path that should be probed for candidate assemblies at assembly load time.
     /// 
@@ -24,19 +15,24 @@ namespace Microsoft.VisualStudio.Shell
     /// This would register the "PackageFolder" (i.e. the location of the pkgdef file) as a directory to be probed
     /// for assemblies to load.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
     public sealed class ProvideBindingPathAttribute : RegistrationAttribute
     {
-        /// <summary>
-        /// An optional SubPath to set after $PackageFolder$. This should be used
-        /// if the assemblies to be probed reside in a different directory than
-        /// the pkgdef file.
-        /// </summary>
-        public string SubPath { get; set; }
-
         private static string GetPathToKey(RegistrationContext context)
         {
-            return string.Concat(@"BindingPaths\", context.ComponentType.GUID.ToString("B").ToUpperInvariant());
+            Guid componentGuid = GetAssemblyGuid(context.CodeBase);
+            return string.Concat(@"BindingPaths\", componentGuid.ToString("B").ToUpperInvariant());
+        }
+
+        private static Guid GetAssemblyGuid(string codeBase)
+        {
+            string assemblyFile = new Uri(codeBase).LocalPath;
+            Assembly assembly = Assembly.LoadFrom(codeBase);
+            object[] attributesData = assembly.GetCustomAttributes(typeof(GuidAttribute), false);
+            if (attributesData.Length == 0)
+                throw new ArgumentException("The specified assembly did not contain a [Guid] attribute.");
+
+            return new Guid(((GuidAttribute)attributesData[0]).Value);
         }
 
         public override void Register(RegistrationContext context)
@@ -48,14 +44,7 @@ namespace Microsoft.VisualStudio.Shell
 
             using (Key childKey = context.CreateKey(GetPathToKey(context)))
             {
-                StringBuilder keyName = new StringBuilder(context.ComponentPath); 
-                if (!string.IsNullOrEmpty(SubPath))
-                {
-                    keyName.Append("\\");
-                    keyName.Append(SubPath);
-                }
-
-                childKey.SetValue(keyName.ToString(), string.Empty);
+                childKey.SetValue(context.ComponentPath, string.Empty);
             }
         }
 

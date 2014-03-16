@@ -80,8 +80,6 @@
     [ProvideDebuggerException(typeof(Antlr4.Runtime.Misc.ParseCanceledException))]
 
     [ProvideAutoLoad(VSConstants.UICONTEXT.CSharpProject_string)]
-
-    [ProvideBindingPath]
     public class AntlrLanguagePackage
         : Package
         , IVsTrackProjectDocumentsEvents2
