@@ -4,7 +4,9 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio;
+#if DEV10ONLY
     using Microsoft.VisualStudio.CallHierarchy.Package.Definitions;
+#endif
     using Microsoft.VisualStudio.ComponentModelHost;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
@@ -52,11 +54,13 @@
             return serviceProvider.GetService<SVsCallBrowser, IVsCallBrowser>();
         }
 
+#if DEV10ONLY
         public static ICallHierarchy GetCallHierarchy(this SVsServiceProvider serviceProvider)
         {
             Contract.Requires<ArgumentNullException>(serviceProvider != null, "serviceProvider");
             return serviceProvider.GetService<SCallHierarchy, ICallHierarchy>();
         }
+#endif
 
         public static IVsNavigationTool GetClassView(this SVsServiceProvider serviceProvider)
         {
