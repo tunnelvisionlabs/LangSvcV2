@@ -58,13 +58,6 @@
 
         private static Type LoadAnalyzerType(SVsServiceProvider serviceProvider)
         {
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            Uri uri;
-            if (Uri.TryCreate(codeBase, UriKind.RelativeOrAbsolute, out uri))
-                codeBase = uri.LocalPath;
-
-            string directoryName = Path.GetDirectoryName(codeBase);
-
             Version version;
             int vsMajorVersion;
             if (Version.TryParse(serviceProvider.GetService<_DTE, DTE>().Version, out version))
@@ -79,15 +72,15 @@
             bool vs2010 = vsMajorVersion == 10;
             bool vs2012 = vsMajorVersion == 11;
 
-            string assemblyFileName;
+            string assemblyName;
             if (vs2010)
-                assemblyFileName = "Tvl.VisualStudio.InheritanceMargin.CSharp.10.0.dll";
+                assemblyName = "Tvl.VisualStudio.InheritanceMargin.CSharp.10.0";
             else if (vs2012)
-                assemblyFileName = "Tvl.VisualStudio.InheritanceMargin.CSharp.11.0.dll";
+                assemblyName = "Tvl.VisualStudio.InheritanceMargin.CSharp.11.0";
             else
-                assemblyFileName = "Tvl.VisualStudio.InheritanceMargin.CSharp.12.0.dll";
+                assemblyName = "Tvl.VisualStudio.InheritanceMargin.CSharp.12.0";
 
-            Assembly assembly = Assembly.LoadFrom(Path.Combine(directoryName, assemblyFileName));
+            Assembly assembly = Assembly.Load(assemblyName);
             return assembly.GetType("Tvl.VisualStudio.InheritanceMargin.CSharp.CSharpInheritanceAnalyzer");
         }
 
