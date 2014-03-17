@@ -45,5 +45,6 @@
     <MefComponent>|Tvl.VisualStudio.Language|</MefComponent>
     <MefComponent>|Tvl.VisualStudio.Shell|</MefComponent>
     <MefComponent>|Tvl.Core|</MefComponent>
+    <VsPackage>|%CurrentProject%|</VsPackage>
   </Content>
 </Vsix>

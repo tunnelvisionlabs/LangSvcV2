@@ -35,6 +35,7 @@
 
   <Content>
     <MefComponent>|Tvl.VisualStudio.Shell.OutputWindow.Implementation|</MefComponent>
+    <VsPackage>|%CurrentProject%|</VsPackage>
   </Content>
 
 </Vsix>
