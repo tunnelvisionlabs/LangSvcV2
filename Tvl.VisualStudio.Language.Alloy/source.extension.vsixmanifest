@@ -3,7 +3,7 @@
   <Identifier Id="Tvl.VisualStudio.Language.Alloy.b3393cfb-8f68-44c2-b4d7-c3210467bb9d">
     <Name>Alloy Language Support</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0.8</Version>
+    <Version>1.1.0</Version>
     <Description xml:space="preserve">Basic support for the Alloy modeling language.</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>

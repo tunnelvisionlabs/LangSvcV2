@@ -3,7 +3,7 @@
   <Identifier Id="Tvl.VisualStudio.Language.Java.1852bf6a-fde2-4268-9e3e-dce34312bfe3">
     <Name>Java Language Support</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0.8</Version>
+    <Version>1.1.0</Version>
     <Description xml:space="preserve">Basic support for the Java programming language.</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>

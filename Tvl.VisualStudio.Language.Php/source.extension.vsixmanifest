@@ -3,7 +3,7 @@
   <Identifier Id="Tvl.VisualStudio.Language.Php.ece72f50-0b6f-4363-9986-e38af13f6aa5">
     <Name>PHP Language Support</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.0.9</Version>
+    <Version>1.1.0</Version>
     <Description xml:space="preserve">Basic support for the PHP programming language.</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
