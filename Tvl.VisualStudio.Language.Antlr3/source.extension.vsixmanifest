@@ -31,7 +31,7 @@
     <SupportedFrameworkRuntimeEdition MinVersion="4.0" />
   </Identifier>
   <References>
-    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.1.0">
+    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.2.0">
       <Name>Visual Studio Extensibility Framework</Name>
       <VsixPath>Tvl.VisualStudio.Framework.vsix</VsixPath>
     </Reference>
