@@ -3,7 +3,7 @@
   <Identifier Id="Tvl.VisualStudio.Language.Antlr3.74dda0ee-262e-4c58-8255-d57136664d2b">
     <Name>ANTLR Language Support</Name>
     <Author>Sam Harwell</Author>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <Description xml:space="preserve">Basic support for the ANTLR grammar description language (V3 and V4).</Description>
     <Locale>1033</Locale>
     <License>Eula.rtf</License>
