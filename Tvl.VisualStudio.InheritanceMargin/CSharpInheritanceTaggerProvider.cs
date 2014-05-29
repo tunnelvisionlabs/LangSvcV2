@@ -11,9 +11,9 @@
 
     [Name("CSharp Inheritance Tagger Provider")]
     [TagType(typeof(IInheritanceTag))]
-    [Export(typeof(IViewTaggerProvider))]
+    [Export(typeof(ITaggerProvider))]
     [ContentType("CSharp")]
-    public class CSharpInheritanceTaggerProvider : IViewTaggerProvider
+    public class CSharpInheritanceTaggerProvider : ITaggerProvider
     {
         public CSharpInheritanceTaggerProvider()
         {
@@ -48,12 +48,12 @@
             private set;
         }
 
-        #region IViewTaggerProvider Members
+        #region ITaggerProvider Members
 
-        public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
+        public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
-            if (textView != null && buffer != null)
-                return CSharpInheritanceTagger.CreateInstance(this, textView, buffer) as ITagger<T>;
+            if (buffer != null)
+                return CSharpInheritanceTagger.CreateInstance(this, buffer) as ITagger<T>;
 
             return null;
         }

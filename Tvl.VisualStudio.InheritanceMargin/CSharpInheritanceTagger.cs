@@ -7,13 +7,11 @@
     using System.Reflection;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Text;
-    using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell;
     using _DTE = EnvDTE._DTE;
     using DTE = EnvDTE.DTE;
-    using Path = System.IO.Path;
 
     public class CSharpInheritanceTagger : ITagger<IInheritanceTag>
     {
@@ -21,20 +19,17 @@
         private static Type _analyzerType;
 
         private readonly CSharpInheritanceTaggerProvider _provider;
-        private readonly ITextView _textView;
         private readonly ITextBuffer _buffer;
         private readonly BackgroundParser _analyzer;
 
         private ITagSpan<IInheritanceTag>[] _tags = NoTags;
 
-        public CSharpInheritanceTagger(CSharpInheritanceTaggerProvider provider, ITextView textView, ITextBuffer buffer)
+        public CSharpInheritanceTagger(CSharpInheritanceTaggerProvider provider, ITextBuffer buffer)
         {
             Contract.Requires<ArgumentNullException>(provider != null, "provider");
-            Contract.Requires<ArgumentNullException>(textView != null, "textView");
             Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
 
             this._provider = provider;
-            this._textView = textView;
             this._buffer = buffer;
 
             if (_analyzerType == null)
@@ -47,13 +42,12 @@
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        internal static CSharpInheritanceTagger CreateInstance(CSharpInheritanceTaggerProvider provider, ITextView textView, ITextBuffer buffer)
+        internal static CSharpInheritanceTagger CreateInstance(CSharpInheritanceTaggerProvider provider, ITextBuffer buffer)
         {
             Contract.Requires<ArgumentNullException>(provider != null, "provider");
-            Contract.Requires<ArgumentNullException>(textView != null, "textView");
             Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
 
-            return textView.Properties.GetOrCreateSingletonProperty(() => new CSharpInheritanceTagger(provider, textView, buffer));
+            return buffer.Properties.GetOrCreateSingletonProperty(() => new CSharpInheritanceTagger(provider, buffer));
         }
 
         private static Type LoadAnalyzerType(SVsServiceProvider serviceProvider)
