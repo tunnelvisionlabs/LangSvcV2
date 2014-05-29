@@ -126,6 +126,9 @@
       <HintPath>..\packages\Microsoft.CodeAnalysis.CSharp.Workspaces.0.6.4033103-beta\lib\net45\Microsoft.CodeAnalysis.CSharp.Workspaces.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.EditorFeatures.Text">
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Microsoft.CodeAnalysis.VisualBasic">
       <HintPath>..\packages\Microsoft.CodeAnalysis.VisualBasic.0.6.4033103-beta\lib\net45\Microsoft.CodeAnalysis.VisualBasic.dll</HintPath>
       <Private>False</Private>
