@@ -5,6 +5,9 @@
 *.suo
 *.vcxproj.user
 
+# Roslyn cache
+*.sln.ide
+
 [Ss]tyle[Cc]op.[Cc]ache
 
 /External/Key.snk
