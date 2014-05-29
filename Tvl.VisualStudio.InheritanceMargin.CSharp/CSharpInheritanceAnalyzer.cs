@@ -6,6 +6,31 @@
     using System.Linq;
     using System.Runtime.InteropServices;
     using System.Threading.Tasks;
+    using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Tagging;
+    using Tvl;
+    using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+
+    using IEnumerable = System.Collections.IEnumerable;
+    using IEnumerator = System.Collections.IEnumerator;
+    using Stopwatch = System.Diagnostics.Stopwatch;
+    using StringBuilder = System.Text.StringBuilder;
+
+#if ROSLYN
+    using Microsoft.CodeAnalysis;
+    using Microsoft.VisualStudio.LanguageServices;
+    using Microsoft.CodeAnalysis.Text;
+    using System.Threading;
+    using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using Microsoft.CodeAnalysis.CSharp;
+    using Microsoft.CodeAnalysis.FindSymbols;
+    using System.Reflection;
+    using System.Collections.Immutable;
+#endif
+
+#if !ROSLYN
     using Microsoft.RestrictedUsage.CSharp.Compiler;
     using Microsoft.RestrictedUsage.CSharp.Compiler.IDE;
     using Microsoft.RestrictedUsage.CSharp.Core;
@@ -14,21 +39,12 @@
     using Microsoft.RestrictedUsage.CSharp.Syntax;
     using Microsoft.RestrictedUsage.CSharp.Utilities;
     using Microsoft.VisualStudio.CSharp.Services.Language.Refactoring;
-    using Microsoft.VisualStudio.Shell;
-    using Microsoft.VisualStudio.Text;
-    using Microsoft.VisualStudio.Text.Tagging;
-    using Tvl;
-    using Tvl.VisualStudio.Language.Parsing;
-    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
 
     using CSRPOSDATA = Microsoft.VisualStudio.CSharp.Services.Language.Interop.CSRPOSDATA;
     using ICSharpTextBuffer = Microsoft.VisualStudio.CSharp.Services.Language.Interop.ICSharpTextBuffer;
-    using IEnumerable = System.Collections.IEnumerable;
-    using IEnumerator = System.Collections.IEnumerator;
     using ILangService = Microsoft.VisualStudio.CSharp.Services.Language.Interop.ILangService;
     using IProject = Microsoft.VisualStudio.CSharp.Services.Language.Interop.IProject;
-    using Stopwatch = System.Diagnostics.Stopwatch;
-    using StringBuilder = System.Text.StringBuilder;
+#endif
 
     public class CSharpInheritanceAnalyzer : BackgroundParser
     {
@@ -54,6 +70,377 @@
             }
         }
 
+#if ROSLYN
+        public static void NavigateToSymbol(SourceTextContainer textContainer, ISymbol symbol, Project project)
+        {
+            Workspace workspace;
+            if (!Workspace.TryGetWorkspace(textContainer, out workspace))
+                return;
+
+            VisualStudioWorkspace visualStudioWorkspace = workspace as VisualStudioWorkspace;
+            if (visualStudioWorkspace == null)
+                return;
+
+            visualStudioWorkspace.TryGoToDefinition(symbol, project, CancellationToken.None);
+        }
+
+        protected override void ReParseImpl()
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            ITextSnapshot snapshot = TextBuffer.CurrentSnapshot;
+
+            try
+            {
+                ITextDocument textDocument = TextDocument;
+                string fileName = textDocument != null ? textDocument.FilePath : null;
+                Document document = snapshot.GetOpenDocumentInCurrentContextWithChanges();
+                SourceTextContainer textContainer = document != null ? document.GetTextAsync().Result.Container : null;
+                Project project = document != null ? document.Project : null;
+                Solution solution = project.Solution;
+
+                List<ITagSpan<IInheritanceTag>> tags = new List<ITagSpan<IInheritanceTag>>();
+
+                if (document != null && !string.IsNullOrEmpty(fileName))
+                {
+                    SyntaxTree syntaxTree = document.GetSyntaxTreeAsync().Result;
+                    SyntaxNode syntaxRoot = syntaxTree.GetRoot();
+                    SemanticModel semanticModel = document.GetSemanticModelAsync().Result;
+                    Compilation compilation = semanticModel.Compilation;
+
+                    IDictionary<ISymbol, ISet<ISymbol>> interfaceImplementations = new Dictionary<ISymbol, ISet<ISymbol>>();
+
+                    List<CSharpSyntaxNode> allMembers = new List<CSharpSyntaxNode>();
+                    IEnumerable<BaseTypeDeclarationSyntax> typeNodes = syntaxRoot.DescendantNodes().OfType<BaseTypeDeclarationSyntax>();
+                    foreach (var typeNode in typeNodes)
+                    {
+                        ISymbol symbol = semanticModel.GetDeclaredSymbol(typeNode);
+                        if (symbol == null)
+                        {
+                            MarkDirty(true);
+                            return;
+                        }
+
+                        INamedTypeSymbol typeSymbol = symbol as INamedTypeSymbol;
+                        if (typeSymbol == null)
+                            continue;
+
+                        // get implemented interface symbols
+                        foreach (INamedTypeSymbol namedTypeSymbol in typeSymbol.AllInterfaces)
+                        {
+                            foreach (ISymbol member in namedTypeSymbol.GetMembers())
+                            {
+                                ISymbol implementation = typeSymbol.FindImplementationForInterfaceMember(member);
+                                if (implementation == null || !(implementation.ContainingSymbol.Equals(typeSymbol)))
+                                    continue;
+
+                                ISet<ISymbol> symbols;
+                                if (!interfaceImplementations.TryGetValue(implementation, out symbols))
+                                {
+                                    symbols = new HashSet<ISymbol>();
+                                    interfaceImplementations[implementation] = symbols;
+                                }
+
+                                symbols.Add(member);
+                            }
+                        }
+
+                        TypeDeclarationSyntax typeDeclarationSyntax = typeNode as TypeDeclarationSyntax;
+                        if (typeDeclarationSyntax != null)
+                            allMembers.AddRange(typeDeclarationSyntax.Members);
+
+                        if (typeSymbol.IsSealed)
+                            continue;
+
+                        // types which implement or derive from this type
+                        ISet<ITypeSymbol> derivedTypes = new HashSet<ITypeSymbol>();
+                        Type dependentTypeFinder = typeof(SymbolFinder).Assembly.GetType("Microsoft.CodeAnalysis.FindSymbols.DependentTypeFinder");
+                        Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>> findDerivedClassesAsync
+                            = (Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>)Delegate.CreateDelegate(typeof(Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>), dependentTypeFinder.GetMethod("FindDerivedClassesAsync", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
+                        Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>> findDerivedInterfacesAsync
+                            = (Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>)Delegate.CreateDelegate(typeof(Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>), dependentTypeFinder.GetMethod("FindDerivedInterfacesAsync", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
+                        Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>> findImplementingTypesAsync
+                            = (Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>)Delegate.CreateDelegate(typeof(Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>), dependentTypeFinder.GetMethod("FindImplementingTypesAsync", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
+
+                        derivedTypes.UnionWith(findDerivedClassesAsync(typeSymbol, solution, null, CancellationToken.None).Result);
+                        derivedTypes.UnionWith(findDerivedInterfacesAsync(typeSymbol, solution, null, CancellationToken.None).Result);
+                        derivedTypes.UnionWith(findImplementingTypesAsync(typeSymbol, solution, null, CancellationToken.None).Result);
+
+                        if (derivedTypes.Count == 0)
+                            continue;
+
+                        StringBuilder builder = new StringBuilder();
+                        string elementKindDisplayName =
+                            "types";
+
+                        builder.AppendLine("Derived " + elementKindDisplayName + ":");
+                        foreach (var derived in derivedTypes)
+                            builder.AppendLine("    " + derived.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+
+                        SyntaxToken identifier = typeNode.Accept(IdentifierSyntaxVisitor.Instance);
+                        SnapshotSpan span = new SnapshotSpan(snapshot, new Span(identifier.SpanStart, identifier.Span.Length));
+
+                        InheritanceGlyph tag = typeSymbol.TypeKind == TypeKind.Interface ? InheritanceGlyph.HasImplementations : InheritanceGlyph.Overridden;
+
+                        var targets = derivedTypes.Select(i => new TypeTarget(textContainer, i, project));
+                        tags.Add(new TagSpan<IInheritanceTag>(span, _tagFactory.CreateTag(tag, builder.ToString().TrimEnd(), targets)));
+                    }
+
+                    foreach (var eventFieldDeclarationSyntax in allMembers.OfType<EventFieldDeclarationSyntax>().ToArray())
+                        allMembers.AddRange(eventFieldDeclarationSyntax.Declaration.Variables);
+
+                    foreach (CSharpSyntaxNode memberNode in allMembers)
+                    {
+                        if (!(memberNode is MethodDeclarationSyntax)
+                            && !(memberNode is PropertyDeclarationSyntax)
+                            && !(memberNode is EventDeclarationSyntax)
+                            && !(memberNode is VariableDeclaratorSyntax))
+                        {
+                            continue;
+                        }
+
+                        ISymbol symbol = semanticModel.GetDeclaredSymbol(memberNode);
+                        if (symbol == null)
+                        {
+                            MarkDirty(true);
+                            return;
+                        }
+
+                        // members which this member implements
+                        ISet<ISymbol> implementedMethods = new HashSet<ISymbol>();
+                        if (!interfaceImplementations.TryGetValue(symbol, out implementedMethods))
+                            implementedMethods = new HashSet<ISymbol>();
+
+                        ISet<ISymbol> overriddenMethods = new HashSet<ISymbol>();
+
+                        IMethodSymbol methodSymbol = symbol as IMethodSymbol;
+                        if (methodSymbol != null)
+                        {
+
+                            // methods which this method overrides
+                            for (IMethodSymbol current = methodSymbol.OverriddenMethod;
+                            current != null;
+                            current = current.OverriddenMethod)
+                            {
+                                overriddenMethods.Add(current);
+                            }
+                        }
+                        else
+                        {
+                            IPropertySymbol propertySymbol = symbol as IPropertySymbol;
+                            if (propertySymbol != null)
+                            {
+                                // properties which this property overrides
+                                for (IPropertySymbol current = propertySymbol.OverriddenProperty;
+                                current != null;
+                                current = current.OverriddenProperty)
+                                {
+                                    overriddenMethods.Add(current);
+                                }
+                            }
+                            else
+                            {
+                                IEventSymbol eventSymbol = symbol as IEventSymbol;
+                                if (eventSymbol != null)
+                                {
+                                    // events which this event overrides
+                                    for (IEventSymbol current = eventSymbol.OverriddenEvent;
+                                    current != null;
+                                    current = current.OverriddenEvent)
+                                    {
+                                        overriddenMethods.Add(current);
+                                    }
+                                }
+                            }
+                        }
+
+                        ISet<ISymbol> implementingMethods = new HashSet<ISymbol>(SymbolFinder.FindImplementationsAsync(symbol, solution).Result);
+                        
+                        ISet<ISymbol> overridingMethods = new HashSet<ISymbol>(SymbolFinder.FindOverridesAsync(symbol, solution).Result);
+
+                        if (implementingMethods.Count == 0 && implementedMethods.Count == 0 && overriddenMethods.Count == 0 && overridingMethods.Count == 0)
+                            continue;
+
+                        StringBuilder builder = new StringBuilder();
+                        string elementKindDisplayName =
+                            symbol is IPropertySymbol ? "properties" :
+                            symbol is IEventSymbol ? "events" :
+                            "methods";
+
+                        if (implementedMethods.Count > 0)
+                        {
+                            builder.AppendLine("Implemented " + elementKindDisplayName + ":");
+                            foreach (var methodId in implementedMethods)
+                                builder.AppendLine("    " + methodId.ToString());
+                        }
+
+                        if (overriddenMethods.Count > 0)
+                        {
+                            builder.AppendLine("Overridden " + elementKindDisplayName + ":");
+                            foreach (var methodId in overriddenMethods)
+                                builder.AppendLine("    " + methodId.ToString());
+                        }
+
+                        if (implementingMethods.Count > 0)
+                        {
+                            builder.AppendLine("Implementing " + elementKindDisplayName + " in derived types:");
+                            foreach (var methodId in implementingMethods)
+                                builder.AppendLine("    " + methodId.ToString());
+                        }
+
+                        if (overridingMethods.Count > 0)
+                        {
+                            builder.AppendLine("Overriding " + elementKindDisplayName + " in derived types:");
+                            foreach (var methodId in overridingMethods)
+                                builder.AppendLine("    " + methodId.ToString());
+                        }
+
+                        SyntaxToken identifier = memberNode.Accept(IdentifierSyntaxVisitor.Instance);
+                        SnapshotSpan span = new SnapshotSpan(snapshot, new Span(identifier.SpanStart, identifier.Span.Length));
+
+                        InheritanceGlyph tag;
+                        if (implementedMethods.Count > 0)
+                        {
+                            if (overridingMethods.Count > 0)
+                                tag = InheritanceGlyph.ImplementsAndOverridden;
+                            else if (implementingMethods.Count > 0)
+                                tag = InheritanceGlyph.ImplementsAndHasImplementations;
+                            else
+                                tag = InheritanceGlyph.Implements;
+                        }
+                        else if (implementingMethods.Count > 0)
+                        {
+                            tag = InheritanceGlyph.HasImplementations;
+                        }
+                        else if (overriddenMethods.Count > 0)
+                        {
+                            if (overridingMethods.Count > 0)
+                                tag = InheritanceGlyph.OverridesAndOverridden;
+                            else
+                                tag = InheritanceGlyph.Overrides;
+                        }
+                        else
+                        {
+                            tag = InheritanceGlyph.Overridden;
+                        }
+
+                        List<ISymbol> members = new List<ISymbol>();
+                        members.AddRange(implementedMethods);
+                        members.AddRange(overriddenMethods);
+                        members.AddRange(implementingMethods);
+                        members.AddRange(overridingMethods);
+
+                        var targets = members.Select(i => new MemberTarget(textContainer, i, project));
+                        tags.Add(new TagSpan<IInheritanceTag>(span, _tagFactory.CreateTag(tag, builder.ToString().TrimEnd(), targets)));
+                    }
+                }
+
+                InheritanceParseResultEventArgs result = new InheritanceParseResultEventArgs(snapshot, NoErrors, stopwatch.Elapsed, tags);
+                OnParseComplete(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                base.MarkDirty(true);
+                ex.PreserveStackTrace();
+                throw;
+            }
+        }
+
+        private static IEnumerable<INamedTypeSymbol> EnumerateTypes(Project project)
+        {
+            return EnumerateTypes(project, project.GetCompilationAsync().Result.Assembly.GlobalNamespace);
+        }
+
+        private static IEnumerable<INamedTypeSymbol> EnumerateTypes(Project project, INamespaceOrTypeSymbol namespaceOrTypeSymbol)
+        {
+            INamespaceSymbol namespaceSymbol = namespaceOrTypeSymbol as INamespaceSymbol;
+            if (namespaceSymbol != null)
+                return namespaceSymbol.GetTypeMembers().SelectMany(i => EnumerateTypes(project, i)).Concat(namespaceSymbol.GetNamespaceMembers().SelectMany(i => EnumerateTypes(project, i)));
+
+            return Enumerable.Repeat((INamedTypeSymbol)namespaceOrTypeSymbol, 1).Concat(namespaceOrTypeSymbol.GetTypeMembers().SelectMany(i => EnumerateTypes(project, i)));
+        }
+
+        private class IdentifierSyntaxVisitor : CSharpSyntaxVisitor<SyntaxToken>
+        {
+            public static readonly IdentifierSyntaxVisitor Instance = new IdentifierSyntaxVisitor();
+
+            private IdentifierSyntaxVisitor()
+            {
+            }
+
+            public override SyntaxToken VisitClassDeclaration(ClassDeclarationSyntax node)
+            {
+                return node.Identifier;
+            }
+
+            public override SyntaxToken VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
+            {
+                return node.Identifier;
+            }
+
+            public override SyntaxToken VisitDelegateDeclaration(DelegateDeclarationSyntax node)
+            {
+                return node.Identifier;
+            }
+
+            public override SyntaxToken VisitDestructorDeclaration(DestructorDeclarationSyntax node)
+            {
+                return node.Identifier;
+            }
+
+            public override SyntaxToken VisitEnumDeclaration(EnumDeclarationSyntax node)
+            {
+                return node.Identifier;
+            }
+
+            public override SyntaxToken VisitEnumMemberDeclaration(EnumMemberDeclarationSyntax node)
+            {
+                return node.Identifier;
+            }
+
+            public override SyntaxToken VisitEventDeclaration(EventDeclarationSyntax node)
+            {
+                return node.Identifier;
+            }
+
+            public override SyntaxToken VisitIndexerDeclaration(IndexerDeclarationSyntax node)
+            {
+                return node.ThisKeyword;
+            }
+
+            public override SyntaxToken VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
+            {
+                return node.Identifier;
+            }
+
+            public override SyntaxToken VisitMethodDeclaration(MethodDeclarationSyntax node)
+            {
+                return node.Identifier;
+            }
+
+            public override SyntaxToken VisitOperatorDeclaration(OperatorDeclarationSyntax node)
+            {
+                return node.OperatorToken;
+            }
+
+            public override SyntaxToken VisitPropertyDeclaration(PropertyDeclarationSyntax node)
+            {
+                return node.Identifier;
+            }
+
+            public override SyntaxToken VisitStructDeclaration(StructDeclarationSyntax node)
+            {
+                return node.Identifier;
+            }
+
+            public override SyntaxToken VisitVariableDeclarator(VariableDeclaratorSyntax node)
+            {
+                return node.Identifier;
+            }
+        }
+#endif
+
+#if !ROSLYN
         [DllImport("CSLangSvc.dll", PreserveSig = false)]
         internal static extern void LangService_GetInstance(out ILangService langService);
 
@@ -489,5 +876,6 @@
             collector.Visit(parseTree.RootNode);
             return collector.Nodes;
         }
+#endif
     }
 }

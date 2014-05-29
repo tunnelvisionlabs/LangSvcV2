@@ -77,6 +77,8 @@
                 assemblyName = "Tvl.VisualStudio.InheritanceMargin.CSharp.10.0";
             else if (vs2012)
                 assemblyName = "Tvl.VisualStudio.InheritanceMargin.CSharp.11.0";
+            else if (RoslynUtilities.IsRoslynInstalled(serviceProvider))
+                assemblyName = "Tvl.VisualStudio.InheritanceMargin.CSharp.Roslyn";
             else
                 assemblyName = "Tvl.VisualStudio.InheritanceMargin.CSharp.12.0";
 

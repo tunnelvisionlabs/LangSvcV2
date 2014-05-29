@@ -124,6 +124,7 @@
     <Compile Include="InheritanceTag.cs" />
     <Compile Include="InheritanceTagFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RoslynUtilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\External\Eula.rtf">
@@ -273,6 +274,11 @@
     <ProjectReference Include="..\Tvl.VisualStudio.InheritanceMargin.CSharp\Tvl.VisualStudio.InheritanceMargin.CSharp.12.0.csproj">
       <Project>{fbb6e057-77da-4ff6-a867-ef741971e511}</Project>
       <Name>Tvl.VisualStudio.InheritanceMargin.CSharp.12.0</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Tvl.VisualStudio.InheritanceMargin.CSharp\Tvl.VisualStudio.InheritanceMargin.CSharp.Roslyn.csproj">
+      <Project>{912f988e-c5d9-413a-9b81-86d0aa67947b}</Project>
+      <Name>Tvl.VisualStudio.InheritanceMargin.CSharp.Roslyn</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\Tvl.VisualStudio.InheritanceMargin.Interfaces\Tvl.VisualStudio.InheritanceMargin.Interfaces.csproj">

@@ -1,4 +1,6 @@
-﻿namespace Tvl.VisualStudio.InheritanceMargin.CSharp
+﻿#if !ROSLYN
+
+namespace Tvl.VisualStudio.InheritanceMargin.CSharp
 {
     using System.Collections.Generic;
     using Microsoft.RestrictedUsage.CSharp.Semantics;
@@ -22,3 +24,5 @@
         }
     }
 }
+
+#endif
