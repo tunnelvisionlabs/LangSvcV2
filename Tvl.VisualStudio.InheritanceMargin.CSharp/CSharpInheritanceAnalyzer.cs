@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Linq;
-    using System.Runtime.InteropServices;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Text;
@@ -13,24 +12,23 @@
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
 
-    using IEnumerable = System.Collections.IEnumerable;
-    using IEnumerator = System.Collections.IEnumerator;
     using Stopwatch = System.Diagnostics.Stopwatch;
     using StringBuilder = System.Text.StringBuilder;
 
 #if ROSLYN
+    using System.Collections.Immutable;
+    using System.Threading;
+    using System.Reflection;
     using Microsoft.CodeAnalysis;
     using Microsoft.VisualStudio.LanguageServices;
     using Microsoft.CodeAnalysis.Text;
-    using System.Threading;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.FindSymbols;
-    using System.Reflection;
-    using System.Collections.Immutable;
 #endif
 
 #if !ROSLYN
+    using System.Runtime.InteropServices;
     using Microsoft.RestrictedUsage.CSharp.Compiler;
     using Microsoft.RestrictedUsage.CSharp.Compiler.IDE;
     using Microsoft.RestrictedUsage.CSharp.Core;
@@ -42,6 +40,8 @@
 
     using CSRPOSDATA = Microsoft.VisualStudio.CSharp.Services.Language.Interop.CSRPOSDATA;
     using ICSharpTextBuffer = Microsoft.VisualStudio.CSharp.Services.Language.Interop.ICSharpTextBuffer;
+    using IEnumerable = System.Collections.IEnumerable;
+    using IEnumerator = System.Collections.IEnumerator;
     using ILangService = Microsoft.VisualStudio.CSharp.Services.Language.Interop.ILangService;
     using IProject = Microsoft.VisualStudio.CSharp.Services.Language.Interop.IProject;
 #endif
@@ -71,6 +71,14 @@
         }
 
 #if ROSLYN
+        private static readonly Lazy<Type> DependentTypeFinder = new Lazy<Type>(() => typeof(SymbolFinder).Assembly.GetType("Microsoft.CodeAnalysis.FindSymbols.DependentTypeFinder"));
+        private static readonly Lazy<Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>> FindDerivedClassesAsync
+            = new Lazy<Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>>(() => (Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>)Delegate.CreateDelegate(typeof(Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>), DependentTypeFinder.Value.GetMethod("FindDerivedClassesAsync", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)));
+        private static readonly Lazy<Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>> FindDerivedInterfacesAsync
+            = new Lazy<Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>>(() => (Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>)Delegate.CreateDelegate(typeof(Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>), DependentTypeFinder.Value.GetMethod("FindDerivedInterfacesAsync", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)));
+        private static readonly Lazy<Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>> FindImplementingTypesAsync
+            = new Lazy<Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>>(() => (Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>)Delegate.CreateDelegate(typeof(Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>), DependentTypeFinder.Value.GetMethod("FindImplementingTypesAsync", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)));
+
         public static void NavigateToSymbol(SourceTextContainer textContainer, ISymbol symbol, Project project)
         {
             Workspace workspace;
@@ -154,17 +162,9 @@
 
                         // types which implement or derive from this type
                         ISet<ITypeSymbol> derivedTypes = new HashSet<ITypeSymbol>();
-                        Type dependentTypeFinder = typeof(SymbolFinder).Assembly.GetType("Microsoft.CodeAnalysis.FindSymbols.DependentTypeFinder");
-                        Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>> findDerivedClassesAsync
-                            = (Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>)Delegate.CreateDelegate(typeof(Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>), dependentTypeFinder.GetMethod("FindDerivedClassesAsync", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
-                        Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>> findDerivedInterfacesAsync
-                            = (Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>)Delegate.CreateDelegate(typeof(Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>), dependentTypeFinder.GetMethod("FindDerivedInterfacesAsync", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
-                        Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>> findImplementingTypesAsync
-                            = (Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>)Delegate.CreateDelegate(typeof(Func<INamedTypeSymbol, Solution, IImmutableSet<Project>, CancellationToken, Task<IEnumerable<INamedTypeSymbol>>>), dependentTypeFinder.GetMethod("FindImplementingTypesAsync", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
-
-                        derivedTypes.UnionWith(findDerivedClassesAsync(typeSymbol, solution, null, CancellationToken.None).Result);
-                        derivedTypes.UnionWith(findDerivedInterfacesAsync(typeSymbol, solution, null, CancellationToken.None).Result);
-                        derivedTypes.UnionWith(findImplementingTypesAsync(typeSymbol, solution, null, CancellationToken.None).Result);
+                        derivedTypes.UnionWith(FindDerivedClassesAsync.Value(typeSymbol, solution, null, CancellationToken.None).Result);
+                        derivedTypes.UnionWith(FindDerivedInterfacesAsync.Value(typeSymbol, solution, null, CancellationToken.None).Result);
+                        derivedTypes.UnionWith(FindImplementingTypesAsync.Value(typeSymbol, solution, null, CancellationToken.None).Result);
 
                         if (derivedTypes.Count == 0)
                             continue;
@@ -344,20 +344,6 @@
                 ex.PreserveStackTrace();
                 throw;
             }
-        }
-
-        private static IEnumerable<INamedTypeSymbol> EnumerateTypes(Project project)
-        {
-            return EnumerateTypes(project, project.GetCompilationAsync().Result.Assembly.GlobalNamespace);
-        }
-
-        private static IEnumerable<INamedTypeSymbol> EnumerateTypes(Project project, INamespaceOrTypeSymbol namespaceOrTypeSymbol)
-        {
-            INamespaceSymbol namespaceSymbol = namespaceOrTypeSymbol as INamespaceSymbol;
-            if (namespaceSymbol != null)
-                return namespaceSymbol.GetTypeMembers().SelectMany(i => EnumerateTypes(project, i)).Concat(namespaceSymbol.GetNamespaceMembers().SelectMany(i => EnumerateTypes(project, i)));
-
-            return Enumerable.Repeat((INamedTypeSymbol)namespaceOrTypeSymbol, 1).Concat(namespaceOrTypeSymbol.GetTypeMembers().SelectMany(i => EnumerateTypes(project, i)));
         }
 
         private class IdentifierSyntaxVisitor : CSharpSyntaxVisitor<SyntaxToken>
