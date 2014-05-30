@@ -22,7 +22,7 @@ namespace Tvl.VisualStudio.InheritanceMargin.CSharp
         {
             get
             {
-                return _memberIdentifier.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                return _memberIdentifier.ToString();
             }
         }
 

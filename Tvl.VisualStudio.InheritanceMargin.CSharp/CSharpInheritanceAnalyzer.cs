@@ -175,7 +175,7 @@
 
                         builder.AppendLine("Derived " + elementKindDisplayName + ":");
                         foreach (var derived in derivedTypes)
-                            builder.AppendLine("    " + derived.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+                            builder.AppendLine("    " + derived.ToString());
 
                         SyntaxToken identifier = typeNode.Accept(IdentifierSyntaxVisitor.Instance);
                         SnapshotSpan span = new SnapshotSpan(snapshot, new Span(identifier.SpanStart, identifier.Span.Length));
