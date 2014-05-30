@@ -182,7 +182,7 @@
 
                         InheritanceGlyph tag = typeSymbol.TypeKind == TypeKind.Interface ? InheritanceGlyph.HasImplementations : InheritanceGlyph.Overridden;
 
-                        var targets = derivedTypes.Select(i => new TypeTarget(textContainer, i, project));
+                        var targets = derivedTypes.Select(i => new TypeTarget(textContainer, i, solution));
                         tags.Add(new TagSpan<IInheritanceTag>(span, _tagFactory.CreateTag(tag, builder.ToString().TrimEnd(), targets)));
                     }
 
@@ -330,7 +330,7 @@
                         members.AddRange(implementingMethods);
                         members.AddRange(overridingMethods);
 
-                        var targets = members.Select(i => new MemberTarget(textContainer, i, project));
+                        var targets = members.Select(i => new MemberTarget(textContainer, i, solution));
                         tags.Add(new TagSpan<IInheritanceTag>(span, _tagFactory.CreateTag(tag, builder.ToString().TrimEnd(), targets)));
                     }
                 }

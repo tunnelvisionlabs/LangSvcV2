@@ -9,13 +9,13 @@ namespace Tvl.VisualStudio.InheritanceMargin.CSharp
     {
         private readonly SourceTextContainer _textContainer;
         private readonly ISymbol _typeIdentifier;
-        private readonly Project _project;
+        private readonly Solution _solution;
 
-        public TypeTarget(SourceTextContainer textContainer, ISymbol typeIdentifier, Project project)
+        public TypeTarget(SourceTextContainer textContainer, ISymbol typeIdentifier, Solution solution)
         {
             _textContainer = textContainer;
             _typeIdentifier = typeIdentifier;
-            _project = project;
+            _solution = solution;
         }
 
         public string DisplayName
@@ -28,7 +28,7 @@ namespace Tvl.VisualStudio.InheritanceMargin.CSharp
 
         public void NavigateTo()
         {
-            CSharpInheritanceAnalyzer.NavigateToSymbol(_textContainer, _typeIdentifier, _project);
+            CSharpInheritanceAnalyzer.NavigateToSymbol(_textContainer, _typeIdentifier, _solution.GetProject(_typeIdentifier.ContainingAssembly));
         }
     }
 }
