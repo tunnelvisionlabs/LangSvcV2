@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Antlr4.4.2.2-alpha001\build\Antlr4.props" Condition="Exists('..\packages\Antlr4.4.2.2-alpha001\build\Antlr4.props')" />
+  <Import Project="..\packages\Antlr4.4.3.0\build\Antlr4.props" Condition="Exists('..\packages\Antlr4.4.3.0\build\Antlr4.props')" />
   <Import Project="..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.props" Condition="Exists('..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -116,9 +116,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Antlr3.Runtime.3.5.0.3-alpha002\lib\net20\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="Antlr4.Runtime.v4.0, Version=4.2.0.0, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Antlr4.Runtime.4.2.2-alpha001\lib\net40\Antlr4.Runtime.v4.0.dll</HintPath>
+    <Reference Include="Antlr4.Runtime.net40">
+      <HintPath>..\packages\Antlr4.Runtime.4.3.0\lib\net40-client\Antlr4.Runtime.net40.dll</HintPath>
     </Reference>
     <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>False</EmbedInteropTypes>
@@ -848,11 +847,11 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
     <Error Condition="!Exists('..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.props'))" />
     <Error Condition="!Exists('..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.targets'))" />
-    <Error Condition="!Exists('..\packages\Antlr4.4.2.2-alpha001\build\Antlr4.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr4.4.2.2-alpha001\build\Antlr4.props'))" />
-    <Error Condition="!Exists('..\packages\Antlr4.4.2.2-alpha001\build\Antlr4.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr4.4.2.2-alpha001\build\Antlr4.targets'))" />
+    <Error Condition="!Exists('..\packages\Antlr4.4.3.0\build\Antlr4.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr4.4.3.0\build\Antlr4.props'))" />
+    <Error Condition="!Exists('..\packages\Antlr4.4.3.0\build\Antlr4.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr4.4.3.0\build\Antlr4.targets'))" />
   </Target>
   <Import Project="..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.targets" Condition="Exists('..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.targets')" />
-  <Import Project="..\packages\Antlr4.4.2.2-alpha001\build\Antlr4.targets" Condition="Exists('..\packages\Antlr4.4.2.2-alpha001\build\Antlr4.targets')" />
+  <Import Project="..\packages\Antlr4.4.3.0\build\Antlr4.targets" Condition="Exists('..\packages\Antlr4.4.3.0\build\Antlr4.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
