@@ -116,9 +116,8 @@
     <Reference Include="Antlr3.Runtime">
       <HintPath>..\packages\Antlr3.Runtime.3.5.0.3-alpha002\lib\net20\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="Antlr4.Runtime.v4.0, Version=4.2.0.0, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Antlr4.Runtime.4.2.2-alpha001\lib\net40\Antlr4.Runtime.v4.0.dll</HintPath>
+    <Reference Include="Antlr4.Runtime.net40">
+      <HintPath>..\packages\Antlr4.Runtime.4.3.0\lib\net40-client\Antlr4.Runtime.net40.dll</HintPath>
     </Reference>
     <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>False</EmbedInteropTypes>
