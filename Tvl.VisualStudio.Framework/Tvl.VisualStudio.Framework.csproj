@@ -192,7 +192,7 @@
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <Private>False</Private>
-      <HintPath>..\packages\VSSDK.Shell.Immutable.10.10.0.0\lib\net40\Microsoft.VisualStudio.Shell.Immutable.10.0.dll</HintPath>
+      <HintPath>..\packages\VSSDK.Shell.Immutable.10.10.0.2\lib\net40\Microsoft.VisualStudio.Shell.Immutable.10.0.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="Tvl.VisualStudio.OutputWindow.Interfaces">
