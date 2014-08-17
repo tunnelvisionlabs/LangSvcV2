@@ -10,7 +10,7 @@
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl;
     using Tvl.VisualStudio.Language.Parsing;
-    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+    using Tvl.VisualStudio.OutputWindow.Interfaces;
 
     using Stopwatch = System.Diagnostics.Stopwatch;
     using StringBuilder = System.Text.StringBuilder;

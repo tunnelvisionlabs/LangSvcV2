@@ -10,7 +10,7 @@
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
-    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+    using Tvl.VisualStudio.OutputWindow.Interfaces;
     using Stopwatch = System.Diagnostics.Stopwatch;
 
     public class StringTemplateBackgroundParser : BackgroundParser

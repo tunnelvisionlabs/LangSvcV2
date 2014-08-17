@@ -11,7 +11,7 @@
     using Tvl.VisualStudio.Language.Java.SourceData.Emit;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Shell;
-    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+    using Tvl.VisualStudio.OutputWindow.Interfaces;
 
     using CancellationToken = System.Threading.CancellationToken;
     using Contract = System.Diagnostics.Contracts.Contract;

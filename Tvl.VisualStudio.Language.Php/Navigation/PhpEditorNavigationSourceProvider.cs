@@ -7,7 +7,7 @@
     using IEditorNavigationSource = Tvl.VisualStudio.Text.Navigation.IEditorNavigationSource;
     using IEditorNavigationSourceProvider = Tvl.VisualStudio.Text.Navigation.IEditorNavigationSourceProvider;
     using IEditorNavigationTypeRegistryService = Tvl.VisualStudio.Text.Navigation.IEditorNavigationTypeRegistryService;
-    using IOutputWindowService = Tvl.VisualStudio.Shell.OutputWindow.Interfaces.IOutputWindowService;
+    using IOutputWindowService = Tvl.VisualStudio.OutputWindow.Interfaces.IOutputWindowService;
     using ITextBuffer = Microsoft.VisualStudio.Text.ITextBuffer;
     using ITextDocumentFactoryService = Microsoft.VisualStudio.Text.ITextDocumentFactoryService;
     using PredefinedTaskSchedulers = Tvl.VisualStudio.Shell.PredefinedTaskSchedulers;

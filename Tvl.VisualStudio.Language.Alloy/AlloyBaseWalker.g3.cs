@@ -4,7 +4,7 @@
     using Antlr.Runtime;
     using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+    using Tvl.VisualStudio.OutputWindow.Interfaces;
 
     abstract partial class AlloyBaseWalker
     {

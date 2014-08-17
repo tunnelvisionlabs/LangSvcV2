@@ -2,7 +2,7 @@
 {
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Utilities;
-    using IOutputWindowService = Tvl.VisualStudio.Shell.OutputWindow.Interfaces.IOutputWindowService;
+    using IOutputWindowService = Tvl.VisualStudio.OutputWindow.Interfaces.IOutputWindowService;
     using IQuickInfoSource = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoSource;
     using IQuickInfoSourceProvider = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoSourceProvider;
     using ITextBuffer = Microsoft.VisualStudio.Text.ITextBuffer;

@@ -6,7 +6,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+    using Tvl.VisualStudio.OutputWindow.Interfaces;
     using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
     using Path = System.IO.Path;
     using Timer = System.Threading.Timer;

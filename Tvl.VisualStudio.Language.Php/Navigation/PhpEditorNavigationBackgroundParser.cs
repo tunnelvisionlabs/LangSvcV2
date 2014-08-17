@@ -10,7 +10,7 @@
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing4;
     using Tvl.VisualStudio.Language.Php.Parser;
-    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+    using Tvl.VisualStudio.OutputWindow.Interfaces;
 
     using BackgroundParser = Tvl.VisualStudio.Language.Parsing.BackgroundParser;
     using ErrorListener = Tvl.VisualStudio.Language.Php.Outlining.PhpOutliningBackgroundParser.ErrorListener;

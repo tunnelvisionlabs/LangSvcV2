@@ -6,7 +6,7 @@
     using System.Diagnostics.Contracts;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio;
-    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+    using Tvl.VisualStudio.OutputWindow.Interfaces;
 
     using CancellationTokenSource = System.Threading.CancellationTokenSource;
     using Thread = System.Threading.Thread;

@@ -9,7 +9,7 @@
     using Antlr4.Runtime.Tree;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Php.Parser;
-    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+    using Tvl.VisualStudio.OutputWindow.Interfaces;
     using BackgroundParser = Tvl.VisualStudio.Language.Parsing.BackgroundParser;
     using BaseErrorListener = Antlr4.Runtime.BaseErrorListener;
     using CommonTokenStream = Antlr4.Runtime.CommonTokenStream;

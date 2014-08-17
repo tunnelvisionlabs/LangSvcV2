@@ -11,7 +11,7 @@
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter;
-    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+    using Tvl.VisualStudio.OutputWindow.Interfaces;
     using AlloySimplifiedAtnBuilder = Tvl.VisualStudio.Language.Alloy.Experimental.AlloySimplifiedAtnBuilder;
     using Expression = Tvl.VisualStudio.Language.Alloy.IntellisenseModel.Expression;
     using IQuickInfoSession = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoSession;

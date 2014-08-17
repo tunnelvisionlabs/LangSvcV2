@@ -2,7 +2,7 @@
 {
     using System.ComponentModel.Composition;
     using System.Threading.Tasks;
-    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+    using Tvl.VisualStudio.OutputWindow.Interfaces;
 
     public class StandardTaskSchedulers
     {

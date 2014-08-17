@@ -13,7 +13,7 @@
 
     using CancellationToken = System.Threading.CancellationToken;
     using Contract = System.Diagnostics.Contracts.Contract;
-    using IOutputWindowPane = Tvl.VisualStudio.Shell.OutputWindow.Interfaces.IOutputWindowPane;
+    using IOutputWindowPane = Tvl.VisualStudio.OutputWindow.Interfaces.IOutputWindowPane;
     using IQuickInfoSession = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoSession;
     using IQuickInfoSource = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoSource;
     using ITextBuffer = Microsoft.VisualStudio.Text.ITextBuffer;
@@ -23,7 +23,7 @@
     using JavaAtnBuilder = Tvl.VisualStudio.Language.Java.Experimental.JavaAtnBuilder;
     using JavaSimplifiedAtnBuilder = Tvl.VisualStudio.Language.Java.Experimental.JavaSimplifiedAtnBuilder;
     using NetworkInterpreter = Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter.NetworkInterpreter;
-    using PredefinedOutputWindowPanes = Tvl.VisualStudio.Shell.OutputWindow.Interfaces.PredefinedOutputWindowPanes;
+    using PredefinedOutputWindowPanes = Tvl.VisualStudio.OutputWindow.Interfaces.PredefinedOutputWindowPanes;
     using SnapshotCharStream = Tvl.VisualStudio.Language.Parsing.SnapshotCharStream;
     using Stopwatch = System.Diagnostics.Stopwatch;
 

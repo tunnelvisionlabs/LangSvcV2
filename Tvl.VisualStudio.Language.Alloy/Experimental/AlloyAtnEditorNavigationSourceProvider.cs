@@ -5,7 +5,7 @@
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Utilities;
     using Tvl.VisualStudio.Shell;
-    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+    using Tvl.VisualStudio.OutputWindow.Interfaces;
     using Tvl.VisualStudio.Text.Navigation;
     using IDispatcherGlyphService = Tvl.VisualStudio.Language.Intellisense.IDispatcherGlyphService;
 

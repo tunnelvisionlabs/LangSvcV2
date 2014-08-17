@@ -5,7 +5,7 @@
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
-    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+    using Tvl.VisualStudio.OutputWindow.Interfaces;
     using Contract = System.Diagnostics.Contracts.Contract;
     using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
     using Stopwatch = System.Diagnostics.Stopwatch;

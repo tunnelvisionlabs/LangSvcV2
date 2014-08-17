@@ -7,7 +7,7 @@
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
-    using Tvl.VisualStudio.Shell.OutputWindow.Interfaces;
+    using Tvl.VisualStudio.OutputWindow.Interfaces;
     using Tvl.VisualStudio.Text.Tagging;
     using StringReader = System.IO.StringReader;
 

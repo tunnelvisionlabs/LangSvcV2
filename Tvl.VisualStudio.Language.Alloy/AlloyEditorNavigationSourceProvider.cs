@@ -7,7 +7,7 @@
     using Tvl.VisualStudio.Text.Navigation;
 
     using IDispatcherGlyphService = Tvl.VisualStudio.Language.Intellisense.IDispatcherGlyphService;
-    using IOutputWindowService = Tvl.VisualStudio.Shell.OutputWindow.Interfaces.IOutputWindowService;
+    using IOutputWindowService = Tvl.VisualStudio.OutputWindow.Interfaces.IOutputWindowService;
 
 #if false
     [Export(typeof(IEditorNavigationSourceProvider))]

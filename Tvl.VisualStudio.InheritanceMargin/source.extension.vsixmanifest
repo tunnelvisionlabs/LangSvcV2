@@ -32,6 +32,10 @@
     <SupportedFrameworkRuntimeEdition MinVersion="4.0" />
   </Identifier>
   <References>
+    <Reference Id="Tvl.VisualStudio.OutputWindow.3EF11167-A319-43DB-B1B4-A9778A90FAE0">
+      <Name>Visual Studio Output Window Services</Name>
+      <VsixPath>Tvl.VisualStudio.OutputWindow.vsix</VsixPath>
+    </Reference>
     <Reference Id="Tvl.VisualStudio.OutputWindow.1a87220f-ee82-4c49-bcfb-bbb9bc4df16d" MinVersion="2.1">
       <Name>Tunnel Vision Labs Output Window Services</Name>
       <VsixPath>Tvl.VisualStudio.OutputWindow.vsix</VsixPath>
