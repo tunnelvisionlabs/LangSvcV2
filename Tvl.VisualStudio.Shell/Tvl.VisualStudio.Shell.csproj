@@ -318,10 +318,6 @@
       <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
       <Name>Tvl.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Shell.OutputWindow.Interfaces\Tvl.VisualStudio.Shell.OutputWindow.Interfaces.csproj">
-      <Project>{56D7EB29-6705-4C37-A7B1-E8780B4350EA}</Project>
-      <Name>Tvl.VisualStudio.Shell.OutputWindow.Interfaces</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\External\Key.snk">
