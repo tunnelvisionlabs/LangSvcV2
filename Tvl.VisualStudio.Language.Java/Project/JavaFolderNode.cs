@@ -18,7 +18,7 @@
             {
                 string buildAction = element.GetMetadata(ProjectFileConstants.BuildAction);
                 if (buildAction == ProjectFileConstants.Folder)
-                    this.IsNonMemberItem = false;
+                    this.IsNonmemberItem = false;
             }
         }
 
@@ -34,7 +34,7 @@
 
         public override object GetIconHandle(bool open)
         {
-            if (this.IsNonMemberItem)
+            if (this.IsNonmemberItem)
                 return base.GetIconHandle(open);
 
             if (string.Equals(ItemNode.ItemName, JavaProjectFileConstants.SourceFolder))

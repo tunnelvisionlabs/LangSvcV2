@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
     using System.Runtime.InteropServices;
     using System.Text;
@@ -9,6 +10,7 @@
 
     using __VSHPROPID = Microsoft.VisualStudio.Shell.Interop.__VSHPROPID;
     using _PersistStorageType = Microsoft.VisualStudio.Shell.Interop._PersistStorageType;
+    using ComponentSelectorGuids80 = Microsoft.VisualStudio.Shell.Interop.ComponentSelectorGuids80;
     using CultureInfo = System.Globalization.CultureInfo;
     using MSBuild = Microsoft.Build.Evaluation;
     using OAVSProject = Microsoft.VisualStudio.Project.Automation.OAVSProject;
@@ -27,13 +29,14 @@
         private VSLangProj.VSProject _vsProject;
         private ImageHandler _extendedImageHandler;
 
-        public JavaProjectNode()
+        public JavaProjectNode(ProjectPackage package)
+            : base(package)
         {
             _sharedBuildOptions = new JavaBuildOptions();
             CanProjectDeleteItems = true;
             OleServiceProvider.AddService(typeof(VSLangProj.VSProject), HandleCreateService, false);
 
-            AddCATIDMapping(typeof(JavaFileNodeProperties), typeof(FileNodeProperties).GUID);
+            AddCatIdMapping(typeof(JavaFileNodeProperties), typeof(FileNodeProperties).GUID);
         }
 
         public JavaBuildOptions SharedBuildOptions
@@ -137,14 +140,14 @@
             }
             else
             {
-                ProjectElement updatedElement = AddFolderToMsBuild(folderNode.VirtualNodeName, buildAction.ToString());
+                ProjectElement updatedElement = AddFolderToMSBuild(folderNode.VirtualNodeName, buildAction.ToString());
                 folderNode.ItemNode = updatedElement;
             }
 
-            folderNode.ReDraw(UIHierarchyElement.Icon);
+            folderNode.Redraw(UIHierarchyElements.Icon);
         }
 
-        protected override ProjectElement AddFolderToMsBuild(string folder, string itemType)
+        protected override ProjectElement AddFolderToMSBuild(string folder, string itemType)
         {
             if (itemType == ProjectFileConstants.Folder)
             {
@@ -156,7 +159,7 @@
             }
             else
             {
-                return base.AddFolderToMsBuild(folder, itemType);
+                return base.AddFolderToMSBuild(folder, itemType);
             }
         }
 
@@ -165,7 +168,7 @@
             return "Java Archive Files (*.jar)\0*.jar\0";
         }
 
-        protected override List<VSCOMPONENTSELECTORTABINIT> GetComponentSelectorTabList()
+        protected override ReadOnlyCollection<VSCOMPONENTSELECTORTABINIT> GetComponentSelectorTabList()
         {
             // no .NET or COM assemblies
             return new List<VSCOMPONENTSELECTORTABINIT>()
@@ -194,9 +197,9 @@
                         guidTab = JavaProjectConstants.MavenComponentSelectorGuid,
                     },
                     new VSCOMPONENTSELECTORTABINIT {
-                        guidTab = GUID_MruPage,
+                        guidTab = new Guid(ComponentSelectorGuids80.MRUPage),
                     },
-                };
+                }.AsReadOnly();
         }
 
         private static string Escape(string unescapedString)
@@ -265,7 +268,7 @@
             return new JavaFileNode(this, item);
         }
 
-        protected override FolderNode CreateFolderNode(string path, ProjectElement element)
+        public override FolderNode CreateFolderNode(string path, ProjectElement element)
         {
             return new JavaFolderNode(this, path, element);
         }

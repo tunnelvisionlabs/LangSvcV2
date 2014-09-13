@@ -25,7 +25,7 @@
 
         protected override ProjectNode CreateProject()
         {
-            JavaProjectNode node = new JavaProjectNode();
+            JavaProjectNode node = new JavaProjectNode(Package);
             IOleServiceProvider serviceProvider = base.Package.GetService<IOleServiceProvider>();
             node.SetSite(serviceProvider);
             return node;

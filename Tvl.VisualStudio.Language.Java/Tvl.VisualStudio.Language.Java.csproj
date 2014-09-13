@@ -144,6 +144,11 @@
       <Private>False</Private>
       <HintPath>..\packages\VSSDK.Debugger.Interop.9.9.0.2\lib\net20\Microsoft.VisualStudio.Debugger.InteropA.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.Designer.Interfaces, Version=1.0.5000.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <Private>False</Private>
+      <HintPath>..\packages\VSSDK.Designer.7.0.2\lib\net20\Microsoft.VisualStudio.Designer.Interfaces.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.Editor, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <Private>False</Private>
       <HintPath>..\packages\VSSDK.Editor.10.10.0.2\lib\net40\Microsoft.VisualStudio.Editor.dll</HintPath>
@@ -159,6 +164,9 @@
     <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>False</Private>
       <HintPath>..\packages\VSSDK.OLE.Interop.7.0.2\lib\net20\Microsoft.VisualStudio.OLE.Interop.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Project.10.0">
+      <HintPath>..\packages\Microsoft.VisualStudio.Project.10.0.1.0.0-alpha005\lib\net40\Microsoft.VisualStudio.Project.10.0.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <Private>False</Private>
@@ -224,6 +232,7 @@
     <Reference Include="System.Xaml">
       <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Xaml.dll</HintPath>
     </Reference>
+    <Reference Include="System.Xml" />
     <Reference Include="Tvl.VisualStudio.OutputWindow.Interfaces">
       <HintPath>..\packages\Tvl.VisualStudio.OutputWindow.Interfaces.2.0.0\lib\net40\Tvl.VisualStudio.OutputWindow.Interfaces.dll</HintPath>
       <Private>False</Private>
@@ -462,6 +471,7 @@
     <Compile Include="Project\JavaProjectNode.cs" />
     <Compile Include="Project\JavaProjectPackage.cs" />
     <Compile Include="Project\JavaReferenceContainerNode.cs" />
+    <Compile Include="Project\NativeMethods.cs" />
     <Compile Include="Project\PropertyPages\JavaApplicationPropertyPage.cs" />
     <Compile Include="Project\PropertyPages\JavaApplicationPropertyPagePanel.cs">
       <SubType>UserControl</SubType>
@@ -648,10 +658,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\External\ProjectBase2010\Microsoft.VisualStudio.Project.csproj">
-      <Project>{CACB60A9-1E76-4F92-8831-B134A658C695}</Project>
-      <Name>Microsoft.VisualStudio.Project</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Templates\Java\ItemTemplates\JavaClassItemTemplate\JavaClassItemTemplate.csproj">
       <Project>{4F09FA7B-761E-4EEF-B705-53AF973B4B59}</Project>
       <Name>JavaClassItemTemplate</Name>

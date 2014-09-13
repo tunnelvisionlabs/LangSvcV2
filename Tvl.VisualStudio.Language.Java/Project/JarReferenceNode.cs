@@ -109,7 +109,7 @@
             base.Dispose(disposing);
         }
 
-        protected override bool IsAlreadyAdded(out ReferenceNode existingEquivalentNode)
+        public override bool IsAlreadyAdded(out ReferenceNode existingEquivalentNode)
         {
             string fullPath = Path.GetFullPath(InstalledFilePath).Replace('\\', '/');
 
