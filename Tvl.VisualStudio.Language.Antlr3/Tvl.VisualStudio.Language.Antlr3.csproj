@@ -291,18 +291,48 @@
     <Compile Include="Experimental\CompletionSourceTest.cs" />
     <Compile Include="Experimental\GrammarHeaderSemanticClassifier.cs" />
     <Compile Include="Experimental\ISemanticTag.cs" />
+    <Compile Include="V4\AlignmentRequirements.cs" />
+    <Compile Include="V4\Anchor.cs" />
+    <Compile Include="V4\Antlr4CodeCompletionParser.cs" />
+    <Compile Include="V4\Antlr4CompletionParserATNSimulator.cs" />
     <Compile Include="V4\Antlr4Constants.cs" />
+    <Compile Include="V4\Antlr4DynamicAnchorPoints.cs" />
+    <Compile Include="V4\Antlr4DynamicAnchorPointsProvider.cs" />
+    <Compile Include="V4\Antlr4ForestParser.cs" />
     <Compile Include="V4\Antlr4LanguageInfo.cs" />
+    <Compile Include="V4\Antlr4ReferenceAnchorPoints.cs" />
+    <Compile Include="V4\Antlr4ReferenceAnchorPointsProvider.cs" />
+    <Compile Include="V4\Antlr4SmartIndent.cs" />
+    <Compile Include="V4\Antlr4SmartIndentProvider.cs" />
+    <Compile Include="V4\CaretReachedException.cs" />
+    <Compile Include="V4\CaretToken.cs" />
+    <Compile Include="V4\CodeCompletionErrorStrategy.cs" />
+    <Compile Include="V4\CodeCompletionTokenSource.cs" />
+    <Compile Include="V4\CompletionParserATNSimulator.cs" />
+    <Compile Include="V4\ForestParser`1.cs" />
     <Compile Include="V4\GrammarHighlighterLexer.cs" />
     <Compile Include="V4\Antlr4TextStructureNavigator.cs" />
     <Compile Include="V4\Antlr4TextStructureNavigatorProvider.cs" />
     <Compile Include="V4\Antlr4Services.cs" />
+    <Compile Include="V4\GrammarLexer.cs" />
+    <Compile Include="V4\GrammarParser.cs" />
+    <Compile Include="V4\IAnchor.cs" />
+    <Compile Include="V4\ICaretToken.cs" />
+    <Compile Include="V4\ICodeCompletionParser.cs" />
+    <Compile Include="V4\IForestParser`1.cs" />
+    <Compile Include="V4\IReferenceAnchors.cs" />
+    <Compile Include="V4\MultipleDecisionData.cs" />
+    <Compile Include="V4\ParserDataOptions.cs" />
+    <Compile Include="V4\ParseTrees.cs" />
+    <Compile Include="V4\ReferenceAnchors.cs" />
+    <Compile Include="V4\SmartIndent.cs" />
+    <Compile Include="V4\SmartIndentProvider.cs" />
     <Compile Include="V4\V4GrammarClassifierLexerState.cs" />
     <None Include="packages.config" />
     <None Include="V4\Antlr4QuickSearchItemProvider.cs" />
     <None Include="V4\Antlr4QuickSearchItemProviderFactory.cs" />
-    <None Include="V4\Antlr4BackgroundParser.cs" />
-    <None Include="V4\Antlr4BackgroundParserProvider.cs" />
+    <Compile Include="V4\Antlr4BackgroundParser.cs" />
+    <Compile Include="V4\Antlr4BackgroundParserProvider.cs" />
     <Compile Include="V4\Antlr4BraceMatchingTaggerProvider.cs" />
     <Compile Include="V4\Antlr4ClassificationTypeNames.cs" />
     <Compile Include="V4\Antlr4Classifier.cs" />
@@ -339,6 +369,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Antlr4 Include="V4\GrammarHighlighterLexer.g4">
       <CustomToolNamespace>Tvl.VisualStudio.Language.AntlrV4</CustomToolNamespace>
+    </Antlr4>
+    <Antlr4 Include="V4\GrammarLexer.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Tvl.VisualStudio.Language.AntlrV4</CustomToolNamespace>
+    </Antlr4>
+    <Antlr4 Include="V4\GrammarParser.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Tvl.VisualStudio.Language.AntlrV4</CustomToolNamespace>
+      <ForceAtn>True</ForceAtn>
     </Antlr4>
   </ItemGroup>
   <ItemGroup>

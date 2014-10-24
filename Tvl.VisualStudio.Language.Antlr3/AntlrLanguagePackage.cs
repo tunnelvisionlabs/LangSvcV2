@@ -74,7 +74,7 @@
         ShowDropDownOptions = false,
         EnableAdvancedMembersOption = false,
         DefaultToInsertSpaces = false,
-        ShowSmartIndent = false,
+        ShowSmartIndent = true,
         //HideAdvancedMembersByDefault = false,
         RequestStockColors = true,
         //DefaultToNonHotURLs = false,
