@@ -4,11 +4,11 @@
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Antlr4.Runtime;
-    using Antlr4.Runtime.Atn;
     using Antlr4.Runtime.Misc;
     using Antlr4.Runtime.Tree;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Language.Parsing4;
+    using ParseResultEventArgs = Tvl.VisualStudio.Language.Parsing.ParseResultEventArgs;
 
     internal class Antlr4ReferenceAnchorPoints
     {
@@ -52,35 +52,16 @@
                 return null;
 
             // calculate the results...
-            result = _referenceAnchors.GetValue(snapshot, CreateReferenceAnchorPoints);
+            result = _referenceAnchors.GetValue(snapshot, key => CreateReferenceAnchorPoints(key, null));
             return result;
         }
 
-        private IList<IAnchor> CreateReferenceAnchorPoints(ITextSnapshot snapshot)
+        private IList<IAnchor> CreateReferenceAnchorPoints(ITextSnapshot snapshot, GrammarParser.GrammarSpecContext parseResult)
         {
-            ITokenSource tokenSource = new GrammarLexer(new AntlrInputStream(snapshot.GetText()));
-            CommonTokenStream tokenStream = new CommonTokenStream(tokenSource);
-            GrammarParser.GrammarSpecContext parseResult;
-            GrammarParser parser = new GrammarParser(tokenStream);
-            try
+            if (parseResult == null)
             {
-                parser.Interpreter.PredictionMode = PredictionMode.Sll;
-                parser.RemoveErrorListeners();
-                parser.BuildParseTree = true;
-                parser.ErrorHandler = new BailErrorStrategy();
-                parseResult = parser.grammarSpec();
-            }
-            catch (ParseCanceledException ex)
-            {
-                if (!(ex.InnerException is RecognitionException))
-                    throw;
-
-                tokenStream.Reset();
-                parser.Interpreter.PredictionMode = PredictionMode.Ll;
-                //parser.AddErrorListener(DescriptiveErrorListener.Default);
-                parser.SetInputStream(tokenStream);
-                parser.ErrorHandler = new DefaultErrorStrategy();
-                parseResult = parser.grammarSpec();
+                AntlrParseResultEventArgs resultEventArgs = Antlr4BackgroundParser.ParseSnapshot(snapshot);
+                parseResult = (GrammarParser.GrammarSpecContext)resultEventArgs.Result;
             }
 
             AnchorListener listener = new AnchorListener(snapshot);
@@ -90,7 +71,8 @@
 
         private void HandleParseComplete(object sender, ParseResultEventArgs e)
         {
-            IList<IAnchor> result = _referenceAnchors.GetValue(e.Snapshot, CreateReferenceAnchorPoints);
+            AntlrParseResultEventArgs antlrEventArgs = (AntlrParseResultEventArgs)e;
+            IList<IAnchor> result = _referenceAnchors.GetValue(e.Snapshot, snapshot => CreateReferenceAnchorPoints(snapshot, (GrammarParser.GrammarSpecContext)antlrEventArgs.Result));
             _newestResult = Tuple.Create(e.Snapshot, result);
         }
 
