@@ -10,18 +10,27 @@
     [Export(typeof(ITaggerProvider))]
     [ContentType(Antlr4Constants.AntlrContentType)]
     [TagType(typeof(IOutliningRegionTag))]
-    public sealed class Antlr4OutliningTaggerProvider : ITaggerProvider
+    internal sealed class Antlr4OutliningTaggerProvider : ITaggerProvider
     {
-        [Import]
-        private IBackgroundParserFactoryService BackgroundParserFactoryService
+        private readonly IBackgroundParserFactoryService _backgroundParserFactoryService;
+
+        [ImportingConstructor]
+        public Antlr4OutliningTaggerProvider(IBackgroundParserFactoryService backgroundParserFactoryService)
         {
-            get;
-            set;
+            _backgroundParserFactoryService = backgroundParserFactoryService;
+        }
+
+        public IBackgroundParserFactoryService BackgroundParserFactoryService
+        {
+            get
+            {
+                return _backgroundParserFactoryService;
+            }
         }
 
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
-            Func<Antlr4OutliningTagger> creator = () => new Antlr4OutliningTagger(buffer, (Antlr4BackgroundParser)BackgroundParserFactoryService.GetBackgroundParser(buffer), this);
+            Func<Antlr4OutliningTagger> creator = () => new Antlr4OutliningTagger(this, buffer);
             return buffer.Properties.GetOrCreateSingletonProperty(creator) as ITagger<T>;
         }
     }

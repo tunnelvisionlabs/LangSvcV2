@@ -348,8 +348,8 @@
     <None Include="V4\Antlr4IntellisenseControllerProvider.cs" />
     <None Include="V4\Antlr4LanguageElementTagger.cs" />
     <None Include="V4\Antlr4LanguageElementTaggerProvider.cs" />
-    <None Include="V4\Antlr4OutliningTagger.cs" />
-    <None Include="V4\Antlr4OutliningTaggerProvider.cs" />
+    <Compile Include="V4\Antlr4OutliningTagger.cs" />
+    <Compile Include="V4\Antlr4OutliningTaggerProvider.cs" />
     <None Include="V4\Antlr4ParserTokenStream.cs" />
     <None Include="V4\Antlr4QuickInfoSource.cs" />
     <None Include="V4\Antlr4QuickInfoSourceProvider.cs" />
