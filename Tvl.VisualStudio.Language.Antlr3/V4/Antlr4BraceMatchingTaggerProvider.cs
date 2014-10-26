@@ -31,7 +31,8 @@
                 {
                     new KeyValuePair<char, char>('(', ')'),
                     new KeyValuePair<char, char>('{', '}'),
-                    new KeyValuePair<char, char>('[', ']')
+                    new KeyValuePair<char, char>('[', ']'),
+                    new KeyValuePair<char, char>('<', '>')
                 };
             return new BraceMatchingTagger(textView, buffer, aggregator, pairs) as ITagger<T>;
         }
