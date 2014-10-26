@@ -7,59 +7,47 @@
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
     using Antlr4.Runtime;
+    using Antlr4.Runtime.Misc;
     using Antlr4.Runtime.Tree;
     using Microsoft.VisualStudio.Text;
-    using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Language.Parsing4;
     using Tvl.VisualStudio.Text.Navigation;
     using AntlrEditorNavigationTypeNames = Tvl.VisualStudio.Language.Antlr3.AntlrEditorNavigationTypeNames;
+    using ParseResultEventArgs = Tvl.VisualStudio.Language.Parsing.ParseResultEventArgs;
 
     internal sealed class Antlr4EditorNavigationSource : IEditorNavigationSource
     {
-        private IEditorNavigationType _parserRuleNavigationType;
-        private IEditorNavigationType _lexerRuleNavigationType;
-        private ImageSource _lexerRuleGlyph;
-        private ImageSource _parserRuleGlyph;
+        private readonly Antlr4EditorNavigationSourceProvider _provider;
+        private readonly ITextBuffer _textBuffer;
+        private readonly Antlr4BackgroundParser _backgroundParser;
+
+        private readonly IEditorNavigationType _parserRuleNavigationType;
+        private readonly IEditorNavigationType _lexerRuleNavigationType;
+        private readonly ImageSource _lexerRuleGlyph;
+        private readonly ImageSource _parserRuleGlyph;
+
         private List<IEditorNavigationTarget> _navigationTargets;
 
         public event EventHandler NavigationTargetsChanged;
 
-        public Antlr4EditorNavigationSource(ITextBuffer textBuffer, Antlr4BackgroundParser backgroundParser, IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
+        public Antlr4EditorNavigationSource(Antlr4EditorNavigationSourceProvider provider, ITextBuffer textBuffer)
         {
+            Contract.Requires<ArgumentNullException>(provider != null, "provider");
             Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
-            Contract.Requires<ArgumentNullException>(editorNavigationTypeRegistryService != null, "editorNavigationTypeRegistryService");
 
-            this.TextBuffer = textBuffer;
-            this.BackgroundParser = backgroundParser;
-            this.EditorNavigationTypeRegistryService = editorNavigationTypeRegistryService;
+            _provider = provider;
+            _textBuffer = textBuffer;
 
-            this._parserRuleNavigationType = this.EditorNavigationTypeRegistryService.GetEditorNavigationType(AntlrEditorNavigationTypeNames.ParserRule);
-            this._lexerRuleNavigationType = this.EditorNavigationTypeRegistryService.GetEditorNavigationType(AntlrEditorNavigationTypeNames.LexerRule);
+            _parserRuleNavigationType = provider.EditorNavigationTypeRegistryService.GetEditorNavigationType(AntlrEditorNavigationTypeNames.ParserRule);
+            _lexerRuleNavigationType = provider.EditorNavigationTypeRegistryService.GetEditorNavigationType(AntlrEditorNavigationTypeNames.LexerRule);
 
             string assemblyName = typeof(Antlr4EditorNavigationSource).Assembly.GetName().Name;
-            this._lexerRuleGlyph = new BitmapImage(new Uri(string.Format("pack://application:,,,/{0};component/Resources/lexericon.png", assemblyName)));
-            this._parserRuleGlyph = new BitmapImage(new Uri(string.Format("pack://application:,,,/{0};component/Resources/parsericon.png", assemblyName)));
+            _lexerRuleGlyph = new BitmapImage(new Uri(string.Format("pack://application:,,,/{0};component/Resources/lexericon.png", assemblyName)));
+            _parserRuleGlyph = new BitmapImage(new Uri(string.Format("pack://application:,,,/{0};component/Resources/parsericon.png", assemblyName)));
 
-            this.BackgroundParser.ParseComplete += HandleBackgroundParseComplete;
-            this.BackgroundParser.RequestParse(false);
-        }
-
-        private ITextBuffer TextBuffer
-        {
-            get;
-            set;
-        }
-
-        private Antlr4BackgroundParser BackgroundParser
-        {
-            get;
-            set;
-        }
-
-        private IEditorNavigationTypeRegistryService EditorNavigationTypeRegistryService
-        {
-            get;
-            set;
+            _backgroundParser = (Antlr4BackgroundParser)provider.BackgroundParserFactoryService.GetBackgroundParser(textBuffer);
+            _backgroundParser.ParseComplete += HandleBackgroundParseComplete;
+            _backgroundParser.RequestParse(false);
         }
 
         public IEnumerable<IEditorNavigationType> GetNavigationTypes()
@@ -70,13 +58,6 @@
 
         public IEnumerable<IEditorNavigationTarget> GetNavigationTargets()
         {
-            if (_navigationTargets == null)
-            {
-                var previousParseResult = BackgroundParser.PreviousParseResult;
-                if (previousParseResult != null)
-                    UpdateNavigationTargets(previousParseResult);
-            }
-
             return _navigationTargets ?? Enumerable.Empty<IEditorNavigationTarget>();
         }
 
@@ -98,83 +79,109 @@
 
         private void UpdateNavigationTargets(AntlrParseResultEventArgs antlrParseResultArgs)
         {
-            Contract.Requires(antlrParseResultArgs != null);
+            Contract.Requires<ArgumentNullException>(antlrParseResultArgs != null, "antlrParseResultArgs");
 
-            List<IEditorNavigationTarget> navigationTargets = new List<IEditorNavigationTarget>();
-            if (antlrParseResultArgs != null)
+            NavigationTargetListener listener = new NavigationTargetListener(this, antlrParseResultArgs.Snapshot, antlrParseResultArgs.Tokens);
+            ParseTreeWalker.Default.Walk(listener, antlrParseResultArgs.Result);
+            _navigationTargets = listener.NavigationTargets;
+            OnNavigationTargetsChanged(EventArgs.Empty);
+        }
+
+        private class NavigationTargetListener : GrammarParserBaseListener
+        {
+            private readonly Antlr4EditorNavigationSource _navigationSource;
+            private readonly ITextSnapshot _snapshot;
+            private readonly IList<IToken> _tokens;
+            private readonly List<IEditorNavigationTarget> _navigationTargets = new List<IEditorNavigationTarget>();
+
+            private readonly Stack<string> _mode = new Stack<string>();
+
+            public NavigationTargetListener(Antlr4EditorNavigationSource navigationSource, ITextSnapshot snapshot, IList<IToken> tokens)
             {
-#if false
-                IAstRuleReturnScope resultArgs = antlrParseResultArgs.Result as IAstRuleReturnScope;
-                var result = resultArgs != null ? resultArgs.Tree as CommonTree : null;
-                if (result != null)
-                {
-                    foreach (CommonTree child in result.Children)
-                    {
-                        if (child == null || string.IsNullOrEmpty(child.Text))
-                            continue;
+                Contract.Requires<ArgumentNullException>(navigationSource != null, "navigationSource");
+                Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
+                Contract.Requires<ArgumentNullException>(tokens != null, "tokens");
 
-                        if (child.Text == "rule" && child.ChildCount > 0)
-                        {
-                            var ruleName = child.GetChild(0).Text;
-                            if (string.IsNullOrEmpty(ruleName))
-                                continue;
-
-                            if (ruleName == "Tokens")
-                                continue;
-
-                            var navigationType = char.IsUpper(ruleName[0]) ? _lexerRuleNavigationType : _parserRuleNavigationType;
-                            IToken startToken = antlrParseResultArgs.Tokens[child.TokenStartIndex];
-                            IToken stopToken = antlrParseResultArgs.Tokens[child.TokenStopIndex];
-                            Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
-                            SnapshotSpan ruleSpan = new SnapshotSpan(antlrParseResultArgs.Snapshot, span);
-                            SnapshotSpan ruleSeek = new SnapshotSpan(antlrParseResultArgs.Snapshot, new Span(((CommonTree)child.GetChild(0)).Token.StartIndex, 0));
-                            var glyph = char.IsUpper(ruleName[0]) ? _lexerRuleGlyph : _parserRuleGlyph;
-                            navigationTargets.Add(new EditorNavigationTarget(ruleName, navigationType, ruleSpan, ruleSeek, glyph));
-                        }
-                        else if (child.Text.StartsWith("tokens"))
-                        {
-                            foreach (CommonTree tokenChild in child.Children)
-                            {
-                                if (tokenChild.Text == "=" && tokenChild.ChildCount == 2)
-                                {
-                                    var ruleName = tokenChild.GetChild(0).Text;
-                                    if (string.IsNullOrEmpty(ruleName))
-                                        continue;
-
-                                    var navigationType = char.IsUpper(ruleName[0]) ? _lexerRuleNavigationType : _parserRuleNavigationType;
-                                    IToken startToken = antlrParseResultArgs.Tokens[tokenChild.TokenStartIndex];
-                                    IToken stopToken = antlrParseResultArgs.Tokens[tokenChild.TokenStopIndex];
-                                    Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
-                                    SnapshotSpan ruleSpan = new SnapshotSpan(antlrParseResultArgs.Snapshot, span);
-                                    SnapshotSpan ruleSeek = new SnapshotSpan(antlrParseResultArgs.Snapshot, new Span(((CommonTree)tokenChild.GetChild(0)).Token.StartIndex, 0));
-                                    var glyph = char.IsUpper(ruleName[0]) ? _lexerRuleGlyph : _parserRuleGlyph;
-                                    navigationTargets.Add(new EditorNavigationTarget(ruleName, navigationType, ruleSpan, ruleSeek, glyph));
-                                }
-                                else if (tokenChild.ChildCount == 0)
-                                {
-                                    var ruleName = tokenChild.Text;
-                                    if (string.IsNullOrEmpty(ruleName))
-                                        continue;
-
-                                    var navigationType = char.IsUpper(ruleName[0]) ? _lexerRuleNavigationType : _parserRuleNavigationType;
-                                    IToken startToken = antlrParseResultArgs.Tokens[tokenChild.TokenStartIndex];
-                                    IToken stopToken = antlrParseResultArgs.Tokens[tokenChild.TokenStopIndex];
-                                    Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
-                                    SnapshotSpan ruleSpan = new SnapshotSpan(antlrParseResultArgs.Snapshot, span);
-                                    SnapshotSpan ruleSeek = new SnapshotSpan(antlrParseResultArgs.Snapshot, new Span(tokenChild.Token.StartIndex, 0));
-                                    var glyph = char.IsUpper(ruleName[0]) ? _lexerRuleGlyph : _parserRuleGlyph;
-                                    navigationTargets.Add(new EditorNavigationTarget(ruleName, navigationType, ruleSpan, ruleSeek, glyph));
-                                }
-                            }
-                        }
-
-                    }
-                }
-#endif
+                _navigationSource = navigationSource;
+                _snapshot = snapshot;
+                _tokens = tokens;
             }
 
-            this._navigationTargets = navigationTargets;
-            OnNavigationTargetsChanged(EventArgs.Empty);
+            public List<IEditorNavigationTarget> NavigationTargets
+            {
+                get
+                {
+                    Contract.Ensures(Contract.Result<List<IEditorNavigationTarget>>() != null);
+                    return _navigationTargets;
+                }
+            }
+
+            public override void EnterParserRuleSpec([NotNull]AbstractGrammarParser.ParserRuleSpecContext context)
+            {
+                AddNavigationTarget(context, context.RULE_REF(), _navigationSource._parserRuleNavigationType, _navigationSource._parserRuleGlyph);
+            }
+
+            public override void EnterLexerRule([NotNull]AbstractGrammarParser.LexerRuleContext context)
+            {
+                AddNavigationTarget(context, context.TOKEN_REF(), _navigationSource._lexerRuleNavigationType, _navigationSource._lexerRuleGlyph);
+            }
+
+            public override void EnterTokensSpec([NotNull]AbstractGrammarParser.TokensSpecContext context)
+            {
+                foreach (GrammarParser.IdContext id in context.id())
+                    AddNavigationTarget(id, ParseTrees.GetStartNode(id), _navigationSource._lexerRuleNavigationType, _navigationSource._lexerRuleGlyph);
+            }
+
+            public override void EnterChannelsSpec([NotNull]AbstractGrammarParser.ChannelsSpecContext context)
+            {
+                // should we do anything here?
+            }
+
+            public override void EnterModeSpec([NotNull]AbstractGrammarParser.ModeSpecContext context)
+            {
+                string modeName = context.id() != null ? context.id().GetText() : null;
+                if (string.IsNullOrEmpty(modeName))
+                    modeName = "?";
+
+                _mode.Push(modeName);
+            }
+
+            public override void ExitModeSpec([NotNull]AbstractGrammarParser.ModeSpecContext context)
+            {
+                _mode.Pop();
+            }
+
+            private void AddNavigationTarget(IParseTree tree, ITerminalNode identifier, IEditorNavigationType navigationType, ImageSource glyph)
+            {
+                Contract.Requires(tree != null);
+                Contract.Requires(navigationType != null);
+
+                Interval sourceInterval = tree.SourceInterval;
+                if (sourceInterval.a < 0 || sourceInterval.b < 0 || sourceInterval.Length <= 0)
+                    return;
+
+                IToken startToken = _tokens[sourceInterval.a];
+                IToken stopToken = _tokens[sourceInterval.b];
+                Span span = new Span(startToken.StartIndex, stopToken.StopIndex - startToken.StartIndex + 1);
+                Span seek;
+                string name = identifier != null ? identifier.GetText() : null;
+                if (string.IsNullOrEmpty(name))
+                {
+                    seek = new Span(span.Start, 0);
+                    name = "?";
+                }
+                else
+                {
+                    seek = new Span(identifier.Symbol.StartIndex, 0);
+                }
+
+                if (_mode.Count > 0)
+                {
+                    name = _mode.Peek() + "." + name;
+                }
+
+                _navigationTargets.Add(new EditorNavigationTarget(name, navigationType, new SnapshotSpan(_snapshot, span), new SnapshotSpan(_snapshot, seek), glyph));
+            }
         }
     }
 }

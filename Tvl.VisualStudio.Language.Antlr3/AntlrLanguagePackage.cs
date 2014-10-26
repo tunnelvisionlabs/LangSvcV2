@@ -71,7 +71,7 @@
 
     [ProvideLanguageService(typeof(Antlr4LanguageInfo), Antlr4Constants.AntlrLanguageName, Antlr4Constants.AntlrLanguageResourceId,
         ShowCompletion = false,
-        ShowDropDownOptions = false,
+        ShowDropDownOptions = true,
         EnableAdvancedMembersOption = false,
         DefaultToInsertSpaces = false,
         ShowSmartIndent = true,

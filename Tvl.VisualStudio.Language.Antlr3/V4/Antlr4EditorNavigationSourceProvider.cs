@@ -3,41 +3,37 @@
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Utilities;
-    using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Text.Navigation;
-
-    //public sealed class EditorNavigationTypeAttribute : MultipleBaseMetadataAttribute
-    //{
-    //    public EditorNavigationTypeAttribute(string type)
-    //    {
-    //        this.EditorNavigationType = type;
-    //    }
-
-    //    public string EditorNavigationType
-    //    {
-    //        get;
-    //        private set;
-    //    }
-    //}
+    using IBackgroundParserFactoryService = Tvl.VisualStudio.Language.Parsing.IBackgroundParserFactoryService;
 
     [Export(typeof(IEditorNavigationSourceProvider))]
     [ContentType(Antlr4Constants.AntlrContentType)]
-    //[EditorNavigationType(AntlrEditorNavigationTypeNames.ParserRule)]
-    //[EditorNavigationType(AntlrEditorNavigationTypeNames.LexerRule)]
     public sealed class Antlr4EditorNavigationSourceProvider : IEditorNavigationSourceProvider
     {
-        [Import]
-        private IBackgroundParserFactoryService BackgroundParserFactoryService
+        private readonly IBackgroundParserFactoryService _backgroundParserFactoryService;
+        private readonly IEditorNavigationTypeRegistryService _editorNavigationTypeRegistryService;
+
+        [ImportingConstructor]
+        public Antlr4EditorNavigationSourceProvider(IBackgroundParserFactoryService backgroundParserFactoryService, IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
         {
-            get;
-            set;
+            _backgroundParserFactoryService = backgroundParserFactoryService;
+            _editorNavigationTypeRegistryService = editorNavigationTypeRegistryService;
         }
 
-        [Import]
-        private IEditorNavigationTypeRegistryService EditorNavigationTypeRegistryService
+        public IBackgroundParserFactoryService BackgroundParserFactoryService
         {
-            get;
-            set;
+            get
+            {
+                return _backgroundParserFactoryService;
+            }
+        }
+
+        public IEditorNavigationTypeRegistryService EditorNavigationTypeRegistryService
+        {
+            get
+            {
+                return _editorNavigationTypeRegistryService;
+            }
         }
 
         public IEditorNavigationSource TryCreateEditorNavigationSource(ITextBuffer textBuffer)
@@ -46,7 +42,7 @@
             if (backgroundParser == null)
                 return null;
 
-            return new Antlr4EditorNavigationSource(textBuffer, backgroundParser, EditorNavigationTypeRegistryService);
+            return new Antlr4EditorNavigationSource(this, textBuffer);
         }
     }
 }
