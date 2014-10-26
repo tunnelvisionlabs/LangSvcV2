@@ -208,9 +208,6 @@
             if (!_dirty && !forceReparse)
                 return;
 
-            if (DateTimeOffset.Now - _lastEdit < TimeSpan.FromSeconds(2))
-                return;
-
             if (Interlocked.CompareExchange(ref _parsing, 1, 0) == 0)
             {
                 try
