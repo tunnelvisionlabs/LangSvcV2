@@ -287,8 +287,17 @@
                 int startIndex = "[wrote ".Length;
                 string writeDetail = singleLine.Substring(startIndex, singleLine.Length - startIndex - 1);
 
-                startIndex = writeDetail.IndexOf('[');
-                string outputFile = writeDetail.Substring(startIndex + 1, writeDetail.Length - startIndex - 2);
+                string outputFile;
+                if (writeDetail.EndsWith("]"))
+                {
+                    // starting with Java 7, the writeDetail is actually wrapped in another set of brackets
+                    startIndex = writeDetail.IndexOf('[');
+                    outputFile = writeDetail.Substring(startIndex + 1, writeDetail.Length - startIndex - 2);
+                }
+                else
+                {
+                    outputFile = writeDetail;
+                }
 
                 TaskItem generated = new TaskItem(outputFile);
                 generated.SetMetadata("BaseOutputDirectory", OutputPath);
