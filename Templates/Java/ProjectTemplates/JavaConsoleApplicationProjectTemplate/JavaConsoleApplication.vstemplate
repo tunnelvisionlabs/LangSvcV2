@@ -11,6 +11,7 @@
     <CreateNewFolder>true</CreateNewFolder>
     <DefaultName>ConsoleApplication</DefaultName>
     <ProvideDefaultName>true</ProvideDefaultName>
+    <PromptForSaveOnCreation>true</PromptForSaveOnCreation>
   </TemplateData>
   <TemplateContent>
     <Project File="ConsoleApplication.javaproj" ReplaceParameters="true">
