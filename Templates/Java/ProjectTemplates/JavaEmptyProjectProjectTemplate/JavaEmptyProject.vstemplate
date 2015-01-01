@@ -13,6 +13,7 @@
   </TemplateData>
   <TemplateContent>
     <Project File="EmptyProject.javaproj" ReplaceParameters="true">
+      <ProjectItem TargetFileName="README.txt">README.txt</ProjectItem>
     </Project>
   </TemplateContent>
   <WizardExtension>
