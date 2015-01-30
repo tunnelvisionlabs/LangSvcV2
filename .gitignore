@@ -6,7 +6,8 @@
 *.vcxproj.user
 
 # Roslyn cache
-*.sln.ide
+*.sln.ide/
+*.vs/
 
 [Ss]tyle[Cc]op.[Cc]ache
 
