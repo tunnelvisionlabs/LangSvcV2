@@ -343,8 +343,13 @@
                                 string methodGenericSignature;
                                 JvmtiErrorHandler.ThrowOnFailure(environment.GetMethodName(_lastMethod, out methodName, out methodSignature, out methodGenericSignature));
 
+                                jobject classLoader;
+                                JvmtiErrorHandler.ThrowOnFailure(environment.GetClassLoader(classHandle.Value, out classLoader));
+                                long classLoaderTag;
+                                JvmtiErrorHandler.ThrowOnFailure(environment.TagClassLoader(classLoader, out classLoaderTag));
+
                                 ReadOnlyCollection<ExceptionTableEntry> exceptionTable;
-                                JvmtiErrorHandler.ThrowOnFailure(environment.VirtualMachine.GetExceptionTable(classSignature, methodName, methodSignature, out exceptionTable));
+                                JvmtiErrorHandler.ThrowOnFailure(environment.VirtualMachine.GetExceptionTable(classLoaderTag, classSignature, methodName, methodSignature, out exceptionTable));
 
                                 _evaluationStackDepths = BytecodeDisassembler.GetEvaluationStackDepths(_disassembledMethod, _constantPool, exceptionTable);
                             }

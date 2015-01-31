@@ -7,6 +7,7 @@
     using System.Linq;
     using System.Runtime.InteropServices;
     using Tvl.Java.DebugInterface.Types;
+    using Interlocked = System.Threading.Interlocked;
 
     public sealed class JvmtiEnvironment
     {
@@ -1027,6 +1028,28 @@
         public jvmtiError SetTag(jobject objectHandle, long tag)
         {
             return RawInterface.SetTag(this, objectHandle, tag);
+        }
+
+        private long _nextClassLoaderTag = 1;
+
+        public jvmtiError TagClassLoader(jobject classLoaderHandle, out long tag)
+        {
+            if (classLoaderHandle == jobject.Null)
+            {
+                tag = 0;
+                return jvmtiError.None;
+            }
+
+            var error = GetTag(classLoaderHandle, out tag);
+            if (error != jvmtiError.None)
+                return error;
+
+            if (tag != 0)
+                return jvmtiError.None;
+
+            tag = Interlocked.Increment(ref _nextClassLoaderTag);
+            error = SetTag(classLoaderHandle, tag);
+            return error;
         }
     }
 }

@@ -37,7 +37,7 @@
             ushort attributeNameIndex = ConstantPoolEntry.ByteSwap((ushort)Marshal.ReadInt16(ptr, offset));
             uint attributeLength = ConstantPoolEntry.ByteSwap((uint)Marshal.ReadInt32(ptr, offset + sizeof(ushort)));
             byte[] info = new byte[attributeLength];
-            Marshal.Copy(ptr + offset, info, 0, (int)attributeLength);
+            Marshal.Copy(ptr + offset + sizeof(ushort) + sizeof(uint), info, 0, (int)attributeLength);
 
             ConstantUtf8 entry = (ConstantUtf8)constantPool[attributeNameIndex - 1];
             switch (entry.Value)

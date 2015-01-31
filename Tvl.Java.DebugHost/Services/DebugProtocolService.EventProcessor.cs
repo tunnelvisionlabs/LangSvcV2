@@ -693,6 +693,9 @@
                 if (classSignature[0] != '[')
                     classSignature = 'L' + classSignature + ';';
 
+                long classLoaderTag;
+                JvmtiErrorHandler.ThrowOnFailure(Environment.TagClassLoader(loaderHandle, out classLoaderTag));
+
                 foreach (var methodInfo in classFile.Methods)
                 {
                     if ((methodInfo.Modifiers & (AccessModifiers.Abstract | AccessModifiers.Native)) != 0)
@@ -708,7 +711,7 @@
                     ConstantUtf8 constantMethodSignature = (ConstantUtf8)classFile.ConstantPool[methodInfo.DescriptorIndex - 1];
                     string methodSignature = constantMethodSignature.Value;
 
-                    VirtualMachine.SetExceptionTable(classSignature, methodName, methodSignature, codeAttribute.ExceptionTable);
+                    VirtualMachine.SetExceptionTable(classLoaderTag, classSignature, methodName, methodSignature, codeAttribute.ExceptionTable);
                 }
 
 #if false

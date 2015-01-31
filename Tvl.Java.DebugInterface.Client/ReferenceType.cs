@@ -434,9 +434,11 @@
             if (_taggedTypeId.TypeTag == TypeTag.Class || _taggedTypeId.TypeTag == TypeTag.Interface)
             {
                 string signature = GetSignature().Substring(1);
-                string relativeFolder = signature.Substring(0, signature.LastIndexOf('/')).Replace('/', Path.DirectorySeparatorChar);
+                string relativeFolder = null;
+                if (signature.IndexOf('/') >= 0)
+                    relativeFolder = signature.Substring(0, signature.LastIndexOf('/')).Replace('/', Path.DirectorySeparatorChar);
 
-                List<string> paths = new List<string>(GetSourceNames(stratum).Select(i => Path.Combine(relativeFolder, i)));
+                List<string> paths = new List<string>(GetSourceNames(stratum).Select(i => string.IsNullOrEmpty(relativeFolder) ? i : Path.Combine(relativeFolder, i)));
                 for (int i = paths.Count - 1; i >= 0; i--)
                 {
                     string path = paths[i];

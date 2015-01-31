@@ -940,8 +940,18 @@
                 if (error != jvmtiError.None)
                     return GetStandardError(error);
 
+                jobject classLoader;
+                error = environment.GetClassLoader(classHandle.Value, out classLoader);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
+
+                long classLoaderTag;
+                error = environment.TagClassLoader(classLoader, out classLoaderTag);
+                if (error != jvmtiError.None)
+                    return GetStandardError(error);
+
                 ReadOnlyCollection<ExceptionTableEntry> exceptionTable;
-                error = environment.VirtualMachine.GetExceptionTable(classSignature, methodName, methodSignature, out exceptionTable);
+                error = environment.VirtualMachine.GetExceptionTable(classLoaderTag, classSignature, methodName, methodSignature, out exceptionTable);
                 if (error != jvmtiError.None)
                     return GetStandardError(error);
 
