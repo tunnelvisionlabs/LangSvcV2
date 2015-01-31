@@ -227,7 +227,7 @@
         private static void HandleFirstChanceException(object sender, FirstChanceExceptionEventArgs e)
         {
             string caption = "First Chance Exception";
-            MessageBox.Show(e.Exception.Message + Environment.NewLine + Environment.NewLine + e.Exception.StackTrace, caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+            MessageBox.Show(e.Exception.Message + Environment.NewLine + Environment.NewLine + e.Exception.StackTrace + (new System.Diagnostics.StackTrace(1)), caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
         }
 
         private static void HandleUnhandledException(object sender, UnhandledExceptionEventArgs e)
