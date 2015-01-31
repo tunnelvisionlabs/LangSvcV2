@@ -1085,8 +1085,15 @@
                 this._threads.TryGetValue(e.Thread.GetUniqueId(), out thread);
             }
 
-            ReadOnlyCollection<string> sourceFiles = e.Type.GetSourcePaths(e.Type.GetDefaultStratum());
-            DebugEngine.BindVirtualizedBreakpoints(this, thread, e.Type, sourceFiles);
+            try
+            {
+                ReadOnlyCollection<string> sourceFiles = e.Type.GetSourcePaths(e.Type.GetDefaultStratum());
+                DebugEngine.BindVirtualizedBreakpoints(this, thread, e.Type, sourceFiles);
+            }
+            catch (MissingInformationException)
+            {
+                // Can't bind debug information for classes that don't contain debug information
+            }
 
             // The format of the message created by the .NET debugger is this:
             // 'devenv.exe' (Managed (v4.0.30319)): Loaded 'C:\Windows\Microsoft.Net\assembly\GAC_MSIL\Microsoft.VisualStudio.Windows.Forms\v4.0_10.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.Windows.Forms.dll'
