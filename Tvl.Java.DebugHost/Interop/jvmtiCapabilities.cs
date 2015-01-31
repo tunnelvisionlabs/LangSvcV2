@@ -353,6 +353,7 @@ namespace Tvl.Java.DebugHost.Interop
         [Flags]
         public enum CapabilityFlags1 : uint
         {
+            None = 0,
             CanTagObjects = 0x00000001,
             CanGenerateFieldModificationEvents = 0x00000002,
             CanGenerateFieldAccessEvents = 0x00000004,
@@ -390,6 +391,7 @@ namespace Tvl.Java.DebugHost.Interop
         [Flags]
         public enum CapabilityFlags2 : uint
         {
+            None = 0,
             CanGenerateObjectFreeEvents = 0x00000001,
             CanForceEarlyReturn = 0x00000002,
             CanGetOwnedMonitorStackDepthInfo = 0x00000004,
@@ -404,11 +406,13 @@ namespace Tvl.Java.DebugHost.Interop
         [Flags]
         public enum CapabilityFlags3 : uint
         {
+            None = 0,
         }
 
         [Flags]
         public enum CapabilityFlags4 : uint
         {
+            None = 0,
         }
     }
 }
