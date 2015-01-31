@@ -14,7 +14,7 @@
         private ushort _accessFlags;
         private ushort _thisClass;
         private ushort _superClass;
-        private short[] _interfaces;
+        private ushort[] _interfaces;
         private FieldInfo[] _fields;
         private MethodInfo[] _methods;
         private AttributeInfo[] _attributes;
@@ -118,9 +118,12 @@
             ushort interfacesCount = ConstantPoolEntry.ByteSwap((ushort)Marshal.ReadInt16(ptr, offset));
             offset += sizeof(ushort);
 
-            classFile._interfaces = new short[interfacesCount];
-            Marshal.Copy(ptr + offset, classFile._interfaces, 0, interfacesCount);
-            offset += interfacesCount * sizeof(ushort);
+            classFile._interfaces = new ushort[interfacesCount];
+            for (int i = 0; i < interfacesCount; i++)
+            {
+                classFile._interfaces[i] = ConstantPoolEntry.ByteSwap((ushort)Marshal.ReadInt16(ptr, offset));
+                offset += sizeof(ushort);
+            }
 
             ushort fieldsCount = ConstantPoolEntry.ByteSwap((ushort)Marshal.ReadInt16(ptr, offset));
             offset += sizeof(ushort);
