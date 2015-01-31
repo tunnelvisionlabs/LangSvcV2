@@ -37,8 +37,9 @@
 
         private readonly ConcurrentDictionary<ThreadId, int> _suspendCounts = new ConcurrentDictionary<ThreadId, int>();
 
-        private readonly Dictionary<string, Dictionary<string, ReadOnlyCollection<ExceptionTableEntry>>> _exceptionTableEntries
-            = new Dictionary<string, Dictionary<string, ReadOnlyCollection<ExceptionTableEntry>>>();
+        // class loader tag -> class signature -> full method signature -> exception table
+        private readonly Dictionary<long, Dictionary<string, Dictionary<string, ReadOnlyCollection<ExceptionTableEntry>>>> _exceptionTableEntries
+            = new Dictionary<long, Dictionary<string, Dictionary<string, ReadOnlyCollection<ExceptionTableEntry>>>>();
 
         #region Object tracking
 
@@ -137,7 +138,7 @@
             }
         }
 
-        internal jvmtiError GetExceptionTable(string classSignature, string methodName, string methodSignature, out ReadOnlyCollection<ExceptionTableEntry> exceptionTable)
+        internal jvmtiError GetExceptionTable(long classLoaderTag, string classSignature, string methodName, string methodSignature, out ReadOnlyCollection<ExceptionTableEntry> exceptionTable)
         {
             Contract.Requires<ArgumentNullException>(classSignature != null, "classSignature");
             Contract.Requires<ArgumentNullException>(methodName != null, "methodName");
@@ -146,8 +147,12 @@
             exceptionTable = null;
             lock (_exceptionTableEntries)
             {
+                Dictionary<string, Dictionary<string, ReadOnlyCollection<ExceptionTableEntry>>> loaderClasses;
+                if (!_exceptionTableEntries.TryGetValue(classLoaderTag, out loaderClasses))
+                    return jvmtiError.AbsentInformation;
+
                 Dictionary<string, ReadOnlyCollection<ExceptionTableEntry>> classMethods;
-                if (!_exceptionTableEntries.TryGetValue(classSignature, out classMethods))
+                if (!loaderClasses.TryGetValue(classSignature, out classMethods))
                     return jvmtiError.AbsentInformation;
 
                 string fullMethodSignature = methodName + methodSignature;
@@ -158,18 +163,25 @@
             }
         }
 
-        internal void SetExceptionTable(string classSignature, string methodName, string methodSignature, ReadOnlyCollection<ExceptionTableEntry> exceptionTable)
+        internal void SetExceptionTable(long classLoaderTag, string classSignature, string methodName, string methodSignature, ReadOnlyCollection<ExceptionTableEntry> exceptionTable)
         {
             if (exceptionTable == null)
                 return;
 
             lock (_exceptionTableEntries)
             {
+                Dictionary<string, Dictionary<string, ReadOnlyCollection<ExceptionTableEntry>>> classExceptionTables;
+                if (!_exceptionTableEntries.TryGetValue(classLoaderTag, out classExceptionTables))
+                {
+                    classExceptionTables = new Dictionary<string, Dictionary<string, ReadOnlyCollection<ExceptionTableEntry>>>();
+                    _exceptionTableEntries.Add(classLoaderTag, classExceptionTables);
+                }
+
                 Dictionary<string, ReadOnlyCollection<ExceptionTableEntry>> classMethods;
-                if (!_exceptionTableEntries.TryGetValue(classSignature, out classMethods))
+                if (!classExceptionTables.TryGetValue(classSignature, out classMethods))
                 {
                     classMethods = new Dictionary<string, ReadOnlyCollection<ExceptionTableEntry>>();
-                    _exceptionTableEntries.Add(classSignature, classMethods);
+                    classExceptionTables.Add(classSignature, classMethods);
                 }
 
                 string fullMethodSignature = methodName + methodSignature;
