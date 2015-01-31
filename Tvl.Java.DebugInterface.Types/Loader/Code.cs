@@ -14,7 +14,7 @@
         public Code(ushort attributeNameIndex, byte[] info)
             : base(attributeNameIndex, info)
         {
-            int offset = sizeof(ushort) + sizeof(uint);
+            int offset = 0;
             _maxStack = ConstantPoolEntry.ByteSwap(BitConverter.ToUInt16(info, offset));
             offset += 2;
 
