@@ -69,14 +69,14 @@
                         int defaultStart = (instructionStart + 4) & (~3);
                         int defaultValue = ReadInt32(bytecode, defaultStart);
                         int lowValue = ReadInt32(bytecode, defaultStart + 4);
-                        int highValue = ReadInt32(bytecode, defaultStart + 4);
+                        int highValue = ReadInt32(bytecode, defaultStart + 8);
                         if (highValue < lowValue)
                             throw new FormatException();
 
                         List<int> offsets = new List<int>();
                         for (int j = 0; j < highValue - lowValue + 1; j++)
                         {
-                            int valueStart = defaultStart + (sizeof(int) * (2 + j));
+                            int valueStart = defaultStart + (sizeof(int) * (3 + j));
                             offsets.Add(ReadInt32(bytecode, valueStart));
                         }
 
