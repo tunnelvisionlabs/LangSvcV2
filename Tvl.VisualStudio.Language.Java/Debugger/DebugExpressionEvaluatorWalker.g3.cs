@@ -71,9 +71,37 @@
                 return new EvaluatedExpression(name, name, _stackFrame.GetThisObject(), field, _stackFrame.GetThisObject().GetValue(field), false);
             }
 
-            // check the outer object?
+            // check the outer object
+            IField outerClassField = declaringType.GetFieldByName("this$0");
+            IObjectReference nestedClassInstance = null;
+            while (outerClassField != null)
+            {
+                if (nestedClassInstance == null)
+                    nestedClassInstance = _stackFrame.GetThisObject();
+                else
+                    nestedClassInstance = nestedClassInstance.GetValue(outerClassField) as IObjectReference;
 
-            throw new NotImplementedException();
+                if (nestedClassInstance == null)
+                    break;
+
+                // what if this$0 is defined in a superclass?
+                IClassType fieldType = outerClassField.GetFieldType() as IClassType;
+                field = fieldType.GetFieldByName(name);
+                if (field != null)
+                {
+                    if (field.GetIsStatic())
+                        return new EvaluatedExpression(name, name, null, field, fieldType.GetValue(field), false);
+
+                    if (method.GetIsStatic())
+                        throw new InvalidOperationException("The instance field cannot be accessed from a static method.");
+
+                    return new EvaluatedExpression(name, name, nestedClassInstance, field, nestedClassInstance.GetValue(field), false);
+                }
+
+                outerClassField = fieldType.GetFieldByName("this$0");
+            }
+
+            throw new InvalidOperationException("No member by this name is available in the current scope.");
         }
 
         private bool TryGetValueInScope(string name, out EvaluatedExpression result)
