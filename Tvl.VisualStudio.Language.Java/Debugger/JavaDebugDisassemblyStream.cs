@@ -226,9 +226,10 @@
                     // field is filled in with the file name where the source can be found, using the
                     // format file://file name."
                     string sourcePath = _executionContext.Location.GetSourcePath();
-                    if (!string.IsNullOrEmpty(sourcePath))
+                    Uri sourceUri;
+                    if (!string.IsNullOrEmpty(sourcePath) && Uri.TryCreate(sourcePath, UriKind.Absolute, out sourceUri))
                     {
-                        prgDisassembly[i].bstrDocumentUrl = new Uri(sourcePath).AbsoluteUri;
+                        prgDisassembly[i].bstrDocumentUrl = sourceUri.AbsoluteUri;
                         // if it starts with file:/// one of the / characters will show in disassembly view
                         if (prgDisassembly[i].bstrDocumentUrl.StartsWith("file:///"))
                             prgDisassembly[i].bstrDocumentUrl = "file://" + prgDisassembly[i].bstrDocumentUrl.Substring("file:///".Length);
