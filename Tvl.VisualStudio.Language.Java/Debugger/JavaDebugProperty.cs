@@ -629,6 +629,32 @@
                                                 displayValue = stringReference.GetValue();
                                         }
                                     }
+
+                                    if (displayValue == null)
+                                    {
+                                        IClassType objectClass = classType;
+                                        while (true)
+                                        {
+                                            IClassType parentClass = objectClass.GetSuperclass();
+                                            if (parentClass != null)
+                                                objectClass = parentClass;
+                                            else
+                                                break;
+                                        }
+
+                                        IMethod objectToStringMethod = objectClass.GetConcreteMethod("toString", "()Ljava/lang/String;");
+
+                                        // fall back to a non-virtual call
+                                        using (IStrongValueHandle<IValue> result = objectReference.InvokeMethod(null, objectToStringMethod, InvokeOptions.NonVirtual | InvokeOptions.SingleThreaded))
+                                        {
+                                            if (result != null)
+                                            {
+                                                stringReference = result.Value as IStringReference;
+                                                if (stringReference != null)
+                                                    displayValue = stringReference.GetValue();
+                                            }
+                                        }
+                                    }
                                 }
 
                                 pPropertyInfo[0].bstrValue = "{" + displayValue + "}";
