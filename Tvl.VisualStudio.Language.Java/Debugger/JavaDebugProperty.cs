@@ -6,6 +6,7 @@
     using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Runtime.InteropServices;
+    using System.Text;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
     using Tvl.Java.DebugInterface;
@@ -811,14 +812,65 @@
             if (cropped)
                 value = value.Substring(0, maxLength) + "...";
 
-            // TODO: handle all escape characters
-            value = value.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\t", "\\t").Replace("\n", "\\n").Replace(quoteCharacter.ToString(), "\\" + quoteCharacter);
-            if (cropped)
-                value = quoteCharacter + value;
-            else
-                value = quoteCharacter + value + quoteCharacter;
+            StringBuilder result = new StringBuilder(value.Length + 2);
+            result.Append(quoteCharacter);
 
-            return value;
+            foreach (char ch in value)
+            {
+                switch (ch)
+                {
+                case '\\':
+                    result.Append("\\\\");
+                    continue;
+
+                case '\r':
+                    result.Append("\\r");
+                    continue;
+
+                case '\n':
+                    result.Append("\\n");
+                    continue;
+
+                case '\t':
+                    result.Append("\\t");
+                    continue;
+
+                case '\f':
+                    result.Append("\\f");
+                    continue;
+
+                case '\'':
+                    if (quoteCharacter != '\'')
+                        goto default;
+
+                    result.Append("\\'");
+                    continue;
+
+                case '"':
+                    if (quoteCharacter != '"')
+                        goto default;
+
+                    result.Append("\\\"");
+                    continue;
+
+                case '\b':
+                    result.Append("\\b");
+                    continue;
+
+                default:
+                    // TODO: reduce these to octal escapes where possible
+                    if (char.IsControl(ch))
+                        result.Append("\\u").Append(((int)ch).ToString("X4"));
+                    else
+                        result.Append(ch);
+                    continue;
+                }
+            }
+
+            if (!cropped)
+                result.Append(quoteCharacter);
+
+            return result.ToString();
         }
 
         /// <summary>
