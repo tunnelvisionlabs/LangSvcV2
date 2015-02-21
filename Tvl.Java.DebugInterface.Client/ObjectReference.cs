@@ -118,6 +118,10 @@
                 throw new NotImplementedException();
             }
 
+            Value returnValueMirror = VirtualMachine.GetMirrorOf(returnValue);
+            if (returnValueMirror == null)
+                return null;
+
             return new StrongValueHandle<Value>(VirtualMachine.GetMirrorOf(returnValue));
         }
 
