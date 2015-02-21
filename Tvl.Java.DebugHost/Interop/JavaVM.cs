@@ -159,6 +159,12 @@
                 if (!classMethods.TryGetValue(fullMethodSignature, out exceptionTable))
                     return jvmtiError.AbsentInformation;
 
+                if (exceptionTable == null)
+                {
+                    // the exception table was intentionally disabled for this method 
+                    return jvmtiError.AbsentInformation;
+                }
+
                 return jvmtiError.None;
             }
         }
@@ -185,6 +191,19 @@
                 }
 
                 string fullMethodSignature = methodName + methodSignature;
+
+                ReadOnlyCollection<ExceptionTableEntry> existingExceptionTable;
+                if (classMethods.TryGetValue(fullMethodSignature, out existingExceptionTable))
+                {
+                    if (existingExceptionTable != null && !exceptionTable.SequenceEqual(existingExceptionTable))
+                    {
+                        // disable the exception table for all methods which reach this point due to aliasing issues
+                        classMethods[fullMethodSignature] = null;
+                    }
+
+                    return;
+                }
+
                 classMethods.Add(fullMethodSignature, exceptionTable);
             }
         }
