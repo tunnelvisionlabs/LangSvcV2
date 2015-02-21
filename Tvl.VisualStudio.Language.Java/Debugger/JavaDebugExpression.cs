@@ -7,6 +7,7 @@
     using Antlr.Runtime.Tree;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Debugger.Interop;
+    using Tvl.Java.DebugInterface;
     using Tvl.VisualStudio.Language.Java.Debugger.Events;
 
     [ComVisible(true)]
@@ -40,7 +41,9 @@
             // don't use pExprCallback!
 
             IDebugEventCallback2 callback = _context.StackFrame.Thread.Program.Callback;
-            Task evaluateTask = Task.Factory.StartNew(() => EvaluateImpl(dwFlags)).HandleNonCriticalExceptions().ContinueWith(task => SendEvaluationCompleteEvent(task, callback), TaskContinuationOptions.OnlyOnRanToCompletion).HandleNonCriticalExceptions();
+            Task<IDebugProperty2> evaluateTask = Task.Factory.StartNew(() => EvaluateImpl(dwFlags)).HandleNonCriticalExceptions();
+            Task successCompletionTask = evaluateTask.ContinueWith(task => SendEvaluationCompleteEvent(task, callback), TaskContinuationOptions.OnlyOnRanToCompletion).HandleNonCriticalExceptions();
+            Task failureCompletionTask = evaluateTask.ContinueWith(task => SendEvaluationCompleteEvent(null, callback), TaskContinuationOptions.NotOnRanToCompletion).HandleNonCriticalExceptions();
             return VSConstants.S_OK;
         }
 
@@ -107,7 +110,13 @@
             var engine = program.DebugEngine;
             var process = program.Process;
 
-            DebugEvent debugEvent = new DebugExpressionEvaluationCompleteEvent(enum_EVENTATTRIBUTES.EVENT_ASYNCHRONOUS, this, task.Result);
+            IDebugProperty2 property;
+            if (task != null)
+                property = task.Result;
+            else
+                property = new JavaDebugProperty(null, new EvaluatedExpression("?", "?", default(IValue), false));
+
+            DebugEvent debugEvent = new DebugExpressionEvaluationCompleteEvent(enum_EVENTATTRIBUTES.EVENT_ASYNCHRONOUS, this, property);
             callback.Event(engine, process, program, thread, debugEvent);
         }
     }
