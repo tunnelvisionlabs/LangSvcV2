@@ -224,7 +224,15 @@
         {
             try
             {
-                string text = File.ReadAllText(_location.GetSourcePath());
+                string sourcePath = _location.GetSourcePath();
+                if (!File.Exists(sourcePath))
+                {
+                    associatedTree = null;
+                    tokens = null;
+                    return false;
+                }
+
+                string text = File.ReadAllText(sourcePath);
                 AntlrInputStream input = new AntlrInputStream(text);
                 JavaLexer lexer = new JavaLexer(new JavaUnicodeStreamV4(input));
                 CommonTokenStream tokenStream = new CommonTokenStream(lexer);
