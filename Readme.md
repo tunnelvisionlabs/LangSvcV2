@@ -1,5 +1,7 @@
 # The "LangSvcV2" Project
 
+[![Join the chat at https://gitter.im/tunnelvisionlabs/LangSvcV2](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tunnelvisionlabs/LangSvcV2?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Welcome to the "Language Service V2" project, or "LangSvcV2" for short. Originally called "SimpleC", this
 code represents a rewrite of the frameworks, tools, and language services targeting Visual Studio 2010+
 and based on experiences with prior extensions. At this point, the repository contains the code for many
