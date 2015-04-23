@@ -19,9 +19,9 @@
   </metadata>
   <files>
     <!-- Build Configuration -->
-    <file src=".\bin\$Configuration$\Tvl.Java.props" target="build\Tvl.Java.props"/>
-    <file src=".\bin\$Configuration$\Tvl.Java.targets" target="build\Tvl.Java.targets"/>
-    <file src=".\bin\$Configuration$\Tvl.Jvm.Common.targets" target="build\Tvl.Jvm.Common.targets"/>
-    <file src=".\bin\$Configuration$\Tvl.Java.BuildTasks.dll" target="build"/>
+    <file src="bin\$Configuration$\Tvl.Java.props" target="build\Tvl.Java.props"/>
+    <file src="bin\$Configuration$\Tvl.Java.targets" target="build\Tvl.Java.targets"/>
+    <file src="bin\$Configuration$\Tvl.Jvm.Common.targets" target="build\Tvl.Jvm.Common.targets"/>
+    <file src="bin\$Configuration$\Tvl.Java.BuildTasks.dll" target="build"/>
   </files>
 </package>
