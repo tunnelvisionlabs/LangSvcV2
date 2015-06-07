@@ -1,4 +1,0 @@
-package $rootnamespace$;
-
-class $safeitemrootname$ {
-}
