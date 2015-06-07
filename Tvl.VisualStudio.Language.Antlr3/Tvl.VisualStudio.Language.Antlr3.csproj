@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Antlr4.4.5-alpha002\build\Antlr4.props" Condition="Exists('..\packages\Antlr4.4.5-alpha002\build\Antlr4.props')" />
   <Import Project="..\packages\Tvl.VisualStudio.OutputWindow.2.0.1\build\Tvl.VisualStudio.OutputWindow.props" Condition="Exists('..\packages\Tvl.VisualStudio.OutputWindow.2.0.1\build\Tvl.VisualStudio.OutputWindow.props')" />
-  <Import Project="..\packages\Antlr4.4.3.0\build\Antlr4.props" Condition="Exists('..\packages\Antlr4.4.3.0\build\Antlr4.props')" />
   <Import Project="..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.props" Condition="Exists('..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -117,8 +117,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Antlr3.Runtime.Debug.3.5.0.3-alpha002\lib\net20\Antlr3.Runtime.Debug.dll</HintPath>
     </Reference>
-    <Reference Include="Antlr4.Runtime.net40">
-      <HintPath>..\packages\Antlr4.Runtime.4.3.0\lib\net40-client\Antlr4.Runtime.net40.dll</HintPath>
+    <Reference Include="Antlr4.Runtime, Version=4.5.0.0, Culture=neutral, PublicKeyToken=e9931a4108ef2354, processorArchitecture=MSIL">
+      <HintPath>..\packages\Antlr4.Runtime.4.5-alpha002\lib\net40-client\Antlr4.Runtime.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Antlr4.StringTemplate, Version=4.0.4.8959, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -291,18 +292,48 @@
     <Compile Include="Experimental\CompletionSourceTest.cs" />
     <Compile Include="Experimental\GrammarHeaderSemanticClassifier.cs" />
     <Compile Include="Experimental\ISemanticTag.cs" />
+    <Compile Include="V4\AlignmentRequirements.cs" />
+    <Compile Include="V4\Anchor.cs" />
+    <Compile Include="V4\Antlr4CodeCompletionParser.cs" />
+    <Compile Include="V4\Antlr4CompletionParserATNSimulator.cs" />
     <Compile Include="V4\Antlr4Constants.cs" />
+    <Compile Include="V4\Antlr4DynamicAnchorPoints.cs" />
+    <Compile Include="V4\Antlr4DynamicAnchorPointsProvider.cs" />
+    <Compile Include="V4\Antlr4ForestParser.cs" />
     <Compile Include="V4\Antlr4LanguageInfo.cs" />
+    <Compile Include="V4\Antlr4ReferenceAnchorPoints.cs" />
+    <Compile Include="V4\Antlr4ReferenceAnchorPointsProvider.cs" />
+    <Compile Include="V4\Antlr4SmartIndent.cs" />
+    <Compile Include="V4\Antlr4SmartIndentProvider.cs" />
+    <Compile Include="V4\CaretReachedException.cs" />
+    <Compile Include="V4\CaretToken.cs" />
+    <Compile Include="V4\CodeCompletionErrorStrategy.cs" />
+    <Compile Include="V4\CodeCompletionTokenSource.cs" />
+    <Compile Include="V4\CompletionParserATNSimulator.cs" />
+    <Compile Include="V4\ForestParser`1.cs" />
     <Compile Include="V4\GrammarHighlighterLexer.cs" />
     <Compile Include="V4\Antlr4TextStructureNavigator.cs" />
     <Compile Include="V4\Antlr4TextStructureNavigatorProvider.cs" />
     <Compile Include="V4\Antlr4Services.cs" />
+    <Compile Include="V4\GrammarLexer.cs" />
+    <Compile Include="V4\GrammarParser.cs" />
+    <Compile Include="V4\IAnchor.cs" />
+    <Compile Include="V4\ICaretToken.cs" />
+    <Compile Include="V4\ICodeCompletionParser.cs" />
+    <Compile Include="V4\IForestParser`1.cs" />
+    <Compile Include="V4\IReferenceAnchors.cs" />
+    <Compile Include="V4\MultipleDecisionData.cs" />
+    <Compile Include="V4\ParserDataOptions.cs" />
+    <Compile Include="V4\ParseTrees.cs" />
+    <Compile Include="V4\ReferenceAnchors.cs" />
+    <Compile Include="V4\SmartIndent.cs" />
+    <Compile Include="V4\SmartIndentProvider.cs" />
     <Compile Include="V4\V4GrammarClassifierLexerState.cs" />
     <None Include="packages.config" />
     <None Include="V4\Antlr4QuickSearchItemProvider.cs" />
     <None Include="V4\Antlr4QuickSearchItemProviderFactory.cs" />
-    <None Include="V4\Antlr4BackgroundParser.cs" />
-    <None Include="V4\Antlr4BackgroundParserProvider.cs" />
+    <Compile Include="V4\Antlr4BackgroundParser.cs" />
+    <Compile Include="V4\Antlr4BackgroundParserProvider.cs" />
     <Compile Include="V4\Antlr4BraceMatchingTaggerProvider.cs" />
     <Compile Include="V4\Antlr4ClassificationTypeNames.cs" />
     <Compile Include="V4\Antlr4Classifier.cs" />
@@ -310,16 +341,16 @@
     <Compile Include="V4\Antlr4CommenterProvider.cs" />
     <None Include="V4\Antlr4CompletionSource.cs" />
     <None Include="V4\Antlr4CompletionSourceProvider.cs" />
-    <None Include="V4\Antlr4EditorNavigationSource.cs" />
-    <None Include="V4\Antlr4EditorNavigationSourceProvider.cs" />
+    <Compile Include="V4\Antlr4EditorNavigationSource.cs" />
+    <Compile Include="V4\Antlr4EditorNavigationSourceProvider.cs" />
     <None Include="V4\Antlr4ErrorTaggerProvider.cs" />
     <None Include="V4\Antlr4IntellisenseCommandFilter.cs" />
     <None Include="V4\Antlr4IntellisenseController.cs" />
     <None Include="V4\Antlr4IntellisenseControllerProvider.cs" />
     <None Include="V4\Antlr4LanguageElementTagger.cs" />
     <None Include="V4\Antlr4LanguageElementTaggerProvider.cs" />
-    <None Include="V4\Antlr4OutliningTagger.cs" />
-    <None Include="V4\Antlr4OutliningTaggerProvider.cs" />
+    <Compile Include="V4\Antlr4OutliningTagger.cs" />
+    <Compile Include="V4\Antlr4OutliningTaggerProvider.cs" />
     <None Include="V4\Antlr4ParserTokenStream.cs" />
     <None Include="V4\Antlr4QuickInfoSource.cs" />
     <None Include="V4\Antlr4QuickInfoSourceProvider.cs" />
@@ -339,6 +370,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Antlr4 Include="V4\GrammarHighlighterLexer.g4">
       <CustomToolNamespace>Tvl.VisualStudio.Language.AntlrV4</CustomToolNamespace>
+    </Antlr4>
+    <Antlr4 Include="V4\GrammarLexer.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Tvl.VisualStudio.Language.AntlrV4</CustomToolNamespace>
+    </Antlr4>
+    <Antlr4 Include="V4\GrammarParser.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Tvl.VisualStudio.Language.AntlrV4</CustomToolNamespace>
+      <ForceAtn>True</ForceAtn>
     </Antlr4>
   </ItemGroup>
   <ItemGroup>
@@ -505,14 +545,14 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.props'))" />
     <Error Condition="!Exists('..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.targets'))" />
-    <Error Condition="!Exists('..\packages\Antlr4.4.3.0\build\Antlr4.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr4.4.3.0\build\Antlr4.props'))" />
-    <Error Condition="!Exists('..\packages\Antlr4.4.3.0\build\Antlr4.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr4.4.3.0\build\Antlr4.targets'))" />
     <Error Condition="!Exists('..\packages\Tvl.VisualStudio.OutputWindow.2.0.1\build\Tvl.VisualStudio.OutputWindow.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tvl.VisualStudio.OutputWindow.2.0.1\build\Tvl.VisualStudio.OutputWindow.props'))" />
     <Error Condition="!Exists('..\packages\Tvl.VisualStudio.OutputWindow.2.0.1\build\Tvl.VisualStudio.OutputWindow.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tvl.VisualStudio.OutputWindow.2.0.1\build\Tvl.VisualStudio.OutputWindow.targets'))" />
+    <Error Condition="!Exists('..\packages\Antlr4.4.5-alpha002\build\Antlr4.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr4.4.5-alpha002\build\Antlr4.props'))" />
+    <Error Condition="!Exists('..\packages\Antlr4.4.5-alpha002\build\Antlr4.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr4.4.5-alpha002\build\Antlr4.targets'))" />
   </Target>
   <Import Project="..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.targets" Condition="Exists('..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.targets')" />
-  <Import Project="..\packages\Antlr4.4.3.0\build\Antlr4.targets" Condition="Exists('..\packages\Antlr4.4.3.0\build\Antlr4.targets')" />
   <Import Project="..\packages\Tvl.VisualStudio.OutputWindow.2.0.1\build\Tvl.VisualStudio.OutputWindow.targets" Condition="Exists('..\packages\Tvl.VisualStudio.OutputWindow.2.0.1\build\Tvl.VisualStudio.OutputWindow.targets')" />
+  <Import Project="..\packages\Antlr4.4.5-alpha002\build\Antlr4.targets" Condition="Exists('..\packages\Antlr4.4.5-alpha002\build\Antlr4.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

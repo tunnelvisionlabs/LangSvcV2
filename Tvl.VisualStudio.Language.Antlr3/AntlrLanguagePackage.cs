@@ -22,19 +22,32 @@
     //[ProvideAutoLoad(AntlrConstants.UIContextSolutionExists)]
     [Guid(AntlrConstants.AntlrLanguagePackageGuidString)]
     [ProvideLanguageService(typeof(AntlrLanguageInfo), AntlrConstants.AntlrLanguageName, AntlrConstants.AntlrLanguageResourceId,
-        //AutoOutlining = true,
-        //QuickInfo = true,
         ShowCompletion = true,
         ShowDropDownOptions = true,
-        //ShowHotURLs = true,
-        //ShowMatchingBrace = true,
         EnableAdvancedMembersOption = false,
         DefaultToInsertSpaces = false,
-        //EnableCommenting = true,
         //HideAdvancedMembersByDefault = false,
-        EnableLineNumbers = true,
+        RequestStockColors = true,
+        //DefaultToNonHotURLs = false,
+
+        // These items are not used. The default values are shown, but ignored.
+        //ShowHotURLs = false,
+
+        // These items were only used by MPF language services framework. The default values are shown, but ignored.
+        //AutoOutlining = true,
         //CodeSense = true,
-        RequestStockColors = true)]
+        //CodeSenseDelay = 1000,
+        //EnableAsyncCompletion = true,
+        //EnableCommenting = true,
+        //EnableFormatSelection = false,
+        //MatchBraces = true,
+        //MatchBracesAtCaret = true,
+        //MaxErrorMessages = 10,
+        //QuickInfo = true,
+        //ShowMatchingBrace = true,
+
+        // this item is last since it's always true
+        EnableLineNumbers = true)]
     [ProvideLanguageExtension(typeof(AntlrLanguageInfo), AntlrConstants.AntlrFileExtension)]
     [ProvideLanguageExtension(typeof(AntlrLanguageInfo), AntlrConstants.AntlrFileExtension2)]
 
@@ -57,19 +70,33 @@
     [ProvideDebuggerException(typeof(Antlr.Runtime.Tree.RewriteEmptyStreamException))]
 
     [ProvideLanguageService(typeof(Antlr4LanguageInfo), Antlr4Constants.AntlrLanguageName, Antlr4Constants.AntlrLanguageResourceId,
-        //AutoOutlining = true,
-        //QuickInfo = true,
-        ShowCompletion = true,
+        ShowCompletion = false,
         ShowDropDownOptions = true,
-        //ShowHotURLs = true,
-        //ShowMatchingBrace = true,
         EnableAdvancedMembersOption = false,
         DefaultToInsertSpaces = false,
-        //EnableCommenting = true,
+        ShowSmartIndent = true,
         //HideAdvancedMembersByDefault = false,
-        EnableLineNumbers = true,
+        RequestStockColors = true,
+        //DefaultToNonHotURLs = false,
+
+        // These items are not used. The default values are shown, but ignored.
+        //ShowHotURLs = false,
+
+        // These items were only used by MPF language services framework. The default values are shown, but ignored.
+        //AutoOutlining = true,
         //CodeSense = true,
-        RequestStockColors = true)]
+        //CodeSenseDelay = 1000,
+        //EnableAsyncCompletion = true,
+        //EnableCommenting = true,
+        //EnableFormatSelection = false,
+        //MatchBraces = true,
+        //MatchBracesAtCaret = true,
+        //MaxErrorMessages = 10,
+        //QuickInfo = true,
+        //ShowMatchingBrace = true,
+
+        // this item is last since it's always true
+        EnableLineNumbers = true)]
     [ProvideLanguageExtension(typeof(Antlr4LanguageInfo), Antlr4Constants.AntlrFileExtension)]
 
     [ProvideDebuggerException(typeof(Antlr4.Runtime.FailedPredicateException))]

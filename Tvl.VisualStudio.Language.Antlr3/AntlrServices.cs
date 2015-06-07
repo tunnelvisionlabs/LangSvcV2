@@ -94,7 +94,7 @@ namespace Tvl.VisualStudio.Language.Antlr3
         {
             public LexerRuleNavigationType()
             {
-                this.DisplayName = "Parser Rules";
+                this.DisplayName = "Lexer Rules";
             }
         }
 
