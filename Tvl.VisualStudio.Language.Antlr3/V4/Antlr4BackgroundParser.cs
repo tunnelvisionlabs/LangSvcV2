@@ -31,6 +31,7 @@
             OnParseComplete(result);
         }
 
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_grammarSpec, 0, Dependents.Self)]
         internal static AntlrParseResultEventArgs ParseSnapshot(ITextSnapshot snapshot)
         {
             Stopwatch timer = Stopwatch.StartNew();

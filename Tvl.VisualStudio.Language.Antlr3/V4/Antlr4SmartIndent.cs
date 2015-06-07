@@ -63,6 +63,7 @@
             return lexer;
         }
 
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_ruleSpec, 0, Dependents.Self)]
         protected override IDictionary<RuleContext, CaretReachedException> GetParseTrees(ITokenStream tokens, IReferenceAnchors referenceAnchors)
         {
             Antlr4CodeCompletionParser parser = new Antlr4CodeCompletionParser(tokens);
@@ -110,6 +111,27 @@
             return _provider.DynamicAnchorPointsProvider.GetDynamicAnchorPoints(snapshot.TextBuffer).GetValue(snapshot, ParserDataOptions.None);
         }
 
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_parserRuleSpec, 0, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_ruleAltList, 0, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerRule, 0, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerAltList, 1, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_altList, 0, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_blockSet, 0, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerBlock, 1, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_block, 0, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_optionsSpec, 6, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_tokensSpec, 6, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_channelsSpec, 6, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_modeSpec, 3, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_delegateGrammars, 6, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_actionBlock, 5, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_elements, 5, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerElements, 3, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_delegateGrammar, 0, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerAlt, 3, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_labeledAlt, 1, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_rules, 0, Dependents.Self | Dependents.Parents)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerCommands, 3, Dependents.Self | Dependents.Descendants)]
         protected override AlignmentRequirements GetAlignmentRequirement(KeyValuePair<RuleContext, CaretReachedException> parseTree, IParseTree targetElement, IParseTree ancestor)
         {
             if (ancestor == targetElement && !(targetElement is ITerminalNode))
@@ -270,6 +292,8 @@
                 throw new NotSupportedException("This visitor is designed for top-level nodes only.");
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_elements, 5, Dependents.Self | Dependents.Parents)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerElements, 3, Dependents.Self | Dependents.Parents)]
             private Tuple<IParseTree, int> VisitElements()
             {
                 // the non-terminals under these rules are straightforward
@@ -298,6 +322,12 @@
                 return null;
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_ruleAltList, 0, Dependents.Self | Dependents.Parents)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerAltList, 1, Dependents.Self | Dependents.Parents)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_altList, 0, Dependents.Self | Dependents.Parents)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_blockSet, 0, Dependents.Self | Dependents.Parents)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerBlock, 1, Dependents.Self | Dependents.Parents)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_block, 0, Dependents.Self | Dependents.Parents)]
             private Tuple<IParseTree, int> VisitGenericBlock(ParserRuleContext container)
             {
                 if (targetElement == ParseTrees.GetStartNode(container))
@@ -359,46 +389,55 @@
                 return null;
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_elements, 5, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitElements([NotNull]AbstractGrammarParser.ElementsContext context)
             {
                 return VisitElements();
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerElements, 3, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitLexerElements([NotNull]AbstractGrammarParser.LexerElementsContext context)
             {
                 return VisitElements();
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_ruleAltList, 0, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitRuleAltList([NotNull]AbstractGrammarParser.RuleAltListContext context)
             {
                 return VisitGenericBlock(context);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerAltList, 1, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitLexerAltList([NotNull]AbstractGrammarParser.LexerAltListContext context)
             {
                 return VisitGenericBlock(context);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_altList, 0, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitAltList([NotNull]AbstractGrammarParser.AltListContext context)
             {
                 return VisitGenericBlock(context);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_blockSet, 0, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitBlockSet([NotNull]AbstractGrammarParser.BlockSetContext context)
             {
                 return VisitGenericBlock(context);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerBlock, 1, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitLexerBlock([NotNull]AbstractGrammarParser.LexerBlockContext context)
             {
                 return VisitGenericBlock(context);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_block, 0, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitBlock([NotNull]AbstractGrammarParser.BlockContext context)
             {
                 return VisitGenericBlock(context);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_parserRuleSpec, 0, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitParserRuleSpec([NotNull]AbstractGrammarParser.ParserRuleSpecContext context)
             {
                 if (ParseTrees.GetTerminalNodeType(targetElement) == GrammarParser.AT)
@@ -423,6 +462,7 @@
                 return Tuple.Create<IParseTree, int>(context, _indentSize);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerRule, 0, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitLexerRule([NotNull]AbstractGrammarParser.LexerRuleContext context)
             {
                 if (context.name == null)
@@ -450,6 +490,9 @@
                 return Tuple.Create<IParseTree, int>(context, _indentSize);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerAlt, 3, Dependents.Self | Dependents.Parents)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerElements, 0, Dependents.Self)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerCommands, 3, Dependents.Self | Dependents.Descendants)]
             public override Tuple<IParseTree, int> VisitLexerAlt([NotNull]AbstractGrammarParser.LexerAltContext context)
             {
                 Debug.Assert(context.lexerCommands() != null && ParseTrees.IsAncestorOf(context.lexerCommands(), targetElement));
@@ -459,6 +502,8 @@
                 return Tuple.Create<IParseTree, int>(context.lexerElements(), 0);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_labeledAlt, 1, Dependents.Self | Dependents.Parents)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_alternative, 5, Dependents.Self)]
             public override Tuple<IParseTree, int> VisitLabeledAlt([NotNull]AbstractGrammarParser.LabeledAltContext context)
             {
                 Debug.Assert(ParseTrees.GetTerminalNodeType(targetElement) == GrammarParser.POUND);
@@ -468,6 +513,7 @@
                 return Tuple.Create<IParseTree, int>(context.alternative(), 0);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_rules, 0, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitRules([NotNull]AbstractGrammarParser.RulesContext context)
             {
                 for (int i = priorSiblings.Count - 2; i >= 0; i--)
@@ -480,6 +526,8 @@
                 return null;
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_optionsSpec, 6, Dependents.Self | Dependents.Parents)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_option, 3, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitOptionsSpec([NotNull]AbstractGrammarParser.OptionsSpecContext context)
             {
                 // use previous option if any, otherwise use the block.
@@ -521,6 +569,7 @@
                 return Tuple.Create<IParseTree, int>(context, _indentSize);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_tokensSpec, 6, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitTokensSpec([NotNull]AbstractGrammarParser.TokensSpecContext context)
             {
                 if (context.ChildCount == 0 || targetElement == context.GetChild(0))
@@ -541,6 +590,7 @@
                 return Tuple.Create<IParseTree, int>(context, _indentSize);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_channelsSpec, 6, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitChannelsSpec([NotNull]AbstractGrammarParser.ChannelsSpecContext context)
             {
                 if (context.ChildCount == 0 || targetElement == context.GetChild(0))
@@ -561,6 +611,7 @@
                 return Tuple.Create<IParseTree, int>(context, _indentSize);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_actionBlock, 5, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitActionBlock([NotNull]AbstractGrammarParser.ActionBlockContext context)
             {
                 if (context.ChildCount == 0 || targetElement == context.GetChild(0))
@@ -591,6 +642,8 @@
                 throw new NotImplementedException();
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_modeSpec, 3, Dependents.Self | Dependents.Parents)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_ruleSpec, 3, Dependents.Self | Dependents.Parents)]
             public override Tuple<IParseTree, int> VisitModeSpec([NotNull]AbstractGrammarParser.ModeSpecContext context)
             {
                 // use the preceding rule (if any), otherwise relative to mode

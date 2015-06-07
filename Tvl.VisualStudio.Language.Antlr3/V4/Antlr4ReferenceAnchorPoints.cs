@@ -56,6 +56,7 @@
             return result;
         }
 
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_grammarSpec, 0, Dependents.Self)]
         private IList<IAnchor> CreateReferenceAnchorPoints(ITextSnapshot snapshot, GrammarParser.GrammarSpecContext parseResult)
         {
             if (parseResult == null)
@@ -95,21 +96,25 @@
                 }
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_grammarType, 0, Dependents.Self | Dependents.Ancestors)]
             public override void EnterGrammarType(GrammarParser.GrammarTypeContext context)
             {
                 EnterAnchor(context);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_grammarType, 0, Dependents.Self | Dependents.Ancestors)]
             public override void ExitGrammarType(GrammarParser.GrammarTypeContext context)
             {
                 ExitAnchor(context, GrammarParser.RULE_grammarType);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_ruleSpec, 3, Dependents.Self | Dependents.Ancestors)]
             public override void EnterRuleSpec(GrammarParser.RuleSpecContext context)
             {
                 EnterAnchor(context);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_ruleSpec, 3, Dependents.Self | Dependents.Ancestors)]
             public override void ExitRuleSpec(GrammarParser.RuleSpecContext context)
             {
                 ExitAnchor(context, GrammarParser.RULE_ruleSpec);
@@ -132,6 +137,7 @@
                 }
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_grammarType, 0, Dependents.Self)]
             private Anchor CreateAnchor(ParserRuleContext context, int start, int stop, SpanTrackingMode trackingMode, int rule)
             {
                 ITrackingSpan trackingSpan = _snapshot.CreateTrackingSpan(start, stop - start, trackingMode);
@@ -165,6 +171,7 @@
             {
                 private readonly int grammarType;
 
+                [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_grammarType, 0, Dependents.Self)]
                 public GrammarTypeAnchor(GrammarParser.GrammarTypeContext context, ITrackingSpan span)
                     : base(GrammarParser.RULE_grammarType, span)
                 {

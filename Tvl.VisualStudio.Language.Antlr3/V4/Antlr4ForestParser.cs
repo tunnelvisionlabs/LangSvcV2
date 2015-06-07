@@ -25,6 +25,8 @@
             _startRule = startRule;
         }
 
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_rules, 0, Dependents.Self)]
+        [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_grammarSpec, 0, Dependents.Self)]
         protected override RuleContext ParseImpl(Antlr4CodeCompletionParser parser)
         {
             switch (_startRule)

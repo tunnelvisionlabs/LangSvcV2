@@ -116,27 +116,34 @@
                 }
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_parserRuleSpec, 3, Dependents.Self | Dependents.Ancestors)]
             public override void EnterParserRuleSpec([NotNull]AbstractGrammarParser.ParserRuleSpecContext context)
             {
                 AddNavigationTarget(context, context.RULE_REF(), _navigationSource._parserRuleNavigationType, _navigationSource._parserRuleGlyph);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerRule, 3, Dependents.Self | Dependents.Ancestors)]
             public override void EnterLexerRule([NotNull]AbstractGrammarParser.LexerRuleContext context)
             {
                 AddNavigationTarget(context, context.TOKEN_REF(), _navigationSource._lexerRuleNavigationType, _navigationSource._lexerRuleGlyph);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_tokensSpec, 6, Dependents.Self | Dependents.Ancestors)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_id, 1, Dependents.Descendants)]
             public override void EnterTokensSpec([NotNull]AbstractGrammarParser.TokensSpecContext context)
             {
                 foreach (GrammarParser.IdContext id in context.id())
                     AddNavigationTarget(id, ParseTrees.GetStartNode(id), _navigationSource._lexerRuleNavigationType, _navigationSource._lexerRuleGlyph);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_channelsSpec, 6, Dependents.Self)]
             public override void EnterChannelsSpec([NotNull]AbstractGrammarParser.ChannelsSpecContext context)
             {
                 // should we do anything here?
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_modeSpec, 3, Dependents.Self | Dependents.Ancestors)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_id, 1, Dependents.Descendants)]
             public override void EnterModeSpec([NotNull]AbstractGrammarParser.ModeSpecContext context)
             {
                 string modeName = context.id() != null ? context.id().GetText() : null;
@@ -146,6 +153,7 @@
                 _mode.Push(modeName);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_modeSpec, 3, Dependents.Self | Dependents.Ancestors)]
             public override void ExitModeSpec([NotNull]AbstractGrammarParser.ModeSpecContext context)
             {
                 _mode.Pop();

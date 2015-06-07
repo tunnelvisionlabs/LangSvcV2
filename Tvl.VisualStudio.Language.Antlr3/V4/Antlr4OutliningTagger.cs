@@ -134,21 +134,27 @@
                 _tokenIndexLimit = sourceInterval.a;
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_tokensSpec, 1, Dependents.Self)]
             public override void EnterTokensSpec([NotNull]AbstractGrammarParser.TokensSpecContext context)
             {
                 OutlineBlock(context, "tokens { ... }");
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_channelsSpec, 6, Dependents.Self)]
             public override void EnterChannelsSpec([NotNull]AbstractGrammarParser.ChannelsSpecContext context)
             {
                 OutlineBlock(context, "channels { ... }");
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_optionsSpec, 3, Dependents.Self)]
             public override void EnterOptionsSpec([NotNull]AbstractGrammarParser.OptionsSpecContext context)
             {
                 OutlineBlock(context, "options { ... }");
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_action, 0, Dependents.Self)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_actionScopeName, 6, Dependents.Self | Dependents.Descendants)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_id, 1, Dependents.Self | Dependents.Descendants)]
             public override void EnterAction([NotNull]AbstractGrammarParser.ActionContext context)
             {
                 string hint = "@";
@@ -166,6 +172,7 @@
                 OutlineBlock(context, hint);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_parserRuleSpec, 0, Dependents.Self)]
             public override void EnterParserRuleSpec([NotNull]AbstractGrammarParser.ParserRuleSpecContext context)
             {
                 string hint;
@@ -177,6 +184,7 @@
                 OutlineBlock(context, hint);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_lexerRule, 0, Dependents.Self)]
             public override void EnterLexerRule([NotNull]AbstractGrammarParser.LexerRuleContext context)
             {
                 string hint;
@@ -188,6 +196,8 @@
                 OutlineBlock(context, hint);
             }
 
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_modeSpec, 3, Dependents.Self)]
+            [RuleDependency(typeof(GrammarParser), GrammarParser.RULE_id, 1, Dependents.Self | Dependents.Descendants)]
             public override void EnterModeSpec([NotNull]AbstractGrammarParser.ModeSpecContext context)
             {
                 string hint;
