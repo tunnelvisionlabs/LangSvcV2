@@ -96,7 +96,7 @@
         }
 
         [return: NotNull]
-        protected override DFAState CreateDFAState(ATNConfigSet configs)
+        protected override DFAState CreateDFAState(DFA dfa, ATNConfigSet configs)
         {
             int t = _input.La(1);
             if (t == AntlrV4.CaretToken.CaretTokenType && !_computingStartState)
@@ -105,7 +105,7 @@
                 throw NoViableAlt(_input, _outerContext, configs, _startIndex);
             }
 
-            return base.CreateDFAState(configs);
+            return base.CreateDFAState(dfa, configs);
         }
 
         public void ClosureHelper(ATNConfigSet sourceConfigs, ATNConfigSet configs, bool collectPredicates, bool hasMoreContext, PredictionContextCache contextCache, bool treatEofAsEpsilon)
