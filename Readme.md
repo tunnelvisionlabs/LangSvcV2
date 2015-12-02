@@ -1,5 +1,7 @@
 # The "LangSvcV2" Project
 
+[![Build status](https://ci.appveyor.com/api/projects/status/7xibxi9sa92q7gb2/branch/master?svg=true)](https://ci.appveyor.com/project/sharwell/langsvcv2/branch/master)
+
 [![Join the chat at https://gitter.im/tunnelvisionlabs/LangSvcV2](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tunnelvisionlabs/LangSvcV2?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Welcome to the "Language Service V2" project, or "LangSvcV2" for short. Originally called "SimpleC", this
