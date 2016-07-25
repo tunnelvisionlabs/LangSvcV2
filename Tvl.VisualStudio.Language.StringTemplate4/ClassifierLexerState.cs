@@ -1,43 +1,48 @@
 ﻿namespace Tvl.VisualStudio.Language.StringTemplate4
 {
-    using System;
+    using Tvl.VisualStudio.Language.Parsing4;
 
-    internal struct ClassifierLexerState : IEquatable<ClassifierLexerState>
+    public struct ClassifierLexerState
     {
-        internal static readonly ClassifierLexerState Initial =
-            new ClassifierLexerState(
-                TemplateLexerMode.Group,
-                OutermostTemplate.None,
-                0,
-                false,
-                '<',
-                '>');
+        private static readonly ClassifierLexerState _initial = new ClassifierLexerState(SimpleLexerState.Initial);
 
-        internal readonly TemplateLexerMode Mode;
-        internal readonly OutermostTemplate Outermost;
-        internal readonly int AnonymousTemplateLevel;
-        internal readonly bool InComment;
-        internal readonly char OpenDelimiter;
-        internal readonly char CloseDelimiter;
+        private readonly SimpleLexerState _simpleLexerState;
+        private readonly char _openDelimiter;
+        private readonly char _closeDelimiter;
 
-        public ClassifierLexerState(TemplateLexerMode mode, OutermostTemplate outermost, int anonymousTemplateLevel, bool inComment, char openDelimiter, char closeDelimiter)
+        public ClassifierLexerState(ClassifierLexer lexer)
         {
-            Mode = mode;
-            Outermost = outermost;
-            AnonymousTemplateLevel = anonymousTemplateLevel;
-            InComment = inComment;
-            OpenDelimiter = openDelimiter;
-            CloseDelimiter = closeDelimiter;
+            _simpleLexerState = new SimpleLexerState(lexer);
+            _openDelimiter = lexer.OpenDelimiter;
+            _closeDelimiter = lexer.CloseDelimiter;
+        }
+
+        private ClassifierLexerState(SimpleLexerState state)
+        {
+            _simpleLexerState = state;
+            _openDelimiter = ClassifierLexer.DefaultOpenDelimiter;
+            _closeDelimiter = ClassifierLexer.DefaultCloseDelimiter;
+        }
+
+        public static ClassifierLexerState Initial
+        {
+            get
+            {
+                return _initial;
+            }
+        }
+
+        public void Apply(ClassifierLexer lexer)
+        {
+            _simpleLexerState.Apply(lexer);
+            lexer.SetDelimiters(_openDelimiter, _closeDelimiter);
         }
 
         public bool Equals(ClassifierLexerState other)
         {
-            return AnonymousTemplateLevel == other.AnonymousTemplateLevel
-                && Mode == other.Mode
-                && Outermost == other.Outermost
-                && InComment == other.InComment
-                && OpenDelimiter == other.OpenDelimiter
-                && CloseDelimiter == other.CloseDelimiter;
+            return _simpleLexerState.Equals(other._simpleLexerState)
+                && _openDelimiter == other._openDelimiter
+                && _closeDelimiter == other._closeDelimiter;
         }
 
         public override bool Equals(object obj)
@@ -50,12 +55,11 @@
 
         public override int GetHashCode()
         {
-            return this.AnonymousTemplateLevel.GetHashCode()
-                ^ this.Mode.GetHashCode()
-                ^ this.Outermost.GetHashCode()
-                ^ this.InComment.GetHashCode()
-                ^ this.OpenDelimiter.GetHashCode()
-                ^ this.CloseDelimiter.GetHashCode();
+            int hashCode = 1;
+            hashCode = hashCode * 31 + _simpleLexerState.GetHashCode();
+            hashCode = hashCode * 31 + _openDelimiter.GetHashCode();
+            hashCode = hashCode * 31 + _closeDelimiter.GetHashCode();
+            return hashCode;
         }
     }
 }

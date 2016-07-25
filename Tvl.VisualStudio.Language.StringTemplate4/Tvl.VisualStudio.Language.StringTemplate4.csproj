@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.props" Condition="Exists('..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.props')" />
+  <Import Project="..\packages\Antlr4.4.5.3\build\Antlr4.props" Condition="Exists('..\packages\Antlr4.4.5.3\build\Antlr4.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -110,19 +110,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ClassifierLexerState.cs" />
-    <Compile Include="TemplateLexerMode.cs" />
-    <Compile Include="OutermostTemplate.cs" />
     <Compile Include="StringTemplateLanguageInfo.cs" />
     <Compile Include="StringTemplateLanguagePackage.cs" />
     <Compile Include="ClassifierLexer.cs" />
-    <Compile Include="GroupClassifierLexer.g3.cs">
-      <DependentUpon>GroupClassifierLexer.g3</DependentUpon>
-    </Compile>
-    <Compile Include="InsideClassifierLexer.g3.cs">
-      <DependentUpon>InsideClassifierLexer.g3</DependentUpon>
-    </Compile>
-    <Compile Include="OutsideClassifierLexer.g3.cs">
-      <DependentUpon>OutsideClassifierLexer.g3</DependentUpon>
+    <Compile Include="GroupClassifierLexer.g4.cs">
+      <DependentUpon>GroupClassifierLexer.g4</DependentUpon>
     </Compile>
     <Compile Include="StringTemplateBraceMatchingTagger.cs" />
     <Compile Include="StringTemplateClassificationTypeNames.cs" />
@@ -155,15 +147,10 @@
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
     </None>
-    <Antlr3 Include="InsideClassifierLexer.g3">
+    <Antlr4 Include="GroupClassifierLexer.g4">
       <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <Antlr3 Include="OutsideClassifierLexer.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <Antlr3 Include="GroupClassifierLexer.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
+      <CustomToolNamespace>Tvl.VisualStudio.Language.StringTemplate4</CustomToolNamespace>
+    </Antlr4>
     <None Include="packages.config" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
@@ -173,6 +160,10 @@
     <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Antlr3.Runtime.3.5.0.3-alpha002\lib\net20\Antlr3.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Antlr4.Runtime, Version=4.5.0.0, Culture=neutral, PublicKeyToken=09abb75b9ed49849, processorArchitecture=MSIL">
+      <HintPath>..\packages\Antlr4.Runtime.4.5.3\lib\net40-client\Antlr4.Runtime.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Antlr4.StringTemplate, Version=4.0.7.0, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -322,12 +313,12 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.props'))" />
-    <Error Condition="!Exists('..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.targets'))" />
     <Error Condition="!Exists('..\packages\Tvl.VisualStudio.OutputWindow.2.1.0\build\Tvl.VisualStudio.OutputWindow.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tvl.VisualStudio.OutputWindow.2.1.0\build\Tvl.VisualStudio.OutputWindow.targets'))" />
+    <Error Condition="!Exists('..\packages\Antlr4.4.5.3\build\Antlr4.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr4.4.5.3\build\Antlr4.props'))" />
+    <Error Condition="!Exists('..\packages\Antlr4.4.5.3\build\Antlr4.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr4.4.5.3\build\Antlr4.targets'))" />
   </Target>
-  <Import Project="..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.targets" Condition="Exists('..\packages\Antlr3.3.5.0.3-alpha002\build\Antlr3.targets')" />
   <Import Project="..\packages\Tvl.VisualStudio.OutputWindow.2.1.0\build\Tvl.VisualStudio.OutputWindow.targets" Condition="Exists('..\packages\Tvl.VisualStudio.OutputWindow.2.1.0\build\Tvl.VisualStudio.OutputWindow.targets')" />
+  <Import Project="..\packages\Antlr4.4.5.3\build\Antlr4.targets" Condition="Exists('..\packages\Antlr4.4.5.3\build\Antlr4.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
