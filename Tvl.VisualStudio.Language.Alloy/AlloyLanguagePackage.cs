@@ -26,6 +26,10 @@
         EnableLineNumbers = true,
         //CodeSense = true,
         RequestStockColors = true)]
+    [ProvideLanguageCodeExpansion(typeof(AlloyLanguageInfo), AlloyConstants.AlloyLanguageName, AlloyConstants.AlloyLanguageResourceId, AlloyConstants.AlloyLanguageName, @"%InstallRoot%\Alloy\Snippets\1033\SnippetsIndex.xml",
+        SearchPaths = @"%InstallRoot%\Alloy\Snippets\%LCID%\Alloy;%MyDocs%\Code Snippets\Alloy\My Code Snippets\",
+        ForceCreateDirs = @"%InstallRoot%\Alloy\Snippets\%LCID%\Alloy;%MyDocs%\Code Snippets\Alloy\My Code Snippets\",
+        ShowRoots = false)]
     [ProvideLanguageExtension(typeof(AlloyLanguageInfo), AlloyConstants.AlloyFileExtension)]
     public class AlloyLanguagePackage : Package
     {

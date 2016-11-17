@@ -26,6 +26,10 @@
         EnableLineNumbers = true,
         //CodeSense = true,
         RequestStockColors = true)]
+    [ProvideLanguageCodeExpansion(typeof(ChapelLanguageInfo), ChapelConstants.ChapelLanguageName, ChapelConstants.ChapelLanguageResourceId, ChapelConstants.ChapelLanguageName, @"%InstallRoot%\Chapel\Snippets\1033\SnippetsIndex.xml",
+        SearchPaths = @"%InstallRoot%\Chapel\Snippets\%LCID%\Chapel;%MyDocs%\Code Snippets\Chapel\My Code Snippets\",
+        ForceCreateDirs = @"%InstallRoot%\Chapel\Snippets\%LCID%\Chapel;%MyDocs%\Code Snippets\Chapel\My Code Snippets\",
+        ShowRoots = false)]
     [ProvideLanguageExtension(typeof(ChapelLanguageInfo), ChapelConstants.ChapelFileExtension)]
     public class ChapelLanguagePackage : Package
     {
