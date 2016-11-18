@@ -43,7 +43,7 @@ namespace Tvl.VisualStudio.Language.StringTemplate4
         [Export(typeof(EditorFormatDefinition))]
         [Name("stringtemplate.anonymoustemplatetag.format")]
         [DisplayName("StringTemplate Anonymous Template Tag")]
-        [UserVisible(false)]
+        [UserVisible(true)]
         [ClassificationType(ClassificationTypeNames = StringTemplateClassificationTypeNames.AnonymousTemplateDelimiter)]
         [Order]
         internal class AnonymousTemplateDelimiterFormatDefinition : ClassificationFormatDefinition
@@ -57,7 +57,7 @@ namespace Tvl.VisualStudio.Language.StringTemplate4
         [Export(typeof(EditorFormatDefinition))]
         [Name("stringtemplate.bigstringdelimiter.format")]
         [DisplayName("StringTemplate Big String Delimiter")]
-        [UserVisible(false)]
+        [UserVisible(true)]
         [ClassificationType(ClassificationTypeNames = StringTemplateClassificationTypeNames.BigStringDelimiter)]
         [Order]
         internal class BigStringDelimiterFormatDefinition : ClassificationFormatDefinition
@@ -71,7 +71,7 @@ namespace Tvl.VisualStudio.Language.StringTemplate4
         [Export(typeof(EditorFormatDefinition))]
         [Name("stringtemplate.expressiontag.format")]
         [DisplayName("StringTemplate Expression Tag")]
-        [UserVisible(false)]
+        [UserVisible(true)]
         [ClassificationType(ClassificationTypeNames = StringTemplateClassificationTypeNames.ExpressionDelimiter)]
         [Order]
         internal class ExpressionDelimiterFormatDefinition : ClassificationFormatDefinition
@@ -84,7 +84,7 @@ namespace Tvl.VisualStudio.Language.StringTemplate4
         [Export(typeof(EditorFormatDefinition))]
         [Name("stringtemplate.escapecharacter.format")]
         [DisplayName("StringTemplate Escape Character")]
-        [UserVisible(false)]
+        [UserVisible(true)]
         [ClassificationType(ClassificationTypeNames = StringTemplateClassificationTypeNames.EscapeCharacter)]
         [Order]
         internal class EscapeCharacterFormatDefinition : ClassificationFormatDefinition
@@ -98,7 +98,7 @@ namespace Tvl.VisualStudio.Language.StringTemplate4
         [Export(typeof(EditorFormatDefinition))]
         [Name("stringtemplate.escapetag.format")]
         [DisplayName("StringTemplate Escape Tag")]
-        [UserVisible(false)]
+        [UserVisible(true)]
         [ClassificationType(ClassificationTypeNames = StringTemplateClassificationTypeNames.EscapeTag)]
         [Order]
         internal class EscapeTagFormatDefinition : ClassificationFormatDefinition
