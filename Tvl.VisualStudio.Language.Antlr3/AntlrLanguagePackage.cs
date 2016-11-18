@@ -48,6 +48,10 @@
 
         // this item is last since it's always true
         EnableLineNumbers = true)]
+    [ProvideLanguageCodeExpansion(typeof(AntlrLanguageInfo), AntlrConstants.AntlrLanguageName, AntlrConstants.AntlrLanguageResourceId, AntlrConstants.AntlrLanguageName, @"%InstallRoot%\ANTLR\Snippets\1033\SnippetsIndex.xml",
+        SearchPaths = @"%InstallRoot%\ANTLR\Snippets\%LCID%\ANTLR;%MyDocs%\Code Snippets\ANTLR\My Code Snippets\",
+        ForceCreateDirs = @"%InstallRoot%\ANTLR\Snippets\%LCID%\ANTLR;%MyDocs%\Code Snippets\ANTLR\My Code Snippets\",
+        ShowRoots = false)]
     [ProvideLanguageExtension(typeof(AntlrLanguageInfo), AntlrConstants.AntlrFileExtension)]
     [ProvideLanguageExtension(typeof(AntlrLanguageInfo), AntlrConstants.AntlrFileExtension2)]
 
@@ -97,6 +101,10 @@
 
         // this item is last since it's always true
         EnableLineNumbers = true)]
+    [ProvideLanguageCodeExpansion(typeof(Antlr4LanguageInfo), Antlr4Constants.AntlrLanguageName, Antlr4Constants.AntlrLanguageResourceId, Antlr4Constants.AntlrLanguageName, @"%InstallRoot%\ANTLR4\Snippets\1033\SnippetsIndex.xml",
+        SearchPaths = @"%InstallRoot%\ANTLR4\Snippets\%LCID%\ANTLR4;%MyDocs%\Code Snippets\ANTLR4\My Code Snippets\",
+        ForceCreateDirs = @"%InstallRoot%\ANTLR4\Snippets\%LCID%\ANTLR4;%MyDocs%\Code Snippets\ANTLR4\My Code Snippets\",
+        ShowRoots = false)]
     [ProvideLanguageExtension(typeof(Antlr4LanguageInfo), Antlr4Constants.AntlrFileExtension)]
 
     [ProvideDebuggerException(typeof(Antlr4.Runtime.FailedPredicateException))]

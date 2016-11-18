@@ -26,6 +26,10 @@
         EnableLineNumbers = true,
         //CodeSense = true,
         RequestStockColors = true)]
+    [ProvideLanguageCodeExpansion(typeof(GoLanguageInfo), GoConstants.GoLanguageName, GoConstants.GoLanguageResourceId, GoConstants.GoLanguageName, @"%InstallRoot%\Go\Snippets\1033\SnippetsIndex.xml",
+        SearchPaths = @"%InstallRoot%\Go\Snippets\%LCID%\Go;%MyDocs%\Code Snippets\Go\My Code Snippets\",
+        ForceCreateDirs = @"%InstallRoot%\Go\Snippets\%LCID%\Go;%MyDocs%\Code Snippets\Go\My Code Snippets\",
+        ShowRoots = false)]
     [ProvideLanguageExtension(typeof(GoLanguageInfo), GoConstants.GoFileExtension)]
     public class GoLanguagePackage : Package
     {

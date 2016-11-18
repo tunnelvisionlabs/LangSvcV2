@@ -26,6 +26,10 @@
         EnableLineNumbers = true,
         //CodeSense = true,
         RequestStockColors = true)]
+    [ProvideLanguageCodeExpansion(typeof(StringTemplateLanguageInfo), StringTemplateConstants.StringTemplateLanguageName, StringTemplateConstants.StringTemplateLanguageResourceId, StringTemplateConstants.StringTemplateLanguageName, @"%InstallRoot%\StringTemplate\Snippets\1033\SnippetsIndex.xml",
+        SearchPaths = @"%InstallRoot%\StringTemplate\Snippets\%LCID%\StringTemplate;%MyDocs%\Code Snippets\StringTemplate\My Code Snippets\",
+        ForceCreateDirs = @"%InstallRoot%\StringTemplate\Snippets\%LCID%\StringTemplate;%MyDocs%\Code Snippets\StringTemplate\My Code Snippets\",
+        ShowRoots = false)]
     [ProvideLanguageExtension(typeof(StringTemplateLanguageInfo), StringTemplateConstants.StringTemplateGroupFileExtension)]
     [ProvideLanguageExtension(typeof(StringTemplateLanguageInfo), StringTemplateConstants.StringTemplateGroup4FileExtension)]
     [ProvideLanguageExtension(typeof(StringTemplateLanguageInfo), StringTemplateConstants.StringTemplateTemplateFileExtension)]

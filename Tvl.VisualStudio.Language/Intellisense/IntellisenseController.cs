@@ -6,6 +6,7 @@
     using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Threading.Tasks;
+    using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
@@ -17,7 +18,7 @@
     using VsMenus = Microsoft.VisualStudio.Shell.VsMenus;
     using VSOBJGOTOSRCTYPE = Microsoft.VisualStudio.Shell.Interop.VSOBJGOTOSRCTYPE;
 
-    public class IntellisenseController : ITvlIntellisenseController, IIntellisenseController
+    public class IntellisenseController : ITvlIntellisenseController, IIntellisenseController, IVsTextViewCreationListener
     {
         private readonly IntellisenseControllerProvider _provider;
 
@@ -476,9 +477,10 @@
             return false;
         }
 
-        public virtual void OnVsTextViewCreated(IVsTextView textViewAdapter)
+        public virtual void VsTextViewCreated(IVsTextView textViewAdapter)
         {
-            Contract.Requires<ArgumentNullException>(textViewAdapter != null, "textViewAdapter");
+            if (textViewAdapter == null)
+                throw new ArgumentNullException("textViewAdapter");
 
             _commandFilter = CreateIntellisenseCommandFilter(textViewAdapter);
             if (_commandFilter != null)

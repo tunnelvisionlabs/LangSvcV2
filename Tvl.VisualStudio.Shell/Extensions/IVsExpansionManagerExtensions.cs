@@ -24,8 +24,8 @@
             bool includeNullType = false;
             bool includeDuplicates = false;
 
-            IVsExpansionEnumeration expEnum;
-            if (ErrorHandler.Succeeded(expansionManager.EnumerateExpansions(language, shortcutsOnly ? 1 : 0, snippetTypes, snippetTypes.Length, includeNullType ? 1 : 0, includeDuplicates ? 1 : 0, out expEnum)))
+            IVsExpansionEnumeration expEnum = null;
+            if (ErrorHandler.Succeeded(ErrorHandler.CallWithCOMConvention(() => expansionManager.EnumerateExpansions(language, shortcutsOnly ? 1 : 0, snippetTypes, snippetTypes.Length, includeNullType ? 1 : 0, includeDuplicates ? 1 : 0, out expEnum))))
             {
                 uint count;
                 ErrorHandler.ThrowOnFailure(expEnum.GetCount(out count));

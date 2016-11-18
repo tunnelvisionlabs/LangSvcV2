@@ -28,6 +28,10 @@
         EnableLineNumbers = true,
         //CodeSense = true,
         RequestStockColors = true)]
+    [ProvideLanguageCodeExpansion(typeof(PhpLanguageInfo), PhpConstants.PhpLanguageName, PhpConstants.PhpLanguageResourceId, PhpConstants.PhpLanguageName, @"%InstallRoot%\PHP\Snippets\1033\SnippetsIndex.xml",
+        SearchPaths = @"%InstallRoot%\PHP\Snippets\%LCID%\PHP;%MyDocs%\Code Snippets\PHP\My Code Snippets\",
+        ForceCreateDirs = @"%InstallRoot%\PHP\Snippets\%LCID%\PHP;%MyDocs%\Code Snippets\PHP\My Code Snippets\",
+        ShowRoots = false)]
 
     [ProvideEditorFactory2(typeof(PhpEditorFactoryWithoutEncoding), 101, CommonPhysicalViewAttributes = (int)__VSPHYSICALVIEWATTRIBUTES.PVA_SupportsPreview)]
     [ProvideLinkedEditorFactory(typeof(PhpEditorFactoryWithEncoding), typeof(PhpEditorFactoryWithoutEncoding), 102, CommonPhysicalViewAttributes = (int)__VSPHYSICALVIEWATTRIBUTES.PVA_None)]
