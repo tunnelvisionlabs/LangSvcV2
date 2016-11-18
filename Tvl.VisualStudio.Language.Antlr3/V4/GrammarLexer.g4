@@ -139,14 +139,14 @@ PLUS         : '+'                    ;
 PLUS_ASSIGN  : '+='                   ;
 OR           : '|'                    ;
 DOLLAR       : '$'                    ;
-DOT		     : '.'                    ; // can be WILDCARD or DOT in qid or imported rule ref
+DOT		     : '.'                    ; // can be WILDCARD or DOT in qualified ID or imported rule ref
 RANGE        : '..'                   ;
 AT           : '@'                    ;
 POUND        : '#'                    ;
 NOT          : '~'                    ;
 RBRACE       : '}'                    ;
 
-/** Allow unicode rule/token names */
+/** Allow Unicode rule/token names */
 ID			:	NameStartChar NameChar*;
 
 fragment
@@ -190,7 +190,7 @@ NameStartChar
 
 // Within actions, or other structures that are not part of the ANTLR
 // syntax, we may encounter literal characters. Within these, we do
-// not want to inadvertantly match things like '}' and so we eat them
+// not want to inadvertently match things like '}' and so we eat them
 // specifically. While this rule is called CHAR it allows for the fact that
 // some languages may use/allow ' as the string delimiter.
 //
@@ -201,7 +201,7 @@ ACTION_CHAR_LITERAL
 
 // Within actions, or other structures that are not part of the ANTLR
 // syntax, we may encounter literal strings. Within these, we do
-// not want to inadvertantly match things like '}' and so we eat them
+// not want to inadvertently match things like '}' and so we eat them
 // specifically.
 //
 fragment
@@ -211,8 +211,8 @@ ACTION_STRING_LITERAL
 
 // Within literal strings and characters that are not part of the ANTLR
 // syntax, we must allow for escaped character sequences so that we do not
-// inadvertantly recognize the end of a string or character when the terminating
-// delimiter has been esacped.
+// inadvertently recognize the end of a string or character when the terminating
+// delimiter has been escaped.
 //
 fragment
 ACTION_ESC
@@ -233,7 +233,7 @@ INT
 //
 // ANTLR makes no distinction between a single character literal and a
 // multi-character string. All literals are single quote delimited and
-// may contain unicode escape sequences of the form \uxxxx, where x
+// may contain Unicode escape sequences of the form \uXXXX, where X
 // is a valid hexadecimal number (as per Java basically).
 STRING_LITERAL
 	:  '\'' (ESC_SEQ | ~['\\\r\n])* '\''?
@@ -302,8 +302,8 @@ UnicodeBOM
 // lexer specification. It matches a single character of any value and being
 // the last rule in the file will match when no other rule knows what to do
 // about the character. It is reported as an error but is not passed on to the
-// parser. This means that the parser to deal with the gramamr file anyway
-// but we will not try to analyse or code generate from a file with lexical
+// parser. This means that the parser to deal with the grammar file anyway
+// but we will not try to analyze or code generate from a file with lexical
 // errors.
 //
 ERRCHAR
@@ -367,7 +367,7 @@ mode ArgAction;
 // braces. Additionally, we must make some assumptions about
 // literal string representation in the target language. We assume
 // that they are delimited by ' or " and so consume these
-// in their own alts so as not to inadvertantly match {}.
+// in their own alts so as not to inadvertently match {}.
 // This mode is recursive on matching a {
 mode ActionMode;
 

@@ -76,7 +76,7 @@ grammarSpec
 		modeSpec*
 
 		// And we force ANTLR to process everything it finds in the input
-		// stream by specifying hte need to match End Of File before the
+		// stream by specifying the need to match End Of File before the
 		// parse is complete.
 		//
 		EOF
@@ -104,7 +104,7 @@ prequelConstruct
 		delegateGrammars
 
 	|	// The declaration of any token types we need that are not already
-		// specified by a preceeding grammar, such as when a parser declares
+		// specified by a preceding grammar, such as when a parser declares
 		// imaginary tokens with which to construct the AST, or a rewriting
 		// tree parser adds further imaginary tokens to ones defined in a prior
 		// {tree} parser.
@@ -157,15 +157,15 @@ delegateGrammars
 	:	IMPORT delegateGrammar (COMMA delegateGrammar)* SEMI
 	;
 
-// A possibly named grammar file that should be imported to this gramamr
-// and delgated to for the rules it specifies
+// A possibly named grammar file that should be imported to this grammar
+// and delegated to for the rules it specifies
 delegateGrammar
 	:	id ASSIGN id
 	|	id
 	;
 
 /** The declaration of any token types we need that are not already
- *  specified by a preceeding grammar, such as when a parser declares
+ *  specified by a preceding grammar, such as when a parser declares
  *  imaginary tokens with which to construct the AST, or a rewriting
  *  tree parser adds further imaginary tokens to ones defined in a prior
  *  {tree} parser.
@@ -267,7 +267,7 @@ ignored
 	|	ARG_ACTION_NEWLINE
 	;
 
-// A declaration of a language target specifc section,
+// A declaration of a language target specific section,
 // such as @header, @includes and so on. We do not verify these
 // sections, they are just passed on to the language target.
 /** Match stuff like @parser::members {int i;} */
@@ -324,10 +324,10 @@ parserRuleSpec
 		// a pure parser or tree parser.
 		name=RULE_REF
 
-		// Immediately following the rulename, there may be a specification
+		// Immediately following the rule name, there may be a specification
 		// of input parameters for the rule. We do not do anything with the
 		// parameters here except gather them for future phases such as
-		// semantic verifcation, type assignment etc. We require that
+		// semantic verification, type assignment etc. We require that
 		// the input parameters are the next syntactically significant element
 		// following the rule id.
 		argActionParameters?
@@ -347,8 +347,8 @@ parserRuleSpec
 		// At the rule level, a programmer may specify a number of sections, such
 		// as scope declarations, rule return elements, @ sections (which may be
 		// language target specific) and so on. We allow any number of these in any
-		// order here and as usual rely onthe semantic verification phase to reject
-		// anything invalid using its addinotal context information. Here we are
+		// order here and as usual rely on the semantic verification phase to reject
+		// anything invalid using its additional context information. Here we are
 		// context free and just accept anything that is a syntactically correct
 		// construct.
 		//
@@ -367,7 +367,7 @@ parserRuleSpec
 
 // Many language targets support exceptions and the rule will
 // generally be able to throw the language target equivalent
-// of a recognition exception. The grammar programmar can
+// of a recognition exception. The grammar programmer can
 // specify a list of exceptions to catch or a generic catch all
 // and the target language code generation template is
 // responsible for generating code that makes sense.
@@ -432,7 +432,7 @@ localsSpec
 // @init {} section where declarations and code can be placed
 // to run before the rule is entered. The C target also has
 // an @declarations {} section, where local variables are declared
-// in order that the generated code is C89 copmliant.
+// in order that the generated code is C89 compliant.
 //
 /** Match stuff like @init {int i;} */
 ruleAction
@@ -507,7 +507,7 @@ lexerElement
 	|	lexerAtom ebnfSuffix?
 	|	lexerBlock ebnfSuffix?
 	|	actionBlock QUESTION? // actions only allowed at end of outer alt actually,
-							  // but preds can be anywhere
+							  // but predicates can be anywhere
 	;
 
 labeledLexerElement
@@ -583,11 +583,11 @@ labeledElement
 		)
 	;
 
-// A block of gramamr structure optionally followed by standard EBNF
+// A block of grammar structure optionally followed by standard EBNF
 // notation, or ANTLR specific notation. I.E. ? + ^ and so on
 ebnf
 	:	block
-		// And now we see if we have any of the optional suffixs and rewrite
+		// And now we see if we have any of the optional suffixes and rewrite
 		// the AST for this rule accordingly
 		(	blockSuffix
 		|
@@ -692,7 +692,7 @@ ruleref
 // Character Range
 //
 // Specifies a range of characters. Valid for lexer rules only, but
-// we do not check that here, the tree walkers shoudl do that.
+// we do not check that here, the tree walkers should do that.
 // Note also that the parser also allows through more than just
 // character literals so that we can produce a much nicer semantic
 // error about any abuse of the .. operator.
