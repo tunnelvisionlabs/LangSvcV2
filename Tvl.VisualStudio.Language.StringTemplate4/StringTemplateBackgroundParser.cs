@@ -64,7 +64,12 @@
                 TemplateGroupWrapper group = new TemplateGroupWrapper('<', '>');
                 parser.group(group, "/");
                 TemplateGroupRuleReturnScope returnScope = BuiltAstForGroupTemplates(group);
-                OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), returnScope));
+
+                // Also parse the input using the V4 lexer/parser for downstream operations that make use of it
+                IList<Antlr4.Runtime.IToken> v4tokens;
+                TemplateParser.GroupFileContext v4result = ParseWithAntlr4(snapshot, out v4tokens);
+
+                OnParseComplete(new StringTemplateParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), returnScope, v4tokens, v4result));
             }
             catch (Exception e) when (!ErrorHandler.IsCriticalException(e))
             {
@@ -77,6 +82,37 @@
                 {
                 }
             }
+        }
+
+        private TemplateParser.GroupFileContext ParseWithAntlr4(ITextSnapshot snapshot, out IList<Antlr4.Runtime.IToken> tokensList)
+        {
+            var input = new Parsing4.SnapshotCharStream(snapshot, new Span(0, snapshot.Length));
+            var lexer = new TemplateLexer(input);
+            var tokens = new Antlr4.Runtime.CommonTokenStream(lexer);
+            var parser = new TemplateParser(tokens);
+            TemplateParser.GroupFileContext parseResult;
+
+            try
+            {
+                parser.Interpreter.PredictionMode = Antlr4.Runtime.Atn.PredictionMode.Sll;
+                parser.RemoveErrorListeners();
+                parser.BuildParseTree = true;
+                parser.ErrorHandler = new Antlr4.Runtime.BailErrorStrategy();
+                parseResult = parser.groupFile();
+            }
+            catch (Antlr4.Runtime.Misc.ParseCanceledException ex) when (ex.InnerException is Antlr4.Runtime.RecognitionException)
+            {
+                // retry with default error handler
+                tokens.Reset();
+                parser.Interpreter.PredictionMode = Antlr4.Runtime.Atn.PredictionMode.Ll;
+                //parser.AddErrorListener(DescriptiveErrorListener.INSTANCE);
+                parser.SetInputStream(tokens);
+                parser.ErrorHandler = new Antlr4.Runtime.DefaultErrorStrategy();
+                parseResult = parser.groupFile();
+            }
+
+            tokensList = tokens.GetTokens();
+            return parseResult;
         }
 
         private TemplateGroupRuleReturnScope BuiltAstForGroupTemplates(TemplateGroupWrapper group)
