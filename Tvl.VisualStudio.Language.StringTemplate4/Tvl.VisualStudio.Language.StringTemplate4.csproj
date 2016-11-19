@@ -129,6 +129,8 @@
     <Compile Include="StringTemplateBackgroundParserProvider.cs" />
     <Compile Include="StringTemplateBraceMatchingTaggerProvider.cs" />
     <Compile Include="StringTemplateParseResultEventArgs.cs" />
+    <Compile Include="StringTemplateSemanticTagger.cs" />
+    <Compile Include="StringTemplateSemanticTaggerProvider.cs" />
     <Compile Include="StringTemplateServices.cs" />
     <Compile Include="StringTemplateConstants.cs" />
     <Compile Include="StringTemplateClassifier.cs" />
