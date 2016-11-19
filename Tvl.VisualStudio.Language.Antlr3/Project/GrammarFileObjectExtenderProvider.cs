@@ -41,10 +41,8 @@
                         _extenderSite.NotifyDelete(_cookie);
                     }
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!ex.IsCritical())
                 {
-                    if (ex.IsCritical())
-                        throw;
                 }
 
                 _extender = extender;
@@ -123,11 +121,8 @@
 
                 return ExtendVersion.None;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ex.IsCritical())
             {
-                if (ex.IsCritical())
-                    throw;
-
                 return ExtendVersion.None;
             }
         }

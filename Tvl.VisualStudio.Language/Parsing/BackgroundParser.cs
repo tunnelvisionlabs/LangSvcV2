@@ -259,11 +259,8 @@
                         outputWindow.WriteLine(string.Format(message, filename, name, "succeeded", time, string.Empty));
                     }
                 }
-                catch (Exception e2)
+                catch (Exception e2) when (!ErrorHandler.IsCriticalException(e2))
                 {
-                    if (ErrorHandler.IsCriticalException(e2))
-                        throw;
-
                     try
                     {
                         if (outputWindow != null)
@@ -272,18 +269,13 @@
                             outputWindow.WriteLine(string.Format(message, filename, name, "failed", time, e2.Message + e2.StackTrace));
                         }
                     }
-                    catch (Exception e3)
+                    catch (Exception e3) when (!ErrorHandler.IsCriticalException(e3))
                     {
-                        if (ErrorHandler.IsCriticalException(e3))
-                            throw;
                     }
                 }
-
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex))
             {
-                if (ErrorHandler.IsCriticalException(ex))
-                    throw;
             }
         }
     }

@@ -35,10 +35,8 @@
                     // have to create an instance of the tool to make sure the error manager gets initialized
                     new AntlrTool();
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ErrorHandler.IsCriticalException(e))
                 {
-                    if (ErrorHandler.IsCriticalException(e))
-                        throw;
                 }
 
 

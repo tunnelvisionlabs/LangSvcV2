@@ -49,11 +49,8 @@
                 parser.ErrorHandler = new BailErrorStrategy();
                 parseResult = parser.grammarSpec();
             }
-            catch (ParseCanceledException ex)
+            catch (ParseCanceledException ex) when (ex.InnerException is RecognitionException)
             {
-                if (!(ex.InnerException is RecognitionException))
-                    throw;
-
                 tokenStream.Reset();
                 parser.Interpreter.PredictionMode = PredictionMode.Ll;
                 //parser.AddErrorListener(DescriptiveErrorListener.Default);

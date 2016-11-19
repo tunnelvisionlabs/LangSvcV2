@@ -137,11 +137,8 @@ namespace Tvl.Go.Build.Tasks
                     ProcessBuildMessage(message);
                 }
             }
-            catch (Exception exception)
+            catch (Exception exception) when (!IsFatalException(exception))
             {
-                if (IsFatalException(exception))
-                    throw;
-
                 ProcessExceptionAsBuildMessage(exception);
                 success = false;
             }

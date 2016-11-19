@@ -90,10 +90,8 @@
 
                 return folder;
             }
-            catch (COMException ex)
+            catch (COMException ex) when (ex.ErrorCode == VSConstants.OLE_E_PROMPTSAVECANCELLED)
             {
-                if (ex.ErrorCode != VSConstants.OLE_E_PROMPTSAVECANCELLED)
-                    throw;
             }
             finally
             {

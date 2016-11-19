@@ -66,20 +66,15 @@
                 TemplateGroupRuleReturnScope returnScope = BuiltAstForGroupTemplates(group);
                 OnParseComplete(new AntlrParseResultEventArgs(snapshot, errors, stopwatch.Elapsed, tokens.GetTokens(), returnScope));
             }
-            catch (Exception e)
+            catch (Exception e) when (!ErrorHandler.IsCriticalException(e))
             {
-                if (ErrorHandler.IsCriticalException(e))
-                    throw;
-
                 try
                 {
                     if (outputWindow != null)
                         outputWindow.WriteLine(e.Message);
                 }
-                catch (Exception ex2)
+                catch (Exception ex2) when (!ErrorHandler.IsCriticalException(ex2))
                 {
-                    if (ErrorHandler.IsCriticalException(ex2))
-                        throw;
                 }
             }
         }

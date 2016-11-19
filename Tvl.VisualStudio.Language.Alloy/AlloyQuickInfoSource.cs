@@ -203,11 +203,8 @@
                                     foundInfo = true;
                                 }
                             }
-                            catch (Exception ex)
+                            catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex))
                             {
-                                if (ErrorHandler.IsCriticalException(ex))
-                                    throw;
-
                                 quickInfoContent.Add(ex.Message);
                             }
                         }
@@ -219,10 +216,8 @@
                         //    if (expression != null)
                         //        expressions.Add(expression);
                         //}
-                        //catch (Exception e)
+                        //catch (Exception e) when (!ErrorHandler.IsCriticalException(e))
                         //{
-                        //    if (ErrorHandler.IsCriticalException(e))
-                        //        throw;
                         //}
                     }
 
@@ -291,11 +286,8 @@
                 //            quickInfoContent.Add("Could not parse expression.");
                 //        }
                 //    }
-                //    catch (Exception ex)
+                //    catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex))
                 //    {
-                //        if (ErrorHandler.IsCriticalException(ex))
-                //            throw;
-
                 //        quickInfoContent.Add(ex.Message);
                 //    }
                 //}
