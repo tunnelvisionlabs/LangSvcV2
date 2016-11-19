@@ -17,11 +17,8 @@
                 GoTypeFormatter formatter = new GoTypeFormatter(input);
                 return formatter.type();
             }
-            catch (Exception e)
+            catch (Exception e) when (!ErrorHandler.IsCriticalException(e))
             {
-                if (ErrorHandler.IsCriticalException(e))
-                    throw;
-
                 return "?";
             }
         }

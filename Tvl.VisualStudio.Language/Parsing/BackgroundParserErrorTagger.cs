@@ -72,10 +72,8 @@
                 {
                     tags.Add(new TagSpan<IErrorTag>(new SnapshotSpan(e.Snapshot, error.Span).TranslateTo(snapshot, SpanTrackingMode.EdgeExclusive), new ErrorTag(PredefinedErrorTypeNames.SyntaxError, error.Message)));
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex))
                 {
-                    if (ErrorHandler.IsCriticalException(ex))
-                        throw;
                 }
             }
             _tags = tags.ToArray();

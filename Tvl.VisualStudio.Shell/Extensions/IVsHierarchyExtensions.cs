@@ -25,13 +25,8 @@
                 if (ErrorHandler.Succeeded(hr))
                     return obj;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (nothrow && !ErrorHandler.IsCriticalException(ex))
             {
-                if (ErrorHandler.IsCriticalException(ex))
-                    throw;
-
-                if (!nothrow)
-                    throw;
             }
 
             return null;

@@ -72,12 +72,9 @@
 
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex))
             {
                 // Throwing an exception from here will crash the IDE.
-                if (ErrorHandler.IsCriticalException(ex))
-                    throw;
-
                 return null;
             }
         }

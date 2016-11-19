@@ -89,10 +89,8 @@
                     {
                         Tree.Items.Clear();
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex))
                     {
-                        if (ErrorHandler.IsCriticalException(ex))
-                            throw;
                     }
                 }));
 

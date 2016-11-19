@@ -94,10 +94,8 @@
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex))
             {
-                if (ErrorHandler.IsCriticalException(ex))
-                    throw;
             }
         }
 
@@ -125,10 +123,8 @@
                         this.Tree.Items.Clear();
                         this.Tree.Items.Add(new ParseTreeWrapper(result));
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex))
                     {
-                        if (ErrorHandler.IsCriticalException(ex))
-                            throw;
                     }
                 }));
 

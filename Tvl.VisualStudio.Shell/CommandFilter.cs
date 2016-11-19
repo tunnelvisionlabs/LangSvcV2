@@ -44,10 +44,8 @@
                     {
                         Disconnect();
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (IsDisposing && !ErrorHandler.IsCriticalException(e))
                     {
-                        if (!IsDisposing || ErrorHandler.IsCriticalException(e))
-                            throw;
                     }
                     finally
                     {

@@ -357,11 +357,8 @@
                     Keyboard.Focus(_currentTextView.VisualElement);
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ex.IsCritical())
             {
-                if (ex.IsCritical())
-                    throw;
-
                 return Marshal.GetHRForException(ex);
             }
 
@@ -622,10 +619,8 @@
             {
                 UpdateSelectedNavigationTargetsImpl();
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ex.IsCritical())
             {
-                if (ex.IsCritical())
-                    throw;
             }
         }
 
