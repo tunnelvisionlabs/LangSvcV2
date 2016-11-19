@@ -50,6 +50,7 @@ namespace Tvl.VisualStudio.Language.StringTemplate4
         {
             public AnonymousTemplateDelimiterFormatDefinition()
             {
+                DisplayName = "StringTemplate Anonymous Template Tag";
                 IsBold = true;
             }
         }
@@ -64,6 +65,7 @@ namespace Tvl.VisualStudio.Language.StringTemplate4
         {
             public BigStringDelimiterFormatDefinition()
             {
+                DisplayName = "StringTemplate Big String Delimiter";
                 BackgroundColor = Colors.Yellow;
             }
         }
@@ -78,6 +80,7 @@ namespace Tvl.VisualStudio.Language.StringTemplate4
         {
             public ExpressionDelimiterFormatDefinition()
             {
+                DisplayName = "StringTemplate Expression Tag";
             }
         }
 
@@ -91,6 +94,7 @@ namespace Tvl.VisualStudio.Language.StringTemplate4
         {
             public EscapeCharacterFormatDefinition()
             {
+                DisplayName = "StringTemplate Escape Character";
                 ForegroundColor = Colors.DarkBlue;
             }
         }
@@ -105,6 +109,7 @@ namespace Tvl.VisualStudio.Language.StringTemplate4
         {
             public EscapeTagFormatDefinition()
             {
+                DisplayName = "StringTemplate Escape Tag";
                 ForegroundColor = Colors.DarkBlue;
             }
         }
