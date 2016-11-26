@@ -1,33 +1,31 @@
 ﻿namespace Tvl.VisualStudio.Language.StringTemplate4
 {
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Antlr4.Runtime;
     using Antlr4.Runtime.Atn;
     using Antlr4.Runtime.Misc;
-    using Tvl.VisualStudio.Language.Parsing4;
 
-    public class ClassifierLexer : AbstractGroupClassifierLexer, ITokenSourceWithState<ClassifierLexerState>
+    public class TemplateLexer : AbstractTemplateLexer
     {
-        public const char DefaultOpenDelimiter = '<';
-        public const char DefaultCloseDelimiter = '>';
+        public static readonly char DEFAULT_OPEN_DELIMITER = '<';
+        public static readonly char DEFAULT_CLOSE_DELIMITER = '>';
 
-        private const int OpenDelimiterPlaceholder = '\uFFF0';
-        private const int CloseDelimiterPlaceholder = '\uFFF1';
-        private static readonly ConcurrentDictionary<int, ATN> DelimiterToAtn = new ConcurrentDictionary<int, ATN>();
+        private static readonly IDictionary<int, ATN> delimiterToATN = new Dictionary<int, ATN>();
+        private static readonly int OPEN_DELIMITER_PLACEHOLDER = '\uFFF0';
+        private static readonly int CLOSE_DELIMITER_PLACEHOLDER = '\uFFF1';
 
-        private readonly Dictionary<ATN, GroupHighlighterATNSimulator> _atnToSimulator = new Dictionary<ATN, GroupHighlighterATNSimulator>();
+        private readonly IDictionary<ATN, TemplateLexerATNSimulator> atnToSimulator = new Dictionary<ATN, TemplateLexerATNSimulator>();
 
-        public ClassifierLexer(ICharStream input)
-            : this(input, DefaultOpenDelimiter, DefaultCloseDelimiter)
+        public TemplateLexer(ICharStream input)
+            : this(input, DEFAULT_OPEN_DELIMITER, DEFAULT_CLOSE_DELIMITER)
         {
         }
 
-        public ClassifierLexer(ICharStream input, char openDelimiter, char closeDelimiter)
-            : base(input)
+        public TemplateLexer(ICharStream input, char openDelimiter, char closeDelimiter)
+                : base(input)
         {
-            _interp = GetSimulatorForDelimiters(openDelimiter, closeDelimiter);
+            _interp = getSimulatorForDelimiters(openDelimiter, closeDelimiter);
         }
 
         public override IToken Emit()
@@ -35,64 +33,29 @@
             switch (_type)
             {
             case LBRACE:
-                if (HandleAcceptPositionForKeyword("["))
+                if (InputStream.Index > _tokenStartCharIndex + 1)
                 {
+                    Interpreter.resetAcceptPosition((ICharStream)InputStream, _tokenStartCharIndex, _tokenStartLine, _tokenStartCharPositionInLine);
                     PushMode(AnonymousTemplateParameters);
                 }
-
                 break;
 
             case DELIMITERS:
-                if (HandleAcceptPositionForKeyword("delimiters"))
+                if (_type == DELIMITERS && InputStream.Index > _tokenStartCharIndex + "delimiters".Length)
                 {
+                    int offset = "delimiters".Length - 1;
+                    Interpreter.resetAcceptPosition((ICharStream)InputStream, _tokenStartCharIndex + offset, _tokenStartLine, _tokenStartCharPositionInLine + offset);
                     PushMode(DelimitersOpenSpec);
                 }
-
-                break;
-
-            case FIRST:
-                HandleAcceptPositionForKeyword("first");
-                break;
-
-            case LAST:
-                HandleAcceptPositionForKeyword("last");
-                break;
-
-            case REST:
-                HandleAcceptPositionForKeyword("rest");
-                break;
-
-            case TRUNC:
-                HandleAcceptPositionForKeyword("trunc");
-                break;
-
-            case STRIP:
-                HandleAcceptPositionForKeyword("strip");
-                break;
-
-            case TRIM:
-                HandleAcceptPositionForKeyword("trim");
-                break;
-
-            case LENGTH:
-                HandleAcceptPositionForKeyword("length");
-                break;
-
-            case STRLEN:
-                HandleAcceptPositionForKeyword("strlen");
-                break;
-
-            case REVERSE:
-                HandleAcceptPositionForKeyword("reverse");
                 break;
 
             case DelimitersOpenSpec_DELIMITER_STRING:
-                SetDelimiters(Text[1], CloseDelimiter);
+                setDelimiters(Text[1], CloseDelimiter);
                 _type = STRING;
                 break;
 
             case DelimitersCloseSpec_DELIMITER_STRING:
-                SetDelimiters(OpenDelimiter, Text[1]);
+                setDelimiters(OpenDelimiter, Text[1]);
                 _type = STRING;
                 break;
 
@@ -103,51 +66,29 @@
             return base.Emit();
         }
 
-        private bool HandleAcceptPositionForKeyword(string keyword)
-        {
-            if (InputStream.Index > _tokenStartCharIndex + keyword.Length)
-            {
-                int offset = keyword.Length - 1;
-                Interpreter.ResetAcceptPosition(_input, _tokenStartCharIndex + offset, _tokenStartLine, _tokenStartCharPositionInLine + offset);
-                return true;
-            }
-
-            return false;
-        }
-
-        protected new GroupHighlighterATNSimulator Interpreter
+        protected new TemplateLexerATNSimulator Interpreter
         {
             get
             {
-                return (GroupHighlighterATNSimulator)base.Interpreter;
+                return (TemplateLexerATNSimulator)base.Interpreter;
             }
         }
 
         public char OpenDelimiter
-        {
-            get
-            {
-                return Interpreter.OpenDelimiter;
-            }
-        }
+            => Interpreter.OpenDelimiter;
 
         public char CloseDelimiter
-        {
-            get
-            {
-                return Interpreter.CloseDelimiter;
-            }
-        }
+            => Interpreter.CloseDelimiter;
 
-        public void SetDelimiters(char openDelimiter, char closeDelimiter)
+        public void setDelimiters(char openDelimiter, char closeDelimiter)
         {
-            GroupHighlighterATNSimulator interpreter = Interpreter;
+            TemplateLexerATNSimulator interpreter = Interpreter;
             if (interpreter.OpenDelimiter == openDelimiter && interpreter.CloseDelimiter == closeDelimiter)
             {
                 return;
             }
 
-            _interp = GetSimulatorForDelimiters(openDelimiter, closeDelimiter);
+            _interp = getSimulatorForDelimiters(openDelimiter, closeDelimiter);
             Interpreter.CopyState(interpreter);
         }
 
@@ -160,29 +101,21 @@
                     return false;
                 }
 
-                // index 0 is DefaultMode, StringTemplate is always 1 inside that
+                // index 0 is DEFAULT_MODE, StringTemplate is always 1 inside that
                 return _modeStack[1] == StringTemplate;
             }
         }
 
-        public ICharStream CharStream
+        private TemplateLexerATNSimulator getSimulatorForDelimiters(char openDelimiter, char closeDelimiter)
         {
-            get
+            ATN atn = getATNForDelimiters(openDelimiter, closeDelimiter);
+            lock (atnToSimulator)
             {
-                return _input;
-            }
-        }
-
-        private GroupHighlighterATNSimulator GetSimulatorForDelimiters(char openDelimiter, char closeDelimiter)
-        {
-            ATN atn = GetATNForDelimiters(openDelimiter, closeDelimiter);
-            lock (_atnToSimulator)
-            {
-                GroupHighlighterATNSimulator simulator;
-                if (!_atnToSimulator.TryGetValue(atn, out simulator))
+                TemplateLexerATNSimulator simulator;
+                if (!atnToSimulator.TryGetValue(atn, out simulator))
                 {
-                    simulator = new GroupHighlighterATNSimulator(this, atn, openDelimiter, closeDelimiter);
-                    _atnToSimulator[atn] = simulator;
+                    simulator = new TemplateLexerATNSimulator(this, atn, openDelimiter, closeDelimiter);
+                    atnToSimulator[atn] = simulator;
                 }
 
                 return simulator;
@@ -190,11 +123,11 @@
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        private static ATN GetATNForDelimiters(char openDelimiter, char closeDelimiter)
+        private static ATN getATNForDelimiters(char openDelimiter, char closeDelimiter)
         {
             int key = (openDelimiter << 16) + (closeDelimiter & 0xFFFF);
             ATN atn;
-            if (DelimiterToAtn.TryGetValue(key, out atn))
+            if (delimiterToATN.TryGetValue(key, out atn))
             {
                 return atn;
             }
@@ -233,7 +166,7 @@
                 }
             }
 
-            DelimiterToAtn[key] = atn;
+            delimiterToATN[key] = atn;
             return atn;
         }
 
@@ -248,11 +181,11 @@
             {
                 AtomTransition atomTransition = (AtomTransition)t;
                 int newLabel;
-                if (atomTransition.label == OpenDelimiterPlaceholder)
+                if (atomTransition.label == OPEN_DELIMITER_PLACEHOLDER)
                 {
                     newLabel = openDelimiter;
                 }
-                else if (atomTransition.label == CloseDelimiterPlaceholder)
+                else if (atomTransition.label == CLOSE_DELIMITER_PLACEHOLDER)
                 {
                     newLabel = closeDelimiter;
                 }
@@ -268,14 +201,14 @@
                 NotSetTransition notSetTransition = (NotSetTransition)t;
                 int removeLabel;
                 int addLabel;
-                if (notSetTransition.set.Contains(OpenDelimiterPlaceholder))
+                if (notSetTransition.set.Contains(OPEN_DELIMITER_PLACEHOLDER))
                 {
-                    removeLabel = OpenDelimiterPlaceholder;
+                    removeLabel = OPEN_DELIMITER_PLACEHOLDER;
                     addLabel = openDelimiter;
                 }
-                else if (notSetTransition.set.Contains(CloseDelimiterPlaceholder))
+                else if (notSetTransition.set.Contains(CLOSE_DELIMITER_PLACEHOLDER))
                 {
-                    removeLabel = CloseDelimiterPlaceholder;
+                    removeLabel = CLOSE_DELIMITER_PLACEHOLDER;
                     addLabel = closeDelimiter;
                 }
                 else
@@ -295,14 +228,14 @@
                 SetTransition setTransition = (SetTransition)t;
                 int removeLabel;
                 int addLabel;
-                if (setTransition.set.Contains(OpenDelimiterPlaceholder))
+                if (setTransition.set.Contains(OPEN_DELIMITER_PLACEHOLDER))
                 {
-                    removeLabel = OpenDelimiterPlaceholder;
+                    removeLabel = OPEN_DELIMITER_PLACEHOLDER;
                     addLabel = openDelimiter;
                 }
-                else if (setTransition.set.Contains(CloseDelimiterPlaceholder))
+                else if (setTransition.set.Contains(CLOSE_DELIMITER_PLACEHOLDER))
                 {
-                    removeLabel = CloseDelimiterPlaceholder;
+                    removeLabel = CLOSE_DELIMITER_PLACEHOLDER;
                     addLabel = closeDelimiter;
                 }
                 else
@@ -322,14 +255,14 @@
                 RangeTransition rangeTransition = (RangeTransition)t;
                 int removeLabel;
                 int addLabel;
-                if (rangeTransition.from <= OpenDelimiterPlaceholder && rangeTransition.to >= OpenDelimiterPlaceholder)
+                if (rangeTransition.from <= OPEN_DELIMITER_PLACEHOLDER && rangeTransition.to >= OPEN_DELIMITER_PLACEHOLDER)
                 {
-                    removeLabel = OpenDelimiterPlaceholder;
+                    removeLabel = OPEN_DELIMITER_PLACEHOLDER;
                     addLabel = openDelimiter;
                 }
-                else if (rangeTransition.from <= CloseDelimiterPlaceholder && rangeTransition.to >= CloseDelimiterPlaceholder)
+                else if (rangeTransition.from <= CLOSE_DELIMITER_PLACEHOLDER && rangeTransition.to >= CLOSE_DELIMITER_PLACEHOLDER)
                 {
-                    removeLabel = CloseDelimiterPlaceholder;
+                    removeLabel = CLOSE_DELIMITER_PLACEHOLDER;
                     addLabel = closeDelimiter;
                 }
                 else
@@ -368,37 +301,29 @@
             }
         }
 
-        public ClassifierLexerState GetCurrentState()
+        protected class TemplateLexerATNSimulator : LexerATNSimulator
         {
-            return new ClassifierLexerState(this);
-        }
+            private readonly char openDelimiter;
+            private readonly char closeDelimiter;
 
-        protected class GroupHighlighterATNSimulator : LexerATNSimulator
-        {
-            public GroupHighlighterATNSimulator(Lexer recog, ATN atn, char openDelimiter, char closeDelimiter)
+            public TemplateLexerATNSimulator(Lexer recog, ATN atn, char openDelimiter, char closeDelimiter)
                 : base(recog, atn)
             {
-                this.OpenDelimiter = openDelimiter;
-                this.CloseDelimiter = closeDelimiter;
+                this.openDelimiter = openDelimiter;
+                this.closeDelimiter = closeDelimiter;
             }
 
-            public char OpenDelimiter
-            {
-                get;
-            }
+            public char OpenDelimiter => openDelimiter;
+            public char CloseDelimiter => closeDelimiter;
 
-            public char CloseDelimiter
-            {
-                get;
-            }
-
-            public void ResetAcceptPosition(ICharStream input, int index, int line, int charPositionInLine)
+            public void resetAcceptPosition(ICharStream input, int index, int line, int charPositionInLine)
             {
                 input.Seek(index);
                 this.line = line;
                 this.charPositionInLine = charPositionInLine;
                 Consume(input);
             }
+
         }
     }
 }

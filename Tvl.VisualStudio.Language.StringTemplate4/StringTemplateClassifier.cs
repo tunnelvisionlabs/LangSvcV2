@@ -1,19 +1,13 @@
 ﻿namespace Tvl.VisualStudio.Language.StringTemplate4
 {
-    using System;
-    using System.Collections.Generic;
-    using Antlr.Runtime;
+    using Antlr4.Runtime;
     using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
-    using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Language.Parsing4;
 
     internal sealed class StringTemplateClassifier : AntlrClassifierBase<ClassifierLexerState>
     {
-        private static readonly string[] _keywords = { "group", "default", "import", "true", "false", "delimiters" };
-        private static readonly string[] _expressionKeywords = { "if", "elseif", "endif", "else", "end" };
-
-        private readonly ITextBuffer _textBuffer;
         private readonly IStandardClassificationService _standardClassificationService;
         private readonly IClassificationTypeRegistryService _classificationTypeRegistryService;
 
@@ -26,7 +20,6 @@
         public StringTemplateClassifier(ITextBuffer textBuffer, IStandardClassificationService standardClassificationService, IClassificationTypeRegistryService classificationTypeRegistryService)
             : base(textBuffer)
         {
-            this._textBuffer = textBuffer;
             this._standardClassificationService = standardClassificationService;
             this._classificationTypeRegistryService = classificationTypeRegistryService;
 
@@ -37,16 +30,13 @@
             this._escapeTagClassificationType = classificationTypeRegistryService.GetClassificationType(StringTemplateClassificationTypeNames.EscapeTag);
         }
 
-        protected override ICharStream CreateInputStream(SnapshotSpan span)
+        protected override ITokenSourceWithState<ClassifierLexerState> CreateLexer(ICharStream input, int startLine, ClassifierLexerState startState)
         {
-            ICharStream input = new StringTemplateEscapedCharStream(span.Snapshot);
-            input.Seek(span.Start.Position);
-            return input;
-        }
-
-        protected override ITokenSourceWithState<ClassifierLexerState> CreateLexer(ICharStream input, ClassifierLexerState state)
-        {
-            return new ClassifierLexer(input, state);
+            var lexer = new ClassifierLexer(input);
+            lexer.Line = startLine;
+            lexer.Column = 0;
+            startState.Apply(lexer);
+            return lexer;
         }
 
         protected override ClassifierLexerState GetStartState()
@@ -54,149 +44,75 @@
             return ClassifierLexerState.Initial;
         }
 
-        //protected override ICharStream CreateInputStream(SnapshotSpan span)
-        //{
-        //    ClassifierLexer.Stream stream = new ClassifierLexer.Stream(span);
-        //    return stream;
-        //}
-
         protected override IClassificationType ClassifyToken(IToken token)
         {
             switch (token.Type)
             {
-            case GroupClassifierLexer.ID:
-                if (Array.IndexOf(_keywords, token.Text) >= 0)
-                    return _standardClassificationService.Keyword;
+            case ClassifierLexer.DEFAULT:
+            case ClassifierLexer.IMPORT:
+            case ClassifierLexer.GROUP:
+            case ClassifierLexer.TRUE:
+            case ClassifierLexer.FALSE:
+            case ClassifierLexer.DELIMITERS:
+            case ClassifierLexer.IF:
+            case ClassifierLexer.ELSEIF:
+            case ClassifierLexer.ELSE:
+            case ClassifierLexer.ENDIF:
+            case ClassifierLexer.END:
 
+            case ClassifierLexer.SUPER:
+            case ClassifierLexer.FIRST:
+            case ClassifierLexer.LAST:
+            case ClassifierLexer.REST:
+            case ClassifierLexer.TRUNC:
+            case ClassifierLexer.STRIP:
+            case ClassifierLexer.TRIM:
+            case ClassifierLexer.LENGTH:
+            case ClassifierLexer.STRLEN:
+            case ClassifierLexer.REVERSE:
+                return _standardClassificationService.Keyword;
+
+            case ClassifierLexer.ID:
                 return _standardClassificationService.Identifier;
 
-            case GroupClassifierLexer.PARAMETER_DEFINITION:
-                return _standardClassificationService.Identifier;
-
-            case InsideClassifierLexer.EXPR_IDENTIFIER:
-                if (Array.IndexOf(_expressionKeywords, token.Text) >= 0)
-                    return _standardClassificationService.Keyword;
-
-                return _standardClassificationService.Identifier;
-
-            case GroupClassifierLexer.BEGIN_BIGSTRING:
-            case GroupClassifierLexer.END_BIGSTRING:
-            case GroupClassifierLexer.BEGIN_BIGSTRINGLINE:
-            case GroupClassifierLexer.END_BIGSTRINGLINE:
-                return _bigStringDelimiterClassificationType;
-
-            case OutsideClassifierLexer.TEXT:
-            case InsideClassifierLexer.STRING:
-            case OutsideClassifierLexer.QUOTE:
-            case GroupClassifierLexer.DELIMITER_SPEC:
-                return _standardClassificationService.StringLiteral;
-
-            case GroupClassifierLexer.COMMENT:
-            case GroupClassifierLexer.LINE_COMMENT:
-                return _standardClassificationService.Comment;
-
-            case GroupClassifierLexer.WS:
-                return _standardClassificationService.WhiteSpace;
-
-            case OutsideClassifierLexer.LDELIM:
-            case InsideClassifierLexer.RDELIM:
-                return _expressionDelimiterClassificationType;
-
-            case GroupClassifierLexer.LBRACE:
-            case GroupClassifierLexer.RBRACE:
+            case ClassifierLexer.LBRACE:
+            case ClassifierLexer.RBRACE:
                 return _anonymousTemplateDelimiterClassificationType;
 
-            case GroupClassifierLexer.DEFINED:
-            case GroupClassifierLexer.EQUALS:
-            case InsideClassifierLexer.ELLIPSIS:
-                return _standardClassificationService.Operator;
+            case ClassifierLexer.BIGSTRING:
+            case ClassifierLexer.BIGSTRINGLINE:
+            case ClassifierLexer.BigStringTemplate_END:
+            case ClassifierLexer.BigStringLineTemplate_END:
+                return _bigStringDelimiterClassificationType;
 
-            case InsideClassifierLexer.REGION_REF:
-                return _standardClassificationService.SymbolReference;
+            case ClassifierLexer.STRING:
+                return _standardClassificationService.StringLiteral;
 
-            case OutsideClassifierLexer.ESCAPE_CHAR:
-                return _escapeCharacterClassificationType;
+            case ClassifierLexer.LINE_COMMENT:
+            case ClassifierLexer.COMMENT:
+                return _standardClassificationService.Comment;
 
-            case OutsideClassifierLexer.ESCAPE_TAG:
+            //case GroupClassifierLexer4.WS:
+            //    return whitespaceAttributes;
+
+            case ClassifierLexer.OPEN_DELIMITER:
+            case ClassifierLexer.CLOSE_DELIMITER:
+                return _expressionDelimiterClassificationType;
+
+            case ClassifierLexer.ESCAPE:
                 return _escapeTagClassificationType;
+
+            case ClassifierLexer.AnonymousTemplate_ID:
+            case ClassifierLexer.AnonymousTemplate_COMMA:
+            case ClassifierLexer.TEXT:
+                return _standardClassificationService.StringLiteral;
+
+            case ClassifierLexer.REGION_ID:
+                //return _regionUseClassificationType;
+                return _standardClassificationService.Identifier;
 
             default:
                 return null;
-            }
-        }
-
-        protected override IEnumerable<ClassificationSpan> GetClassificationSpansForToken(IToken token, ITextSnapshot snapshot)
-        {
-            if (token.Type == GroupClassifierLexer.LEGACY_DELIMITERS)
-            {
-                SnapshotSpan commentPrefix = new SnapshotSpan(snapshot, token.StartIndex, 3);
-                ClassificationSpan commentClassificationSpan = new ClassificationSpan(commentPrefix, _standardClassificationService.Comment);
-                SnapshotSpan delimitersMarker = new SnapshotSpan(snapshot, Span.FromBounds(token.StartIndex + 3, token.StopIndex + 1));
-                ClassificationSpan delimitersClassificationSpan = new ClassificationSpan(delimitersMarker, _standardClassificationService.Keyword);
-                return new ClassificationSpan[] { commentClassificationSpan, delimitersClassificationSpan };
-            }
-            else
-            {
-                return base.GetClassificationSpansForToken(token, snapshot);
-            }
-        }
-
-        internal class StringTemplateEscapedCharStream : SnapshotCharStream
-        {
-            public StringTemplateEscapedCharStream(ITextSnapshot snapshot)
-                : base(snapshot)
-            {
-            }
-
-            public ClassifierLexer Lexer
-            {
-                get;
-                set;
-            }
-
-            public override void Consume()
-            {
-                bool consumeEscape = ShouldConsumeEscape(0);
-
-                if (consumeEscape)
-                    base.Consume();
-
-                base.Consume();
-            }
-
-            public override int LA(int i)
-            {
-                int escapeCount = 0;
-                if (i >= 1)
-                {
-                    for (int j = 0; j < i; j++)
-                    {
-                        if (ShouldConsumeEscape(j + escapeCount))
-                            escapeCount++;
-                    }
-                }
-
-                return base.LA(i + escapeCount);
-            }
-
-            private bool ShouldConsumeEscape(int offset)
-            {
-                if (Lexer == null)
-                    return false;
-
-                if (base.LA(offset + 1) != '\\')
-                    return false;
-
-                bool inString = Lexer.Outermost == OutermostTemplate.String;
-                if (inString)
-                    return base.LA(offset + 2) == '"';
-
-                bool inBigString = Lexer.Outermost == OutermostTemplate.BigString
-                    || Lexer.Outermost == OutermostTemplate.BigStringLine;
-                if (inBigString)
-                    return base.LA(offset + 2) == '>';
-
-                return false;
             }
         }
     }
