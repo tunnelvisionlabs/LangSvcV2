@@ -24,10 +24,17 @@
             Contract.Requires(outputWindowService != null);
         }
 
+        internal AntlrParseResultEventArgs LastResult
+        {
+            get;
+            private set;
+        }
+
         protected override void ReParseImpl()
         {
             var snapshot = TextBuffer.CurrentSnapshot;
             AntlrParseResultEventArgs result = ParseSnapshot(snapshot);
+            LastResult = result;
             OnParseComplete(result);
         }
 

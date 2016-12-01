@@ -356,8 +356,8 @@
     <Compile Include="V4\Antlr4OutliningTagger.cs" />
     <Compile Include="V4\Antlr4OutliningTaggerProvider.cs" />
     <None Include="V4\Antlr4ParserTokenStream.cs" />
-    <None Include="V4\Antlr4QuickInfoSource.cs" />
-    <None Include="V4\Antlr4QuickInfoSourceProvider.cs" />
+    <Compile Include="V4\Antlr4QuickInfoSource.cs" />
+    <Compile Include="V4\Antlr4QuickInfoSourceProvider.cs" />
     <None Include="Experimental\SemanticClassifierBase`1.cs" />
     <Compile Include="OptionsPages\AntlrIntellisenseOptions.cs">
       <SubType>Component</SubType>

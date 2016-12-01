@@ -48,6 +48,10 @@
             _backgroundParser = (Antlr4BackgroundParser)provider.BackgroundParserFactoryService.GetBackgroundParser(textBuffer);
             _backgroundParser.ParseComplete += HandleBackgroundParseComplete;
             _backgroundParser.RequestParse(false);
+
+            var lastParseResult = _backgroundParser.LastResult;
+            if (lastParseResult != null)
+                UpdateNavigationTargets(lastParseResult);
         }
 
         public IEnumerable<IEditorNavigationType> GetNavigationTypes()

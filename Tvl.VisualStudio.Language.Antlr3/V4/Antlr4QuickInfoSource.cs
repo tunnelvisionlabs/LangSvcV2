@@ -2,18 +2,20 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
+    using Tvl.VisualStudio.Text.Navigation;
     using AntlrClassificationTypeNames = Tvl.VisualStudio.Language.Antlr3.AntlrClassificationTypeNames;
 
     internal sealed class Antlr4QuickInfoSource : IQuickInfoSource
     {
-        public Antlr4QuickInfoSource(ITextBuffer textBuffer, Antlr4BackgroundParser backgroundParser, ITagAggregator<ClassificationTag> aggregator)
+        public Antlr4QuickInfoSource(ITextBuffer textBuffer, IEditorNavigationSourceAggregator editorNavigationSourceAggregator, ITagAggregator<ClassificationTag> aggregator)
         {
             this.Aggregator = aggregator;
-            this.BackgroundParser = backgroundParser;
+            this.EditorNavigationSourceAggregator = editorNavigationSourceAggregator;
             this.TextBuffer = textBuffer;
         }
 
@@ -23,7 +25,7 @@
             private set;
         }
 
-        public Antlr4BackgroundParser BackgroundParser
+        public IEditorNavigationSourceAggregator EditorNavigationSourceAggregator
         {
             get;
             private set;
@@ -61,52 +63,53 @@
                     }
 
                     NormalizedSnapshotSpanCollection spans = span.Span.GetSpans(currentSnapshot);
-                    if (spans.Count == 1)
+                    if (spans.Count != 1)
+                        continue;
+
+                    SnapshotSpan span2 = spans[0];
+                    SnapshotSpan anchorSpan = span.Span.GetSpans(span.Span.AnchorBuffer)[0];
+                    if (span2.Length != anchorSpan.Length)
+                        continue;
+
+                    if (!span2.Contains(triggerPoint.Value))
+                        continue;
+
+                    var rules = EditorNavigationSourceAggregator.GetNavigationTargets().ToArray();
+                    if (rules.Length == 0)
                     {
-                        SnapshotSpan span2 = spans[0];
-                        SnapshotSpan span3 = span.Span.GetSpans(span.Span.AnchorBuffer)[0];
-                        if (span2.Length == span3.Length)
+                        quickInfoContent.Add("Parsing...");
+                        applicableToSpan = currentSnapshot.CreateTrackingSpan(span2, SpanTrackingMode.EdgeExclusive);
+                        return;
+                    }
+
+                    string ruleName = span2.GetText();
+                    IEditorNavigationTarget target = null;
+                    foreach (var rule in rules)
+                    {
+                        if (string.Equals(rule.Name, ruleName))
                         {
-                            SnapshotSpan span4 = spans[0];
-                            if (span4.Contains(triggerPoint.Value))
-                            {
-                                StringBuilder builder = new StringBuilder();
-                                string ruleName = span2.GetText();
-                                var rules = BackgroundParser.RuleSpans;
-                                KeyValuePair<ITrackingSpan, ITrackingPoint> value;
-                                if (rules == null || !rules.TryGetValue(ruleName, out value))
-                                {
-#if DEBUG
-                                    if (span.Tag.ClassificationType.IsOfType(AntlrClassificationTypeNames.LexerRule))
-                                        builder.Append("Found an unknown lexer rule.");
-                                    else
-                                        builder.Append("Found an unknown parser rule.");
-#else
-                                    return;
-#endif
-                                }
-                                else
-                                {
-                                    SnapshotPoint ruleSeek = value.Value.GetPoint(triggerPoint.Value.Snapshot);
-                                    if (span2.Contains(ruleSeek))
-                                        return;
-
-                                    builder.Append(value.Key.GetText(span2.Snapshot));
-                                }
-
-                                //builder.AppendLine(span.Tag.Url.OriginalString);
-                                //builder.Append(Strings.UrlQuickInfoFollowLink);
-                                quickInfoContent.Add(builder.ToString());
-                                applicableToSpan = currentSnapshot.CreateTrackingSpan((Span)spans[0], SpanTrackingMode.EdgeExclusive);
-                            }
+                            target = rule;
+                            break;
                         }
                     }
+
+                    if (target == null)
+                        continue;
+
+                    SnapshotSpan targetSpan = target.Span;
+                    quickInfoContent.Add(!targetSpan.IsEmpty ? targetSpan.GetText() : target.Name);
+                    applicableToSpan = currentSnapshot.CreateTrackingSpan(span2, SpanTrackingMode.EdgeExclusive);
+                    return;
                 }
             }
         }
 
         private void Dispose(bool disposing)
         {
+            if (disposing)
+            {
+                EditorNavigationSourceAggregator.Dispose();
+            }
         }
     }
 }
