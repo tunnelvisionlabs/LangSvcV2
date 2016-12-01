@@ -348,9 +348,9 @@
     <Compile Include="V4\Antlr4EditorNavigationSource.cs" />
     <Compile Include="V4\Antlr4EditorNavigationSourceProvider.cs" />
     <None Include="V4\Antlr4ErrorTaggerProvider.cs" />
-    <None Include="V4\Antlr4IntellisenseCommandFilter.cs" />
-    <None Include="V4\Antlr4IntellisenseController.cs" />
-    <None Include="V4\Antlr4IntellisenseControllerProvider.cs" />
+    <Compile Include="V4\Antlr4IntellisenseCommandFilter.cs" />
+    <Compile Include="V4\Antlr4IntellisenseController.cs" />
+    <Compile Include="V4\Antlr4IntellisenseControllerProvider.cs" />
     <None Include="V4\Antlr4LanguageElementTagger.cs" />
     <None Include="V4\Antlr4LanguageElementTaggerProvider.cs" />
     <Compile Include="V4\Antlr4OutliningTagger.cs" />

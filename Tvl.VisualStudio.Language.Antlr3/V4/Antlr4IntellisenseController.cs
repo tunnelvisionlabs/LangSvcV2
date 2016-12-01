@@ -1,11 +1,13 @@
 ﻿namespace Tvl.VisualStudio.Language.AntlrV4
 {
     using System.Collections.Generic;
+    using System.Linq;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Intellisense;
     using Tvl.VisualStudio.Shell;
+    using Tvl.VisualStudio.Text.Navigation;
 
     using AntlrClassificationTypeNames = Tvl.VisualStudio.Language.Antlr3.AntlrClassificationTypeNames;
     using AntlrIntellisenseOptions = Tvl.VisualStudio.Language.Antlr3.OptionsPages.AntlrIntellisenseOptions;
@@ -21,6 +23,7 @@
             : base(textView, provider)
         {
             BackgroundParser = backgroundParser;
+            EditorNavigationSourceAggregator = provider.EditorNavigationSourceAggregatorFactoryService.CreateEditorNavigationSourceAggregator(textView.TextBuffer);
             ClassificationTagAggregator = provider.AggregatorFactory.CreateTagAggregator<ClassificationTag>(textView.TextBuffer);
 
             var shell = Provider.GlobalServiceProvider.GetShell();
@@ -53,6 +56,12 @@
         }
 
         public Antlr4BackgroundParser BackgroundParser
+        {
+            get;
+            private set;
+        }
+
+        public IEditorNavigationSourceAggregator EditorNavigationSourceAggregator
         {
             get;
             private set;
@@ -124,10 +133,15 @@
                         if (span4.Contains(point))
                         {
                             string ruleName = span2.GetText();
-                            var rules = BackgroundParser.RuleSpans;
-                            KeyValuePair<ITrackingSpan, ITrackingPoint> value;
-                            if (rules != null && rules.TryGetValue(ruleName, out value))
-                                return new INavigateToTarget[] { new SnapshotSpanNavigateToTarget(TextView, new SnapshotSpan(value.Value.GetPoint(currentSnapshot), value.Value.GetPoint(currentSnapshot))) };
+                            var rules = EditorNavigationSourceAggregator.GetNavigationTargets().ToArray();
+                            var rule = rules.FirstOrDefault(x => string.Equals(x.Name, ruleName));
+                            if (rule != null)
+                            {
+                                var snapshot = rule.Seek.Snapshot;
+                                var trackingSeek = snapshot.CreateTrackingSpan(rule.Seek.Span, SpanTrackingMode.EdgeExclusive);
+                                var seek = trackingSeek.GetSpan(TextView.TextBuffer.CurrentSnapshot);
+                                return new INavigateToTarget[] { new SnapshotSpanNavigateToTarget(TextView, seek) };
+                            }
                         }
                     }
                 }
