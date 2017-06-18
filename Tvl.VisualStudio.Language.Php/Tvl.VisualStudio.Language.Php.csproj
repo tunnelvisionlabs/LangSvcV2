@@ -387,13 +387,13 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Antlr3.3.5.1\build\Antlr3.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr3.3.5.1\build\Antlr3.props'))" />
     <Error Condition="!Exists('..\packages\Antlr3.3.5.1\build\Antlr3.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr3.3.5.1\build\Antlr3.targets'))" />
-    <Error Condition="!Exists('..\packages\Tvl.VisualStudio.OutputWindow.2.1.0\build\Tvl.VisualStudio.OutputWindow.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tvl.VisualStudio.OutputWindow.2.1.0\build\Tvl.VisualStudio.OutputWindow.targets'))" />
     <Error Condition="!Exists('..\packages\Antlr4.CodeGenerator.4.6.1\build\Antlr4.CodeGenerator.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr4.CodeGenerator.4.6.1\build\Antlr4.CodeGenerator.props'))" />
     <Error Condition="!Exists('..\packages\Antlr4.CodeGenerator.4.6.1\build\Antlr4.CodeGenerator.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Antlr4.CodeGenerator.4.6.1\build\Antlr4.CodeGenerator.targets'))" />
+    <Error Condition="!Exists('..\packages\Tvl.VisualStudio.OutputWindow.3.0.0\build\Tvl.VisualStudio.OutputWindow.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tvl.VisualStudio.OutputWindow.3.0.0\build\Tvl.VisualStudio.OutputWindow.targets'))" />
   </Target>
   <Import Project="..\packages\Antlr3.3.5.1\build\Antlr3.targets" Condition="Exists('..\packages\Antlr3.3.5.1\build\Antlr3.targets')" />
-  <Import Project="..\packages\Tvl.VisualStudio.OutputWindow.2.1.0\build\Tvl.VisualStudio.OutputWindow.targets" Condition="Exists('..\packages\Tvl.VisualStudio.OutputWindow.2.1.0\build\Tvl.VisualStudio.OutputWindow.targets')" />
   <Import Project="..\packages\Antlr4.CodeGenerator.4.6.1\build\Antlr4.CodeGenerator.targets" Condition="Exists('..\packages\Antlr4.CodeGenerator.4.6.1\build\Antlr4.CodeGenerator.targets')" />
+  <Import Project="..\packages\Tvl.VisualStudio.OutputWindow.3.0.0\build\Tvl.VisualStudio.OutputWindow.targets" Condition="Exists('..\packages\Tvl.VisualStudio.OutputWindow.3.0.0\build\Tvl.VisualStudio.OutputWindow.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
