@@ -9,10 +9,6 @@
     <License>Eula.rtf</License>
     <PreviewImage>VSIXProject_large.png</PreviewImage>
     <SupportedProducts>
-      <VisualStudio Version="10.0">
-        <Edition>Pro</Edition>
-        <Edition>IntegratedShell</Edition>
-      </VisualStudio>
       <VisualStudio Version="11.0">
         <Edition>Pro</Edition>
         <Edition>IntegratedShell</Edition>
