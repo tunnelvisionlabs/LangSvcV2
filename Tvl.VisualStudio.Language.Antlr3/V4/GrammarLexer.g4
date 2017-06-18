@@ -416,7 +416,7 @@ mode ActionMode;
 				|   [{}]             // nested actions
 				|   '\\'             // escapes
 				|   '/'              // potential comments
-				|   [.=,<>()\[\]:-]  // delimiters
+				|   [.=,<>()[\]:-]  // delimiters
 				|   [$a-zA-Z0-9_]    // words
 				|   [ \t\r\n]
 				)
