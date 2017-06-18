@@ -1,42 +1,37 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
-  <Identifier Id="Tvl.VisualStudio.Language.Php.ece72f50-0b6f-4363-9986-e38af13f6aa5">
-    <Name>PHP Language Support</Name>
-    <Author>Sam Harwell</Author>
-    <Version>1.1.0</Version>
-    <Description xml:space="preserve">Basic support for the PHP programming language.</Description>
-    <Locale>1033</Locale>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Id="Tvl.VisualStudio.Language.Php.ece72f50-0b6f-4363-9986-e38af13f6aa5" Version="1.1.0" Language="en-US" Publisher="Sam Harwell" />
+    <DisplayName>PHP Language Support</DisplayName>
+    <Description>Basic support for the PHP programming language.</Description>
+    <MoreInfo>https://github.com/tunnelvisionlabs/LangSvcV2</MoreInfo>
     <License>Eula.rtf</License>
+    <!--<GettingStartedGuide></GettingStartedGuide>-->
+    <!--<ReleaseNotes></ReleaseNotes>-->
     <Icon>VSIXProject_small.png</Icon>
     <PreviewImage>VSIXProject_large.png</PreviewImage>
-    <SupportedProducts>
-      <VisualStudio Version="11.0">
-        <Edition>Pro</Edition>
-        <Edition>IntegratedShell</Edition>
-      </VisualStudio>
-      <VisualStudio Version="12.0">
-        <Edition>Pro</Edition>
-        <Edition>IntegratedShell</Edition>
-      </VisualStudio>
-      <VisualStudio Version="14.0">
-        <Edition>Pro</Edition>
-        <Edition>IntegratedShell</Edition>
-      </VisualStudio>
-    </SupportedProducts>
-    <SupportedFrameworkRuntimeEdition MinVersion="4.0" />
-  </Identifier>
-  <References>
-    <Reference Id="Tvl.VisualStudio.OutputWindow.3EF11167-A319-43DB-B1B4-A9778A90FAE0">
-      <Name>Visual Studio Output Window Services</Name>
-      <VsixPath>Tvl.VisualStudio.OutputWindow.vsix</VsixPath>
-    </Reference>
-    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.2.0">
-      <Name>Visual Studio Extensibility Framework</Name>
-      <VsixPath>Tvl.VisualStudio.Framework.vsix</VsixPath>
-    </Reference>
-  </References>
-  <Content>
-    <MefComponent>|%CurrentProject%|</MefComponent>
-    <VsPackage>|%CurrentProject%|</VsPackage>
-  </Content>
-</Vsix>
+    <!--<Tags></Tags>-->
+  </Metadata>
+  <Installation>
+    <InstallationTarget Version="[11.0,15.0)" Id="Microsoft.VisualStudio.Community" />
+    <InstallationTarget Version="[11.0,15.0)" Id="Microsoft.VisualStudio.Pro" />
+  </Installation>
+  <Dependencies>
+    <Dependency d:Source="File"
+      DisplayName="Visual Studio Output Window Services"
+      Id="Tvl.VisualStudio.OutputWindow.3EF11167-A319-43DB-B1B4-A9778A90FAE0"
+      Version="[2.1.0,)"
+      d:InstallSource="Embed"
+      Location="Tvl.VisualStudio.OutputWindow.vsix" />
+    <Dependency d:Source="File"
+      DisplayName="Visual Studio Extensibility Framework"
+      Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6"
+      Version="[1.2.0,)"
+      d:InstallSource="Embed"
+      Location="Tvl.VisualStudio.Framework.vsix" />
+  </Dependencies>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
+    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
+  </Assets>
+</PackageManifest>

@@ -1,42 +1,44 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
-  <Identifier Id="Tvl.VisualStudio.Language.Antlr3.74dda0ee-262e-4c58-8255-d57136664d2b">
-    <Name>ANTLR Language Support</Name>
-    <Author>Sam Harwell</Author>
-    <Version>1.3.0</Version>
-    <Description xml:space="preserve">Basic support for the ANTLR grammar description language (V3 and V4).</Description>
-    <Locale>1033</Locale>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Id="Tvl.VisualStudio.Language.Antlr3.74dda0ee-262e-4c58-8255-d57136664d2b" Version="1.3.0" Language="en-US" Publisher="Sam Harwell" />
+    <DisplayName>ANTLR Language Support</DisplayName>
+    <Description>Basic support for the ANTLR grammar description language (V3 and V4).</Description>
+    <MoreInfo>https://github.com/tunnelvisionlabs/LangSvcV2</MoreInfo>
     <License>Eula.rtf</License>
+    <!--<GettingStartedGuide></GettingStartedGuide>-->
+    <!--<ReleaseNotes></ReleaseNotes>-->
+    <!--<Icon></Icon>-->
     <PreviewImage>VSIXProject_large.png</PreviewImage>
-    <SupportedProducts>
-      <VisualStudio Version="11.0">
-        <Edition>Pro</Edition>
-        <Edition>IntegratedShell</Edition>
-      </VisualStudio>
-      <VisualStudio Version="12.0">
-        <Edition>Pro</Edition>
-        <Edition>IntegratedShell</Edition>
-      </VisualStudio>
-      <VisualStudio Version="14.0">
-        <Edition>Pro</Edition>
-        <Edition>IntegratedShell</Edition>
-      </VisualStudio>
-    </SupportedProducts>
-    <SupportedFrameworkRuntimeEdition MinVersion="4.0" />
-  </Identifier>
-  <References>
-    <Reference Id="Tvl.VisualStudio.OutputWindow.3EF11167-A319-43DB-B1B4-A9778A90FAE0">
-      <Name>Visual Studio Output Window Services</Name>
-      <VsixPath>Tvl.VisualStudio.OutputWindow.vsix</VsixPath>
-    </Reference>
-    <Reference Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6" MinVersion="1.3.0">
-      <Name>Visual Studio Extensibility Framework</Name>
-      <VsixPath>Tvl.VisualStudio.Framework.vsix</VsixPath>
-    </Reference>
-  </References>
-  <Content>
-    <MefComponent>|%CurrentProject%|</MefComponent>
-    <VsPackage>|%CurrentProject%|</VsPackage>
-    <ItemTemplate>ItemTemplates</ItemTemplate>
-  </Content>
-</Vsix>
+    <!--<Tags></Tags>-->
+  </Metadata>
+  <Installation>
+    <InstallationTarget Version="[11.0,15.0)" Id="Microsoft.VisualStudio.Community" />
+    <InstallationTarget Version="[11.0,15.0)" Id="Microsoft.VisualStudio.Pro" />
+  </Installation>
+  <Dependencies>
+    <Dependency d:Source="File"
+      DisplayName="Visual Studio Output Window Services"
+      Id="Tvl.VisualStudio.OutputWindow.3EF11167-A319-43DB-B1B4-A9778A90FAE0"
+      Version="[2.1.0,)"
+      d:InstallSource="Embed"
+      Location="Tvl.VisualStudio.OutputWindow.vsix" />
+    <Dependency d:Source="File"
+      DisplayName="Visual Studio Extensibility Framework"
+      Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6"
+      Version="[1.3.0,)"
+      d:InstallSource="Embed"
+      Location="Tvl.VisualStudio.Framework.vsix" />
+  </Dependencies>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
+    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
+    <Asset Type="Microsoft.VisualStudio.ItemTemplate" d:Source="Project" d:ProjectName="CombinedGrammarItemTemplate" d:TargetPath="|CombinedGrammarItemTemplate;TemplateProjectOutputGroup|" Path="ItemTemplates" d:VsixSubPath="ItemTemplates" />
+    <Asset Type="Microsoft.VisualStudio.ItemTemplate" d:Source="Project" d:ProjectName="LexerGrammarItemTemplate" d:TargetPath="|LexerGrammarItemTemplate;TemplateProjectOutputGroup|" Path="ItemTemplates" d:VsixSubPath="ItemTemplates" />
+    <Asset Type="Microsoft.VisualStudio.ItemTemplate" d:Source="Project" d:ProjectName="ParserGrammarItemTemplate" d:TargetPath="|ParserGrammarItemTemplate;TemplateProjectOutputGroup|" Path="ItemTemplates" d:VsixSubPath="ItemTemplates" />
+    <Asset Type="Microsoft.VisualStudio.ItemTemplate" d:Source="Project" d:ProjectName="TreeGrammarItemTemplate" d:TargetPath="|TreeGrammarItemTemplate;TemplateProjectOutputGroup|" Path="ItemTemplates" d:VsixSubPath="ItemTemplates" />
+    <Asset Type="Microsoft.VisualStudio.ItemTemplate" d:Source="Project" d:ProjectName="V4CombinedGrammarItemTemplate" d:TargetPath="|V4CombinedGrammarItemTemplate;TemplateProjectOutputGroup|" Path="ItemTemplates" d:VsixSubPath="ItemTemplates" />
+    <Asset Type="Microsoft.VisualStudio.ItemTemplate" d:Source="Project" d:ProjectName="V4LexerGrammarItemTemplate" d:TargetPath="|V4LexerGrammarItemTemplate;TemplateProjectOutputGroup|" Path="ItemTemplates" d:VsixSubPath="ItemTemplates" />
+    <Asset Type="Microsoft.VisualStudio.ItemTemplate" d:Source="Project" d:ProjectName="V4ParserGrammarItemTemplate" d:TargetPath="|V4ParserGrammarItemTemplate;TemplateProjectOutputGroup|" Path="ItemTemplates" d:VsixSubPath="ItemTemplates" />
+  </Assets>
+</PackageManifest>

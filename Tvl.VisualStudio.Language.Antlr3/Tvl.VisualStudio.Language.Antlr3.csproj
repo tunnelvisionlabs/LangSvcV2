@@ -451,7 +451,6 @@
       <Project>{954B34BD-34F9-4AC3-8FB7-2B5651425C61}</Project>
       <Name>CombinedGrammarItemTemplate</Name>
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-      <TemplateType>Item</TemplateType>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <VSIXSubPath>ItemTemplates</VSIXSubPath>
     </ProjectReference>
@@ -459,7 +458,6 @@
       <Project>{15CE12D9-B4E9-4DB3-8434-55339D2874AF}</Project>
       <Name>LexerGrammarItemTemplate</Name>
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-      <TemplateType>Item</TemplateType>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <VSIXSubPath>ItemTemplates</VSIXSubPath>
     </ProjectReference>
@@ -467,7 +465,6 @@
       <Project>{AC7D2CF6-D8C7-41F1-B87F-3EAC16510923}</Project>
       <Name>ParserGrammarItemTemplate</Name>
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-      <TemplateType>Item</TemplateType>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <VSIXSubPath>ItemTemplates</VSIXSubPath>
     </ProjectReference>
@@ -475,31 +472,27 @@
       <Project>{7E3A333F-092A-4BB7-9A00-3F53A2496BFB}</Project>
       <Name>TreeGrammarItemTemplate</Name>
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-      <TemplateType>Item</TemplateType>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <VSIXSubPath>ItemTemplates</VSIXSubPath>
     </ProjectReference>
     <ProjectReference Include="..\Templates\Antlr\ItemTemplates\V4CombinedGrammarItemTemplate\V4CombinedGrammarItemTemplate.csproj">
-      <Project>{07a5a934-8bbe-498f-abb4-bdfd31d80078}</Project>
+      <Project>{07A5A934-8BBE-498F-ABB4-BDFD31D80078}</Project>
       <Name>V4CombinedGrammarItemTemplate</Name>
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-      <TemplateType>Item</TemplateType>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <VSIXSubPath>ItemTemplates</VSIXSubPath>
     </ProjectReference>
     <ProjectReference Include="..\Templates\Antlr\ItemTemplates\V4LexerGrammarItemTemplate\V4LexerGrammarItemTemplate.csproj">
-      <Project>{5c45e24d-37f8-4660-8832-f5108a90e87a}</Project>
+      <Project>{5C45E24D-37F8-4660-8832-F5108A90E87A}</Project>
       <Name>V4LexerGrammarItemTemplate</Name>
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-      <TemplateType>Item</TemplateType>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <VSIXSubPath>ItemTemplates</VSIXSubPath>
     </ProjectReference>
     <ProjectReference Include="..\Templates\Antlr\ItemTemplates\V4ParserGrammarItemTemplate\V4ParserGrammarItemTemplate.csproj">
-      <Project>{5601e585-16bb-4fa8-9495-bf22e3123bfa}</Project>
+      <Project>{5601E585-16BB-4FA8-9495-BF22E3123BFA}</Project>
       <Name>V4ParserGrammarItemTemplate</Name>
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-      <TemplateType>Item</TemplateType>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <VSIXSubPath>ItemTemplates</VSIXSubPath>
     </ProjectReference>
