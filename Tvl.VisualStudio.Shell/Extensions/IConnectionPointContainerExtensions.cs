@@ -45,14 +45,14 @@
 
         private sealed class ConnectionPointCookie : IDisposable
         {
-            private readonly WeakReference<IConnectionPoint> _connectionPoint;
+            private readonly Tvl.WeakReference<IConnectionPoint> _connectionPoint;
             private uint _cookie;
 
             public ConnectionPointCookie(IConnectionPoint connectionPoint, uint cookie)
             {
                 Contract.Requires(connectionPoint != null);
 
-                _connectionPoint = new WeakReference<IConnectionPoint>(connectionPoint);
+                _connectionPoint = new Tvl.WeakReference<IConnectionPoint>(connectionPoint);
                 _cookie = cookie;
             }
 
