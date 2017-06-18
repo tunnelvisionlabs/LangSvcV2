@@ -25,6 +25,10 @@
         <Edition>Pro</Edition>
         <Edition>IntegratedShell</Edition>
       </VisualStudio>
+      <VisualStudio Version="15.0">
+        <Edition>Pro</Edition>
+        <Edition>IntegratedShell</Edition>
+      </VisualStudio>
     </SupportedProducts>
     <SupportedFrameworkRuntimeEdition MinVersion="4.0" />
   </Identifier>
