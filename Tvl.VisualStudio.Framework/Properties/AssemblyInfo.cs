@@ -44,3 +44,24 @@ using Microsoft.VisualStudio.Shell;
 [assembly: ProvideCodeBase(AssemblyName = "Tvl.VisualStudio.Text")]
 [assembly: ProvideCodeBase(AssemblyName = "Tvl.VisualStudio.Text.Implementation")]
 [assembly: ProvideCodeBase(AssemblyName = "Tvl.VisualStudio.Text.Interfaces")]
+
+[assembly: ProvideBindingRedirection(
+    AssemblyName = "Tvl.Core",
+    OldVersionLowerBound = "1.0.2.0",
+    OldVersionUpperBound = "1.1.0.0",
+    NewVersion = "1.1.0.0")]
+[assembly: ProvideBindingRedirection(
+    AssemblyName = "Tvl.VisualStudio.Language.Interfaces",
+    OldVersionLowerBound = "1.0.2.0",
+    OldVersionUpperBound = "1.1.0.0",
+    NewVersion = "1.1.0.0")]
+[assembly: ProvideBindingRedirection(
+    AssemblyName = "Tvl.VisualStudio.Shell.Interfaces",
+    OldVersionLowerBound = "1.0.2.0",
+    OldVersionUpperBound = "1.1.0.0",
+    NewVersion = "1.1.0.0")]
+[assembly: ProvideBindingRedirection(
+    AssemblyName = "Tvl.VisualStudio.Text.Interfaces",
+    OldVersionLowerBound = "1.0.2.0",
+    OldVersionUpperBound = "1.1.0.0",
+    NewVersion = "1.1.0.0")]
