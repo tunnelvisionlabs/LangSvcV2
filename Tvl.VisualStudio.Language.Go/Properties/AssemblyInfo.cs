@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Tvl.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
@@ -15,7 +15,6 @@ using Tvl.VisualStudio.Shell;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: ProvideBindingPath]
 [assembly: Guid("AB52887E-20CB-4FAB-B30B-DA724488779F")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
@@ -37,3 +36,12 @@ using Tvl.VisualStudio.Shell;
 [assembly: AssemblyVersion("1.1.0.0")]
 [assembly: AssemblyFileVersion("1.1.0.0")]
 [assembly: AssemblyInformationalVersion("1.1.0.0")]
+
+[assembly: ProvideCodeBase(AssemblyName = "Antlr3.Runtime")]
+[assembly: ProvideCodeBase(AssemblyName = "Tvl.Core")]
+[assembly: ProvideCodeBase(AssemblyName = "Tvl.VisualStudio.Antlr")]
+[assembly: ProvideCodeBase(AssemblyName = "Tvl.VisualStudio.Language")]
+[assembly: ProvideCodeBase(AssemblyName = "Tvl.VisualStudio.Language.Interfaces")]
+[assembly: ProvideCodeBase(AssemblyName = "Tvl.VisualStudio.Shell")]
+[assembly: ProvideCodeBase(AssemblyName = "Tvl.VisualStudio.Text")]
+[assembly: ProvideCodeBase(AssemblyName = "Tvl.VisualStudio.Text.Interfaces")]

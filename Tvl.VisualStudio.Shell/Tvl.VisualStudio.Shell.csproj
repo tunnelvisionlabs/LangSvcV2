@@ -257,7 +257,6 @@
     <Compile Include="PriorityCommandFilter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertySheetPageFlags.cs" />
-    <Compile Include="ProvideBindingPathAttribute.cs" />
     <Compile Include="ProvideComponentSelectorTabAttribute.cs" />
     <Compile Include="ProvideDebugEngineAttribute.cs" />
     <Compile Include="ProvideDebuggerExceptionAttribute.cs" />
