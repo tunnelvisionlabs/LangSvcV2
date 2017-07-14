@@ -6,7 +6,6 @@
     <Icon>TreeGrammarItemTemplate.ico</Icon>
     <TemplateID>Tvl.Antlr.TreeGrammar</TemplateID>
     <ProjectType>CSharp</ProjectType>
-    <RequiredFrameworkVersion>3.0</RequiredFrameworkVersion>
     <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
     <DefaultName>Tree.g3</DefaultName>
   </TemplateData>
