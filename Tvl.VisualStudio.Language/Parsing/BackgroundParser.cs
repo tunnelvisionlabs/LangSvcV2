@@ -13,7 +13,7 @@
 
     public abstract class BackgroundParser : IBackgroundParser, IDisposable
     {
-        private readonly WeakReference<ITextBuffer> _textBuffer;
+        private readonly Tvl.WeakReference<ITextBuffer> _textBuffer;
         private readonly TaskScheduler _taskScheduler;
         private readonly ITextDocumentFactoryService _textDocumentFactoryService;
         private readonly IOutputWindowService _outputWindowService;
@@ -52,7 +52,7 @@
             Contract.Requires<ArgumentNullException>(textDocumentFactoryService != null, "textDocumentFactoryService");
             Contract.Requires<ArgumentNullException>(outputWindowService != null, "outputWindowService");
 
-            this._textBuffer = new WeakReference<ITextBuffer>(textBuffer);
+            this._textBuffer = new Tvl.WeakReference<ITextBuffer>(textBuffer);
             this._taskScheduler = taskScheduler;
             this._textDocumentFactoryService = textDocumentFactoryService;
             this._outputWindowService = outputWindowService;
