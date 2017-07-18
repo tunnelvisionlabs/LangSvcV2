@@ -6,7 +6,6 @@
     <Icon>ParserGrammarItemTemplate.ico</Icon>
     <TemplateID>Tvl.Antlr.ParserGrammar</TemplateID>
     <ProjectType>CSharp</ProjectType>
-    <RequiredFrameworkVersion>3.0</RequiredFrameworkVersion>
     <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
     <DefaultName>Parser.g3</DefaultName>
   </TemplateData>

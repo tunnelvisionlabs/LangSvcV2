@@ -6,7 +6,6 @@
 		<Icon>V4LexerGrammarItemTemplate.ico</Icon>
 		<TemplateID>Tvl.Antlr4.LexerGrammar</TemplateID>
 		<ProjectType>CSharp</ProjectType>
-		<RequiredFrameworkVersion>3.0</RequiredFrameworkVersion>
 		<NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
 		<DefaultName>Lexer.g4</DefaultName>
 	</TemplateData>

@@ -7,7 +7,6 @@
 		<TemplateID>Tvl.Antlr4.CombinedGrammar</TemplateID>
 		<TemplateGroupID>ANTLR</TemplateGroupID>
 		<ProjectType>CSharp</ProjectType>
-		<RequiredFrameworkVersion>3.0</RequiredFrameworkVersion>
 		<NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
 		<DefaultName>Combined.g4</DefaultName>
 	</TemplateData>
