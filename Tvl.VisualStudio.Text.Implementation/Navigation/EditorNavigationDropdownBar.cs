@@ -38,8 +38,8 @@
         private readonly IEditorNavigationTypeRegistryService _editorNavigationTypeRegistryService;
         private readonly Dispatcher _dispatcher;
         private readonly ImageList _imageList;
-        private readonly Dictionary<WeakReference<ImageSource>, int> _glyphIndexes =
-            new Dictionary<WeakReference<ImageSource>, int>();
+        private readonly Dictionary<Tvl.WeakReference<ImageSource>, int> _glyphIndexes =
+            new Dictionary<Tvl.WeakReference<ImageSource>, int>();
 
         private uint _codeWindowEventsCookie;
         private readonly Dictionary<IVsTextView, uint> _textViewEventsCookies = new Dictionary<IVsTextView, uint>();
@@ -268,7 +268,7 @@
                 return VSConstants.S_FALSE;
 
             int index;
-            if (!_glyphIndexes.TryGetValue(new WeakReference<ImageSource>(targetGlyph), out index))
+            if (!_glyphIndexes.TryGetValue(new Tvl.WeakReference<ImageSource>(targetGlyph), out index))
             {
                 index = -1;
 
@@ -299,7 +299,7 @@
                         Bitmap bitmap = new Bitmap(bitmapSource.PixelWidth, bitmapSource.PixelHeight, stride, pixelFormat, nativeData);
                         _imageList.Images.Add(bitmap);
                         index = _imageList.Images.Count - 1;
-                        _glyphIndexes.Add(new WeakReference<ImageSource>(targetGlyph), index);
+                        _glyphIndexes.Add(new Tvl.WeakReference<ImageSource>(targetGlyph), index);
                     }
                     finally
                     {
