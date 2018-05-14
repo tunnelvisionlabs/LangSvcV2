@@ -2,8 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
@@ -17,11 +17,11 @@
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        public AlloyOutliningTagger(ITextBuffer textBuffer, AlloyBackgroundParser backgroundParser, AlloyOutliningTaggerProvider provider)
+        public AlloyOutliningTagger([NotNull] ITextBuffer textBuffer, [NotNull] AlloyBackgroundParser backgroundParser, [NotNull] AlloyOutliningTaggerProvider provider)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
-            Contract.Requires<ArgumentNullException>(provider != null, "provider");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
+            Requires.NotNull(backgroundParser, nameof(backgroundParser));
+            Requires.NotNull(provider, nameof(provider));
 
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;

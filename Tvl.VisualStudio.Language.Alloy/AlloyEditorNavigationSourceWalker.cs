@@ -3,10 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr.Runtime;
     using Antlr.Runtime.Tree;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Alloy.Experimental;
@@ -23,11 +23,11 @@
 
         private string _moduleName = string.Empty;
 
-        private AlloyEditorNavigationSourceWalker(ITreeNodeStream input, ITextSnapshot snapshot, ReadOnlyCollection<IToken> tokens, IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService, IGlyphService glyphService, IOutputWindowService outputWindowService)
+        private AlloyEditorNavigationSourceWalker(ITreeNodeStream input, ITextSnapshot snapshot, ReadOnlyCollection<IToken> tokens, [NotNull] IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService, [NotNull] IGlyphService glyphService, IOutputWindowService outputWindowService)
             : base(input, snapshot, outputWindowService)
         {
-            Contract.Requires<ArgumentNullException>(editorNavigationTypeRegistryService != null, "editorNavigationTypeRegistryService");
-            Contract.Requires<ArgumentNullException>(glyphService != null, "glyphService");
+            Requires.NotNull(editorNavigationTypeRegistryService, nameof(editorNavigationTypeRegistryService));
+            Requires.NotNull(glyphService, nameof(glyphService));
 
             _tokens = tokens;
             _editorNavigationTypeRegistryService = editorNavigationTypeRegistryService;

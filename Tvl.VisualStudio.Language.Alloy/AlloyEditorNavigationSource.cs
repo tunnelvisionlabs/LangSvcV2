@@ -2,8 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Linq;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Text.Navigation;
@@ -15,11 +16,11 @@
         private List<IEditorNavigationTarget> _navigationTargets;
         private readonly AlloyEditorNavigationSourceProvider _provider;
 
-        public AlloyEditorNavigationSource(ITextBuffer textBuffer, AlloyBackgroundParser backgroundParser, AlloyEditorNavigationSourceProvider provider)
+        public AlloyEditorNavigationSource([NotNull] ITextBuffer textBuffer, [NotNull] AlloyBackgroundParser backgroundParser, [NotNull] AlloyEditorNavigationSourceProvider provider)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
-            Contract.Requires<ArgumentNullException>(provider != null, "provider");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
+            Requires.NotNull(backgroundParser, nameof(backgroundParser));
+            Requires.NotNull(provider, nameof(provider));
 
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;
@@ -85,9 +86,9 @@
             UpdateNavigationTargets(antlrParseResultArgs);
         }
 
-        private void UpdateNavigationTargets(AntlrParseResultEventArgs antlrParseResultArgs)
+        private void UpdateNavigationTargets([NotNull] AntlrParseResultEventArgs antlrParseResultArgs)
         {
-            Contract.Requires(antlrParseResultArgs != null);
+            Debug.Assert(antlrParseResultArgs != null);
 
             List<IEditorNavigationTarget> navigationTargets = null;
             if (antlrParseResultArgs != null)
