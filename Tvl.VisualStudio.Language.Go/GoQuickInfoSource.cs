@@ -3,9 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr.Runtime;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
@@ -25,29 +25,29 @@
         private readonly ITextBuffer _textBuffer;
         private readonly GoQuickInfoSourceProvider _provider;
 
-        public GoQuickInfoSource(ITextBuffer textBuffer, GoQuickInfoSourceProvider provider)
+        public GoQuickInfoSource([NotNull] ITextBuffer textBuffer, [NotNull] GoQuickInfoSourceProvider provider)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(provider != null, "provider");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
+            Requires.NotNull(provider, nameof(provider));
 
             _textBuffer = textBuffer;
             _provider = provider;
         }
 
+        [NotNull]
         public ITextBuffer TextBuffer
         {
             get
             {
-                Contract.Ensures(Contract.Result<ITextBuffer>() != null);
                 return _textBuffer;
             }
         }
 
+        [NotNull]
         public GoQuickInfoSourceProvider Provider
         {
             get
             {
-                Contract.Ensures(Contract.Result<GoQuickInfoSourceProvider>() != null);
                 return _provider;
             }
         }
