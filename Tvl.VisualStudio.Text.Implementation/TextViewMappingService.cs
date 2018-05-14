@@ -8,6 +8,7 @@
     using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Threading;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Utilities;
@@ -24,8 +25,11 @@
 
         #region ITextViewMappingService Members
 
-        public IEnumerable<IWpfTextView> GetViewsForBuffer(ITextBuffer buffer)
+        [NotNull]
+        public IEnumerable<IWpfTextView> GetViewsForBuffer([NotNull] ITextBuffer buffer)
         {
+            Requires.NotNull(buffer, nameof(buffer));
+
             List<WeakReference<IWpfTextView>> views;
             if (!_bufferToViewsMap.TryGetValue(buffer, out views))
                 return EmptyViews;

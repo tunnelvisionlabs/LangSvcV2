@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
     using System.Linq;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Utilities;
 
     [Export(typeof(IEditorNavigationTypeRegistryService))]
@@ -44,25 +45,37 @@
             }
         }
 
-        public IEditorNavigationType CreateEditorNavigationType(EditorNavigationTypeDefinition definition, string type, IEnumerable<IEditorNavigationType> baseTypes)
+        [NotNull]
+        public IEditorNavigationType CreateEditorNavigationType([NotNull] EditorNavigationTypeDefinition definition, [NotNull] string type, IEnumerable<IEditorNavigationType> baseTypes)
         {
+            Requires.NotNull(definition, nameof(definition));
+            Requires.NotNull(type, nameof(type));
+
             var navigationType = new EditorNavigationType(definition, type, baseTypes);
             _navigationTypes.Add(type, navigationType);
             return navigationType;
         }
 
-        public IEditorNavigationType CreateTransientEditorNavigationType(IEnumerable<IEditorNavigationType> baseTypes)
+        [NotNull]
+        public IEditorNavigationType CreateTransientEditorNavigationType([NotNull] IEnumerable<IEditorNavigationType> baseTypes)
         {
+            Requires.NotNullOrEmpty(baseTypes, nameof(baseTypes));
+
             throw new NotImplementedException();
         }
 
-        public IEditorNavigationType CreateTransientEditorNavigationType(params IEditorNavigationType[] baseTypes)
+        [NotNull]
+        public IEditorNavigationType CreateTransientEditorNavigationType([NotNull] params IEditorNavigationType[] baseTypes)
         {
+            Requires.NotNullOrEmpty(baseTypes, nameof(baseTypes));
+
             throw new NotImplementedException();
         }
 
-        public IEditorNavigationType GetEditorNavigationType(string type)
+        public IEditorNavigationType GetEditorNavigationType([NotNull] string type)
         {
+            Requires.NotNull(type, nameof(type));
+
             EditorNavigationType navigationType;
             if (!this._navigationTypes.TryGetValue(type, out navigationType))
                 return null;

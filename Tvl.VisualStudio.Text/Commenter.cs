@@ -5,6 +5,7 @@
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Linq;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Operations;
@@ -116,8 +117,11 @@
             }
         }
 
-        public virtual NormalizedSnapshotSpanCollection CommentSpans(NormalizedSnapshotSpanCollection spans)
+        [NotNull]
+        public virtual NormalizedSnapshotSpanCollection CommentSpans([NotNull] NormalizedSnapshotSpanCollection spans)
         {
+            Requires.NotNull(spans, nameof(spans));
+
             List<SnapshotSpan> result = new List<SnapshotSpan>();
 
             if (spans.Count == 0)
@@ -155,8 +159,11 @@
             return new NormalizedSnapshotSpanCollection(result);
         }
 
-        public virtual NormalizedSnapshotSpanCollection UncommentSpans(NormalizedSnapshotSpanCollection spans)
+        [NotNull]
+        public virtual NormalizedSnapshotSpanCollection UncommentSpans([NotNull] NormalizedSnapshotSpanCollection spans)
         {
+            Requires.NotNull(spans, nameof(spans));
+
             List<SnapshotSpan> result = new List<SnapshotSpan>();
 
             if (spans.Count == 0)
