@@ -1,8 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Intellisense
 {
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Threading.Tasks;
+    using JetBrains.Annotations;
     using Guid = System.Guid;
     using ICompletionSession = Microsoft.VisualStudio.Language.Intellisense.ICompletionSession;
     using IIntellisenseController = Microsoft.VisualStudio.Language.Intellisense.IIntellisenseController;
@@ -19,7 +19,6 @@
     using SmartTagType = Microsoft.VisualStudio.Language.Intellisense.SmartTagType;
     using VSOBJGOTOSRCTYPE = Microsoft.VisualStudio.Shell.Interop.VSOBJGOTOSRCTYPE;
 
-    [ContractClass(typeof(Contracts.ITvlIntellisenseControllerContracts))]
     public interface ITvlIntellisenseController : IIntellisenseController
     {
         IIntellisenseSessionStack IntellisenseSessionStack
@@ -102,21 +101,23 @@
             get;
         }
 
-        void GoToSource(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint);
+        void GoToSource(VSOBJGOTOSRCTYPE gotoSourceType, [NotNull] ITrackingPoint triggerPoint);
 
-        Task<IEnumerable<INavigateToTarget>> GoToSourceAsync(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint);
+        [NotNull]
+        Task<IEnumerable<INavigateToTarget>> GoToSourceAsync(VSOBJGOTOSRCTYPE gotoSourceType, [NotNull] ITrackingPoint triggerPoint);
 
-        IEnumerable<INavigateToTarget> GoToSourceImpl(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint);
+        [NotNull]
+        IEnumerable<INavigateToTarget> GoToSourceImpl(VSOBJGOTOSRCTYPE gotoSourceType, [NotNull] ITrackingPoint triggerPoint);
 
-        void TriggerCompletion(ITrackingPoint triggerPoint);
+        void TriggerCompletion([NotNull] ITrackingPoint triggerPoint);
 
-        void TriggerCompletion(ITrackingPoint triggerPoint, CompletionInfoType completionInfoType, IntellisenseInvocationType intellisenseInvocationType);
+        void TriggerCompletion([NotNull] ITrackingPoint triggerPoint, CompletionInfoType completionInfoType, IntellisenseInvocationType intellisenseInvocationType);
 
-        void TriggerSignatureHelp(ITrackingPoint triggerPoint);
+        void TriggerSignatureHelp([NotNull] ITrackingPoint triggerPoint);
 
-        void TriggerQuickInfo(ITrackingPoint triggerPoint);
+        void TriggerQuickInfo([NotNull] ITrackingPoint triggerPoint);
 
-        void TriggerSmartTag(ITrackingPoint triggerPoint, SmartTagType type, SmartTagState state);
+        void TriggerSmartTag([NotNull] ITrackingPoint triggerPoint, SmartTagType type, SmartTagState state);
 
         void DismissCompletion();
 

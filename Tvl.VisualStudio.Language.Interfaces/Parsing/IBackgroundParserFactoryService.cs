@@ -1,11 +1,10 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing
 {
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
 
-    [ContractClass(typeof(IBackgroundParserFactoryServiceContracts))]
     public interface IBackgroundParserFactoryService
     {
-        IBackgroundParser GetBackgroundParser(ITextBuffer buffer);
+        IBackgroundParser GetBackgroundParser([NotNull] ITextBuffer buffer);
     }
 }

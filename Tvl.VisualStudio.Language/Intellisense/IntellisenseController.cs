@@ -6,6 +6,7 @@
     using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Threading.Tasks;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
@@ -224,20 +225,26 @@
             }
         }
 
-        public virtual void GoToSource(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
+        public virtual void GoToSource(VSOBJGOTOSRCTYPE gotoSourceType, [NotNull] ITrackingPoint triggerPoint)
         {
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
+
             Task<IEnumerable<INavigateToTarget>> task = GoToSourceAsync(gotoSourceType, triggerPoint).HandleNonCriticalExceptions();
             var resultContinuation = task.ContinueWith(HandleGoToSourceResult, TaskContinuationOptions.OnlyOnRanToCompletion).HandleNonCriticalExceptions();
         }
 
-        public virtual Task<IEnumerable<INavigateToTarget>> GoToSourceAsync(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
+        [NotNull]
+        public virtual Task<IEnumerable<INavigateToTarget>> GoToSourceAsync(VSOBJGOTOSRCTYPE gotoSourceType, [NotNull] ITrackingPoint triggerPoint)
         {
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
+
             return Task.Factory.StartNew(() => GoToSourceImpl(gotoSourceType, triggerPoint));
         }
 
-        public virtual IEnumerable<INavigateToTarget> GoToSourceImpl(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
+        [NotNull]
+        public virtual IEnumerable<INavigateToTarget> GoToSourceImpl(VSOBJGOTOSRCTYPE gotoSourceType, [NotNull] ITrackingPoint triggerPoint)
         {
-            Contract.Ensures(Contract.Result<IEnumerable<INavigateToTarget>>() != null);
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
 
             return new INavigateToTarget[0];
         }
@@ -249,13 +256,17 @@
                 target.NavigateTo();
         }
 
-        public virtual void TriggerCompletion(ITrackingPoint triggerPoint)
+        public virtual void TriggerCompletion([NotNull] ITrackingPoint triggerPoint)
         {
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
+
             this.TriggerCompletion(triggerPoint, CompletionInfoType.NoInfo, IntellisenseInvocationType.Default);
         }
 
-        public virtual void TriggerCompletion(ITrackingPoint triggerPoint, CompletionInfoType completionInfoType, IntellisenseInvocationType intellisenseInvocationType)
+        public virtual void TriggerCompletion([NotNull] ITrackingPoint triggerPoint, CompletionInfoType completionInfoType, IntellisenseInvocationType intellisenseInvocationType)
         {
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
+
             DismissCompletion();
             CompletionInfo.InfoType = completionInfoType;
             CompletionInfo.InvocationType = intellisenseInvocationType;
@@ -276,8 +287,10 @@
             }
         }
 
-        public virtual void TriggerSignatureHelp(ITrackingPoint triggerPoint)
+        public virtual void TriggerSignatureHelp([NotNull] ITrackingPoint triggerPoint)
         {
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
+
             DismissSignatureHelp();
             ISignatureHelpSession session = Provider.SignatureHelpBroker.TriggerSignatureHelp(TextView, triggerPoint, true);
             if (session != null)
@@ -287,8 +300,10 @@
             }
         }
 
-        public virtual void TriggerQuickInfo(ITrackingPoint triggerPoint)
+        public virtual void TriggerQuickInfo([NotNull] ITrackingPoint triggerPoint)
         {
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
+
             DismissQuickInfo();
             IQuickInfoSession session = Provider.QuickInfoBroker.TriggerQuickInfo(TextView, triggerPoint, true);
             if (session != null)
@@ -298,8 +313,10 @@
             }
         }
 
-        public virtual void TriggerSmartTag(ITrackingPoint triggerPoint, SmartTagType type, SmartTagState state)
+        public virtual void TriggerSmartTag([NotNull] ITrackingPoint triggerPoint, SmartTagType type, SmartTagState state)
         {
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
+
             DismissSmartTag();
             ISmartTagSession session = Provider.SmartTagBroker.CreateSmartTagSession(TextView, type, triggerPoint, state);
             if (session != null)

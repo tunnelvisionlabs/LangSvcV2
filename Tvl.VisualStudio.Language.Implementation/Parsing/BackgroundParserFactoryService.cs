@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
     using System.Linq;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Text;
 
@@ -17,8 +18,10 @@
             set;
         }
 
-        public IBackgroundParser GetBackgroundParser(ITextBuffer buffer)
+        public IBackgroundParser GetBackgroundParser([NotNull] ITextBuffer buffer)
         {
+            Requires.NotNull(buffer, nameof(buffer));
+
             foreach (var provider in BackgroundParserProviders)
             {
                 if (provider.Metadata.ContentTypes.Any(contentType => buffer.ContentType.IsOfType(contentType)))
