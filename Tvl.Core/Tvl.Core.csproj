@@ -69,10 +69,12 @@
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="IDisposableObject.cs" />
     <Compile Include="Interop\Variant.cs" />
+    <Compile Include="PrivateErrorHelpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ObjectReferenceEqualityComparer`1.cs" />
     <Compile Include="Requires.cs" />
     <Compile Include="Threading\DeferredPeriodicOperation.cs" />
+    <Compile Include="Verify.cs" />
     <Compile Include="WeakReference`1.cs" />
   </ItemGroup>
   <ItemGroup>
