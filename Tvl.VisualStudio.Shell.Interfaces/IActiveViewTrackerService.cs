@@ -1,10 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
-    using System.Diagnostics.Contracts;
     using Microsoft.VisualStudio.Text.Editor;
 
-    [ContractClass(typeof(Contracts.IActiveViewTrackerServiceContracts))]
     public interface IActiveViewTrackerService
     {
         event EventHandler<ViewChangedEventArgs> ViewChanged;
