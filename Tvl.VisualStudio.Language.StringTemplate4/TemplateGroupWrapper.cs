@@ -1,14 +1,13 @@
 ﻿namespace Tvl.VisualStudio.Language.StringTemplate4
 {
-    using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using Antlr.Runtime;
     using Antlr4.StringTemplate;
     using Antlr4.StringTemplate.Compiler;
     using Antlr4.StringTemplate.Misc;
+    using JetBrains.Annotations;
 
-//#error TODO: handle dictionaries.
+    //#error TODO: handle dictionaries.
     public class TemplateGroupWrapper : TemplateGroup
     {
         private readonly List<TemplateInformation> _templateInformation = new List<TemplateInformation>();
@@ -59,11 +58,11 @@
             return _templateInformation;
         }
 
-        internal TemplateInformation GetTemplateInformation(CompiledTemplate template)
+        [NotNull]
+        internal TemplateInformation GetTemplateInformation([NotNull] CompiledTemplate template)
         {
-            Contract.Requires<ArgumentNullException>(template != null, "template");
-            Contract.Requires<ArgumentException>(template.NativeGroup == this);
-            Contract.Ensures(Contract.Result<TemplateInformation>() != null);
+            Requires.NotNull(template, nameof(template));
+            Requires.Argument(template.NativeGroup == this, nameof(template), "The template must belong to the current group.");
 
             return _compiledTemplateInformation[template];
         }

@@ -1,8 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.StringTemplate4
 {
-    using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
@@ -20,12 +19,12 @@
                 new KeyValuePair<char, char>('<', '>'),
             };
 
-        public StringTemplateBraceMatchingTagger(ITextView textView, ITextBuffer sourceBuffer, IClassifier aggregator)
+        public StringTemplateBraceMatchingTagger([NotNull] ITextView textView, [NotNull] ITextBuffer sourceBuffer, [NotNull] IClassifier aggregator)
             : base(textView, sourceBuffer, aggregator, _matchingCharacters)
         {
-            Contract.Requires<ArgumentNullException>(textView != null, "textView");
-            Contract.Requires<ArgumentNullException>(sourceBuffer != null, "sourceBuffer");
-            Contract.Requires<ArgumentNullException>(aggregator != null, "aggregator");
+            Requires.NotNull(textView, nameof(textView));
+            Requires.NotNull(sourceBuffer, nameof(sourceBuffer));
+            Requires.NotNull(aggregator, nameof(aggregator));
         }
 
         protected override bool IsClassificationTypeIgnored(IClassificationType classificationType)

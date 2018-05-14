@@ -2,9 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr4.StringTemplate.Misc;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
@@ -17,11 +17,11 @@
         private List<IEditorNavigationTarget> _navigationTargets;
         private readonly StringTemplateEditorNavigationSourceProvider _provider;
 
-        public StringTemplateEditorNavigationSource(ITextBuffer textBuffer, IBackgroundParser backgroundParser, StringTemplateEditorNavigationSourceProvider provider)
+        public StringTemplateEditorNavigationSource([NotNull] ITextBuffer textBuffer, [NotNull] IBackgroundParser backgroundParser, [NotNull] StringTemplateEditorNavigationSourceProvider provider)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
-            Contract.Requires<ArgumentNullException>(provider != null, "provider");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
+            Requires.NotNull(backgroundParser, nameof(backgroundParser));
+            Requires.NotNull(provider, nameof(provider));
 
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;
