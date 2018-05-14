@@ -1,17 +1,16 @@
 ﻿namespace Tvl.VisualStudio.Language.Chapel
 {
-    using System;
-    using System.Diagnostics.Contracts;
     using Antlr.Runtime;
+    using JetBrains.Annotations;
 
     partial class ChapelCodeClassifierLexer
     {
         private readonly ChapelClassifierLexer _lexer;
 
-        public ChapelCodeClassifierLexer(ICharStream input, ChapelClassifierLexer lexer)
+        public ChapelCodeClassifierLexer(ICharStream input, [NotNull] ChapelClassifierLexer lexer)
             : this(input)
         {
-            Contract.Requires<ArgumentNullException>(lexer != null, "lexer");
+            Requires.NotNull(lexer, nameof(lexer));
 
             _lexer = lexer;
         }

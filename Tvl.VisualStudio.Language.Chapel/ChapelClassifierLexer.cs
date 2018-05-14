@@ -1,8 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Chapel
 {
-    using System;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using Antlr.Runtime;
+    using JetBrains.Annotations;
     using Tvl.VisualStudio.Language.Parsing;
 
     internal class ChapelClassifierLexer : ITokenSourceWithState<ChapelClassifierLexerState>
@@ -14,15 +14,15 @@
         private ChapelClassifierLexerMode _mode;
         private bool _inComment;
 
-        public ChapelClassifierLexer(ICharStream input)
+        public ChapelClassifierLexer([NotNull] ICharStream input)
             : this(input, ChapelClassifierLexerState.Initial)
         {
-            Contract.Requires(input != null);
+            Debug.Assert(input != null);
         }
 
-        public ChapelClassifierLexer(ICharStream input, ChapelClassifierLexerState state)
+        public ChapelClassifierLexer([NotNull] ICharStream input, ChapelClassifierLexerState state)
         {
-            Contract.Requires<ArgumentNullException>(input != null, "input");
+            Requires.NotNull(input, nameof(input));
 
             _input = input;
             _languageLexer = new ChapelCodeClassifierLexer(input, this);
