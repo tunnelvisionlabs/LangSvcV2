@@ -1,7 +1,6 @@
 ﻿namespace Tvl.VisualStudio.Language.AntlrV4
 {
-    using System;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Operations;
     using Microsoft.VisualStudio.Utilities;
@@ -11,10 +10,10 @@
         private readonly ITextBuffer _textBuffer;
         private readonly ITextStructureNavigator _delegateNavigator;
 
-        public Antlr4TextStructureNavigator(ITextBuffer textBuffer, ITextStructureNavigator delegateNavigator)
+        public Antlr4TextStructureNavigator([NotNull] ITextBuffer textBuffer, [NotNull] ITextStructureNavigator delegateNavigator)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(delegateNavigator != null, "delegateNavigator");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
+            Requires.NotNull(delegateNavigator, nameof(delegateNavigator));
 
             _textBuffer = textBuffer;
             _delegateNavigator = delegateNavigator;

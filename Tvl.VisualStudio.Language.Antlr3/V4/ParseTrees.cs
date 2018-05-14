@@ -1,16 +1,16 @@
 ﻿namespace Tvl.VisualStudio.Language.AntlrV4
 {
     using System;
-    using System.Diagnostics.Contracts;
     using Antlr4.Runtime;
-    using Antlr4.Runtime.Misc;
     using Antlr4.Runtime.Tree;
+    using JetBrains.Annotations;
+    using Interval = Antlr4.Runtime.Misc.Interval;
 
     public static class ParseTrees
     {
-        public static Interval GetSourceInterval(ParserRuleContext context)
+        public static Interval GetSourceInterval([NotNull] ParserRuleContext context)
         {
-            Contract.Requires<ArgumentNullException>(context != null, "context");
+            Requires.NotNull(context, nameof(context));
 
             int startIndex = context.Start.StartIndex;
             IToken stopSymbol = GetStopSymbol(context);

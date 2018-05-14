@@ -10,18 +10,17 @@
     using Tvl.VisualStudio.Language.Parsing4;
     using Tvl.VisualStudio.OutputWindow.Interfaces;
     using BackgroundParser = Tvl.VisualStudio.Language.Parsing.BackgroundParser;
-    using Contract = System.Diagnostics.Contracts.Contract;
     using ParseErrorEventArgs = Parsing.ParseErrorEventArgs;
 
     public class Antlr4BackgroundParser : BackgroundParser
     {
-        public Antlr4BackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+        public Antlr4BackgroundParser([NotNull] ITextBuffer textBuffer, [NotNull] TaskScheduler taskScheduler, [NotNull] ITextDocumentFactoryService textDocumentFactoryService, [NotNull] IOutputWindowService outputWindowService)
             : base(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService)
         {
-            Contract.Requires(textBuffer != null);
-            Contract.Requires(taskScheduler != null);
-            Contract.Requires(textDocumentFactoryService != null);
-            Contract.Requires(outputWindowService != null);
+            Debug.Assert(textBuffer != null);
+            Debug.Assert(taskScheduler != null);
+            Debug.Assert(textDocumentFactoryService != null);
+            Debug.Assert(outputWindowService != null);
         }
 
         protected override void ReParseImpl()

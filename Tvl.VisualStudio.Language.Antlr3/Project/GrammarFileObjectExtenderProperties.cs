@@ -2,8 +2,8 @@
 {
     using System;
     using System.ComponentModel;
-    using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
 
@@ -13,9 +13,9 @@
         private readonly IVsBuildPropertyStorage _buildPropertyStorage;
         private readonly uint _itemId;
 
-        public GrammarFileObjectExtenderProperties(IVsBuildPropertyStorage buildPropertyStorage, uint itemId)
+        public GrammarFileObjectExtenderProperties([NotNull] IVsBuildPropertyStorage buildPropertyStorage, uint itemId)
         {
-            Contract.Requires<ArgumentNullException>(buildPropertyStorage != null, "buildPropertyStorage");
+            Requires.NotNull(buildPropertyStorage, nameof(buildPropertyStorage));
 
             _buildPropertyStorage = buildPropertyStorage;
             _itemId = itemId;

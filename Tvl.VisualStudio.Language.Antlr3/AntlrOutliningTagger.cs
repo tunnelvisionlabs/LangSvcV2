@@ -2,10 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr.Runtime.Tree;
     using global::Antlr3.Grammars;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Tvl.VisualStudio.Language.Parsing;
@@ -20,11 +20,11 @@
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        public AntlrOutliningTagger(ITextBuffer textBuffer, AntlrBackgroundParser backgroundParser, AntlrOutliningTaggerProvider provider)
+        public AntlrOutliningTagger([NotNull] ITextBuffer textBuffer, [NotNull] AntlrBackgroundParser backgroundParser, [NotNull] AntlrOutliningTaggerProvider provider)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
-            Contract.Requires<ArgumentNullException>(provider != null, "provider");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
+            Requires.NotNull(backgroundParser, nameof(backgroundParser));
+            Requires.NotNull(provider, nameof(provider));
 
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;

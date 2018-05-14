@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Linq;
     using Antlr.Runtime;
     using JetBrains.Annotations;
@@ -560,21 +560,21 @@
             return labels;
         }
 
-        private IEnumerable<IToken> ExtractScopeAttributes(IToken token)
+        private IEnumerable<IToken> ExtractScopeAttributes([NotNull] IToken token)
         {
-            Contract.Requires(token != null);
+            Debug.Assert(token != null);
             return ExtractArguments(token, ';');
         }
 
-        private IEnumerable<IToken> ExtractArguments(IToken token)
+        private IEnumerable<IToken> ExtractArguments([NotNull] IToken token)
         {
-            Contract.Requires(token != null);
+            Debug.Assert(token != null);
             return ExtractArguments(token, ',');
         }
 
-        private IEnumerable<IToken> ExtractArguments(IToken token, char separator)
+        private IEnumerable<IToken> ExtractArguments([NotNull] IToken token, char separator)
         {
-            Contract.Requires<ArgumentNullException>(token != null, "token");
+            Requires.NotNull(token, nameof(token));
 
             string actionText = token.Text;
             List<IToken> attributeTokens = new List<IToken>();

@@ -2,12 +2,13 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Linq;
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
     using Antlr.Runtime;
     using Antlr.Runtime.Tree;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.Text.Navigation;
@@ -22,11 +23,11 @@
 
         public event EventHandler NavigationTargetsChanged;
 
-        public AntlrEditorNavigationSource(ITextBuffer textBuffer, AntlrBackgroundParser backgroundParser, IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
+        public AntlrEditorNavigationSource([NotNull] ITextBuffer textBuffer, [NotNull] AntlrBackgroundParser backgroundParser, [NotNull] IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
-            Contract.Requires<ArgumentNullException>(editorNavigationTypeRegistryService != null, "editorNavigationTypeRegistryService");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
+            Requires.NotNull(backgroundParser, nameof(backgroundParser));
+            Requires.NotNull(editorNavigationTypeRegistryService, nameof(editorNavigationTypeRegistryService));
 
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;
@@ -95,9 +96,9 @@
             UpdateNavigationTargets(antlrParseResultArgs);
         }
 
-        private void UpdateNavigationTargets(AntlrParseResultEventArgs antlrParseResultArgs)
+        private void UpdateNavigationTargets([NotNull] AntlrParseResultEventArgs antlrParseResultArgs)
         {
-            Contract.Requires(antlrParseResultArgs != null);
+            Debug.Assert(antlrParseResultArgs != null);
 
             List<IEditorNavigationTarget> navigationTargets = new List<IEditorNavigationTarget>();
             if (antlrParseResultArgs != null)

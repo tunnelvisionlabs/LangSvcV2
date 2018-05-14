@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr4.Runtime;
     using Antlr4.Runtime.Misc;
@@ -22,10 +21,10 @@
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        public Antlr4OutliningTagger(Antlr4OutliningTaggerProvider provider, ITextBuffer textBuffer)
+        public Antlr4OutliningTagger([NotNull] Antlr4OutliningTaggerProvider provider, [NotNull] ITextBuffer textBuffer)
         {
-            Contract.Requires<ArgumentNullException>(provider != null, "provider");
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Requires.NotNull(provider, nameof(provider));
+            Requires.NotNull(textBuffer, nameof(textBuffer));
 
             _provider = provider;
             _textBuffer = textBuffer;
@@ -56,9 +55,9 @@
             UpdateTags(antlrParseResultArgs);
         }
 
-        private void UpdateTags(AntlrParseResultEventArgs antlrParseResultArgs)
+        private void UpdateTags([NotNull] AntlrParseResultEventArgs antlrParseResultArgs)
         {
-            Contract.Requires<ArgumentNullException>(antlrParseResultArgs != null, "antlrParseResultArgs");
+            Requires.NotNull(antlrParseResultArgs, nameof(antlrParseResultArgs));
 
             OutliningRegionListener listener = new OutliningRegionListener(antlrParseResultArgs.Snapshot, antlrParseResultArgs.Tokens);
             ParseTreeWalker.Default.Walk(listener, antlrParseResultArgs.Result);
@@ -74,20 +73,20 @@
 
             private int _tokenIndexLimit = -1;
 
-            public OutliningRegionListener(ITextSnapshot snapshot, IList<IToken> tokens)
+            public OutliningRegionListener([NotNull] ITextSnapshot snapshot, [NotNull] IList<IToken> tokens)
             {
-                Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
-                Contract.Requires<ArgumentNullException>(tokens != null, "tokens");
+                Requires.NotNull(snapshot, nameof(snapshot));
+                Requires.NotNull(tokens, nameof(tokens));
 
                 _snapshot = snapshot;
                 _tokens = tokens;
             }
 
+            [NotNull]
             public List<ITagSpan<IOutliningRegionTag>> OutliningRegions
             {
                 get
                 {
-                    Contract.Ensures(Contract.Result<List<ITagSpan<IOutliningRegionTag>>>() != null);
                     return _outliningRegions;
                 }
             }

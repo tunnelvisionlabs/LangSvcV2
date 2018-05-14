@@ -1,10 +1,11 @@
 ﻿namespace Tvl.VisualStudio.Language.Antlr3
 {
     using System;
-    using System.Diagnostics.Contracts;
     using Antlr.Runtime;
     using Tvl.VisualStudio.Language.Parsing;
     using System.Collections.Generic;
+    using System.Diagnostics;
+    using JetBrains.Annotations;
 
     internal class AntlrClassifierLexer : ITokenSourceWithState<AntlrClassifierLexerState>
     {
@@ -18,15 +19,15 @@
         private bool _inOptions;
         private bool _inTokens;
 
-        public AntlrClassifierLexer(ICharStream input)
+        public AntlrClassifierLexer([NotNull] ICharStream input)
             : this(input, AntlrClassifierLexerState.Initial)
         {
-            Contract.Requires(input != null);
+            Debug.Assert(input != null);
         }
 
-        public AntlrClassifierLexer(ICharStream input, AntlrClassifierLexerState state)
+        public AntlrClassifierLexer([NotNull] ICharStream input, AntlrClassifierLexerState state)
         {
-            Contract.Requires<ArgumentNullException>(input != null, "input");
+            Requires.NotNull(input, nameof(input));
 
             _input = input;
             _grammarLexer = new AntlrGrammarClassifierLexer(input, this);
