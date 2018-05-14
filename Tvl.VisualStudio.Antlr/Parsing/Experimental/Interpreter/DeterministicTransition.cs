@@ -1,7 +1,6 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter
 {
-    using System;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Tvl.VisualStudio.Language.Parsing.Collections;
 
     public class DeterministicTransition
@@ -10,9 +9,9 @@
         private DeterministicState _targetState;
         private IntervalSet _matchSet = new IntervalSet();
 
-        public DeterministicTransition(DeterministicState targetState)
+        public DeterministicTransition([NotNull] DeterministicState targetState)
         {
-            Contract.Requires<ArgumentNullException>(targetState != null, "targetState");
+            Requires.NotNull(targetState, nameof(targetState));
 
             _targetState = targetState;
         }

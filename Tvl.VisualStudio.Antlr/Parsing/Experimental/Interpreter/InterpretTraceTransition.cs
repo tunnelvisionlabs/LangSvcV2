@@ -1,8 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using Antlr.Runtime;
+    using JetBrains.Annotations;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
 
     public class InterpretTraceTransition : IEquatable<InterpretTraceTransition>
@@ -12,20 +13,20 @@
         public readonly int? Symbol;
         public readonly int? TokenIndex;
 
-        public InterpretTraceTransition(Transition transition, NetworkInterpreter interpreter)
+        public InterpretTraceTransition([NotNull] Transition transition, [NotNull] NetworkInterpreter interpreter)
         {
-            Contract.Requires<ArgumentNullException>(transition != null, "transition");
-            Contract.Requires<ArgumentNullException>(interpreter != null, "interpreter");
+            Requires.NotNull(transition, nameof(transition));
+            Requires.NotNull(interpreter, nameof(interpreter));
 
             Transition = transition;
             Interpreter = interpreter;
         }
 
-        public InterpretTraceTransition(Transition transition, int symbol, int symbolPosition, NetworkInterpreter interpreter)
+        public InterpretTraceTransition([NotNull] Transition transition, int symbol, int symbolPosition, [NotNull] NetworkInterpreter interpreter)
             : this(transition, interpreter)
         {
-            Contract.Requires(transition != null);
-            Contract.Requires(interpreter != null);
+            Debug.Assert(transition != null);
+            Debug.Assert(interpreter != null);
 
             Symbol = symbol;
             TokenIndex = symbolPosition;

@@ -2,13 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Linq;
     using Antlr4.Runtime;
-    using Antlr4.Runtime.Misc;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using ClassifierOptions = Tvl.VisualStudio.Language.Parsing.ClassifierOptions;
+    using Interval = Antlr4.Runtime.Misc.Interval;
 
     public abstract class AntlrTaggerBaseOld<TState, TTag> : ITagger<TTag>
         where TState : Tvl.VisualStudio.Language.Parsing.ITextLineState<TState>
@@ -31,9 +32,9 @@
         private int? _firstChangedLine;
         private int? _lastChangedLine;
 
-        public AntlrTaggerBaseOld(ITextBuffer textBuffer, IEqualityComparer<TState> stateComparer = null, ClassifierOptions options = ClassifierOptions.None)
+        public AntlrTaggerBaseOld([NotNull] ITextBuffer textBuffer, IEqualityComparer<TState> stateComparer = null, ClassifierOptions options = ClassifierOptions.None)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
 
             _textBuffer = textBuffer;
             _stateComparer = stateComparer ?? EqualityComparer<TState>.Default;
@@ -59,10 +60,9 @@
 
         protected abstract ITokenSourceWithState<TState> CreateLexer(SnapshotSpan span, int startLine, TState startState);
 
+        [NotNull]
         protected virtual IEnumerable<ITagSpan<TTag>> GetTags(SnapshotSpan span)
         {
-            Contract.Ensures(Contract.Result<IEnumerable<ITagSpan<TTag>>>() != null);
-
             List<ITagSpan<TTag>> classificationSpans = new List<ITagSpan<TTag>>();
 
             bool spanExtended = false;
@@ -266,7 +266,7 @@
             start = span.Snapshot.GetLineFromLineNumber(startLine).Start;
             int length = endPosition - start;
             span = new SnapshotSpan(span.Snapshot, start, length);
-            Contract.Assert(haveState);
+            Debug.Assert(haveState);
             return state;
         }
 
@@ -299,20 +299,20 @@
             return line.End <= token.StopIndex + 1 && line.EndIncludingLineBreak >= token.StopIndex + 1;
         }
 
-        protected virtual void OnTagsChanged(SnapshotSpanEventArgs e)
+        protected virtual void OnTagsChanged([NotNull] SnapshotSpanEventArgs e)
         {
-            Contract.Requires<ArgumentNullException>(e != null, "e");
+            Requires.NotNull(e, nameof(e));
 
             var t = TagsChanged;
             if (t != null)
                 t(this, e);
         }
 
-        protected virtual IEnumerable<ITagSpan<TTag>> GetTagSpansForToken(IToken token, ITextSnapshot snapshot)
+        [NotNull]
+        protected virtual IEnumerable<ITagSpan<TTag>> GetTagSpansForToken([NotNull] IToken token, [NotNull] ITextSnapshot snapshot)
         {
-            Contract.Requires<ArgumentNullException>(token != null, "token");
-            Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
-            Contract.Ensures(Contract.Result<IEnumerable<ITagSpan<TTag>>>() != null);
+            Requires.NotNull(token, nameof(token));
+            Requires.NotNull(snapshot, nameof(snapshot));
 
             TTag tag;
             if (TryClassifyToken(token, out tag))
@@ -324,10 +324,10 @@
             return Enumerable.Empty<ITagSpan<TTag>>();
         }
 
-        protected virtual bool TryClassifyToken(IToken token, out TTag tag)
+        [ContractAnnotation("=> true, tag:notnull")]
+        protected virtual bool TryClassifyToken([NotNull] IToken token, out TTag tag)
         {
-            Contract.Requires<ArgumentNullException>(token != null, "token");
-            Contract.Ensures(!Contract.Result<bool>() || Contract.ValueAtReturn(out tag) != null);
+            Requires.NotNull(token, nameof(token));
 
             tag = default(TTag);
             return false;

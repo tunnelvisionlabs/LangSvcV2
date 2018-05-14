@@ -1,9 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing4
 {
     using System;
+    using System.Diagnostics;
     using Antlr4.Runtime;
     using Tvl.Collections;
-    using Contract = System.Diagnostics.Contracts.Contract;
 
     public struct SimpleLexerState : IEquatable<SimpleLexerState>
     {
@@ -60,7 +60,7 @@
         public void Apply(Lexer lexer)
         {
             lexer._mode = this.Mode;
-            Contract.Assert(_modeStack != null);
+            Debug.Assert(_modeStack != null);
             lexer._modeStack.AddRange(_modeStack ?? EmptyModeStack);
         }
 

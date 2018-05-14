@@ -2,8 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Linq;
+    using JetBrains.Annotations;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
 
     public class InterpretTrace : IEquatable<InterpretTrace>
@@ -49,12 +50,12 @@
             }
         }
 
-        public bool TryStepBackward(Transition transition, int symbol, int symbolPosition, out InterpretTrace result)
+        public bool TryStepBackward([NotNull] Transition transition, int symbol, int symbolPosition, out InterpretTrace result)
         {
-            Contract.Requires<ArgumentNullException>(transition != null, "transition");
+            Requires.NotNull(transition, nameof(transition));
 
-            Contract.Assert(Network.States.ContainsKey(transition.SourceState.Id), "Attempted to step outside the network.");
-            Contract.Assert(Network.States.ContainsKey(transition.TargetState.Id), "Attempted to step into the network.");
+            Debug.Assert(Network.States.ContainsKey(transition.SourceState.Id), "Attempted to step outside the network.");
+            Debug.Assert(Network.States.ContainsKey(transition.TargetState.Id), "Attempted to step into the network.");
 
             bool boundedStart = BoundedStart;
             if (!boundedStart && Transitions.Count > 0)
@@ -85,7 +86,7 @@
                     bool nested = false;
                     for (ContextFrame parent = StartContext.Parent; parent != null; parent = parent.Parent)
                     {
-                        Contract.Assert(parent.Context != null);
+                        Debug.Assert(parent.Context != null);
 
                         RuleBinding contextRule = Network.ContextRules[parent.Context.Value];
                         if (Interpreter.BoundaryRules.Contains(contextRule))
@@ -160,7 +161,7 @@
                         int label = pushContextTransition.ContextIdentifiers[i];
                         if (startContext.Parent != null)
                         {
-                            Contract.Assert(startContext.Parent.Context.HasValue);
+                            Debug.Assert(startContext.Parent.Context.HasValue);
 
                             // if the start context has a state stack, pop an item off it
                             if (startContext.Parent.Context != label)
@@ -219,13 +220,13 @@
             throw new NotSupportedException("Unknown transition type.");
         }
 
-        public bool TryStepForward(Transition transition, int symbol, int symbolPosition, out InterpretTrace result)
+        [ContractAnnotation("=> true, result:notnull")]
+        public bool TryStepForward([NotNull] Transition transition, int symbol, int symbolPosition, out InterpretTrace result)
         {
-            Contract.Requires<ArgumentNullException>(transition != null, "transition");
-            Contract.Ensures(!Contract.Result<bool>() || Contract.ValueAtReturn(out result) != null);
+            Requires.NotNull(transition, nameof(transition));
 
-            Contract.Assert(Network.States.ContainsKey(transition.SourceState.Id), "Attempted to step into the network.");
-            Contract.Assert(Network.States.ContainsKey(transition.TargetState.Id), "Attempted to step outside the network.");
+            Debug.Assert(Network.States.ContainsKey(transition.SourceState.Id), "Attempted to step into the network.");
+            Debug.Assert(Network.States.ContainsKey(transition.TargetState.Id), "Attempted to step outside the network.");
 
             bool boundedEnd = BoundedEnd;
             if (!boundedEnd && Transitions.Count > 0)
@@ -256,7 +257,7 @@
                     bool nested = false;
                     for (ContextFrame parent = EndContext.Parent; parent != null; parent = parent.Parent)
                     {
-                        Contract.Assert(parent.Context != null);
+                        Debug.Assert(parent.Context != null);
 
                         RuleBinding contextRule = Network.ContextRules[parent.Context.Value];
                         if (Interpreter.BoundaryRules.Contains(contextRule))
@@ -326,7 +327,7 @@
                         int label = popContextTransition.ContextIdentifiers[i];
                         if (endContext.Parent != null)
                         {
-                            Contract.Assert(endContext.Parent.Context.HasValue);
+                            Debug.Assert(endContext.Parent.Context.HasValue);
 
                             // if the end context has a state stack, pop an item off it
                             if (endContext.Parent.Context != label)

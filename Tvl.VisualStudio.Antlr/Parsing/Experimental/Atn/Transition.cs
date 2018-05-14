@@ -1,8 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental.Atn
 {
-    using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using IntervalSet = Tvl.VisualStudio.Language.Parsing.Collections.IntervalSet;
 
     public abstract class Transition
@@ -11,9 +10,9 @@
         private State _sourceState;
         private bool _isRecursive;
 
-        public Transition(State targetState)
+        public Transition([NotNull] State targetState)
         {
-            Contract.Requires<ArgumentNullException>(targetState != null, "targetState");
+            Requires.NotNull(targetState, nameof(targetState));
 
             _targetState = targetState;
         }

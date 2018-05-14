@@ -1,9 +1,10 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental.Atn
 {
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Xml.Linq;
-    using Contract = System.Diagnostics.Contracts.Contract;
+    using JetBrains.Annotations;
     using StringBuilder = System.Text.StringBuilder;
 
     public abstract class NetworkBuilder
@@ -131,9 +132,9 @@
             return new Network(this, optimizer, Rules, stateRules, contextRules);
         }
 
-        protected virtual void TryBindRule(RuleBinding ruleBinding, Nfa nfa)
+        protected virtual void TryBindRule([NotNull] RuleBinding ruleBinding, Nfa nfa)
         {
-            Contract.Requires(ruleBinding != null);
+            Debug.Assert(ruleBinding != null);
             if (nfa == null)
                 return;
 
@@ -298,11 +299,11 @@
 
         #region graph output
 
-        private static void ExportDot(IList<string> tokenNames, List<RuleBinding> rules, HashSet<State> reachableStates, Dictionary<int, RuleBinding> stateRules, string path)
+        private static void ExportDot(IList<string> tokenNames, [NotNull] List<RuleBinding> rules, [NotNull] HashSet<State> reachableStates, [NotNull] Dictionary<int, RuleBinding> stateRules, string path)
         {
-            Contract.Requires(rules != null);
-            Contract.Requires(reachableStates != null);
-            Contract.Requires(stateRules != null);
+            Debug.Assert(rules != null);
+            Debug.Assert(reachableStates != null);
+            Debug.Assert(stateRules != null);
 
             StringBuilder builder = new StringBuilder();
             builder.AppendLine("digraph G {");
@@ -333,11 +334,11 @@
             System.IO.File.WriteAllText(path, builder.ToString());
         }
 
-        private static void ExportDgml(IList<string> tokenNames, List<RuleBinding> rules, HashSet<State> reachableStates, Dictionary<int, RuleBinding> stateRules, string path)
+        private static void ExportDgml(IList<string> tokenNames, [NotNull] List<RuleBinding> rules, [NotNull] HashSet<State> reachableStates, [NotNull] Dictionary<int, RuleBinding> stateRules, string path)
         {
-            Contract.Requires(rules != null);
-            Contract.Requires(reachableStates != null);
-            Contract.Requires(stateRules != null);
+            Debug.Assert(rules != null);
+            Debug.Assert(reachableStates != null);
+            Debug.Assert(stateRules != null);
 
             List<XElement> extraLinks = new List<XElement>();
             XElement nodes = GetNodes(rules, reachableStates, stateRules, extraLinks);
@@ -357,14 +358,13 @@
             document.Save(path);
         }
 
-        private static XElement GetNodes(List<RuleBinding> rules, HashSet<State> reachableStates, Dictionary<int, RuleBinding> stateRules, List<XElement> extraLinks)
+        [NotNull]
+        private static XElement GetNodes([NotNull] List<RuleBinding> rules, [NotNull] HashSet<State> reachableStates, [NotNull] Dictionary<int, RuleBinding> stateRules, [NotNull] List<XElement> extraLinks)
         {
-            Contract.Requires(rules != null);
-            Contract.Requires(reachableStates != null);
-            Contract.Requires(stateRules != null);
-            Contract.Requires(extraLinks != null);
-
-            Contract.Ensures(Contract.Result<XElement>() != null);
+            Debug.Assert(rules != null);
+            Debug.Assert(reachableStates != null);
+            Debug.Assert(stateRules != null);
+            Debug.Assert(extraLinks != null);
 
             Dictionary<State, XElement> nodes = new Dictionary<State, XElement>();
             List<XElement> extraNodes = new List<XElement>();
@@ -397,12 +397,12 @@
             return new XElement(Elements.Nodes, nodes.Values.Concat(extraNodes));
         }
 
-        private static XElement GetLinks(IList<string> tokenNames, HashSet<State> reachableStates, Dictionary<int, RuleBinding> stateRules, List<XElement> extraLinks)
+        [NotNull]
+        private static XElement GetLinks(IList<string> tokenNames, [NotNull] HashSet<State> reachableStates, [NotNull] Dictionary<int, RuleBinding> stateRules, [NotNull] List<XElement> extraLinks)
         {
-            Contract.Requires(reachableStates != null);
-            Contract.Requires(stateRules != null);
-            Contract.Requires(extraLinks != null);
-            Contract.Ensures(Contract.Result<XElement>() != null);
+            Debug.Assert(reachableStates != null);
+            Debug.Assert(stateRules != null);
+            Debug.Assert(extraLinks != null);
 
             List<XElement> links = new List<XElement>();
 

@@ -1,10 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter
 {
-    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Diagnostics.Contracts;
     using System.Linq;
+    using JetBrains.Annotations;
 
     public class DeterministicTrace
     {
@@ -17,11 +16,11 @@
         {
         }
 
-        public DeterministicTrace(DeterministicState startState, DeterministicState endState, IEnumerable<DeterministicTraceTransition> transitions)
+        public DeterministicTrace([NotNull] DeterministicState startState, [NotNull] DeterministicState endState, [NotNull] IEnumerable<DeterministicTraceTransition> transitions)
         {
-            Contract.Requires<ArgumentNullException>(startState != null, "startState");
-            Contract.Requires<ArgumentNullException>(endState != null, "endState");
-            Contract.Requires<ArgumentNullException>(transitions != null, "transitions");
+            Requires.NotNull(startState, nameof(startState));
+            Requires.NotNull(endState, nameof(endState));
+            Requires.NotNull(transitions, nameof(transitions));
 
             _startState = startState;
             _endState = endState;

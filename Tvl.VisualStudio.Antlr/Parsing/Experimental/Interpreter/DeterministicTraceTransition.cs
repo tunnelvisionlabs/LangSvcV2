@@ -1,8 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter
 {
-    using System;
-    using System.Diagnostics.Contracts;
     using Antlr.Runtime;
+    using JetBrains.Annotations;
 
     public class DeterministicTraceTransition
     {
@@ -11,10 +10,10 @@
         public readonly int Symbol;
         public readonly int TokenIndex;
 
-        public DeterministicTraceTransition(DeterministicTransition transition, int symbol, int symbolPosition, NetworkInterpreter interpreter)
+        public DeterministicTraceTransition([NotNull] DeterministicTransition transition, int symbol, int symbolPosition, [NotNull] NetworkInterpreter interpreter)
         {
-            Contract.Requires<ArgumentNullException>(transition != null, "transition");
-            Contract.Requires<ArgumentNullException>(interpreter != null, "interpreter");
+            Requires.NotNull(transition, nameof(transition));
+            Requires.NotNull(interpreter, nameof(interpreter));
 
             Transition = transition;
             Interpreter = interpreter;
