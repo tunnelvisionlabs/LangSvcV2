@@ -1,17 +1,16 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
-    using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
 
     public static class IVsUIDataSourceExtensions
     {
-        private static IEnumerable<VsUIPropertyDescriptor> GetProperties(IVsUIDataSource dataSource)
+        [NotNull]
+        private static IEnumerable<VsUIPropertyDescriptor> GetProperties([NotNull] IVsUIDataSource dataSource)
         {
-            Contract.Requires<ArgumentNullException>(dataSource != null, "dataSource");
-            Contract.Ensures(Contract.Result<IEnumerable<VsUIPropertyDescriptor>>() != null);
+            Requires.NotNull(dataSource, nameof(dataSource));
 
             IVsUIEnumDataSourceProperties verbs;
             if (ErrorHandler.Succeeded(dataSource.EnumProperties(out verbs)))
@@ -31,10 +30,10 @@
             }
         }
 
-        private static IEnumerable<string> GetVerbs(IVsUIDataSource dataSource)
+        [NotNull]
+        private static IEnumerable<string> GetVerbs([NotNull] IVsUIDataSource dataSource)
         {
-            Contract.Requires<ArgumentNullException>(dataSource != null, "dataSource");
-            Contract.Ensures(Contract.Result<IEnumerable<string>>() != null);
+            Requires.NotNull(dataSource, nameof(dataSource));
 
             IVsUIEnumDataSourceVerbs verbs;
             if (ErrorHandler.Succeeded(dataSource.EnumVerbs(out verbs)))

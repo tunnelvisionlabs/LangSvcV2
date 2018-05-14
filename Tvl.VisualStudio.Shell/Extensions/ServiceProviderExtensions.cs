@@ -1,47 +1,48 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Runtime.InteropServices;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
     using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
     public static class ServiceProviderExtensions
     {
-        public static SVsServiceProvider AsVsServiceProvider(this IServiceProvider sp)
+        [NotNull]
+        public static SVsServiceProvider AsVsServiceProvider([NotNull] this IServiceProvider sp)
         {
-            Contract.Requires<ArgumentNullException>(sp != null, "sp");
-            Contract.Ensures(Contract.Result<SVsServiceProvider>() != null);
+            Requires.NotNull(sp, nameof(sp));
 
             return new VsServiceProviderWrapper(sp);
         }
 
-        public static TService GetService<TService>(this IServiceProvider sp)
+        public static TService GetService<TService>([NotNull] this IServiceProvider sp)
         {
-            Contract.Requires(sp != null);
+            Debug.Assert(sp != null);
 
             return GetService<TService, TService>(sp);
         }
 
-        public static TServiceInterface GetService<TServiceClass, TServiceInterface>(this IServiceProvider sp)
+        public static TServiceInterface GetService<TServiceClass, TServiceInterface>([NotNull] this IServiceProvider sp)
         {
-            Contract.Requires<ArgumentNullException>(sp != null, "sp");
+            Requires.NotNull(sp, nameof(sp));
 
             return (TServiceInterface)sp.GetService(typeof(TServiceClass));
         }
 
-        public static IOleServiceProvider TryGetOleServiceProvider(this IServiceProvider sp)
+        public static IOleServiceProvider TryGetOleServiceProvider([NotNull] this IServiceProvider sp)
         {
-            Contract.Requires<ArgumentNullException>(sp != null, "sp");
+            Requires.NotNull(sp, nameof(sp));
 
             return (IOleServiceProvider)sp.GetService(typeof(IOleServiceProvider));
         }
 
-        public static TServiceInterface TryGetGlobalService<TServiceClass, TServiceInterface>(this IOleServiceProvider sp)
+        public static TServiceInterface TryGetGlobalService<TServiceClass, TServiceInterface>([NotNull] this IOleServiceProvider sp)
             where TServiceInterface : class
         {
-            Contract.Requires<ArgumentNullException>(sp != null, "sp");
+            Requires.NotNull(sp, nameof(sp));
 
             Guid guidService = typeof(TServiceClass).GUID;
             Guid riid = typeof(TServiceClass).GUID;

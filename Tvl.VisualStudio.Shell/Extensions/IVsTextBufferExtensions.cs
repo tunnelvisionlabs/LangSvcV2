@@ -1,15 +1,15 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using IVsTextBuffer = Microsoft.VisualStudio.TextManager.Interop.IVsTextBuffer;
 
     public static class IVsTextBufferExtensions
     {
-        public static Guid? GetLanguageServiceID(this IVsTextBuffer textBuffer)
+        public static Guid? GetLanguageServiceID([NotNull] this IVsTextBuffer textBuffer)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
 
             Guid id;
             int hr = textBuffer.GetLanguageServiceID(out id);

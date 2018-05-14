@@ -3,8 +3,9 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Threading.Tasks;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Tvl.VisualStudio.OutputWindow.Interfaces;
 
@@ -28,13 +29,13 @@
         public BackgroundParserTaskScheduler(IOutputWindowService outputWindowService)
             : this("TVL IntelliSense", DefaultConcurrencyLevel, outputWindowService)
         {
-            Contract.Requires(outputWindowService != null);
+            Debug.Assert(outputWindowService != null);
         }
 
-        public BackgroundParserTaskScheduler(string name, int maximumConcurrencyLevel, IOutputWindowService outputWindowService)
+        public BackgroundParserTaskScheduler(string name, int maximumConcurrencyLevel, [NotNull] IOutputWindowService outputWindowService)
         {
-            Contract.Requires<ArgumentOutOfRangeException>(maximumConcurrencyLevel > 0);
-            Contract.Requires<ArgumentNullException>(outputWindowService != null, "outputWindowService");
+            Requires.Range(maximumConcurrencyLevel > 0, nameof(maximumConcurrencyLevel));
+            Requires.NotNull(outputWindowService, nameof(outputWindowService));
 
             _blockingQueue = new BlockingCollection<Task>();
 

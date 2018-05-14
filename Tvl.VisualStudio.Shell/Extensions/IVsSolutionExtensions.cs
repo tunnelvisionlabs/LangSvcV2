@@ -2,23 +2,25 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
 
     public static class IVsSolutionExtensions
     {
-        public static IEnumerable<IVsHierarchy> GetProjectHierarchies(this IVsSolution solution)
+        [NotNull]
+        public static IEnumerable<IVsHierarchy> GetProjectHierarchies([NotNull] this IVsSolution solution)
         {
-            Contract.Requires(solution != null);
+            Debug.Assert(solution != null);
 
             return GetProjectHierarchies(solution, __VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION);
         }
 
-        public static IEnumerable<IVsHierarchy> GetProjectHierarchies(this IVsSolution solution, __VSENUMPROJFLAGS flags)
+        [NotNull]
+        public static IEnumerable<IVsHierarchy> GetProjectHierarchies([NotNull] this IVsSolution solution, __VSENUMPROJFLAGS flags)
         {
-            Contract.Requires<ArgumentNullException>(solution != null, "solution");
-            Contract.Ensures(Contract.Result<IEnumerable<IVsHierarchy>>() != null);
+            Requires.NotNull(solution, nameof(solution));
 
             Guid empty = Guid.Empty;
             IEnumHierarchies ppenum;

@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
 
@@ -30,10 +30,10 @@
             return message;
         }
 
-        public static IEnumerable<IVsWindowFrame> GetToolWindows(this IVsUIShell shell)
+        [NotNull]
+        public static IEnumerable<IVsWindowFrame> GetToolWindows([NotNull] this IVsUIShell shell)
         {
-            Contract.Requires<ArgumentNullException>(shell != null, "shell");
-            Contract.Ensures(Contract.Result<IEnumerable<IVsWindowFrame>>() != null);
+            Requires.NotNull(shell, nameof(shell));
 
             IEnumWindowFrames frames;
             ErrorHandler.ThrowOnFailure(shell.GetToolWindowEnum(out frames));
@@ -52,12 +52,10 @@
             }
         }
 
-        public static string GetDirectoryViaBrowseDialog(this IVsUIShell2 shell, IntPtr parentWindow, Guid persistenceSlot, string title, string initialDirectory, bool overridePersistedInitialDirectory)
+        public static string GetDirectoryViaBrowseDialog([NotNull] this IVsUIShell2 shell, IntPtr parentWindow, Guid persistenceSlot, [NotNull] string title, string initialDirectory, bool overridePersistedInitialDirectory)
         {
-            if (shell == null)
-                throw new ArgumentNullException("shell");
-            if (title == null)
-                throw new ArgumentNullException("title");
+            Requires.NotNull(shell, nameof(shell));
+            Requires.NotNull(title, nameof(title));
 
             const int MaxDirName = 10000;
             IntPtr dirNameBuffer = Marshal.AllocCoTaskMem((MaxDirName + 1) * sizeof(char));
