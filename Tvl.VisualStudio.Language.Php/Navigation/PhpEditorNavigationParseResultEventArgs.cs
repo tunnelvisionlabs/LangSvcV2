@@ -3,8 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Diagnostics.Contracts;
     using Antlr4.Runtime;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing4;
 
@@ -14,10 +14,10 @@
     {
         private readonly ReadOnlyCollection<ParserRuleContext> _navigationTrees;
 
-        public PhpEditorNavigationParseResultEventArgs(ITextSnapshot snapshot, IList<ParseErrorEventArgs> errors, TimeSpan elapsedTime, IList<IToken> tokens, ParserRuleContext result, ReadOnlyCollection<ParserRuleContext> navigationTrees)
+        public PhpEditorNavigationParseResultEventArgs(ITextSnapshot snapshot, IList<ParseErrorEventArgs> errors, TimeSpan elapsedTime, IList<IToken> tokens, ParserRuleContext result, [NotNull] ReadOnlyCollection<ParserRuleContext> navigationTrees)
             : base(snapshot, errors, elapsedTime, tokens, result)
         {
-            Contract.Requires<ArgumentNullException>(navigationTrees != null, "navigationTrees");
+            Requires.NotNull(navigationTrees, nameof(navigationTrees));
 
             this._navigationTrees = navigationTrees;
         }

@@ -1,8 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy
 {
-    using System;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using Antlr.Runtime;
+    using JetBrains.Annotations;
     using Tvl.VisualStudio.Language.Parsing;
 
     internal class AlloyClassifierLexer : ITokenSourceWithState<AlloyClassifierLexerState>
@@ -13,15 +13,15 @@
         private AlloyClassifierLexerMode _mode;
         private bool _inComment;
 
-        public AlloyClassifierLexer(ICharStream input)
+        public AlloyClassifierLexer([NotNull] ICharStream input)
             : this(input, AlloyClassifierLexerState.Initial)
         {
-            Contract.Requires(input != null);
+            Debug.Assert(input != null);
         }
 
-        public AlloyClassifierLexer(ICharStream input, AlloyClassifierLexerState state)
+        public AlloyClassifierLexer([NotNull] ICharStream input, AlloyClassifierLexerState state)
         {
-            Contract.Requires<ArgumentNullException>(input != null, "input");
+            Requires.NotNull(input, nameof(input));
 
             _input = input;
             _languageLexer = new AlloyColorizerLexer(input, this);

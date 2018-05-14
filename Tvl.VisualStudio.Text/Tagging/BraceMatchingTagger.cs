@@ -3,9 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
@@ -19,12 +20,12 @@
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        public BraceMatchingTagger(ITextView textView, ITextBuffer sourceBuffer, IClassifier aggregator, IEnumerable<KeyValuePair<char, char>> matchingCharacters)
+        public BraceMatchingTagger([NotNull] ITextView textView, [NotNull] ITextBuffer sourceBuffer, [NotNull] IClassifier aggregator, [NotNull] IEnumerable<KeyValuePair<char, char>> matchingCharacters)
         {
-            Contract.Requires<ArgumentNullException>(textView != null, "textView");
-            Contract.Requires<ArgumentNullException>(sourceBuffer != null, "sourceBuffer");
-            Contract.Requires<ArgumentNullException>(aggregator != null, "aggregator");
-            Contract.Requires<ArgumentNullException>(matchingCharacters != null, "matchingCharacters");
+            Requires.NotNull(textView, nameof(textView));
+            Requires.NotNull(sourceBuffer, nameof(sourceBuffer));
+            Requires.NotNull(aggregator, nameof(aggregator));
+            Requires.NotNull(matchingCharacters, nameof(matchingCharacters));
 
             this.TextView = textView;
             this.SourceBuffer = sourceBuffer;
@@ -71,9 +72,9 @@
             set;
         }
 
-        public IEnumerable<ITagSpan<TextMarkerTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+        public IEnumerable<ITagSpan<TextMarkerTag>> GetTags([NotNull] NormalizedSnapshotSpanCollection spans)
         {
-            Contract.Requires<ArgumentNullException>(spans != null, "spans");
+            Requires.NotNull(spans, nameof(spans));
 
             return Tags;
         }
@@ -83,17 +84,17 @@
             return GetTags(spans);
         }
 
-        protected virtual bool IsClassificationTypeIgnored(IClassificationType classificationType)
+        protected virtual bool IsClassificationTypeIgnored([NotNull] IClassificationType classificationType)
         {
-            Contract.Requires<ArgumentNullException>(classificationType != null, "classificationType");
+            Requires.NotNull(classificationType, nameof(classificationType));
 
             return classificationType.IsOfType(PredefinedClassificationTypeNames.Comment)
                 || classificationType.IsOfType(PredefinedClassificationTypeNames.Literal);
         }
 
-        protected virtual bool IsInIgnoredSpan(IClassifier aggregator, SnapshotPoint point, PositionAffinity affinity)
+        protected virtual bool IsInIgnoredSpan([NotNull] IClassifier aggregator, SnapshotPoint point, PositionAffinity affinity)
         {
-            Contract.Requires(aggregator != null);
+            Debug.Assert(aggregator != null);
 
             // TODO: handle affinity
             SnapshotSpan span = new SnapshotSpan(point, 1);
@@ -106,9 +107,9 @@
             return IsClassificationTypeIgnored(relevant.ClassificationType);
         }
 
-        protected virtual bool FindMatchingCloseChar(int revision, SnapshotPoint start, IClassifier aggregator, char open, char close, int maxLines, out SnapshotSpan pairSpan)
+        protected virtual bool FindMatchingCloseChar(int revision, SnapshotPoint start, [NotNull] IClassifier aggregator, char open, char close, int maxLines, out SnapshotSpan pairSpan)
         {
-            Contract.Requires(aggregator != null);
+            Debug.Assert(aggregator != null);
 
             pairSpan = new SnapshotSpan(start.Snapshot, 1, 1);
             ITextSnapshotLine line = start.GetContainingLine();
@@ -166,9 +167,9 @@
             return false;
         }
 
-        protected virtual bool FindMatchingOpenChar(int revision, SnapshotPoint start, IClassifier aggregator, char open, char close, int maxLines, out SnapshotSpan pairSpan)
+        protected virtual bool FindMatchingOpenChar(int revision, SnapshotPoint start, [NotNull] IClassifier aggregator, char open, char close, int maxLines, out SnapshotSpan pairSpan)
         {
-            Contract.Requires(aggregator != null);
+            Debug.Assert(aggregator != null);
 
             pairSpan = new SnapshotSpan(start, start);
             ITextSnapshotLine line = start.GetContainingLine();
@@ -235,9 +236,9 @@
             return false;
         }
 
-        protected virtual void OnTagsChanged(SnapshotSpanEventArgs e)
+        protected virtual void OnTagsChanged([NotNull] SnapshotSpanEventArgs e)
         {
-            Contract.Requires<ArgumentNullException>(e != null, "e");
+            Requires.NotNull(e, nameof(e));
 
             var t = TagsChanged;
             if (t != null)

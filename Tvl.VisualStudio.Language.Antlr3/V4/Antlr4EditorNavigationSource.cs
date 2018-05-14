@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Linq;
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
@@ -30,10 +30,10 @@
 
         public event EventHandler NavigationTargetsChanged;
 
-        public Antlr4EditorNavigationSource(Antlr4EditorNavigationSourceProvider provider, ITextBuffer textBuffer)
+        public Antlr4EditorNavigationSource([NotNull] Antlr4EditorNavigationSourceProvider provider, [NotNull] ITextBuffer textBuffer)
         {
-            Contract.Requires<ArgumentNullException>(provider != null, "provider");
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Requires.NotNull(provider, nameof(provider));
+            Requires.NotNull(textBuffer, nameof(textBuffer));
 
             _provider = provider;
             _textBuffer = textBuffer;
@@ -77,9 +77,9 @@
             UpdateNavigationTargets(antlrParseResultArgs);
         }
 
-        private void UpdateNavigationTargets(AntlrParseResultEventArgs antlrParseResultArgs)
+        private void UpdateNavigationTargets([NotNull] AntlrParseResultEventArgs antlrParseResultArgs)
         {
-            Contract.Requires<ArgumentNullException>(antlrParseResultArgs != null, "antlrParseResultArgs");
+            Requires.NotNull(antlrParseResultArgs, nameof(antlrParseResultArgs));
 
             NavigationTargetListener listener = new NavigationTargetListener(this, antlrParseResultArgs.Snapshot, antlrParseResultArgs.Tokens);
             ParseTreeWalker.Default.Walk(listener, antlrParseResultArgs.Result);
@@ -96,22 +96,22 @@
 
             private readonly Stack<string> _mode = new Stack<string>();
 
-            public NavigationTargetListener(Antlr4EditorNavigationSource navigationSource, ITextSnapshot snapshot, IList<IToken> tokens)
+            public NavigationTargetListener([NotNull] Antlr4EditorNavigationSource navigationSource, [NotNull] ITextSnapshot snapshot, [NotNull] IList<IToken> tokens)
             {
-                Contract.Requires<ArgumentNullException>(navigationSource != null, "navigationSource");
-                Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
-                Contract.Requires<ArgumentNullException>(tokens != null, "tokens");
+                Requires.NotNull(navigationSource, nameof(navigationSource));
+                Requires.NotNull(snapshot, nameof(snapshot));
+                Requires.NotNull(tokens, nameof(tokens));
 
                 _navigationSource = navigationSource;
                 _snapshot = snapshot;
                 _tokens = tokens;
             }
 
+            [NotNull]
             public List<IEditorNavigationTarget> NavigationTargets
             {
                 get
                 {
-                    Contract.Ensures(Contract.Result<List<IEditorNavigationTarget>>() != null);
                     return _navigationTargets;
                 }
             }
@@ -159,10 +159,10 @@
                 _mode.Pop();
             }
 
-            private void AddNavigationTarget(IParseTree tree, ITerminalNode identifier, IEditorNavigationType navigationType, ImageSource glyph)
+            private void AddNavigationTarget([NotNull] IParseTree tree, ITerminalNode identifier, [NotNull] IEditorNavigationType navigationType, ImageSource glyph)
             {
-                Contract.Requires(tree != null);
-                Contract.Requires(navigationType != null);
+                Debug.Assert(tree != null);
+                Debug.Assert(navigationType != null);
 
                 Interval sourceInterval = tree.SourceInterval;
                 if (sourceInterval.a < 0 || sourceInterval.b < 0 || sourceInterval.Length <= 0)

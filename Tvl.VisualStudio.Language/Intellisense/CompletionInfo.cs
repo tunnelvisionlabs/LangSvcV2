@@ -1,15 +1,14 @@
 ﻿namespace Tvl.VisualStudio.Language.Intellisense
 {
-    using System;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
 
     public class CompletionInfo
     {
         private readonly IntellisenseController _controller;
 
-        public CompletionInfo(IntellisenseController controller)
+        public CompletionInfo([NotNull] IntellisenseController controller)
         {
-            Contract.Requires<ArgumentNullException>(controller != null, "controller");
+            Requires.NotNull(controller, nameof(controller));
 
             _controller = controller;
         }
@@ -67,12 +66,11 @@
             set;
         }
 
+        [NotNull]
         protected IntellisenseController Controller
         {
             get
             {
-                Contract.Ensures(Contract.Result<IntellisenseController>() != null);
-
                 return _controller;
             }
         }

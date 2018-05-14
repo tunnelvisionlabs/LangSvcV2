@@ -1,18 +1,19 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
-    using Contract = System.Diagnostics.Contracts.Contract;
+    using System.Diagnostics;
+    using JetBrains.Annotations;
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public sealed class ProvideLinkedEditorFactoryAttribute : EditorFactoryRegistrationAttribute
     {
         private readonly Type _linkedFactoryType;
 
-        public ProvideLinkedEditorFactoryAttribute(Type factoryType, Type linkedFactoryType, short nameResourceID)
+        public ProvideLinkedEditorFactoryAttribute([NotNull] Type factoryType, [NotNull] Type linkedFactoryType, short nameResourceID)
             : base(factoryType, nameResourceID)
         {
-            Contract.Requires(factoryType != null);
-            Contract.Requires<ArgumentNullException>(linkedFactoryType != null, "linkedFactoryType");
+            Debug.Assert(factoryType != null);
+            Requires.NotNull(linkedFactoryType, nameof(linkedFactoryType));
 
             _linkedFactoryType = linkedFactoryType;
         }

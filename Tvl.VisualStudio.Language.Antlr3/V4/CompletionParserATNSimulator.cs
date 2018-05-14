@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using Antlr4.Runtime;
     using Antlr4.Runtime.Atn;
     using Antlr4.Runtime.Dfa;
@@ -25,10 +24,10 @@
         // avoid throwing an exception when the caret is found while computing the start state
         private bool _computingStartState;
 
-        protected CompletionParserATNSimulator(Parser parser, ATN atn)
+        protected CompletionParserATNSimulator([NotNull] Parser parser, ATN atn)
             : base(parser, atn)
         {
-            Contract.Requires<ArgumentNullException>(parser != null, "parser");
+            Requires.NotNull(parser, nameof(parser));
             PredictionMode = PredictionMode.Sll;
         }
 
@@ -48,10 +47,10 @@
             }
         }
 
-        public virtual void SetFixedDecisions(List<MultipleDecisionData> decisionPoints, List<int> selections)
+        public virtual void SetFixedDecisions([NotNull] List<MultipleDecisionData> decisionPoints, [NotNull] List<int> selections)
         {
-            Contract.Requires<ArgumentNullException>(decisionPoints != null, "decisionPoints");
-            Contract.Requires<ArgumentNullException>(selections != null, "selections");
+            Requires.NotNull(decisionPoints, nameof(decisionPoints));
+            Requires.NotNull(selections, nameof(selections));
 
             _decisionPoints = decisionPoints;
             _selections = selections;

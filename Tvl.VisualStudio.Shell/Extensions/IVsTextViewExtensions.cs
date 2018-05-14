@@ -1,8 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
     using Microsoft.VisualStudio.TextManager.Interop;
@@ -11,9 +11,9 @@
 
     public static class IVsTextViewExtensions
     {
-        public static IVsCodeWindow GetCodeWindow(this IVsTextView textView)
+        public static IVsCodeWindow GetCodeWindow([NotNull] this IVsTextView textView)
         {
-            Contract.Requires<ArgumentNullException>(textView != null, "textView");
+            Requires.NotNull(textView, nameof(textView));
 
             IObjectWithSite objectWithSite = textView as IObjectWithSite;
             if (objectWithSite == null)

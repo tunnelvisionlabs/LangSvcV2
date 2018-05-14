@@ -1,7 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental.Atn
 {
     using System;
-    using Contract = System.Diagnostics.Contracts.Contract;
+    using System.Diagnostics;
+    using JetBrains.Annotations;
     using RuntimeHelpers = System.Runtime.CompilerServices.RuntimeHelpers;
 
     public class RuleBinding : IEquatable<RuleBinding>
@@ -12,55 +13,46 @@
 
         private bool _isStartRule;
 
-        public RuleBinding(string name)
+        public RuleBinding([NotNull] string name)
             : this(name, new State(), new State())
         {
-            Contract.Requires(!String.IsNullOrEmpty(name));
-
-            Contract.Ensures(!string.IsNullOrEmpty(this.Name));
-            Contract.Ensures(this.StartState != null);
-            Contract.Ensures(this.EndState != null);
+            Debug.Assert(!String.IsNullOrEmpty(name));
         }
 
-        public RuleBinding(string name, State startState, State endState)
+        public RuleBinding([NotNull] string name, [NotNull] State startState, [NotNull] State endState)
         {
-            Contract.Requires<ArgumentNullException>(name != null, "name");
-            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(name));
-            Contract.Requires<ArgumentNullException>(startState != null, "startState");
-            Contract.Requires<ArgumentNullException>(endState != null, "endState");
-
-            Contract.Ensures(!string.IsNullOrEmpty(this.Name));
-            Contract.Ensures(this.StartState != null);
-            Contract.Ensures(this.EndState != null);
+            Requires.NotNullOrEmpty(name, nameof(name));
+            Requires.NotNull(startState, nameof(startState));
+            Requires.NotNull(endState, nameof(endState));
 
             _name = name;
             _startState = startState;
             _endState = endState;
         }
 
+        [NotNull]
         public string Name
         {
             get
             {
-                Contract.Ensures(!string.IsNullOrEmpty(Contract.Result<string>()));
                 return _name;
             }
         }
 
+        [NotNull]
         public State StartState
         {
             get
             {
-                Contract.Ensures(Contract.Result<State>() != null);
                 return _startState;
             }
         }
 
+        [NotNull]
         public State EndState
         {
             get
             {
-                Contract.Ensures(Contract.Result<State>() != null);
                 return _endState;
             }
         }

@@ -2,9 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Linq;
     using System.Runtime.CompilerServices;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using ClassifierOptions = Tvl.VisualStudio.Language.Parsing.ClassifierOptions;
@@ -44,10 +45,10 @@
         {
         }
 
-        public AntlrTaggerBase(ITextBuffer textBuffer, IEqualityComparer<TState> stateComparer, ClassifierOptions options)
+        public AntlrTaggerBase([NotNull] ITextBuffer textBuffer, [NotNull] IEqualityComparer<TState> stateComparer, ClassifierOptions options)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(stateComparer != null, "stateComparer");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
+            Requires.NotNull(stateComparer, nameof(stateComparer));
 
             _textBuffer = textBuffer;
             _stateComparer = stateComparer;
@@ -62,11 +63,11 @@
             ForceRetagLines(taggerState, 0, currentSnapshot.LineCount - 1);
         }
 
+        [NotNull]
         public ITextBuffer TextBuffer
         {
             get
             {
-                Contract.Ensures(Contract.Result<ITextBuffer>() != null);
                 return _textBuffer;
             }
         }
@@ -81,10 +82,9 @@
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
+        [NotNull]
         public virtual IEnumerable<ITagSpan<TTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            Contract.Ensures(Contract.Result<IEnumerable<ITagSpan<TTag>>>() != null);
-
             if (spans.Count == 0)
                 return Enumerable.Empty<ITagSpan<TTag>>();
 
@@ -136,7 +136,7 @@
                     int endLinePrevious;
                     if (previousToken != null)
                     {
-                        Contract.Assert(previousToken.StopIndex >= previousToken.StartIndex, "previousToken can't be EOF");
+                        Debug.Assert(previousToken.StopIndex >= previousToken.StartIndex, "previousToken can't be EOF");
                         endLinePrevious = span.Snapshot.GetLineNumberFromPosition(previousToken.StopIndex);
                     }
                     else
@@ -246,15 +246,15 @@
             return tagSpans;
         }
 
+        [NotNull]
         protected virtual ITokenSource GetEffectiveTokenSource(ITokenSourceWithState<TState> lexer)
         {
-            Contract.Ensures(Contract.Result<ITokenSource>() != null);
             return lexer;
         }
 
         protected virtual void SetLineState(TaggerState taggerState, int line, LineStateInfo state)
         {
-            Contract.Requires(state.IsDirty || !taggerState._firstDirtyLine.HasValue || line <= taggerState._firstDirtyLine);
+            Debug.Assert(state.IsDirty || !taggerState._firstDirtyLine.HasValue || line <= taggerState._firstDirtyLine);
 
             using (_lock.WriteLock())
             {
@@ -316,7 +316,7 @@
             start = span.Snapshot.GetLineFromLineNumber(startLine).Start;
             int length = endPosition - start;
             span = new SnapshotSpan(span.Snapshot, start, length);
-            Contract.Assert(haveState);
+            Debug.Assert(haveState);
             return state;
         }
 
@@ -359,11 +359,11 @@
 
         protected abstract ITokenSourceWithState<TState> CreateLexer(ICharStream input, int startLine, TState startState);
 
-        protected virtual IEnumerable<ITagSpan<TTag>> GetTagSpansForToken(IToken token, ITextSnapshot snapshot)
+        [NotNull]
+        protected virtual IEnumerable<ITagSpan<TTag>> GetTagSpansForToken([NotNull] IToken token, [NotNull] ITextSnapshot snapshot)
         {
-            Contract.Requires<ArgumentNullException>(token != null, "token");
-            Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
-            Contract.Ensures(Contract.Result<IEnumerable<ITagSpan<TTag>>>() != null);
+            Requires.NotNull(token, nameof(token));
+            Requires.NotNull(snapshot, nameof(snapshot));
 
             TTag tag;
             if (TryTagToken(token, out tag))
@@ -375,25 +375,25 @@
             return Enumerable.Empty<ITagSpan<TTag>>();
         }
 
-        protected virtual bool TryTagToken(IToken token, out TTag tag)
+        protected virtual bool TryTagToken([NotNull] IToken token, out TTag tag)
         {
-            Contract.Requires<ArgumentNullException>(token != null, "token");
+            Requires.NotNull(token, nameof(token));
             tag = default(TTag);
             return false;
         }
 
-        protected virtual void OnTagsChanged(SnapshotSpanEventArgs e)
+        protected virtual void OnTagsChanged([NotNull] SnapshotSpanEventArgs e)
         {
-            Contract.Requires<ArgumentNullException>(e != null, "e");
+            Requires.NotNull(e, nameof(e));
 
             var t = TagsChanged;
             if (t != null)
                 t(this, e);
         }
 
-        protected virtual bool IsMultilineTagSpan(ITagSpan<TTag> span)
+        protected virtual bool IsMultilineTagSpan([NotNull] ITagSpan<TTag> span)
         {
-            Contract.Requires<ArgumentNullException>(span != null, "span");
+            Requires.NotNull(span, nameof(span));
             if (span.Span.IsEmpty)
                 return false;
 
@@ -516,7 +516,7 @@
                         afterState._lastChangedLine = Math.Max(afterState._lastChangedLine ?? num2, num2);
                     }
 
-                    Contract.Assert(lineStates.Count == afterState._lineStates.Length);
+                    Debug.Assert(lineStates.Count == afterState._lineStates.Length);
                     lineStates.CopyTo(afterState._lineStates);
                 }
             }
@@ -580,9 +580,9 @@
             public int? _firstChangedLine;
             public int? _lastChangedLine;
 
-            public TaggerState(ITextSnapshot snapshot)
+            public TaggerState([NotNull] ITextSnapshot snapshot)
             {
-                Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
+                Requires.NotNull(snapshot, nameof(snapshot));
                 _lineStatesVersion = snapshot.Version;
                 _lineStates = new LineStateInfo[snapshot.LineCount];
                 for (int i = 0; i < _lineStates.Length; i++)

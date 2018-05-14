@@ -2,8 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Linq;
+    using JetBrains.Annotations;
 
     public class StateOptimizer
     {
@@ -16,9 +17,9 @@
         private readonly HashSet<ulong> _nestedContexts = new HashSet<ulong>();
         private readonly HashSet<ulong> _contextStates = new HashSet<ulong>();
 
-        public StateOptimizer(IEnumerable<State> reachableStates)
+        public StateOptimizer([NotNull] IEnumerable<State> reachableStates)
         {
-            Contract.Requires<ArgumentNullException>(reachableStates != null, "reachableStates");
+            Requires.NotNull(reachableStates, nameof(reachableStates));
 
             _reachableStates = new HashSet<State>(reachableStates, ObjectReferenceEqualityComparer<State>.Default);
             _reachableTransitions = new HashSet<Transition>(ObjectReferenceEqualityComparer<Transition>.Default);
@@ -45,9 +46,9 @@
             }
         }
 
-        private IEnumerable<State> GetStatesInContext(State state, HashSet<State> visited)
+        private IEnumerable<State> GetStatesInContext([NotNull] State state, HashSet<State> visited)
         {
-            Contract.Requires(state != null);
+            Debug.Assert(state != null);
 
             if (!visited.Add(state))
                 yield break;
@@ -73,9 +74,9 @@
             }
         }
 
-        public void Optimize(IEnumerable<State> ruleStartStates)
+        public void Optimize([NotNull] IEnumerable<State> ruleStartStates)
         {
-            Contract.Requires<ArgumentNullException>(ruleStartStates != null, "ruleStartStates");
+            Requires.NotNull(ruleStartStates, nameof(ruleStartStates));
 
             foreach (var state in _reachableStates)
                 state.RemoveExtraEpsilonTransitions(this, ruleStartStates.Contains(state));
@@ -102,10 +103,10 @@
             }
         }
 
-        private void GetReachableTransitions(IEnumerable<State> reachableStates, ISet<Transition> reachableTransitions)
+        private void GetReachableTransitions([NotNull] IEnumerable<State> reachableStates, [NotNull] ISet<Transition> reachableTransitions)
         {
-            Contract.Requires(reachableStates != null);
-            Contract.Requires(reachableTransitions != null);
+            Debug.Assert(reachableStates != null);
+            Debug.Assert(reachableTransitions != null);
 
             foreach (var state in reachableStates)
             {
@@ -114,17 +115,17 @@
             }
         }
 
-        private void AddReachableTransition(Transition transition)
+        private void AddReachableTransition([NotNull] Transition transition)
         {
-            Contract.Requires(transition != null);
+            Debug.Assert(transition != null);
 
             if (!_reachableTransitions.Add(transition))
                 throw new InvalidOperationException();
         }
 
-        private void RemoveReachableTransition(Transition transition)
+        private void RemoveReachableTransition([NotNull] Transition transition)
         {
-            Contract.Requires(transition != null);
+            Debug.Assert(transition != null);
 
             if (!_reachableTransitions.Remove(transition))
                 throw new InvalidOperationException();
@@ -132,7 +133,7 @@
 
         internal void AddTransition(Transition transition)
         {
-            Contract.Requires<ArgumentNullException>(transition != null, "transition");
+            Requires.NotNull(transition, nameof(transition));
 
             AddReachableTransition(transition);
 
@@ -165,9 +166,9 @@
             }
         }
 
-        internal void RemoveTransition(Transition transition)
+        internal void RemoveTransition([NotNull] Transition transition)
         {
-            Contract.Requires<ArgumentNullException>(transition != null, "transition");
+            Requires.NotNull(transition, nameof(transition));
 
             RemoveReachableTransition(transition);
 
@@ -188,17 +189,16 @@
             }
         }
 
-        internal IEnumerable<PushContextTransition> GetPushContextTransitions(PopContextTransition popContextTransition)
+        [NotNull]
+        internal IEnumerable<PushContextTransition> GetPushContextTransitions([NotNull] PopContextTransition popContextTransition)
         {
-            Contract.Requires<ArgumentNullException>(popContextTransition != null, "popContextTransition");
-            Contract.Ensures(Contract.Result<IEnumerable<PushContextTransition>>() != null);
+            Requires.NotNull(popContextTransition, nameof(popContextTransition));
             return GetPushContextTransitions(popContextTransition.ContextIdentifiers.Last());
         }
 
+        [NotNull]
         internal IEnumerable<PushContextTransition> GetPushContextTransitions(int context)
         {
-            Contract.Ensures(Contract.Result<IEnumerable<PushContextTransition>>() != null);
-
             HashSet<PushContextTransition> transitions;
             if (!_pushContextTransitions.TryGetValue(context, out transitions))
                 return Enumerable.Empty<PushContextTransition>();
@@ -206,17 +206,16 @@
             return transitions;
         }
 
-        internal IEnumerable<PopContextTransition> GetPopContextTransitions(PushContextTransition pushContextTransition)
+        [NotNull]
+        internal IEnumerable<PopContextTransition> GetPopContextTransitions([NotNull] PushContextTransition pushContextTransition)
         {
-            Contract.Requires<ArgumentNullException>(pushContextTransition != null, "pushContextTransition");
-            Contract.Ensures(Contract.Result<IEnumerable<PopContextTransition>>() != null);
+            Requires.NotNull(pushContextTransition, nameof(pushContextTransition));
             return GetPopContextTransitions(pushContextTransition.ContextIdentifiers[0]);
         }
 
+        [NotNull]
         internal IEnumerable<PopContextTransition> GetPopContextTransitions(int context)
         {
-            Contract.Ensures(Contract.Result<IEnumerable<PopContextTransition>>() != null);
-
             HashSet<PopContextTransition> transitions;
             if (!_popContextTransitions.TryGetValue(context, out transitions))
                 return Enumerable.Empty<PopContextTransition>();

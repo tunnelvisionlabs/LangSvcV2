@@ -1,14 +1,13 @@
 ﻿namespace Tvl.VisualStudio.Text.Classification
 {
     using System.ComponentModel.Composition;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Language.StandardClassification;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
     using Tvl.VisualStudio.Shell;
 
-    [ContractClass(typeof(Contracts.LanguageClassifierProviderContracts<>))]
     public abstract class LanguageClassifierProvider<TLanguagePackage> : IClassifierProvider
         where TLanguagePackage : Package
     {
@@ -49,6 +48,6 @@
             return GetClassifierImpl(textBuffer);
         }
 
-        protected abstract IClassifier GetClassifierImpl(ITextBuffer textBuffer);
+        protected abstract IClassifier GetClassifierImpl([NotNull] ITextBuffer textBuffer);
     }
 }

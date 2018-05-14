@@ -2,37 +2,34 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
 
     public static class ListExtensions
     {
-        public static int FindIndex<T>(this IList<T> collection, Predicate<T> predicate)
+        public static int FindIndex<T>([NotNull] this IList<T> collection, [NotNull] Predicate<T> predicate)
         {
-            Contract.Requires<ArgumentNullException>(collection != null, "collection");
-            Contract.Requires<ArgumentNullException>(predicate != null, "predicate");
-            Contract.Ensures(Contract.Result<int>() >= -1 && Contract.Result<int>() < collection.Count);
+            Requires.NotNull(collection, nameof(collection));
+            Requires.NotNull(predicate, nameof(predicate));
 
             return FindIndex(collection, 0, collection.Count, predicate);
         }
 
-        public static int FindIndex<T>(this IList<T> collection, int startIndex, Predicate<T> predicate)
+        public static int FindIndex<T>([NotNull] this IList<T> collection, int startIndex, [NotNull] Predicate<T> predicate)
         {
-            Contract.Requires<ArgumentNullException>(collection != null, "collection");
-            Contract.Requires<ArgumentOutOfRangeException>(startIndex >= 0);
-            Contract.Requires<ArgumentException>(startIndex <= collection.Count);
-            Contract.Requires<ArgumentNullException>(predicate != null, "predicate");
-            Contract.Ensures(Contract.Result<int>() >= -1 && Contract.Result<int>() < collection.Count);
+            Requires.NotNull(collection, nameof(collection));
+            Requires.Range(startIndex >= 0, nameof(startIndex));
+            Requires.Argument(startIndex <= collection.Count, nameof(startIndex), $"{nameof(startIndex)} must be less than or equal to the collection size");
+            Requires.NotNull(predicate, nameof(predicate));
 
             return FindIndex(collection, startIndex, collection.Count - startIndex, predicate);
         }
 
-        public static int FindIndex<T>(this IList<T> collection, int startIndex, int count, Predicate<T> predicate)
+        public static int FindIndex<T>([NotNull] this IList<T> collection, int startIndex, int count, [NotNull] Predicate<T> predicate)
         {
-            Contract.Requires<ArgumentNullException>(collection != null, "collection");
-            Contract.Requires<ArgumentOutOfRangeException>(startIndex >= 0);
-            Contract.Requires<ArgumentException>(startIndex <= collection.Count);
-            Contract.Requires<ArgumentNullException>(predicate != null, "predicate");
-            Contract.Ensures(Contract.Result<int>() >= -1 && Contract.Result<int>() < collection.Count);
+            Requires.NotNull(collection, nameof(collection));
+            Requires.Range(startIndex >= 0, nameof(startIndex));
+            Requires.Argument(startIndex <= collection.Count, nameof(startIndex), $"{nameof(startIndex)} must be less than or equal to the collection size");
+            Requires.NotNull(predicate, nameof(predicate));
 
             for (int i = 0; i < collection.Count; i++)
             {
@@ -43,33 +40,30 @@
             return -1;
         }
 
-        public static int FindLastIndex<T>(this IList<T> collection, Predicate<T> predicate)
+        public static int FindLastIndex<T>([NotNull] this IList<T> collection, [NotNull] Predicate<T> predicate)
         {
-            Contract.Requires<ArgumentNullException>(collection != null, "collection");
-            Contract.Requires<ArgumentNullException>(predicate != null, "predicate");
-            Contract.Ensures(Contract.Result<int>() >= -1 && Contract.Result<int>() < collection.Count);
+            Requires.NotNull(collection, nameof(collection));
+            Requires.NotNull(predicate, nameof(predicate));
 
             return FindLastIndex(collection, 0, collection.Count, predicate);
         }
 
-        public static int FindLastIndex<T>(this IList<T> collection, int startIndex, Predicate<T> predicate)
+        public static int FindLastIndex<T>([NotNull] this IList<T> collection, int startIndex, [NotNull] Predicate<T> predicate)
         {
-            Contract.Requires<ArgumentNullException>(collection != null, "collection");
-            Contract.Requires<ArgumentOutOfRangeException>(startIndex >= 0);
-            Contract.Requires<ArgumentException>(startIndex <= collection.Count);
-            Contract.Requires<ArgumentNullException>(predicate != null, "predicate");
-            Contract.Ensures(Contract.Result<int>() >= -1 && Contract.Result<int>() < collection.Count);
+            Requires.NotNull(collection, nameof(collection));
+            Requires.Range(startIndex >= 0, nameof(startIndex));
+            Requires.Argument(startIndex <= collection.Count, nameof(startIndex), $"{nameof(startIndex)} must be less than or equal to the collection size");
+            Requires.NotNull(predicate, nameof(predicate));
 
             return FindLastIndex(collection, startIndex, collection.Count - startIndex, predicate);
         }
 
-        public static int FindLastIndex<T>(this IList<T> collection, int startIndex, int count, Predicate<T> predicate)
+        public static int FindLastIndex<T>([NotNull] this IList<T> collection, int startIndex, int count, [NotNull] Predicate<T> predicate)
         {
-            Contract.Requires<ArgumentNullException>(collection != null, "collection");
-            Contract.Requires<ArgumentOutOfRangeException>(startIndex >= 0);
-            Contract.Requires<ArgumentException>(startIndex <= collection.Count);
-            Contract.Requires<ArgumentNullException>(predicate != null, "predicate");
-            Contract.Ensures(Contract.Result<int>() >= -1 && Contract.Result<int>() < collection.Count);
+            Requires.NotNull(collection, nameof(collection));
+            Requires.Range(startIndex >= 0, nameof(startIndex));
+            Requires.Argument(startIndex <= collection.Count, nameof(startIndex), $"{nameof(startIndex)} must be less than or equal to the collection size");
+            Requires.NotNull(predicate, nameof(predicate));
 
             for (int i = collection.Count - 1; i >= 0; i--)
             {
@@ -80,10 +74,10 @@
             return -1;
         }
 
-        public static T Find<T>(this IList<T> collection, Predicate<T> match)
+        public static T Find<T>([NotNull] this IList<T> collection, [NotNull] Predicate<T> match)
         {
-            Contract.Requires<ArgumentNullException>(collection != null, "collection");
-            Contract.Requires<ArgumentNullException>(match != null, "match");
+            Requires.NotNull(collection, nameof(collection));
+            Requires.NotNull(match, nameof(match));
 
             for (int i = 0; i < collection.Count; i++)
             {
@@ -94,10 +88,10 @@
             return default(T);
         }
 
-        public static T FindLast<T>(this IList<T> collection, Predicate<T> match)
+        public static T FindLast<T>([NotNull] this IList<T> collection, [NotNull] Predicate<T> match)
         {
-            Contract.Requires<ArgumentNullException>(collection != null, "collection");
-            Contract.Requires<ArgumentNullException>(match != null, "match");
+            Requires.NotNull(collection, nameof(collection));
+            Requires.NotNull(match, nameof(match));
 
             for (int i = collection.Count - 1; i >= 0; i--)
             {
@@ -108,11 +102,11 @@
             return default(T);
         }
 
-        public static List<T> FindAll<T>(this IList<T> collection, Predicate<T> match)
+        [NotNull]
+        public static List<T> FindAll<T>([NotNull] this IList<T> collection, [NotNull] Predicate<T> match)
         {
-            Contract.Requires<ArgumentNullException>(collection != null, "collection");
-            Contract.Requires<ArgumentNullException>(match != null, "match");
-            Contract.Ensures(Contract.Result<List<T>>() != null);
+            Requires.NotNull(collection, nameof(collection));
+            Requires.NotNull(match, nameof(match));
 
             List<T> result = new List<T>();
             for (int i = 0; i < collection.Count; i++)

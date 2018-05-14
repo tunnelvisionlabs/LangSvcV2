@@ -1,8 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
+    using JetBrains.Annotations;
     using __VSEDITORTRUSTLEVEL = Microsoft.VisualStudio.Shell.Interop.__VSEDITORTRUSTLEVEL;
-    using Contract = System.Diagnostics.Contracts.Contract;
     using CultureInfo = System.Globalization.CultureInfo;
     using LogicalView = Microsoft.VisualStudio.Shell.LogicalView;
     using ProvideViewAttribute = Microsoft.VisualStudio.Shell.ProvideViewAttribute;
@@ -17,9 +17,9 @@
         private __VSEDITORTRUSTLEVEL _trustLevel;
         private int _commonPhysicalViewAttributes;
 
-        protected EditorFactoryRegistrationAttribute(Type factoryType, short nameResourceID)
+        protected EditorFactoryRegistrationAttribute([NotNull] Type factoryType, short nameResourceID)
         {
-            Contract.Requires<ArgumentNullException>(factoryType != null, "factoryType");
+            Requires.NotNull(factoryType, nameof(factoryType));
 
             _factoryType = factoryType;
             _nameResourceID = nameResourceID;

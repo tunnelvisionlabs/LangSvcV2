@@ -1,10 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental.Atn
 {
-    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Diagnostics.Contracts;
     using System.Linq;
+    using JetBrains.Annotations;
 
     public class Network
     {
@@ -16,11 +15,11 @@
         private readonly Dictionary<int, RuleBinding> _contextRules;
         private readonly StateOptimizer _optimizer;
 
-        public Network(NetworkBuilder builder, StateOptimizer optimizer, IEnumerable<RuleBinding> rules, Dictionary<int, RuleBinding> stateRules, Dictionary<int, RuleBinding> contextRules)
+        public Network([NotNull] NetworkBuilder builder, [NotNull] StateOptimizer optimizer, [NotNull] IEnumerable<RuleBinding> rules, Dictionary<int, RuleBinding> stateRules, Dictionary<int, RuleBinding> contextRules)
         {
-            Contract.Requires<ArgumentNullException>(builder != null, "builder");
-            Contract.Requires<ArgumentNullException>(optimizer != null, "optimizer");
-            Contract.Requires<ArgumentNullException>(rules != null, "rules");
+            Requires.NotNull(builder, nameof(builder));
+            Requires.NotNull(optimizer, nameof(optimizer));
+            Requires.NotNull(rules, nameof(rules));
 
             _builder = builder;
             _rules = new List<RuleBinding>(rules);

@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr4.Runtime;
     using Antlr4.Runtime.Misc;
@@ -22,10 +21,10 @@
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        public PhpOutliningTagger(ITextBuffer textBuffer, PhpOutliningTaggerProvider provider)
+        public PhpOutliningTagger([NotNull] ITextBuffer textBuffer, [NotNull] PhpOutliningTaggerProvider provider)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(provider != null, "provider");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
+            Requires.NotNull(provider, nameof(provider));
 
             this._textBuffer = textBuffer;
             this._backgroundParser = PhpOutliningBackgroundParser.CreateParser(textBuffer, provider.BackgroundIntelliSenseTaskScheduler, provider.OutputWindowService, provider.TextDocumentFactoryService);

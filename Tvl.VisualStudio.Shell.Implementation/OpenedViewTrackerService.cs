@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
+    using JetBrains.Annotations;
     using EventArgs = System.EventArgs;
     using ITextView = Microsoft.VisualStudio.Text.Editor.ITextView;
     using IVsEditorAdaptersFactoryService = Microsoft.VisualStudio.Editor.IVsEditorAdaptersFactoryService;
@@ -14,6 +15,7 @@
     {
         private readonly List<ITextView> _openedViews = new List<ITextView>();
 
+        [NotNull]
         public IEnumerable<ITextView> OpenedViews
         {
             get

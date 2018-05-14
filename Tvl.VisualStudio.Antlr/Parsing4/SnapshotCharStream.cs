@@ -1,7 +1,5 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing4
 {
-    using System;
-    using System.Diagnostics.Contracts;
     using Antlr4.Runtime;
     using Antlr4.Runtime.Misc;
     using Microsoft.VisualStudio.Text;
@@ -16,9 +14,9 @@
 
         private int _count;
 
-        public SnapshotCharStream(ITextSnapshot snapshot)
+        public SnapshotCharStream([NotNull] ITextSnapshot snapshot)
         {
-            Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
+            Requires.NotNull(snapshot, nameof(snapshot));
 
             this.Snapshot = snapshot;
             this._count = snapshot.Length;
@@ -26,15 +24,15 @@
             UpdateCachedLine();
         }
 
-        public SnapshotCharStream(ITextSnapshot snapshot, Span cachedSpan)
+        public SnapshotCharStream([NotNull] ITextSnapshot snapshot, Span cachedSpan)
             : this(new SnapshotSpan(snapshot, cachedSpan))
         {
-            Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
+            Requires.NotNull(snapshot, nameof(snapshot));
         }
 
         public SnapshotCharStream(SnapshotSpan cachedSpan)
         {
-            Contract.Requires<ArgumentException>(cachedSpan.Snapshot != null);
+            Requires.Argument(cachedSpan.Snapshot != null, nameof(cachedSpan), $"The {nameof(cachedSpan)} snapshot cannot be null.");
 
             this.Snapshot = cachedSpan.Snapshot;
             _count = Snapshot.Length;

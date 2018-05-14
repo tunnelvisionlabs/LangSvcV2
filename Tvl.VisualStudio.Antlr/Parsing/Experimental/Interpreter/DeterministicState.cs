@@ -3,8 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Diagnostics.Contracts;
     using System.Linq;
+    using JetBrains.Annotations;
 
     public class DeterministicState : IEquatable<DeterministicState>
     {
@@ -13,9 +13,9 @@
         private readonly List<DeterministicTransition> _incomingTransitions = new List<DeterministicTransition>();
         private readonly List<DeterministicTransition> _outgoingTransitions = new List<DeterministicTransition>();
 
-        public DeterministicState(IEnumerable<ContextFrame> contexts)
+        public DeterministicState([NotNull] IEnumerable<ContextFrame> contexts)
         {
-            Contract.Requires<ArgumentNullException>(contexts != null, "contexts");
+            Requires.NotNull(contexts, nameof(contexts));
 
             _contexts = new HashSet<ContextFrame>(contexts);
         }
@@ -44,9 +44,9 @@
             }
         }
 
-        public void AddTransition(DeterministicTransition transition)
+        public void AddTransition([NotNull] DeterministicTransition transition)
         {
-            Contract.Requires<ArgumentNullException>(transition != null, "transition");
+            Requires.NotNull(transition, nameof(transition));
 
             _outgoingTransitions.Add(transition);
             transition.TargetState._incomingTransitions.Add(transition);

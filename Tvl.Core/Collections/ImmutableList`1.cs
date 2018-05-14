@@ -1,28 +1,27 @@
 ﻿namespace Tvl.Collections
 {
-    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Diagnostics.Contracts;
     using System.Linq;
+    using JetBrains.Annotations;
 
     public class ImmutableList<T> : ReadOnlyCollection<T>
     {
-        public ImmutableList(IEnumerable<T> collection)
+        public ImmutableList([NotNull] IEnumerable<T> collection)
             : base(GetImmutableList(collection))
         {
-            Contract.Requires<ArgumentNullException>(collection != null, "collection");
+            Requires.NotNull(collection, nameof(collection));
         }
 
-        public ImmutableList(ImmutableList<T> collection)
+        public ImmutableList([NotNull] ImmutableList<T> collection)
             : base(collection.Items)
         {
-            Contract.Requires<ArgumentNullException>(collection != null, "collection");
+            Requires.NotNull(collection, nameof(collection));
         }
 
-        private static IList<T> GetImmutableList(IEnumerable<T> collection)
+        private static IList<T> GetImmutableList([NotNull] IEnumerable<T> collection)
         {
-            Contract.Requires(collection != null);
+            Requires.NotNull(collection, nameof(collection));
 
             ImmutableList<T> immutable = collection as ImmutableList<T>;
             if (immutable != null)

@@ -1,8 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental.Atn
 {
+    using JetBrains.Annotations;
     using Tvl.VisualStudio.Language.Parsing.Collections;
-    using ArgumentNullException = System.ArgumentNullException;
-    using Contract = System.Diagnostics.Contracts.Contract;
     using Interval = Tvl.VisualStudio.Language.Parsing.Collections.Interval;
 
     public class Nfa
@@ -10,19 +9,19 @@
         public readonly State StartState;
         public readonly State EndState;
 
-        public Nfa(State startState, State endState)
+        public Nfa([NotNull] State startState, [NotNull] State endState)
         {
-            Contract.Requires<ArgumentNullException>(startState != null, "startState");
-            Contract.Requires<ArgumentNullException>(endState != null, "endState");
+            Requires.NotNull(startState, nameof(startState));
+            Requires.NotNull(endState, nameof(endState));
 
             StartState = startState;
             EndState = endState;
         }
 
-        public static void BindRule(RuleBinding ruleBinding, Nfa body)
+        public static void BindRule([NotNull] RuleBinding ruleBinding, [NotNull] Nfa body)
         {
-            Contract.Requires<ArgumentNullException>(ruleBinding != null, "ruleBinding");
-            Contract.Requires<ArgumentNullException>(body != null, "body");
+            Requires.NotNull(ruleBinding, nameof(ruleBinding));
+            Requires.NotNull(body, nameof(body));
 
             ruleBinding.StartState.AddTransition(new EpsilonTransition(body.StartState));
             body.EndState.AddTransition(new EpsilonTransition(ruleBinding.EndState));

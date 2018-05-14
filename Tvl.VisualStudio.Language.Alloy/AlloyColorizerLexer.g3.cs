@@ -1,17 +1,16 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy
 {
-    using System;
-    using System.Diagnostics.Contracts;
     using Antlr.Runtime;
+    using JetBrains.Annotations;
 
     partial class AlloyColorizerLexer
     {
         private readonly AlloyClassifierLexer _lexer;
 
-        public AlloyColorizerLexer(ICharStream input, AlloyClassifierLexer lexer)
+        public AlloyColorizerLexer(ICharStream input, [NotNull] AlloyClassifierLexer lexer)
             : this(input)
         {
-            Contract.Requires<ArgumentNullException>(lexer != null, "lexer");
+            Requires.NotNull(lexer, nameof(lexer));
 
             _lexer = lexer;
         }

@@ -2,8 +2,8 @@
 {
     using System;
     using System.ComponentModel.Composition;
-    using System.Diagnostics.Contracts;
     using System.Windows;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.Shell.Interop;
@@ -92,9 +92,9 @@
             return null;
         }
 
-        private bool IsViewOnScreen(ITextView view)
+        private bool IsViewOnScreen([NotNull] ITextView view)
         {
-            Contract.Requires<ArgumentNullException>(view != null, "view");
+            Requires.NotNull(view, nameof(view));
 
             IVsTextView viewAdapter = VsEditorAdaptersFactoryService.GetViewAdapter(view);
             IServiceProvider sp = viewAdapter as IServiceProvider;

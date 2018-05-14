@@ -2,13 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Threading.Tasks;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.OutputWindow.Interfaces;
     using AntlrTool = global::Antlr3.AntlrTool;
     using CommonTree = Antlr.Runtime.Tree.CommonTree;
-    using Contract = System.Diagnostics.Contracts.Contract;
     using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
     using ErrorManager = global::Antlr3.Tool.ErrorManager;
     using Grammar = global::Antlr3.Tool.Grammar;
@@ -20,13 +21,13 @@
     {
         private static bool _initialized;
 
-        public AntlrBackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+        public AntlrBackgroundParser([NotNull] ITextBuffer textBuffer, [NotNull] TaskScheduler taskScheduler, [NotNull] ITextDocumentFactoryService textDocumentFactoryService, [NotNull] IOutputWindowService outputWindowService)
             : base(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService)
         {
-            Contract.Requires(textBuffer != null);
-            Contract.Requires(taskScheduler != null);
-            Contract.Requires(textDocumentFactoryService != null);
-            Contract.Requires(outputWindowService != null);
+            Debug.Assert(textBuffer != null);
+            Debug.Assert(taskScheduler != null);
+            Debug.Assert(textDocumentFactoryService != null);
+            Debug.Assert(outputWindowService != null);
 
             if (!_initialized)
             {

@@ -1,8 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Runtime.InteropServices;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
 
@@ -10,9 +11,9 @@
     {
         public delegate void ProcessHierarchyNode(IVsHierarchy hierarchyNode, uint itemid, int recursionLevel);
 
-        public static object GetExtensibilityObject(this IVsHierarchy hierarchy, uint itemId, bool nothrow)
+        public static object GetExtensibilityObject([NotNull] this IVsHierarchy hierarchy, uint itemId, bool nothrow)
         {
-            Contract.Requires<ArgumentNullException>(hierarchy != null, "hierarchy");
+            Requires.NotNull(hierarchy, nameof(hierarchy));
 
             try
             {
@@ -32,35 +33,35 @@
             return null;
         }
 
-        public static object GetExtensibilityObject(this IVsHierarchy hierarchy, uint itemId)
+        public static object GetExtensibilityObject([NotNull] this IVsHierarchy hierarchy, uint itemId)
         {
-            Contract.Requires(hierarchy != null);
+            Debug.Assert(hierarchy != null);
             return GetExtensibilityObject(hierarchy, itemId, false);
         }
 
-        public static object GetExtensibilityObjectOrDefault(this IVsHierarchy hierarchy, uint itemId)
+        public static object GetExtensibilityObjectOrDefault([NotNull] this IVsHierarchy hierarchy, uint itemId)
         {
-            Contract.Requires(hierarchy != null);
+            Debug.Assert(hierarchy != null);
             return GetExtensibilityObject(hierarchy, itemId, true);
         }
 
-        public static object GetExtensibilityObject(this IVsHierarchy hierarchy)
+        public static object GetExtensibilityObject([NotNull] this IVsHierarchy hierarchy)
         {
-            Contract.Requires(hierarchy != null);
+            Debug.Assert(hierarchy != null);
             return GetExtensibilityObject(hierarchy, VSConstants.VSITEMID_ROOT, true);
         }
 
-        public static void EnumHierarchyItems(this IVsHierarchy hierarchy, uint itemid, int recursionLevel, bool isSolution, bool visibleOnly, ProcessHierarchyNode processNode)
+        public static void EnumHierarchyItems([NotNull] this IVsHierarchy hierarchy, uint itemid, int recursionLevel, bool isSolution, bool visibleOnly, [NotNull] ProcessHierarchyNode processNode)
         {
-            Contract.Requires(hierarchy != null);
-            Contract.Requires(processNode != null);
+            Debug.Assert(hierarchy != null);
+            Debug.Assert(processNode != null);
             EnumHierarchyItems(hierarchy, itemid, recursionLevel, isSolution, visibleOnly, false, processNode);
         }
 
-        public static void EnumHierarchyItems(this IVsHierarchy hierarchy, uint itemid, int recursionLevel, bool isSolution, bool visibleOnly, bool nothrow, ProcessHierarchyNode processNode)
+        public static void EnumHierarchyItems([NotNull] this IVsHierarchy hierarchy, uint itemid, int recursionLevel, bool isSolution, bool visibleOnly, bool nothrow, [NotNull] ProcessHierarchyNode processNode)
         {
-            Contract.Requires<ArgumentNullException>(hierarchy != null, "hierarchy");
-            Contract.Requires<ArgumentNullException>(processNode != null, "processNode");
+            Requires.NotNull(hierarchy, nameof(hierarchy));
+            Requires.NotNull(processNode, nameof(processNode));
 
             int hr;
             IntPtr nestedHierarchyObj;

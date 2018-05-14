@@ -1,7 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Intellisense
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text.Editor;
     using Keyboard = System.Windows.Input.Keyboard;
     using SnapshotSpan = Microsoft.VisualStudio.Text.SnapshotSpan;
@@ -11,20 +11,19 @@
         private readonly ITextView _textView;
         private readonly SnapshotSpan _snapshotSpan;
 
-        public SnapshotSpanNavigateToTarget(ITextView textView, SnapshotSpan snapshotSpan)
+        public SnapshotSpanNavigateToTarget([NotNull] ITextView textView, SnapshotSpan snapshotSpan)
         {
-            Contract.Requires<ArgumentNullException>(textView != null, "textView");
+            Requires.NotNull(textView, nameof(textView));
 
             this._textView = textView;
             this._snapshotSpan = snapshotSpan;
         }
 
+        [NotNull]
         public ITextView TextView
         {
             get
             {
-                Contract.Ensures(Contract.Result<ITextView>() != null);
-
                 return _textView;
             }
         }

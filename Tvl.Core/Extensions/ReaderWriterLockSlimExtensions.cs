@@ -1,70 +1,70 @@
 ﻿namespace Tvl
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using ReaderWriterLockSlim = System.Threading.ReaderWriterLockSlim;
 
     public static class ReaderWriterLockSlimExtensions
     {
-        public static ReadLockHelper ReadLock(this ReaderWriterLockSlim readerWriterLock)
+        public static ReadLockHelper ReadLock([NotNull] this ReaderWriterLockSlim readerWriterLock)
         {
-            Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+            Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
             return new ReadLockHelper(readerWriterLock);
         }
 
-        public static ReadLockHelper ReadLock(this ReaderWriterLockSlim readerWriterLock, int millisecondsTimeout)
+        public static ReadLockHelper ReadLock([NotNull] this ReaderWriterLockSlim readerWriterLock, int millisecondsTimeout)
         {
-            Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+            Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
             return new ReadLockHelper(readerWriterLock, millisecondsTimeout);
         }
 
-        public static ReadLockHelper ReadLock(this ReaderWriterLockSlim readerWriterLock, TimeSpan timeout)
+        public static ReadLockHelper ReadLock([NotNull] this ReaderWriterLockSlim readerWriterLock, TimeSpan timeout)
         {
-            Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+            Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
             return new ReadLockHelper(readerWriterLock, timeout);
         }
 
-        public static UpgradeableReadLockHelper UpgradableReadLock(this ReaderWriterLockSlim readerWriterLock)
+        public static UpgradeableReadLockHelper UpgradableReadLock([NotNull] this ReaderWriterLockSlim readerWriterLock)
         {
-            Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+            Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
             return new UpgradeableReadLockHelper(readerWriterLock);
         }
 
-        public static UpgradeableReadLockHelper UpgradableReadLock(this ReaderWriterLockSlim readerWriterLock, int millisecondsTimeout)
+        public static UpgradeableReadLockHelper UpgradableReadLock([NotNull] this ReaderWriterLockSlim readerWriterLock, int millisecondsTimeout)
         {
-            Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+            Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
             return new UpgradeableReadLockHelper(readerWriterLock, millisecondsTimeout);
         }
 
-        public static UpgradeableReadLockHelper UpgradableReadLock(this ReaderWriterLockSlim readerWriterLock, TimeSpan timeout)
+        public static UpgradeableReadLockHelper UpgradableReadLock([NotNull] this ReaderWriterLockSlim readerWriterLock, TimeSpan timeout)
         {
-            Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+            Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
             return new UpgradeableReadLockHelper(readerWriterLock, timeout);
         }
 
-        public static WriteLockHelper WriteLock(this ReaderWriterLockSlim readerWriterLock)
+        public static WriteLockHelper WriteLock([NotNull] this ReaderWriterLockSlim readerWriterLock)
         {
-            Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+            Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
             return new WriteLockHelper(readerWriterLock);
         }
 
-        public static WriteLockHelper WriteLock(this ReaderWriterLockSlim readerWriterLock, int millisecondsTimeout)
+        public static WriteLockHelper WriteLock([NotNull] this ReaderWriterLockSlim readerWriterLock, int millisecondsTimeout)
         {
-            Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+            Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
             return new WriteLockHelper(readerWriterLock, millisecondsTimeout);
         }
 
-        public static WriteLockHelper WriteLock(this ReaderWriterLockSlim readerWriterLock, TimeSpan timeout)
+        public static WriteLockHelper WriteLock([NotNull] this ReaderWriterLockSlim readerWriterLock, TimeSpan timeout)
         {
-            Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+            Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
             return new WriteLockHelper(readerWriterLock, timeout);
         }
@@ -73,17 +73,17 @@
         {
             private readonly ReaderWriterLockSlim _readerWriterLock;
 
-            public ReadLockHelper(ReaderWriterLockSlim readerWriterLock)
+            public ReadLockHelper([NotNull] ReaderWriterLockSlim readerWriterLock)
             {
-                Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+                Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
                 readerWriterLock.EnterReadLock();
                 this._readerWriterLock = readerWriterLock;
             }
 
-            public ReadLockHelper(ReaderWriterLockSlim readerWriterLock, int millisecondsTimeout)
+            public ReadLockHelper([NotNull] ReaderWriterLockSlim readerWriterLock, int millisecondsTimeout)
             {
-                Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+                Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
                 if (!readerWriterLock.TryEnterReadLock(millisecondsTimeout))
                     throw new TimeoutException();
@@ -91,9 +91,9 @@
                 this._readerWriterLock = readerWriterLock;
             }
 
-            public ReadLockHelper(ReaderWriterLockSlim readerWriterLock, TimeSpan timeout)
+            public ReadLockHelper([NotNull] ReaderWriterLockSlim readerWriterLock, TimeSpan timeout)
             {
-                Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+                Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
                 if (!readerWriterLock.TryEnterReadLock(timeout))
                     throw new TimeoutException();
@@ -112,18 +112,18 @@
             private readonly ReaderWriterLockSlim _readerWriterLock;
             private bool _readonly;
 
-            public UpgradeableReadLockHelper(ReaderWriterLockSlim readerWriterLock)
+            public UpgradeableReadLockHelper([NotNull] ReaderWriterLockSlim readerWriterLock)
             {
-                Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+                Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
                 this._readerWriterLock = readerWriterLock;
                 this._readonly = false;
                 this._readerWriterLock.EnterUpgradeableReadLock();
             }
 
-            public UpgradeableReadLockHelper(ReaderWriterLockSlim readerWriterLock, int millisecondsTimeout)
+            public UpgradeableReadLockHelper([NotNull] ReaderWriterLockSlim readerWriterLock, int millisecondsTimeout)
             {
-                Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+                Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
                 this._readerWriterLock = readerWriterLock;
                 this._readonly = false;
@@ -131,9 +131,9 @@
                     throw new TimeoutException();
             }
 
-            public UpgradeableReadLockHelper(ReaderWriterLockSlim readerWriterLock, TimeSpan timeout)
+            public UpgradeableReadLockHelper([NotNull] ReaderWriterLockSlim readerWriterLock, TimeSpan timeout)
             {
-                Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+                Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
                 this._readerWriterLock = readerWriterLock;
                 this._readonly = false;
@@ -174,17 +174,17 @@
         {
             private readonly ReaderWriterLockSlim _readerWriterLock;
 
-            public WriteLockHelper(ReaderWriterLockSlim readerWriterLock)
+            public WriteLockHelper([NotNull] ReaderWriterLockSlim readerWriterLock)
             {
-                Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+                Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
                 readerWriterLock.EnterWriteLock();
                 this._readerWriterLock = readerWriterLock;
             }
 
-            public WriteLockHelper(ReaderWriterLockSlim readerWriterLock, int millisecondsTimeout)
+            public WriteLockHelper([NotNull] ReaderWriterLockSlim readerWriterLock, int millisecondsTimeout)
             {
-                Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+                Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
                 if (!readerWriterLock.TryEnterWriteLock(millisecondsTimeout))
                     throw new TimeoutException();
@@ -192,9 +192,9 @@
                 this._readerWriterLock = readerWriterLock;
             }
 
-            public WriteLockHelper(ReaderWriterLockSlim readerWriterLock, TimeSpan timeout)
+            public WriteLockHelper([NotNull] ReaderWriterLockSlim readerWriterLock, TimeSpan timeout)
             {
-                Contract.Requires<ArgumentNullException>(readerWriterLock != null, "readerWriterLock");
+                Requires.NotNull(readerWriterLock, nameof(readerWriterLock));
 
                 if (!readerWriterLock.TryEnterWriteLock(timeout))
                     throw new TimeoutException();

@@ -1,17 +1,16 @@
 ﻿namespace Tvl.VisualStudio.Language.Go
 {
-    using System;
-    using System.Diagnostics.Contracts;
     using Antlr.Runtime;
+    using JetBrains.Annotations;
 
     partial class GoColorizerLexer
     {
         private readonly GoClassifierLexer _lexer;
 
-        public GoColorizerLexer(ICharStream input, GoClassifierLexer lexer)
+        public GoColorizerLexer(ICharStream input, [NotNull] GoClassifierLexer lexer)
             : this(input)
         {
-            Contract.Requires<ArgumentNullException>(lexer != null, "lexer");
+            Requires.NotNull(lexer, nameof(lexer));
 
             _lexer = lexer;
         }

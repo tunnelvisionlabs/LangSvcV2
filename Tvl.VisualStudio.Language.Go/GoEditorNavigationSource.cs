@@ -2,9 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using Antlr.Runtime;
     using Antlr.Runtime.Tree;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
@@ -18,11 +18,11 @@
 
         public event EventHandler NavigationTargetsChanged;
 
-        public GoEditorNavigationSource(ITextBuffer textBuffer, IBackgroundParser backgroundParser, GoEditorNavigationSourceProvider provider)
+        public GoEditorNavigationSource([NotNull] ITextBuffer textBuffer, [NotNull] IBackgroundParser backgroundParser, [NotNull] GoEditorNavigationSourceProvider provider)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
-            Contract.Requires<ArgumentNullException>(provider != null, "provider");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
+            Requires.NotNull(backgroundParser, nameof(backgroundParser));
+            Requires.NotNull(provider, nameof(provider));
 
             this.TextBuffer = textBuffer;
             this.BackgroundParser = backgroundParser;

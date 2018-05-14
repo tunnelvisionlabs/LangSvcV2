@@ -1,18 +1,17 @@
 ﻿namespace Tvl.VisualStudio.Language.Antlr3
 {
-    using System;
-    using System.Diagnostics.Contracts;
     using Antlr.Runtime;
+    using JetBrains.Annotations;
 
     partial class AntlrGrammarClassifierLexer
     {
         private readonly AntlrClassifierLexer _lexer;
 
-        internal AntlrGrammarClassifierLexer(ICharStream input, AntlrClassifierLexer lexer)
+        internal AntlrGrammarClassifierLexer([NotNull] ICharStream input, [NotNull] AntlrClassifierLexer lexer)
             : this(input)
         {
-            Contract.Requires<ArgumentNullException>(input != null, "input");
-            Contract.Requires<ArgumentNullException>(lexer != null, "lexer");
+            Requires.NotNull(input, nameof(input));
+            Requires.NotNull(lexer, nameof(lexer));
 
             _lexer = lexer;
         }

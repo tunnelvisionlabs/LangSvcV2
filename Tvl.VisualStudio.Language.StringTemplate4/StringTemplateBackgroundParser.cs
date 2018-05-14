@@ -2,11 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Antlr.Runtime;
     using Antlr.Runtime.Tree;
     using Antlr4.StringTemplate.Compiler;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
@@ -15,13 +16,13 @@
 
     public class StringTemplateBackgroundParser : BackgroundParser
     {
-        public StringTemplateBackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+        public StringTemplateBackgroundParser([NotNull] ITextBuffer textBuffer, [NotNull] TaskScheduler taskScheduler, [NotNull] ITextDocumentFactoryService textDocumentFactoryService, [NotNull] IOutputWindowService outputWindowService)
             : base(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService)
         {
-            Contract.Requires(textBuffer != null);
-            Contract.Requires(taskScheduler != null);
-            Contract.Requires(textDocumentFactoryService != null);
-            Contract.Requires(outputWindowService != null);
+            Debug.Assert(textBuffer != null);
+            Debug.Assert(taskScheduler != null);
+            Debug.Assert(textDocumentFactoryService != null);
+            Debug.Assert(outputWindowService != null);
         }
 
         protected override void ReParseImpl()
@@ -132,10 +133,10 @@
             private readonly TemplateGroupWrapper _group;
             private readonly CommonTree _tree;
 
-            public TemplateGroupRuleReturnScope(TemplateGroupWrapper group, CommonTree tree)
+            public TemplateGroupRuleReturnScope([NotNull] TemplateGroupWrapper group, [NotNull] CommonTree tree)
             {
-                Contract.Requires<ArgumentNullException>(group != null, "group");
-                Contract.Requires<ArgumentNullException>(tree != null, "tree");
+                Requires.NotNull(group, nameof(group));
+                Requires.NotNull(tree, nameof(tree));
 
                 _group = group;
                 _tree = tree;

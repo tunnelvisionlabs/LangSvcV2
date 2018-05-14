@@ -1,7 +1,6 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
-    using System;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using IVsDropdownBar = Microsoft.VisualStudio.TextManager.Interop.IVsDropdownBar;
     using IVsDropdownBarClient = Microsoft.VisualStudio.TextManager.Interop.IVsDropdownBarClient;
@@ -9,9 +8,9 @@
 
     public static class IVsDropdownBarManagerExtensions
     {
-        public static IVsDropdownBar GetDropdownBar(this IVsDropdownBarManager dropdownBarManager)
+        public static IVsDropdownBar GetDropdownBar([NotNull] this IVsDropdownBarManager dropdownBarManager)
         {
-            Contract.Requires<ArgumentNullException>(dropdownBarManager != null, "dropdownBarManager");
+            Requires.NotNull(dropdownBarManager, nameof(dropdownBarManager));
 
             IVsDropdownBar dropdownBar;
             if (ErrorHandler.Failed(dropdownBarManager.GetDropdownBar(out dropdownBar)))
@@ -20,9 +19,9 @@
             return dropdownBar;
         }
 
-        public static IVsDropdownBarClient GetDropdownBarClient(this IVsDropdownBarManager dropdownBarManager)
+        public static IVsDropdownBarClient GetDropdownBarClient([NotNull] this IVsDropdownBarManager dropdownBarManager)
         {
-            Contract.Requires<ArgumentNullException>(dropdownBarManager != null, "dropdownBarManager");
+            Requires.NotNull(dropdownBarManager, nameof(dropdownBarManager));
 
             IVsDropdownBar dropdownBar = GetDropdownBar(dropdownBarManager);
             IVsDropdownBarClient client;

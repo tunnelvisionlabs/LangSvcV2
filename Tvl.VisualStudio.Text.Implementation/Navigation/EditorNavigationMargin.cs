@@ -2,13 +2,13 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Controls.Primitives;
     using System.Windows.Input;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Tvl.Events;
@@ -25,11 +25,11 @@
         private readonly Dictionary<IEditorNavigationTarget, IEditorNavigationTarget> _owners =
             new Dictionary<IEditorNavigationTarget, IEditorNavigationTarget>();
 
-        public EditorNavigationMargin(IWpfTextView wpfTextView, IEnumerable<IEditorNavigationSource> sources, IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
+        public EditorNavigationMargin([NotNull] IWpfTextView wpfTextView, [NotNull] IEnumerable<IEditorNavigationSource> sources, [NotNull] IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
         {
-            Contract.Requires<ArgumentNullException>(wpfTextView != null, "wpfTextView");
-            Contract.Requires<ArgumentNullException>(sources != null, "sources");
-            Contract.Requires<ArgumentNullException>(editorNavigationTypeRegistryService != null, "editorNavigationTypeRegistryService");
+            Requires.NotNull(wpfTextView, nameof(wpfTextView));
+            Requires.NotNull(sources, nameof(sources));
+            Requires.NotNull(editorNavigationTypeRegistryService, nameof(editorNavigationTypeRegistryService));
 
             this._wpfTextView = wpfTextView;
             this._sources = sources;
@@ -110,12 +110,11 @@
             private set;
         }
 
+        [NotNull]
         public FrameworkElement VisualElement
         {
             get
             {
-                Contract.Ensures(Contract.Result<FrameworkElement>() != null);
-
                 return _container;
             }
         }
@@ -185,9 +184,9 @@
             return _navigationControls.Select(i => i.Item2.SelectedItem).OfType<IEditorNavigationTarget>().Contains(owner);
         }
 
-        private void UpdateNavigationTargets(IEditorNavigationSource source)
+        private void UpdateNavigationTargets([NotNull] IEditorNavigationSource source)
         {
-            Contract.Requires<ArgumentNullException>(source != null, "source");
+            Requires.NotNull(source, nameof(source));
 
             lock (this)
             {
@@ -211,9 +210,9 @@
             }
         }
 
-        private void UpdateNavigationTargets(IEnumerable<IEditorNavigationTarget> targets)
+        private void UpdateNavigationTargets([NotNull] IEnumerable<IEditorNavigationTarget> targets)
         {
-            Contract.Requires<ArgumentNullException>(targets != null, "targets");
+            Requires.NotNull(targets, nameof(targets));
 
             foreach (var group in targets.GroupBy(target => target.EditorNavigationType))
             {

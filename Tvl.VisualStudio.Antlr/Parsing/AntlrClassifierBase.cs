@@ -4,10 +4,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using Antlr.Runtime;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
-
-    using Contract = System.Diagnostics.Contracts.Contract;
 
     public abstract class AntlrClassifierBase : IClassifier
     {
@@ -20,9 +19,9 @@
         private int? _firstChangedLine;
         private int? _lastChangedLine;
 
-        public AntlrClassifierBase(ITextBuffer textBuffer)
+        public AntlrClassifierBase([NotNull] ITextBuffer textBuffer)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
 
             _textBuffer = textBuffer;
 
@@ -33,10 +32,9 @@
 
         public event EventHandler<ClassificationChangedEventArgs> ClassificationChanged;
 
+        [NotNull]
         public virtual IList<ClassificationSpan> GetClassificationSpans(SnapshotSpan span)
         {
-            Contract.Ensures(Contract.Result<IList<ClassificationSpan>>() != null);
-
             Span requestedSpan = span;
             AdjustParseSpan(ref span);
 
@@ -264,11 +262,11 @@
 
         protected abstract ITokenSource CreateLexer(ICharStream input);
 
-        protected virtual IEnumerable<ClassificationSpan> GetClassificationSpansForToken(IToken token, ITextSnapshot snapshot)
+        [NotNull]
+        protected virtual IEnumerable<ClassificationSpan> GetClassificationSpansForToken([NotNull] IToken token, [NotNull] ITextSnapshot snapshot)
         {
-            Contract.Requires<ArgumentNullException>(token != null, "token");
-            Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
-            Contract.Ensures(Contract.Result<IEnumerable<ClassificationSpan>>() != null);
+            Requires.NotNull(token, nameof(token));
+            Requires.NotNull(snapshot, nameof(snapshot));
 
             var classification = ClassifyToken(token);
             if (classification != null)
@@ -280,24 +278,24 @@
             return Enumerable.Empty<ClassificationSpan>();
         }
 
-        protected virtual IClassificationType ClassifyToken(IToken token)
+        protected virtual IClassificationType ClassifyToken([NotNull] IToken token)
         {
-            Contract.Requires<ArgumentNullException>(token != null, "token");
+            Requires.NotNull(token, nameof(token));
             return null;
         }
 
-        protected virtual void OnClassificationChanged(ClassificationChangedEventArgs e)
+        protected virtual void OnClassificationChanged([NotNull] ClassificationChangedEventArgs e)
         {
-            Contract.Requires<ArgumentNullException>(e != null, "e");
+            Requires.NotNull(e, nameof(e));
 
             var t = ClassificationChanged;
             if (t != null)
                 t(this, e);
         }
 
-        private static bool IsMultilineClassificationSpan(ClassificationSpan span)
+        private static bool IsMultilineClassificationSpan([NotNull] ClassificationSpan span)
         {
-            Contract.Requires<ArgumentNullException>(span != null, "span");
+            Requires.NotNull(span, nameof(span));
 
             if (span.Span.IsEmpty)
                 return false;

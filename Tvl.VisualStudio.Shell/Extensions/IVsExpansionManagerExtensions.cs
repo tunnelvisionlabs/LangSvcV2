@@ -1,25 +1,26 @@
 ﻿namespace Tvl.VisualStudio.Shell
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Runtime.InteropServices;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.TextManager.Interop;
 
     public static class IVsExpansionManagerExtensions
     {
-        public static VsExpansion[] EnumerateExpansions(this IVsExpansionManager expansionManager, Guid language)
+        [NotNull]
+        public static VsExpansion[] EnumerateExpansions([NotNull] this IVsExpansionManager expansionManager, Guid language)
         {
-            Contract.Requires(expansionManager != null);
-            Contract.Ensures(Contract.Result<VsExpansion[]>() != null);
+            Debug.Assert(expansionManager != null);
 
             return expansionManager.EnumerateExpansions(language, null, false);
         }
 
-        public static VsExpansion[] EnumerateExpansions(this IVsExpansionManager expansionManager, Guid language, string[] snippetTypes, bool shortcutsOnly)
+        [NotNull]
+        public static VsExpansion[] EnumerateExpansions([NotNull] this IVsExpansionManager expansionManager, Guid language, string[] snippetTypes, bool shortcutsOnly)
         {
-            Contract.Requires<ArgumentNullException>(expansionManager != null, "expansionManager");
-            Contract.Ensures(Contract.Result<VsExpansion[]>() != null);
+            Requires.NotNull(expansionManager, nameof(expansionManager));
 
             bool includeNullType = false;
             bool includeDuplicates = false;

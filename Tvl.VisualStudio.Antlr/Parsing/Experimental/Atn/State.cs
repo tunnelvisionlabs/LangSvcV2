@@ -3,8 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Diagnostics.Contracts;
     using System.Linq;
+    using JetBrains.Annotations;
     using IntervalSet = Tvl.VisualStudio.Language.Parsing.Collections.IntervalSet;
     using PreventContextType = Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter.PreventContextType;
 
@@ -202,13 +202,11 @@
             _recursiveTransitions = OutgoingTransitions.Count != originalTransitionCount;
         }
 
-        private bool AddRecursivePushTransitions(HashSet<State> visited, State currentState, Transition effectiveTransition, List<int> contexts, StateOptimizer optimizer)
+        private bool AddRecursivePushTransitions([NotNull] HashSet<State> visited, [NotNull] State currentState, Transition effectiveTransition, [NotNull] List<int> contexts, StateOptimizer optimizer)
         {
-            Contract.Requires(visited != null);
-            Contract.Requires(currentState != null);
-            Contract.Requires(contexts != null);
-            Contract.Ensures(visited.Count == Contract.OldValue(visited.Count));
-            Contract.Ensures(contexts.Count == Contract.OldValue(contexts.Count));
+            Debug.Assert(visited != null);
+            Debug.Assert(currentState != null);
+            Debug.Assert(contexts != null);
 
             bool foundRecursive = false;
 
@@ -258,13 +256,11 @@
             return foundRecursive;
         }
 
-        private bool AddRecursivePopTransitions(HashSet<State> visited, State currentState, Transition effectiveTransition, List<int> contexts, StateOptimizer optimizer)
+        private bool AddRecursivePopTransitions([NotNull] HashSet<State> visited, [NotNull] State currentState, Transition effectiveTransition, [NotNull] List<int> contexts, StateOptimizer optimizer)
         {
-            Contract.Requires(visited != null);
-            Contract.Requires(currentState != null);
-            Contract.Requires(contexts != null);
-            Contract.Ensures(visited.Count == Contract.OldValue(visited.Count));
-            Contract.Ensures(contexts.Count == Contract.OldValue(contexts.Count));
+            Debug.Assert(visited != null);
+            Debug.Assert(currentState != null);
+            Debug.Assert(contexts != null);
 
             bool foundRecursive = false;
 
@@ -314,10 +310,9 @@
             return foundRecursive;
         }
 
+        [NotNull]
         internal IEnumerable<Transition> GetOptimizedTransitions()
         {
-            Contract.Ensures(Contract.Result<IEnumerable<Transition>>() != null);
-
             if (IsOptimized)
                 return OutgoingTransitions;
 
@@ -328,12 +323,10 @@
             return OutgoingTransitions.SelectMany(i => FollowOptimizedTransitions(visited, i));
         }
 
-        private IEnumerable<Transition> FollowOptimizedTransitions(HashSet<State> visited, Transition currentTransition)
+        private IEnumerable<Transition> FollowOptimizedTransitions([NotNull] HashSet<State> visited, [NotNull] Transition currentTransition)
         {
-            Contract.Requires(visited != null);
-            Contract.Requires(currentTransition != null);
-
-            Contract.Ensures(visited.Count == Contract.OldValue(visited.Count));
+            Debug.Assert(visited != null);
+            Debug.Assert(currentTransition != null);
 
             if (currentTransition.TargetState == this)
             {
@@ -405,10 +398,10 @@
             return result;
         }
 
-        public void Optimize(StateOptimizer optimizer)
+        public void Optimize([NotNull] StateOptimizer optimizer)
         {
-            Contract.Requires<ArgumentNullException>(optimizer != null, "optimizer");
-            Contract.Requires<InvalidOperationException>(IsRecursiveAnalysisComplete);
+            Requires.NotNull(optimizer, nameof(optimizer));
+            Verify.Operation(IsRecursiveAnalysisComplete, "Expected recursive analysis to be complete.");
 
             if (IsOptimized)
                 return;
@@ -423,7 +416,7 @@
             foreach (var transition in oldTransitions)
                 RemoveTransitionInternal(transition, optimizer);
 
-            Contract.Assert(Contract.ForAll(OutgoingTransitions, i => i.IsRecursive));
+            Debug.Assert(OutgoingTransitions.All(i => i.IsRecursive));
 
             foreach (var transition in oldTransitions)
             {
@@ -432,18 +425,16 @@
                 AddOptimizedTransitions(optimizer, visited, transition, PreventContextType.None);
             }
 
-            Contract.Assert(oldTransitions.Count == 0 || OutgoingTransitions.Count > 0);
+            Debug.Assert(oldTransitions.Count == 0 || OutgoingTransitions.Count > 0);
         }
 
-        private void AddOptimizedTransitions(StateOptimizer optimizer, HashSet<Transition> visited, Transition transition, PreventContextType preventContextType)
+        private void AddOptimizedTransitions([NotNull] StateOptimizer optimizer, [NotNull] HashSet<Transition> visited, [NotNull] Transition transition, PreventContextType preventContextType)
         {
-            Contract.Requires(optimizer != null);
-            Contract.Requires(visited != null);
-            Contract.Requires(transition != null);
-            Contract.Requires(transition.SourceState == null);
-            Contract.Requires(preventContextType != PreventContextType.PushRecursive && preventContextType != PreventContextType.PopRecursive);
-
-            Contract.Ensures(visited.Count == Contract.OldValue(visited.Count));
+            Debug.Assert(optimizer != null);
+            Debug.Assert(visited != null);
+            Debug.Assert(transition != null);
+            Debug.Assert(transition.SourceState == null);
+            Debug.Assert(preventContextType != PreventContextType.PushRecursive && preventContextType != PreventContextType.PopRecursive);
 
             List<Transition> addedTransitions = null;
 
@@ -527,7 +518,7 @@
 
                         try
                         {
-                            Contract.Assert(!preventMerge);
+                            Debug.Assert(!preventMerge);
                             AddOptimizedTransitions(optimizer, visited, MergeTransitions(transition, nextTransition), preventContextType);
                         }
                         finally
@@ -595,16 +586,13 @@
             }
         }
 
-        private Transition MergeTransitions(Transition first, Transition second)
+        private Transition MergeTransitions([NotNull] Transition first, [NotNull] Transition second)
         {
-            Contract.Requires(first != null);
-            Contract.Requires(second != null);
+            Debug.Assert(first != null);
+            Debug.Assert(second != null);
 
-            Contract.Ensures(Contract.Result<Transition>().SourceState == null);
-            Contract.Ensures(Contract.Result<Transition>().IsRecursive == second.IsRecursive);
-
-            Contract.Assert(!first.IsRecursive);
-            Contract.Assert(first.IsEpsilon || !second.IsRecursive);
+            Debug.Assert(!first.IsRecursive);
+            Debug.Assert(first.IsEpsilon || !second.IsRecursive);
 
             if (first.IsMatch)
             {
@@ -713,23 +701,19 @@
 
         public void AddTransition(Transition transition, StateOptimizer optimizer = null)
         {
-            Contract.Requires<ArgumentNullException>(transition != null, "transition");
-            Contract.Requires<InvalidOperationException>(transition.SourceState == null);
-            Contract.Requires<InvalidOperationException>(!OutgoingTransitions.Contains(transition));
-            Contract.Requires<InvalidOperationException>(!transition.TargetState.IncomingTransitions.Contains(transition));
+            Requires.NotNull(transition, nameof(transition));
+            Verify.Operation(transition.SourceState == null, "Expected the transition to not be associated with a source state.");
+            Verify.Operation(!OutgoingTransitions.Contains(transition), "Expected the state to not already contain the transition.");
+            Verify.Operation(!transition.TargetState.IncomingTransitions.Contains(transition), "Expected the target state to not already contain the incoming transition.");
 
             AddTransitionInternal(transition, optimizer);
         }
 
         public void RemoveTransition(Transition transition, StateOptimizer optimizer = null)
         {
-            Contract.Requires<ArgumentNullException>(transition != null, "transition");
-            Contract.Requires<ArgumentException>(transition.SourceState == this);
-            Contract.Requires<InvalidOperationException>(OutgoingTransitions.Contains(transition));
-
-            Contract.Ensures(transition.SourceState == null);
-            Contract.Ensures(!Contract.OldValue(transition.SourceState).OutgoingTransitions.Contains(transition));
-            Contract.Ensures(!transition.TargetState.IncomingTransitions.Contains(transition));
+            Requires.NotNull(transition, nameof(transition));
+            Requires.Argument(transition.SourceState == this, nameof(transition), "The transition source state must be the current instance.");
+            Verify.Operation(OutgoingTransitions.Contains(transition), "Expected the state to contain the transition.");
 
             RemoveTransitionInternal(transition, optimizer);
         }
@@ -933,13 +917,13 @@
                 OutgoingTransitions.Count);
         }
 
-        internal void AddTransitionInternal(Transition transition, StateOptimizer optimizer)
+        internal void AddTransitionInternal([NotNull] Transition transition, StateOptimizer optimizer)
         {
-            Contract.Requires(transition != null);
-            Contract.Requires(transition.SourceState == null);
+            Debug.Assert(transition != null);
+            Debug.Assert(transition.SourceState == null);
 #if ALL_CHECKS
-            Contract.Requires(!OutgoingTransitions.Contains(transition));
-            Contract.Requires(!transition.TargetState.IncomingTransitions.Contains(transition));
+            Debug.Assert(!OutgoingTransitions.Contains(transition));
+            Debug.Assert(!transition.TargetState.IncomingTransitions.Contains(transition));
 #endif
 
             if (IsRecursiveAnalysisComplete && !transition.IsMatch && transition.TargetState == this && !transition.IsRecursive)
@@ -1050,20 +1034,12 @@
             transition.TargetState._isBackwardRecursive = null;
         }
 
-        internal void RemoveTransitionInternal(Transition transition, StateOptimizer optimizer)
+        internal void RemoveTransitionInternal([NotNull] Transition transition, StateOptimizer optimizer)
         {
-            Contract.Requires(transition != null, "transition");
-            Contract.Requires(transition.SourceState == this);
+            Debug.Assert(transition != null, "transition");
+            Debug.Assert(transition.SourceState == this);
 #if ALL_CHECKS
-            Contract.Requires(OutgoingTransitions.Contains(transition));
-#endif
-
-            Contract.Ensures(transition.SourceState == null);
-#if ALL_CHECKS
-            Contract.Ensures(!Contract.OldValue(transition.SourceState).OutgoingTransitions.Contains(transition));
-            Contract.Ensures(!transition.TargetState.IncomingTransitions.Contains(transition));
-
-            Contract.Assert(transition.TargetState.IncomingTransitions.Contains(transition));
+            Debug.Assert(OutgoingTransitions.Contains(transition));
 #endif
 
             //PopContextTransition popContextTransition = transition as PopContextTransition;

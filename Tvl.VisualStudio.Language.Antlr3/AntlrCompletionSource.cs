@@ -2,9 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Linq;
     using Antlr.Runtime;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
@@ -72,6 +73,7 @@
             }
         }
 
+        [NotNull]
         public override IEnumerable<string> Keywords
         {
             get
@@ -215,6 +217,7 @@
             return base.GetKeywordCompletions();
         }
 
+        [NotNull]
         protected override IEnumerable<Completion> GetSnippetCompletions()
         {
             if (!_intellisenseOptions.CodeSnippetsInCompletionLists)
@@ -557,21 +560,21 @@
             return labels;
         }
 
-        private IEnumerable<IToken> ExtractScopeAttributes(IToken token)
+        private IEnumerable<IToken> ExtractScopeAttributes([NotNull] IToken token)
         {
-            Contract.Requires(token != null);
+            Debug.Assert(token != null);
             return ExtractArguments(token, ';');
         }
 
-        private IEnumerable<IToken> ExtractArguments(IToken token)
+        private IEnumerable<IToken> ExtractArguments([NotNull] IToken token)
         {
-            Contract.Requires(token != null);
+            Debug.Assert(token != null);
             return ExtractArguments(token, ',');
         }
 
-        private IEnumerable<IToken> ExtractArguments(IToken token, char separator)
+        private IEnumerable<IToken> ExtractArguments([NotNull] IToken token, char separator)
         {
-            Contract.Requires<ArgumentNullException>(token != null, "token");
+            Requires.NotNull(token, nameof(token));
 
             string actionText = token.Text;
             List<IToken> attributeTokens = new List<IToken>();

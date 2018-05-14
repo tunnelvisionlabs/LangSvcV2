@@ -1,9 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Intellisense
 {
-    using System;
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
@@ -65,10 +64,10 @@
             return controller;
         }
 
-        protected virtual IntellisenseController TryCreateIntellisenseController(ITextView textView, IList<ITextBuffer> subjectBuffers)
+        protected virtual IntellisenseController TryCreateIntellisenseController([NotNull] ITextView textView, [NotNull] IList<ITextBuffer> subjectBuffers)
         {
-            Contract.Requires<ArgumentNullException>(textView != null, "textView");
-            Contract.Requires<ArgumentNullException>(subjectBuffers != null, "subjectBuffers");
+            Requires.NotNull(textView, nameof(textView));
+            Requires.NotNull(subjectBuffers, nameof(subjectBuffers));
 
             IntellisenseController controller = new IntellisenseController(textView, this);
             return controller;

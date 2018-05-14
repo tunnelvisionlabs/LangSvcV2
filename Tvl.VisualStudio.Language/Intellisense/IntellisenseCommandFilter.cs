@@ -3,8 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Linq;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Shell;
@@ -24,21 +25,20 @@
         private readonly IntellisenseController _controller;
         private bool _isInConsumeFirstCompletionMode;
 
-        public IntellisenseCommandFilter(IVsTextView textViewAdapter, IntellisenseController controller)
+        public IntellisenseCommandFilter([NotNull] IVsTextView textViewAdapter, [NotNull] IntellisenseController controller)
             : base(textViewAdapter)
         {
-            Contract.Requires(textViewAdapter != null);
-            Contract.Requires<ArgumentNullException>(controller != null, "controller");
+            Debug.Assert(textViewAdapter != null);
+            Requires.NotNull(controller, nameof(controller));
 
             _controller = controller;
         }
 
+        [NotNull]
         public IntellisenseController Controller
         {
             get
             {
-                Contract.Ensures(Contract.Result<IntellisenseController>() != null);
-
                 return _controller;
             }
         }

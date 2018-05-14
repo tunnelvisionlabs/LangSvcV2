@@ -3,9 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr.Runtime;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
@@ -26,10 +26,10 @@
         private readonly ITextBuffer _textBuffer;
         private readonly AlloyQuickInfoSourceProvider _provider;
 
-        public AlloyQuickInfoSource(ITextBuffer textBuffer, AlloyQuickInfoSourceProvider provider)
+        public AlloyQuickInfoSource([NotNull] ITextBuffer textBuffer, [NotNull] AlloyQuickInfoSourceProvider provider)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(provider != null, "provider");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
+            Requires.NotNull(provider, nameof(provider));
 
             _textBuffer = textBuffer;
             _provider = provider;

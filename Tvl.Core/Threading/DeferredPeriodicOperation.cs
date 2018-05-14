@@ -1,7 +1,7 @@
 ﻿namespace Tvl.Threading
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
 
     public class DeferredPeriodicOperation : IDisposable
     {
@@ -13,9 +13,9 @@
         private bool _dirty;
         //private int _operating;
 
-        public DeferredPeriodicOperation(Action action, TimeSpan deferPeriod, TimeSpan minimumPeriod, bool requiresInitialOperation)
+        public DeferredPeriodicOperation([NotNull] Action action, TimeSpan deferPeriod, TimeSpan minimumPeriod, bool requiresInitialOperation)
         {
-            Contract.Requires<ArgumentNullException>(action != null, "action");
+            Requires.NotNull(action, nameof(action));
 
             this._action = action;
             this._lastDefer = DateTimeOffset.MinValue;

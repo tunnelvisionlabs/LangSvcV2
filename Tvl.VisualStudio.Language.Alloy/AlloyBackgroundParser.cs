@@ -1,25 +1,26 @@
 ﻿namespace Tvl.VisualStudio.Language.Alloy
 {
     using System.Collections.Generic;
+    using System.Diagnostics;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing;
     using Tvl.VisualStudio.OutputWindow.Interfaces;
 
     using CommonTokenStream = Antlr.Runtime.CommonTokenStream;
-    using Contract = System.Diagnostics.Contracts.Contract;
     using OperationCanceledException = System.OperationCanceledException;
     using Stopwatch = System.Diagnostics.Stopwatch;
     using TaskScheduler = System.Threading.Tasks.TaskScheduler;
 
     public class AlloyBackgroundParser : BackgroundParser
     {
-        public AlloyBackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+        public AlloyBackgroundParser([NotNull] ITextBuffer textBuffer, [NotNull] TaskScheduler taskScheduler, [NotNull] ITextDocumentFactoryService textDocumentFactoryService, [NotNull] IOutputWindowService outputWindowService)
             : base(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService)
         {
-            Contract.Requires(textBuffer != null);
-            Contract.Requires(taskScheduler != null);
-            Contract.Requires(textDocumentFactoryService != null);
-            Contract.Requires(outputWindowService != null);
+            Debug.Assert(textBuffer != null);
+            Debug.Assert(taskScheduler != null);
+            Debug.Assert(textDocumentFactoryService != null);
+            Debug.Assert(outputWindowService != null);
         }
 
         public override string Name

@@ -2,7 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Adornments;
     using Microsoft.VisualStudio.Text.Tagging;
@@ -18,10 +19,10 @@
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        public BackgroundParserErrorTagger(ITextBuffer textBuffer, IBackgroundParser backgroundParser)
+        public BackgroundParserErrorTagger([NotNull] ITextBuffer textBuffer, [NotNull] IBackgroundParser backgroundParser)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(backgroundParser != null, "backgroundParser");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
+            Requires.NotNull(backgroundParser, nameof(backgroundParser));
 
             this._textBuffer = textBuffer;
             this._backgroundParser = backgroundParser;
@@ -29,30 +30,28 @@
             this._backgroundParser.RequestParse(false);
         }
 
+        [NotNull]
         public ITextBuffer TextBuffer
         {
             get
             {
-                Contract.Ensures(Contract.Result<ITextBuffer>() != null);
-
                 return _textBuffer;
             }
         }
 
+        [NotNull]
         public IBackgroundParser BackgroundParser
         {
             get
             {
-                Contract.Ensures(Contract.Result<IBackgroundParser>() != null);
-
                 return _backgroundParser;
             }
         }
 
-        public IEnumerable<ITagSpan<IErrorTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+        [NotNull]
+        public IEnumerable<ITagSpan<IErrorTag>> GetTags([NotNull] NormalizedSnapshotSpanCollection spans)
         {
-            Contract.Requires<ArgumentNullException>(spans != null, "spans");
-            Contract.Ensures(Contract.Result<IEnumerable<ITagSpan<IErrorTag>>>() != null);
+            Requires.NotNull(spans, nameof(spans));
 
             return _tags;
         }
@@ -82,7 +81,7 @@
 
         private void OnTagsChanged(SnapshotSpanEventArgs e)
         {
-            Contract.Requires(e != null);
+            Debug.Assert(e != null);
 
             var t = TagsChanged;
             if (t != null)

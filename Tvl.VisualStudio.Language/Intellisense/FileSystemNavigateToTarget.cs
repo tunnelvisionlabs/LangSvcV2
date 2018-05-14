@@ -1,7 +1,6 @@
 ﻿namespace Tvl.VisualStudio.Language.Intellisense
 {
-    using System;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
@@ -9,11 +8,10 @@
 
     public class FileSystemNavigateToTarget : INavigateToTarget
     {
-        public FileSystemNavigateToTarget(string fileName, int line, int column, ServiceProvider serviceProvider)
+        public FileSystemNavigateToTarget([NotNull] string fileName, int line, int column, [NotNull] ServiceProvider serviceProvider)
         {
-            Contract.Requires<ArgumentNullException>(fileName != null, "fileName");
-            Contract.Requires<ArgumentNullException>(serviceProvider != null, "serviceProvider");
-            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(fileName));
+            Requires.NotNullOrEmpty(fileName, nameof(fileName));
+            Requires.NotNull(serviceProvider, nameof(serviceProvider));
 
             FileName = fileName;
             Line = line;

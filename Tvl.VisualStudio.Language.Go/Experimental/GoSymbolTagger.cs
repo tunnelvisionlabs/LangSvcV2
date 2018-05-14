@@ -3,10 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Threading.Tasks;
     using Antlr.Runtime;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
     using Microsoft.VisualStudio.Text.Tagging;
@@ -356,11 +356,11 @@
             OnTagsChanged(new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, new Span(0, snapshot.Length))));
         }
 
-        private bool IsConsistentWithPreviousResult(InterpretTrace trace, bool checkStart, HashSet<IToken> definitions, HashSet<IToken> references)
+        private bool IsConsistentWithPreviousResult([NotNull] InterpretTrace trace, bool checkStart, [NotNull] HashSet<IToken> definitions, [NotNull] HashSet<IToken> references)
         {
-            Contract.Requires(trace != null);
-            Contract.Requires(definitions != null);
-            Contract.Requires(references != null);
+            Debug.Assert(trace != null);
+            Debug.Assert(definitions != null);
+            Debug.Assert(references != null);
 
             InterpretTraceTransition transition = checkStart ? trace.Transitions.First.Value : trace.Transitions.Last.Value;
             IToken token = transition.Token;

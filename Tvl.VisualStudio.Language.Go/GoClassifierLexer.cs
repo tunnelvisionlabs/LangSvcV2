@@ -1,8 +1,8 @@
 ﻿namespace Tvl.VisualStudio.Language.Go
 {
-    using System;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using Antlr.Runtime;
+    using JetBrains.Annotations;
     using Tvl.VisualStudio.Language.Parsing;
 
     internal class GoClassifierLexer : ITokenSourceWithState<GoClassifierLexerState>
@@ -12,15 +12,15 @@
 
         private GoClassifierLexerMode _mode;
 
-        public GoClassifierLexer(ICharStream input)
+        public GoClassifierLexer([NotNull] ICharStream input)
             : this(input, GoClassifierLexerState.Initial)
         {
-            Contract.Requires(input != null);
+            Debug.Assert(input != null);
         }
 
-        public GoClassifierLexer(ICharStream input, GoClassifierLexerState state)
+        public GoClassifierLexer([NotNull] ICharStream input, GoClassifierLexerState state)
         {
-            Contract.Requires<ArgumentNullException>(input != null, "input");
+            Requires.NotNull(input, nameof(input));
 
             _input = input;
             _languageLexer = new GoColorizerLexer(input, this);

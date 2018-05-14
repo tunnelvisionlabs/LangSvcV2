@@ -1,10 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Language.Parsing.Experimental.Interpreter
 {
-    using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using Antlr.Runtime;
+    using JetBrains.Annotations;
     using Tvl.VisualStudio.Language.Parsing.Experimental.Atn;
     using IntervalSet = Tvl.VisualStudio.Language.Parsing.Collections.IntervalSet;
     using Stopwatch = System.Diagnostics.Stopwatch;
@@ -37,10 +36,10 @@
         private bool _failedBackward;
         private bool _failedForward;
 
-        public NetworkInterpreter(Network network, ITokenStream input)
+        public NetworkInterpreter([NotNull] Network network, [NotNull] ITokenStream input)
         {
-            Contract.Requires<ArgumentNullException>(network != null, "network");
-            Contract.Requires<ArgumentNullException>(input != null, "input");
+            Requires.NotNull(network, nameof(network));
+            Requires.NotNull(input, nameof(input));
 
             _network = network;
             _input = input;

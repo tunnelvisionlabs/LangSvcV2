@@ -1,6 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Antlr3
 {
     using System.Collections.Generic;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Tagging;
@@ -95,8 +96,11 @@
             return _intellisenseOptions.CommitCharacters.IndexOf(CompletionInfo.CommitChar.Value) < 0;
         }
 
-        public override IEnumerable<INavigateToTarget> GoToSourceImpl(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
+        [NotNull]
+        public override IEnumerable<INavigateToTarget> GoToSourceImpl(VSOBJGOTOSRCTYPE gotoSourceType, [NotNull] ITrackingPoint triggerPoint)
         {
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
+
             if (triggerPoint == null)
                 return new INavigateToTarget[0];
 

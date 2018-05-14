@@ -1,8 +1,9 @@
 ﻿namespace Tvl.VisualStudio.Text.Implementation
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Runtime.InteropServices;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.TextManager.Interop;
     using Tvl.VisualStudio.Shell;
@@ -12,12 +13,12 @@
     [ComVisible(true)]
     internal class CommenterFilter : TextViewCommandFilter
     {
-        public CommenterFilter(IVsTextView textViewAdapter, ITextView textView, ICommenter commenter)
+        public CommenterFilter([NotNull] IVsTextView textViewAdapter, [NotNull] ITextView textView, [NotNull] ICommenter commenter)
             : base(textViewAdapter)
         {
-            Contract.Requires(textViewAdapter != null);
-            Contract.Requires<ArgumentNullException>(textView != null, "textView");
-            Contract.Requires<ArgumentNullException>(commenter != null, "commenter");
+            Debug.Assert(textViewAdapter != null);
+            Requires.NotNull(textView, nameof(textView));
+            Requires.NotNull(commenter, nameof(commenter));
 
             this.TextView = textView;
             this.Commenter = commenter;

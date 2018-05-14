@@ -1,15 +1,15 @@
 ﻿namespace Tvl.Events
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.Reflection;
+    using JetBrains.Annotations;
 
     public static class WeakEvents
     {
-        public static EventHandler AsWeak(EventHandler handler, Action<EventHandler> unregister)
+        [NotNull]
+        public static EventHandler AsWeak([NotNull] EventHandler handler, Action<EventHandler> unregister)
         {
-            Contract.Requires<ArgumentNullException>(handler != null, "handler");
-            Contract.Ensures(Contract.Result<EventHandler>() != null);
+            Requires.NotNull(handler, nameof(handler));
 
             if (handler.Method.IsStatic)
                 return handler;
@@ -20,11 +20,11 @@
             return weakHandler.Handler;
         }
 
-        public static EventHandler<TEventArgs> AsWeak<TEventArgs>(this EventHandler<TEventArgs> handler, Action<EventHandler<TEventArgs>> unregister)
+        [NotNull]
+        public static EventHandler<TEventArgs> AsWeak<TEventArgs>([NotNull] this EventHandler<TEventArgs> handler, Action<EventHandler<TEventArgs>> unregister)
             where TEventArgs : EventArgs
         {
-            Contract.Requires<ArgumentNullException>(handler != null, "handler");
-            Contract.Ensures(Contract.Result<EventHandler<TEventArgs>>() != null);
+            Requires.NotNull(handler, nameof(handler));
 
             if (handler.Method.IsStatic)
                 return handler;

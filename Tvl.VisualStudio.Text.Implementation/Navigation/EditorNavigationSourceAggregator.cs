@@ -2,9 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Threading;
+    using JetBrains.Annotations;
     using Tvl.Events;
 
     internal class EditorNavigationSourceAggregator : IEditorNavigationSourceAggregator
@@ -15,9 +15,9 @@
         public event EventHandler NavigationTargetsChanged;
         public event EventHandler Disposed;
 
-        public EditorNavigationSourceAggregator(IEnumerable<IEditorNavigationSource> sources)
+        public EditorNavigationSourceAggregator([NotNull] IEnumerable<IEditorNavigationSource> sources)
         {
-            Contract.Requires<ArgumentNullException>(sources != null, "sources");
+            Requires.NotNull(sources, nameof(sources));
 
             this._sources = sources.ToArray();
 

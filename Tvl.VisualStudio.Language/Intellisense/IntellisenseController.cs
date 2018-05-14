@@ -3,9 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Threading.Tasks;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
@@ -31,22 +31,21 @@
         private readonly Lazy<CompletionInfo> _completionInfo;
         private bool _isProcessingCommand;
 
-        public IntellisenseController(ITextView textView, IntellisenseControllerProvider provider)
+        public IntellisenseController([NotNull] ITextView textView, [NotNull] IntellisenseControllerProvider provider)
         {
-            Contract.Requires<ArgumentNullException>(textView != null, "textView");
-            Contract.Requires<ArgumentNullException>(provider != null, "provider");
+            Requires.NotNull(textView, nameof(textView));
+            Requires.NotNull(provider, nameof(provider));
 
             _provider = provider;
             _completionInfo = new Lazy<CompletionInfo>(CreateCompletionInfo);
             Attach(textView);
         }
 
+        [NotNull]
         public IntellisenseControllerProvider Provider
         {
             get
             {
-                Contract.Ensures(Contract.Result<IntellisenseControllerProvider>() != null);
-
                 return _provider;
             }
         }
@@ -224,20 +223,26 @@
             }
         }
 
-        public virtual void GoToSource(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
+        public virtual void GoToSource(VSOBJGOTOSRCTYPE gotoSourceType, [NotNull] ITrackingPoint triggerPoint)
         {
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
+
             Task<IEnumerable<INavigateToTarget>> task = GoToSourceAsync(gotoSourceType, triggerPoint).HandleNonCriticalExceptions();
             var resultContinuation = task.ContinueWith(HandleGoToSourceResult, TaskContinuationOptions.OnlyOnRanToCompletion).HandleNonCriticalExceptions();
         }
 
-        public virtual Task<IEnumerable<INavigateToTarget>> GoToSourceAsync(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
+        [NotNull]
+        public virtual Task<IEnumerable<INavigateToTarget>> GoToSourceAsync(VSOBJGOTOSRCTYPE gotoSourceType, [NotNull] ITrackingPoint triggerPoint)
         {
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
+
             return Task.Factory.StartNew(() => GoToSourceImpl(gotoSourceType, triggerPoint));
         }
 
-        public virtual IEnumerable<INavigateToTarget> GoToSourceImpl(VSOBJGOTOSRCTYPE gotoSourceType, ITrackingPoint triggerPoint)
+        [NotNull]
+        public virtual IEnumerable<INavigateToTarget> GoToSourceImpl(VSOBJGOTOSRCTYPE gotoSourceType, [NotNull] ITrackingPoint triggerPoint)
         {
-            Contract.Ensures(Contract.Result<IEnumerable<INavigateToTarget>>() != null);
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
 
             return new INavigateToTarget[0];
         }
@@ -249,13 +254,17 @@
                 target.NavigateTo();
         }
 
-        public virtual void TriggerCompletion(ITrackingPoint triggerPoint)
+        public virtual void TriggerCompletion([NotNull] ITrackingPoint triggerPoint)
         {
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
+
             this.TriggerCompletion(triggerPoint, CompletionInfoType.NoInfo, IntellisenseInvocationType.Default);
         }
 
-        public virtual void TriggerCompletion(ITrackingPoint triggerPoint, CompletionInfoType completionInfoType, IntellisenseInvocationType intellisenseInvocationType)
+        public virtual void TriggerCompletion([NotNull] ITrackingPoint triggerPoint, CompletionInfoType completionInfoType, IntellisenseInvocationType intellisenseInvocationType)
         {
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
+
             DismissCompletion();
             CompletionInfo.InfoType = completionInfoType;
             CompletionInfo.InvocationType = intellisenseInvocationType;
@@ -276,8 +285,10 @@
             }
         }
 
-        public virtual void TriggerSignatureHelp(ITrackingPoint triggerPoint)
+        public virtual void TriggerSignatureHelp([NotNull] ITrackingPoint triggerPoint)
         {
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
+
             DismissSignatureHelp();
             ISignatureHelpSession session = Provider.SignatureHelpBroker.TriggerSignatureHelp(TextView, triggerPoint, true);
             if (session != null)
@@ -287,8 +298,10 @@
             }
         }
 
-        public virtual void TriggerQuickInfo(ITrackingPoint triggerPoint)
+        public virtual void TriggerQuickInfo([NotNull] ITrackingPoint triggerPoint)
         {
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
+
             DismissQuickInfo();
             IQuickInfoSession session = Provider.QuickInfoBroker.TriggerQuickInfo(TextView, triggerPoint, true);
             if (session != null)
@@ -298,8 +311,10 @@
             }
         }
 
-        public virtual void TriggerSmartTag(ITrackingPoint triggerPoint, SmartTagType type, SmartTagState state)
+        public virtual void TriggerSmartTag([NotNull] ITrackingPoint triggerPoint, SmartTagType type, SmartTagState state)
         {
+            Requires.NotNull(triggerPoint, nameof(triggerPoint));
+
             DismissSmartTag();
             ISmartTagSession session = Provider.SmartTagBroker.CreateSmartTagSession(TextView, type, triggerPoint, state);
             if (session != null)
@@ -502,9 +517,9 @@
             DisconnectSubjectBuffer(subjectBuffer);
         }
 
-        protected virtual void Attach(ITextView textView)
+        protected virtual void Attach([NotNull] ITextView textView)
         {
-            Contract.Requires<ArgumentNullException>(textView != null, "textView");
+            Requires.NotNull(textView, nameof(textView));
 
             if (_textView != null)
                 throw new InvalidOperationException();
@@ -513,9 +528,9 @@
             _textView.Selection.SelectionChanged += HandleViewSelectionChanged;
         }
 
-        protected virtual void Detach(ITextView textView)
+        protected virtual void Detach([NotNull] ITextView textView)
         {
-            Contract.Requires<ArgumentNullException>(textView != null, "textView");
+            Requires.NotNull(textView, nameof(textView));
 
             DismissAll();
 
@@ -529,27 +544,26 @@
             _commandFilter = null;
         }
 
-        protected virtual void ConnectSubjectBuffer(ITextBuffer subjectBuffer)
+        protected virtual void ConnectSubjectBuffer([NotNull] ITextBuffer subjectBuffer)
         {
-            Contract.Requires<ArgumentNullException>(subjectBuffer != null, "subjectBuffer");
+            Requires.NotNull(subjectBuffer, nameof(subjectBuffer));
         }
 
-        protected virtual void DisconnectSubjectBuffer(ITextBuffer subjectBuffer)
+        protected virtual void DisconnectSubjectBuffer([NotNull] ITextBuffer subjectBuffer)
         {
-            Contract.Requires<ArgumentNullException>(subjectBuffer != null, "subjectBuffer");
+            Requires.NotNull(subjectBuffer, nameof(subjectBuffer));
         }
 
+        [NotNull]
         protected virtual CompletionInfo CreateCompletionInfo()
         {
-            Contract.Ensures(Contract.Result<CompletionInfo>() != null);
-
             return new CompletionInfo(this);
         }
 
-        protected virtual IntellisenseCommandFilter CreateIntellisenseCommandFilter(IVsTextView textViewAdapter)
+        [NotNull]
+        protected virtual IntellisenseCommandFilter CreateIntellisenseCommandFilter([NotNull] IVsTextView textViewAdapter)
         {
-            Contract.Requires<ArgumentNullException>(textViewAdapter != null, "textViewAdapter");
-            Contract.Ensures(Contract.Result<IntellisenseCommandFilter>() != null);
+            Requires.NotNull(textViewAdapter, nameof(textViewAdapter));
 
             return new IntellisenseCommandFilter(textViewAdapter, this);
         }
