@@ -1,6 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Language.Php.Classification
 {
     using System.ComponentModel.Composition;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Classification;
     using Microsoft.VisualStudio.Utilities;
@@ -17,7 +18,7 @@
             private set;
         }
 
-        protected override IClassifier GetClassifierImpl(ITextBuffer textBuffer)
+        protected override IClassifier GetClassifierImpl([NotNull] ITextBuffer textBuffer)
         {
             if (!textBuffer.ContentType.IsOfType(PhpConstants.PhpContentType))
                 return null;

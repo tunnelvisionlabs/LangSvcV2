@@ -206,6 +206,29 @@ namespace Tvl
         }
 
         /// <summary>
+        /// Throws an exception if the specified parameter's value is null
+        /// or has an element with a null value.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements in the sequence.</typeparam>
+        /// <param name="values">The value of the argument.</param>
+        /// <param name="parameterName">The name of the parameter to include in any thrown exception.</param>
+        /// <exception cref="ArgumentException">Thrown if the tested condition is false.</exception>
+        [DebuggerStepThrough]
+        public static void NotNullOrNullElements<T>(IEnumerable<T> values, string parameterName)
+            where T : class // ensures value-types aren't passed to a null checking method
+        {
+            NotNull(values, parameterName);
+
+            foreach (T value in values)
+            {
+                if (value == null)
+                {
+                    throw new ArgumentException(Format(Strings.Argument_NullElement, parameterName), parameterName);
+                }
+            }
+        }
+
+        /// <summary>
         /// Throws an exception if the specified parameter's value is null,
         /// has no elements or has an element with a null value.
         /// </summary>

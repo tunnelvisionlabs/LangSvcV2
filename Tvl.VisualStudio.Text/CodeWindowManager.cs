@@ -1,7 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Text
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.Shell;
@@ -17,11 +17,11 @@
         private readonly LanguagePreferences _languagePreferences;
         private IVsDropdownBarClient _dropdownBarClient;
 
-        public CodeWindowManager(IVsCodeWindow codeWindow, SVsServiceProvider serviceProvider, LanguagePreferences languagePreferences)
+        public CodeWindowManager([NotNull] IVsCodeWindow codeWindow, [NotNull] SVsServiceProvider serviceProvider, [NotNull] LanguagePreferences languagePreferences)
         {
-            Contract.Requires<ArgumentNullException>(codeWindow != null, "codeWindow");
-            Contract.Requires<ArgumentNullException>(serviceProvider != null, "serviceProvider");
-            Contract.Requires<ArgumentNullException>(languagePreferences != null, "languagePreferences");
+            Requires.NotNull(codeWindow, nameof(codeWindow));
+            Requires.NotNull(serviceProvider, nameof(serviceProvider));
+            Requires.NotNull(languagePreferences, nameof(languagePreferences));
 
             _codeWindow = codeWindow;
             _serviceProvider = serviceProvider;
@@ -72,9 +72,9 @@
             return VSConstants.S_OK;
         }
 
-        public virtual int OnNewView(IVsTextView view)
+        public virtual int OnNewView([NotNull] IVsTextView view)
         {
-            Contract.Requires<ArgumentNullException>(view != null, "view");
+            Requires.NotNull(view, nameof(view));
 
             return VSConstants.S_OK;
         }
@@ -113,10 +113,10 @@
             return true;
         }
 
-        protected virtual int AddDropdownBar(int comboBoxCount, IVsDropdownBarClient client)
+        protected virtual int AddDropdownBar(int comboBoxCount, [NotNull] IVsDropdownBarClient client)
         {
-            Contract.Requires<ArgumentNullException>(client != null, "client");
-            Contract.Requires<ArgumentOutOfRangeException>(comboBoxCount > 0);
+            Requires.NotNull(client, nameof(client));
+            Requires.Range(comboBoxCount > 0, nameof(comboBoxCount));
 
             IVsDropdownBarManager manager = CodeWindow as IVsDropdownBarManager;
             if (manager == null)
@@ -157,9 +157,9 @@
             return VSConstants.S_OK;
         }
 
-        protected virtual void HandleLanguagePreferencesChanged(object sender, EventArgs e)
+        protected virtual void HandleLanguagePreferencesChanged(object sender, [NotNull] EventArgs e)
         {
-            Contract.Requires<ArgumentNullException>(e != null, "e");
+            Requires.NotNull(e, nameof(e));
 
             int comboBoxCount;
             IVsDropdownBarClient client;

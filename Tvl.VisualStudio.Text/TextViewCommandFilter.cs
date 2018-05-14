@@ -1,8 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Text
 {
-    using System;
-    using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.TextManager.Interop;
     using Tvl.VisualStudio.Shell;
@@ -12,9 +11,9 @@
     [ComVisible(true)]
     public abstract class TextViewCommandFilter : CommandFilter
     {
-        protected TextViewCommandFilter(IVsTextView textViewAdapter)
+        protected TextViewCommandFilter([NotNull] IVsTextView textViewAdapter)
         {
-            Contract.Requires<ArgumentNullException>(textViewAdapter != null, "textViewAdapter");
+            Requires.NotNull(textViewAdapter, nameof(textViewAdapter));
 
             this.TextViewAdapter = textViewAdapter;
         }

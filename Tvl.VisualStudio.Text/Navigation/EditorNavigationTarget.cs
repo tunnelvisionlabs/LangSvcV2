@@ -1,7 +1,7 @@
 ﻿namespace Tvl.VisualStudio.Text.Navigation
 {
-    using System;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
+    using JetBrains.Annotations;
     using ImageSource = System.Windows.Media.ImageSource;
     using SnapshotSpan = Microsoft.VisualStudio.Text.SnapshotSpan;
 
@@ -11,17 +11,17 @@
         private readonly IEditorNavigationType _editorNavigationType;
         private readonly NavigationTargetStyle _style;
 
-        public EditorNavigationTarget(string name, IEditorNavigationType editorNavigationType, SnapshotSpan span, ImageSource glyph = null, NavigationTargetStyle style = NavigationTargetStyle.None)
+        public EditorNavigationTarget([NotNull] string name, [NotNull] IEditorNavigationType editorNavigationType, SnapshotSpan span, ImageSource glyph = null, NavigationTargetStyle style = NavigationTargetStyle.None)
             : this(name, editorNavigationType, span, new SnapshotSpan(span.Start, span.End), glyph, style)
         {
-            Contract.Requires(name != null);
-            Contract.Requires(editorNavigationType != null);
+            Debug.Assert(name != null);
+            Debug.Assert(editorNavigationType != null);
         }
 
-        public EditorNavigationTarget(string name, IEditorNavigationType editorNavigationType, SnapshotSpan span, SnapshotSpan seek, ImageSource glyph = null, NavigationTargetStyle style = NavigationTargetStyle.None)
+        public EditorNavigationTarget([NotNull] string name, [NotNull] IEditorNavigationType editorNavigationType, SnapshotSpan span, SnapshotSpan seek, ImageSource glyph = null, NavigationTargetStyle style = NavigationTargetStyle.None)
         {
-            Contract.Requires<ArgumentNullException>(name != null, "name");
-            Contract.Requires<ArgumentNullException>(editorNavigationType != null, "editorNavigationType");
+            Requires.NotNull(name, nameof(name));
+            Requires.NotNull(editorNavigationType, nameof(editorNavigationType));
 
             this._name = name;
             this._editorNavigationType = editorNavigationType;
@@ -31,22 +31,20 @@
             this.Glyph = glyph;
         }
 
+        [NotNull]
         public string Name
         {
             get
             {
-                Contract.Ensures(Contract.Result<string>() != null);
-
                 return _name;
             }
         }
 
+        [NotNull]
         public IEditorNavigationType EditorNavigationType
         {
             get
             {
-                Contract.Ensures(Contract.Result<IEditorNavigationType>() != null);
-
                 return _editorNavigationType;
             }
         }

@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.ComponentModelHost;
     using Microsoft.VisualStudio.Editor;
@@ -20,9 +20,9 @@
         private LanguagePreferences _languagePreferences;
         private IDisposable _languagePreferencesCookie;
 
-        public LanguageInfo(SVsServiceProvider serviceProvider, Guid languageGuid)
+        public LanguageInfo([NotNull] SVsServiceProvider serviceProvider, Guid languageGuid)
         {
-            Contract.Requires<ArgumentNullException>(serviceProvider != null, "serviceProvider");
+            Requires.NotNull(serviceProvider, nameof(serviceProvider));
 
             _serviceProvider = serviceProvider;
             _languageGuid = languageGuid;
@@ -83,9 +83,9 @@
             GC.SuppressFinalize(this);
         }
 
-        public virtual int GetColorizer(IVsTextLines buffer, out IVsColorizer colorizer)
+        public virtual int GetColorizer([NotNull] IVsTextLines buffer, out IVsColorizer colorizer)
         {
-            Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
+            Requires.NotNull(buffer, nameof(buffer));
 
             colorizer = null;
             return VSConstants.E_FAIL;
@@ -104,9 +104,9 @@
         /// <param name="col">[in] Integer containing the column index.</param>
         /// <param name="languageId">[out] Returns a GUID specifying the language identifier.</param>
         /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
-        public virtual int GetLanguageID(IVsTextBuffer buffer, int line, int col, out Guid languageId)
+        public virtual int GetLanguageID([NotNull] IVsTextBuffer buffer, int line, int col, out Guid languageId)
         {
-            Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
+            Requires.NotNull(buffer, nameof(buffer));
 
             languageId = LanguageGuid;
             return VSConstants.S_OK;
@@ -120,10 +120,9 @@
         /// <param name="spans">Do not use.</param>
         /// <returns></returns>
         [Obsolete]
-        public virtual int GetLocationOfName(string name, out string pbstrMkDoc, TextSpan[] spans)
+        public virtual int GetLocationOfName([NotNull] string name, out string pbstrMkDoc, TextSpan[] spans)
         {
-            Contract.Requires<ArgumentNullException>(name != null, "name");
-            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(name));
+            Requires.NotNullOrEmpty(name, nameof(name));
 
             pbstrMkDoc = null;
             return VSConstants.E_NOTIMPL;
@@ -144,9 +143,9 @@
         /// <param name="name">[out] Returns a string containing the name of the location.</param>
         /// <param name="lineOffset">[out] Returns an integer containing the line offset from <paramref name="line"/>.</param>
         /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
-        public virtual int GetNameOfLocation(IVsTextBuffer buffer, int line, int col, out string name, out int lineOffset)
+        public virtual int GetNameOfLocation([NotNull] IVsTextBuffer buffer, int line, int col, out string name, out int lineOffset)
         {
-            Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
+            Requires.NotNull(buffer, nameof(buffer));
 
             name = null;
             lineOffset = 0;
@@ -170,9 +169,9 @@
         /// <param name="cLines">[in] Number of lines within the expression.</param>
         /// <param name="expressions">[out] Returns an IVsEnumBSTR object that is used to enumerate BSTRs.</param>
         /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
-        public virtual int GetProximityExpressions(IVsTextBuffer buffer, int line, int col, int cLines, out IVsEnumBSTR expressions)
+        public virtual int GetProximityExpressions([NotNull] IVsTextBuffer buffer, int line, int col, int cLines, out IVsEnumBSTR expressions)
         {
-            Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
+            Requires.NotNull(buffer, nameof(buffer));
 
             expressions = null;
             return VSConstants.S_FALSE;
@@ -190,9 +189,9 @@
         /// <param name="col">[in] Integer containing the column index.</param>
         /// <returns>If the method succeeds, returns S_OK indicating the location contains mapped code.
         /// If the location does not contain mapped code, returns S_FALSE. Otherwise, returns an error code.</returns>
-        public virtual int IsMappedLocation(IVsTextBuffer buffer, int line, int col)
+        public virtual int IsMappedLocation([NotNull] IVsTextBuffer buffer, int line, int col)
         {
-            Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
+            Requires.NotNull(buffer, nameof(buffer));
             return VSConstants.S_FALSE;
         }
 
@@ -206,10 +205,9 @@
         /// <param name="flags">[in] Flags. For more information, see RESOLVENAMEFLAGS.</param>
         /// <param name="names">[out] Returns an object containing a list of names. For more information, see IVsEnumDebugName.</param>
         /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
-        public virtual int ResolveName(string name, RESOLVENAMEFLAGS flags, out IVsEnumDebugName names)
+        public virtual int ResolveName([NotNull] string name, RESOLVENAMEFLAGS flags, out IVsEnumDebugName names)
         {
-            Contract.Requires<ArgumentNullException>(name != null, "name");
-            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(name));
+            Requires.NotNullOrEmpty(name, nameof(name));
 
             names = null;
             return VSConstants.E_NOTIMPL;
@@ -235,11 +233,10 @@
         /// <param name="col">[in] Number of the column containing the breakpoint.</param>
         /// <param name="pCodeSpan">[out] Returns a span of text containing the extent of the statement at which execution would stop if the breakpoint were set.</param>
         /// <returns>If the method succeeds, it returns S_OK. If it fails, it returns an error code.</returns>
-        public virtual int ValidateBreakpointLocation(IVsTextBuffer buffer, int line, int col, TextSpan[] pCodeSpan)
+        public virtual int ValidateBreakpointLocation([NotNull] IVsTextBuffer buffer, int line, int col, [NotNull] TextSpan[] pCodeSpan)
         {
-            Contract.Requires<ArgumentNullException>(buffer != null, "buffer");
-            Contract.Requires<ArgumentNullException>(pCodeSpan != null, "pCodeSpan");
-            Contract.Requires<ArgumentException>(pCodeSpan.Length > 0);
+            Requires.NotNull(buffer, nameof(buffer));
+            Requires.NotNullOrEmpty(pCodeSpan, nameof(pCodeSpan));
 
             return VSConstants.E_NOTIMPL;
         }
@@ -354,18 +351,17 @@
             }
         }
 
+        [NotNull]
         protected virtual LanguagePreferences CreateLanguagePreferences(LANGPREFERENCES2 preferences)
         {
-            Contract.Ensures(Contract.Result<LanguagePreferences>() != null);
-
             return new LanguagePreferences(preferences);
         }
 
-        protected virtual IVsCodeWindowManager GetCodeWindowManager(IVsCodeWindow codeWindow, ITextBuffer textBuffer)
+        [NotNull]
+        protected virtual IVsCodeWindowManager GetCodeWindowManager([NotNull] IVsCodeWindow codeWindow, [NotNull] ITextBuffer textBuffer)
         {
-            Contract.Requires<ArgumentNullException>(codeWindow != null, "codeWindow");
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Ensures(Contract.Result<IVsCodeWindowManager>() != null);
+            Requires.NotNull(codeWindow, nameof(codeWindow));
+            Requires.NotNull(textBuffer, nameof(textBuffer));
 
             return textBuffer.Properties.GetOrCreateSingletonProperty<CodeWindowManager>(() => new CodeWindowManager(codeWindow, ServiceProvider, LanguagePreferences));
         }
