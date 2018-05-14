@@ -1,34 +1,34 @@
 ﻿namespace Tvl
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Threading.Tasks;
+    using JetBrains.Annotations;
 
     public static class TaskExtensions
     {
-        public static T HandleNonCriticalExceptions<T>(this T task)
+        [NotNull]
+        public static T HandleNonCriticalExceptions<T>([NotNull] this T task)
             where T : Task
         {
-            Contract.Requires<ArgumentNullException>(task != null, "task");
-            Contract.Ensures(Contract.Result<T>() != null);
+            Requires.NotNull(task, nameof(task));
 
             task.ContinueWith(HandleNonCriticalExceptionsCore, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
             return task;
         }
 
-        private static void HandleNonCriticalExceptionsCore(Task task)
+        private static void HandleNonCriticalExceptionsCore([NotNull] Task task)
         {
-            Contract.Requires<ArgumentNullException>(task != null, "task");
+            Requires.NotNull(task, nameof(task));
 
             AggregateException exception = task.Exception;
             if (HasCriticalException(exception))
                 throw exception;
         }
 
-        private static bool HasCriticalException(Exception exception)
+        private static bool HasCriticalException([NotNull] Exception exception)
         {
-            Contract.Requires<ArgumentNullException>(exception != null, "exception");
+            Requires.NotNull(exception, nameof(exception));
 
             AggregateException aggregate = exception as AggregateException;
             if (aggregate != null)

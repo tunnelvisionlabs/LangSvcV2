@@ -1,8 +1,8 @@
 ﻿namespace Tvl
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.Reflection;
+    using JetBrains.Annotations;
 
     public static class ExceptionExtensions
     {
@@ -14,9 +14,9 @@
                     BindingFlags.Instance | BindingFlags.NonPublic));
 
 #pragma warning disable 618
-        public static bool IsCritical(this Exception e)
+        public static bool IsCritical([NotNull] this Exception e)
         {
-            Contract.Requires<ArgumentNullException>(e != null, "e");
+            Requires.NotNull(e, nameof(e));
 
             if (e is AccessViolationException
                 || e is StackOverflowException
@@ -32,9 +32,9 @@
         }
 #pragma warning restore 618
 
-        public static void PreserveStackTrace(this Exception e)
+        public static void PreserveStackTrace([NotNull] this Exception e)
         {
-            Contract.Requires<ArgumentNullException>(e != null, "e");
+            Requires.NotNull(e, nameof(e));
 
             _internalPreserveStackTrace(e);
         }

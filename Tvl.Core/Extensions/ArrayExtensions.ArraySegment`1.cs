@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using ICollection = System.Collections.ICollection;
     using IEnumerable = System.Collections.IEnumerable;
     using IEnumerator = System.Collections.IEnumerator;
@@ -12,17 +12,18 @@
     {
         private sealed class ArraySegment<T> : IList<T>, ICollection<T>, IEnumerable<T>, IList, ICollection, IEnumerable
         {
+            [NotNull]
             private readonly T[] _array;
             private readonly int _offset;
             private readonly int _count;
 
-            public ArraySegment(T[] array, int offset, int count)
+            public ArraySegment([NotNull] T[] array, int offset, int count)
             {
-                Contract.Requires<ArgumentNullException>(array != null, "array");
-                Contract.Requires<ArgumentOutOfRangeException>(offset >= 0);
-                Contract.Requires<ArgumentOutOfRangeException>(count >= 0);
-                Contract.Requires<ArgumentException>(offset <= array.Length);
-                Contract.Requires<ArgumentException>(checked(offset + count) <= array.Length);
+                Requires.NotNull(array, nameof(array));
+                Requires.Range(offset >= 0, nameof(offset));
+                Requires.Range(count >= 0, nameof(count));
+                Requires.Argument(offset <= array.Length, nameof(offset), $"{nameof(offset)} must be less than or equal to the array length");
+                Requires.Argument(checked(offset + count) <= array.Length, nameof(count), $"({nameof(offset)} + {nameof(count)}) must be less than or equal to the array length");
 
                 _array = array;
                 _offset = offset;
@@ -73,16 +74,16 @@
             {
                 get
                 {
-                    Contract.Requires<ArgumentOutOfRangeException>(index >= 0);
-                    Contract.Requires<ArgumentException>(index < Count);
+                    Requires.Range(index >= 0, nameof(index));
+                    Requires.Argument(index < Count, nameof(index), $"{nameof(index)} must be less than {nameof(Count)}");
 
                     return _array[_offset + index];
                 }
 
                 set
                 {
-                    Contract.Requires<ArgumentOutOfRangeException>(index >= 0);
-                    Contract.Requires<ArgumentException>(index < Count);
+                    Requires.Range(index >= 0, nameof(index));
+                    Requires.Argument(index < Count, nameof(index), $"{nameof(index)} must be less than {nameof(Count)}");
 
                     _array[_offset + index] = value;
                 }
@@ -139,18 +140,16 @@
                 Array.Copy(_array, _offset, array, arrayIndex, _count);
             }
 
+            [NotNull]
             public IEnumerator<T> GetEnumerator()
             {
-                Contract.Ensures(Contract.Result<IEnumerator<T>>() != null);
-
                 for (int i = 0; i < _count; i++)
                     yield return _array[_offset + i];
             }
 
+            [NotNull]
             IEnumerator IEnumerable.GetEnumerator()
             {
-                Contract.Ensures(Contract.Result<IEnumerator>() != null);
-
                 return GetEnumerator();
             }
 
@@ -207,15 +206,6 @@
             void IList.RemoveAt(int index)
             {
                 throw new NotSupportedException();
-            }
-
-            [ContractInvariantMethod]
-            private void ObjectInvariants()
-            {
-                Contract.Invariant(_array != null);
-                Contract.Invariant(_offset >= 0 && _offset <= _array.Length);
-                Contract.Invariant(_count >= 0);
-                Contract.Invariant(_offset + _count <= _array.Length);
             }
         }
     }

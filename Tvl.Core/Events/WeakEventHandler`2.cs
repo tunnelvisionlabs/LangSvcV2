@@ -1,7 +1,7 @@
 ﻿namespace Tvl.Events
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
 
     public class WeakEventHandler<T, TEventArgs> : IWeakEventHandler<TEventArgs>
         where T : class
@@ -14,9 +14,9 @@
         private EventHandler<TEventArgs> _handler;
         private Action<EventHandler<TEventArgs>> _unregister;
 
-        public WeakEventHandler(EventHandler<TEventArgs> handler, Action<EventHandler<TEventArgs>> unregister)
+        public WeakEventHandler([NotNull] EventHandler<TEventArgs> handler, Action<EventHandler<TEventArgs>> unregister)
         {
-            Contract.Requires<ArgumentNullException>(handler != null, "handler");
+            Requires.NotNull(handler, nameof(handler));
 
             _target = new WeakReference(handler.Target);
             _openHandler = (OpenEventHandler)Delegate.CreateDelegate(typeof(OpenEventHandler), null, handler.Method);
