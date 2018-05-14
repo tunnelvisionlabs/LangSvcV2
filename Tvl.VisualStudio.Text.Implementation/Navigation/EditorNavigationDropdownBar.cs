@@ -2,9 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Runtime.InteropServices;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.Text;
@@ -52,13 +52,13 @@
         private readonly Dictionary<IEditorNavigationTarget, IEditorNavigationTarget> _owners =
             new Dictionary<IEditorNavigationTarget, IEditorNavigationTarget>();
 
-        public EditorNavigationDropdownBar(IVsCodeWindow codeWindow, IVsEditorAdaptersFactoryService editorAdaptersFactory, IEnumerable<IEditorNavigationSource> sources, IBufferGraphFactoryService bufferGraphFactoryService, IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
+        public EditorNavigationDropdownBar([NotNull] IVsCodeWindow codeWindow, [NotNull] IVsEditorAdaptersFactoryService editorAdaptersFactory, [NotNull] IEnumerable<IEditorNavigationSource> sources, [NotNull] IBufferGraphFactoryService bufferGraphFactoryService, [NotNull] IEditorNavigationTypeRegistryService editorNavigationTypeRegistryService)
         {
-            Contract.Requires<ArgumentNullException>(codeWindow != null, "codeWindow");
-            Contract.Requires<ArgumentNullException>(editorAdaptersFactory != null, "editorAdaptersFactory");
-            Contract.Requires<ArgumentNullException>(sources != null, "sources");
-            Contract.Requires<ArgumentNullException>(bufferGraphFactoryService != null, "bufferGraphFactoryService");
-            Contract.Requires<ArgumentNullException>(editorNavigationTypeRegistryService != null, "editorNavigationTypeRegistryService");
+            Requires.NotNull(codeWindow, nameof(codeWindow));
+            Requires.NotNull(editorAdaptersFactory, nameof(editorAdaptersFactory));
+            Requires.NotNull(sources, nameof(sources));
+            Requires.NotNull(bufferGraphFactoryService, nameof(bufferGraphFactoryService));
+            Requires.NotNull(editorNavigationTypeRegistryService, nameof(editorNavigationTypeRegistryService));
 
             this._codeWindow = codeWindow;
             this._editorAdaptersFactory = editorAdaptersFactory;
@@ -516,9 +516,9 @@
             return _selectedItem.Contains(owner);
         }
 
-        private void UpdateNavigationTargets(IEditorNavigationSource source)
+        private void UpdateNavigationTargets([NotNull] IEditorNavigationSource source)
         {
-            Contract.Requires<ArgumentNullException>(source != null, "source");
+            Requires.NotNull(source, nameof(source));
 
             lock (this)
             {
@@ -542,9 +542,9 @@
             }
         }
 
-        private void UpdateNavigationTargets(IEnumerable<IEditorNavigationTarget> targets)
+        private void UpdateNavigationTargets([NotNull] IEnumerable<IEditorNavigationTarget> targets)
         {
-            Contract.Requires<ArgumentNullException>(targets != null, "targets");
+            Requires.NotNull(targets, nameof(targets));
 
             foreach (var control in _navigationControls)
             {

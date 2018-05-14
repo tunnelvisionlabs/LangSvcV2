@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel.Composition;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Threading;
@@ -87,10 +87,10 @@
         {
             private int _hashCode;
 
-            public WeakReference(T target)
+            public WeakReference([NotNull] T target)
                 : base(target)
             {
-                Contract.Requires(target != null);
+                Debug.Assert(target != null);
                 this._hashCode = RuntimeHelpers.GetHashCode(target);
             }
 
