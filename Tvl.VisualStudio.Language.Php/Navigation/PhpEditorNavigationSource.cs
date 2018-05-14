@@ -2,10 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Linq;
     using Antlr4.Runtime;
     using Antlr4.Runtime.Tree;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing4;
     using Tvl.VisualStudio.Language.Php.Parser;
@@ -25,9 +26,9 @@
 
         public event EventHandler NavigationTargetsChanged;
 
-        public PhpEditorNavigationSource(ITextBuffer textBuffer, PhpEditorNavigationSourceProvider provider)
+        public PhpEditorNavigationSource([NotNull] ITextBuffer textBuffer, PhpEditorNavigationSourceProvider provider)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
 
             this._textBuffer = textBuffer;
             this._backgroundParser = PhpEditorNavigationBackgroundParser.CreateParser(textBuffer, provider.BackgroundIntelliSenseTaskScheduler, provider.OutputWindowService, provider.TextDocumentFactoryService);
@@ -80,9 +81,9 @@
             UpdateNavigationTargets(antlrParseResultArgs);
         }
 
-        private void UpdateNavigationTargets(PhpEditorNavigationParseResultEventArgs antlrParseResultArgs)
+        private void UpdateNavigationTargets([NotNull] PhpEditorNavigationParseResultEventArgs antlrParseResultArgs)
         {
-            Contract.Requires(antlrParseResultArgs != null);
+            Debug.Assert(antlrParseResultArgs != null);
 
             List<IEditorNavigationTarget> navigationTargets = new List<IEditorNavigationTarget>();
 
@@ -188,12 +189,12 @@
             private readonly AntlrParseResultEventArgs _antlrParseResultArgs;
             private readonly ICollection<IEditorNavigationTarget> _navigationTargets;
 
-            public Listener(PhpEditorNavigationSourceProvider provider, ITextSnapshot snapshot, AntlrParseResultEventArgs antlrParseResultArgs, ICollection<IEditorNavigationTarget> navigationTargets)
+            public Listener([NotNull] PhpEditorNavigationSourceProvider provider, [NotNull] ITextSnapshot snapshot, [NotNull] AntlrParseResultEventArgs antlrParseResultArgs, [NotNull] ICollection<IEditorNavigationTarget> navigationTargets)
             {
-                Contract.Requires<ArgumentNullException>(provider != null, "provider");
-                Contract.Requires<ArgumentNullException>(snapshot != null, "snapshot");
-                Contract.Requires<ArgumentNullException>(antlrParseResultArgs != null, "antlrParseResultArgs");
-                Contract.Requires<ArgumentNullException>(navigationTargets != null, "navigationTargets");
+                Requires.NotNull(provider, nameof(provider));
+                Requires.NotNull(snapshot, nameof(snapshot));
+                Requires.NotNull(antlrParseResultArgs, nameof(antlrParseResultArgs));
+                Requires.NotNull(navigationTargets, nameof(navigationTargets));
 
                 _provider = provider;
                 _snapshot = snapshot;
@@ -271,9 +272,9 @@
             }
 
             [RuleDependency(typeof(PhpParser), PhpParser.RULE_classOrInterfaceDefinition, 0, Dependents.Self)]
-            private static string GetName(PhpParser.ClassOrInterfaceDefinitionContext context)
+            private static string GetName([NotNull] PhpParser.ClassOrInterfaceDefinitionContext context)
             {
-                Contract.Requires(context != null);
+                Debug.Assert(context != null);
 
                 ITerminalNode nameNode = context.PHP_IDENTIFIER();
                 if (nameNode == null)
@@ -287,9 +288,9 @@
             }
 
             [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionDefinition, 2, Dependents.Self)]
-            private static string GetName(PhpParser.FunctionDefinitionContext context)
+            private static string GetName([NotNull] PhpParser.FunctionDefinitionContext context)
             {
-                Contract.Requires(context != null);
+                Debug.Assert(context != null);
 
                 ITerminalNode nameNode = context.PHP_IDENTIFIER();
                 if (nameNode == null)
@@ -303,9 +304,9 @@
             }
 
             [RuleDependency(typeof(PhpParser), PhpParser.RULE_functionParameter, 0, Dependents.Self)]
-            private static string GetName(PhpParser.FunctionParameterContext context)
+            private static string GetName([NotNull] PhpParser.FunctionParameterContext context)
             {
-                Contract.Requires(context != null);
+                Debug.Assert(context != null);
 
                 ITerminalNode nameNode = context.PHP_IDENTIFIER();
                 if (nameNode == null)

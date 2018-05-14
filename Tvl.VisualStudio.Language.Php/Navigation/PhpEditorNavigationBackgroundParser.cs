@@ -1,12 +1,12 @@
 ﻿namespace Tvl.VisualStudio.Language.Php.Navigation
 {
-    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Antlr4.Runtime;
     using Antlr4.Runtime.Tree;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.Language.Parsing4;
     using Tvl.VisualStudio.Language.Php.Parser;
@@ -19,21 +19,21 @@
 
     internal class PhpEditorNavigationBackgroundParser : BackgroundParser
     {
-        private PhpEditorNavigationBackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, IOutputWindowService outputWindowService, ITextDocumentFactoryService textDocumentFactoryService)
+        private PhpEditorNavigationBackgroundParser([NotNull] ITextBuffer textBuffer, [NotNull] TaskScheduler taskScheduler, [NotNull] IOutputWindowService outputWindowService, [NotNull] ITextDocumentFactoryService textDocumentFactoryService)
             : base(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService)
         {
-            Contract.Requires(textBuffer != null);
-            Contract.Requires(taskScheduler != null);
-            Contract.Requires(outputWindowService != null);
-            Contract.Requires(textDocumentFactoryService != null);
+            Debug.Assert(textBuffer != null);
+            Debug.Assert(taskScheduler != null);
+            Debug.Assert(outputWindowService != null);
+            Debug.Assert(textDocumentFactoryService != null);
         }
 
-        internal static PhpEditorNavigationBackgroundParser CreateParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, IOutputWindowService outputWindowService, ITextDocumentFactoryService textDocumentFactoryService)
+        internal static PhpEditorNavigationBackgroundParser CreateParser([NotNull] ITextBuffer textBuffer, [NotNull] TaskScheduler taskScheduler, [NotNull] IOutputWindowService outputWindowService, [NotNull] ITextDocumentFactoryService textDocumentFactoryService)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(taskScheduler != null, "taskScheduler");
-            Contract.Requires<ArgumentNullException>(outputWindowService != null, "outputWindowService");
-            Contract.Requires<ArgumentNullException>(textDocumentFactoryService != null, "textDocumentFactoryService");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
+            Requires.NotNull(taskScheduler, nameof(taskScheduler));
+            Requires.NotNull(outputWindowService, nameof(outputWindowService));
+            Requires.NotNull(textDocumentFactoryService, nameof(textDocumentFactoryService));
 
             return new PhpEditorNavigationBackgroundParser(textBuffer, taskScheduler, outputWindowService, textDocumentFactoryService);
         }
