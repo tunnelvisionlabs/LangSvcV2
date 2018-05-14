@@ -2,8 +2,8 @@
 {
     using System;
     using System.ComponentModel.Composition;
-    using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Editor;
     using Microsoft.VisualStudio.Shell;
@@ -107,10 +107,10 @@
             private MonitorSelectionService _service;
             private uint _adviseCookie;
 
-            public Listener(MonitorSelectionService service, SVsServiceProvider serviceProvider)
+            public Listener([NotNull] MonitorSelectionService service, [NotNull] SVsServiceProvider serviceProvider)
             {
-                Contract.Requires<ArgumentNullException>(service != null, "service");
-                Contract.Requires<ArgumentNullException>(serviceProvider != null, "serviceProvider");
+                Requires.NotNull(service, nameof(service));
+                Requires.NotNull(serviceProvider, nameof(serviceProvider));
 
                 _service = service;
                 _monitorSelection = serviceProvider.GetMonitorSelection();
