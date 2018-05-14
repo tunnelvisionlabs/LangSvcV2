@@ -2,8 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.TextManager.Interop;
@@ -21,22 +21,21 @@
         private readonly Guid _languageGuid;
         private readonly List<Completion> _keywordCompletions = new List<Completion>();
 
-        public CompletionSource(ITextBuffer textBuffer, CompletionSourceProvider provider, Guid languageGuid)
+        public CompletionSource([NotNull] ITextBuffer textBuffer, [NotNull] CompletionSourceProvider provider, Guid languageGuid)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(provider != null, "provider");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
+            Requires.NotNull(provider, nameof(provider));
 
             _textBuffer = textBuffer;
             _provider = provider;
             _languageGuid = languageGuid;
         }
 
+        [NotNull]
         public ITextBuffer TextBuffer
         {
             get
             {
-                Contract.Ensures(Contract.Result<ITextBuffer>() != null);
-
                 return _textBuffer;
             }
         }
@@ -49,22 +48,20 @@
             }
         }
 
+        [NotNull]
         public virtual IEnumerable<string> Keywords
         {
             get
             {
-                Contract.Ensures(Contract.Result<IEnumerable<string>>() != null);
-
                 return EmptyKeywords;
             }
         }
 
+        [NotNull]
         protected CompletionSourceProvider Provider
         {
             get
             {
-                Contract.Ensures(Contract.Result<CompletionSourceProvider>() != null);
-
                 return _provider;
             }
         }
@@ -91,11 +88,10 @@
             return _keywordCompletions;
         }
 
-        protected virtual Completion CreateKeywordCompletion(string keyword)
+        [NotNull]
+        protected virtual Completion CreateKeywordCompletion([NotNull] string keyword)
         {
-            Contract.Requires<ArgumentNullException>(keyword != null, "keyword");
-            Contract.Requires<ArgumentException>(!string.IsNullOrEmpty(keyword));
-            Contract.Ensures(Contract.Result<Completion>() != null);
+            Requires.NotNullOrEmpty(keyword, nameof(keyword));
 
             string displayText = keyword;
             string insertionText = keyword;
@@ -105,10 +101,9 @@
             return new Completion(displayText, insertionText, description, iconSource, iconAutomationText);
         }
 
+        [NotNull]
         protected virtual IEnumerable<Completion> GetSnippetCompletions()
         {
-            Contract.Ensures(Contract.Result<IEnumerable<Completion>>() != null);
-
             if (LanguageGuid == Guid.Empty)
                 return EmptyCompletions;
 

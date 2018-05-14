@@ -2,9 +2,9 @@
 {
     using System;
     using System.Diagnostics;
-    using System.Diagnostics.Contracts;
     using System.Threading;
     using System.Threading.Tasks;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Tvl.VisualStudio.OutputWindow.Interfaces;
     using ErrorHandler = Microsoft.VisualStudio.ErrorHandler;
@@ -28,29 +28,29 @@
         public event EventHandler<ParseResultEventArgs> ParseComplete;
 
         [Obsolete]
-        public BackgroundParser(ITextBuffer textBuffer, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+        public BackgroundParser([NotNull] ITextBuffer textBuffer, [NotNull] ITextDocumentFactoryService textDocumentFactoryService, [NotNull] IOutputWindowService outputWindowService)
             : this(textBuffer, TaskScheduler.Default, textDocumentFactoryService, outputWindowService, PredefinedOutputWindowPanes.TvlDiagnostics)
         {
-            Contract.Requires(textBuffer != null);
-            Contract.Requires(textDocumentFactoryService != null);
-            Contract.Requires(outputWindowService != null);
+            Debug.Assert(textBuffer != null);
+            Debug.Assert(textDocumentFactoryService != null);
+            Debug.Assert(outputWindowService != null);
         }
 
-        public BackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService)
+        public BackgroundParser([NotNull] ITextBuffer textBuffer, [NotNull] TaskScheduler taskScheduler, [NotNull] ITextDocumentFactoryService textDocumentFactoryService, [NotNull] IOutputWindowService outputWindowService)
             : this(textBuffer, taskScheduler, textDocumentFactoryService, outputWindowService, PredefinedOutputWindowPanes.TvlDiagnostics)
         {
-            Contract.Requires(textBuffer != null);
-            Contract.Requires(taskScheduler != null);
-            Contract.Requires(textDocumentFactoryService != null);
-            Contract.Requires(outputWindowService != null);
+            Debug.Assert(textBuffer != null);
+            Debug.Assert(taskScheduler != null);
+            Debug.Assert(textDocumentFactoryService != null);
+            Debug.Assert(outputWindowService != null);
         }
 
-        public BackgroundParser(ITextBuffer textBuffer, TaskScheduler taskScheduler, ITextDocumentFactoryService textDocumentFactoryService, IOutputWindowService outputWindowService, string outputPaneName)
+        public BackgroundParser([NotNull] ITextBuffer textBuffer, [NotNull] TaskScheduler taskScheduler, [NotNull] ITextDocumentFactoryService textDocumentFactoryService, [NotNull] IOutputWindowService outputWindowService, string outputPaneName)
         {
-            Contract.Requires<ArgumentNullException>(textBuffer != null, "textBuffer");
-            Contract.Requires<ArgumentNullException>(taskScheduler != null, "taskScheduler");
-            Contract.Requires<ArgumentNullException>(textDocumentFactoryService != null, "textDocumentFactoryService");
-            Contract.Requires<ArgumentNullException>(outputWindowService != null, "outputWindowService");
+            Requires.NotNull(textBuffer, nameof(textBuffer));
+            Requires.NotNull(taskScheduler, nameof(taskScheduler));
+            Requires.NotNull(textDocumentFactoryService, nameof(textDocumentFactoryService));
+            Requires.NotNull(outputWindowService, nameof(outputWindowService));
 
             this._textBuffer = new Tvl.WeakReference<ITextBuffer>(textBuffer);
             this._taskScheduler = taskScheduler;
@@ -171,7 +171,7 @@
 
         protected virtual void OnParseComplete(ParseResultEventArgs e)
         {
-            Contract.Requires<ArgumentNullException>(e != null, "e");
+            Requires.NotNull(e, nameof(e));
 
             var t = ParseComplete;
             if (t != null)

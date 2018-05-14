@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Threading.Tasks;
     using JetBrains.Annotations;
@@ -32,22 +31,21 @@
         private readonly Lazy<CompletionInfo> _completionInfo;
         private bool _isProcessingCommand;
 
-        public IntellisenseController(ITextView textView, IntellisenseControllerProvider provider)
+        public IntellisenseController([NotNull] ITextView textView, [NotNull] IntellisenseControllerProvider provider)
         {
-            Contract.Requires<ArgumentNullException>(textView != null, "textView");
-            Contract.Requires<ArgumentNullException>(provider != null, "provider");
+            Requires.NotNull(textView, nameof(textView));
+            Requires.NotNull(provider, nameof(provider));
 
             _provider = provider;
             _completionInfo = new Lazy<CompletionInfo>(CreateCompletionInfo);
             Attach(textView);
         }
 
+        [NotNull]
         public IntellisenseControllerProvider Provider
         {
             get
             {
-                Contract.Ensures(Contract.Result<IntellisenseControllerProvider>() != null);
-
                 return _provider;
             }
         }
@@ -519,9 +517,9 @@
             DisconnectSubjectBuffer(subjectBuffer);
         }
 
-        protected virtual void Attach(ITextView textView)
+        protected virtual void Attach([NotNull] ITextView textView)
         {
-            Contract.Requires<ArgumentNullException>(textView != null, "textView");
+            Requires.NotNull(textView, nameof(textView));
 
             if (_textView != null)
                 throw new InvalidOperationException();
@@ -530,9 +528,9 @@
             _textView.Selection.SelectionChanged += HandleViewSelectionChanged;
         }
 
-        protected virtual void Detach(ITextView textView)
+        protected virtual void Detach([NotNull] ITextView textView)
         {
-            Contract.Requires<ArgumentNullException>(textView != null, "textView");
+            Requires.NotNull(textView, nameof(textView));
 
             DismissAll();
 
@@ -546,27 +544,26 @@
             _commandFilter = null;
         }
 
-        protected virtual void ConnectSubjectBuffer(ITextBuffer subjectBuffer)
+        protected virtual void ConnectSubjectBuffer([NotNull] ITextBuffer subjectBuffer)
         {
-            Contract.Requires<ArgumentNullException>(subjectBuffer != null, "subjectBuffer");
+            Requires.NotNull(subjectBuffer, nameof(subjectBuffer));
         }
 
-        protected virtual void DisconnectSubjectBuffer(ITextBuffer subjectBuffer)
+        protected virtual void DisconnectSubjectBuffer([NotNull] ITextBuffer subjectBuffer)
         {
-            Contract.Requires<ArgumentNullException>(subjectBuffer != null, "subjectBuffer");
+            Requires.NotNull(subjectBuffer, nameof(subjectBuffer));
         }
 
+        [NotNull]
         protected virtual CompletionInfo CreateCompletionInfo()
         {
-            Contract.Ensures(Contract.Result<CompletionInfo>() != null);
-
             return new CompletionInfo(this);
         }
 
-        protected virtual IntellisenseCommandFilter CreateIntellisenseCommandFilter(IVsTextView textViewAdapter)
+        [NotNull]
+        protected virtual IntellisenseCommandFilter CreateIntellisenseCommandFilter([NotNull] IVsTextView textViewAdapter)
         {
-            Contract.Requires<ArgumentNullException>(textViewAdapter != null, "textViewAdapter");
-            Contract.Ensures(Contract.Result<IntellisenseCommandFilter>() != null);
+            Requires.NotNull(textViewAdapter, nameof(textViewAdapter));
 
             return new IntellisenseCommandFilter(textViewAdapter, this);
         }

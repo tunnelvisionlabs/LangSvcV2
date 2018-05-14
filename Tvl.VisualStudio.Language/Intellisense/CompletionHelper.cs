@@ -1,15 +1,14 @@
 ﻿namespace Tvl.VisualStudio.Language.Intellisense
 {
-    using System;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
 
     public static class CompletionHelper
     {
-        public static bool DoCallMatch(IntellisenseController completionTarget)
+        public static bool DoCallMatch([NotNull] IntellisenseController completionTarget)
         {
-            Contract.Requires<ArgumentNullException>(completionTarget != null, "completionTarget");
+            Requires.NotNull(completionTarget, nameof(completionTarget));
 
 #if true
             return false;
@@ -74,9 +73,9 @@
 #endif
         }
 
-        public static void DoTriggerCompletion(IntellisenseController controller, CompletionInfoType infoType, bool signatureHelpOnly, IntellisenseInvocationType invocationType)
+        public static void DoTriggerCompletion([NotNull] IntellisenseController controller, CompletionInfoType infoType, bool signatureHelpOnly, IntellisenseInvocationType invocationType)
         {
-            Contract.Requires<ArgumentNullException>(controller != null, "controller");
+            Requires.NotNull(controller, nameof(controller));
 
             var completionInfo = controller.CompletionInfo;
             ITextView textView = controller.TextView;
@@ -102,9 +101,9 @@
             }
         }
 
-        public static bool IsCompletionPresenterActive(IntellisenseController controller, bool evenIfUsingDefaultPresenter)
+        public static bool IsCompletionPresenterActive([NotNull] IntellisenseController controller, bool evenIfUsingDefaultPresenter)
         {
-            Contract.Requires<ArgumentNullException>(controller != null, "controller");
+            Requires.NotNull(controller, nameof(controller));
 
             if (controller.Provider.CompletionBroker == null || controller.CompletionSession == null || controller.CompletionSession.IsDismissed)
                 return false;

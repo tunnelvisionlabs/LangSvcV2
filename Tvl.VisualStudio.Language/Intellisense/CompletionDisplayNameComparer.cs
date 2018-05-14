@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using JetBrains.Annotations;
     using Completion = Microsoft.VisualStudio.Language.Intellisense.Completion;
     using IComparer = System.Collections.IComparer;
     using IEqualityComparer = System.Collections.IEqualityComparer;
@@ -18,9 +18,9 @@
 
         private readonly StringComparer _comparer;
 
-        public CompletionDisplayNameComparer(StringComparer comparer)
+        public CompletionDisplayNameComparer([NotNull] StringComparer comparer)
         {
-            Contract.Requires<ArgumentNullException>(comparer != null, "comparer");
+            Requires.NotNull(comparer, nameof(comparer));
 
             _comparer = comparer;
         }
