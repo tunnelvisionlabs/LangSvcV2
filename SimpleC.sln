@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2000
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Shell", "Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj", "{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}"
 EndProject
@@ -76,13 +76,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{66840BE0-CE19-4FF1-99B4-4C8CE2E61D8B}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AA9E3959-A720-4B43-A4D9-E7C4E4EC3AA7}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
 		Readme.md = Readme.md
 	EndProjectSection
 EndProject
@@ -471,5 +472,8 @@ Global
 		{07A5A934-8BBE-498F-ABB4-BDFD31D80078} = {D4ECFC2D-A2B0-477A-86B9-6EF0479E4987}
 		{5C45E24D-37F8-4660-8832-F5108A90E87A} = {D4ECFC2D-A2B0-477A-86B9-6EF0479E4987}
 		{5601E585-16BB-4FA8-9495-BF22E3123BFA} = {D4ECFC2D-A2B0-477A-86B9-6EF0479E4987}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EFA03701-5D26-4FCC-B8C5-B39893DBFA5D}
 	EndGlobalSection
 EndGlobal
