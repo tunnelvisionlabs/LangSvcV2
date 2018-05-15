@@ -291,23 +291,23 @@
     </Antlr4>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\packages\Antlr3.3.5.1\tools\Tool\Templates\depend.stg">
+    <Content Include="$(NuGetPackageRoot)antlr3\3.5.1\tools\Tool\Templates\depend.stg">
       <Link>Tool\Templates\depend.stg</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="..\packages\Antlr3.3.5.1\tools\Tool\Templates\dot\dot.stg">
+    <Content Include="$(NuGetPackageRoot)antlr3\3.5.1\tools\Tool\Templates\dot\dot.stg">
       <Link>Tool\Templates\dot\dot.stg</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="..\packages\Antlr3.3.5.1\tools\Tool\Templates\messages\formats\antlr.stg">
+    <Content Include="$(NuGetPackageRoot)antlr3\3.5.1\tools\Tool\Templates\messages\formats\antlr.stg">
       <Link>Tool\Templates\messages\formats\antlr.stg</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="..\packages\Antlr3.3.5.1\tools\Tool\Templates\messages\formats\vs2005.stg">
+    <Content Include="$(NuGetPackageRoot)antlr3\3.5.1\tools\Tool\Templates\messages\formats\vs2005.stg">
       <Link>Tool\Templates\messages\formats\vs2005.stg</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="..\packages\Antlr3.3.5.1\tools\Tool\Templates\messages\languages\en.stg">
+    <Content Include="$(NuGetPackageRoot)antlr3\3.5.1\tools\Tool\Templates\messages\languages\en.stg">
       <Link>Tool\Templates\messages\languages\en.stg</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
