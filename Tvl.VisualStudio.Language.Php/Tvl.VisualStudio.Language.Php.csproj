@@ -21,7 +21,6 @@
     <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
-    <VsixType>v3</VsixType>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Common debugging support -->
@@ -61,7 +60,7 @@
   <ItemGroup>
     <PackageReference Include="Antlr3" Version="3.5.1" PrivateAssets="all" />
     <PackageReference Include="Antlr4.CodeGenerator" Version="4.6.1" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.VisualStudio.Sdk.BuildTasks.14.0" Version="14.0.215" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="15.1.192" PrivateAssets="all" />
     <PackageReference Include="Tvl.VisualStudio.OutputWindow" Version="3.0.0" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>

@@ -45,7 +45,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Sdk.BuildTasks.14.0" Version="14.0.215" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="15.1.192" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Combined.g4.lexer.cs" />
