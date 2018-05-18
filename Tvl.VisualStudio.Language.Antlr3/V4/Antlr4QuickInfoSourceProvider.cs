@@ -1,11 +1,12 @@
 ﻿namespace Tvl.VisualStudio.Language.AntlrV4
 {
+    using System;
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Language.Intellisense;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
-    using Tvl.VisualStudio.Language.Parsing;
+    using Tvl.VisualStudio.Text.Navigation;
 
     [Export(typeof(IQuickInfoSourceProvider))]
     [Order]
@@ -14,10 +15,10 @@
     public sealed class Antlr4QuickInfoSourceProvider : IQuickInfoSourceProvider
     {
         [Import]
-        private IBackgroundParserFactoryService BackgroundParserFactoryService
+        internal IEditorNavigationSourceAggregatorFactoryService EditorNavigationSourceAggregatorFactoryService
         {
             get;
-            set;
+            private set;
         }
 
         [Import]
@@ -29,8 +30,16 @@
 
         public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer)
         {
-            var backgroundParser = BackgroundParserFactoryService.GetBackgroundParser(textBuffer) as Antlr4BackgroundParser;
-            return new Antlr4QuickInfoSource(textBuffer, backgroundParser, AggregatorFactory.CreateTagAggregator<ClassificationTag>(textBuffer));
+            Func<Antlr4QuickInfoSource> factory =
+                () =>
+                {
+                    return new Antlr4QuickInfoSource(
+                        textBuffer,
+                        EditorNavigationSourceAggregatorFactoryService.CreateEditorNavigationSourceAggregator(textBuffer),
+                        AggregatorFactory.CreateTagAggregator<ClassificationTag>(textBuffer));
+                };
+
+            return textBuffer.Properties.GetOrCreateSingletonProperty(factory);
         }
     }
 }

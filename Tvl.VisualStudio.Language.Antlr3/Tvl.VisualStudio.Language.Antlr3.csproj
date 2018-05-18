@@ -252,16 +252,16 @@
     <Compile Include="V4\Antlr4EditorNavigationSource.cs" />
     <Compile Include="V4\Antlr4EditorNavigationSourceProvider.cs" />
     <None Include="V4\Antlr4ErrorTaggerProvider.cs" />
-    <None Include="V4\Antlr4IntellisenseCommandFilter.cs" />
-    <None Include="V4\Antlr4IntellisenseController.cs" />
-    <None Include="V4\Antlr4IntellisenseControllerProvider.cs" />
+    <Compile Include="V4\Antlr4IntellisenseCommandFilter.cs" />
+    <Compile Include="V4\Antlr4IntellisenseController.cs" />
+    <Compile Include="V4\Antlr4IntellisenseControllerProvider.cs" />
     <None Include="V4\Antlr4LanguageElementTagger.cs" />
     <None Include="V4\Antlr4LanguageElementTaggerProvider.cs" />
     <Compile Include="V4\Antlr4OutliningTagger.cs" />
     <Compile Include="V4\Antlr4OutliningTaggerProvider.cs" />
     <None Include="V4\Antlr4ParserTokenStream.cs" />
-    <None Include="V4\Antlr4QuickInfoSource.cs" />
-    <None Include="V4\Antlr4QuickInfoSourceProvider.cs" />
+    <Compile Include="V4\Antlr4QuickInfoSource.cs" />
+    <Compile Include="V4\Antlr4QuickInfoSourceProvider.cs" />
     <None Include="Experimental\SemanticClassifierBase`1.cs" />
     <Compile Include="OptionsPages\AntlrIntellisenseOptions.cs">
       <SubType>Component</SubType>

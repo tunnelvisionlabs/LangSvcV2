@@ -1,5 +1,6 @@
 ﻿namespace Tvl.VisualStudio.Language.AntlrV4
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
     using Microsoft.VisualStudio.Language.Intellisense;
@@ -9,6 +10,7 @@
     using Microsoft.VisualStudio.Text.Operations;
     using Microsoft.VisualStudio.Text.Tagging;
     using Microsoft.VisualStudio.Utilities;
+    using Tvl.VisualStudio.Text.Navigation;
     using Tvl.VisualStudio.Language.Intellisense;
     using Tvl.VisualStudio.Language.Parsing;
     using SVsServiceProvider = Microsoft.VisualStudio.Shell.SVsServiceProvider;
@@ -29,6 +31,13 @@
 
         [Import]
         internal IClassifierAggregatorService ClassifierAggregatorService
+        {
+            get;
+            private set;
+        }
+
+        [Import]
+        internal IEditorNavigationSourceAggregatorFactoryService EditorNavigationSourceAggregatorFactoryService
         {
             get;
             private set;
@@ -64,9 +73,13 @@
 
         protected override IntellisenseController TryCreateIntellisenseController(ITextView textView, IList<ITextBuffer> subjectBuffers)
         {
-            Antlr4IntellisenseController controller = new Antlr4IntellisenseController(textView, this, (Antlr4BackgroundParser)BackgroundParserFactoryService.GetBackgroundParser(textView.TextBuffer));
-            textView.Properties[typeof(Antlr4IntellisenseController)] = controller;
-            return controller;
+            Func<Antlr4IntellisenseController> factory =
+                () =>
+                {
+                    return new Antlr4IntellisenseController(textView, this, (Antlr4BackgroundParser)BackgroundParserFactoryService.GetBackgroundParser(textView.TextBuffer));
+                };
+
+            return textView.Properties.GetOrCreateSingletonProperty(factory);
         }
     }
 }
