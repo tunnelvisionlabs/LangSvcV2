@@ -31,8 +31,9 @@ using Microsoft.VisualStudio.Shell;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.1.594")]
-[assembly: AssemblyFileVersion("1.0.1.594")]
+[assembly: AssemblyVersion("1.2.0.0")]
+[assembly: AssemblyFileVersion("1.2.0.0")]
+[assembly: AssemblyInformationalVersion("1.2.0")]
 
 [assembly: ProvideCodeBase(AssemblyName = "Tvl.Core")]
 [assembly: ProvideCodeBase(AssemblyName = "Tvl.VisualStudio.Language")]
@@ -48,20 +49,20 @@ using Microsoft.VisualStudio.Shell;
 [assembly: ProvideBindingRedirection(
     AssemblyName = "Tvl.Core",
     OldVersionLowerBound = "1.0.2.0",
-    OldVersionUpperBound = "1.1.0.0",
-    NewVersion = "1.1.0.0")]
+    OldVersionUpperBound = "1.2.0.0",
+    NewVersion = "1.2.0.0")]
 [assembly: ProvideBindingRedirection(
     AssemblyName = "Tvl.VisualStudio.Language.Interfaces",
     OldVersionLowerBound = "1.0.2.0",
-    OldVersionUpperBound = "1.1.0.0",
-    NewVersion = "1.1.0.0")]
+    OldVersionUpperBound = "1.2.0.0",
+    NewVersion = "1.2.0.0")]
 [assembly: ProvideBindingRedirection(
     AssemblyName = "Tvl.VisualStudio.Shell.Interfaces",
     OldVersionLowerBound = "1.0.2.0",
-    OldVersionUpperBound = "1.1.0.0",
-    NewVersion = "1.1.0.0")]
+    OldVersionUpperBound = "1.2.0.0",
+    NewVersion = "1.2.0.0")]
 [assembly: ProvideBindingRedirection(
     AssemblyName = "Tvl.VisualStudio.Text.Interfaces",
     OldVersionLowerBound = "1.0.2.0",
-    OldVersionUpperBound = "1.1.0.0",
-    NewVersion = "1.1.0.0")]
+    OldVersionUpperBound = "1.2.0.0",
+    NewVersion = "1.2.0.0")]
