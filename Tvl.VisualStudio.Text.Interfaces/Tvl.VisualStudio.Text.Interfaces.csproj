@@ -54,7 +54,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ICommenterProvider.cs" />
     <Compile Include="ITextViewMappingService.cs" />
     <Compile Include="Navigation\EditorNavigationTypeDefinition.cs" />
     <Compile Include="Navigation\IEditorNavigationDropdownBarClient.cs" />
@@ -67,7 +66,6 @@
     <Compile Include="Navigation\IEditorNavigationType.cs" />
     <Compile Include="Navigation\IEditorNavigationTypeRegistryService.cs" />
     <Compile Include="Navigation\PredefinedEditorNavigationTypes.cs" />
-    <Compile Include="ICommenter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

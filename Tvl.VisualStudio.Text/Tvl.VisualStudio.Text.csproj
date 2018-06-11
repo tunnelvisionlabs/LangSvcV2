@@ -60,17 +60,13 @@
   <ItemGroup>
     <Compile Include="Classification\LanguageClassifierProvider`1.cs" />
     <Compile Include="LanguageInfo.cs" />
-    <Compile Include="BlockCommentFormat.cs" />
     <Compile Include="CodeWindowManager.cs" />
     <Compile Include="IContentTypeMetadata.cs" />
     <Compile Include="LanguagePreferences.cs" />
-    <Compile Include="LineCommentFormat.cs" />
     <Compile Include="Navigation\EditorNavigationTarget.cs" />
     <Compile Include="Navigation\NavigationTargetStyle.cs" />
     <Compile Include="Tagging\BlockTypeDefinition.cs" />
     <Compile Include="Tagging\BraceMatchingTagger.cs" />
-    <Compile Include="Commenter.cs" />
-    <Compile Include="CommentFormat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tagging\DeclarationFormatOptions.cs" />
     <Compile Include="Tagging\IBlockType.cs" />

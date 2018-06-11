@@ -64,8 +64,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AutoCommentService.cs" />
-    <Compile Include="CommenterFilter.cs" />
     <None Include="..\External\Key.snk">
       <Link>Key.snk</Link>
     </None>

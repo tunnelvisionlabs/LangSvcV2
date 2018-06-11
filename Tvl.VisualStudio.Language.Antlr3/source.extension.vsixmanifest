@@ -18,6 +18,12 @@
   </Installation>
   <Dependencies>
     <Dependency d:Source="File"
+      DisplayName="Visual Studio Commenter Services"
+      Id="Tvl.VisualStudio.Commenter.F3FD3E6D-611C-4703-B160-0C425AAFBACF"
+      Version="[2.0.0,)"
+      d:InstallSource="Embed"
+      Location="Tvl.VisualStudio.Commenter.vsix" />
+    <Dependency d:Source="File"
       DisplayName="Visual Studio Output Window Services"
       Id="Tvl.VisualStudio.OutputWindow.3EF11167-A319-43DB-B1B4-A9778A90FAE0"
       Version="[3.0.0,)"

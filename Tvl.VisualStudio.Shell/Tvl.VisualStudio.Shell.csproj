@@ -45,8 +45,8 @@
     <PackageReference Include="Tvl.VisualStudio.OutputWindow.Interfaces" Version="2.1.0" />
     <PackageReference Include="VSSDK.ComponentModelHost.11" Version="11.0.4" />
     <PackageReference Include="VSSDK.Debugger.Interop.10" Version="10.0.4" />
-    <PackageReference Include="VSSDK.Editor.11" Version="11.0.4" />
-    <PackageReference Include="VSSDK.Language.11" Version="11.0.4" />
+    <PackageReference Include="VSSDK.Editor" Version="10.0.4" />
+    <PackageReference Include="VSSDK.Language" Version="10.0.4" />
     <PackageReference Include="VSSDK.Shell.11" Version="11.0.4" />
   </ItemGroup>
   <ItemGroup>

@@ -3,10 +3,10 @@
     using System;
     using System.ComponentModel.Composition;
     using JetBrains.Annotations;
-    using Microsoft.VisualStudio.Text.Editor;
-    using Microsoft.VisualStudio.Text.Operations;
+    using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Utilities;
-    using Tvl.VisualStudio.Text;
+    using Tvl.VisualStudio.Text.Commenter;
+    using Tvl.VisualStudio.Text.Commenter.Interfaces;
 
     [Export(typeof(ICommenterProvider))]
     [ContentType(AntlrConstants.AntlrContentType)]
@@ -15,19 +15,12 @@
         private static readonly LineCommentFormat LineCommentFormat = new LineCommentFormat("//");
         private static readonly BlockCommentFormat BlockCommentFormat = new BlockCommentFormat("/*", "*/");
 
-        [Import]
-        private ITextUndoHistoryRegistry TextUndoHistoryRegistry
+        public ICommenter TryCreateCommenter([NotNull] ITextBuffer textBuffer)
         {
-            get;
-            set;
-        }
+            Requires.NotNull(textBuffer, nameof(textBuffer));
 
-        public ICommenter GetCommenter([NotNull] ITextView textView)
-        {
-            Requires.NotNull(textView, nameof(textView));
-
-            Func<Commenter> factory = () => new Commenter(textView, TextUndoHistoryRegistry, LineCommentFormat, BlockCommentFormat);
-            return textView.Properties.GetOrCreateSingletonProperty<Commenter>(factory);
+            Func<FormatCommenter> factory = () => new FormatCommenter(textBuffer, LineCommentFormat, BlockCommentFormat);
+            return textBuffer.Properties.GetOrCreateSingletonProperty<FormatCommenter>(factory);
         }
     }
 }
