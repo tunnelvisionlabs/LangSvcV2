@@ -1,77 +1,37 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{7305730D-8DBE-4A01-A9D9-5F69AF2049B1}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tvl.Go.Compiler</RootNamespace>
-    <AssemblyName>Tvl.Go.Compiler</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
-    <FileAlignment>512</FileAlignment>
-    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    <TargetFramework>net45</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+
+  <PropertyGroup>
+    <Company>Tunnel Vision Laboratories, LLC</Company>
+    <Copyright>Copyright © Sam Harwell 2010</Copyright>
+    <Version>1.0.1.594</Version>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
     <AssemblyOriginatorKeyFile>..\External\Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Antlr3" Version="3.5.1" PrivateAssets="all" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="CSharpCodeGenerator.cs" />
-    <Compile Include="CSharpCodeGeneratorWalkerHelper.cs">
-      <DependentUpon>CSharpCodeGeneratorWalker.g3</DependentUpon>
-    </Compile>
-    <Compile Include="GoLexerHelper.cs">
-      <DependentUpon>Go.g3</DependentUpon>
-    </Compile>
-    <Compile Include="GoParserHelper.cs">
-      <DependentUpon>Go.g3</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Update="CSharpCodeGeneratorWalkerHelper.cs" DependentUpon="CSharpCodeGeneratorWalker.g3" />
+    <Compile Update="GoLexerHelper.cs" DependentUpon="Go.g3" />
+    <Compile Update="GoParserHelper.cs" DependentUpon="Go.g3" />
   </ItemGroup>
+
   <ItemGroup>
     <Antlr3 Include="Go.g3" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="..\External\Key.snk">
-      <Link>Key.snk</Link>
-    </None>
-    <None Include="CSharpCodeGeneratorWalker.g3" />
+    <None Include="..\External\Key.snk" Link="Key.snk" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

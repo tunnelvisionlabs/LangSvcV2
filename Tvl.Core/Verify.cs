@@ -8,6 +8,9 @@ namespace Tvl
 {
     using System;
     using System.Diagnostics;
+#if NET45
+    using System.Runtime.InteropServices;
+#endif
 
     /// <summary>
     /// Common runtime checks that throw exceptions upon failure.

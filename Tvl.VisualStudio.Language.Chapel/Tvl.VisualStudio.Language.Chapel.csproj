@@ -1,18 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project>
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>{3B2CF601-A92A-49F2-8262-DA9402CA3762}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tvl.VisualStudio.Language.Chapel</RootNamespace>
-    <AssemblyName>Tvl.VisualStudio.Language.Chapel</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
+    <TargetFramework>net45</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Company>Tunnel Vision Laboratories, LLC</Company>
+    <Copyright>Copyright © Sam Harwell 2011</Copyright>
+    <Version>1.0.1.594</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
@@ -21,149 +21,71 @@
     <!-- Include the build output to avoid problems with the fast up-to-date check in Visual Studio. -->
     <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
-    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
-  <PropertyGroup>
-    <!-- Common debugging support -->
-    <StartAction>Program</StartAction>
-    <StartProgram>$(DevEnvDir)\devenv.exe</StartProgram>
-    <StartArguments>/rootSuffix Exp</StartArguments>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(VisualStudioVersion)' != ''">
-    <!-- This is added to prevent forced migrations in Visual Studio 2012 and newer -->
-    <MinimumVisualStudioVersion>$(VisualStudioVersion)</MinimumVisualStudioVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="('$(BuildingInsideVisualStudio)' != 'true') Or ('$(VisualStudioVersion)' == '')">
+
+  <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' != 'true'">
     <!-- This property disables extension deployment for command line builds; required for automated builds -->
-    <!-- It also disables deployment when run in an enviroment earlier than Visual Studio 2012 -->
     <DeployExtension>False</DeployExtension>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\External\Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Antlr3" Version="3.5.1" PrivateAssets="all" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="15.1.192" PrivateAssets="all" />
-    <PackageReference Include="Tvl.VisualStudio.OutputWindow" Version="3.0.0" PrivateAssets="all" />
+    <PackageReference Include="Tvl.VisualStudio.OutputWindow" Version="3.1.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.VisualStudio.TextManager.Interop.8.0" Version="8.0.50728" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
-      <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
-      <Name>Tvl.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Antlr\Tvl.VisualStudio.Language.Antlr.csproj">
-      <Project>{3852C7D0-60EA-45CC-A84C-BF66B350CF3B}</Project>
-      <Name>Tvl.VisualStudio.Language.Antlr</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Framework\Tvl.VisualStudio.Framework.csproj">
-      <Project>{E5568831-E802-481F-A34F-D7DC69DD9C4F}</Project>
-      <Name>Tvl.VisualStudio.Framework</Name>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <Private>False</Private>
-      <IncludeOutputGroupsInVSIX>CreateVsixContainer</IncludeOutputGroupsInVSIX>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Language.Interfaces\Tvl.VisualStudio.Language.Interfaces.csproj">
-      <Project>{4599ac99-de26-4686-8821-67cf461c6b26}</Project>
-      <Name>Tvl.VisualStudio.Language.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Language\Tvl.VisualStudio.Language.csproj">
-      <Project>{90E28BCA-BD13-475B-B051-7A7D852A6206}</Project>
-      <Name>Tvl.VisualStudio.Language</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj">
-      <Project>{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}</Project>
-      <Name>Tvl.VisualStudio.Shell</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Text.Interfaces\Tvl.VisualStudio.Text.Interfaces.csproj">
-      <Project>{36884750-a681-412c-9ebf-801847f38df1}</Project>
-      <Name>Tvl.VisualStudio.Text.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj">
-      <Project>{2B913C3A-3FD8-4633-81C8-683AF66741A8}</Project>
-      <Name>Tvl.VisualStudio.Text</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Antlr\Tvl.VisualStudio.Language.Antlr.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Framework\Tvl.VisualStudio.Framework.csproj" Private="false" ReferenceOutputAssembly="false" IncludeOutputGroupsInVSIX="CreateVsixContainer" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Language.Interfaces\Tvl.VisualStudio.Language.Interfaces.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Language\Tvl.VisualStudio.Language.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Text.Interfaces\Tvl.VisualStudio.Text.Interfaces.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="Chapel.g3.lexer.cs">
-      <DependentUpon>Chapel.g3</DependentUpon>
-    </None>
-    <None Include="Chapel.g3.parser.cs">
-      <DependentUpon>Chapel.g3</DependentUpon>
-    </None>
-    <Compile Include="ChapelBraceMatchingTaggerProvider.cs" />
-    <Compile Include="ChapelCodeClassifierLexer.g3.cs">
-      <DependentUpon>ChapelCodeClassifierLexer.g3</DependentUpon>
-    </Compile>
-    <Compile Include="ChapelConstants.cs" />
-    <Compile Include="ChapelClassificationTypeNames.cs" />
-    <Compile Include="ChapelClassificationTypes.cs" />
-    <Compile Include="ChapelClassifier.cs" />
-    <Compile Include="ChapelClassifierLexer.cs" />
-    <Compile Include="ChapelClassifierLexerMode.cs" />
-    <Compile Include="ChapelClassifierLexerState.cs" />
-    <Compile Include="ChapelClassifierProvider.cs" />
-    <Compile Include="ChapelCommenterProvider.cs" />
-    <Compile Include="ChapelLanguageInfo.cs" />
-    <Compile Include="ChapelLanguagePackage.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ChapelServices.cs" />
+    <Compile Remove="Chapel.g3.lexer.cs" />
+    <Compile Remove="Chapel.g3.parser.cs" />
+    <Compile Update="ChapelCodeClassifierLexer.g3.cs" DependentUpon="ChapelCodeClassifierLexer.g3" />
   </ItemGroup>
+
   <ItemGroup>
-    <Antlr3 Include="ChapelCodeClassifierLexer.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <None Include="..\External\Key.snk">
-      <Link>Key.snk</Link>
-    </None>
-    <None Include="Chapel.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Include="source.extension.vsixmanifest">
-      <SubType>Designer</SubType>
-    </None>
+    <Antlr3 Include="ChapelCodeClassifierLexer.g3" Generator="MSBuild:Compile" />
   </ItemGroup>
+
   <ItemGroup>
-    <Content Include="VSIXProject_large.png">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
+    <None Include="..\External\Key.snk" Link="Key.snk" />
+    <None Update="Chapel.g3" Generator="MSBuild:Compile" />
+    <None Update="Chapel.g3.lexer.cs" DependentUpon="Chapel.g3" />
+    <None Update="Chapel.g3.parser.cs" DependentUpon="Chapel.g3" />
   </ItemGroup>
+
   <ItemGroup>
-    <EmbeddedResource Include="VSPackage.resx">
-      <SubType>Designer</SubType>
-      <LogicalName>VSPackage.resources</LogicalName>
-      <MergeWithCTO>true</MergeWithCTO>
-    </EmbeddedResource>
+    <Content Include="VSIXProject_large.png" IncludeInVSIX="true" />
   </ItemGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\External\Key.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+  <ItemGroup>
+    <EmbeddedResource Update="VSPackage.resx" SubType="Designer" LogicalName="VSPackage.resources" MergeWithCTO="true" />
+  </ItemGroup>
+
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
+
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="Exists('$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets')" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
+  <ItemGroup>
+    <!-- https://github.com/dotnet/sdk/issues/433 -->
+    <ProjectReference Update="@(ProjectReference)" AdditionalProperties="TargetFramework=net45" />
+
+    <!-- https://github.com/Microsoft/extendvs/issues/57 -->
+    <ProjectReference Update="@(ProjectReference)" Name="%(Filename)" />
+  </ItemGroup>
+
 </Project>
