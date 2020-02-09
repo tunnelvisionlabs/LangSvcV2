@@ -3,31 +3,31 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29721.120
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Shell", "Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj", "{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Shell", "Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj", "{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Shell.Interfaces", "Tvl.VisualStudio.Shell.Interfaces\Tvl.VisualStudio.Shell.Interfaces.csproj", "{C8450E39-55B4-4BBF-A08F-F1E38B76DDEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Shell.Interfaces", "Tvl.VisualStudio.Shell.Interfaces\Tvl.VisualStudio.Shell.Interfaces.csproj", "{C8450E39-55B4-4BBF-A08F-F1E38B76DDEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language", "Tvl.VisualStudio.Language\Tvl.VisualStudio.Language.csproj", "{90E28BCA-BD13-475B-B051-7A7D852A6206}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Language", "Tvl.VisualStudio.Language\Tvl.VisualStudio.Language.csproj", "{90E28BCA-BD13-475B-B051-7A7D852A6206}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.Core", "Tvl.Core\Tvl.Core.csproj", "{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.Core", "Tvl.Core\Tvl.Core.csproj", "{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Shell.Implementation", "Tvl.VisualStudio.Shell.Implementation\Tvl.VisualStudio.Shell.Implementation.csproj", "{D9C9E707-E9C3-428B-85BD-B5AAE8F714A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Shell.Implementation", "Tvl.VisualStudio.Shell.Implementation\Tvl.VisualStudio.Shell.Implementation.csproj", "{D9C9E707-E9C3-428B-85BD-B5AAE8F714A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language.Antlr", "Tvl.VisualStudio.Antlr\Tvl.VisualStudio.Language.Antlr.csproj", "{3852C7D0-60EA-45CC-A84C-BF66B350CF3B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Language.Antlr", "Tvl.VisualStudio.Antlr\Tvl.VisualStudio.Language.Antlr.csproj", "{3852C7D0-60EA-45CC-A84C-BF66B350CF3B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Text", "Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj", "{2B913C3A-3FD8-4633-81C8-683AF66741A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Text", "Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj", "{2B913C3A-3FD8-4633-81C8-683AF66741A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Text.Interfaces", "Tvl.VisualStudio.Text.Interfaces\Tvl.VisualStudio.Text.Interfaces.csproj", "{36884750-A681-412C-9EBF-801847F38DF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Text.Interfaces", "Tvl.VisualStudio.Text.Interfaces\Tvl.VisualStudio.Text.Interfaces.csproj", "{36884750-A681-412C-9EBF-801847F38DF1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Text.Implementation", "Tvl.VisualStudio.Text.Implementation\Tvl.VisualStudio.Text.Implementation.csproj", "{D9B45C61-9721-41B7-9ABF-85C452CD9F49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Text.Implementation", "Tvl.VisualStudio.Text.Implementation\Tvl.VisualStudio.Text.Implementation.csproj", "{D9B45C61-9721-41B7-9ABF-85C452CD9F49}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language.Interfaces", "Tvl.VisualStudio.Language.Interfaces\Tvl.VisualStudio.Language.Interfaces.csproj", "{4599AC99-DE26-4686-8821-67CF461C6B26}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Language.Interfaces", "Tvl.VisualStudio.Language.Interfaces\Tvl.VisualStudio.Language.Interfaces.csproj", "{4599AC99-DE26-4686-8821-67CF461C6B26}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language.Implementation", "Tvl.VisualStudio.Language.Implementation\Tvl.VisualStudio.Language.Implementation.csproj", "{9C111828-9344-4CB2-8A2C-A20C4B909908}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Language.Implementation", "Tvl.VisualStudio.Language.Implementation\Tvl.VisualStudio.Language.Implementation.csproj", "{9C111828-9344-4CB2-8A2C-A20C4B909908}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Tools.Antlr", "Tvl.VisualStudio.Tools.Antlr\Tvl.VisualStudio.Tools.Antlr.csproj", "{728757BD-5485-411B-83A6-B02318B2F61A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Tools.Antlr", "Tvl.VisualStudio.Tools.Antlr\Tvl.VisualStudio.Tools.Antlr.csproj", "{728757BD-5485-411B-83A6-B02318B2F61A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Framework", "Tvl.VisualStudio.Framework\Tvl.VisualStudio.Framework.csproj", "{E5568831-E802-481F-A34F-D7DC69DD9C4F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Framework", "Tvl.VisualStudio.Framework\Tvl.VisualStudio.Framework.csproj", "{E5568831-E802-481F-A34F-D7DC69DD9C4F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{2841C8ED-0C1F-40EF-8BE6-4F700A9740C6}"
 EndProject
@@ -35,43 +35,43 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Public Assemblies", "Public
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Private Assemblies", "Private Assemblies", "{27B8B675-BC57-4568-8BB7-EE0B1DA16E64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language.Php", "Tvl.VisualStudio.Language.Php\Tvl.VisualStudio.Language.Php.csproj", "{278B5C1B-CF8B-4DD7-A514-EE27B268F11E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Language.Php", "Tvl.VisualStudio.Language.Php\Tvl.VisualStudio.Language.Php.csproj", "{278B5C1B-CF8B-4DD7-A514-EE27B268F11E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language.Go", "Tvl.VisualStudio.Language.Go\Tvl.VisualStudio.Language.Go.csproj", "{202C26A6-5388-4D5D-BE36-7912A02939DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Language.Go", "Tvl.VisualStudio.Language.Go\Tvl.VisualStudio.Language.Go.csproj", "{202C26A6-5388-4D5D-BE36-7912A02939DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.Go.Compiler", "Tvl.Go.Compiler\Tvl.Go.Compiler.csproj", "{7305730D-8DBE-4A01-A9D9-5F69AF2049B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.Go.Compiler", "Tvl.Go.Compiler\Tvl.Go.Compiler.csproj", "{7305730D-8DBE-4A01-A9D9-5F69AF2049B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.Go.Build.Tasks", "Tvl.Go.Build.Tasks\Tvl.Go.Build.Tasks.csproj", "{1581500B-38FC-433B-A664-B05D94004193}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.Go.Build.Tasks", "Tvl.Go.Build.Tasks\Tvl.Go.Build.Tasks.csproj", "{1581500B-38FC-433B-A664-B05D94004193}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language.Antlr3", "Tvl.VisualStudio.Language.Antlr3\Tvl.VisualStudio.Language.Antlr3.csproj", "{4CC2E094-48EF-4E03-B485-2C876EF54500}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Language.Antlr3", "Tvl.VisualStudio.Language.Antlr3\Tvl.VisualStudio.Language.Antlr3.csproj", "{4CC2E094-48EF-4E03-B485-2C876EF54500}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{030635BA-D0D5-4D97-A9D9-7724C6B76F6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LexerGrammarItemTemplate", "Templates\Antlr\ItemTemplates\LexerGrammarItemTemplate\LexerGrammarItemTemplate.csproj", "{15CE12D9-B4E9-4DB3-8434-55339D2874AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LexerGrammarItemTemplate", "Templates\Antlr\ItemTemplates\LexerGrammarItemTemplate\LexerGrammarItemTemplate.csproj", "{15CE12D9-B4E9-4DB3-8434-55339D2874AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserGrammarItemTemplate", "Templates\Antlr\ItemTemplates\ParserGrammarItemTemplate\ParserGrammarItemTemplate.csproj", "{AC7D2CF6-D8C7-41F1-B87F-3EAC16510923}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParserGrammarItemTemplate", "Templates\Antlr\ItemTemplates\ParserGrammarItemTemplate\ParserGrammarItemTemplate.csproj", "{AC7D2CF6-D8C7-41F1-B87F-3EAC16510923}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombinedGrammarItemTemplate", "Templates\Antlr\ItemTemplates\CombinedGrammarItemTemplate\CombinedGrammarItemTemplate.csproj", "{954B34BD-34F9-4AC3-8FB7-2B5651425C61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CombinedGrammarItemTemplate", "Templates\Antlr\ItemTemplates\CombinedGrammarItemTemplate\CombinedGrammarItemTemplate.csproj", "{954B34BD-34F9-4AC3-8FB7-2B5651425C61}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TreeGrammarItemTemplate", "Templates\Antlr\ItemTemplates\TreeGrammarItemTemplate\TreeGrammarItemTemplate.csproj", "{7E3A333F-092A-4BB7-9A00-3F53A2496BFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TreeGrammarItemTemplate", "Templates\Antlr\ItemTemplates\TreeGrammarItemTemplate\TreeGrammarItemTemplate.csproj", "{7E3A333F-092A-4BB7-9A00-3F53A2496BFB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Antlr", "Antlr", "{1F312219-3AC2-41A2-BBAF-EDC7F299A7C9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Item Templates", "Item Templates", "{D4ECFC2D-A2B0-477A-86B9-6EF0479E4987}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language.Alloy", "Tvl.VisualStudio.Language.Alloy\Tvl.VisualStudio.Language.Alloy.csproj", "{216D5774-6864-4270-A8A3-464AF172F23B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Language.Alloy", "Tvl.VisualStudio.Language.Alloy\Tvl.VisualStudio.Language.Alloy.csproj", "{216D5774-6864-4270-A8A3-464AF172F23B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language.StringTemplate4", "Tvl.VisualStudio.Language.StringTemplate4\Tvl.VisualStudio.Language.StringTemplate4.csproj", "{DB4120BB-A42F-48C7-9746-6B034E6234FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Language.StringTemplate4", "Tvl.VisualStudio.Language.StringTemplate4\Tvl.VisualStudio.Language.StringTemplate4.csproj", "{DB4120BB-A42F-48C7-9746-6B034E6234FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tvl.VisualStudio.Language.Chapel", "Tvl.VisualStudio.Language.Chapel\Tvl.VisualStudio.Language.Chapel.csproj", "{3B2CF601-A92A-49F2-8262-DA9402CA3762}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tvl.VisualStudio.Language.Chapel", "Tvl.VisualStudio.Language.Chapel\Tvl.VisualStudio.Language.Chapel.csproj", "{3B2CF601-A92A-49F2-8262-DA9402CA3762}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Go", "Go", "{56D686C2-5C0E-44A2-B35D-CBC3EC10FA48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V4CombinedGrammarItemTemplate", "Templates\Antlr\ItemTemplates\V4CombinedGrammarItemTemplate\V4CombinedGrammarItemTemplate.csproj", "{07A5A934-8BBE-498F-ABB4-BDFD31D80078}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "V4CombinedGrammarItemTemplate", "Templates\Antlr\ItemTemplates\V4CombinedGrammarItemTemplate\V4CombinedGrammarItemTemplate.csproj", "{07A5A934-8BBE-498F-ABB4-BDFD31D80078}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V4LexerGrammarItemTemplate", "Templates\Antlr\ItemTemplates\V4LexerGrammarItemTemplate\V4LexerGrammarItemTemplate.csproj", "{5C45E24D-37F8-4660-8832-F5108A90E87A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "V4LexerGrammarItemTemplate", "Templates\Antlr\ItemTemplates\V4LexerGrammarItemTemplate\V4LexerGrammarItemTemplate.csproj", "{5C45E24D-37F8-4660-8832-F5108A90E87A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V4ParserGrammarItemTemplate", "Templates\Antlr\ItemTemplates\V4ParserGrammarItemTemplate\V4ParserGrammarItemTemplate.csproj", "{5601E585-16BB-4FA8-9495-BF22E3123BFA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "V4ParserGrammarItemTemplate", "Templates\Antlr\ItemTemplates\V4ParserGrammarItemTemplate\V4ParserGrammarItemTemplate.csproj", "{5601E585-16BB-4FA8-9495-BF22E3123BFA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{66840BE0-CE19-4FF1-99B4-4C8CE2E61D8B}"
 	ProjectSection(SolutionItems) = preProject
