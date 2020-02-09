@@ -17,4 +17,16 @@
     </PropertyGroup>
   </Target>
 
+  <Target Name="GetMinSupportedVisualStudioVersionInclusive" Returns="$(MinSupportedVisualStudioVersionInclusive)">
+    <PropertyGroup>
+      <MinSupportedVisualStudioVersionInclusive Condition="'$(MinSupportedVisualStudioVersionInclusive)' == ''">11.0</MinSupportedVisualStudioVersionInclusive>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="GetMaxSupportedVisualStudioVersionExclusive" Returns="$(MaxSupportedVisualStudioVersionExclusive)">
+    <PropertyGroup>
+      <MaxSupportedVisualStudioVersionExclusive Condition="'$(MaxSupportedVisualStudioVersionExclusive)' == ''">16.0</MaxSupportedVisualStudioVersionExclusive>
+    </PropertyGroup>
+  </Target>
+
 </Project>
