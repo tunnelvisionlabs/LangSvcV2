@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="Tvl.VisualStudio.Language.Go.c837d3e9-5ae2-4455-a608-f6a4ae016688" Version="1.1.0" Language="en-US" Publisher="Sam Harwell" />
+    <Identity Id="Tvl.VisualStudio.Language.Go.c837d3e9-5ae2-4455-a608-f6a4ae016688" Version="|%CurrentProject%;GetVsixVersion|" Language="en-US" Publisher="Sam Harwell" />
     <DisplayName>Go Language Support</DisplayName>
     <Description>Basic support for the Go programming language.</Description>
     <MoreInfo>https://github.com/tunnelvisionlabs/LangSvcV2</MoreInfo>
@@ -26,7 +26,7 @@
     <Dependency d:Source="File"
       DisplayName="Visual Studio Extensibility Framework"
       Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6"
-      Version="[1.2.0,)"
+      Version="[|Tvl.VisualStudio.Framework;GetVsixVersion|,)"
       d:InstallSource="Embed"
       Location="Tvl.VisualStudio.Framework.vsix" />
   </Dependencies>

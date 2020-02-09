@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="Tvl.VisualStudio.Language.Chapel.68c0f3a0-30b1-4e27-a8b4-436e9a03eaee" Version="1.0.2" Language="en-US" Publisher="Sam Harwell" />
+    <Identity Id="Tvl.VisualStudio.Language.Chapel.68c0f3a0-30b1-4e27-a8b4-436e9a03eaee" Version="|%CurrentProject%;GetVsixVersion|" Language="en-US" Publisher="Sam Harwell" />
     <DisplayName>Chapel Language Support</DisplayName>
     <Description>Basic support for the Chapel high-performance programming language.</Description>
     <MoreInfo>https://github.com/tunnelvisionlabs/LangSvcV2</MoreInfo>
@@ -26,7 +26,7 @@
     <Dependency d:Source="File"
       DisplayName="Visual Studio Extensibility Framework"
       Id="Tvl.VisualStudio.Framework.922dc49e-a1f8-43c2-a748-504c676ebbb6"
-      Version="[1.2.0,)"
+      Version="[|Tvl.VisualStudio.Framework;GetVsixVersion|,)"
       d:InstallSource="Embed"
       Location="Tvl.VisualStudio.Framework.vsix" />
   </Dependencies>

@@ -11,4 +11,10 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="GetVsixVersion" Returns="$(VsixVersion)">
+    <PropertyGroup>
+      <VsixVersion Condition="'$(VsixVersion)' == ''">$(InformationalVersion)</VsixVersion>
+    </PropertyGroup>
+  </Target>
+
 </Project>

@@ -11,6 +11,7 @@
     <Company>Tunnel Vision Laboratories, LLC</Company>
     <Copyright>Copyright © Sam Harwell 2010</Copyright>
     <Version>1.0.1.594</Version>
+    <VsixVersion>1.0.6</VsixVersion>
   </PropertyGroup>
 
   <PropertyGroup>

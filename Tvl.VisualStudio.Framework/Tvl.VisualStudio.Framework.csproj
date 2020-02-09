@@ -11,6 +11,7 @@
     <Copyright>Copyright © Sam Harwell 2010</Copyright>
     <Version>1.2.0.0</Version>
     <InformationalVersion>1.2.0</InformationalVersion>
+    <VsixVersion>1.4.0</VsixVersion>
   </PropertyGroup>
 
   <PropertyGroup>
