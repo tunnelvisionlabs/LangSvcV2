@@ -24,13 +24,6 @@
     <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <!-- Common debugging support -->
-    <StartAction>Program</StartAction>
-    <StartProgram>$(DevEnvDir)\devenv.exe</StartProgram>
-    <StartArguments>/rootSuffix $(VSSDKTargetPlatformRegRootSuffix)</StartArguments>
-  </PropertyGroup>
-
   <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' != 'true'">
     <!-- This property disables extension deployment for command line builds; required for automated builds -->
     <DeployExtension>False</DeployExtension>
