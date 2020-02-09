@@ -27,7 +27,7 @@
 
   <Target Name="GetMaxSupportedVisualStudioVersionExclusive" Returns="$(MaxSupportedVisualStudioVersionExclusive)">
     <PropertyGroup>
-      <MaxSupportedVisualStudioVersionExclusive Condition="'$(MaxSupportedVisualStudioVersionExclusive)' == ''">16.0</MaxSupportedVisualStudioVersionExclusive>
+      <MaxSupportedVisualStudioVersionExclusive Condition="'$(MaxSupportedVisualStudioVersionExclusive)' == ''">17.0</MaxSupportedVisualStudioVersionExclusive>
     </PropertyGroup>
   </Target>
 
