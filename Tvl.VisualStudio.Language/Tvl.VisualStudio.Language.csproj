@@ -1,91 +1,35 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{90E28BCA-BD13-475B-B051-7A7D852A6206}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tvl.VisualStudio.Language</RootNamespace>
-    <AssemblyName>Tvl.VisualStudio.Language</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
-    <FileAlignment>512</FileAlignment>
-    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    <TargetFramework>net45</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+
+  <PropertyGroup>
+    <Company>Tunnel Vision Laboratories, LLC</Company>
+    <Copyright>Copyright © Sam Harwell 2010</Copyright>
+    <Version>1.2.0.0</Version>
+    <InformationalVersion>1.2.0</InformationalVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
     <AssemblyOriginatorKeyFile>..\External\Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
     <Reference Include="System.Xaml" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
-      <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
-      <Name>Tvl.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Language.Interfaces\Tvl.VisualStudio.Language.Interfaces.csproj">
-      <Project>{4599ac99-de26-4686-8821-67cf461c6b26}</Project>
-      <Name>Tvl.VisualStudio.Language.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj">
-      <Project>{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}</Project>
-      <Name>Tvl.VisualStudio.Shell</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj">
-      <Project>{2B913C3A-3FD8-4633-81C8-683AF66741A8}</Project>
-      <Name>Tvl.VisualStudio.Text</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Language.Interfaces\Tvl.VisualStudio.Language.Interfaces.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Intellisense\CompletionDisplayNameComparer.cs" />
-    <Compile Include="Intellisense\CompletionHelper.cs" />
-    <Compile Include="Intellisense\CompletionInfo.cs" />
-    <Compile Include="Intellisense\CompletionSource.cs" />
-    <Compile Include="Intellisense\CompletionSourceProvider.cs" />
-    <Compile Include="Intellisense\FileSystemNavigateToTarget.cs" />
-    <Compile Include="Intellisense\IntellisenseCommandFilter.cs" />
-    <Compile Include="Intellisense\IntellisenseController.cs" />
-    <Compile Include="Intellisense\IntellisenseControllerProvider.cs" />
-    <Compile Include="Intellisense\SnapshotSpanNavigateToTarget.cs" />
-    <Compile Include="Parsing\BackgroundParserErrorTagger.cs" />
-    <Compile Include="Parsing\BackgroundParser.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="..\External\Key.snk" Link="Key.snk" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\External\Key.snk">
-      <Link>Key.snk</Link>
-    </None>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>
