@@ -1,18 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project>
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>{4CC2E094-48EF-4E03-B485-2C876EF54500}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tvl.VisualStudio.Language.Antlr3</RootNamespace>
-    <AssemblyName>Tvl.VisualStudio.Language.Antlr3</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
+    <TargetFramework>net45</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Company>Tunnel Vision Laboratories, LLC</Company>
+    <Copyright>Copyright © Sam Harwell 2014</Copyright>
+    <Version>1.4.0.0</Version>
+    <InformationalVersion>1.4.0</InformationalVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
@@ -21,345 +22,139 @@
     <!-- Include the build output to avoid problems with the fast up-to-date check in Visual Studio. -->
     <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
-    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
+
   <PropertyGroup>
     <!-- Common debugging support -->
     <StartAction>Program</StartAction>
     <StartProgram>$(DevEnvDir)\devenv.exe</StartProgram>
-    <StartArguments>/rootSuffix Exp</StartArguments>
+    <StartArguments>/rootSuffix $(VSSDKTargetPlatformRegRootSuffix)</StartArguments>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(VisualStudioVersion)' != ''">
-    <!-- This is added to prevent forced migrations in Visual Studio 2012 and newer -->
-    <MinimumVisualStudioVersion>$(VisualStudioVersion)</MinimumVisualStudioVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="('$(BuildingInsideVisualStudio)' != 'true') Or ('$(VisualStudioVersion)' == '')">
+
+  <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' != 'true'">
     <!-- This property disables extension deployment for command line builds; required for automated builds -->
-    <!-- It also disables deployment when run in an enviroment earlier than Visual Studio 2012 -->
     <DeployExtension>False</DeployExtension>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\External\Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="Antlr3" HintPath="$(NuGetPackageRoot)antlr3\3.5.1\tools\Antlr3.exe" />
+    <Reference Include="Antlr3" HintPath="$(PkgAntlr3)\tools\Antlr3.exe" />
   </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="Antlr3" Version="3.5.1" />
+    <PackageReference Include="Antlr3" Version="3.5.1" GeneratePathProperty="true" />
     <PackageReference Include="Antlr4.CodeGenerator" Version="4.6.1" PrivateAssets="all" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="15.1.192" PrivateAssets="all" />
     <PackageReference Include="StringTemplate4.Visualizer" Version="4.0.8" />
-    <PackageReference Include="Tvl.VisualStudio.OutputWindow" Version="3.0.0" PrivateAssets="all" />
+    <PackageReference Include="Tvl.VisualStudio.OutputWindow" Version="3.1.0" PrivateAssets="all" />
     <PackageReference Include="VSSDK.DTE.8" Version="8.0.4" />
     <PackageReference Include="VSSDK.NavigateTo.11" Version="11.0.4" />
     <PackageReference Include="VSSDK.VSLangProj" Version="7.0.4" />
+    <PackageReference Include="Microsoft.VisualStudio.TextManager.Interop.8.0" Version="8.0.50728" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\CombinedGrammarItemTemplate\CombinedGrammarItemTemplate.csproj">
-      <Project>{954B34BD-34F9-4AC3-8FB7-2B5651425C61}</Project>
-      <Name>CombinedGrammarItemTemplate</Name>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <VSIXSubPath>ItemTemplates</VSIXSubPath>
-    </ProjectReference>
-    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\LexerGrammarItemTemplate\LexerGrammarItemTemplate.csproj">
-      <Project>{15CE12D9-B4E9-4DB3-8434-55339D2874AF}</Project>
-      <Name>LexerGrammarItemTemplate</Name>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <VSIXSubPath>ItemTemplates</VSIXSubPath>
-    </ProjectReference>
-    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\ParserGrammarItemTemplate\ParserGrammarItemTemplate.csproj">
-      <Project>{AC7D2CF6-D8C7-41F1-B87F-3EAC16510923}</Project>
-      <Name>ParserGrammarItemTemplate</Name>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <VSIXSubPath>ItemTemplates</VSIXSubPath>
-    </ProjectReference>
-    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\TreeGrammarItemTemplate\TreeGrammarItemTemplate.csproj">
-      <Project>{7E3A333F-092A-4BB7-9A00-3F53A2496BFB}</Project>
-      <Name>TreeGrammarItemTemplate</Name>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <VSIXSubPath>ItemTemplates</VSIXSubPath>
-    </ProjectReference>
-    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\V4CombinedGrammarItemTemplate\V4CombinedGrammarItemTemplate.csproj">
-      <Project>{07A5A934-8BBE-498F-ABB4-BDFD31D80078}</Project>
-      <Name>V4CombinedGrammarItemTemplate</Name>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <VSIXSubPath>ItemTemplates</VSIXSubPath>
-    </ProjectReference>
-    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\V4LexerGrammarItemTemplate\V4LexerGrammarItemTemplate.csproj">
-      <Project>{5C45E24D-37F8-4660-8832-F5108A90E87A}</Project>
-      <Name>V4LexerGrammarItemTemplate</Name>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <VSIXSubPath>ItemTemplates</VSIXSubPath>
-    </ProjectReference>
-    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\V4ParserGrammarItemTemplate\V4ParserGrammarItemTemplate.csproj">
-      <Project>{5601E585-16BB-4FA8-9495-BF22E3123BFA}</Project>
-      <Name>V4ParserGrammarItemTemplate</Name>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <VSIXSubPath>ItemTemplates</VSIXSubPath>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
-      <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
-      <Name>Tvl.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Antlr\Tvl.VisualStudio.Language.Antlr.csproj">
-      <Project>{3852C7D0-60EA-45CC-A84C-BF66B350CF3B}</Project>
-      <Name>Tvl.VisualStudio.Language.Antlr</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Framework\Tvl.VisualStudio.Framework.csproj">
-      <Project>{E5568831-E802-481F-A34F-D7DC69DD9C4F}</Project>
-      <Name>Tvl.VisualStudio.Framework</Name>
-      <Private>False</Private>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <IncludeOutputGroupsInVSIX>CreateVsixContainer</IncludeOutputGroupsInVSIX>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Language.Interfaces\Tvl.VisualStudio.Language.Interfaces.csproj">
-      <Project>{4599ac99-de26-4686-8821-67cf461c6b26}</Project>
-      <Name>Tvl.VisualStudio.Language.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Language\Tvl.VisualStudio.Language.csproj">
-      <Project>{90E28BCA-BD13-475B-B051-7A7D852A6206}</Project>
-      <Name>Tvl.VisualStudio.Language</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj">
-      <Project>{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}</Project>
-      <Name>Tvl.VisualStudio.Shell</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Text.Interfaces\Tvl.VisualStudio.Text.Interfaces.csproj">
-      <Project>{36884750-a681-412c-9ebf-801847f38df1}</Project>
-      <Name>Tvl.VisualStudio.Text.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj">
-      <Project>{2B913C3A-3FD8-4633-81C8-683AF66741A8}</Project>
-      <Name>Tvl.VisualStudio.Text</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\CombinedGrammarItemTemplate\CombinedGrammarItemTemplate.csproj" ReferenceOutputAssembly="false" IncludeOutputGroupsInVSIX="TemplateProjectOutputGroup%3b" VSIXSubPath="ItemTemplates" />
+    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\LexerGrammarItemTemplate\LexerGrammarItemTemplate.csproj" ReferenceOutputAssembly="false" IncludeOutputGroupsInVSIX="TemplateProjectOutputGroup%3b" VSIXSubPath="ItemTemplates" />
+    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\ParserGrammarItemTemplate\ParserGrammarItemTemplate.csproj" ReferenceOutputAssembly="false" IncludeOutputGroupsInVSIX="TemplateProjectOutputGroup%3b" VSIXSubPath="ItemTemplates" />
+    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\TreeGrammarItemTemplate\TreeGrammarItemTemplate.csproj" ReferenceOutputAssembly="false" IncludeOutputGroupsInVSIX="TemplateProjectOutputGroup%3b" VSIXSubPath="ItemTemplates" />
+    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\V4CombinedGrammarItemTemplate\V4CombinedGrammarItemTemplate.csproj" ReferenceOutputAssembly="false" IncludeOutputGroupsInVSIX="TemplateProjectOutputGroup%3b" VSIXSubPath="ItemTemplates" />
+    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\V4LexerGrammarItemTemplate\V4LexerGrammarItemTemplate.csproj" ReferenceOutputAssembly="false" IncludeOutputGroupsInVSIX="TemplateProjectOutputGroup%3b" VSIXSubPath="ItemTemplates" />
+    <ProjectReference Include="..\Templates\Antlr\ItemTemplates\V4ParserGrammarItemTemplate\V4ParserGrammarItemTemplate.csproj" ReferenceOutputAssembly="false" IncludeOutputGroupsInVSIX="TemplateProjectOutputGroup%3b" VSIXSubPath="ItemTemplates" />
+    <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Antlr\Tvl.VisualStudio.Language.Antlr.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Framework\Tvl.VisualStudio.Framework.csproj" Private="false" ReferenceOutputAssembly="false" IncludeOutputGroupsInVSIX="CreateVsixContainer" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Language.Interfaces\Tvl.VisualStudio.Language.Interfaces.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Language\Tvl.VisualStudio.Language.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Text.Interfaces\Tvl.VisualStudio.Text.Interfaces.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="AntlrActionClassifierLexer.g3.cs">
-      <DependentUpon>AntlrActionClassifierLexer.g3</DependentUpon>
-    </Compile>
-    <Compile Include="AntlrClassifierLexer.cs" />
-    <Compile Include="AntlrClassifierLexerMode.cs" />
-    <Compile Include="AntlrIntellisenseCommandFilter.cs" />
-    <Compile Include="AntlrIntellisenseController.cs" />
-    <Compile Include="AntlrIntellisenseControllerProvider.cs" />
-    <Compile Include="AntlrCompletionSource.cs" />
-    <Compile Include="AntlrCompletionSourceProvider.cs" />
-    <Compile Include="AntlrLanguagePackage.cs" />
-    <Compile Include="AntlrLanguageInfo.cs" />
-    <Compile Include="AntlrBackgroundParser.cs" />
-    <Compile Include="AntlrBackgroundParserProvider.cs" />
-    <Compile Include="AntlrBraceMatchingTaggerProvider.cs" />
-    <Compile Include="AntlrClassificationTypeNames.cs" />
-    <Compile Include="AntlrClassifier.cs" />
-    <Compile Include="AntlrClassifierProvider.cs" />
-    <Compile Include="AntlrGrammarClassifierLexer.g3.cs">
-      <DependentUpon>AntlrGrammarClassifierLexer.g3</DependentUpon>
-    </Compile>
-    <Compile Include="AntlrCommenterProvider.cs" />
-    <Compile Include="AntlrConstants.cs" />
-    <Compile Include="AntlrEditorNavigationSource.cs" />
-    <Compile Include="AntlrEditorNavigationSourceProvider.cs" />
-    <Compile Include="AntlrEditorNavigationTypeNames.cs" />
-    <Compile Include="AntlrErrorProvidingLexer.cs" />
-    <Compile Include="AntlrErrorProvidingParser.cs" />
-    <Compile Include="AntlrErrorTaggerProvider.cs" />
-    <Compile Include="AntlrLanguageElementTagger.cs" />
-    <Compile Include="AntlrLanguageElementTaggerProvider.cs" />
-    <Compile Include="AntlrParserTokenStream.cs" />
-    <Compile Include="AntlrQuickInfoSource.cs" />
-    <Compile Include="AntlrQuickInfoSourceProvider.cs" />
-    <Compile Include="AntlrQuickSearchItemProvider.cs" />
-    <Compile Include="AntlrQuickSearchItemProviderFactory.cs" />
-    <Compile Include="AntlrServices.cs" />
-    <Compile Include="AntlrOutliningTagger.cs" />
-    <Compile Include="AntlrOutliningTaggerProvider.cs" />
-    <Compile Include="AntlrClassifierLexerState.cs" />
-    <Compile Include="AntlrTextStructureNavigator.cs" />
-    <Compile Include="AntlrTextStructureNavigatorProvider.cs" />
-    <Compile Include="Experimental\AntlrAtnBuilder.cs" />
-    <Compile Include="Experimental\CompletionSourceTest.cs" />
-    <Compile Include="Experimental\GrammarHeaderSemanticClassifier.cs" />
-    <Compile Include="Experimental\ISemanticTag.cs" />
-    <Compile Include="V4\AlignmentRequirements.cs" />
-    <Compile Include="V4\Anchor.cs" />
-    <Compile Include="V4\Antlr4CodeCompletionParser.cs" />
-    <Compile Include="V4\Antlr4CompletionParserATNSimulator.cs" />
-    <Compile Include="V4\Antlr4Constants.cs" />
-    <Compile Include="V4\Antlr4DynamicAnchorPoints.cs" />
-    <Compile Include="V4\Antlr4DynamicAnchorPointsProvider.cs" />
-    <Compile Include="V4\Antlr4ForestParser.cs" />
-    <Compile Include="V4\Antlr4LanguageInfo.cs" />
-    <Compile Include="V4\Antlr4ReferenceAnchorPoints.cs" />
-    <Compile Include="V4\Antlr4ReferenceAnchorPointsProvider.cs" />
-    <Compile Include="V4\Antlr4SmartIndent.cs" />
-    <Compile Include="V4\Antlr4SmartIndentProvider.cs" />
-    <Compile Include="V4\CaretReachedException.cs" />
-    <Compile Include="V4\CaretToken.cs" />
-    <Compile Include="V4\CodeCompletionErrorStrategy.cs" />
-    <Compile Include="V4\CodeCompletionTokenSource.cs" />
-    <Compile Include="V4\CompletionParserATNSimulator.cs" />
-    <Compile Include="V4\ForestParser`1.cs" />
-    <Compile Include="V4\GrammarHighlighterLexer.cs" />
-    <Compile Include="V4\Antlr4TextStructureNavigator.cs" />
-    <Compile Include="V4\Antlr4TextStructureNavigatorProvider.cs" />
-    <Compile Include="V4\Antlr4Services.cs" />
-    <Compile Include="V4\GrammarLexer.cs" />
-    <Compile Include="V4\GrammarParser.cs" />
-    <Compile Include="V4\IAnchor.cs" />
-    <Compile Include="V4\ICaretToken.cs" />
-    <Compile Include="V4\ICodeCompletionParser.cs" />
-    <Compile Include="V4\IForestParser`1.cs" />
-    <Compile Include="V4\IReferenceAnchors.cs" />
-    <Compile Include="V4\MultipleDecisionData.cs" />
-    <Compile Include="V4\ParserDataOptions.cs" />
-    <Compile Include="V4\ParseTrees.cs" />
-    <Compile Include="V4\ReferenceAnchors.cs" />
-    <Compile Include="V4\SmartIndent.cs" />
-    <Compile Include="V4\SmartIndentProvider.cs" />
-    <Compile Include="V4\V4GrammarClassifierLexerState.cs" />
+    <Compile Update="AntlrActionClassifierLexer.g3.cs" DependentUpon="AntlrActionClassifierLexer.g3" />
+    <Compile Update="AntlrGrammarClassifierLexer.g3.cs" DependentUpon="AntlrGrammarClassifierLexer.g3" />
+    <Compile Update="V4\GrammarHighlighterLexer.cs" DependentUpon="GrammarHighlighterLexer.g4" />
+    <Compile Update="V4\GrammarLexer.cs" DependentUpon="GrammarLexer.g4" />
+    <Compile Update="V4\GrammarParser.cs" DependentUpon="GrammarParser.g4" />
+    <Compile Remove="V4\Antlr4QuickSearchItemProvider.cs" />
     <None Include="V4\Antlr4QuickSearchItemProvider.cs" />
+    <Compile Remove="V4\Antlr4QuickSearchItemProviderFactory.cs" />
     <None Include="V4\Antlr4QuickSearchItemProviderFactory.cs" />
-    <Compile Include="V4\Antlr4BackgroundParser.cs" />
-    <Compile Include="V4\Antlr4BackgroundParserProvider.cs" />
-    <Compile Include="V4\Antlr4BraceMatchingTaggerProvider.cs" />
-    <Compile Include="V4\Antlr4ClassificationTypeNames.cs" />
-    <Compile Include="V4\Antlr4Classifier.cs" />
-    <Compile Include="V4\Antlr4ClassifierProvider.cs" />
-    <Compile Include="V4\Antlr4CommenterProvider.cs" />
+    <Compile Remove="V4\Antlr4CompletionSource.cs" />
     <None Include="V4\Antlr4CompletionSource.cs" />
+    <Compile Remove="V4\Antlr4CompletionSourceProvider.cs" />
     <None Include="V4\Antlr4CompletionSourceProvider.cs" />
-    <Compile Include="V4\Antlr4EditorNavigationSource.cs" />
-    <Compile Include="V4\Antlr4EditorNavigationSourceProvider.cs" />
+    <Compile Remove="V4\Antlr4ErrorTaggerProvider.cs" />
     <None Include="V4\Antlr4ErrorTaggerProvider.cs" />
-    <Compile Include="V4\Antlr4IntellisenseCommandFilter.cs" />
-    <Compile Include="V4\Antlr4IntellisenseController.cs" />
-    <Compile Include="V4\Antlr4IntellisenseControllerProvider.cs" />
+    <Compile Remove="V4\Antlr4LanguageElementTagger.cs" />
     <None Include="V4\Antlr4LanguageElementTagger.cs" />
+    <Compile Remove="V4\Antlr4LanguageElementTaggerProvider.cs" />
     <None Include="V4\Antlr4LanguageElementTaggerProvider.cs" />
-    <Compile Include="V4\Antlr4OutliningTagger.cs" />
-    <Compile Include="V4\Antlr4OutliningTaggerProvider.cs" />
+    <Compile Remove="V4\Antlr4ParserTokenStream.cs" />
     <None Include="V4\Antlr4ParserTokenStream.cs" />
-    <Compile Include="V4\Antlr4QuickInfoSource.cs" />
-    <Compile Include="V4\Antlr4QuickInfoSourceProvider.cs" />
-    <None Include="Experimental\SemanticClassifierBase`1.cs" />
-    <Compile Include="OptionsPages\AntlrIntellisenseOptions.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="OptionsPages\AntlrIntellisenseOptionsControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="OptionsPages\AntlrIntellisenseOptionsControl.Designer.cs">
-      <DependentUpon>AntlrIntellisenseOptionsControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Project\GrammarFileObjectExtenderPropertiesV4.cs" />
-    <Compile Include="Project\GrammarFileObjectExtenderProperties.cs" />
-    <Compile Include="Project\GrammarFileObjectExtenderProvider.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Antlr4 Include="V4\GrammarHighlighterLexer.g4">
-      <CustomToolNamespace>Tvl.VisualStudio.Language.AntlrV4</CustomToolNamespace>
-    </Antlr4>
-    <Antlr4 Include="V4\GrammarLexer.g4">
-      <Generator>MSBuild:Compile</Generator>
-      <CustomToolNamespace>Tvl.VisualStudio.Language.AntlrV4</CustomToolNamespace>
-    </Antlr4>
-    <Antlr4 Include="V4\GrammarParser.g4">
-      <Generator>MSBuild:Compile</Generator>
-      <CustomToolNamespace>Tvl.VisualStudio.Language.AntlrV4</CustomToolNamespace>
-      <ForceAtn>True</ForceAtn>
-    </Antlr4>
+    <Compile Update="OptionsPages\AntlrIntellisenseOptions.cs" SubType="Component" />
+    <Compile Update="OptionsPages\AntlrIntellisenseOptionsControl.cs" SubType="UserControl" />
+    <Compile Update="OptionsPages\AntlrIntellisenseOptionsControl.Designer.cs" DependentUpon="AntlrIntellisenseOptionsControl.cs" />
   </ItemGroup>
+
   <ItemGroup>
-    <Content Include="$(NuGetPackageRoot)antlr3\3.5.1\tools\Tool\Templates\depend.stg">
-      <Link>Tool\Templates\depend.stg</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="$(NuGetPackageRoot)antlr3\3.5.1\tools\Tool\Templates\dot\dot.stg">
-      <Link>Tool\Templates\dot\dot.stg</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="$(NuGetPackageRoot)antlr3\3.5.1\tools\Tool\Templates\messages\formats\antlr.stg">
-      <Link>Tool\Templates\messages\formats\antlr.stg</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="$(NuGetPackageRoot)antlr3\3.5.1\tools\Tool\Templates\messages\formats\vs2005.stg">
-      <Link>Tool\Templates\messages\formats\vs2005.stg</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="$(NuGetPackageRoot)antlr3\3.5.1\tools\Tool\Templates\messages\languages\en.stg">
-      <Link>Tool\Templates\messages\languages\en.stg</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <AntlrTokens Include="ANTLR.tokens" />
-    <Antlr3 Include="AntlrGrammarClassifierLexer.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <Content Include="..\External\Eula.rtf">
-      <Link>Eula.rtf</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="VSIXProject_large.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <None Include="..\External\Key.snk">
-      <Link>Key.snk</Link>
-    </None>
-    <Antlr3 Include="AntlrActionClassifierLexer.g3">
-      <Generator>MSBuild:Compile</Generator>
-    </Antlr3>
-    <None Include="source.extension.vsixmanifest">
-      <SubType>Designer</SubType>
-    </None>
+    <Compile Remove="Experimental\SemanticClassifierBase`1.cs" />
+    <None Include="Experimental\SemanticClassifierBase`1.cs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="$(PkgAntlr3)\tools\Tool\Templates\depend.stg" Link="Tool\Templates\depend.stg" IncludeInVSIX="true" />
+    <Content Include="$(PkgAntlr3)\tools\Tool\Templates\dot\dot.stg" Link="Tool\Templates\dot\dot.stg" IncludeInVSIX="true" />
+    <Content Include="$(PkgAntlr3)\tools\Tool\Templates\messages\formats\antlr.stg" Link="Tool\Templates\messages\formats\antlr.stg" IncludeInVSIX="true" />
+    <Content Include="$(PkgAntlr3)\tools\Tool\Templates\messages\formats\vs2005.stg" Link="Tool\Templates\messages\formats\vs2005.stg" IncludeInVSIX="true" />
+    <Content Include="$(PkgAntlr3)\tools\Tool\Templates\messages\languages\en.stg" Link="Tool\Templates\messages\languages\en.stg" IncludeInVSIX="true" />
+    <Content Include="..\External\Eula.rtf" Link="Eula.rtf" IncludeInVSIX="true" />
+    <Content Include="VSIXProject_large.png" CopyToOutputDirectory="PreserveNewest" IncludeInVSIX="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AntlrTokens Include="ANTLR.tokens" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Antlr3 Include="AntlrGrammarClassifierLexer.g3" Generator="MSBuild:Compile" />
+    <Antlr3 Include="AntlrActionClassifierLexer.g3" Generator="MSBuild:Compile" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Antlr4 Include="V4\GrammarHighlighterLexer.g4" CustomToolNamespace="Tvl.VisualStudio.Language.AntlrV4" />
+    <Antlr4 Include="V4\GrammarLexer.g4" Generator="MSBuild:Compile" CustomToolNamespace="Tvl.VisualStudio.Language.AntlrV4" />
+    <Antlr4 Include="V4\GrammarParser.g4" Generator="MSBuild:Compile" CustomToolNamespace="Tvl.VisualStudio.Language.AntlrV4" ForceAtn="True" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\External\Key.snk" Link="Key.snk" />
+  </ItemGroup>
+
   <ItemGroup>
     <Resource Include="Resources\lexericon.png" />
     <Resource Include="Resources\parsericon.png" />
   </ItemGroup>
+
   <ItemGroup>
-    <EmbeddedResource Include="OptionsPages\AntlrIntellisenseOptionsControl.resx">
-      <DependentUpon>AntlrIntellisenseOptionsControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="VSPackage.resx">
-      <SubType>Designer</SubType>
-      <LogicalName>VSPackage.resources</LogicalName>
-      <MergeWithCTO>true</MergeWithCTO>
-    </EmbeddedResource>
+    <EmbeddedResource Update="OptionsPages\AntlrIntellisenseOptionsControl.resx" DependentUpon="AntlrIntellisenseOptionsControl.cs" />
+    <EmbeddedResource Update="VSPackage.resx" SubType="Designer" LogicalName="VSPackage.resources" MergeWithCTO="true" />
   </ItemGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\External\Key.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
+
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="Exists('$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets')" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
+  <ItemGroup>
+    <!-- https://github.com/dotnet/sdk/issues/433 -->
+    <ProjectReference Update="@(ProjectReference)" AdditionalProperties="TargetFramework=net45" />
+
+    <!-- https://github.com/Microsoft/extendvs/issues/57 -->
+    <ProjectReference Update="@(ProjectReference)" Name="%(Filename)" />
+  </ItemGroup>
 </Project>

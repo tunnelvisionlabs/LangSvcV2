@@ -1,18 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project>
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>{E5568831-E802-481F-A34F-D7DC69DD9C4F}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tvl.VisualStudio.Framework</RootNamespace>
-    <AssemblyName>Tvl.VisualStudio.Framework</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
+    <TargetFramework>net45</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Company>Tunnel Vision Laboratories, LLC</Company>
+    <Copyright>Copyright © Sam Harwell 2010</Copyright>
+    <Version>1.2.0.0</Version>
+    <InformationalVersion>1.2.0</InformationalVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
     <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
@@ -20,139 +21,63 @@
     <!-- Include the build output to avoid problems with the fast up-to-date check in Visual Studio. -->
     <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
-    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
+
   <PropertyGroup>
     <!-- Common debugging support -->
     <StartAction>Program</StartAction>
     <StartProgram>$(DevEnvDir)\devenv.exe</StartProgram>
-    <StartArguments>/rootSuffix Exp</StartArguments>
+    <StartArguments>/rootSuffix $(VSSDKTargetPlatformRegRootSuffix)</StartArguments>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(VisualStudioVersion)' != ''">
-    <!-- This is added to prevent forced migrations in Visual Studio 2012 and newer -->
-    <MinimumVisualStudioVersion>$(VisualStudioVersion)</MinimumVisualStudioVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="('$(BuildingInsideVisualStudio)' != 'true') Or ('$(VisualStudioVersion)' == '')">
+
+  <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' != 'true'">
     <!-- This property disables extension deployment for command line builds; required for automated builds -->
-    <!-- It also disables deployment when run in an enviroment earlier than Visual Studio 2012 -->
     <DeployExtension>False</DeployExtension>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
     <AssemblyOriginatorKeyFile>..\External\Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="15.1.192" PrivateAssets="all" />
-    <PackageReference Include="Tvl.VisualStudio.OutputWindow" Version="3.0.0" PrivateAssets="all" />
+    <PackageReference Include="Tvl.VisualStudio.OutputWindow" Version="3.1.0" PrivateAssets="all" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj">
-      <Project>{ADD60D3C-8EF6-44ED-B7CD-1FD13FBF8036}</Project>
-      <Name>Tvl.Core</Name>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Language.Implementation\Tvl.VisualStudio.Language.Implementation.csproj">
-      <Project>{9C111828-9344-4CB2-8A2C-A20C4B909908}</Project>
-      <Name>Tvl.VisualStudio.Language.Implementation</Name>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Language.Interfaces\Tvl.VisualStudio.Language.Interfaces.csproj">
-      <Project>{4599ac99-de26-4686-8821-67cf461c6b26}</Project>
-      <Name>Tvl.VisualStudio.Language.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Language\Tvl.VisualStudio.Language.csproj">
-      <Project>{90E28BCA-BD13-475B-B051-7A7D852A6206}</Project>
-      <Name>Tvl.VisualStudio.Language</Name>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Shell.Implementation\Tvl.VisualStudio.Shell.Implementation.csproj">
-      <Project>{D9C9E707-E9C3-428B-85BD-B5AAE8F714A2}</Project>
-      <Name>Tvl.VisualStudio.Shell.Implementation</Name>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Shell.Interfaces\Tvl.VisualStudio.Shell.Interfaces.csproj">
-      <Project>{c8450e39-55b4-4bbf-a08f-f1e38b76ddef}</Project>
-      <Name>Tvl.VisualStudio.Shell.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj">
-      <Project>{93C8C1B3-9C22-4DE3-A06B-28947E503ED9}</Project>
-      <Name>Tvl.VisualStudio.Shell</Name>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Text.Implementation\Tvl.VisualStudio.Text.Implementation.csproj">
-      <Project>{D9B45C61-9721-41B7-9ABF-85C452CD9F49}</Project>
-      <Name>Tvl.VisualStudio.Text.Implementation</Name>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Text.Interfaces\Tvl.VisualStudio.Text.Interfaces.csproj">
-      <Project>{36884750-a681-412c-9ebf-801847f38df1}</Project>
-      <Name>Tvl.VisualStudio.Text.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj">
-      <Project>{2B913C3A-3FD8-4633-81C8-683AF66741A8}</Project>
-      <Name>Tvl.VisualStudio.Text</Name>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
+    <ProjectReference Include="..\Tvl.Core\Tvl.Core.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Language.Implementation\Tvl.VisualStudio.Language.Implementation.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Language.Interfaces\Tvl.VisualStudio.Language.Interfaces.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Language\Tvl.VisualStudio.Language.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Shell.Implementation\Tvl.VisualStudio.Shell.Implementation.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Shell.Interfaces\Tvl.VisualStudio.Shell.Interfaces.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Shell\Tvl.VisualStudio.Shell.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Text.Implementation\Tvl.VisualStudio.Text.Implementation.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Text.Interfaces\Tvl.VisualStudio.Text.Interfaces.csproj" />
+    <ProjectReference Include="..\Tvl.VisualStudio.Text\Tvl.VisualStudio.Text.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="..\External\Key.snk" Link="Key.snk" />
   </ItemGroup>
+
   <ItemGroup>
-    <Content Include="..\External\Eula.rtf">
-      <Link>Eula.rtf</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <None Include="..\External\Key.snk">
-      <Link>Key.snk</Link>
-    </None>
-    <None Include="source.extension.vsixmanifest">
-      <SubType>Designer</SubType>
-    </None>
+    <Content Include="..\External\Eula.rtf" Link="Eula.rtf" IncludeInVSIX="true" />
+    <Content Include="VSIXProject_large.png" IncludeInVSIX="true" />
+    <Content Include="VSIXProject_small.png" IncludeInVSIX="true" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="VSIXProject_large.png">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="VSIXProject_small.png">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
+
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="Exists('$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets')" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
+  <ItemGroup>
+    <!-- https://github.com/dotnet/sdk/issues/433 -->
+    <ProjectReference Update="@(ProjectReference)" AdditionalProperties="TargetFramework=net45" />
+
+    <!-- https://github.com/Microsoft/extendvs/issues/57 -->
+    <ProjectReference Update="@(ProjectReference)" Name="%(Filename)" />
+  </ItemGroup>
+
 </Project>
