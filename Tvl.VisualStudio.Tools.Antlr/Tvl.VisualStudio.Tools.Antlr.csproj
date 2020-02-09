@@ -11,6 +11,7 @@
     <Company>Tunnel Vision Laboratories, LLC</Company>
     <Copyright>Copyright © Sam Harwell 2010</Copyright>
     <Version>1.0.1.594</Version>
+    <VsixVersion>1.0.6</VsixVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -40,7 +41,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="15.1.192" PrivateAssets="all" />
-    <PackageReference Include="Tvl.VisualStudio.OutputWindow" Version="3.1.0" PrivateAssets="all" />
+    <PackageReference Include="Tvl.VisualStudio.OutputWindow" Version="$(TvlVisualStudioOutputWindowVersion)" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
