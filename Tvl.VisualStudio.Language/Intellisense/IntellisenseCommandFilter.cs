@@ -188,11 +188,6 @@
                         }
                         break;
 
-                    case ECMD_SMARTTASKS:
-                        ExpandSmartTagUnderCaret();
-                        handled = true;
-                        break;
-
                     case VSConstants.VSStd2KCmdID.SHOWMEMBERLIST:
                         CompletionHelper.DoTriggerCompletion(Controller, CompletionInfoType.ContextInfo, false, IntellisenseInvocationType.Default);
                         handled = true;
@@ -276,29 +271,6 @@
                 session.Dismiss();
 
             return completionSessions.Count > 0;
-        }
-
-        protected virtual void ExpandSmartTagUnderCaret()
-        {
-            ITextView textView = Controller.TextView;
-            SnapshotPoint? insertionPoint = textView.Caret.Position.Point.GetInsertionPoint(buffer => buffer == textView.TextBuffer);
-            if (!insertionPoint.HasValue)
-                throw new InvalidOperationException();
-
-            ITextSnapshot snapshot = insertionPoint.Value.Snapshot;
-            SnapshotSpan caretSpan = new SnapshotSpan(insertionPoint.Value, 0);
-            IEnumerable<ISmartTagSession> sessions = Controller.Provider.SmartTagBroker.GetSessions(textView);
-            ISmartTagSession session = sessions.FirstOrDefault(i => i.ApplicableToSpan.GetSpan(snapshot).IntersectsWith(caretSpan) && i.Type == SmartTagType.Factoid);
-            List<ISmartTagSession> source = sessions.Where(i => i.Type == SmartTagType.Ephemeral).ToList();
-
-            if (session == null)
-                session = source.FirstOrDefault(i => i.ApplicableToSpan.GetSpan(snapshot).IntersectsWith(caretSpan));
-
-            if (session == null && source.Count == 1)
-                session = source[0];
-
-            if (session != null)
-                session.State = SmartTagState.Expanded;
         }
 
         protected override CommandStatus QueryCommandStatus(ref Guid group, uint id)

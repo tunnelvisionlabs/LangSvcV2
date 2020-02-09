@@ -45,13 +45,6 @@
             private set;
         }
 
-        [Import]
-        public ISmartTagBroker SmartTagBroker
-        {
-            get;
-            private set;
-        }
-
         IIntellisenseController IIntellisenseControllerProvider.TryCreateIntellisenseController(ITextView textView, IList<ITextBuffer> subjectBuffers)
         {
             IntellisenseController controller = TryCreateIntellisenseController(textView, subjectBuffers);

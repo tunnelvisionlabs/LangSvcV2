@@ -27,7 +27,6 @@
         private ICompletionSession _completionSession;
         private ISignatureHelpSession _signatureHelpSession;
         private IQuickInfoSession _quickInfoSession;
-        private ISmartTagSession _smartTagSession;
         private readonly Lazy<CompletionInfo> _completionInfo;
         private bool _isProcessingCommand;
 
@@ -177,19 +176,6 @@
             }
         }
 
-        public ISmartTagSession SmartTagSession
-        {
-            get
-            {
-                return _smartTagSession;
-            }
-
-            private set
-            {
-                _smartTagSession = value;
-            }
-        }
-
         public virtual bool IsCompletionActive
         {
             get
@@ -311,19 +297,6 @@
             }
         }
 
-        public virtual void TriggerSmartTag([NotNull] ITrackingPoint triggerPoint, SmartTagType type, SmartTagState state)
-        {
-            Requires.NotNull(triggerPoint, nameof(triggerPoint));
-
-            DismissSmartTag();
-            ISmartTagSession session = Provider.SmartTagBroker.CreateSmartTagSession(TextView, type, triggerPoint, state);
-            if (session != null)
-            {
-                session.Dismissed += HandleSmartTagDismissed;
-                SmartTagSession = session;
-            }
-        }
-
         public virtual void DismissCompletion()
         {
             ICompletionSession session = CompletionSession;
@@ -348,20 +321,11 @@
                 session.Dismiss();
         }
 
-        public virtual void DismissSmartTag()
-        {
-            ISmartTagSession session = SmartTagSession;
-            SmartTagSession = null;
-            if (session != null && !session.IsDismissed)
-                session.Dismiss();
-        }
-
         public virtual void DismissAll()
         {
             DismissCompletion();
             DismissSignatureHelp();
             DismissQuickInfo();
-            DismissSmartTag();
         }
 
         public virtual bool PreprocessCommand(ref Guid commandGroup, uint commandId, OLECMDEXECOPT executionOptions, IntPtr pvaIn, IntPtr pvaOut)
@@ -600,11 +564,6 @@
         protected virtual void HandleQuickInfoDismissed(object sender, EventArgs e)
         {
             QuickInfoSession = null;
-        }
-
-        protected virtual void HandleSmartTagDismissed(object sender, EventArgs e)
-        {
-            SmartTagSession = null;
         }
     }
 }
