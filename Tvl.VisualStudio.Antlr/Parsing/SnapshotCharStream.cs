@@ -36,6 +36,8 @@
 
             this.Snapshot = snapshot;
             this._count = snapshot.Length;
+            this.Index = 0;
+            this.Line = 1;
 
             UpdateCachedLine();
         }
@@ -52,6 +54,8 @@
 
             this.Snapshot = cachedSpan.Snapshot;
             _count = Snapshot.Length;
+            this.Index = 0;
+            this.Line = 1;
             _explicitCache = true;
             _currentSnapshotLineStartIndex = cachedSpan.Start;
             _currentSnapshotLine = cachedSpan.GetText();
@@ -230,7 +234,7 @@
 
             Index = index;
             var line = Snapshot.GetLineFromPosition(Index);
-            Line = line.LineNumber;
+            Line = line.LineNumber + 1;
             CharPositionInLine = Index - line.Start.Position;
             UpdateCachedLine();
         }

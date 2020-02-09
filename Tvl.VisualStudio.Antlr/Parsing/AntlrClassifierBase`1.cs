@@ -135,6 +135,7 @@
                     else
                     {
                         endLinePrevious = span.Snapshot.GetLineNumberFromPosition(span.Start) - 1;
+                        previousTokenEndsLine = endLinePrevious < startLineCurrent;
                     }
 
                     if (startLineCurrent > endLinePrevious + 1 || (startLineCurrent == endLinePrevious + 1 && !previousTokenEndsLine))
