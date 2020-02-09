@@ -73,12 +73,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "V4LexerGrammarItemTemplate"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "V4ParserGrammarItemTemplate", "Templates\Antlr\ItemTemplates\V4ParserGrammarItemTemplate\V4ParserGrammarItemTemplate.csproj", "{5601E585-16BB-4FA8-9495-BF22E3123BFA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{66840BE0-CE19-4FF1-99B4-4C8CE2E61D8B}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\packages.config = .nuget\packages.config
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AA9E3959-A720-4B43-A4D9-E7C4E4EC3AA7}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
