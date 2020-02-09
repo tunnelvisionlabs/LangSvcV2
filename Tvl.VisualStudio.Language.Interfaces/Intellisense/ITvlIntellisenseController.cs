@@ -11,7 +11,6 @@
     using IntPtr = System.IntPtr;
     using IQuickInfoSession = Microsoft.VisualStudio.Language.Intellisense.IQuickInfoSession;
     using ISignatureHelpSession = Microsoft.VisualStudio.Language.Intellisense.ISignatureHelpSession;
-    using ISmartTagSession = Microsoft.VisualStudio.Language.Intellisense.ISmartTagSession;
     using ITextView = Microsoft.VisualStudio.Text.Editor.ITextView;
     using ITrackingPoint = Microsoft.VisualStudio.Text.ITrackingPoint;
     using OLECMDEXECOPT = Microsoft.VisualStudio.OLE.Interop.OLECMDEXECOPT;
@@ -91,11 +90,6 @@
             get;
         }
 
-        ISmartTagSession SmartTagSession
-        {
-            get;
-        }
-
         bool IsCompletionActive
         {
             get;
@@ -117,15 +111,11 @@
 
         void TriggerQuickInfo([NotNull] ITrackingPoint triggerPoint);
 
-        void TriggerSmartTag([NotNull] ITrackingPoint triggerPoint, SmartTagType type, SmartTagState state);
-
         void DismissCompletion();
 
         void DismissQuickInfo();
 
         void DismissSignatureHelp();
-
-        void DismissSmartTag();
 
         void DismissAll();
 
