@@ -39,7 +39,7 @@
     <PackageReference Include="Antlr4.CodeGenerator" Version="4.6.1" PrivateAssets="all" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="15.1.192" PrivateAssets="all" />
     <PackageReference Include="StringTemplate4" Version="4.0.8" />
-    <PackageReference Include="Tvl.VisualStudio.OutputWindow" Version="3.1.0" PrivateAssets="all" />
+    <PackageReference Include="Tvl.VisualStudio.OutputWindow" Version="$(TvlVisualStudioOutputWindowVersion)" PrivateAssets="all" />
     <PackageReference Include="Microsoft.VisualStudio.TextManager.Interop.8.0" Version="8.0.50728" />
   </ItemGroup>
 

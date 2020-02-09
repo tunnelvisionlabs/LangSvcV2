@@ -1,3 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
+
+  <PropertyGroup>
+    <TvlVisualStudioOutputWindowVersion>3.1.0</TvlVisualStudioOutputWindowVersion>
+  </PropertyGroup>
+
 </Project>

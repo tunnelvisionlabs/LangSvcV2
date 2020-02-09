@@ -17,6 +17,8 @@
     </PropertyGroup>
   </Target>
 
+  <Target Name="GetTvlVisualStudioOutputWindowVersion" Returns="$(TvlVisualStudioOutputWindowVersion)" />
+
   <Target Name="GetMinSupportedVisualStudioVersionInclusive" Returns="$(MinSupportedVisualStudioVersionInclusive)">
     <PropertyGroup>
       <MinSupportedVisualStudioVersionInclusive Condition="'$(MinSupportedVisualStudioVersionInclusive)' == ''">11.0</MinSupportedVisualStudioVersionInclusive>
